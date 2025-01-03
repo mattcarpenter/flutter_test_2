@@ -1,13 +1,13 @@
 import 'package:fluent_ui/fluent_ui.dart';
-import 'package:flutter_test_2/src/windows/router.dart';
-import 'package:flutter_test_2/src/windows/theme.dart';
+import 'package:flutter_test_2/src/windows/core/router.dart';
+import 'package:flutter_test_2/src/windows/core/theme.dart';
 import 'package:go_router/go_router.dart';
 import 'package:window_manager/window_manager.dart';
 import 'package:url_launcher/link.dart';
 import 'package:provider/provider.dart';
 
-class MyHomePage extends StatefulWidget {
-  const MyHomePage({
+class Shell extends StatefulWidget {
+  const Shell({
     super.key,
     required this.child,
     required this.shellContext,
@@ -17,10 +17,10 @@ class MyHomePage extends StatefulWidget {
   final BuildContext? shellContext;
 
   @override
-  State<MyHomePage> createState() => _MyHomePageState();
+  State<Shell> createState() => _ShellState();
 }
 
-class _MyHomePageState extends State<MyHomePage> with WindowListener {
+class _ShellState extends State<Shell> with WindowListener {
   bool value = false;
 
   // int index = 0;

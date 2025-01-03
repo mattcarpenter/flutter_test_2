@@ -1,8 +1,6 @@
 import 'package:fluent_ui/fluent_ui.dart';
 import 'package:url_launcher/link.dart';
 
-import 'home_page.dart';
-
 /// Current sponsors of the project <3
 const sponsors = [
   Person(
@@ -103,5 +101,33 @@ class Person {
         },
       );
     });
+  }
+}
+
+class SponsorButton extends StatelessWidget {
+  const SponsorButton({
+    super.key,
+    required this.imageUrl,
+    required this.username,
+  });
+
+  final String imageUrl;
+  final String username;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(children: [
+      Container(
+        height: 60,
+        width: 60,
+        decoration: BoxDecoration(
+          image: DecorationImage(
+            image: NetworkImage(imageUrl),
+          ),
+          shape: BoxShape.circle,
+        ),
+      ),
+      Text(username),
+    ]);
   }
 }

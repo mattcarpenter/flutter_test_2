@@ -1,15 +1,15 @@
 import 'package:fluent_ui/fluent_ui.dart';
-import 'package:flutter_test_2/src/windows/sponsors.dart';
+import 'package:flutter_test_2/src/windows/features/sponsors/sponsors_view.dart';
 import 'package:url_launcher/link.dart';
 
-class HomePage extends StatefulWidget {
-  const HomePage({super.key});
+class HomeView extends StatefulWidget {
+  const HomeView({super.key});
 
   @override
-  State<HomePage> createState() => _HomePageState();
+  State<HomeView> createState() => _HomeViewState();
 }
 
-class _HomePageState extends State<HomePage> {
+class _HomeViewState extends State<HomeView> {
   bool selected = true;
   String? comboboxValue;
 
@@ -208,33 +208,5 @@ class _HomePageState extends State<HomePage> {
         ),
       ],
     );
-  }
-}
-
-class SponsorButton extends StatelessWidget {
-  const SponsorButton({
-    super.key,
-    required this.imageUrl,
-    required this.username,
-  });
-
-  final String imageUrl;
-  final String username;
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(children: [
-      Container(
-        height: 60,
-        width: 60,
-        decoration: BoxDecoration(
-          image: DecorationImage(
-            image: NetworkImage(imageUrl),
-          ),
-          shape: BoxShape.circle,
-        ),
-      ),
-      Text(username),
-    ]);
   }
 }

@@ -1,10 +1,8 @@
-import 'package:fluent_ui/fluent_ui.dart' hide Page;
-import 'package:flutter_acrylic/flutter_acrylic.dart' as flutter_acrylic;
-import 'package:flutter/foundation.dart';
-import 'package:flutter_test_2/src/windows/router.dart';
-import 'package:flutter_test_2/src/windows/theme.dart';
+import 'package:fluent_ui/fluent_ui.dart';
+import 'package:flutter_test_2/src/windows/core/router.dart';
+import 'package:flutter_test_2/src/windows/core/theme.dart';
 import 'package:provider/provider.dart';
-
+import 'package:flutter_acrylic/flutter_acrylic.dart' as flutter_acrylic;
 final _appTheme = AppTheme();
 
 class WindowsApp extends StatelessWidget {
@@ -59,4 +57,3 @@ class WindowsApp extends StatelessWidget {
     );
   }
 }
-
