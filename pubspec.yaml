@@ -23,6 +23,8 @@ dependencies:
   macos_ui: ^2.0.9
   provider: ^6.1.2
   system_theme: ^3.1.2
+  url_launcher: ^6.3.1
+  window_manager: ^0.4.3
 
 dev_dependencies:
   flutter_test:

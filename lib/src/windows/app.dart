@@ -1,13 +1,11 @@
 import 'package:fluent_ui/fluent_ui.dart' hide Page;
 import 'package:flutter_acrylic/flutter_acrylic.dart' as flutter_acrylic;
 import 'package:flutter/foundation.dart';
+import 'package:flutter_test_2/src/windows/router.dart';
 import 'package:flutter_test_2/src/windows/theme.dart';
 import 'package:provider/provider.dart';
-import 'package:go_router/go_router.dart';
 
 final _appTheme = AppTheme();
-
-final GoRouter _router = GoRouter(routes: []);
 
 class WindowsApp extends StatelessWidget {
   const WindowsApp({super.key});
@@ -53,9 +51,9 @@ class WindowsApp extends StatelessWidget {
               ),
             );
           },
-          routeInformationParser: _router.routeInformationParser,
-          routerDelegate: _router.routerDelegate,
-          routeInformationProvider: _router.routeInformationProvider,
+          routeInformationParser: router.routeInformationParser,
+          routerDelegate: router.routerDelegate,
+          routeInformationProvider: router.routeInformationProvider,
         );
       },
     );
