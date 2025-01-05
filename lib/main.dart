@@ -1,7 +1,6 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
-import 'package:flutter_acrylic/window.dart';
 import 'package:macos_ui/macos_ui.dart';
 
 import 'src/app.dart';

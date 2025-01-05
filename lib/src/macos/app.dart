@@ -4,7 +4,7 @@ import 'package:macos_ui/macos_ui.dart';
 import 'hello_page.dart';
 
 class MacApp extends StatelessWidget {
-  const MacApp({Key? key}) : super(key: key);
+  const MacApp({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -17,13 +17,13 @@ class MacApp extends StatelessWidget {
 }
 
 class MyHomePage extends StatefulWidget {
-  const MyHomePage({Key? key}) : super(key: key);
+  const MyHomePage({super.key});
   @override
   State<MyHomePage> createState() => _MyHomePageState();
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  int _pageIndex = 0;
+  final int _pageIndex = 0;
 
   @override
   Widget build(BuildContext context) {

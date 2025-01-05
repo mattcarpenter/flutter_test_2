@@ -1,10 +1,7 @@
 import 'package:flutter/material.dart';
 
-import '../settings/settings_view.dart';
 import 'sample_item.dart';
-import 'sample_item_details_view.dart';
 import 'dart:ui';  // For ImageFilter
-import 'package:flutter/material.dart';
 
 // https://pub.dev/packages/macos_window_utils
 
@@ -45,10 +42,10 @@ class SampleItemListView extends StatelessWidget {
                   ),
                 ),
                 // 3. Sidebar content goes here
-                Positioned.fill(
+                const Positioned.fill(
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
-                    children: const [
+                    children: [
                       Icon(Icons.home, color: Colors.white),
                       SizedBox(height: 20),
                       Icon(Icons.settings, color: Colors.white),
