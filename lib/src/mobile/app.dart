@@ -27,6 +27,11 @@ class AdaptiveApp extends StatelessWidget {
       return MaterialApp(
         theme: ThemeData(
           primarySwatch: Colors.blue,
+          bottomNavigationBarTheme: const BottomNavigationBarThemeData(
+            backgroundColor: Colors.blue, // Set background color
+            selectedItemColor: Colors.white, // Highlight the selected item
+            unselectedItemColor: Colors.white70, // Dim the unselected items
+          ),
         ),
         home: const MainPage(),
       );
@@ -274,6 +279,7 @@ class _MainPageState extends State<MainPage> with SingleTickerProviderStateMixin
         body: _tabs[_selectedTab],
         bottomNavigationBar: BottomNavigationBar(
           currentIndex: _selectedTab,
+          type: BottomNavigationBarType.fixed,
           onTap: (index) {
             if (index == 0) {
               _toggleDrawer();
