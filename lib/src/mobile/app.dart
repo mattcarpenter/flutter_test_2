@@ -3,11 +3,11 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
 // Your existing pages and widgets
-import 'package:flutter_test_2/src/ios/pages/discover.dart';
-import 'package:flutter_test_2/src/ios/pages/meal_plan.dart';
-import 'package:flutter_test_2/src/ios/pages/recipes.dart';
-import 'package:flutter_test_2/src/ios/pages/shopping_list.dart';
-import 'package:flutter_test_2/src/ios/widgets/more_menu.dart';
+import 'package:flutter_test_2/src/mobile/pages/discover.dart';
+import 'package:flutter_test_2/src/mobile/pages/meal_plan.dart';
+import 'package:flutter_test_2/src/mobile/pages/recipes.dart';
+import 'package:flutter_test_2/src/mobile/pages/shopping_list.dart';
+import 'package:flutter_test_2/src/mobile/widgets/more_menu.dart';
 
 class AdaptiveApp extends StatelessWidget {
   const AdaptiveApp({super.key});

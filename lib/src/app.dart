@@ -1,6 +1,6 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
-import 'package:flutter_test_2/src/ios/app.dart';
+import 'package:flutter_test_2/src/mobile/app.dart';
 import 'package:flutter_test_2/src/macos/app.dart';
 import 'package:flutter_test_2/src/mobile/app.dart';
 import 'package:flutter_test_2/src/windows/app.dart';
@@ -30,7 +30,7 @@ class MyApp extends StatelessWidget {
           return const WindowsApp();
         }
 
-        return const IOSApp();
+        return const AdaptiveApp();
       },
     );
   }

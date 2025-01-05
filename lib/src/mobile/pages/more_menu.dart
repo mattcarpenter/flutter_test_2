@@ -1,8 +1,8 @@
 import 'package:flutter/cupertino.dart';
-import 'package:flutter_test_2/src/ios/pages/pantry_page.dart';
-import 'package:flutter_test_2/src/ios/pages/recipes.dart';
-import 'package:flutter_test_2/src/ios/pages/shopping_list.dart';
-import 'package:flutter_test_2/src/ios/pages/menus_page.dart';
+import 'package:flutter_test_2/src/mobile/pages/pantry_page.dart';
+import 'package:flutter_test_2/src/mobile/pages/recipes.dart';
+import 'package:flutter_test_2/src/mobile/pages/shopping_list.dart';
+import 'package:flutter_test_2/src/mobile/pages/menus_page.dart';
 
 import 'meal_plan.dart';
 
