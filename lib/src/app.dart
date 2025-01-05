@@ -2,6 +2,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_test_2/src/ios/app.dart';
 import 'package:flutter_test_2/src/macos/app.dart';
+import 'package:flutter_test_2/src/mobile/app.dart';
 import 'package:flutter_test_2/src/windows/app.dart';
 import 'settings/settings_controller.dart';
 
@@ -23,8 +24,8 @@ class MyApp extends StatelessWidget {
     return ListenableBuilder(
       listenable: settingsController,
       builder: (BuildContext context, Widget? child) {
-        if (Platform.isMacOS) {
-          return const MacApp();
+        if (Platform.isMacOS || Platform.isAndroid) {
+          return const AdaptiveApp();
         } else if (Platform.isWindows) {
           return const WindowsApp();
         }
