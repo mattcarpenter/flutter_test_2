@@ -11,11 +11,11 @@ class IOSApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return CupertinoApp(
-      theme: const CupertinoThemeData(
+    return const CupertinoApp(
+      theme: CupertinoThemeData(
         primaryColor: CupertinoColors.systemBlue,
       ),
-      home: const MainPage(),
+      home: MainPage(),
     );
   }
 }
@@ -28,11 +28,13 @@ class MainPage extends StatefulWidget {
 }
 
 class _MainPageState extends State<MainPage> with SingleTickerProviderStateMixin {
-  // Start on Recipes tab by default
-  int _selectedTab = 1;
+  int _selectedTab = 1; // Start on "Recipes"
   bool _isDrawerOpen = false;
 
   late AnimationController _drawerController;
+  late Animation<double> _animation; // We'll add a curve
+  late Animation<double> _overlayAnimation;
+  late CupertinoTabController _tabController;
 
   final List<Widget> _tabs = [
     const SizedBox(), // index 0 => "drawer" placeholder
@@ -45,17 +47,44 @@ class _MainPageState extends State<MainPage> with SingleTickerProviderStateMixin
   @override
   void initState() {
     super.initState();
-    _isDrawerOpen = false;
+
+    _tabController = CupertinoTabController(initialIndex: _selectedTab)
+    ..addListener(() {
+      setState(() {
+        if (_tabController.index == 0) {
+          _tabController.index = _selectedTab;
+        }
+      });
+    });
+
+    // Faster animation: 200ms
     _drawerController = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 300),
-      value: 0.0, // 0 => closed, 1 => open
+      duration: const Duration(milliseconds: 200),
     );
+
+    // Apply an easing curve
+    _animation = CurvedAnimation(
+      parent: _drawerController,
+      curve: Curves.easeOutQuad, // can try easeInOutCubic, etc.
+      reverseCurve: Curves.easeInQuad
+    );
+
+    _overlayAnimation = CurvedAnimation(
+      parent: _drawerController,
+      curve: Curves.easeOut,
+      reverseCurve: Curves.easeIn
+    );
+
+    // Make sure it's closed initially
+    _drawerController.value = 0.0;
+    _isDrawerOpen = false;
   }
 
   @override
   void dispose() {
     _drawerController.dispose();
+    _tabController.dispose();
     super.dispose();
   }
 
@@ -63,9 +92,9 @@ class _MainPageState extends State<MainPage> with SingleTickerProviderStateMixin
     setState(() {
       _isDrawerOpen = !_isDrawerOpen;
       if (_isDrawerOpen) {
-        _drawerController.forward();
+        _drawerController.forward(); // animate 0 -> 1
       } else {
-        _drawerController.reverse();
+        _drawerController.reverse(); // animate 1 -> 0
       }
     });
   }
@@ -80,32 +109,101 @@ class _MainPageState extends State<MainPage> with SingleTickerProviderStateMixin
   }
 
   void _switchToTab(int index) {
+    print('Switching to tab $index');
     setState(() {
       _selectedTab = index;
     });
-    _closeDrawer();
+    _tabController.index = index; // Update the tab controller's index
+    _closeDrawer(); // Close the drawer if switching tabs
   }
 
   @override
   Widget build(BuildContext context) {
-    final screenWidth = MediaQuery.of(context).size.width;
-    final drawerWidth = screenWidth > 400 ? 400.0 : screenWidth * 0.8;
+    final width = MediaQuery.of(context).size.width;
+    final drawerWidth = width > 300 ? 300.0 : width * 0.8;
 
     return CupertinoPageScaffold(
       backgroundColor: Colors.white,
       child: AnimatedBuilder(
-        animation: _drawerController,
+        animation: _animation,
         builder: (context, _) {
-          // _drawerController.value goes 0 -> 1
-          // We'll interpolate positions from that.
-          final double slideAmount = drawerWidth * _drawerController.value;
+          // The animation value goes from 0 (closed) to 1 (open)
+          final double slide = drawerWidth * _animation.value;
+          final double overlayOpacity = 0.5 * _overlayAnimation.value;
 
           return Stack(
             children: [
-              // 1) Drawer, sliding from left = -drawerWidth (closed) to 0 (open)
-              AnimatedPositioned(
-                duration: const Duration(milliseconds: 300),
-                left: -drawerWidth + slideAmount,
+              // 1) MAIN CONTENT
+              //    starts at left=0, moves to left=drawerWidth as we open
+              Positioned(
+                left: slide,
+                right: -slide,
+                top: 0,
+                bottom: 0,
+                child: CupertinoTabScaffold(
+                  controller: _tabController,
+                  tabBar: CupertinoTabBar(
+                    items: const [
+                      BottomNavigationBarItem(
+                        icon: Icon(CupertinoIcons.bars),
+                        label: 'More',
+                      ),
+                      BottomNavigationBarItem(
+                        icon: Icon(CupertinoIcons.book),
+                        label: 'Recipes',
+                      ),
+                      BottomNavigationBarItem(
+                        icon: Icon(CupertinoIcons.cart),
+                        label: 'Shopping',
+                      ),
+                      BottomNavigationBarItem(
+                        icon: Icon(CupertinoIcons.calendar),
+                        label: 'Meal Plan',
+                      ),
+                      BottomNavigationBarItem(
+                        icon: Icon(CupertinoIcons.home),
+                        label: 'Discover',
+                      ),
+                    ],
+                    currentIndex: _selectedTab, // Keep the active tab highlighted
+                    onTap: (index) {
+                      if (index == 0) {
+                        // "More" tab tapped -> Open the drawer
+                        _toggleDrawer();
+                      } else {
+                        // Switch to a different tab
+                        _switchToTab(index);
+                      }
+                    },
+                  ),
+                  tabBuilder: (context, index) {
+                    return CupertinoTabView(
+                      builder: (_) => _tabs[index],
+                    );
+                  },
+                ),
+              ),
+
+              // 2) DARK OVERLAY that sits exactly over the main content area,
+              //    letting the drawer remain visible and *not* tinted.
+              if (overlayOpacity > 0)
+                Positioned(
+                  left: slide,
+                  right: -slide,
+                  top: 0,
+                  bottom: 0,
+                  child: GestureDetector(
+                    onTap: _closeDrawer,
+                    child: Container(
+                      color: Colors.black54.withOpacity(overlayOpacity),
+                    ),
+                  ),
+                ),
+
+              // 3) DRAWER itself
+              //    starts at left = -drawerWidth, slides to left=0
+              Positioned(
+                left: -drawerWidth + slide,
                 top: 0,
                 bottom: 0,
                 width: drawerWidth,
@@ -113,7 +211,6 @@ class _MainPageState extends State<MainPage> with SingleTickerProviderStateMixin
                   color: CupertinoColors.systemGrey6,
                   child: MoreMenu(
                     onSelect: (route) {
-                      // Switch to a tab if it matches, otherwise push
                       if (route is RecipesPage) {
                         _switchToTab(1);
                       } else if (route is ShoppingListPage) {
@@ -128,64 +225,6 @@ class _MainPageState extends State<MainPage> with SingleTickerProviderStateMixin
                   ),
                 ),
               ),
-
-              // 2) Main content, sliding from left=0 to left=drawerWidth
-              AnimatedPositioned(
-                duration: const Duration(milliseconds: 300),
-                left: slideAmount,
-                right: -slideAmount,
-                top: 0,
-                bottom: 0,
-                child: SizedBox(
-                  height: MediaQuery.of(context).size.height,
-                  child: CupertinoTabScaffold(
-                    tabBar: CupertinoTabBar(
-                      items: const [
-                        BottomNavigationBarItem(
-                          icon: Icon(CupertinoIcons.bars),
-                          label: 'More',
-                        ),
-                        BottomNavigationBarItem(
-                          icon: Icon(CupertinoIcons.book),
-                          label: 'Recipes',
-                        ),
-                        BottomNavigationBarItem(
-                          icon: Icon(CupertinoIcons.cart),
-                          label: 'Shopping',
-                        ),
-                        BottomNavigationBarItem(
-                          icon: Icon(CupertinoIcons.calendar),
-                          label: 'Meal Plan',
-                        ),
-                        BottomNavigationBarItem(
-                          icon: Icon(CupertinoIcons.home),
-                          label: 'Discover',
-                        ),
-                      ],
-                      currentIndex: _selectedTab,
-                      onTap: (index) {
-                        if (index == 0) {
-                          _toggleDrawer();
-                        } else {
-                          _switchToTab(index);
-                        }
-                      },
-                    ),
-                    tabBuilder: (context, index) {
-                      return CupertinoTabView(
-                        builder: (context) => _tabs[index],
-                      );
-                    },
-                  ),
-                ),
-              ),
-
-              // 3) Dimming overlay that closes the drawer on tap
-              if (_isDrawerOpen)
-                GestureDetector(
-                  onTap: _closeDrawer,
-                  child: Container(color: Colors.black54.withOpacity(0.5)),
-                ),
             ],
           );
         },

@@ -11,10 +11,10 @@ class MoreMenu extends StatelessWidget {
   final VoidCallback onClose;
 
   const MoreMenu({
-    Key? key,
+    super.key,
     required this.onSelect,
     required this.onClose,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
