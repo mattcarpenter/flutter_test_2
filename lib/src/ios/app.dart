@@ -28,12 +28,14 @@ class MainPage extends StatefulWidget {
 }
 
 class _MainPageState extends State<MainPage> with SingleTickerProviderStateMixin {
-  int _selectedTab = 1; // Default to Recipes
+  // Start on Recipes tab by default
+  int _selectedTab = 1;
   bool _isDrawerOpen = false;
+
   late AnimationController _drawerController;
 
   final List<Widget> _tabs = [
-    const SizedBox(), // Placeholder for drawer
+    const SizedBox(), // index 0 => "drawer" placeholder
     const RecipesPage(title: 'Recipes'),
     const ShoppingListPage(title: 'Shopping List'),
     const MealPlanPage(title: 'Meal Plan'),
@@ -43,9 +45,11 @@ class _MainPageState extends State<MainPage> with SingleTickerProviderStateMixin
   @override
   void initState() {
     super.initState();
+    _isDrawerOpen = false;
     _drawerController = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 300),
+      value: 0.0, // 0 => closed, 1 => open
     );
   }
 
@@ -84,98 +88,108 @@ class _MainPageState extends State<MainPage> with SingleTickerProviderStateMixin
 
   @override
   Widget build(BuildContext context) {
-    final double screenWidth = MediaQuery.of(context).size.width;
-    final double drawerWidth = screenWidth > 400 ? 400 : screenWidth * 0.8;
+    final screenWidth = MediaQuery.of(context).size.width;
+    final drawerWidth = screenWidth > 400 ? 400.0 : screenWidth * 0.8;
 
     return CupertinoPageScaffold(
-      child: Stack(
-        children: [
-          // Main App Content
-          AnimatedPositioned(
-            duration: const Duration(milliseconds: 300),
-            left: _isDrawerOpen ? drawerWidth : 0,
-            right: _isDrawerOpen ? -drawerWidth : 0,
-            child: SizedBox(
-              height: MediaQuery.of(context).size.height,
-              child: CupertinoTabScaffold(
-                tabBar: CupertinoTabBar(
-                  items: const [
-                    BottomNavigationBarItem(
-                      icon: Icon(CupertinoIcons.bars),
-                      label: 'More',
-                    ),
-                    BottomNavigationBarItem(
-                      icon: Icon(CupertinoIcons.book),
-                      label: 'Recipes',
-                    ),
-                    BottomNavigationBarItem(
-                      icon: Icon(CupertinoIcons.cart),
-                      label: 'Shopping',
-                    ),
-                    BottomNavigationBarItem(
-                      icon: Icon(CupertinoIcons.calendar),
-                      label: 'Meal Plan',
-                    ),
-                    BottomNavigationBarItem(
-                      icon: Icon(CupertinoIcons.home),
-                      label: 'Discover',
-                    ),
-                  ],
-                  currentIndex: _selectedTab,
-                  onTap: (index) {
-                    if (index == 0) {
-                      _toggleDrawer();
-                    } else {
-                      _switchToTab(index);
-                    }
-                  },
+      backgroundColor: Colors.white,
+      child: AnimatedBuilder(
+        animation: _drawerController,
+        builder: (context, _) {
+          // _drawerController.value goes 0 -> 1
+          // We'll interpolate positions from that.
+          final double slideAmount = drawerWidth * _drawerController.value;
+
+          return Stack(
+            children: [
+              // 1) Drawer, sliding from left = -drawerWidth (closed) to 0 (open)
+              AnimatedPositioned(
+                duration: const Duration(milliseconds: 300),
+                left: -drawerWidth + slideAmount,
+                top: 0,
+                bottom: 0,
+                width: drawerWidth,
+                child: Material(
+                  color: CupertinoColors.systemGrey6,
+                  child: MoreMenu(
+                    onSelect: (route) {
+                      // Switch to a tab if it matches, otherwise push
+                      if (route is RecipesPage) {
+                        _switchToTab(1);
+                      } else if (route is ShoppingListPage) {
+                        _switchToTab(2);
+                      } else {
+                        Navigator.of(context).push(
+                          CupertinoPageRoute(builder: (_) => route),
+                        );
+                      }
+                    },
+                    onClose: _closeDrawer,
+                  ),
                 ),
-                tabBuilder: (context, index) {
-                  return CupertinoTabView(
-                    builder: (context) => _tabs[index],
-                  );
-                },
               ),
-            ),
-          ),
-          // Drawer
-          Positioned(
-            left: 0,
-            top: 0,
-            bottom: 0,
-            width: drawerWidth,
-            child: Material(
-              color: CupertinoColors.systemGrey6, // Background color for drawer
-              child: MoreMenu(
-                onSelect: (route) {
-                  if (route == 'Recipes') {
-                    _switchToTab(1); // Switch to Recipes tab
-                  } else if (route == 'Shopping List') {
-                    _switchToTab(2); // Switch to Shopping List tab
-                  } else {
-                    Navigator.of(context).push(
-                      CupertinoPageRoute(
-                        builder: (context) => route,
-                      ),
-                    );
-                  }
-                },
-                onClose: _closeDrawer,
+
+              // 2) Main content, sliding from left=0 to left=drawerWidth
+              AnimatedPositioned(
+                duration: const Duration(milliseconds: 300),
+                left: slideAmount,
+                right: -slideAmount,
+                top: 0,
+                bottom: 0,
+                child: SizedBox(
+                  height: MediaQuery.of(context).size.height,
+                  child: CupertinoTabScaffold(
+                    tabBar: CupertinoTabBar(
+                      items: const [
+                        BottomNavigationBarItem(
+                          icon: Icon(CupertinoIcons.bars),
+                          label: 'More',
+                        ),
+                        BottomNavigationBarItem(
+                          icon: Icon(CupertinoIcons.book),
+                          label: 'Recipes',
+                        ),
+                        BottomNavigationBarItem(
+                          icon: Icon(CupertinoIcons.cart),
+                          label: 'Shopping',
+                        ),
+                        BottomNavigationBarItem(
+                          icon: Icon(CupertinoIcons.calendar),
+                          label: 'Meal Plan',
+                        ),
+                        BottomNavigationBarItem(
+                          icon: Icon(CupertinoIcons.home),
+                          label: 'Discover',
+                        ),
+                      ],
+                      currentIndex: _selectedTab,
+                      onTap: (index) {
+                        if (index == 0) {
+                          _toggleDrawer();
+                        } else {
+                          _switchToTab(index);
+                        }
+                      },
+                    ),
+                    tabBuilder: (context, index) {
+                      return CupertinoTabView(
+                        builder: (context) => _tabs[index],
+                      );
+                    },
+                  ),
+                ),
               ),
-            ),
-          ),
-          // Gesture Detector to close drawer
-          if (_isDrawerOpen)
-            GestureDetector(
-              onTap: _closeDrawer,
-              child: Container(
-                color: Colors.black54.withOpacity(0.5),
-              ),
-            ),
-        ],
+
+              // 3) Dimming overlay that closes the drawer on tap
+              if (_isDrawerOpen)
+                GestureDetector(
+                  onTap: _closeDrawer,
+                  child: Container(color: Colors.black54.withOpacity(0.5)),
+                ),
+            ],
+          );
+        },
       ),
     );
   }
 }
-
-
