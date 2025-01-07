@@ -1,13 +1,17 @@
 import 'dart:io' show Platform;
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 
-// Your existing pages and widgets
 import 'package:flutter_test_2/src/mobile/pages/discover.dart';
 import 'package:flutter_test_2/src/mobile/pages/meal_plan.dart';
 import 'package:flutter_test_2/src/mobile/pages/recipes.dart';
 import 'package:flutter_test_2/src/mobile/pages/shopping_list.dart';
 import 'package:flutter_test_2/src/mobile/widgets/more_menu.dart';
+
+bool isTablet(BuildContext context) {
+  return MediaQuery.of(context).size.shortestSide >= 600;
+}
 
 class AdaptiveApp extends StatelessWidget {
   const AdaptiveApp({super.key});
@@ -15,22 +19,31 @@ class AdaptiveApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     if (Platform.isIOS) {
-      // iOS => Cupertino theme
-      return const CupertinoApp(
-        theme: CupertinoThemeData(
+      // iOS => CupertinoApp
+      return CupertinoApp(
+        // Provide these delegates so Material widgets won't complain
+        localizationsDelegates: const [
+          GlobalMaterialLocalizations.delegate,
+          GlobalWidgetsLocalizations.delegate,
+          GlobalCupertinoLocalizations.delegate,
+        ],
+        supportedLocales: const [
+          Locale('en', ''),
+        ],
+        theme: const CupertinoThemeData(
           primaryColor: CupertinoColors.systemBlue,
         ),
-        home: MainPage(),
+        home: const MainPage(),
       );
     } else {
-      // Android => Material theme
+      // Android => MaterialApp
       return MaterialApp(
         theme: ThemeData(
           primarySwatch: Colors.blue,
           bottomNavigationBarTheme: const BottomNavigationBarThemeData(
-            backgroundColor: Colors.blue, // Set background color
-            selectedItemColor: Colors.white, // Highlight the selected item
-            unselectedItemColor: Colors.white70, // Dim the unselected items
+            backgroundColor: Colors.blue,
+            selectedItemColor: Colors.white,
+            unselectedItemColor: Colors.white70,
           ),
         ),
         home: const MainPage(),
@@ -39,8 +52,6 @@ class AdaptiveApp extends StatelessWidget {
   }
 }
 
-/// The main page that holds your custom sliding drawer logic
-/// and bottom navigation, adapting between iOS and Android.
 class MainPage extends StatefulWidget {
   const MainPage({super.key});
 
@@ -49,17 +60,20 @@ class MainPage extends StatefulWidget {
 }
 
 class _MainPageState extends State<MainPage> with SingleTickerProviderStateMixin {
-  int _selectedTab = 1; // Start on "Recipes"
+  int _selectedTab = 1;
   bool _isDrawerOpen = false;
 
   late AnimationController _drawerController;
-  late Animation<double> _animation;       // slides main content & drawer
-  late Animation<double> _overlayAnimation; // fades the overlay
-  late CupertinoTabController? _iosTabController; // For iOS bottom nav logic
+  late Animation<double> _animation;
+  late Animation<double> _overlayAnimation;
 
-  // The tabs to show at indexes 1..4; index 0 is "More" placeholder
+  /// We keep the addListener approach
+  CupertinoTabController? _iosTabController;
+
+  bool _isSidebarVisible = true;
+
   final List<Widget> _tabs = [
-    const SizedBox(), // index 0 => "drawer" placeholder
+    const SizedBox(), // index 0 => "More"
     const RecipesPage(title: 'Recipes'),
     const ShoppingListPage(title: 'Shopping List'),
     const MealPlanPage(title: 'Meal Plan'),
@@ -70,40 +84,40 @@ class _MainPageState extends State<MainPage> with SingleTickerProviderStateMixin
   void initState() {
     super.initState();
 
-    // If we're on iOS, we can use a CupertinoTabController for the bottom nav
     if (Platform.isIOS) {
+      // CHANGED: We re-enable the addListener approach so that tapping index 0 reverts
       _iosTabController = CupertinoTabController(initialIndex: _selectedTab)
         ..addListener(() {
-          // If user taps index 0 => "More", revert to the old tab (prevent tab switch)
-          if (_iosTabController!.index == 0) {
-            _iosTabController!.index = _selectedTab;
+          final newIndex = _iosTabController!.index;
+          if (newIndex == 0) {
+            // Tapped "More"
+            _iosTabController!.index = _selectedTab; // revert to old tab
+            _toggleDrawer(); // open the drawer
+          } else {
+            // Tapped a normal tab => switch
+            _switchToTab(newIndex);
           }
         });
     } else {
-      // On Android, we won't use a CupertinoTabController
       _iosTabController = null;
     }
 
-    // Drawer animation controller
+    // Drawer animation (phone only)
     _drawerController = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 200),
     );
-
-    // Easing curve for opening (forward) & closing (reverse)
     _animation = CurvedAnimation(
       parent: _drawerController,
       curve: Curves.easeOutQuad,
       reverseCurve: Curves.easeInQuad,
     );
-
     _overlayAnimation = CurvedAnimation(
       parent: _drawerController,
       curve: Curves.easeOut,
       reverseCurve: Curves.easeIn,
     );
 
-    // Ensure drawer is initially closed
     _drawerController.value = 0.0;
     _isDrawerOpen = false;
   }
@@ -115,19 +129,17 @@ class _MainPageState extends State<MainPage> with SingleTickerProviderStateMixin
     super.dispose();
   }
 
-  // Toggle the drawer open/closed
   void _toggleDrawer() {
     setState(() {
       _isDrawerOpen = !_isDrawerOpen;
       if (_isDrawerOpen) {
-        _drawerController.forward();  // animate 0 -> 1
+        _drawerController.forward();
       } else {
-        _drawerController.reverse();  // animate 1 -> 0
+        _drawerController.reverse();
       }
     });
   }
 
-  // Force the drawer closed
   void _closeDrawer() {
     if (_isDrawerOpen) {
       setState(() {
@@ -137,24 +149,38 @@ class _MainPageState extends State<MainPage> with SingleTickerProviderStateMixin
     }
   }
 
-  // Switch bottom tab to [index], also close the drawer
   void _switchToTab(int index) {
     setState(() {
       _selectedTab = index;
     });
     if (_iosTabController != null) {
-      _iosTabController!.index = index; // For iOS
+      _iosTabController!.index = index;
     }
     _closeDrawer();
   }
 
+  void _toggleSidebar() {
+    setState(() {
+      _isSidebarVisible = !_isSidebarVisible;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
-    // Use the same drawer animation logic for both iOS & Android
+    if (isTablet(context)) {
+      return _buildTabletLayout(context);
+    } else {
+      return _buildPhoneLayout(context);
+    }
+  }
+
+  // --------------------------------------------------------------------------
+  // PHONE LAYOUT
+  // --------------------------------------------------------------------------
+  Widget _buildPhoneLayout(BuildContext context) {
     final width = MediaQuery.of(context).size.width;
     final drawerWidth = width > 300 ? 300.0 : width * 0.8;
 
-    // Rebuild whenever the drawer animation changes
     return AnimatedBuilder(
       animation: _animation,
       builder: (context, _) {
@@ -163,16 +189,15 @@ class _MainPageState extends State<MainPage> with SingleTickerProviderStateMixin
 
         return Stack(
           children: [
-            // 1) MAIN CONTENT & BOTTOM NAV
+            // main content
             Positioned(
               left: slide,
               right: -slide,
               top: 0,
               bottom: 0,
-              child: _buildMainContent(context),
+              child: _buildPhoneMainContent(context),
             ),
-
-            // 2) OVERLAY that fades in/out, blocking taps when drawer is open
+            // overlay
             if (overlayOpacity > 0)
               Positioned(
                 left: slide,
@@ -186,8 +211,7 @@ class _MainPageState extends State<MainPage> with SingleTickerProviderStateMixin
                   ),
                 ),
               ),
-
-            // 3) The actual drawer sliding in
+            // drawer sliding in
             Positioned(
               left: -drawerWidth + slide,
               top: 0,
@@ -201,8 +225,12 @@ class _MainPageState extends State<MainPage> with SingleTickerProviderStateMixin
                       _switchToTab(1);
                     } else if (route is ShoppingListPage) {
                       _switchToTab(2);
+                    } else if (route is MealPlanPage) {
+                      _switchToTab(3);
+                    } else if (route is DiscoverPage) {
+                      _switchToTab(4);
                     } else {
-                      // If it's not one of the main tabs, push a route
+                      // If it's not one of the main tabs
                       if (Platform.isIOS) {
                         Navigator.of(context).push(
                           CupertinoPageRoute(builder: (_) => route),
@@ -224,23 +252,15 @@ class _MainPageState extends State<MainPage> with SingleTickerProviderStateMixin
     );
   }
 
-  /// Build the main content + bottom nav differently for iOS vs. Android,
-  /// but keep the same drawer logic in both cases.
-  Widget _buildMainContent(BuildContext context) {
+  Widget _buildPhoneMainContent(BuildContext context) {
     if (Platform.isIOS) {
-      // iOS => Use your existing CupertinoTabScaffold approach
+      // iOS => rely on CupertinoTabController addListener
+      // <-- REMOVED onTap since we handle in .addListener
       return CupertinoTabScaffold(
         controller: _iosTabController,
         tabBar: CupertinoTabBar(
           currentIndex: _selectedTab,
-          onTap: (index) {
-            if (index == 0) {
-              // "More" => toggle drawer
-              _toggleDrawer();
-            } else {
-              _switchToTab(index);
-            }
-          },
+          // no onTap for iOS => the .addListener handles all changes
           items: const [
             BottomNavigationBarItem(
               icon: Icon(CupertinoIcons.bars),
@@ -271,7 +291,7 @@ class _MainPageState extends State<MainPage> with SingleTickerProviderStateMixin
         },
       );
     } else {
-      // Android => Use a Material Scaffold with bottom nav
+      // Android => Material
       return Scaffold(
         appBar: AppBar(
           title: Text(_titleForTab(_selectedTab)),
@@ -310,6 +330,147 @@ class _MainPageState extends State<MainPage> with SingleTickerProviderStateMixin
             ),
           ],
         ),
+      );
+    }
+  }
+
+  // --------------------------------------------------------------------------
+  // TABLET LAYOUT
+  // --------------------------------------------------------------------------
+  Widget _buildTabletLayout(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text(_titleForTab(_selectedTab)),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.menu),
+            onPressed: _toggleSidebar,
+          ),
+        ],
+      ),
+      body: Row(
+        children: [
+          if (_isSidebarVisible)
+            SizedBox(
+              width: 250,
+              child: Material(
+                color: CupertinoColors.systemGrey6,
+                child: MoreMenu(
+                  onSelect: (route) {
+                    if (route is RecipesPage) {
+                      _switchToTab(1);
+                    } else if (route is ShoppingListPage) {
+                      _switchToTab(2);
+                    } else if (route is MealPlanPage) {
+                      _switchToTab(3);
+                    } else if (route is DiscoverPage) {
+                      _switchToTab(4);
+                    } else {
+                      if (Platform.isIOS) {
+                        Navigator.of(context).push(
+                          CupertinoPageRoute(builder: (_) => route),
+                        );
+                      } else {
+                        Navigator.of(context).push(
+                          MaterialPageRoute(builder: (_) => route),
+                        );
+                      }
+                    }
+                  },
+                  onClose: () {
+                    setState(() {
+                      _isSidebarVisible = false;
+                    });
+                  },
+                ),
+              ),
+            ),
+          Expanded(
+            child: _tabs[_selectedTab],
+          ),
+        ],
+      ),
+      // If you still want a bottom nav on tablet
+      bottomNavigationBar: _buildTabletBottomNav(context),
+    );
+  }
+
+  Widget _buildTabletBottomNav(BuildContext context) {
+    if (Platform.isIOS) {
+      // (Optional) Remove ripple on iPad
+      return Theme(
+        data: Theme.of(context).copyWith(
+          splashFactory: NoSplash.splashFactory,
+          highlightColor: Colors.transparent,
+          splashColor: Colors.transparent,
+        ),
+        child: BottomNavigationBar(
+          currentIndex: _selectedTab,
+          type: BottomNavigationBarType.fixed,
+          onTap: (index) {
+            if (index == 0) {
+              _toggleSidebar();
+            } else {
+              _switchToTab(index);
+            }
+          },
+          items: const [
+            BottomNavigationBarItem(
+              icon: Icon(Icons.menu),
+              label: 'More',
+            ),
+            BottomNavigationBarItem(
+              icon: Icon(Icons.book),
+              label: 'Recipes',
+            ),
+            BottomNavigationBarItem(
+              icon: Icon(Icons.shopping_cart),
+              label: 'Shopping',
+            ),
+            BottomNavigationBarItem(
+              icon: Icon(Icons.calendar_month),
+              label: 'Meal Plan',
+            ),
+            BottomNavigationBarItem(
+              icon: Icon(Icons.home),
+              label: 'Discover',
+            ),
+          ],
+        ),
+      );
+    } else {
+      return BottomNavigationBar(
+        currentIndex: _selectedTab,
+        type: BottomNavigationBarType.fixed,
+        onTap: (index) {
+          if (index == 0) {
+            _toggleSidebar();
+          } else {
+            _switchToTab(index);
+          }
+        },
+        items: const [
+          BottomNavigationBarItem(
+            icon: Icon(Icons.menu),
+            label: 'More',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.book),
+            label: 'Recipes',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.shopping_cart),
+            label: 'Shopping',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.calendar_month),
+            label: 'Meal Plan',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.home),
+            label: 'Discover',
+          ),
+        ],
       );
     }
   }
