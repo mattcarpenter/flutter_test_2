@@ -57,16 +57,24 @@ class MainPage extends StatefulWidget {
   State<MainPage> createState() => _MainPageState();
 }
 
-class _MainPageState extends State<MainPage> with SingleTickerProviderStateMixin {
+class _MainPageState extends State<MainPage> with TickerProviderStateMixin {
   int _selectedTab = 1;
   bool _isDrawerOpen = false;
 
+  // Phone drawer animations
   late AnimationController _drawerController;
   late Animation<double> _animation;
   late Animation<double> _overlayAnimation;
 
+  // iOS bottom nav
   CupertinoTabController? _iosTabController;
+
+  // Whether the sidebar is logically "open" or "closed" on tablet
   bool _isSidebarVisible = true;
+
+  // Tablet sidebar animation (0 => hidden, 1 => fully visible)
+  late AnimationController _tabletSidebarController;
+  late Animation<double> _tabletSidebarAnimation;
 
   final List<Widget> _tabs = [
     const SizedBox(),
@@ -80,8 +88,8 @@ class _MainPageState extends State<MainPage> with SingleTickerProviderStateMixin
   void initState() {
     super.initState();
 
+    // iOS phone => "More" does not become the active tab
     if (Platform.isIOS) {
-      // Keep the addListener approach so "More" never appears as active
       _iosTabController = CupertinoTabController(initialIndex: _selectedTab)
         ..addListener(() {
           final newIndex = _iosTabController!.index;
@@ -94,6 +102,7 @@ class _MainPageState extends State<MainPage> with SingleTickerProviderStateMixin
         });
     }
 
+    // Phone drawer animations
     _drawerController = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 200),
@@ -108,18 +117,38 @@ class _MainPageState extends State<MainPage> with SingleTickerProviderStateMixin
       curve: Curves.easeOut,
       reverseCurve: Curves.easeIn,
     );
-
     _drawerController.value = 0.0;
     _isDrawerOpen = false;
+
+    // Tablet sidebar animation
+    // Will animate from width=0 to width=250
+    _tabletSidebarController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 200),
+    );
+    _tabletSidebarAnimation = CurvedAnimation(
+      parent: _tabletSidebarController,
+      curve: Curves.easeOutQuad,
+      reverseCurve: Curves.easeInQuad,
+    );
+    // Initialize to 1.0 if we want it open initially
+    _tabletSidebarController.value = _isSidebarVisible ? 1.0 : 0.0;
   }
 
   @override
   void dispose() {
     _drawerController.dispose();
     _iosTabController?.dispose();
+
+    // Tablet
+    _tabletSidebarController.dispose();
+
     super.dispose();
   }
 
+  // --------------------------------------------------------------------------
+  // PHONE: Drawer logic
+  // --------------------------------------------------------------------------
   void _toggleDrawer() {
     setState(() {
       _isDrawerOpen = !_isDrawerOpen;
@@ -140,6 +169,7 @@ class _MainPageState extends State<MainPage> with SingleTickerProviderStateMixin
     }
   }
 
+  // Switch tabs
   void _switchToTab(int index) {
     setState(() {
       _selectedTab = index;
@@ -148,25 +178,35 @@ class _MainPageState extends State<MainPage> with SingleTickerProviderStateMixin
     _closeDrawer();
   }
 
+  // --------------------------------------------------------------------------
+  // TABLET: Show/hide the sidebar with animation
+  // --------------------------------------------------------------------------
   void _toggleSidebar() {
     setState(() {
       _isSidebarVisible = !_isSidebarVisible;
     });
+    if (_isSidebarVisible) {
+      _tabletSidebarController.forward();   // 0 -> 1
+    } else {
+      _tabletSidebarController.reverse();   // 1 -> 0
+    }
   }
 
+  // --------------------------------------------------------------------------
+  // BUILD
+  // --------------------------------------------------------------------------
   @override
   Widget build(BuildContext context) {
-    // On tablets, no bottom nav, just the sidebar
-    // On phones, bottom nav + no title bar
+    // If tablet => animate sidebar
+    // If phone => normal drawer
     return isTablet(context)
         ? _buildTabletLayout(context)
         : _buildPhoneLayout(context);
   }
 
   // --------------------------------------------------------------------------
-  // PHONE LAYOUT
+  // PHONE LAYOUT (no top AppBar, bottom nav only)
   // --------------------------------------------------------------------------
-  // CHANGED: remove any AppBar usage; we can just show the tab bar at bottom
   Widget _buildPhoneLayout(BuildContext context) {
     final width = MediaQuery.of(context).size.width;
     final drawerWidth = width > 300 ? 300.0 : width * 0.8;
@@ -179,7 +219,7 @@ class _MainPageState extends State<MainPage> with SingleTickerProviderStateMixin
 
         return Stack(
           children: [
-            // 1) MAIN CONTENT
+            // 1) Main content
             Positioned(
               left: slide,
               right: -slide,
@@ -188,7 +228,7 @@ class _MainPageState extends State<MainPage> with SingleTickerProviderStateMixin
               child: _buildPhoneMainContent(context),
             ),
 
-            // 2) OVERLAY
+            // 2) Overlay
             if (overlayOpacity > 0)
               Positioned(
                 left: slide,
@@ -203,7 +243,7 @@ class _MainPageState extends State<MainPage> with SingleTickerProviderStateMixin
                 ),
               ),
 
-            // 3) SLIDING DRAWER
+            // 3) Drawer
             Positioned(
               left: -drawerWidth + slide,
               top: 0,
@@ -243,7 +283,7 @@ class _MainPageState extends State<MainPage> with SingleTickerProviderStateMixin
     );
   }
 
-  // On phone, purely the bottom nav with no app bar
+  /// Bottom nav only, no top AppBar on phone
   Widget _buildPhoneMainContent(BuildContext context) {
     if (Platform.isIOS) {
       return CupertinoTabScaffold(
@@ -274,13 +314,13 @@ class _MainPageState extends State<MainPage> with SingleTickerProviderStateMixin
           ],
         ),
         tabBuilder: (context, index) {
-          // pages
-          return CupertinoTabView(builder: (_) => _tabs[index]);
+          return CupertinoTabView(
+            builder: (_) => _tabs[index],
+          );
         },
       );
     } else {
       return Scaffold(
-        // REMOVED APPBAR ON PHONE
         body: _tabs[_selectedTab],
         bottomNavigationBar: BottomNavigationBar(
           currentIndex: _selectedTab,
@@ -319,83 +359,108 @@ class _MainPageState extends State<MainPage> with SingleTickerProviderStateMixin
     }
   }
 
-  // --------------------------------------------------------------------------
-  // TABLET LAYOUT
-  // --------------------------------------------------------------------------
-  /// Build the tablet layout with a sidebar on the left
-  /// and a nested Scaffold on the right. The AppBar appears
-  /// only above the main content, not over the sidebar.
+  /// TABLET LAYOUT:
+  /// Animated left column from 0..250 px, main content in the rest.
+  /// A top-level Stack is used only for the toggle button.
+  /// A tablet layout where:
+  /// - The sidebar slides in from offscreen (no text reflow in the sidebar).
+  /// - The main content transforms (offset and/or scale) so it “shrinks”
+  ///   but does NOT reflow text.
+  /// Build the tablet layout so the sidebar "slides in" from offscreen
+  /// (width 0..250) and physically shrinks the main content area by that same amount.
+  /// There's no scaling of the main content's height or text — it's a real reflow of width.
+  /// Build the tablet layout where:
+  /// - Sidebar is fixed at 250px but slides offscreen via Transform.translate.
+  /// - Main content adjusts its left edge via Positioned offset.
   Widget _buildTabletLayout(BuildContext context) {
+    const double sidebarWidth = 250.0;
+
     return SafeArea(
-      // 1) Wrap everything in a Stack
       child: Stack(
         children: [
-          // 2) The main row: [ sidebar | expanded Scaffold(main content) ]
-          Row(
-            children: [
-              // Sidebar
-              if (_isSidebarVisible)
-                SizedBox(
-                  width: 250,
-                  child: Material(
-                    color: CupertinoColors.systemGrey6,
-                    child: MoreMenu(
-                      onSelect: (route) {
-                        if (route is RecipesPage) {
-                          _switchToTab(1);
-                        } else if (route is ShoppingListPage) {
-                          _switchToTab(2);
-                        } else if (route is MealPlanPage) {
-                          _switchToTab(3);
-                        } else if (route is DiscoverPage) {
-                          _switchToTab(4);
-                        } else {
-                          if (Platform.isIOS) {
-                            Navigator.of(context).push(
-                              CupertinoPageRoute(builder: (_) => route),
-                            );
-                          } else {
-                            Navigator.of(context).push(
-                              MaterialPageRoute(builder: (_) => route),
-                            );
-                          }
-                        }
-                      },
-                      onClose: () {
-                        setState(() {
-                          _isSidebarVisible = false;
-                        });
-                      },
-                    ),
-                  ),
-                ),
+          // 1) The sidebar: Fixed width, slides in/out via translate
+          AnimatedBuilder(
+            animation: _tabletSidebarAnimation, // 0..1
+            builder: (context, child) {
+              final fraction = _tabletSidebarAnimation.value;
 
-              // Main content => nested Scaffold
-              Expanded(
-                child: Scaffold(
-                  appBar: AppBar(
-                    title: Text(_titleForTab(_selectedTab)),
-                  ),
-                  body: _tabs[_selectedTab],
+              // Sidebar slides from x=-250 (hidden) to x=0 (fully visible)
+              final double offsetX = -sidebarWidth * (1 - fraction);
+
+              return Transform.translate(
+                offset: Offset(offsetX, 0),
+                child: child,
+              );
+            },
+            child: Material(
+              color: CupertinoColors.systemGrey6,
+              child: SizedBox(
+                width: sidebarWidth,
+                child: MoreMenu(
+                  onSelect: (route) {
+                    if (route is RecipesPage) {
+                      _switchToTab(1);
+                    } else if (route is ShoppingListPage) {
+                      _switchToTab(2);
+                    } else if (route is MealPlanPage) {
+                      _switchToTab(3);
+                    } else if (route is DiscoverPage) {
+                      _switchToTab(4);
+                    } else {
+                      if (Platform.isIOS) {
+                        Navigator.of(context).push(
+                          CupertinoPageRoute(builder: (_) => route),
+                        );
+                      } else {
+                        Navigator.of(context).push(
+                          MaterialPageRoute(builder: (_) => route),
+                        );
+                      }
+                    }
+                  },
+                  onClose: _toggleSidebar,
                 ),
               ),
-            ],
+            ),
           ),
 
-          // 3) The static show/hide button at top-left corner
-          //    This button always stays in the same place,
-          //    even if the sidebar is shown or hidden.
+          // 2) Main content: Adjusts its left position as sidebar slides
+          AnimatedBuilder(
+            animation: _tabletSidebarAnimation, // 0..1
+            builder: (context, child) {
+              final fraction = _tabletSidebarAnimation.value;
+
+              // Main content's left edge moves from 0..250
+              final double offsetX = sidebarWidth * fraction;
+
+              return Positioned(
+                left: offsetX,
+                right: 0, // Full width minus left offset
+                top: 0,
+                bottom: 0,
+                child: child!,
+              );
+            },
+            child: Scaffold(
+              appBar: AppBar(
+                title: Text(_titleForTab(_selectedTab)),
+              ),
+              body: _tabs[_selectedTab],
+            ),
+          ),
+
+          // 3) Static toggle button pinned at top-left of the screen
           Positioned(
             top: 16,
             left: 16,
             child: ElevatedButton(
               onPressed: _toggleSidebar,
               style: ElevatedButton.styleFrom(
-                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+                padding: const EdgeInsets.all(8),
               ),
               child: Icon(
                 _isSidebarVisible ? Icons.arrow_back_ios : Icons.menu,
-                size: 20,
+                size: 18,
               ),
             ),
           ),
@@ -405,6 +470,7 @@ class _MainPageState extends State<MainPage> with SingleTickerProviderStateMixin
   }
 
 
+  // Title for the AppBar
   String _titleForTab(int index) {
     switch (index) {
       case 1:
