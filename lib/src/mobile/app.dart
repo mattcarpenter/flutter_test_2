@@ -377,6 +377,7 @@ class _MainPageState extends State<MainPage> with TickerProviderStateMixin {
     const double sidebarWidth = 250.0;
 
     return SafeArea(
+      top: false,
       child: Stack(
         children: [
           // 1) The sidebar: Fixed width, slides in/out via translate
@@ -453,11 +454,11 @@ class _MainPageState extends State<MainPage> with TickerProviderStateMixin {
 
           // 3) Static toggle button pinned at top-left of the screen
           Positioned(
-            top: 8,
-            left: 16,
+            top: 36,
+            left: 32,
             child: GestureDetector(
               onTap: _toggleSidebar,
-              child: SvgPicture.asset("assets/images/sidebar.svg"),
+              child: const Icon(CupertinoIcons.sidebar_left), //SvgPicture.asset("assets/images/sidebar.svg"),
             ),
           ),
         ],
