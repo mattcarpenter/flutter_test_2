@@ -2,6 +2,7 @@ import 'dart:io' show Platform;
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:flutter_svg/svg.dart';
 
 import 'package:flutter_test_2/src/mobile/pages/discover.dart';
 import 'package:flutter_test_2/src/mobile/pages/meal_plan.dart';
@@ -443,6 +444,7 @@ class _MainPageState extends State<MainPage> with TickerProviderStateMixin {
             },
             child: Scaffold(
               appBar: AppBar(
+                backgroundColor: Colors.white,
                 title: Text(_titleForTab(_selectedTab)),
               ),
               body: _tabs[_selectedTab],
@@ -451,17 +453,11 @@ class _MainPageState extends State<MainPage> with TickerProviderStateMixin {
 
           // 3) Static toggle button pinned at top-left of the screen
           Positioned(
-            top: 16,
+            top: 8,
             left: 16,
-            child: ElevatedButton(
-              onPressed: _toggleSidebar,
-              style: ElevatedButton.styleFrom(
-                padding: const EdgeInsets.all(8),
-              ),
-              child: Icon(
-                _isSidebarVisible ? Icons.arrow_back_ios : Icons.menu,
-                size: 18,
-              ),
+            child: GestureDetector(
+              onTap: _toggleSidebar,
+              child: SvgPicture.asset("assets/images/sidebar.svg"),
             ),
           ),
         ],

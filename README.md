@@ -2,6 +2,10 @@
 
 A new Flutter project.
 
+## TODO
+[ ] Make sidebar pretty on tablet
+[ ] Make sidebar pretty on phone
+
 ## Getting Started
 
 This project is a starting point for a Flutter application that follows the
