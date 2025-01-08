@@ -19,20 +19,20 @@ class AdaptiveApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     if (Platform.isIOS) {
-      return CupertinoApp(
+      return const CupertinoApp(
         // Provide these for Material widgets
-        localizationsDelegates: const [
+        localizationsDelegates: [
           GlobalMaterialLocalizations.delegate,
           GlobalWidgetsLocalizations.delegate,
           GlobalCupertinoLocalizations.delegate,
         ],
-        supportedLocales: const [
+        supportedLocales: [
           Locale('en', ''),
         ],
-        theme: const CupertinoThemeData(
+        theme: CupertinoThemeData(
           primaryColor: CupertinoColors.systemBlue,
         ),
-        home: const MainPage(),
+        home: MainPage(),
       );
     } else {
       return MaterialApp(
