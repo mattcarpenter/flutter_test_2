@@ -67,7 +67,6 @@ class _MainPageState extends State<MainPage> with SingleTickerProviderStateMixin
   late Animation<double> _animation;
   late Animation<double> _overlayAnimation;
 
-  /// We keep the addListener approach
   CupertinoTabController? _iosTabController;
 
   bool _isSidebarVisible = true;
@@ -85,7 +84,7 @@ class _MainPageState extends State<MainPage> with SingleTickerProviderStateMixin
     super.initState();
 
     if (Platform.isIOS) {
-      // CHANGED: We re-enable the addListener approach so that tapping index 0 reverts
+      // We rely on addListener so tapping index 0 reverts immediately
       _iosTabController = CupertinoTabController(initialIndex: _selectedTab)
         ..addListener(() {
           final newIndex = _iosTabController!.index;
@@ -189,7 +188,6 @@ class _MainPageState extends State<MainPage> with SingleTickerProviderStateMixin
 
         return Stack(
           children: [
-            // main content
             Positioned(
               left: slide,
               right: -slide,
@@ -197,7 +195,6 @@ class _MainPageState extends State<MainPage> with SingleTickerProviderStateMixin
               bottom: 0,
               child: _buildPhoneMainContent(context),
             ),
-            // overlay
             if (overlayOpacity > 0)
               Positioned(
                 left: slide,
@@ -211,7 +208,6 @@ class _MainPageState extends State<MainPage> with SingleTickerProviderStateMixin
                   ),
                 ),
               ),
-            // drawer sliding in
             Positioned(
               left: -drawerWidth + slide,
               top: 0,
@@ -230,7 +226,6 @@ class _MainPageState extends State<MainPage> with SingleTickerProviderStateMixin
                     } else if (route is DiscoverPage) {
                       _switchToTab(4);
                     } else {
-                      // If it's not one of the main tabs
                       if (Platform.isIOS) {
                         Navigator.of(context).push(
                           CupertinoPageRoute(builder: (_) => route),
@@ -254,13 +249,12 @@ class _MainPageState extends State<MainPage> with SingleTickerProviderStateMixin
 
   Widget _buildPhoneMainContent(BuildContext context) {
     if (Platform.isIOS) {
-      // iOS => rely on CupertinoTabController addListener
-      // <-- REMOVED onTap since we handle in .addListener
+      // iOS phone => rely on CupertinoTabController addListener
       return CupertinoTabScaffold(
         controller: _iosTabController,
         tabBar: CupertinoTabBar(
           currentIndex: _selectedTab,
-          // no onTap for iOS => the .addListener handles all changes
+          // No onTap needed, listener handles changes
           items: const [
             BottomNavigationBarItem(
               icon: Icon(CupertinoIcons.bars),
@@ -291,7 +285,7 @@ class _MainPageState extends State<MainPage> with SingleTickerProviderStateMixin
         },
       );
     } else {
-      // Android => Material
+      // Android phone => Material bottom nav
       return Scaffold(
         appBar: AppBar(
           title: Text(_titleForTab(_selectedTab)),
@@ -338,6 +332,7 @@ class _MainPageState extends State<MainPage> with SingleTickerProviderStateMixin
   // TABLET LAYOUT
   // --------------------------------------------------------------------------
   Widget _buildTabletLayout(BuildContext context) {
+    // REMOVED BOTTOM NAV ON TABLET: just the sidebar & main content
     return Scaffold(
       appBar: AppBar(
         title: Text(_titleForTab(_selectedTab)),
@@ -350,6 +345,7 @@ class _MainPageState extends State<MainPage> with SingleTickerProviderStateMixin
       ),
       body: Row(
         children: [
+          // 1) The Sidebar
           if (_isSidebarVisible)
             SizedBox(
               width: 250,
@@ -357,6 +353,7 @@ class _MainPageState extends State<MainPage> with SingleTickerProviderStateMixin
                 color: CupertinoColors.systemGrey6,
                 child: MoreMenu(
                   onSelect: (route) {
+                    // If it's a main tab route, switch
                     if (route is RecipesPage) {
                       _switchToTab(1);
                     } else if (route is ShoppingListPage) {
@@ -366,6 +363,7 @@ class _MainPageState extends State<MainPage> with SingleTickerProviderStateMixin
                     } else if (route is DiscoverPage) {
                       _switchToTab(4);
                     } else {
+                      // Otherwise, push a route
                       if (Platform.isIOS) {
                         Navigator.of(context).push(
                           CupertinoPageRoute(builder: (_) => route),
@@ -377,6 +375,7 @@ class _MainPageState extends State<MainPage> with SingleTickerProviderStateMixin
                       }
                     }
                   },
+                  // On tablet, "onClose" might just hide the sidebar
                   onClose: () {
                     setState(() {
                       _isSidebarVisible = false;
@@ -385,94 +384,16 @@ class _MainPageState extends State<MainPage> with SingleTickerProviderStateMixin
                 ),
               ),
             ),
+
+          // 2) Main content
           Expanded(
             child: _tabs[_selectedTab],
           ),
         ],
       ),
-      // If you still want a bottom nav on tablet
-      bottomNavigationBar: _buildTabletBottomNav(context),
+      // REMOVED BOTTOM NAV ON TABLET
+      // bottomNavigationBar: Some nav? => Removed as per your request
     );
-  }
-
-  Widget _buildTabletBottomNav(BuildContext context) {
-    if (Platform.isIOS) {
-      // (Optional) Remove ripple on iPad
-      return Theme(
-        data: Theme.of(context).copyWith(
-          splashFactory: NoSplash.splashFactory,
-          highlightColor: Colors.transparent,
-          splashColor: Colors.transparent,
-        ),
-        child: BottomNavigationBar(
-          currentIndex: _selectedTab,
-          type: BottomNavigationBarType.fixed,
-          onTap: (index) {
-            if (index == 0) {
-              _toggleSidebar();
-            } else {
-              _switchToTab(index);
-            }
-          },
-          items: const [
-            BottomNavigationBarItem(
-              icon: Icon(Icons.menu),
-              label: 'More',
-            ),
-            BottomNavigationBarItem(
-              icon: Icon(Icons.book),
-              label: 'Recipes',
-            ),
-            BottomNavigationBarItem(
-              icon: Icon(Icons.shopping_cart),
-              label: 'Shopping',
-            ),
-            BottomNavigationBarItem(
-              icon: Icon(Icons.calendar_month),
-              label: 'Meal Plan',
-            ),
-            BottomNavigationBarItem(
-              icon: Icon(Icons.home),
-              label: 'Discover',
-            ),
-          ],
-        ),
-      );
-    } else {
-      return BottomNavigationBar(
-        currentIndex: _selectedTab,
-        type: BottomNavigationBarType.fixed,
-        onTap: (index) {
-          if (index == 0) {
-            _toggleSidebar();
-          } else {
-            _switchToTab(index);
-          }
-        },
-        items: const [
-          BottomNavigationBarItem(
-            icon: Icon(Icons.menu),
-            label: 'More',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.book),
-            label: 'Recipes',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.shopping_cart),
-            label: 'Shopping',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.calendar_month),
-            label: 'Meal Plan',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.home),
-            label: 'Discover',
-          ),
-        ],
-      );
-    }
   }
 
   String _titleForTab(int index) {
