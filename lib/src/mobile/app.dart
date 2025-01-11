@@ -9,6 +9,9 @@ import 'package:flutter_test_2/src/mobile/pages/meal_plan.dart';
 import 'package:flutter_test_2/src/mobile/pages/recipes.dart';
 import 'package:flutter_test_2/src/mobile/pages/shopping_list.dart';
 import 'package:flutter_test_2/src/mobile/widgets/more_menu.dart';
+import 'package:flutter_test_2/src/widgets/sidebar_button.dart';
+
+import '../color_theme.dart';
 
 bool isTablet(BuildContext context) {
   return MediaQuery.of(context).size.shortestSide >= 600;
@@ -19,32 +22,31 @@ class AdaptiveApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final Brightness brightness =
+        MediaQuery.of(context).platformBrightness;
+    final bool isDarkMode = brightness == Brightness.dark;
+
     if (Platform.isIOS) {
-      return const CupertinoApp(
+      return CupertinoApp(
         // Provide these for Material widgets
-        localizationsDelegates: [
+        localizationsDelegates: const [
           GlobalMaterialLocalizations.delegate,
           GlobalWidgetsLocalizations.delegate,
           GlobalCupertinoLocalizations.delegate,
         ],
-        supportedLocales: [
+        supportedLocales: const [
           Locale('en', ''),
         ],
-        theme: CupertinoThemeData(
-          primaryColor: CupertinoColors.systemBlue,
-        ),
-        home: MainPage(),
+        theme: isDarkMode
+          ? AppTheme.cupertinoDarkTheme
+          : AppTheme.cupertinoLightTheme,
+        home: const MainPage(),
       );
     } else {
       return MaterialApp(
-        theme: ThemeData(
-          primarySwatch: Colors.blue,
-          bottomNavigationBarTheme: const BottomNavigationBarThemeData(
-            backgroundColor: Colors.blue,
-            selectedItemColor: Colors.white,
-            unselectedItemColor: Colors.white70,
-          ),
-        ),
+        theme: isDarkMode
+            ? AppTheme.materialDarkTheme
+            : AppTheme.materialLightTheme,
         home: const MainPage(),
       );
     }
@@ -399,6 +401,7 @@ class _MainPageState extends State<MainPage> with TickerProviderStateMixin {
               child: SizedBox(
                 width: sidebarWidth,
                 child: MoreMenu(
+                  showCloseButton: false,
                   onSelect: (route) {
                     if (route is RecipesPage) {
                       _switchToTab(1);
@@ -455,10 +458,9 @@ class _MainPageState extends State<MainPage> with TickerProviderStateMixin {
           // 3) Static toggle button pinned at top-left of the screen
           Positioned(
             top: 36,
-            left: 32,
-            child: GestureDetector(
+            left: 20,
+            child: SidebarButton(
               onTap: _toggleSidebar,
-              child: const Icon(CupertinoIcons.sidebar_left), //SvgPicture.asset("assets/images/sidebar.svg"),
             ),
           ),
         ],

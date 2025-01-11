@@ -3,8 +3,16 @@
 A new Flutter project.
 
 ## TODO
-[ ] Make sidebar pretty on tablet
-[ ] Make sidebar pretty on phone
+### Goal: Sidebar UX finalized and implemented
+[ ] Conditionally show close button in sidebar
+[ ] Create color scheme library (sidebar bg color, active bg color, icon color) also support platform and light/dark
+[ ] Adjust padding around active state
+[ ] Figure out active state for menu items
+[ ] Spec for tree nav (look at Notion?)
+[ ] Finish impl of tree nav (minus nav)
+
+## Resources
+https://schema.org/Recipe
 
 ## Getting Started
 
