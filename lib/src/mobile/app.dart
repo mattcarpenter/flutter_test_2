@@ -35,7 +35,7 @@ class AdaptiveApp extends StatelessWidget {
           Locale('en', ''),
         ],
         theme: isDarkMode ? AppTheme.cupertinoDarkTheme : AppTheme.cupertinoLightTheme,
-        home: MainPage(),
+        home: const MainPage(),
       );
     } else {
       return MaterialApp(
@@ -382,13 +382,12 @@ class _MainPageState extends State<MainPage> with TickerProviderStateMixin {
       top: false,
       child: Stack(
         children: [
-          // 1) The sidebar: Fixed width, slides in/out via translate
+          // Sidebar
           AnimatedBuilder(
             animation: _tabletSidebarAnimation, // 0..1
             builder: (context, child) {
               final fraction = _tabletSidebarAnimation.value;
 
-              // Sidebar slides from x=-250 (hidden) to x=0 (fully visible)
               final double offsetX = -sidebarWidth * (1 - fraction);
 
               return Transform.translate(
@@ -429,13 +428,12 @@ class _MainPageState extends State<MainPage> with TickerProviderStateMixin {
             ),
           ),
 
-          // 2) Main content: Adjusts its left position as sidebar slides
+          // Main Content
           AnimatedBuilder(
             animation: _tabletSidebarAnimation, // 0..1
             builder: (context, child) {
               final fraction = _tabletSidebarAnimation.value;
 
-              // Main content's left edge moves from 0..250
               final double offsetX = sidebarWidth * fraction;
 
               return Positioned(
@@ -443,22 +441,24 @@ class _MainPageState extends State<MainPage> with TickerProviderStateMixin {
                 right: 0, // Full width minus left offset
                 top: 0,
                 bottom: 0,
-                child: child!,
+                child: Container(
+                  color: CupertinoTheme.of(context).scaffoldBackgroundColor, // Use theme background
+                  child: Column(
+                    children: [
+                      CupertinoNavigationBar(
+                        middle: Text(_titleForTab(_selectedTab)),
+                      ),
+                      Expanded(
+                        child: _tabs[_selectedTab],
+                      ),
+                    ],
+                  ),
+                ),
               );
             },
-            child: Column(
-              children: [
-                CupertinoNavigationBar(
-                  middle: Text(_titleForTab(_selectedTab)),
-                ),
-                Expanded(
-                  child: _tabs[_selectedTab],
-                ),
-              ],
-            ),
           ),
 
-          // 3) Static toggle button pinned at top-left of the screen
+          // Sidebar Toggle Button
           Positioned(
             top: 38,
             left: 28,
@@ -470,6 +470,7 @@ class _MainPageState extends State<MainPage> with TickerProviderStateMixin {
       ),
     );
   }
+
 
 
   // Title for the AppBar
