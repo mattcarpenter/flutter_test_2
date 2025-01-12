@@ -34,26 +34,17 @@ class AdaptiveApp extends StatelessWidget {
         supportedLocales: const [
           Locale('en', ''),
         ],
-        theme: CupertinoThemeData(
-          brightness: isDarkMode ? Brightness.dark : Brightness.light,
-        ),
-        home: CupertinoPageScaffold(
-          navigationBar: CupertinoNavigationBar(
-            middle: Text('App Title'),
-          ),
-          child: MainPage(), 
-        ),
+        theme: isDarkMode ? AppTheme.cupertinoDarkTheme : AppTheme.cupertinoLightTheme,
+        home: MainPage(),
       );
     } else {
       return MaterialApp(
-        theme: ThemeData(
-          brightness: isDarkMode ? Brightness.dark : Brightness.light,
-        ),
+        theme: isDarkMode ? AppTheme.materialDarkTheme : AppTheme.materialLightTheme,
         home: Scaffold(
           appBar: AppBar(
             title: Text('App Title'),
           ),
-          body: MainPage(), 
+          body: MainPage(),
         ),
       );
     }
@@ -455,11 +446,15 @@ class _MainPageState extends State<MainPage> with TickerProviderStateMixin {
                 child: child!,
               );
             },
-            child: Scaffold(
-              appBar: AppBar(
-                title: Text(_titleForTab(_selectedTab)),
-              ),
-              body: _tabs[_selectedTab],
+            child: Column(
+              children: [
+                CupertinoNavigationBar(
+                  middle: Text(_titleForTab(_selectedTab)),
+                ),
+                Expanded(
+                  child: _tabs[_selectedTab],
+                ),
+              ],
             ),
           ),
 
