@@ -4,15 +4,19 @@ A new Flutter project.
 
 ## TODO
 ### Goal: Sidebar UX finalized and implemented
-[ ] Conditionally show close button in sidebar
-[ ] Create color scheme library (sidebar bg color, active bg color, icon color) also support platform and light/dark
-[ ] Adjust padding around active state
+[X] Conditionally show close button in sidebar
+[X] Create color scheme library (sidebar bg color, active bg color, icon color) also support platform and light/dark
+[X] Adjust padding around active state
 [ ] Figure out active state for menu items
 [ ] Spec for tree nav (look at Notion?)
 [ ] Finish impl of tree nav (minus nav)
 
+### Goal: Understand routing and pages
+[ ] 
+
 ## Resources
 https://schema.org/Recipe
+https://bakewithrise.com/index.html
 
 ## Getting Started
 

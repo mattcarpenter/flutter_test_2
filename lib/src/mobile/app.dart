@@ -2,7 +2,6 @@ import 'dart:io' show Platform;
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
-import 'package:flutter_svg/svg.dart';
 
 import 'package:flutter_test_2/src/mobile/pages/discover.dart';
 import 'package:flutter_test_2/src/mobile/pages/meal_plan.dart';
@@ -22,13 +21,11 @@ class AdaptiveApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final Brightness brightness =
-        MediaQuery.of(context).platformBrightness;
+    final Brightness brightness = MediaQuery.of(context).platformBrightness;
     final bool isDarkMode = brightness == Brightness.dark;
 
     if (Platform.isIOS) {
       return CupertinoApp(
-        // Provide these for Material widgets
         localizationsDelegates: const [
           GlobalMaterialLocalizations.delegate,
           GlobalWidgetsLocalizations.delegate,
@@ -37,17 +34,27 @@ class AdaptiveApp extends StatelessWidget {
         supportedLocales: const [
           Locale('en', ''),
         ],
-        theme: isDarkMode
-          ? AppTheme.cupertinoDarkTheme
-          : AppTheme.cupertinoLightTheme,
-        home: const MainPage(),
+        theme: CupertinoThemeData(
+          brightness: isDarkMode ? Brightness.dark : Brightness.light,
+        ),
+        home: CupertinoPageScaffold(
+          navigationBar: CupertinoNavigationBar(
+            middle: Text('App Title'),
+          ),
+          child: MainPage(), 
+        ),
       );
     } else {
       return MaterialApp(
-        theme: isDarkMode
-            ? AppTheme.materialDarkTheme
-            : AppTheme.materialLightTheme,
-        home: const MainPage(),
+        theme: ThemeData(
+          brightness: isDarkMode ? Brightness.dark : Brightness.light,
+        ),
+        home: Scaffold(
+          appBar: AppBar(
+            title: Text('App Title'),
+          ),
+          body: MainPage(), 
+        ),
       );
     }
   }
@@ -377,6 +384,8 @@ class _MainPageState extends State<MainPage> with TickerProviderStateMixin {
   /// - Main content adjusts its left edge via Positioned offset.
   Widget _buildTabletLayout(BuildContext context) {
     const double sidebarWidth = 250.0;
+    final isDarkMode = CupertinoTheme.of(context).brightness == Brightness.dark;
+    final sidebarColor = isDarkMode ? AppColors.sidebarDark : AppColors.sidebarLight;
 
     return SafeArea(
       top: false,
@@ -397,7 +406,7 @@ class _MainPageState extends State<MainPage> with TickerProviderStateMixin {
               );
             },
             child: Material(
-              color: CupertinoColors.systemGrey6,
+              color: sidebarColor,
               child: SizedBox(
                 width: sidebarWidth,
                 child: MoreMenu(
@@ -448,7 +457,6 @@ class _MainPageState extends State<MainPage> with TickerProviderStateMixin {
             },
             child: Scaffold(
               appBar: AppBar(
-                backgroundColor: Colors.white,
                 title: Text(_titleForTab(_selectedTab)),
               ),
               body: _tabs[_selectedTab],
@@ -457,8 +465,8 @@ class _MainPageState extends State<MainPage> with TickerProviderStateMixin {
 
           // 3) Static toggle button pinned at top-left of the screen
           Positioned(
-            top: 36,
-            left: 20,
+            top: 38,
+            left: 28,
             child: SidebarButton(
               onTap: _toggleSidebar,
             ),

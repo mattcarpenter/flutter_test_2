@@ -7,6 +7,7 @@ class AppColors {
   static const Color secondaryLight = Color(0xFF03DAC6);
   static const Color backgroundLight = Color(0xFFFFFFFF);
   static const Color surfaceLight = Color(0xFFFAFAFA);
+  static const Color sidebarLight = Color(0xFFF0F0F5); // Sidebar color for light mode
   static const Color errorLight = Color(0xFFB00020);
   static const Color onPrimaryLight = Color(0xFFFFFFFF);
   static const Color onSecondaryLight = Color(0xFF000000);
@@ -15,10 +16,11 @@ class AppColors {
   static const Color onErrorLight = Color(0xFFFFFFFF);
 
   // Dark Mode Colors
-  static const Color primaryDark = Color(0xFFBB86FC);
+  static const Color primaryDark = Color(0xFFFF595E);
   static const Color secondaryDark = Color(0xFF03DAC6);
   static const Color backgroundDark = Color(0xFF121212);
   static const Color surfaceDark = Color(0xFF1F1F1F);
+  static const Color sidebarDark = Color(0xFF1E1E1E); // Sidebar color for dark mode
   static const Color errorDark = Color(0xFFCF6679);
   static const Color onPrimaryDark = Color(0xFF000000);
   static const Color onSecondaryDark = Color(0xFF000000);
@@ -48,7 +50,7 @@ class AppTheme {
   static CupertinoThemeData cupertinoLightTheme = const CupertinoThemeData(
     brightness: Brightness.light,
     primaryColor: AppColors.primaryLight,
-    barBackgroundColor: AppColors.surfaceLight,
+    barBackgroundColor: AppColors.backgroundLight,
     scaffoldBackgroundColor: AppColors.backgroundLight,
     textTheme: CupertinoTextThemeData(
       primaryColor: AppColors.onBackgroundLight,
@@ -75,7 +77,7 @@ class AppTheme {
   static CupertinoThemeData cupertinoDarkTheme = const CupertinoThemeData(
     brightness: Brightness.dark,
     primaryColor: AppColors.primaryDark,
-    barBackgroundColor: AppColors.surfaceDark,
+    barBackgroundColor: AppColors.backgroundDark,
     scaffoldBackgroundColor: AppColors.backgroundDark,
     textTheme: CupertinoTextThemeData(
       primaryColor: AppColors.onBackgroundDark,
