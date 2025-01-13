@@ -7,7 +7,8 @@ A new Flutter project.
 [X] Conditionally show close button in sidebar
 [X] Create color scheme library (sidebar bg color, active bg color, icon color) also support platform and light/dark
 [X] Adjust padding around active state
-[ ] Get content colors sorted out in dark mode and light mode
+[X] Get content colors sorted out in dark mode and light mode
+[ ] Implement CupertinoSliverNavigationBar
 [ ] Consult w/ ChatGPT on viability of scaffolding
 [ ] Figure out active state for menu items
 [ ] Spec for tree nav (look at Notion?)

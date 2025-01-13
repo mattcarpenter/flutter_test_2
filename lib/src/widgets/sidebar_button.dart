@@ -17,7 +17,7 @@ class _SidebarButtonState extends State<SidebarButton> {
     // On touch start, immediately set opacity to 20%
     setState(() {
       _shouldAnimate = false; // Disable animation for this state change
-      _opacity = 0.2;
+      _opacity = 0.4;
     });
   }
 

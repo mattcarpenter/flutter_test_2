@@ -125,12 +125,12 @@ class _MainPageState extends State<MainPage> with TickerProviderStateMixin {
     // Will animate from width=0 to width=250
     _tabletSidebarController = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 200),
+      duration: const Duration(milliseconds: 500),
     );
     _tabletSidebarAnimation = CurvedAnimation(
       parent: _tabletSidebarController,
-      curve: Curves.easeOutQuad,
-      reverseCurve: Curves.easeInQuad,
+      curve: Curves.easeOutExpo,
+      reverseCurve: Curves.easeInExpo,
     );
     // Initialize to 1.0 if we want it open initially
     _tabletSidebarController.value = _isSidebarVisible ? 1.0 : 0.0;
