@@ -1,4 +1,5 @@
 import 'dart:io' show Platform;
+import 'package:cupertino_sidebar/cupertino_sidebar.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
@@ -61,6 +62,7 @@ class MainPage extends StatefulWidget {
 class _MainPageState extends State<MainPage> with TickerProviderStateMixin {
   int _selectedTab = 1;
   bool _isDrawerOpen = false;
+  bool isExpanded = true;
 
   // Phone drawer animations
   late AnimationController _drawerController;
@@ -379,90 +381,94 @@ class _MainPageState extends State<MainPage> with TickerProviderStateMixin {
   /// - Sidebar is fixed at 250px but slides offscreen via Transform.translate.
   /// - Main content adjusts its left edge via Positioned offset.
   Widget _buildTabletLayout(BuildContext context) {
-    const double sidebarWidth = 250.0;
-    final isDarkMode = CupertinoTheme.of(context).brightness == Brightness.dark;
-    final sidebarColor = isDarkMode ? AppColors.sidebarDark : AppColors.sidebarLight;
-
-    return SafeArea(
-      top: false,
+    return CupertinoPageScaffold(
       child: Stack(
         children: [
-          // Sidebar
-          AnimatedBuilder(
-            animation: _tabletSidebarAnimation, // 0..1
-            builder: (context, child) {
-              final fraction = _tabletSidebarAnimation.value;
-
-              final double offsetX = -sidebarWidth * (1 - fraction);
-
-              return Transform.translate(
-                offset: Offset(offsetX, 0),
-                child: child,
-              );
-            },
-            child: Material(
-              color: sidebarColor,
-              child: SizedBox(
-                width: sidebarWidth,
-                child: MoreMenu(
-                  showCloseButton: false,
-                  onSelect: (route) {
-                    if (route is RecipesPage) {
-                      _switchToTab(1);
-                    } else if (route is ShoppingListPage) {
-                      _switchToTab(2);
-                    } else if (route is MealPlanPage) {
-                      _switchToTab(3);
-                    } else if (route is DiscoverPage) {
-                      _switchToTab(4);
-                    } else {
-                      if (Platform.isIOS) {
-                        Navigator.of(context).push(
-                          CupertinoPageRoute(builder: (_) => route),
-                        );
-                      } else {
-                        Navigator.of(context).push(
-                          MaterialPageRoute(builder: (_) => route),
-                        );
-                      }
-                    }
+          Row(
+            children: [
+              // Collapsible Sidebar
+              CupertinoSidebarCollapsible(
+                isExpanded: isExpanded,
+                child: CupertinoSidebar(
+                  selectedIndex: _selectedTab,
+                  onDestinationSelected: (value) {
+                    setState(() {
+                      _selectedTab = value;
+                    });
                   },
-                  onClose: _toggleSidebar,
+                  navigationBar: const SidebarNavigationBar(
+                    title: Text('Sidebar'),
+                  ),
+                  children: const [
+                    // index 0
+                    SidebarDestination(
+                      icon: Icon(CupertinoIcons.home),
+                      label: Text('Home'),
+                    ),
+                    // index 1
+                    SidebarDestination(
+                      icon: Icon(CupertinoIcons.person),
+                      label: Text('Items'),
+                    ),
+                    // index 2
+                    SidebarDestination(
+                      icon: Icon(CupertinoIcons.search),
+                      label: Text('Search'),
+                    ),
+                    // index 3
+                    SidebarSection(
+                      label: Text('My section'),
+                      children: [
+                        // index 4
+                        SidebarDestination(
+                          icon: Icon(CupertinoIcons.settings),
+                          label: Text('Settings'),
+                        ),
+                        // index 5
+                        SidebarDestination(
+                          icon: Icon(CupertinoIcons.person),
+                          label: Text('Profile'),
+                        )
+                      ],
+                    ),
+                    // index 6
+                    SidebarDestination(
+                      icon: Icon(CupertinoIcons.mail),
+                      label: Text('Messages'),
+                    ),
+                  ],
                 ),
               ),
-            ),
+              // Main Content Area
+              Expanded(
+                child: Center(
+                  child: CupertinoTabTransitionBuilder(
+                    child: _tabs[_selectedTab],
+                  ),
+                ),
+              ),
+            ],
           ),
-
-          // Main Content
-          AnimatedBuilder(
-            animation: _tabletSidebarAnimation, // 0..1
-            builder: (context, child) {
-              final fraction = _tabletSidebarAnimation.value;
-
-              final double offsetX = sidebarWidth * fraction;
-
-              return Positioned(
-                left: offsetX,
-                right: 0, // Full width minus left offset
-                top: 0,
-                bottom: 0,
-                child: _tabs[_selectedTab]
-              );
-            },
-          ),
-
-          // Sidebar Toggle Button
-          Positioned(
-            top: 38,
-            left: 28,
-            child: SidebarButton(
-              onTap: _toggleSidebar,
+          // Toggle Sidebar Button
+          SafeArea(
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 10),
+              child: CupertinoButton(
+                padding: EdgeInsets.zero,
+                onPressed: () {
+                  setState(() {
+                    isExpanded = !isExpanded; // Toggle the sidebar
+                  });
+                },
+                child: const Icon(CupertinoIcons.sidebar_left), // Sidebar toggle icon
+              ),
             ),
           ),
         ],
       ),
     );
   }
+
 
 
 

@@ -27,6 +27,7 @@ dependencies:
   window_manager: ^0.4.3
   cupertino_icons: ^1.0.0
   flutter_svg: ^2.0.16
+  cupertino_sidebar: ^1.0.1
 
 dev_dependencies:
   flutter_test:
