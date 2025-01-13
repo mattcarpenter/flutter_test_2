@@ -7,9 +7,17 @@ class RecipesPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Text(
-        'Hello, $title!',
-        style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-      );
+    return CupertinoPageScaffold(
+      navigationBar: CupertinoNavigationBar(
+        middle: Text(title),
+        leading: Text("Leading"),
+      ),
+      child: Center(
+        child: Text(
+          'Hello, $title!',
+          style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+        ),
+      ),
+    );
   }
 }

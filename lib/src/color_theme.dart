@@ -50,7 +50,7 @@ class AppTheme {
   static CupertinoThemeData cupertinoLightTheme = const CupertinoThemeData(
     brightness: Brightness.light,
     primaryColor: AppColors.primaryLight,
-    barBackgroundColor: AppColors.backgroundLight,
+    //barBackgroundColor: AppColors.backgroundLight,
     scaffoldBackgroundColor: AppColors.backgroundLight,
     textTheme: CupertinoTextThemeData(
       primaryColor: AppColors.onBackgroundLight,
@@ -77,7 +77,7 @@ class AppTheme {
   static CupertinoThemeData cupertinoDarkTheme = const CupertinoThemeData(
     brightness: Brightness.dark,
     primaryColor: AppColors.primaryDark,
-    barBackgroundColor: AppColors.backgroundDark,
+    //barBackgroundColor: AppColors.backgroundDark,
     scaffoldBackgroundColor: AppColors.backgroundDark,
     textTheme: CupertinoTextThemeData(
       primaryColor: AppColors.onBackgroundDark,

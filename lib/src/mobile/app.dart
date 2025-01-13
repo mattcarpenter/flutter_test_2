@@ -284,6 +284,7 @@ class _MainPageState extends State<MainPage> with TickerProviderStateMixin {
     );
   }
 
+
   /// Bottom nav only, no top AppBar on phone
   Widget _buildPhoneMainContent(BuildContext context) {
     if (Platform.isIOS) {
@@ -322,6 +323,9 @@ class _MainPageState extends State<MainPage> with TickerProviderStateMixin {
       );
     } else {
       return Scaffold(
+        appBar: AppBar(
+          title: Text(_titleForTab(_selectedTab)),
+        ),
         body: _tabs[_selectedTab],
         bottomNavigationBar: BottomNavigationBar(
           currentIndex: _selectedTab,
@@ -359,6 +363,7 @@ class _MainPageState extends State<MainPage> with TickerProviderStateMixin {
       );
     }
   }
+
 
   /// TABLET LAYOUT:
   /// Animated left column from 0..250 px, main content in the rest.
@@ -441,19 +446,7 @@ class _MainPageState extends State<MainPage> with TickerProviderStateMixin {
                 right: 0, // Full width minus left offset
                 top: 0,
                 bottom: 0,
-                child: Container(
-                  color: CupertinoTheme.of(context).scaffoldBackgroundColor, // Use theme background
-                  child: Column(
-                    children: [
-                      CupertinoNavigationBar(
-                        middle: Text(_titleForTab(_selectedTab)),
-                      ),
-                      Expanded(
-                        child: _tabs[_selectedTab],
-                      ),
-                    ],
-                  ),
-                ),
+                child: _tabs[_selectedTab]
               );
             },
           ),
