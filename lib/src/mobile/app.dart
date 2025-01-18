@@ -396,10 +396,9 @@ class _MainPageState extends State<MainPage> with TickerProviderStateMixin {
                       _selectedTab = value;
                     });
                   },
-                  navigationBar: const SidebarNavigationBar(
-                    title: Text('Sidebar'),
-                  ),
+
                   children: const [
+                    SizedBox(height: 50),
                     // index 0
                     SidebarDestination(
                       icon: Icon(CupertinoIcons.home),
