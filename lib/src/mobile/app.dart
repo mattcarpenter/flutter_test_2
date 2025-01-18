@@ -400,7 +400,11 @@ class _MainPageState extends State<MainPage> with TickerProviderStateMixin {
 
                   children:  [
                     SizedBox(height: 50),
-                    Menu(selectedIndex: 0, onMenuItemClick: (index) {}),
+                    Menu(selectedIndex: _selectedTab, onMenuItemClick: (index) {
+                      setState(() {
+                        _selectedTab = index;
+                      });
+                    }),
                     // index 0
                     const SidebarDestination(
                       icon: Icon(CupertinoIcons.home),
