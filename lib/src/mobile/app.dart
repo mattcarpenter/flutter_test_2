@@ -340,9 +340,6 @@ class _MainPageState extends State<MainPage> with TickerProviderStateMixin {
       );
     } else {
       return Scaffold(
-        appBar: AppBar(
-          title: Text(_titleForTab(_selectedTab)),
-        ),
         body: _tabs[_selectedTab],
         bottomNavigationBar: BottomNavigationBar(
           currentIndex: _selectedTab,
