@@ -13,7 +13,8 @@ A new Flutter project.
 [X] Add new menu component to phone
 [ ] Android dark mode colors
 [X] Fix active item styling in custom sidebar (update active state; ensure text is primary color when active)
-[ ] Implement CupertinoSliverNavigationBar
+[ ] Experiment with CupertinoSliverNavigationBar
+  [ ] Might need to create a page "wrapper" or some utility to manage android/ios diffs and manage the padding logic
 [ ] Consult w/ ChatGPT on viability of scaffolding
 [ ] Figure out active state for menu items
 [ ] Spec for tree nav (look at Notion?)
