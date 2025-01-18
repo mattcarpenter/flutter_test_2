@@ -8,7 +8,7 @@ import 'package:flutter_test_2/src/mobile/pages/discover.dart';
 import 'package:flutter_test_2/src/mobile/pages/meal_plan.dart';
 import 'package:flutter_test_2/src/mobile/pages/recipes.dart';
 import 'package:flutter_test_2/src/mobile/pages/shopping_list.dart';
-import 'package:flutter_test_2/src/mobile/widgets/menu/menu.dart';
+import 'package:flutter_test_2/src/widgets/menu/menu.dart';
 import 'package:flutter_test_2/src/mobile/widgets/more_menu.dart';
 import 'package:flutter_test_2/src/widgets/sidebar_button.dart';
 
@@ -405,6 +405,7 @@ class _MainPageState extends State<MainPage> with TickerProviderStateMixin {
                         _selectedTab = index;
                       });
                     }),
+                    /* Leaving in place in case I need to copy section functionality
                     // index 0
                     const SidebarDestination(
                       icon: Icon(CupertinoIcons.home),
@@ -441,6 +442,7 @@ class _MainPageState extends State<MainPage> with TickerProviderStateMixin {
                       icon: Icon(CupertinoIcons.mail),
                       label: Text('Messages'),
                     ),
+                     */
                   ],
                 ),
               ),

@@ -10,6 +10,7 @@ A new Flutter project.
 [X] Get content colors sorted out in dark mode and light mode
 [X] Get rid of "Sidebar" text in cupertino sidebar and replace with placeholder
 [ ] Replace cupertino sidebar content with sidebar content; make sure replacement animation still works
+[ ] Add new menu component to phone
 [ ] Fix active item styling in custom sidebar (update active state; ensure text is primary color when active)
 [ ] Implement CupertinoSliverNavigationBar
 [ ] Consult w/ ChatGPT on viability of scaffolding

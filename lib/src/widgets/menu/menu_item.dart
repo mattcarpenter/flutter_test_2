@@ -1,82 +1,5 @@
+import 'package:fluent_ui/fluent_ui.dart';
 import 'package:flutter/cupertino.dart';
-import 'package:flutter/material.dart';
-
-import '../../../color_theme.dart';
-
-class Menu extends StatelessWidget {
-  final int selectedIndex;
-  final void Function(int index) onMenuItemClick;
-
-  const Menu({
-    super.key,
-    required this.selectedIndex,
-    required this.onMenuItemClick,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final isDarkMode = CupertinoTheme.of(context).brightness == Brightness.dark;
-
-    // Theme Colors
-    final Color backgroundColor = isDarkMode ? CupertinoTheme.of(context).barBackgroundColor : CupertinoTheme.of(context).scaffoldBackgroundColor;
-    final Color primaryColor = CupertinoTheme.of(context).primaryColor;
-    final Color textColor = CupertinoTheme.of(context)
-        .textTheme
-        .textStyle
-        .color ?? Colors.black;
-    final Color activeTextColor = isDarkMode ? textColor : primaryColor;
-
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        MenuItem(
-          index: 0,
-          title: 'Recipes',
-          icon: CupertinoIcons.book,
-          isActive: selectedIndex == 0,
-          color: primaryColor,
-          textColor: textColor,
-          activeTextColor: activeTextColor,
-          backgroundColor: backgroundColor,
-          onTap: onMenuItemClick,
-        ),
-        MenuItem(
-          index: 1,
-          title: 'Shopping List',
-          icon: CupertinoIcons.shopping_cart,
-          isActive: selectedIndex == 1,
-          color: primaryColor,
-          textColor: textColor,
-          activeTextColor: activeTextColor,
-          backgroundColor: backgroundColor,
-          onTap: onMenuItemClick,
-        ),
-        MenuItem(
-          index: 2,
-          title: 'Meal Plans',
-          icon: CupertinoIcons.calendar_today,
-          isActive: selectedIndex == 2,
-          color: primaryColor,
-          textColor: textColor,
-          activeTextColor: activeTextColor,
-          backgroundColor: backgroundColor,
-          onTap: onMenuItemClick,
-        ),
-        MenuItem(
-          index: 3,
-          title: 'Discover',
-          icon: CupertinoIcons.compass,
-          isActive: selectedIndex == 3,
-          color: primaryColor,
-          textColor: textColor,
-          activeTextColor: activeTextColor,
-          backgroundColor: backgroundColor,
-          onTap: onMenuItemClick,
-        ),
-      ],
-    );
-  }
-}
 
 class MenuItem extends StatefulWidget {
   final int index;
@@ -103,10 +26,10 @@ class MenuItem extends StatefulWidget {
   });
 
   @override
-  _MenuItemState createState() => _MenuItemState();
+  MenuItemState createState() => MenuItemState();
 }
 
-class _MenuItemState extends State<MenuItem> {
+class MenuItemState extends State<MenuItem> {
   double _opacity = 1.0; // Default opacity
   bool _shouldAnimate = false; // Controls animation behavior
 
@@ -188,4 +111,3 @@ class _MenuItemState extends State<MenuItem> {
     );
   }
 }
-
