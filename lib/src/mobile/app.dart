@@ -214,6 +214,7 @@ class _MainPageState extends State<MainPage> with TickerProviderStateMixin {
   Widget _buildPhoneLayout(BuildContext context) {
     final width = MediaQuery.of(context).size.width;
     final drawerWidth = width > 300 ? 300.0 : width * 0.8;
+    final Color backgroundColor = CupertinoColors.systemBackground.resolveFrom(context);
 
     return AnimatedBuilder(
       animation: _animation,
@@ -254,8 +255,21 @@ class _MainPageState extends State<MainPage> with TickerProviderStateMixin {
               bottom: 0,
               width: drawerWidth,
               child: Material(
-                color: CupertinoColors.systemGrey6,
-                child: MoreMenu(
+                color: backgroundColor,//CupertinoColors.systemGrey6,
+                child: SafeArea(
+                  child: Column(
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.only(left: 10, right: 10),
+                        child: Menu(selectedIndex: _selectedTab, onMenuItemClick: (index) {
+                          _switchToTab(index);
+                        }),
+                      )
+                    ],
+                  ),
+                ),
+
+                /*MoreMenu(
                   onSelect: (route) {
                     if (route is RecipesPage) {
                       _switchToTab(1);
@@ -278,7 +292,7 @@ class _MainPageState extends State<MainPage> with TickerProviderStateMixin {
                     }
                   },
                   onClose: _closeDrawer,
-                ),
+                ),*/
               ),
             ),
           ],

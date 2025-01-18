@@ -1,7 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
-import '../../color_theme.dart';
 import 'menu_item.dart';
 
 class Menu extends StatelessWidget {

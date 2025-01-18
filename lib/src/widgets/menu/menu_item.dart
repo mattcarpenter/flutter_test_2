@@ -82,7 +82,7 @@ class MenuItemState extends State<MenuItem> {
         opacity: _opacity,
         child: Container(
           padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 8.0),
-          margin: const EdgeInsets.symmetric(vertical: 0.0, horizontal: 0.0),
+          margin: const EdgeInsets.symmetric(vertical: 2.0, horizontal: 0.0),
           decoration: BoxDecoration(
             color: widget.isActive ? widget.backgroundColor : Colors.transparent,
             borderRadius: BorderRadius.circular(10.0),
