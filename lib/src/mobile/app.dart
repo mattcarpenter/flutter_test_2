@@ -8,6 +8,7 @@ import 'package:flutter_test_2/src/mobile/pages/discover.dart';
 import 'package:flutter_test_2/src/mobile/pages/meal_plan.dart';
 import 'package:flutter_test_2/src/mobile/pages/recipes.dart';
 import 'package:flutter_test_2/src/mobile/pages/shopping_list.dart';
+import 'package:flutter_test_2/src/mobile/widgets/menu/menu.dart';
 import 'package:flutter_test_2/src/mobile/widgets/more_menu.dart';
 import 'package:flutter_test_2/src/widgets/sidebar_button.dart';
 
@@ -397,25 +398,26 @@ class _MainPageState extends State<MainPage> with TickerProviderStateMixin {
                     });
                   },
 
-                  children: const [
+                  children:  [
                     SizedBox(height: 50),
+                    Menu(selectedIndex: 0, onMenuItemClick: (index) {}),
                     // index 0
-                    SidebarDestination(
+                    const SidebarDestination(
                       icon: Icon(CupertinoIcons.home),
                       label: Text('Home'),
                     ),
                     // index 1
-                    SidebarDestination(
+                    const SidebarDestination(
                       icon: Icon(CupertinoIcons.person),
                       label: Text('Items'),
                     ),
                     // index 2
-                    SidebarDestination(
+                    const SidebarDestination(
                       icon: Icon(CupertinoIcons.search),
                       label: Text('Search'),
                     ),
                     // index 3
-                    SidebarSection(
+                    const SidebarSection(
                       label: Text('My section'),
                       children: [
                         // index 4
@@ -431,7 +433,7 @@ class _MainPageState extends State<MainPage> with TickerProviderStateMixin {
                       ],
                     ),
                     // index 6
-                    SidebarDestination(
+                    const SidebarDestination(
                       icon: Icon(CupertinoIcons.mail),
                       label: Text('Messages'),
                     ),

@@ -8,8 +8,8 @@ A new Flutter project.
 [X] Create color scheme library (sidebar bg color, active bg color, icon color) also support platform and light/dark
 [X] Adjust padding around active state
 [X] Get content colors sorted out in dark mode and light mode
-[ ] Get rid of "Sidebar" text in cupertino sidebar and replace with placeholder
-[ ] Replace cupertino sidebar content with custom sidebar, ensuring content replacement animation still works
+[X] Get rid of "Sidebar" text in cupertino sidebar and replace with placeholder
+[ ] Replace cupertino sidebar content with sidebar content; make sure replacement animation still works
 [ ] Fix active item styling in custom sidebar (update active state; ensure text is primary color when active)
 [ ] Implement CupertinoSliverNavigationBar
 [ ] Consult w/ ChatGPT on viability of scaffolding
