@@ -335,9 +335,7 @@ class _MainPageState extends State<MainPage> with TickerProviderStateMixin {
           ],
         ),
         tabBuilder: (context, index) {
-          return CupertinoTabView(
-            builder: (_) => _tabs[index],
-          );
+          return _tabs[index];
         },
       );
     } else {

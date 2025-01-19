@@ -16,6 +16,8 @@ A new Flutter project.
 [ ] Experiment with CupertinoSliverNavigationBar
   [X] Try navigating to new route
   [X] Document the relevant bits of my component tree for Cupertino
+  [X] Leading padding
+  [ ] Make new widget tree docs
   [ ] Figure out how to actually do routing in my kind of setup
   [ ] Might need to create a page "wrapper" or some utility to manage android/ios diffs and manage the padding logic
 [ ] Consult w/ ChatGPT on viability of scaffolding

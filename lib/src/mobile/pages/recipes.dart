@@ -14,11 +14,14 @@ class RecipesPage extends StatelessWidget {
             builder: (BuildContext context, BoxConstraints constraints) {
               final double screenWidth = MediaQuery.of(context).size.width;
               final double pageWidth = constraints.maxWidth;
+              final bool isTablet = MediaQuery.of(context).size.shortestSide >= 600;
 
               // Same dynamic padding logic
               final double padding = (screenWidth - pageWidth > 50)
                   ? 0
-                  : 50 - (screenWidth - pageWidth);
+                  : (isTablet ? 50 - (screenWidth - pageWidth) : 0);
+
+              print('screenWidth: $screenWidth, pageWidth: $pageWidth, padding: $padding');
 
               return CustomScrollView(
                 slivers: <Widget>[
@@ -71,11 +74,12 @@ class NextPage extends StatelessWidget {
       child: LayoutBuilder(
         builder: (BuildContext context, BoxConstraints constraints) {
           final double pageWidth = constraints.maxWidth;
+          final bool isTablet = MediaQuery.of(context).size.shortestSide >= 600;
 
-          // Calculate the dynamic padding
+          // Same dynamic padding logic
           final double padding = (screenWidth - pageWidth > 50)
               ? 0
-              : 50 - (screenWidth - pageWidth);
+              : (isTablet ? 50 - (screenWidth - pageWidth) : 0);
 
           return CustomScrollView(
             slivers: <Widget>[
@@ -88,10 +92,6 @@ class NextPage extends StatelessWidget {
 
                 largeTitle: Text(title),
                 automaticallyImplyLeading: true,
-                /*leading: Padding(
-                  padding: EdgeInsets.symmetric(horizontal: padding),
-                  child: const Icon(CupertinoIcons.person_2),
-                ),*/
                 padding: EdgeInsetsDirectional.only(start: padding),
                 trailing: const Icon(CupertinoIcons.add_circled),
               ),
