@@ -14,6 +14,9 @@ A new Flutter project.
 [ ] Android dark mode colors
 [X] Fix active item styling in custom sidebar (update active state; ensure text is primary color when active)
 [ ] Experiment with CupertinoSliverNavigationBar
+  [X] Try navigating to new route
+  [X] Document the relevant bits of my component tree for Cupertino
+  [ ] Figure out how to actually do routing in my kind of setup
   [ ] Might need to create a page "wrapper" or some utility to manage android/ios diffs and manage the padding logic
 [ ] Consult w/ ChatGPT on viability of scaffolding
 [ ] Figure out active state for menu items

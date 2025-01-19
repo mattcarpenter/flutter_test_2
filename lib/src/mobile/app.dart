@@ -65,6 +65,8 @@ class _MainPageState extends State<MainPage> with TickerProviderStateMixin {
   bool _isDrawerOpen = false;
   bool isExpanded = true;
 
+  final GlobalKey<NavigatorState> _nestedNavigatorKey = GlobalKey<NavigatorState>();
+
   // Phone drawer animations
   late AnimationController _drawerController;
   late Animation<double> _animation;
@@ -398,66 +400,30 @@ class _MainPageState extends State<MainPage> with TickerProviderStateMixin {
         children: [
           Row(
             children: [
-              // Collapsible Sidebar
+              // Sidebar
               CupertinoSidebarCollapsible(
                 isExpanded: isExpanded,
                 child: CupertinoSidebar(
                   selectedIndex: _selectedTab,
-                  onDestinationSelected: (value) {
+                  onDestinationSelected: (index) {
                     setState(() {
-                      _selectedTab = value;
+                      _selectedTab = index; // Switch to that top-level page
                     });
                   },
-
-                  children:  [
-                    SizedBox(height: 50),
-                    Menu(selectedIndex: _selectedTab, onMenuItemClick: (index) {
-                      setState(() {
-                        _selectedTab = index;
-                      });
-                    }),
-                    /* Leaving in place in case I need to copy section functionality
-                    // index 0
-                    const SidebarDestination(
-                      icon: Icon(CupertinoIcons.home),
-                      label: Text('Home'),
+                  children: [
+                    const SizedBox(height: 50),
+                    Menu(
+                      selectedIndex: _selectedTab,
+                      onMenuItemClick: (index) {
+                        setState(() {
+                          _selectedTab = index;
+                        });
+                      },
                     ),
-                    // index 1
-                    const SidebarDestination(
-                      icon: Icon(CupertinoIcons.person),
-                      label: Text('Items'),
-                    ),
-                    // index 2
-                    const SidebarDestination(
-                      icon: Icon(CupertinoIcons.search),
-                      label: Text('Search'),
-                    ),
-                    // index 3
-                    const SidebarSection(
-                      label: Text('My section'),
-                      children: [
-                        // index 4
-                        SidebarDestination(
-                          icon: Icon(CupertinoIcons.settings),
-                          label: Text('Settings'),
-                        ),
-                        // index 5
-                        SidebarDestination(
-                          icon: Icon(CupertinoIcons.person),
-                          label: Text('Profile'),
-                        )
-                      ],
-                    ),
-                    // index 6
-                    const SidebarDestination(
-                      icon: Icon(CupertinoIcons.mail),
-                      label: Text('Messages'),
-                    ),
-                     */
                   ],
                 ),
               ),
-              // Main Content Area
+              // Main Content
               Expanded(
                 child: Center(
                   child: CupertinoTabTransitionBuilder(
@@ -478,7 +444,7 @@ class _MainPageState extends State<MainPage> with TickerProviderStateMixin {
                     isExpanded = !isExpanded; // Toggle the sidebar
                   });
                 },
-                child: const Icon(CupertinoIcons.sidebar_left), // Sidebar toggle icon
+                child: const Icon(CupertinoIcons.sidebar_left),
               ),
             ),
           ),
@@ -488,6 +454,31 @@ class _MainPageState extends State<MainPage> with TickerProviderStateMixin {
   }
 
 
+
+
+  void _navigateToTab(int index) {
+    setState(() {
+      _selectedTab = index; // Update the selected tab index
+    });
+
+    // Map index to routes
+    final Map<int, String> routes = {
+      0: '/recipes',
+      1: '/shopping',
+      2: '/meal_plan',
+      3: '/discover',
+    };
+
+    final String? routeName = routes[index];
+
+    if (routeName != null) {
+      // Use the nested navigator key to push the route
+      _nestedNavigatorKey.currentState?.pushNamedAndRemoveUntil(
+        routeName,
+            (Route<dynamic> route) => false, // Remove all routes
+      );
+    }
+  }
 
 
   // Title for the AppBar
