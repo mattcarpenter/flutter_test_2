@@ -17,9 +17,10 @@ A new Flutter project.
   [X] Try navigating to new route
   [X] Document the relevant bits of my component tree for Cupertino
   [X] Leading padding
-  [ ] Make new widget tree docs
-  [ ] Figure out how to actually do routing in my kind of setup
-  [ ] Might need to create a page "wrapper" or some utility to manage android/ios diffs and manage the padding logic
+  [X] Make new widget tree docs
+  [ ] Regression test iPhone
+  [ ] Android Adaptive Widget Updates
+  [X] Might need to create a page "wrapper" or some utility to manage android/ios diffs and manage the padding logic
 [ ] Consult w/ ChatGPT on viability of scaffolding
 [ ] Figure out active state for menu items
 [ ] Spec for tree nav (look at Notion?)

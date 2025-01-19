@@ -43,7 +43,7 @@ class AdaptiveSliverPage extends StatelessWidget {
         final double padding = (screenWidth - pageWidth > 50)
             ? 0
             : (isTablet ? 50 - (screenWidth - pageWidth) : 0);
-        print('Leading is $leading');
+
         if (Platform.isIOS) {
           // iOS: Use CupertinoPageScaffold with CupertinoSliverNavigationBar
           return CupertinoPageScaffold(
