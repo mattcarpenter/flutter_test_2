@@ -10,6 +10,9 @@ class AdaptiveSliverPage extends StatelessWidget {
   final Widget body;
   final Widget? trailing;
   final Widget? leading;
+  final bool? transitionBetweenRoutes;
+  final String? previousPageTitle;
+  final bool? automaticallyImplyLeading;
 
   const AdaptiveSliverPage({
     Key? key,
@@ -17,67 +20,76 @@ class AdaptiveSliverPage extends StatelessWidget {
     required this.body,
     this.trailing,
     this.leading,
+    this.transitionBetweenRoutes,
+    this.previousPageTitle,
+    this.automaticallyImplyLeading,
   }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    return CupertinoTabView(
-      builder: (BuildContext context) {
-        return LayoutBuilder(
-          builder: (context, constraints) {
-            final double screenWidth = MediaQuery
-                .of(context)
-                .size
-                .width;
-            final double pageWidth = constraints.maxWidth;
-            final bool isTablet = MediaQuery
-                .of(context)
-                .size
-                .shortestSide >= 600;
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final double screenWidth = MediaQuery
+            .of(context)
+            .size
+            .width;
+        final double pageWidth = constraints.maxWidth;
+        final bool isTablet = MediaQuery
+            .of(context)
+            .size
+            .shortestSide >= 600;
 
-            // Same dynamic padding logic
-            final double padding = (screenWidth - pageWidth > 50)
-                ? 0
-                : (isTablet ? 50 - (screenWidth - pageWidth) : 0);
-
-            if (Platform.isIOS) {
-              // iOS: Use CupertinoPageScaffold with CupertinoSliverNavigationBar
-              return CupertinoPageScaffold(
-                child: CustomScrollView(
-                  slivers: [
-                    CupertinoSliverNavigationBar(
-                      largeTitle: Text(title),
-                      trailing: trailing,
-                      leading: leading != null ? Padding(
-                        padding: EdgeInsets.symmetric(horizontal: padding),
-                        child: leading,
-                      ) : null,
-                    ),
-                    SliverFillRemaining(child: Builder(builder: (BuildContext context)  {return body; })),
-                  ],
+        // Same dynamic padding logic
+        final double padding = (screenWidth - pageWidth > 50)
+            ? 0
+            : (isTablet ? 50 - (screenWidth - pageWidth) : 0);
+        print('Leading is $leading');
+        if (Platform.isIOS) {
+          // iOS: Use CupertinoPageScaffold with CupertinoSliverNavigationBar
+          return CupertinoPageScaffold(
+            child: CustomScrollView(
+              slivers: [
+                leading == null ?
+                CupertinoSliverNavigationBar(
+                  largeTitle: Text(title),
+                  transitionBetweenRoutes: true,//transitionBetweenRoutes ?? false,
+                  previousPageTitle: previousPageTitle,
+                  trailing: trailing,
+                  automaticallyImplyLeading: automaticallyImplyLeading ?? false,
+                ) : CupertinoSliverNavigationBar(
+                  largeTitle: Text(title),
+                  transitionBetweenRoutes: true,//transitionBetweenRoutes ?? false,
+                  previousPageTitle: previousPageTitle,
+                  trailing: trailing,
+                  automaticallyImplyLeading: automaticallyImplyLeading ?? false,
+                  leading: leading != null ? Padding(
+                    padding: EdgeInsets.symmetric(horizontal: padding),
+                    child: leading,
+                  ) : null,
                 ),
-              );
-            } else {
-              // Android: Use Scaffold with a SliverAppBar
-              return Scaffold(
-                body: CustomScrollView(
-                  slivers: [
-                    SliverAppBar(
-                      title: Text(title),
-                      floating: true,
-                      pinned: true,
-                      actions: trailing != null
-                          ? [trailing!]
-                          : null,
-                      leading: leading,
-                    ),
-                    SliverFillRemaining(child: body),
-                  ],
+                SliverFillRemaining(child: Builder(builder: (BuildContext context)  {return body; })),
+              ],
+            ),
+          );
+        } else {
+          // Android: Use Scaffold with a SliverAppBar
+          return Scaffold(
+            body: CustomScrollView(
+              slivers: [
+                SliverAppBar(
+                  title: Text(title),
+                  floating: true,
+                  pinned: true,
+                  actions: trailing != null
+                      ? [trailing!]
+                      : null,
+                  leading: leading,
                 ),
-              );
-            }
-          },
-        );
+                SliverFillRemaining(child: body),
+              ],
+            ),
+          );
+        }
       },
     );
   }
