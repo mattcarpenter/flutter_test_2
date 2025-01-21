@@ -181,10 +181,21 @@ class _MainPageState extends State<MainPage> with TickerProviderStateMixin {
 
   // Switch tabs
   void _switchToTab(int index) {
+
+    if (_selectedTab == index && !Platform.isIOS) {
+      // Pop the navigation stack to the root of the current tab
+      _androidNavigatorKeys[index]
+          .currentState
+          ?.popUntil((route) => route.isFirst);
+      _closeDrawer();
+      return; // No need to update _selectedTab, as it's already active
+    }
+
     setState(() {
       _selectedTab = index;
     });
     _iosTabController?.index = index;
+
     _closeDrawer();
   }
 
