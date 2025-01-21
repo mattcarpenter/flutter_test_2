@@ -9,8 +9,6 @@ import 'package:flutter_test_2/src/mobile/pages/meal_plan.dart';
 import 'package:flutter_test_2/src/mobile/pages/recipes.dart';
 import 'package:flutter_test_2/src/mobile/pages/shopping_list.dart';
 import 'package:flutter_test_2/src/widgets/menu/menu.dart';
-import 'package:flutter_test_2/src/mobile/widgets/more_menu.dart';
-import 'package:flutter_test_2/src/widgets/sidebar_button.dart';
 
 import '../color_theme.dart';
 
@@ -36,12 +34,16 @@ class AdaptiveApp extends StatelessWidget {
         supportedLocales: const [
           Locale('en', ''),
         ],
-        theme: isDarkMode ? AppTheme.cupertinoDarkTheme : AppTheme.cupertinoLightTheme,
+        theme: isDarkMode
+            ? AppTheme.cupertinoDarkTheme
+            : AppTheme.cupertinoLightTheme,
         home: const MainPage(),
       );
     } else {
       return MaterialApp(
-        theme: isDarkMode ? AppTheme.materialDarkTheme : AppTheme.materialLightTheme,
+        theme: isDarkMode
+            ? AppTheme.materialDarkTheme
+            : AppTheme.materialLightTheme,
         home: Scaffold(
           appBar: AppBar(
             title: Text('App Title'),
@@ -65,7 +67,8 @@ class _MainPageState extends State<MainPage> with TickerProviderStateMixin {
   bool _isDrawerOpen = false;
   bool isExpanded = true;
 
-  final GlobalKey<NavigatorState> _nestedNavigatorKey = GlobalKey<NavigatorState>();
+  final GlobalKey<NavigatorState> _nestedNavigatorKey =
+      GlobalKey<NavigatorState>();
 
   // Phone drawer animations
   late AnimationController _drawerController;
@@ -96,7 +99,8 @@ class _MainPageState extends State<MainPage> with TickerProviderStateMixin {
   void initState() {
     super.initState();
 
-    _androidNavigatorKeys = List.generate(5, (_) => GlobalKey<NavigatorState>());
+    _androidNavigatorKeys =
+        List.generate(5, (_) => GlobalKey<NavigatorState>());
 
     // iOS phone => "More" does not become the active tab
     if (Platform.isIOS) {
@@ -181,8 +185,7 @@ class _MainPageState extends State<MainPage> with TickerProviderStateMixin {
 
   // Switch tabs
   void _switchToTab(int index) {
-
-   if (_selectedTab == index && !Platform.isIOS) {
+    if (_selectedTab == index && !Platform.isIOS) {
       // Pop the navigation stack to the root of the current tab
       _androidNavigatorKeys[index]
           .currentState
@@ -207,9 +210,9 @@ class _MainPageState extends State<MainPage> with TickerProviderStateMixin {
       _isSidebarVisible = !_isSidebarVisible;
     });
     if (_isSidebarVisible) {
-      _tabletSidebarController.forward();   // 0 -> 1
+      _tabletSidebarController.forward(); // 0 -> 1
     } else {
-      _tabletSidebarController.reverse();   // 1 -> 0
+      _tabletSidebarController.reverse(); // 1 -> 0
     }
   }
 
@@ -231,7 +234,8 @@ class _MainPageState extends State<MainPage> with TickerProviderStateMixin {
   Widget _buildPhoneLayout(BuildContext context) {
     final width = MediaQuery.of(context).size.width;
     final drawerWidth = width > 300 ? 300.0 : width * 0.8;
-    final Color backgroundColor = CupertinoColors.systemBackground.resolveFrom(context);
+    final Color backgroundColor =
+        CupertinoColors.systemBackground.resolveFrom(context);
 
     return AnimatedBuilder(
       animation: _animation,
@@ -272,15 +276,17 @@ class _MainPageState extends State<MainPage> with TickerProviderStateMixin {
               bottom: 0,
               width: drawerWidth,
               child: Material(
-                color: backgroundColor,//CupertinoColors.systemGrey6,
+                color: backgroundColor, //CupertinoColors.systemGrey6,
                 child: SafeArea(
                   child: Column(
                     children: [
                       Padding(
                         padding: const EdgeInsets.only(left: 10, right: 10),
-                        child: Menu(selectedIndex: _selectedTab, onMenuItemClick: (index) {
-                          _switchToTab(index);
-                        }),
+                        child: Menu(
+                            selectedIndex: _selectedTab,
+                            onMenuItemClick: (index) {
+                              _switchToTab(index);
+                            }),
                       )
                     ],
                   ),
@@ -317,7 +323,6 @@ class _MainPageState extends State<MainPage> with TickerProviderStateMixin {
       },
     );
   }
-
 
   /// Bottom nav only, no top AppBar on phone
   /// Bottom nav only, no top AppBar on phone
@@ -357,7 +362,6 @@ class _MainPageState extends State<MainPage> with TickerProviderStateMixin {
           });
         },
       );
-
     } else {
       // ANDROID: Use an IndexedStack of nested Navigators for each tab.
       return Scaffold(
@@ -466,27 +470,30 @@ class _MainPageState extends State<MainPage> with TickerProviderStateMixin {
               Expanded(
                 child: Platform.isAndroid
                     ? IndexedStack(
-                  index: _selectedTab,
-                  children: List.generate(
-                    _tabs.length,
-                        (index) => Navigator(
-                      key: _androidNavigatorKeys[index],
-                      onGenerateRoute: (settings) {
-                        if (settings.name == '/') {
-                          return MaterialPageRoute(
-                            builder: (_) => _tabs[index],
-                          );
-                        }
-                        return null;
-                      },
-                    ),
-                  ),
-                )
+                        index: _selectedTab,
+                        children: List.generate(
+                          _tabs.length,
+                          (index) => Navigator(
+                            key: _androidNavigatorKeys[index],
+                            onGenerateRoute: (settings) {
+                              if (settings.name == '/') {
+                                return MaterialPageRoute(
+                                  builder: (_) => _tabs[index],
+                                );
+                              }
+                              return null;
+                            },
+                          ),
+                        ),
+                      )
                     : Center(
-                  child: CupertinoTabTransitionBuilder(
-                    child: CupertinoTabView(builder: (BuildContext context) { return _tabs[_selectedTab]; }),
-                  ),
-                ),
+                        child: CupertinoTabTransitionBuilder(
+                          child:
+                              CupertinoTabView(builder: (BuildContext context) {
+                            return _tabs[_selectedTab];
+                          }),
+                        ),
+                      ),
               ),
             ],
           ),
@@ -510,9 +517,6 @@ class _MainPageState extends State<MainPage> with TickerProviderStateMixin {
     );
   }
 
-
-
-
   void _navigateToTab(int index) {
     setState(() {
       _selectedTab = index; // Update the selected tab index
@@ -532,7 +536,7 @@ class _MainPageState extends State<MainPage> with TickerProviderStateMixin {
       // Use the nested navigator key to push the route
       _nestedNavigatorKey.currentState?.pushNamedAndRemoveUntil(
         routeName,
-            (Route<dynamic> route) => false, // Remove all routes
+        (Route<dynamic> route) => false, // Remove all routes
       );
     }
   }
