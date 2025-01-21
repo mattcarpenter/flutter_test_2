@@ -90,9 +90,13 @@ class _MainPageState extends State<MainPage> with TickerProviderStateMixin {
     const DiscoverPage(title: 'Discover'),
   ];
 
+  late final List<GlobalKey<NavigatorState>> _androidNavigatorKeys;
+
   @override
   void initState() {
     super.initState();
+
+    _androidNavigatorKeys = List.generate(5, (_) => GlobalKey<NavigatorState>());
 
     // iOS phone => "More" does not become the active tab
     if (Platform.isIOS) {
@@ -305,8 +309,10 @@ class _MainPageState extends State<MainPage> with TickerProviderStateMixin {
 
 
   /// Bottom nav only, no top AppBar on phone
+  /// Bottom nav only, no top AppBar on phone
   Widget _buildPhoneMainContent(BuildContext context) {
     if (Platform.isIOS) {
+      // iOS is unchanged: uses CupertinoTabScaffold
       return CupertinoTabScaffold(
         controller: _iosTabController,
         tabBar: CupertinoTabBar(
@@ -335,19 +341,46 @@ class _MainPageState extends State<MainPage> with TickerProviderStateMixin {
           ],
         ),
         tabBuilder: (context, index) {
-          return _tabs[index];
+          return CupertinoTabView(builder: (BuildContext context) {
+            return _tabs[index];
+          });
         },
       );
+
     } else {
+      // ANDROID: Use an IndexedStack of nested Navigators for each tab.
       return Scaffold(
-        body: _tabs[_selectedTab],
+        // The body is now an IndexedStack instead of just `_tabs[_selectedTab]`.
+        body: IndexedStack(
+          index: _selectedTab,
+          children: [
+            // 0 => "More" (drawer trigger). We never actually display this,
+            //      so just use an empty Container.
+            Container(),
+
+            // 1 => Recipes
+            _buildTabNavigator(1),
+
+            // 2 => Shopping
+            _buildTabNavigator(2),
+
+            // 3 => Meal Plan
+            _buildTabNavigator(3),
+
+            // 4 => Discover
+            _buildTabNavigator(4),
+          ],
+        ),
+
         bottomNavigationBar: BottomNavigationBar(
           currentIndex: _selectedTab,
           type: BottomNavigationBarType.fixed,
           onTap: (index) {
             if (index == 0) {
+              // "More" => toggle the drawer
               _toggleDrawer();
             } else {
+              // Switch to that tab
               _switchToTab(index);
             }
           },
@@ -377,7 +410,6 @@ class _MainPageState extends State<MainPage> with TickerProviderStateMixin {
       );
     }
   }
-
 
   /// TABLET LAYOUT:
   /// Animated left column from 0..250 px, main content in the rest.
@@ -478,6 +510,23 @@ class _MainPageState extends State<MainPage> with TickerProviderStateMixin {
     }
   }
 
+  Widget _buildTabNavigator(int index) {
+    return Navigator(
+      key: _androidNavigatorKeys[index],
+      onGenerateRoute: (settings) {
+        if (settings.name == '/') {
+          // The default/initial route for this tab is _tabs[index].
+          return MaterialPageRoute(
+            builder: (_) => _tabs[index],
+            settings: settings,
+          );
+        }
+        // If you have any sub-routes, handle them here:
+        // if (settings.name == '/details') { ... }
+        return null;
+      },
+    );
+  }
 
   // Title for the AppBar
   String _titleForTab(int index) {
