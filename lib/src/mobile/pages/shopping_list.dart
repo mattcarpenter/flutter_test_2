@@ -9,26 +9,29 @@ class ShoppingListPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return AdaptiveSliverPage(
-      title: 'Shopping List',
-      body: Center(
-        child: CupertinoButton.filled(
-          onPressed: () {
-            Navigator.of(context).push(
-              CupertinoPageRoute<Widget>(
-                builder: (_) =>
-                const ShoppingListSubPage(title: 'Kinokuniya'),
-              ),
-            );
-            // For iOS, you might push in this tab's Navigator.
-            // For Android, you might push on the global navigator or a nested one.
-          },
-          child: const Text('Go to Next Page'),
+    return CupertinoTabView(builder: (BuildContext context)
+    {
+      return AdaptiveSliverPage(
+        title: 'Shopping List',
+        body: Center(
+          child: CupertinoButton.filled(
+            onPressed: () {
+              Navigator.of(context).push(
+                CupertinoPageRoute<Widget>(
+                  builder: (_) =>
+                  const ShoppingListSubPage(title: 'Kinokuniya'),
+                ),
+              );
+              // For iOS, you might push in this tab's Navigator.
+              // For Android, you might push on the global navigator or a nested one.
+            },
+            child: const Text('Go to Next Page'),
+          ),
         ),
-      ),
-      trailing: const Icon(CupertinoIcons.add_circled),
-      leading: const Icon(CupertinoIcons.person_2),
-      transitionBetweenRoutes: true,
-    );
+        trailing: const Icon(CupertinoIcons.add_circled),
+        leading: const Icon(CupertinoIcons.person_2),
+        transitionBetweenRoutes: true,
+      );
+    });
   }
 }

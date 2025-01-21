@@ -27,7 +27,8 @@ class AdaptiveSliverPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return LayoutBuilder(
+    return
+      LayoutBuilder(
       builder: (context, constraints) {
         final double screenWidth = MediaQuery
             .of(context)

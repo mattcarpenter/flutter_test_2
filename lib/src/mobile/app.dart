@@ -488,10 +488,7 @@ class _MainPageState extends State<MainPage> with TickerProviderStateMixin {
                       )
                     : Center(
                         child: CupertinoTabTransitionBuilder(
-                          child:
-                              CupertinoTabView(builder: (BuildContext context) {
-                            return _tabs[_selectedTab];
-                          }),
+                          child: _tabs[_selectedTab],
                         ),
                       ),
               ),
