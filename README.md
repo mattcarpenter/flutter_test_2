@@ -11,21 +11,22 @@ A new Flutter project.
 [X] Get rid of "Sidebar" text in cupertino sidebar and replace with placeholder
 [X] Replace cupertino sidebar content with sidebar content; make sure replacement animation still works
 [X] Add new menu component to phone
-[ ] Android dark mode colors
 [X] Fix active item styling in custom sidebar (update active state; ensure text is primary color when active)
+[X] Figure out active state for menu items
 [ ] Experiment with CupertinoSliverNavigationBar
   [X] Try navigating to new route
   [X] Document the relevant bits of my component tree for Cupertino
   [X] Leading padding
   [X] Make new widget tree docs
   [X] Regression test iPhone
-  [ ] Android Adaptive Widget Updates
+  [X] Android Adaptive Widget Updates
   [X] Might need to create a page "wrapper" or some utility to manage android/ios diffs and manage the padding logic
-[ ] Consult w/ ChatGPT on viability of scaffolding
-[ ] Figure out active state for menu items
+  [ ] Repurpose pages as tab navigators. Try out deep linking
+[ ] Think about MacOS
+[ ] Think about Windows
+[ ] Android dark mode colors
 [ ] Spec for tree nav (look at Notion?)
 [ ] Finish impl of tree nav (minus nav)
-[ ] maybe modularize?
 
 ### Goal: Understand routing and pages
 [ ] 
