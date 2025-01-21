@@ -182,7 +182,7 @@ class _MainPageState extends State<MainPage> with TickerProviderStateMixin {
   // Switch tabs
   void _switchToTab(int index) {
 
-    if (_selectedTab == index && !Platform.isIOS) {
+   if (_selectedTab == index && !Platform.isIOS) {
       // Pop the navigation stack to the root of the current tab
       _androidNavigatorKeys[index]
           .currentState
@@ -456,9 +456,7 @@ class _MainPageState extends State<MainPage> with TickerProviderStateMixin {
                     Menu(
                       selectedIndex: _selectedTab,
                       onMenuItemClick: (index) {
-                        setState(() {
-                          _selectedTab = index;
-                        });
+                        _switchToTab(index);
                       },
                     ),
                   ],
@@ -466,7 +464,25 @@ class _MainPageState extends State<MainPage> with TickerProviderStateMixin {
               ),
               // Main Content
               Expanded(
-                child: Center(
+                child: Platform.isAndroid
+                    ? IndexedStack(
+                  index: _selectedTab,
+                  children: List.generate(
+                    _tabs.length,
+                        (index) => Navigator(
+                      key: _androidNavigatorKeys[index],
+                      onGenerateRoute: (settings) {
+                        if (settings.name == '/') {
+                          return MaterialPageRoute(
+                            builder: (_) => _tabs[index],
+                          );
+                        }
+                        return null;
+                      },
+                    ),
+                  ),
+                )
+                    : Center(
                   child: CupertinoTabTransitionBuilder(
                     child: CupertinoTabView(builder: (BuildContext context) { return _tabs[_selectedTab]; }),
                   ),
