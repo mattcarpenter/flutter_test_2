@@ -18,7 +18,7 @@ A new Flutter project.
   [X] Document the relevant bits of my component tree for Cupertino
   [X] Leading padding
   [X] Make new widget tree docs
-  [ ] Regression test iPhone
+  [X] Regression test iPhone
   [ ] Android Adaptive Widget Updates
   [X] Might need to create a page "wrapper" or some utility to manage android/ios diffs and manage the padding logic
 [ ] Consult w/ ChatGPT on viability of scaffolding
