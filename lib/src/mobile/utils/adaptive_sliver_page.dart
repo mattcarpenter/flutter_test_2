@@ -44,6 +44,8 @@ class AdaptiveSliverPage extends StatelessWidget {
             ? 0
             : (isTablet ? 50 - (screenWidth - pageWidth) : 0);
 
+        print('screenWidth: $screenWidth pageWidth: $pageWidth isTablet: $isTablet padding: $padding');
+
         if (Platform.isIOS) {
           // iOS: Use CupertinoPageScaffold with CupertinoSliverNavigationBar
           return CupertinoPageScaffold(
@@ -55,6 +57,7 @@ class AdaptiveSliverPage extends StatelessWidget {
                   transitionBetweenRoutes: true,//transitionBetweenRoutes ?? false,
                   previousPageTitle: previousPageTitle,
                   trailing: trailing,
+                  padding: EdgeInsetsDirectional.only(start: padding),
                   automaticallyImplyLeading: automaticallyImplyLeading ?? false,
                 ) : CupertinoSliverNavigationBar(
                   largeTitle: Text(title),
