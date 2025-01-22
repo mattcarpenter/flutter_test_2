@@ -22,6 +22,7 @@ A new Flutter project.
   [X] Android Adaptive Widget Updates
   [X] Might need to create a page "wrapper" or some utility to manage android/ios diffs and manage the padding logic
   [ ] Repurpose pages as tab navigators. Try out deep linking
+  [ ] Hack SliverAppBar to allow padding
 [ ] Think about MacOS
 [ ] Think about Windows
 [ ] Android dark mode colors

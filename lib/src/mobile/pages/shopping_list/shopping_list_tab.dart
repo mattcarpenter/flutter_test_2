@@ -1,4 +1,7 @@
+import 'dart:io';
+
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_test_2/src/mobile/pages/shopping_list/shopping_list_root_page.dart';
 import 'package:flutter_test_2/src/mobile/pages/shopping_list/shopping_list_routes.dart';
 
@@ -48,17 +51,36 @@ class _ShoppingListTabState extends State<ShoppingListTab> {
         print('ON GENERATE ROUTE: ${settings.name}');
         switch (settings.name) {
           case '/':
-            return CupertinoPageRoute(
+            return _platformPageRoute(
               builder: (_) => ShoppingListRootPage(),
+              settings: settings,
             );
           case '/sub':
-            return CupertinoPageRoute(
+            return _platformPageRoute(
               builder: (_) => const ShoppingListSubPage(),
+              settings: settings,
             );
           default:
             throw Exception('Unknown route: ${settings.name}');
         }
       },
     );
+  }
+
+  Route<dynamic> _platformPageRoute({
+    required WidgetBuilder builder,
+    required RouteSettings settings,
+  }) {
+    if (Platform.isIOS) {
+      return CupertinoPageRoute(
+        builder: builder,
+        settings: settings,
+      );
+    } else {
+      return MaterialPageRoute(
+        builder: builder,
+        settings: settings,
+      );
+    }
   }
 }
