@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:flutter_test_2/src/mobile/adaptive_app.dart';
 import 'package:flutter_test_2/src/mobile/app.dart';
 import 'package:flutter_test_2/src/windows/app.dart';
 import 'macos/app.dart';
@@ -24,7 +25,7 @@ class MyApp extends StatelessWidget {
       listenable: settingsController,
       builder: (BuildContext context, Widget? child) {
         if (Platform.isIOS || Platform.isAndroid) {
-          return const AdaptiveApp();
+          return const AdaptiveApp2();
         } else if (Platform.isWindows) {
           return const WindowsApp();
         } else if (Platform.isMacOS) {
