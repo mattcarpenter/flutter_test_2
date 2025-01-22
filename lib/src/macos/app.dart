@@ -1,6 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:macos_ui/macos_ui.dart';
 
+import '../widgets/menu/menu.dart';
 import 'hello_page.dart';
 
 class MacApp extends StatelessWidget {
@@ -25,13 +26,16 @@ class MyHomePage extends StatefulWidget {
 class _MyHomePageState extends State<MyHomePage> {
   final int _pageIndex = 0;
 
+  int _selectedIndex = 0;
+
   @override
   Widget build(BuildContext context) {
+
     return MacosWindow(
       sidebar: Sidebar(
         minWidth: 200,
         builder: (context, scrollController) {
-          return SidebarItems(
+          /*return SidebarItems(
             currentIndex: _pageIndex,
             onChanged: (index) {},
             items: const [
@@ -44,7 +48,12 @@ class _MyHomePageState extends State<MyHomePage> {
                 label: Text('Explore'),
               ),
             ],
-          );
+          );*/
+          return Menu(selectedIndex: _selectedIndex, onMenuItemClick: (index) {
+            setState(() {
+              _selectedIndex = index;
+            });
+          });
         },
       ),
       child: const HelloPage(),

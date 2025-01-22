@@ -21,7 +21,8 @@ A new Flutter project.
   [X] Regression test iPhone
   [X] Android Adaptive Widget Updates
   [X] Might need to create a page "wrapper" or some utility to manage android/ios diffs and manage the padding logic
-  [ ] Repurpose pages as tab navigators. Try out deep linking
+  [X] Repurpose pages as tab navigators
+  [ ] Try out deep linking
   [ ] Hack SliverAppBar to allow padding
 [ ] Think about MacOS
 [ ] Think about Windows
@@ -29,8 +30,10 @@ A new Flutter project.
 [ ] Spec for tree nav (look at Notion?)
 [ ] Finish impl of tree nav (minus nav)
 
-### Goal: Understand routing and pages
-[ ] 
+### Thinking
+* macos app.dart will be very similar to mobile app.dart. same for windows.
+  * Might need to abstract just a little bit of common stuff out. maybe implement mac first and see the diffs
+* realistically a lot of the stuff in mobile might become not-mobile-specific
 
 ## Resources
 https://schema.org/Recipe

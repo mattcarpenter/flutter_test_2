@@ -48,7 +48,6 @@ class _ShoppingListTabState extends State<ShoppingListTab> {
     return CupertinoTabView(
       navigatorKey: _navigatorKey, // Assign the custom navigator key
       onGenerateRoute: (RouteSettings settings) {
-        print('ON GENERATE ROUTE: ${settings.name}');
         switch (settings.name) {
           case '/':
             return _platformPageRoute(
