@@ -13,7 +13,7 @@ A new Flutter project.
 [X] Add new menu component to phone
 [X] Fix active item styling in custom sidebar (update active state; ensure text is primary color when active)
 [X] Figure out active state for menu items
-[ ] Experiment with CupertinoSliverNavigationBar
+[ ] Navigation Epic
   [X] Try navigating to new route
   [X] Document the relevant bits of my component tree for Cupertino
   [X] Leading padding
@@ -22,8 +22,12 @@ A new Flutter project.
   [X] Android Adaptive Widget Updates
   [X] Might need to create a page "wrapper" or some utility to manage android/ios diffs and manage the padding logic
   [X] Repurpose pages as tab navigators
-  [ ] Try out deep linking
-  [ ] Hack SliverAppBar to allow padding
+  [X] Try out deep linking
+  [ ] Go router: simplify rest of pages; simplify directory structures
+  [ ] Go router: fix weird animations on tab changes
+  [ ] Go router: replace old app with this new one
+  [ ] Go router: Since we have a shell; maybe Windows and Macos fit into this pattern? Investigate
+  [ ] Hack android SliverAppBar to allow padding
 [ ] Think about MacOS
 [ ] Think about Windows
 [ ] Android dark mode colors
