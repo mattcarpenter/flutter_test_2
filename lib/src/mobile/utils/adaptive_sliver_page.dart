@@ -46,7 +46,7 @@ class AdaptiveSliverPage extends StatelessWidget {
             : (isTablet ? 50 - (screenWidth - pageWidth) : 0);
 
         print('screenWidth: $screenWidth pageWidth: $pageWidth isTablet: $isTablet padding: $padding');
-
+        print('adaptive navigator: ${Navigator.of(context)}');
         if (Platform.isIOS) {
           // iOS: Use CupertinoPageScaffold with CupertinoSliverNavigationBar
           return CupertinoPageScaffold(

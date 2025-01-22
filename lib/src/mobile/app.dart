@@ -8,6 +8,7 @@ import 'package:flutter_test_2/src/mobile/pages/discover.dart';
 import 'package:flutter_test_2/src/mobile/pages/meal_plan.dart';
 import 'package:flutter_test_2/src/mobile/pages/recipes.dart';
 import 'package:flutter_test_2/src/mobile/pages/shopping_list.dart';
+import 'package:flutter_test_2/src/mobile/pages/shopping_list/shopping_list_tab.dart';
 import 'package:flutter_test_2/src/widgets/menu/menu.dart';
 
 import '../color_theme.dart';
@@ -88,7 +89,8 @@ class _MainPageState extends State<MainPage> with TickerProviderStateMixin {
   final List<Widget> _tabs = [
     const SizedBox(),
     const RecipesPage(title: 'Recipes'),
-    const ShoppingListPage(title: 'Shopping List'),
+    const ShoppingListTab(),
+    //const ShoppingListPage(title: 'Shopping List'),
     const MealPlanPage(title: 'Meal Plan'),
     const DiscoverPage(title: 'Discover'),
   ];

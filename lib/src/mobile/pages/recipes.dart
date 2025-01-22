@@ -7,7 +7,7 @@ class RecipesPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return CupertinoTabView(
+    /*return CupertinoTabView(
       builder: (BuildContext context) {
         return CupertinoPageScaffold(
           child: LayoutBuilder(
@@ -107,7 +107,8 @@ class NextPage extends StatelessWidget {
           );
         },
       ),
-    );
+    );*/
+    return Text('hello world temp');
   }
 }
 
