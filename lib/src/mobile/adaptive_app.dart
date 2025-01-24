@@ -65,7 +65,7 @@ class AdaptiveApp2 extends StatelessWidget {
             // Each child route represents a tab (or drawer item).
             GoRoute(
               path: '/recipes',
-              pageBuilder: (context, state) => _platformPage(
+              pageBuilder: (context, state) => _tabTransitionPage(
                 state: state,
                 child: const RecipesTab(),
               ),
@@ -82,21 +82,21 @@ class AdaptiveApp2 extends StatelessWidget {
                   ),
                 ),
               ],
-              pageBuilder: (context, state) => _platformPage(
+              pageBuilder: (context, state) => _tabTransitionPage(
                 state: state,
                 child: const ShoppingListTab(),
               ),
             ),
             GoRoute(
               path: '/meal_plan',
-              pageBuilder: (context, state) => _platformPage(
+              pageBuilder: (context, state) => _tabTransitionPage(
                 state: state,
                 child: const MealPlanPage(title: 'Meal Plan'),
               ),
             ),
             GoRoute(
               path: '/discover',
-              pageBuilder: (context, state) => _platformPage(
+              pageBuilder: (context, state) => _tabTransitionPage(
                 state: state,
                 child: const DiscoverPage(title: 'Discover'),
               ),
@@ -135,8 +135,8 @@ Page<void> _tabTransitionPage({
   return CustomTransitionPage<void>(
     key: state.pageKey,
     child: child,
-    transitionDuration: const Duration(milliseconds: 400),
-    reverseTransitionDuration: const Duration(milliseconds: 400),
+    transitionDuration: const Duration(milliseconds: 1400),
+    reverseTransitionDuration: const Duration(milliseconds: 1400),
     // This is the magic: use CupertinoTabPageTransition for the "zoom/fade" effect
     transitionsBuilder: (context, animation, secondaryAnimation, child) {
       return CupertinoTabPageTransition(
