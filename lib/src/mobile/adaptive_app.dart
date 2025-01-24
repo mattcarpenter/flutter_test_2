@@ -3,14 +3,18 @@ import 'package:cupertino_sidebar/cupertino_sidebar.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:flutter_test_2/src/features/discover/views/discover_root.dart';
+import 'package:flutter_test_2/src/features/discover/views/discover_sub_page.dart';
+import 'package:flutter_test_2/src/features/meal_plans/views/meal_plans_root.dart';
+import 'package:flutter_test_2/src/features/meal_plans/views/meal_plans_sub_page.dart';
 import 'package:flutter_test_2/src/features/recipes/views/recipes_root.dart';
-import 'package:flutter_test_2/src/mobile/pages/discover.dart';
 import 'package:flutter_test_2/src/mobile/pages/meal_plan.dart';
 import 'package:flutter_test_2/src/features/shopping_list/views/shopping_list_sub_page.dart';
 import 'package:flutter_test_2/src/features/shopping_list/views/shopping_list_root.dart';
 import 'package:go_router/go_router.dart';
 
 import '../color_theme.dart';
+import '../features/recipes/views/recipes_sub_page.dart';
 import 'main_page_shell.dart'; // We'll define a Shell widget for the tabs.
 
 class AdaptiveApp2 extends StatelessWidget {
@@ -77,6 +81,15 @@ class AdaptiveApp2 extends StatelessWidget {
             // Tab 1
             GoRoute(
               path: '/recipes',
+              routes: [
+                GoRoute(
+                  path: 'sub',
+                  pageBuilder: (context, state) => _platformPage(
+                    state: state,
+                    child: const RecipesSubPage(title: 'Sub Page'),
+                  ),
+                )
+              ],
               pageBuilder: (context, state) => _tabTransitionPage(
                 state: state,
                 // We'll pass a param to tell the page if we want transitions or not
@@ -106,22 +119,38 @@ class AdaptiveApp2 extends StatelessWidget {
             ),
             // Tab 3
             GoRoute(
-              path: '/meal_plan',
+              path: '/meal_plans',
+              routes: [
+                GoRoute(
+                  path: 'sub',
+                  pageBuilder: (context, state) => _platformPage(
+                    state: state,
+                    child: const MealPlansSubPage(),
+                  ),
+                ),
+              ],
               pageBuilder: (context, state) => _tabTransitionPage(
                 state: state,
-                child: MealPlanPage(
-                  title: 'Meal Plan',
-                  enableTitleTransition: _isSameTab(from: _lastLocation, to: '/meal_plan'),
+                child: MealPlansRoot(
+                  enableTitleTransition: _isSameTab(from: _lastLocation, to: '/meal_plans'),
                 ),
               ),
             ),
             // Tab 4
             GoRoute(
               path: '/discover',
+              routes: [
+                GoRoute(
+                  path: 'sub',
+                  pageBuilder: (context, state) => _platformPage(
+                    state: state,
+                    child: const DiscoverSubPage(),
+                  ),
+                ),
+              ],
               pageBuilder: (context, state) => _tabTransitionPage(
                 state: state,
-                child: DiscoverPage(
-                  title: 'Discover',
+                child: DiscoverTab(
                   enableTitleTransition: _isSameTab(from: _lastLocation, to: '/discover'),
                 ),
               ),

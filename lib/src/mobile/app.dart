@@ -525,7 +525,7 @@ class _MainPageState extends State<MainPage> with TickerProviderStateMixin {
     final Map<int, String> routes = {
       0: '/recipes',
       1: '/shopping',
-      2: '/meal_plan',
+      2: '/meal_plans',
       3: '/discover',
     };
 

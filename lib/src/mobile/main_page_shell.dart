@@ -321,7 +321,7 @@ class _MainPageShellState extends State<MainPageShell> with TickerProviderStateM
         context.go('/shopping');
         break;
       case 3:
-        context.go('/meal_plan');
+        context.go('/meal_plans');
         break;
       case 4:
         context.go('/discover');
