@@ -27,6 +27,8 @@ A new Flutter project.
   [X] Go router: replace old app with this new one
   [ ] Regression test android phone
   [ ] Regression test android tablet
+  [ ] Figure out why we get a back button instead of the previous title
+  [ ] Fix weird padding in nav bar on sub routes
   [ ] Test deep-linking
   [ ] Hack android SliverAppBar to allow padding
   [ ] Go router: Since we have a shell; maybe Windows and Macos fit into this pattern? Investigate
