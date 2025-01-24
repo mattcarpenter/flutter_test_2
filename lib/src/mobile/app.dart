@@ -3,12 +3,11 @@ import 'package:cupertino_sidebar/cupertino_sidebar.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:flutter_test_2/src/features/discover/views/discover_root.dart';
+import 'package:flutter_test_2/src/features/meal_plans/views/meal_plans_root.dart';
+import 'package:flutter_test_2/src/features/recipes/views/recipes_root.dart';
+import 'package:flutter_test_2/src/features/shopping_list/views/shopping_list_root.dart';
 
-import 'package:flutter_test_2/src/mobile/pages/discover.dart';
-import 'package:flutter_test_2/src/mobile/pages/meal_plan.dart';
-import 'package:flutter_test_2/src/mobile/pages/recipes.dart';
-import 'package:flutter_test_2/src/mobile/pages/shopping_list.dart';
-import 'package:flutter_test_2/src/mobile/pages/shopping_list/shopping_list_tab.dart';
 import 'package:flutter_test_2/src/widgets/menu/menu.dart';
 
 import '../color_theme.dart';
@@ -88,11 +87,10 @@ class _MainPageState extends State<MainPage> with TickerProviderStateMixin {
 
   final List<Widget> _tabs = [
     const SizedBox(),
-    const RecipesPage(title: 'Recipes'),
+    const RecipesTab(),
     const ShoppingListTab(),
-    //const ShoppingListPage(title: 'Shopping List'),
-    const MealPlanPage(title: 'Meal Plan'),
-    const DiscoverPage(title: 'Discover'),
+    const MealPlansRoot(),
+    const DiscoverTab(),
   ];
 
   late final List<GlobalKey<NavigatorState>> _androidNavigatorKeys;

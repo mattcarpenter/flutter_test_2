@@ -8,7 +8,6 @@ import 'package:flutter_test_2/src/features/discover/views/discover_sub_page.dar
 import 'package:flutter_test_2/src/features/meal_plans/views/meal_plans_root.dart';
 import 'package:flutter_test_2/src/features/meal_plans/views/meal_plans_sub_page.dart';
 import 'package:flutter_test_2/src/features/recipes/views/recipes_root.dart';
-import 'package:flutter_test_2/src/mobile/pages/meal_plan.dart';
 import 'package:flutter_test_2/src/features/shopping_list/views/shopping_list_sub_page.dart';
 import 'package:flutter_test_2/src/features/shopping_list/views/shopping_list_root.dart';
 import 'package:go_router/go_router.dart';
