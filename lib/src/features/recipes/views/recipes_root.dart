@@ -3,7 +3,9 @@ import 'package:go_router/go_router.dart';
 import '../../../mobile/utils/adaptive_sliver_page.dart';
 
 class RecipesTab extends StatelessWidget {
-  const RecipesTab({super.key});
+  final bool enableTitleTransition;
+
+  const RecipesTab({super.key, this.enableTitleTransition = false});
 
   @override
   Widget build(BuildContext context) {
@@ -26,7 +28,7 @@ class RecipesTab extends StatelessWidget {
       ),
       trailing: const Icon(CupertinoIcons.add_circled),
       leading: const Icon(CupertinoIcons.person_2),
-      transitionBetweenRoutes: false,
+      transitionBetweenRoutes: enableTitleTransition,
     );
   }
 }

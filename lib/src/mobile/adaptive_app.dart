@@ -51,31 +51,46 @@ class AdaptiveApp2 extends StatelessWidget {
   }
 
   /// Create a [GoRouter] instance with shell routing for the bottom tabs.
+  /// In `_createRouter()`, we track the last known path so we can detect
+  /// if the user is switching tabs or pushing deeper.
+
   GoRouter _createRouter() {
+    String? _lastLocation;
+
     return GoRouter(
-      debugLogDiagnostics: true, // Helpful for debugging route transitions
-      initialLocation: '/recipes', // e.g., set the default tab
+      debugLogDiagnostics: true,
+      initialLocation: '/recipes',
+      // Use a redirect to store the old location before we change.
+      // So we can tell if the new path is the same tab or not.
+      redirect: (context, state) {
+        final from = _lastLocation;
+        final to = state.uri.path;
+        _lastLocation = to; // update for next time
+        return null;        // no actual redirect
+      },
       routes: [
-        // A ShellRoute that manages your bottom/tab navigation or drawer-based layout
         ShellRoute(
           builder: (context, state, child) {
             return MainPageShell(child: child);
           },
           routes: [
-            // Each child route represents a tab (or drawer item).
+            // Tab 1
             GoRoute(
               path: '/recipes',
               pageBuilder: (context, state) => _tabTransitionPage(
                 state: state,
-                child: const RecipesTab(),
+                // We'll pass a param to tell the page if we want transitions or not
+                child: RecipesTab(
+                  enableTitleTransition: _isSameTab(from: _lastLocation, to: '/recipes'),
+                ),
               ),
             ),
+            // Tab 2
             GoRoute(
               path: '/shopping',
-              // We can nest sub-routes for /sub or /deep:
               routes: [
                 GoRoute(
-                  path: 'sub',  // combined => /shopping/sub
+                  path: 'sub',
                   pageBuilder: (context, state) => _platformPage(
                     state: state,
                     child: const ShoppingListSubPage(title: 'Sub Page'),
@@ -84,21 +99,31 @@ class AdaptiveApp2 extends StatelessWidget {
               ],
               pageBuilder: (context, state) => _tabTransitionPage(
                 state: state,
-                child: const ShoppingListTab(),
+                child: ShoppingListTab(
+                  enableTitleTransition: _isSameTab(from: _lastLocation, to: '/shopping'),
+                ),
               ),
             ),
+            // Tab 3
             GoRoute(
               path: '/meal_plan',
               pageBuilder: (context, state) => _tabTransitionPage(
                 state: state,
-                child: const MealPlanPage(title: 'Meal Plan'),
+                child: MealPlanPage(
+                  title: 'Meal Plan',
+                  enableTitleTransition: _isSameTab(from: _lastLocation, to: '/meal_plan'),
+                ),
               ),
             ),
+            // Tab 4
             GoRoute(
               path: '/discover',
               pageBuilder: (context, state) => _tabTransitionPage(
                 state: state,
-                child: const DiscoverPage(title: 'Discover'),
+                child: DiscoverPage(
+                  title: 'Discover',
+                  enableTitleTransition: _isSameTab(from: _lastLocation, to: '/discover'),
+                ),
               ),
             ),
           ],
@@ -106,6 +131,16 @@ class AdaptiveApp2 extends StatelessWidget {
       ],
     );
   }
+
+  /// A helper method to see if we're staying in the same tab or not.
+  bool _isSameTab({ required String? from, required String to }) {
+    if (from == null) return false; // first time
+    // simplistic check: see if both start with '/recipes' or '/shopping' ...
+    final fromTab = from.split('/')[1];
+    final toTab = to.split('/')[1];
+    return (fromTab == toTab);
+  }
+
 
   /// Wraps routes in CupertinoPage on iOS, MaterialPage on other platforms.
   Page<void> _platformPage({

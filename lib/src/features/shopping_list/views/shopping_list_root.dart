@@ -3,7 +3,8 @@ import 'package:go_router/go_router.dart';
 import '../../../mobile/utils/adaptive_sliver_page.dart';
 
 class ShoppingListTab extends StatelessWidget {
-  const ShoppingListTab({super.key});
+  final bool enableTitleTransition;
+  const ShoppingListTab({super.key, this.enableTitleTransition = false});
 
   @override
   Widget build(BuildContext context) {
@@ -26,7 +27,7 @@ class ShoppingListTab extends StatelessWidget {
       ),
       trailing: const Icon(CupertinoIcons.add_circled),
       leading: const Icon(CupertinoIcons.person_2),
-      transitionBetweenRoutes: false,
+      transitionBetweenRoutes: enableTitleTransition,
     );
   }
 }

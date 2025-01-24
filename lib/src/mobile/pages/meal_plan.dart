@@ -2,8 +2,9 @@ import 'package:flutter/cupertino.dart';
 
 class MealPlanPage extends StatelessWidget {
   final String title;
+  final bool enableTitleTransition;
 
-  const MealPlanPage({super.key, required this.title});
+  const MealPlanPage({super.key, required this.title, this.enableTitleTransition = false});
 
   @override
   Widget build(BuildContext context) {

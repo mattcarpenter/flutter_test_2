@@ -2,8 +2,9 @@ import 'package:flutter/cupertino.dart';
 
 class DiscoverPage extends StatelessWidget {
   final String title;
+  final bool enableTitleTransition;
 
-  const DiscoverPage({super.key, required this.title});
+  const DiscoverPage({super.key, required this.title, this.enableTitleTransition = false});
 
   @override
   Widget build(BuildContext context) {
