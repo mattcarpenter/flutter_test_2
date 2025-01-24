@@ -115,7 +115,7 @@ class AdaptiveApp2 extends StatelessWidget {
                       ),
                     ),
                   ],
-                  pageBuilder: (context, state) => _tabTransitionPage(
+                  pageBuilder: (context, state) => _platformPage(
                     state: state,
                     child: RecipesTab(),
                   ),
@@ -150,7 +150,7 @@ class AdaptiveApp2 extends StatelessWidget {
                       ),
                     ),
                   ],
-                  pageBuilder: (context, state) => _tabTransitionPage(
+                  pageBuilder: (context, state) => _platformPage(
                     state: state,
                     child: ShoppingListTab(),
                   ),
@@ -185,7 +185,7 @@ class AdaptiveApp2 extends StatelessWidget {
                       ),
                     ),
                   ],
-                  pageBuilder: (context, state) => _tabTransitionPage(
+                  pageBuilder: (context, state) => _platformPage(
                     state: state,
                     child: MealPlansRoot(),
                   ),
@@ -220,7 +220,7 @@ class AdaptiveApp2 extends StatelessWidget {
                       ),
                     ),
                   ],
-                  pageBuilder: (context, state) => _tabTransitionPage(
+                  pageBuilder: (context, state) => _platformPage(
                     state: state,
                     child: DiscoverTab(),
                   ),
@@ -248,43 +248,6 @@ class AdaptiveApp2 extends StatelessWidget {
       return MaterialPage(
         child: child,
         key: state.pageKey,
-      );
-    }
-  }
-
-  /// We'll keep your tabTransitionPage as is:
-  Page<void> _tabTransitionPage({
-    required GoRouterState state,
-    required Widget child,
-  }) {
-    return CustomTransitionPage<void>(
-      key: state.pageKey,
-      child: child,
-      transitionDuration: const Duration(milliseconds: 400),
-      reverseTransitionDuration: const Duration(milliseconds: 400),
-      transitionsBuilder: (context, animation, secondaryAnimation, child) {
-        return CupertinoTabPageTransition(
-          animation: animation,
-          child: child,
-        );
-      },
-    );
-  }
-
-  Page<void> _pushTransitionPage({
-    required GoRouterState state,
-    required Widget child,
-  }) {
-    if (Platform.isIOS) {
-      return CupertinoPage<void>(
-        key: state.pageKey,
-        child: child,
-        title: state.name,
-      );
-    } else {
-      return MaterialPage<void>(
-        key: state.pageKey,
-        child: child,
       );
     }
   }
