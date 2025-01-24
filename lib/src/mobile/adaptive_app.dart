@@ -59,8 +59,6 @@ class AdaptiveApp2 extends StatelessWidget {
   /// will have its own ShellRoute + navigatorKey.
 
   GoRouter _createRouter() {
-    String? _previousLocation;
-    String? _currentLocation;
 
     // Navigator keys for each tab's separate shell:
     final _recipesNavKey   = GlobalKey<NavigatorState>(debugLabel: 'recipesNavKey');
@@ -71,14 +69,6 @@ class AdaptiveApp2 extends StatelessWidget {
     return GoRouter(
       debugLogDiagnostics: true,
       initialLocation: '/recipes',
-      redirect: (context, state) {
-        // Before changing anything, store the old in _previousLocation
-        _previousLocation = _currentLocation;
-        // Now update _currentLocation to the new path
-        _currentLocation = state.uri.path;
-        // No actual redirect
-        return null;
-      },
       routes: [
         // ─────────────────────────────────────────────────────────────
         // TOP-LEVEL SHELL: Builds MainPageShell
