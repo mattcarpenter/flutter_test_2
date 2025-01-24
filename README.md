@@ -22,12 +22,14 @@ A new Flutter project.
   [X] Android Adaptive Widget Updates
   [X] Might need to create a page "wrapper" or some utility to manage android/ios diffs and manage the padding logic
   [X] Repurpose pages as tab navigators
-  [X] Try out deep linking
-  [ ] Go router: simplify rest of pages; simplify directory structures
-  [ ] Go router: fix weird animations on tab changes
-  [ ] Go router: replace old app with this new one
-  [ ] Go router: Since we have a shell; maybe Windows and Macos fit into this pattern? Investigate
+  [X] Go router: simplify rest of pages; simplify directory structures
+  [X] Go router: fix weird animations on tab changes
+  [X] Go router: replace old app with this new one
+  [ ] Regression test android phone
+  [ ] Regression test android tablet
+  [ ] Test deep-linking
   [ ] Hack android SliverAppBar to allow padding
+  [ ] Go router: Since we have a shell; maybe Windows and Macos fit into this pattern? Investigate
 [ ] Think about MacOS
 [ ] Think about Windows
 [ ] Android dark mode colors
