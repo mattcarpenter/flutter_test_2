@@ -16,7 +16,6 @@ class MealPlansSubPage extends StatelessWidget {
       ),
       trailing: const Icon(CupertinoIcons.add_circled),
       previousPageTitle: 'Meal Plans',
-      transitionBetweenRoutes: true,
       automaticallyImplyLeading: true,
     );
   }

@@ -3,9 +3,8 @@ import 'package:go_router/go_router.dart';
 import '../../../mobile/utils/adaptive_sliver_page.dart';
 
 class MealPlansRoot extends StatelessWidget {
-  final bool enableTitleTransition;
 
-  const MealPlansRoot({super.key, this.enableTitleTransition = false});
+  const MealPlansRoot({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -28,7 +27,6 @@ class MealPlansRoot extends StatelessWidget {
       ),
       trailing: const Icon(CupertinoIcons.add_circled),
       leading: const Icon(CupertinoIcons.person_2),
-      transitionBetweenRoutes: enableTitleTransition,
     );
   }
 }

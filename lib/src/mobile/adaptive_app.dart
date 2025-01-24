@@ -117,12 +117,7 @@ class AdaptiveApp2 extends StatelessWidget {
                   ],
                   pageBuilder: (context, state) => _tabTransitionPage(
                     state: state,
-                    child: RecipesTab(
-                      enableTitleTransition: _isSameTab(
-                        from: _previousLocation,
-                        to: state.uri.path
-                      ),
-                    ),
+                    child: RecipesTab(),
                   ),
                 ),
               ],
@@ -157,12 +152,7 @@ class AdaptiveApp2 extends StatelessWidget {
                   ],
                   pageBuilder: (context, state) => _tabTransitionPage(
                     state: state,
-                    child: ShoppingListTab(
-                      enableTitleTransition: _isSameTab(
-                        from: _previousLocation,
-                        to: state.uri.path
-                      ),
-                    ),
+                    child: ShoppingListTab(),
                   ),
                 ),
               ],
@@ -197,12 +187,7 @@ class AdaptiveApp2 extends StatelessWidget {
                   ],
                   pageBuilder: (context, state) => _tabTransitionPage(
                     state: state,
-                    child: MealPlansRoot(
-                      enableTitleTransition: _isSameTab(
-                        from: _previousLocation,
-                        to: state.uri.path
-                      ),
-                    ),
+                    child: MealPlansRoot(),
                   ),
                 ),
               ],
@@ -237,12 +222,7 @@ class AdaptiveApp2 extends StatelessWidget {
                   ],
                   pageBuilder: (context, state) => _tabTransitionPage(
                     state: state,
-                    child: DiscoverTab(
-                      enableTitleTransition: _isSameTab(
-                        from: _previousLocation,
-                        to: state.uri.path
-                      ),
-                    ),
+                    child: DiscoverTab(),
                   ),
                 ),
               ],
@@ -251,14 +231,6 @@ class AdaptiveApp2 extends StatelessWidget {
         ),
       ],
     );
-  }
-
-  /// A helper method to see if we're staying in the same tab or not.
-  bool _isSameTab({ required String? from, required String to }) {
-    if (from == null) return false; // first time
-    final fromTab = from.split('/')[1];
-    final toTab = to.split('/')[1];
-    return (fromTab == toTab);
   }
 
   /// We'll keep your platformPage exactly as is:

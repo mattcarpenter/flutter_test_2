@@ -3,15 +3,14 @@ import 'package:go_router/go_router.dart';
 import '../../../mobile/utils/adaptive_sliver_page.dart';
 
 class RecipesTab extends StatelessWidget {
-  final bool enableTitleTransition;
 
-  const RecipesTab({super.key, this.enableTitleTransition = false});
+  const RecipesTab({super.key});
 
   @override
   Widget build(BuildContext context) {
     // This is the "root" content for `/shopping`.
     // No nested Navigator needed—go_router handles sub-routes:
-    print('=============== enableTitleTransition: $enableTitleTransition');
+
     return AdaptiveSliverPage(
       title: 'Recipes',
       body: Center(
@@ -29,7 +28,6 @@ class RecipesTab extends StatelessWidget {
       ),
       trailing: const Icon(CupertinoIcons.add_circled),
       leading: const Icon(CupertinoIcons.person_2),
-      transitionBetweenRoutes: enableTitleTransition,
     );
   }
 }

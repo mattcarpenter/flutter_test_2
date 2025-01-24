@@ -3,9 +3,8 @@ import 'package:go_router/go_router.dart';
 import '../../../mobile/utils/adaptive_sliver_page.dart';
 
 class DiscoverTab extends StatelessWidget {
-  final bool enableTitleTransition;
 
-  const DiscoverTab({super.key, this.enableTitleTransition = false});
+  const DiscoverTab({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -28,7 +27,6 @@ class DiscoverTab extends StatelessWidget {
       ),
       trailing: const Icon(CupertinoIcons.add_circled),
       leading: const Icon(CupertinoIcons.person_2),
-      transitionBetweenRoutes: enableTitleTransition,
     );
   }
 }

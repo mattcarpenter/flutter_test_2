@@ -5,7 +5,7 @@ import 'package:go_router/go_router.dart';
 class RecipesSubPage extends StatelessWidget {
   final String title;
 
-  const RecipesSubPage({Key? key, this.title = 'Sub Page'}) : super(key: key);
+  const RecipesSubPage({super.key, this.title = 'Sub Page'});
 
   @override
   Widget build(BuildContext context) {
@@ -16,7 +16,6 @@ class RecipesSubPage extends StatelessWidget {
       ),
       trailing: const Icon(CupertinoIcons.add_circled),
       previousPageTitle: 'Recipes',
-      transitionBetweenRoutes: true,
       automaticallyImplyLeading: true,
     );
   }

@@ -20,7 +20,6 @@ class ShoppingListSubPage extends StatelessWidget {
       ),
       trailing: const Icon(CupertinoIcons.add_circled),
       previousPageTitle: 'Shopping List',
-      transitionBetweenRoutes: true,
       automaticallyImplyLeading: true,
     );
   }

@@ -14,7 +14,6 @@ class ShoppingListSubPage extends StatelessWidget {
         child: Text('Buy Doritos 🌮'),
       ),
       trailing: Icon(CupertinoIcons.add_circled),
-      transitionBetweenRoutes: true,
       previousPageTitle: 'Shopping List',
       automaticallyImplyLeading: true,
     );

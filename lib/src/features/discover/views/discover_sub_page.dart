@@ -16,7 +16,6 @@ class DiscoverSubPage extends StatelessWidget {
       ),
       trailing: const Icon(CupertinoIcons.add_circled),
       previousPageTitle: 'Discover',
-      transitionBetweenRoutes: true,
       automaticallyImplyLeading: true,
     );
   }
