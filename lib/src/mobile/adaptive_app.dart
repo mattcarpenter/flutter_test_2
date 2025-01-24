@@ -55,105 +55,197 @@ class AdaptiveApp2 extends StatelessWidget {
   }
 
   /// Create a [GoRouter] instance with shell routing for the bottom tabs.
-  /// In `_createRouter()`, we track the last known path so we can detect
-  /// if the user is switching tabs or pushing deeper.
+  /// We still track _lastLocation, isSameTab, etc., but now each tab
+  /// will have its own ShellRoute + navigatorKey.
 
   GoRouter _createRouter() {
-    String? _lastLocation;
+    String? _previousLocation;
+    String? _currentLocation;
+
+    // Navigator keys for each tab's separate shell:
+    final _recipesNavKey   = GlobalKey<NavigatorState>(debugLabel: 'recipesNavKey');
+    final _shoppingNavKey  = GlobalKey<NavigatorState>(debugLabel: 'shoppingNavKey');
+    final _mealPlansNavKey = GlobalKey<NavigatorState>(debugLabel: 'mealPlansNavKey');
+    final _discoverNavKey  = GlobalKey<NavigatorState>(debugLabel: 'discoverNavKey');
 
     return GoRouter(
       debugLogDiagnostics: true,
       initialLocation: '/recipes',
-      // Use a redirect to store the old location before we change.
-      // So we can tell if the new path is the same tab or not.
       redirect: (context, state) {
-        final from = _lastLocation;
-        final to = state.uri.path;
-        _lastLocation = to; // update for next time
-        return null;        // no actual redirect
+        // Before changing anything, store the old in _previousLocation
+        _previousLocation = _currentLocation;
+        // Now update _currentLocation to the new path
+        _currentLocation = state.uri.path;
+        // No actual redirect
+        return null;
       },
       routes: [
+        // ─────────────────────────────────────────────────────────────
+        // TOP-LEVEL SHELL: Builds MainPageShell
+        // ─────────────────────────────────────────────────────────────
         ShellRoute(
           builder: (context, state, child) {
             return MainPageShell(child: child);
           },
           routes: [
-            // Tab 1
-            GoRoute(
-              path: '/recipes',
+            // ─────────────────────────────────────────────────────────
+            // TAB 1 SHELL: Recipes
+            // ─────────────────────────────────────────────────────────
+            ShellRoute(
+              navigatorKey: _recipesNavKey,
+              pageBuilder: (BuildContext context, GoRouterState state, Widget child) {
+                return CustomTransitionPage<void>(
+                  key: state.pageKey,
+                  child: child,
+                  transitionDuration: const Duration(milliseconds: 400),
+                  reverseTransitionDuration: const Duration(milliseconds: 400),
+                  transitionsBuilder: (context, animation, secondaryAnimation, child) =>
+                      CupertinoTabPageTransition(animation: animation, child: child),
+                );
+              },
               routes: [
                 GoRoute(
-                  path: 'sub',
-                  pageBuilder: (context, state) => _platformPage(
+                  path: '/recipes',
+                  routes: [
+                    GoRoute(
+                      path: 'sub',
+                      pageBuilder: (context, state) => _platformPage(
+                        state: state,
+                        child: const RecipesSubPage(title: 'Sub Page'),
+                      ),
+                    ),
+                  ],
+                  pageBuilder: (context, state) => _tabTransitionPage(
                     state: state,
-                    child: const RecipesSubPage(title: 'Sub Page'),
+                    child: RecipesTab(
+                      enableTitleTransition: _isSameTab(
+                        from: _previousLocation,
+                        to: state.uri.path
+                      ),
+                    ),
                   ),
-                )
-              ],
-              pageBuilder: (context, state) => _tabTransitionPage(
-                state: state,
-                // We'll pass a param to tell the page if we want transitions or not
-                child: RecipesTab(
-                  enableTitleTransition: _isSameTab(from: _lastLocation, to: '/recipes'),
                 ),
-              ),
+              ],
             ),
-            // Tab 2
-            GoRoute(
-              path: '/shopping',
+
+            // ─────────────────────────────────────────────────────────
+            // TAB 2 SHELL: Shopping
+            // ─────────────────────────────────────────────────────────
+            ShellRoute(
+              navigatorKey: _shoppingNavKey,
+              pageBuilder: (BuildContext context, GoRouterState state, Widget child) {
+                return CustomTransitionPage<void>(
+                  key: state.pageKey,
+                  child: child,
+                  transitionDuration: const Duration(milliseconds: 400),
+                  reverseTransitionDuration: const Duration(milliseconds: 400),
+                  transitionsBuilder: (context, animation, secondaryAnimation, child) =>
+                      CupertinoTabPageTransition(animation: animation, child: child),
+                );
+              },
               routes: [
                 GoRoute(
-                  path: 'sub',
-                  pageBuilder: (context, state) => _platformPage(
+                  path: '/shopping',
+                  routes: [
+                    GoRoute(
+                      path: 'sub',
+                      pageBuilder: (context, state) => _platformPage(
+                        state: state,
+                        child: const ShoppingListSubPage(title: 'Sub Page'),
+                      ),
+                    ),
+                  ],
+                  pageBuilder: (context, state) => _tabTransitionPage(
                     state: state,
-                    child: const ShoppingListSubPage(title: 'Sub Page'),
+                    child: ShoppingListTab(
+                      enableTitleTransition: _isSameTab(
+                        from: _previousLocation,
+                        to: state.uri.path
+                      ),
+                    ),
                   ),
                 ),
               ],
-              pageBuilder: (context, state) => _tabTransitionPage(
-                state: state,
-                child: ShoppingListTab(
-                  enableTitleTransition: _isSameTab(from: _lastLocation, to: '/shopping'),
-                ),
-              ),
             ),
-            // Tab 3
-            GoRoute(
-              path: '/meal_plans',
+
+            // ─────────────────────────────────────────────────────────
+            // TAB 3 SHELL: Meal Plans
+            // ─────────────────────────────────────────────────────────
+            ShellRoute(
+              navigatorKey: _mealPlansNavKey,
+              pageBuilder: (BuildContext context, GoRouterState state, Widget child) {
+                return CustomTransitionPage<void>(
+                  key: state.pageKey,
+                  child: child,
+                  transitionDuration: const Duration(milliseconds: 400),
+                  reverseTransitionDuration: const Duration(milliseconds: 400),
+                  transitionsBuilder: (context, animation, secondaryAnimation, child) =>
+                      CupertinoTabPageTransition(animation: animation, child: child),
+                );
+              },
               routes: [
                 GoRoute(
-                  path: 'sub',
-                  pageBuilder: (context, state) => _platformPage(
+                  path: '/meal_plans',
+                  routes: [
+                    GoRoute(
+                      path: 'sub',
+                      pageBuilder: (context, state) => _platformPage(
+                        state: state,
+                        child: const MealPlansSubPage(),
+                      ),
+                    ),
+                  ],
+                  pageBuilder: (context, state) => _tabTransitionPage(
                     state: state,
-                    child: const MealPlansSubPage(),
+                    child: MealPlansRoot(
+                      enableTitleTransition: _isSameTab(
+                        from: _previousLocation,
+                        to: state.uri.path
+                      ),
+                    ),
                   ),
                 ),
               ],
-              pageBuilder: (context, state) => _tabTransitionPage(
-                state: state,
-                child: MealPlansRoot(
-                  enableTitleTransition: _isSameTab(from: _lastLocation, to: '/meal_plans'),
-                ),
-              ),
             ),
-            // Tab 4
-            GoRoute(
-              path: '/discover',
+
+            // ─────────────────────────────────────────────────────────
+            // TAB 4 SHELL: Discover
+            // ─────────────────────────────────────────────────────────
+            ShellRoute(
+              navigatorKey: _discoverNavKey,
+              pageBuilder: (BuildContext context, GoRouterState state, Widget child) {
+                return CustomTransitionPage<void>(
+                  key: state.pageKey,
+                  child: child,
+                  transitionDuration: const Duration(milliseconds: 400),
+                  reverseTransitionDuration: const Duration(milliseconds: 400),
+                  transitionsBuilder: (context, animation, secondaryAnimation, child) =>
+                      CupertinoTabPageTransition(animation: animation, child: child),
+                );
+              },
               routes: [
                 GoRoute(
-                  path: 'sub',
-                  pageBuilder: (context, state) => _platformPage(
+                  path: '/discover',
+                  routes: [
+                    GoRoute(
+                      path: 'sub',
+                      pageBuilder: (context, state) => _platformPage(
+                        state: state,
+                        child: const DiscoverSubPage(),
+                      ),
+                    ),
+                  ],
+                  pageBuilder: (context, state) => _tabTransitionPage(
                     state: state,
-                    child: const DiscoverSubPage(),
+                    child: DiscoverTab(
+                      enableTitleTransition: _isSameTab(
+                        from: _previousLocation,
+                        to: state.uri.path
+                      ),
+                    ),
                   ),
                 ),
               ],
-              pageBuilder: (context, state) => _tabTransitionPage(
-                state: state,
-                child: DiscoverTab(
-                  enableTitleTransition: _isSameTab(from: _lastLocation, to: '/discover'),
-                ),
-              ),
             ),
           ],
         ),
@@ -164,14 +256,12 @@ class AdaptiveApp2 extends StatelessWidget {
   /// A helper method to see if we're staying in the same tab or not.
   bool _isSameTab({ required String? from, required String to }) {
     if (from == null) return false; // first time
-    // simplistic check: see if both start with '/recipes' or '/shopping' ...
     final fromTab = from.split('/')[1];
     final toTab = to.split('/')[1];
     return (fromTab == toTab);
   }
 
-
-  /// Wraps routes in CupertinoPage on iOS, MaterialPage on other platforms.
+  /// We'll keep your platformPage exactly as is:
   Page<void> _platformPage({
     required GoRouterState state,
     required Widget child,
@@ -189,42 +279,41 @@ class AdaptiveApp2 extends StatelessWidget {
       );
     }
   }
-}
 
-Page<void> _tabTransitionPage({
-  required GoRouterState state,
-  required Widget child,
-}) {
-  // We'll use a CustomTransitionPage so we can define exactly how to animate.
-  return CustomTransitionPage<void>(
-    key: state.pageKey,
-    child: child,
-    transitionDuration: const Duration(milliseconds: 400),
-    reverseTransitionDuration: const Duration(milliseconds: 400),
-    //This is the magic: use CupertinoTabPageTransition for the "zoom/fade" effect
-    transitionsBuilder: (context, animation, secondaryAnimation, child) {
-      return CupertinoTabPageTransition(
-        animation: animation,
+  /// We'll keep your tabTransitionPage as is:
+  Page<void> _tabTransitionPage({
+    required GoRouterState state,
+    required Widget child,
+  }) {
+    return CustomTransitionPage<void>(
+      key: state.pageKey,
+      child: child,
+      transitionDuration: const Duration(milliseconds: 400),
+      reverseTransitionDuration: const Duration(milliseconds: 400),
+      transitionsBuilder: (context, animation, secondaryAnimation, child) {
+        return CupertinoTabPageTransition(
+          animation: animation,
+          child: child,
+        );
+      },
+    );
+  }
+
+  Page<void> _pushTransitionPage({
+    required GoRouterState state,
+    required Widget child,
+  }) {
+    if (Platform.isIOS) {
+      return CupertinoPage<void>(
+        key: state.pageKey,
+        child: child,
+        title: state.name,
+      );
+    } else {
+      return MaterialPage<void>(
+        key: state.pageKey,
         child: child,
       );
-    },
-  );
-}
-
-Page<void> _pushTransitionPage({
-  required GoRouterState state,
-  required Widget child,
-}) {
-  if (Platform.isIOS) {
-    return CupertinoPage<void>(
-      key: state.pageKey,
-      child: child,
-      title: state.name,
-    );
-  } else {
-    return MaterialPage<void>(
-      key: state.pageKey,
-      child: child,
-    );
+    }
   }
 }

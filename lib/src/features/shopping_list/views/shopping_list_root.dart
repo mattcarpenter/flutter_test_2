@@ -10,6 +10,8 @@ class ShoppingListTab extends StatelessWidget {
   Widget build(BuildContext context) {
     // This is the "root" content for `/shopping`.
     // No nested Navigator needed—go_router handles sub-routes:
+    print('=============== enableTitleTransition: $enableTitleTransition');
+
     return AdaptiveSliverPage(
       title: 'Shopping List',
       body: Center(
