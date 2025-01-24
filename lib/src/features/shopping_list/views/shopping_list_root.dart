@@ -1,6 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:go_router/go_router.dart';
-import '../../utils/adaptive_sliver_page.dart';
+import '../../../mobile/utils/adaptive_sliver_page.dart';
 
 class ShoppingListTab extends StatelessWidget {
   const ShoppingListTab({super.key});

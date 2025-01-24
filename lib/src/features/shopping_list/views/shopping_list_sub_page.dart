@@ -1,5 +1,5 @@
 import 'package:flutter/cupertino.dart';
-import '../../utils/adaptive_sliver_page.dart';
+import '../../../mobile/utils/adaptive_sliver_page.dart';
 import 'package:go_router/go_router.dart';
 
 class ShoppingListSubPage extends StatelessWidget {
@@ -11,17 +11,11 @@ class ShoppingListSubPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return AdaptiveSliverPage(
       title: title,
-      body: Center(
-        child: CupertinoButton.filled(
-          onPressed: () {
-            // Another deeper route => /shopping/deep
-            context.push('/shopping/deep');
-          },
-          child: const Text('Go to Deep Nested Page'),
-        ),
+      body: const Center(
+        child: Text("Shopping list sub page 🛒"),
       ),
       trailing: const Icon(CupertinoIcons.add_circled),
-      previousPageTitle: 'Shopping',
+      previousPageTitle: 'Shopping List',
       transitionBetweenRoutes: true,
       automaticallyImplyLeading: true,
     );

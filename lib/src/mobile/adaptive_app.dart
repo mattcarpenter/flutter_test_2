@@ -1,12 +1,13 @@
 import 'dart:io' show Platform;
+import 'package:cupertino_sidebar/cupertino_sidebar.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:flutter_test_2/src/features/recipes/views/recipes_root.dart';
 import 'package:flutter_test_2/src/mobile/pages/discover.dart';
 import 'package:flutter_test_2/src/mobile/pages/meal_plan.dart';
-import 'package:flutter_test_2/src/mobile/pages/recipes.dart';
-import 'package:flutter_test_2/src/mobile/pages/shopping_list_v2/shopping_list_sub_page.dart';
-import 'package:flutter_test_2/src/mobile/pages/shopping_list_v2/shopping_list_tab.dart';
+import 'package:flutter_test_2/src/features/shopping_list/views/shopping_list_sub_page.dart';
+import 'package:flutter_test_2/src/features/shopping_list/views/shopping_list_root.dart';
 import 'package:go_router/go_router.dart';
 
 import '../color_theme.dart';
@@ -66,7 +67,7 @@ class AdaptiveApp2 extends StatelessWidget {
               path: '/recipes',
               pageBuilder: (context, state) => _platformPage(
                 state: state,
-                child: const RecipesPage(title: 'Recipes'),
+                child: const RecipesTab(),
               ),
             ),
             GoRoute(
@@ -78,13 +79,6 @@ class AdaptiveApp2 extends StatelessWidget {
                   pageBuilder: (context, state) => _platformPage(
                     state: state,
                     child: const ShoppingListSubPage(title: 'Sub Page'),
-                  ),
-                ),
-                GoRoute(
-                  path: 'deep', // combined => /shopping/deep
-                  pageBuilder: (context, state) => _platformPage(
-                    state: state,
-                    child: const ShoppingListSubPage(title: 'Deep Nested Page'),
                   ),
                 ),
               ],
@@ -130,5 +124,43 @@ class AdaptiveApp2 extends StatelessWidget {
         key: state.pageKey,
       );
     }
+  }
+}
+
+Page<void> _tabTransitionPage({
+  required GoRouterState state,
+  required Widget child,
+}) {
+  // We'll use a CustomTransitionPage so we can define exactly how to animate.
+  return CustomTransitionPage<void>(
+    key: state.pageKey,
+    child: child,
+    transitionDuration: const Duration(milliseconds: 400),
+    reverseTransitionDuration: const Duration(milliseconds: 400),
+    // This is the magic: use CupertinoTabPageTransition for the "zoom/fade" effect
+    transitionsBuilder: (context, animation, secondaryAnimation, child) {
+      return CupertinoTabPageTransition(
+        animation: animation,
+        child: child,
+      );
+    },
+  );
+}
+
+Page<void> _pushTransitionPage({
+  required GoRouterState state,
+  required Widget child,
+}) {
+  if (Platform.isIOS) {
+    return CupertinoPage<void>(
+      key: state.pageKey,
+      child: child,
+      title: state.name,
+    );
+  } else {
+    return MaterialPage<void>(
+      key: state.pageKey,
+      child: child,
+    );
   }
 }
