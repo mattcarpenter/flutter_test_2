@@ -135,9 +135,9 @@ Page<void> _tabTransitionPage({
   return CustomTransitionPage<void>(
     key: state.pageKey,
     child: child,
-    transitionDuration: const Duration(milliseconds: 1400),
-    reverseTransitionDuration: const Duration(milliseconds: 1400),
-    // This is the magic: use CupertinoTabPageTransition for the "zoom/fade" effect
+    transitionDuration: const Duration(milliseconds: 400),
+    reverseTransitionDuration: const Duration(milliseconds: 400),
+    //This is the magic: use CupertinoTabPageTransition for the "zoom/fade" effect
     transitionsBuilder: (context, animation, secondaryAnimation, child) {
       return CupertinoTabPageTransition(
         animation: animation,

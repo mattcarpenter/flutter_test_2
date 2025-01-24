@@ -26,7 +26,7 @@ class ShoppingListTab extends StatelessWidget {
       ),
       trailing: const Icon(CupertinoIcons.add_circled),
       leading: const Icon(CupertinoIcons.person_2),
-      transitionBetweenRoutes: true,
+      transitionBetweenRoutes: false,
     );
   }
 }
