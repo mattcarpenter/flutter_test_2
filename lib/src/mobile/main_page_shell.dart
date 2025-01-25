@@ -15,10 +15,10 @@ class MainPageShell extends StatefulWidget {
   const MainPageShell({super.key, required this.child});
 
   @override
-  State<MainPageShell> createState() => _MainPageShellState();
+  State<MainPageShell> createState() => MainPageShellState();
 }
 
-class _MainPageShellState extends State<MainPageShell> with TickerProviderStateMixin {
+class MainPageShellState extends State<MainPageShell> with TickerProviderStateMixin {
   bool _isDrawerOpen = false;
   late AnimationController _drawerController;
   late Animation<double> _animation;
@@ -221,6 +221,17 @@ class _MainPageShellState extends State<MainPageShell> with TickerProviderStateM
   }
 
   void _toggleDrawer() {
+    setState(() {
+      _isDrawerOpen = !_isDrawerOpen;
+      if (_isDrawerOpen) {
+        _drawerController.forward();
+      } else {
+        _drawerController.reverse();
+      }
+    });
+  }
+
+  void toggleDrawer() {
     setState(() {
       _isDrawerOpen = !_isDrawerOpen;
       if (_isDrawerOpen) {

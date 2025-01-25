@@ -14,14 +14,14 @@ class AdaptiveSliverPage extends StatelessWidget {
   final bool? automaticallyImplyLeading;
 
   const AdaptiveSliverPage({
-    Key? key,
+    super.key,
     required this.title,
     required this.body,
     this.trailing,
     this.leading,
     this.previousPageTitle,
     this.automaticallyImplyLeading,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

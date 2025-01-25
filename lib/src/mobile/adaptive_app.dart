@@ -64,16 +64,15 @@ class AdaptiveApp2 extends StatelessWidget {
   /// will have its own ShellRoute + navigatorKey.
 
   GoRouter _createRouter(BuildContext context) {
-
     // Navigator keys for each tab's separate shell:
     final _recipesNavKey   = GlobalKey<NavigatorState>(debugLabel: 'recipesNavKey');
     final _shoppingNavKey  = GlobalKey<NavigatorState>(debugLabel: 'shoppingNavKey');
     final _mealPlansNavKey = GlobalKey<NavigatorState>(debugLabel: 'mealPlansNavKey');
     final _discoverNavKey  = GlobalKey<NavigatorState>(debugLabel: 'discoverNavKey');
+    final _mainPageShellKey = GlobalKey<MainPageShellState>(debugLabel: 'mainPageShellKey');
 
     final nonTabRoutes = [
       ShellRoute(
-        //navigatorKey: _discoverNavKey,
         pageBuilder: (BuildContext context, GoRouterState state, Widget child) {
           return CustomTransitionPage<void>(
             key: state.pageKey,
@@ -81,7 +80,7 @@ class AdaptiveApp2 extends StatelessWidget {
             transitionDuration: const Duration(milliseconds: 400),
             reverseTransitionDuration: const Duration(milliseconds: 400),
             transitionsBuilder: (context, animation, secondaryAnimation, child) =>
-                CupertinoTabPageTransition(animation: animation, child: child),
+                CupertinoTabPageTransition(animation: animation, child: MainPageShell(key: _mainPageShellKey, child: child)),
           );
         },
         routes: [
@@ -98,7 +97,7 @@ class AdaptiveApp2 extends StatelessWidget {
             ],
             pageBuilder: (context, state) => _platformPage(
               state: state,
-              child: LabsTab(),
+              child: LabsTab(onMenuPressed: () { _mainPageShellKey.currentState?.toggleDrawer(); }),
             ),
           ),
         ],
