@@ -64,6 +64,8 @@ class AdaptiveApp2 extends StatelessWidget {
   /// will have its own ShellRoute + navigatorKey.
 
   GoRouter _createRouter(BuildContext context) {
+    final isTablet = MediaQuery.of(context).size.shortestSide >= 600;
+
     // Navigator keys for each tab's separate shell:
     final _recipesNavKey   = GlobalKey<NavigatorState>(debugLabel: 'recipesNavKey');
     final _shoppingNavKey  = GlobalKey<NavigatorState>(debugLabel: 'shoppingNavKey');
@@ -80,7 +82,7 @@ class AdaptiveApp2 extends StatelessWidget {
             transitionDuration: const Duration(milliseconds: 400),
             reverseTransitionDuration: const Duration(milliseconds: 400),
             transitionsBuilder: (context, animation, secondaryAnimation, child) =>
-                CupertinoTabPageTransition(animation: animation, child: MainPageShell(key: _mainPageShellKey, child: child, showBottomNavBar: false,)),
+                CupertinoTabPageTransition(animation: animation, child: isTablet ? child : MainPageShell(key: _mainPageShellKey, child: child, showBottomNavBar: false,)),
           );
         },
         routes: [
@@ -257,10 +259,10 @@ class AdaptiveApp2 extends StatelessWidget {
             ),
 
             // Include non-tab routes within this ShellRoute if on tablet
-            if (isTablet(context)) ...nonTabRoutes,
+            if (isTablet) ...nonTabRoutes,
           ],
         ),
-        if (!isTablet(context)) ...nonTabRoutes,
+        if (!isTablet) ...nonTabRoutes,
       ],
     );
   }
