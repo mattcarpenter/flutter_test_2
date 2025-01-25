@@ -286,7 +286,9 @@ class _MainPageState extends State<MainPage> with TickerProviderStateMixin {
                             selectedIndex: _selectedTab,
                             onMenuItemClick: (index) {
                               _switchToTab(index);
-                            }),
+                            },
+                            onRouteGo: (_) {}
+                        ),
                       )
                     ],
                   ),
@@ -458,6 +460,7 @@ class _MainPageState extends State<MainPage> with TickerProviderStateMixin {
                   children: [
                     const SizedBox(height: 50),
                     Menu(
+                      onRouteGo: (_) {},
                       selectedIndex: _selectedTab,
                       onMenuItemClick: (index) {
                         _switchToTab(index);

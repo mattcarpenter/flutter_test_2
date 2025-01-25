@@ -49,7 +49,7 @@ class _MyHomePageState extends State<MyHomePage> {
               ),
             ],
           );*/
-          return Menu(selectedIndex: _selectedIndex, onMenuItemClick: (index) {
+          return Menu(selectedIndex: _selectedIndex, onRouteGo: (_){}, onMenuItemClick: (index) {
             setState(() {
               _selectedIndex = index;
             });

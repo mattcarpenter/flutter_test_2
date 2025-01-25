@@ -6,11 +6,13 @@ import 'menu_item.dart';
 class Menu extends StatelessWidget {
   final int selectedIndex;
   final void Function(int index) onMenuItemClick;
+  final void Function(String route) onRouteGo;
 
   const Menu({
     super.key,
     required this.selectedIndex,
     required this.onMenuItemClick,
+    required this.onRouteGo,
   });
 
   @override
@@ -72,6 +74,19 @@ class Menu extends StatelessWidget {
           activeTextColor: activeTextColor,
           backgroundColor: backgroundColor,
           onTap: onMenuItemClick,
+        ),
+        MenuItem(
+          index: 4,
+          title: '🧪Labs',
+          icon: CupertinoIcons.settings,
+          isActive: selectedIndex == 4,
+          color: primaryColor,
+          textColor: textColor,
+          activeTextColor: activeTextColor,
+          backgroundColor: backgroundColor,
+          onTap: (_) {
+            onRouteGo('/labs');
+          },
         ),
       ],
     );

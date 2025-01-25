@@ -134,6 +134,9 @@ class _MainPageShellState extends State<MainPageShell> with TickerProviderStateM
                     onMenuItemClick: (index) {
                       _switchToTab(context, index);
                     },
+                    onRouteGo: (route) {
+                      context.go(route);
+                    },
                   ),
                 ),
               ),
@@ -259,6 +262,7 @@ class _MainPageShellState extends State<MainPageShell> with TickerProviderStateM
                     Menu(
                       selectedIndex: _selectedIndexFromLocation(),
                       onMenuItemClick: (index) => _switchToTab(context, index),
+                      onRouteGo: (route) => context.go(route),
                     ),
                   ],
                 ),
