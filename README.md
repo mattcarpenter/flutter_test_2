@@ -13,7 +13,7 @@ A new Flutter project.
 [X] Add new menu component to phone
 [X] Fix active item styling in custom sidebar (update active state; ensure text is primary color when active)
 [X] Figure out active state for menu items
-[ ] Navigation Epic
+[X] Navigation Epic
   [X] Try navigating to new route
   [X] Document the relevant bits of my component tree for Cupertino
   [X] Leading padding
@@ -33,8 +33,7 @@ A new Flutter project.
   [X] Figure out why we get a back button instead of the previous title. reason: based on length
   [X] Fix weird padding in nav bar on sub routes
   [X] Test deep-linking
-  [ ] Hack android SliverAppBar to allow padding
-  [ ] Go router: Since we have a shell; maybe Windows and Macos fit into this pattern? Investigate
+  [X] Hack android SliverAppBar to allow padding
 [ ] Think about MacOS
 [ ] Think about Windows
 [ ] Android dark mode colors
