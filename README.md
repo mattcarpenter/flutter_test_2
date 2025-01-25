@@ -29,9 +29,9 @@ A new Flutter project.
   [X] Regression test android tablet
   [X] Routes that dont have a bottom nav bar
   [X] Figure out menu button for pages outside of main scaffold
-  [ ] Ensure no extra nav bar on tablet when going to labs (did this regress because i added the shell?)
-  [ ] Figure out why we get a back button instead of the previous title
-  [ ] Fix weird padding in nav bar on sub routes
+  [X] Ensure no extra nav bar on tablet when going to labs (did this regress because i added the shell?)
+  [X] Figure out why we get a back button instead of the previous title. reason: based on length
+  [X] Fix weird padding in nav bar on sub routes
   [ ] Test deep-linking
   [ ] Hack android SliverAppBar to allow padding
   [ ] Go router: Since we have a shell; maybe Windows and Macos fit into this pattern? Investigate

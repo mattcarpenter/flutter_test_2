@@ -55,7 +55,10 @@ class AdaptiveSliverPage extends StatelessWidget {
                   largeTitle: Text(title),
                   transitionBetweenRoutes: true,
                   previousPageTitle: previousPageTitle,
-                  trailing: trailing,
+                  trailing: Padding(
+                    padding: EdgeInsets.symmetric(horizontal: 16),
+                    child: trailing,
+                  ),
                   padding: EdgeInsetsDirectional.only(start: padding),
                   automaticallyImplyLeading: automaticallyImplyLeading ?? false,
                 ) : CupertinoSliverNavigationBar(

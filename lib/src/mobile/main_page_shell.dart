@@ -36,12 +36,12 @@ class MainPageShellState extends State<MainPageShell> with TickerProviderStateMi
     // Phone drawer animations
     _drawerController = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 200),
+      duration: const Duration(milliseconds: 400),
     );
     _animation = CurvedAnimation(
       parent: _drawerController,
-      curve: Curves.easeOutQuad,
-      reverseCurve: Curves.easeInQuad,
+      curve: Curves.easeOutExpo,
+      reverseCurve: Curves.easeInExpo,
     );
     _overlayAnimation = CurvedAnimation(
       parent: _drawerController,

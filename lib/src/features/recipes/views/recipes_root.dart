@@ -3,7 +3,6 @@ import 'package:go_router/go_router.dart';
 import '../../../mobile/utils/adaptive_sliver_page.dart';
 
 class RecipesTab extends StatelessWidget {
-
   const RecipesTab({super.key});
 
   @override
