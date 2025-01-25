@@ -27,7 +27,8 @@ A new Flutter project.
   [X] Go router: replace old app with this new one
   [ ] Regression test android phone
   [ ] Regression test android tablet
-  [ ] Routes that dont have a bottom nav bar
+  [X] Routes that dont have a bottom nav bar
+  [ ] Figure out menu button for pages outside of main scaffold
   [ ] Figure out why we get a back button instead of the previous title
   [ ] Fix weird padding in nav bar on sub routes
   [ ] Test deep-linking
