@@ -80,7 +80,7 @@ class AdaptiveApp2 extends StatelessWidget {
             transitionDuration: const Duration(milliseconds: 400),
             reverseTransitionDuration: const Duration(milliseconds: 400),
             transitionsBuilder: (context, animation, secondaryAnimation, child) =>
-                CupertinoTabPageTransition(animation: animation, child: MainPageShell(key: _mainPageShellKey, child: child)),
+                CupertinoTabPageTransition(animation: animation, child: MainPageShell(key: _mainPageShellKey, child: child, showBottomNavBar: false,)),
           );
         },
         routes: [

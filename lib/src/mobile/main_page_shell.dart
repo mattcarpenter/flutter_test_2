@@ -11,8 +11,9 @@ bool isTablet(BuildContext context) {
 
 class MainPageShell extends StatefulWidget {
   final Widget child; // The active tab's child from the GoRouter
+  final bool showBottomNavBar;
 
-  const MainPageShell({super.key, required this.child});
+  const MainPageShell({super.key, required this.child, this.showBottomNavBar = true});
 
   @override
   State<MainPageShell> createState() => MainPageShellState();
@@ -101,7 +102,7 @@ class MainPageShellState extends State<MainPageShell> with TickerProviderStateMi
               bottom: 0,
               child: Scaffold(
                 body: widget.child, // The content from go_router
-                bottomNavigationBar: _buildPhoneBottomNavBar(context),
+                bottomNavigationBar: widget.showBottomNavBar ? _buildPhoneBottomNavBar(context) : null,
               ),
             ),
 
