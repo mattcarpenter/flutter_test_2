@@ -86,7 +86,12 @@ class AdaptiveSliverPage extends StatelessWidget {
                   floating: true,
                   pinned: true,
                   actions: trailing != null
-                      ? [trailing!]
+                      ? [
+                    Padding(
+                      padding: const EdgeInsets.only(right: 16.0), // Add padding on the right side
+                      child: trailing,
+                    )
+                  ]
                       : null,
                   leading: leading,
                 ),
