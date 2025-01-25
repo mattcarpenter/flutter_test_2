@@ -25,8 +25,8 @@ A new Flutter project.
   [X] Go router: simplify rest of pages; simplify directory structures
   [X] Go router: fix weird animations on tab changes
   [X] Go router: replace old app with this new one
-  [ ] Regression test android phone
-  [ ] Regression test android tablet
+  [X] Regression test android phone
+  [X] Regression test android tablet
   [X] Routes that dont have a bottom nav bar
   [ ] Figure out menu button for pages outside of main scaffold
   [ ] Figure out why we get a back button instead of the previous title
