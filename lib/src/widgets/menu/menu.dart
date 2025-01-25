@@ -88,6 +88,19 @@ class Menu extends StatelessWidget {
             onRouteGo('/labs');
           },
         ),
+        MenuItem(
+          index: 5,
+          title: '🧪Labs DEEP',
+          icon: CupertinoIcons.settings,
+          isActive: selectedIndex == 6,
+          color: primaryColor,
+          textColor: textColor,
+          activeTextColor: activeTextColor,
+          backgroundColor: backgroundColor,
+          onTap: (_) {
+            onRouteGo('/labs/sub');
+          },
+        ),
       ],
     );
   }
