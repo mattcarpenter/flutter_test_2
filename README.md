@@ -36,6 +36,7 @@ A new Flutter project.
   [ ] Hack android SliverAppBar to allow padding for leading
 [ ] Think about MacOS
 [ ] Think about Windows
+[ ] Transparent navigation sliver background??
 [ ] Android dark mode colors
 [ ] Spec for tree nav (look at Notion?)
 [ ] Finish impl of tree nav (minus nav)

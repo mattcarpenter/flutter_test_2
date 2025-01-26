@@ -84,6 +84,7 @@ class AdaptiveSliverPage extends StatelessWidget {
                 SliverAppBar(
                   title: Text(title),
                   floating: true,
+                  leadingPadding: isTablet ? EdgeInsetsDirectional.only(start: padding) : null,
                   pinned: true,
                   actions: trailing != null
                       ? [
