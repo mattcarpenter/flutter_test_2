@@ -33,7 +33,7 @@ A new Flutter project.
   [X] Figure out why we get a back button instead of the previous title. reason: based on length
   [X] Fix weird padding in nav bar on sub routes
   [X] Test deep-linking
-  [ ] Hack android SliverAppBar to allow padding for leading
+  [X] Hack android SliverAppBar to allow padding for leading
 [ ] Think about MacOS
 [ ] Think about Windows
 [ ] Transparent navigation sliver background??
