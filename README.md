@@ -34,8 +34,16 @@ A new Flutter project.
   [X] Fix weird padding in nav bar on sub routes
   [X] Test deep-linking
   [X] Hack android SliverAppBar to allow padding for leading
-[ ] Think about MacOS
+[X] Think about MacOS
+[ ] Domain model
+[ ] Read up on Cloud Firestore data modeling
+[ ] Consult on Firestore setup (auth, whether bloc or riverpod is needed or just providers, offline support) - maybe build a todo app?
+[ ] Implement Folders
+[ ] Implement Basic Recipes
 [ ] Think about Windows
+[ ] L10n
+[ ] Internationalization (default units settings)
+[ ] Settings page
 [ ] Transparent navigation sliver background??
 [ ] Android dark mode colors
 [ ] Spec for tree nav (look at Notion?)

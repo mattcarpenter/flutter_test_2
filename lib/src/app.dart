@@ -32,7 +32,7 @@ class MyApp extends StatelessWidget {
           return const MacApp();
         }
 
-        return const AdaptiveApp();
+        return const AdaptiveApp2();
       },
     );
   }
