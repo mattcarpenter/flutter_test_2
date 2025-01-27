@@ -3,14 +3,13 @@ import 'package:cupertino_sidebar/cupertino_sidebar.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
-import 'package:flutter_test_2/src/features/discover/views/discover_root.dart';
-import 'package:flutter_test_2/src/features/meal_plans/views/meal_plans_root.dart';
-import 'package:flutter_test_2/src/features/recipes/views/recipes_root.dart';
-import 'package:flutter_test_2/src/features/shopping_list/views/shopping_list_root.dart';
-
-import 'package:flutter_test_2/src/widgets/menu/menu.dart';
 
 import '../color_theme.dart';
+import '../features/discover/views/discover_root.dart';
+import '../features/meal_plans/views/meal_plans_root.dart';
+import '../features/recipes/views/recipes_root.dart';
+import '../features/shopping_list/views/shopping_list_root.dart';
+import '../widgets/menu/menu.dart';
 
 bool isTablet(BuildContext context) {
   return MediaQuery.of(context).size.shortestSide >= 600;

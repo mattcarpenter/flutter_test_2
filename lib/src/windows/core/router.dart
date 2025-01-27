@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:flutter_test_2/src/windows/features/home/home_view.dart';
-import 'package:flutter_test_2/src/windows/layout/shell.dart';
+import '../features/home/home_view.dart';
+import '../layout/shell.dart';
 
 final rootNavigatorKey = GlobalKey<NavigatorState>();
 final shellNavigatorKey = GlobalKey<NavigatorState>();

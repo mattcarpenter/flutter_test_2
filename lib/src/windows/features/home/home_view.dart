@@ -1,5 +1,5 @@
 import 'package:fluent_ui/fluent_ui.dart';
-import 'package:flutter_test_2/src/windows/features/sponsors/sponsors_view.dart';
+import '../sponsors/sponsors_view.dart';
 import 'package:url_launcher/link.dart';
 
 class HomeView extends StatefulWidget {

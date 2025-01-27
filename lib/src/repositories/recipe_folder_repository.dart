@@ -20,6 +20,7 @@ class RecipeFolderRepository {
   // Fetch all folders
   Future<List<RecipeFolder>> getAllFolders() async {
     final querySnapshot = await _collection.get();
+    print(querySnapshot);
     return querySnapshot.docs
         .map((doc) => RecipeFolder.fromJson(doc.data() as Map<String, dynamic>))
         .toList();

@@ -1,9 +1,8 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
-import 'package:flutter_test_2/src/mobile/adaptive_app.dart';
-import 'package:flutter_test_2/src/mobile/app.dart';
-import 'package:flutter_test_2/src/windows/app.dart';
+import 'package:recipe_app/src/windows/app.dart';
 import 'macos/app.dart';
+import 'mobile/adaptive_app.dart';
 import 'settings/settings_controller.dart';
 
 /// The Widget that configures your application.

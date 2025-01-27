@@ -1,9 +1,10 @@
-import 'dart:io' show Platform;
+import 'dart:io' show Platform, sleep;
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:cupertino_sidebar/cupertino_sidebar.dart';
-import 'package:flutter_test_2/src/widgets/menu/menu.dart';
 import 'package:go_router/go_router.dart';
+
+import '../widgets/menu/menu.dart';
 
 bool isTablet(BuildContext context) {
   return MediaQuery.of(context).size.shortestSide >= 600;

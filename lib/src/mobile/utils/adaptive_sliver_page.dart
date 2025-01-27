@@ -43,12 +43,11 @@ class AdaptiveSliverPage extends StatelessWidget {
             ? 0
             : (isTablet ? 50 - (screenWidth - pageWidth) : 0);
 
-        print('screenWidth: $screenWidth pageWidth: $pageWidth isTablet: $isTablet padding: $padding');
-        print('adaptive navigator: ${Navigator.of(context)}');
         if (Platform.isIOS) {
           // iOS: Use CupertinoPageScaffold with CupertinoSliverNavigationBar
           return CupertinoPageScaffold(
             child: CustomScrollView(
+              keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
               slivers: [
                 leading == null ?
                 CupertinoSliverNavigationBar(
@@ -80,6 +79,7 @@ class AdaptiveSliverPage extends StatelessWidget {
           // Android: Use Scaffold with a SliverAppBar
           return Scaffold(
             body: CustomScrollView(
+              keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
               slivers: [
                 SliverAppBar(
                   title: Text(title),

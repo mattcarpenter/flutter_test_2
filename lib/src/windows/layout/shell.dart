@@ -1,6 +1,6 @@
 import 'package:fluent_ui/fluent_ui.dart';
-import 'package:flutter_test_2/src/windows/core/router.dart';
-import 'package:flutter_test_2/src/windows/core/theme.dart';
+import '../core/router.dart';
+import '../core/theme.dart';
 import 'package:go_router/go_router.dart';
 import 'package:window_manager/window_manager.dart';
 import 'package:url_launcher/link.dart';

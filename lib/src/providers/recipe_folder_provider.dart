@@ -18,8 +18,8 @@ class RecipeFolderNotifier extends StateNotifier<List<RecipeFolder>> {
   }
 
   Future<void> addFolder(RecipeFolder folder) async {
+    state = [...state, folder];
     await _repository.addFolder(folder);
-    await loadFolders();
   }
 
   Future<void> deleteFolder(String id) async {

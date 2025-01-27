@@ -1,6 +1,6 @@
 import 'package:fluent_ui/fluent_ui.dart';
-import 'package:flutter_test_2/src/windows/core/router.dart';
-import 'package:flutter_test_2/src/windows/core/theme.dart';
+import 'core/router.dart';
+import 'core/theme.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter_acrylic/flutter_acrylic.dart' as flutter_acrylic;
 final _appTheme = AppTheme();
