@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:macos_ui/macos_ui.dart';
@@ -29,6 +30,8 @@ void main() async {
   }
 
   SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
+
+  await Firebase.initializeApp(); // Initialize Firebase
 
   // Run the app and pass in the SettingsController. The app listens to the
   // SettingsController for changes, then passes it further down to the
