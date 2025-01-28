@@ -11,7 +11,9 @@ final recipeFolderRepositoryProvider = Provider<RecipeFolderRepository>((ref) {
 class RecipeFolderNotifier extends StateNotifier<List<RecipeFolder>> {
   final RecipeFolderRepository _repository;
 
-  RecipeFolderNotifier(this._repository) : super([]);
+  RecipeFolderNotifier(this._repository) : super([]) {
+    loadFolders();
+  }
 
   Future<void> loadFolders() async {
     state = await _repository.getAllFolders();

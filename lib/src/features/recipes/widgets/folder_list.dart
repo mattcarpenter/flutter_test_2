@@ -18,9 +18,8 @@ class _FolderListState extends ConsumerState<FolderList> {
 
   @override
   Widget build(BuildContext context) {
-    //final folders = ref.watch(recipeFolderNotifierProvider);
-    //final folderNotifier = ref.read(recipeFolderNotifierProvider.notifier);
-    final folders = [];
+    final folders = ref.watch(recipeFolderNotifierProvider);
+    final folderNotifier = ref.read(recipeFolderNotifierProvider.notifier);
 
     return Column(
       children: [
@@ -63,10 +62,10 @@ class _FolderListState extends ConsumerState<FolderList> {
                 onPressed: () {
                   final folderName = folderNameController.text.trim();
                   if (folderName.isNotEmpty) {
-                    /*folderNotifier.addFolder(
+                    folderNotifier.addFolder(
                       RecipeFolder.newFolder(folderName),
                     );
-                    folderNameController.clear();*/
+                    folderNameController.clear();
                   }
                 },
                 child: const Text('Add'),
