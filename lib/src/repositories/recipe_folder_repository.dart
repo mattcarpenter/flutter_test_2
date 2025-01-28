@@ -1,42 +1,37 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
 import '../models/recipe_folder.dart';
 
 class RecipeFolderRepository {
-  final FirebaseFirestore _firestore;
-
-  RecipeFolderRepository({FirebaseFirestore? firestore})
-      : _firestore = firestore ?? FirebaseFirestore.instance;
-
-  // Firestore collection reference
-  CollectionReference get _collection =>
-      _firestore.collection('recipeFolders');
+  // In-memory storage for recipe folders
+  final List<RecipeFolder> _folders = [];
 
   // Add a new folder
   Future<void> addFolder(RecipeFolder folder) async {
-    final doc = _collection.doc();
-    await doc.set(folder.toJson()..['id'] = doc.id); // Assign Firestore ID
+    // Generate a unique ID for the folder
+    final uniqueId = DateTime.now().millisecondsSinceEpoch.toString();
+    final folderWithId = RecipeFolder(
+      id: uniqueId, // Assign generated ID
+      name: folder.name,
+      parentId: folder.parentId,
+    );
+    _folders.add(folderWithId);
   }
 
   // Fetch all folders
   Future<List<RecipeFolder>> getAllFolders() async {
-    final querySnapshot = await _collection.get();
-    print(querySnapshot);
-    return querySnapshot.docs
-        .map((doc) => RecipeFolder.fromJson(doc.data() as Map<String, dynamic>))
-        .toList();
+    return List.unmodifiable(_folders); // Return an immutable copy of the list
   }
 
   // Fetch a folder by ID
   Future<RecipeFolder?> getFolderById(String id) async {
-    final doc = await _collection.doc(id).get();
-    if (doc.exists) {
-      return RecipeFolder.fromJson(doc.data() as Map<String, dynamic>);
+    try {
+      return _folders.firstWhere((folder) => folder.id == id);
+    } catch (e) {
+      return null; // Return null if no folder matches
     }
-    return null;
   }
 
   // Delete a folder
   Future<void> deleteFolder(String id) async {
-    await _collection.doc(id).delete();
+    _folders.removeWhere((folder) => folder.id == id);
   }
 }
