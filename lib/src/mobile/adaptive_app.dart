@@ -16,20 +16,39 @@ import '../features/recipes/views/recipes_root.dart';
 import '../features/recipes/views/recipes_sub_page.dart';
 import '../features/shopping_list/views/shopping_list_root.dart';
 import '../features/shopping_list/views/shopping_list_sub_page.dart';
-import 'main_page_shell.dart'; // We'll define a Shell widget for the tabs.
+import 'main_page_shell.dart';
 
 bool isTablet(BuildContext context) {
   return MediaQuery.of(context).size.shortestSide >= 600;
 }
 
-class AdaptiveApp2 extends StatelessWidget {
+class AdaptiveApp2 extends StatefulWidget {
   const AdaptiveApp2({super.key});
 
   @override
+  State<AdaptiveApp2> createState() => _AdaptiveApp2State();
+}
+
+class _AdaptiveApp2State extends State<AdaptiveApp2> {
+  GoRouter? _router;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    // Only create the GoRouter once. We use `isTablet(context)` here
+    // but do not re-create the router on subsequent rebuilds.
+    if (_router == null) {
+      _router = _createRouter(isTablet(context));
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
-    final router = _createRouter(context);
     final Brightness brightness = MediaQuery.of(context).platformBrightness;
     final bool isDarkMode = brightness == Brightness.dark;
+
+    // Safely unwrap the router we created.
+    final router = _router!;
 
     if (Platform.isIOS) {
       return CupertinoApp.router(
@@ -60,12 +79,7 @@ class AdaptiveApp2 extends StatelessWidget {
   }
 
   /// Create a [GoRouter] instance with shell routing for the bottom tabs.
-  /// We still track _lastLocation, isSameTab, etc., but now each tab
-  /// will have its own ShellRoute + navigatorKey.
-
-  GoRouter _createRouter(BuildContext context) {
-    final isTablet = MediaQuery.of(context).size.shortestSide >= 600;
-
+  GoRouter _createRouter(bool isTablet) {
     // Navigator keys for each tab's separate shell:
     final _recipesNavKey   = GlobalKey<NavigatorState>(debugLabel: 'recipesNavKey');
     final _shoppingNavKey  = GlobalKey<NavigatorState>(debugLabel: 'shoppingNavKey');
@@ -82,7 +96,16 @@ class AdaptiveApp2 extends StatelessWidget {
             transitionDuration: const Duration(milliseconds: 400),
             reverseTransitionDuration: const Duration(milliseconds: 400),
             transitionsBuilder: (context, animation, secondaryAnimation, child) =>
-                CupertinoTabPageTransition(animation: animation, child: isTablet ? child : MainPageShell(key: _mainPageShellKey, child: child, showBottomNavBar: false,)),
+                CupertinoTabPageTransition(
+                  animation: animation,
+                  child: isTablet
+                      ? child
+                      : MainPageShell(
+                    key: _mainPageShellKey,
+                    child: child,
+                    showBottomNavBar: false,
+                  ),
+                ),
           );
         },
         routes: [
@@ -99,7 +122,11 @@ class AdaptiveApp2 extends StatelessWidget {
             ],
             pageBuilder: (context, state) => _platformPage(
               state: state,
-              child: LabsTab(onMenuPressed: () { _mainPageShellKey.currentState?.toggleDrawer(); }),
+              child: LabsTab(
+                onMenuPressed: () {
+                  _mainPageShellKey.currentState?.toggleDrawer();
+                },
+              ),
             ),
           ),
         ],
@@ -267,7 +294,7 @@ class AdaptiveApp2 extends StatelessWidget {
     );
   }
 
-  /// We'll keep your platformPage exactly as is:
+  /// Platform-aware page builder, unchanged from your code.
   Page<void> _platformPage({
     required GoRouterState state,
     required Widget child,

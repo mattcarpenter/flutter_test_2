@@ -258,6 +258,7 @@ class MainPageShellState extends State<MainPageShell> with TickerProviderStateMi
   // --------------------------------------------------------------------------
   Widget _buildTabletLayout(BuildContext context) {
     return CupertinoPageScaffold(
+      resizeToAvoidBottomInset: false,
       child: Stack(
         children: [
           Row(
