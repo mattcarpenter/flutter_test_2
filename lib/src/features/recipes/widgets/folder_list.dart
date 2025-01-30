@@ -2,7 +2,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../providers/recipe_folder_provider.dart';
-import '../../../models/recipe_folder.dart';
+import '../../../models/recipe_folder.model.dart';
 
 class FolderList extends ConsumerStatefulWidget {
   const FolderList({super.key});
@@ -12,40 +12,46 @@ class FolderList extends ConsumerStatefulWidget {
 }
 
 class _FolderListState extends ConsumerState<FolderList> {
-
   final TextEditingController folderNameController = TextEditingController();
   final FocusNode textFieldFocusNode = FocusNode();
 
   @override
   Widget build(BuildContext context) {
-    final folders = ref.watch(recipeFolderNotifierProvider);
+    final foldersState = ref.watch(recipeFolderNotifierProvider);
     final folderNotifier = ref.read(recipeFolderNotifierProvider.notifier);
 
     return Column(
       children: [
-        // List of folders
         Expanded(
-          child: folders.isEmpty
-              ? const Center(child: Text('No folders available'))
-              : ListView.builder(
-            itemCount: folders.length,
-            itemBuilder: (context, index) {
-              final folder = folders[index];
-              return Card(
-                child: ListTile(
-                  title: Text(folder.name),
-                  subtitle: folder.parentId != null
-                      ? Text('Parent: ${folder.parentId}')
-                      : null,
-                  onTap: () {
-                    // Handle tap (no action for now)
-                  },
-                ),
-              );
-            },
+          child: foldersState.when(
+            data: (folders) => folders.isEmpty
+                ? const Center(child: Text('No folders available'))
+                : ListView.builder(
+              itemCount: folders.length,
+              itemBuilder: (context, index) {
+                final folder = folders[index];
+                return Card(
+                  child: ListTile(
+                    title: Text(folder.name),
+                    subtitle: folder.parentId != null
+                        ? Text('Parent: ${folder.parentId}')
+                        : null,
+                    trailing: IconButton(
+                      icon: Icon(Icons.delete, color: Colors.red),
+                      onPressed: () => folderNotifier.deleteFolder(folder),
+                    ),
+                    onTap: () {
+                      // Handle tap (no action for now)
+                    },
+                  ),
+                );
+              },
+            ),
+            loading: () => const Center(child: CircularProgressIndicator()),
+            error: (error, stackTrace) =>
+                Center(child: Text('Error: ${error.toString()}')),
           ),
         ),
-        // Input for adding folders
         Padding(
           padding: const EdgeInsets.all(16.0),
           child: Row(
@@ -62,9 +68,7 @@ class _FolderListState extends ConsumerState<FolderList> {
                 onPressed: () {
                   final folderName = folderNameController.text.trim();
                   if (folderName.isNotEmpty) {
-                    folderNotifier.addFolder(
-                      RecipeFolder.newFolder(folderName),
-                    );
+                    folderNotifier.addFolder(RecipeFolder.create(folderName));
                     folderNameController.clear();
                   }
                 },

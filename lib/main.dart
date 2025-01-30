@@ -4,10 +4,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:macos_ui/macos_ui.dart';
-
 import 'src/app.dart';
 import 'src/settings/settings_controller.dart';
 import 'src/settings/settings_service.dart';
+import 'src/repositories/base_repository.dart';
+import 'package:sqflite/sqflite.dart' show databaseFactory;
 
 Future<void> _configureMacosWindowUtils() async {
   const config = MacosWindowUtilsConfig(
@@ -18,6 +19,10 @@ Future<void> _configureMacosWindowUtils() async {
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  await BaseRepository.configure(databaseFactory);
+
+  await BaseRepository().initialize();
 
   // Set up the SettingsController, which will glue user settings to multiple
   // Flutter Widgets.
