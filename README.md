@@ -35,10 +35,12 @@ A new Flutter project.
   [X] Test deep-linking
   [X] Hack android SliverAppBar to allow padding for leading
 [X] Think about MacOS
-[ ] Domain model
-[ ] Read up on Cloud Firestore data modeling
-[ ] Consult on Firestore setup (auth, whether bloc or riverpod is needed or just providers, offline support) - maybe build a todo app?
+[X] Domain model
 [ ] Implement Folders
+  [X] Supabase scaffolding
+  [ ] Review Riverpod + Supabase + Brick integration for correctness
+  [ ] Create schema in Supabase to fix failed attempts
+  [ ] Fix latency when adding folders
 [ ] Implement Basic Recipes
 [ ] Think about Windows
 [ ] L10n
