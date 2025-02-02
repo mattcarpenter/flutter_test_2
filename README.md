@@ -38,9 +38,9 @@ A new Flutter project.
 [X] Domain model
 [ ] Implement Folders
   [X] Supabase scaffolding
-  [ ] Review Riverpod + Supabase + Brick integration for correctness
-  [ ] Create schema in Supabase to fix failed attempts
-  [ ] Fix latency when adding folders
+  [ ] Sort out the role of riverpod vs repository
+  [ ] Sort out soft deletes (filtering in the query vs in code)
+  [X] Fix latency when adding folders
 [ ] Revisit directory structure (mobile vs other platforms - are they necessary, can we consolidate or clean up)
 [ ] Implement Basic Recipes
 [ ] Think about Windows
