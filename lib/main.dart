@@ -10,6 +10,8 @@ import 'src/settings/settings_controller.dart';
 import 'src/settings/settings_service.dart';
 import 'src/repositories/base_repository.dart';
 import 'package:sqflite/sqflite.dart' show databaseFactory;
+import 'package:path_provider/path_provider.dart';
+import 'dart:io';
 
 Future<void> _configureMacosWindowUtils() async {
   const config = MacosWindowUtilsConfig(
@@ -28,6 +30,9 @@ void main() async {
   // Set up the SettingsController, which will glue user settings to multiple
   // Flutter Widgets.
   final settingsController = SettingsController(SettingsService());
+
+  final directory = await getApplicationDocumentsDirectory();
+  print('SQLite DB Path: ${directory.path}');
 
   // Load the user's preferred theme while the splash screen is displayed.
   // This prevents a sudden theme change when the app is first displayed.

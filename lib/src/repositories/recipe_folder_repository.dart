@@ -7,17 +7,21 @@ class RecipeFolderRepository {
   RecipeFolderRepository(this._baseRepository);
 
   Future<void> addFolder(RecipeFolder folder) async {
-    // This call triggers Brick’s upsert, which will update local SQLite first.
+    // This triggers Brick’s upsert, which writes to local SQLite immediately.
     await _baseRepository.add(folder);
-    // No manual stream update is necessary.
   }
 
   Future<void> deleteFolder(RecipeFolder folder) async {
-    await _baseRepository.delete(folder);
+    // Instead of deleting, update the folder with a deletion timestamp.
+    //final softDeletedFolder = folder.copyWith(deletedAt: DateTime.now());
+    folder.deletedAt = DateTime.now();
+    await _baseRepository.upsert(folder);
   }
 
-  // Use Brick’s built-in subscription method for on-device reactivity.
+  /// Use Brick’s built‑in subscription method for on-device reactivity.
+  /// We filter out records that have been soft-deleted.
   Stream<List<RecipeFolder>> watchFolders() {
-    return _baseRepository.subscribe<RecipeFolder>();
+    return _baseRepository.subscribe<RecipeFolder>().map((folders) =>
+        folders.where((folder) => folder.deletedAt == null).toList());
   }
 }
