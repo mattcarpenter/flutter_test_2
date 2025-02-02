@@ -5,6 +5,7 @@ import 'package:uuid/uuid.dart';
 
 @ConnectOfflineFirstWithSupabase(
   supabaseConfig: SupabaseSerializable(tableName: 'recipe_folders'),
+  sqliteConfig: SqliteSerializable(),
 )
 class RecipeFolder extends OfflineFirstWithSupabaseModel {
   final String name;

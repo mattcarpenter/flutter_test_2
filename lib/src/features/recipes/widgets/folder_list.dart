@@ -68,7 +68,7 @@ class _FolderListState extends ConsumerState<FolderList> {
                 onPressed: () {
                   final folderName = folderNameController.text.trim();
                   if (folderName.isNotEmpty) {
-                    folderNotifier.addFolder(RecipeFolder.create(folderName));
+                    folderNotifier.addFolder(folderName); // ✅ Pass only the name, not the model
                     folderNameController.clear();
                   }
                 },

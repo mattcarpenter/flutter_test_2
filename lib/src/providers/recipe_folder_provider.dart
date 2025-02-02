@@ -26,26 +26,31 @@ class RecipeFolderNotifier extends StateNotifier<AsyncValue<List<RecipeFolder>>>
     try {
       final folders = await _repository.getAllFolders();
       state = AsyncValue.data(folders);
-    } catch (e, st) {
-      state = AsyncValue.error(e, st);
+    } catch (e, stack) {
+      state = AsyncValue.error(e, stack);
     }
   }
 
-  Future<void> addFolder(RecipeFolder folder) async {
+  Future<void> addFolder(String folderName) async { // ✅ Accept only folderName
     try {
-      await _repository.addFolder(folder);
-      loadFolders(); // Refresh state after adding
-    } catch (e, st) {
-      state = AsyncValue.error(e, st);
+      print('creating folder: $folderName');
+      final newFolder = RecipeFolder.create(folderName); // ✅ Create model inside the notifier
+      print('calling repository...');
+      await _repository.addFolder(newFolder);
+      print('repo called. updating state...');
+      state = AsyncValue.data([...state.value ?? [], newFolder]);
+      print('state updated');
+    } catch (e, stack) {
+      state = AsyncValue.error(e, stack);
     }
   }
 
   Future<void> deleteFolder(RecipeFolder folder) async {
     try {
       await _repository.deleteFolder(folder);
-      loadFolders(); // Refresh state after deleting
-    } catch (e, st) {
-      state = AsyncValue.error(e, st);
+      state = AsyncValue.data(state.value!.where((f) => f.id != folder.id).toList());
+    } catch (e, stack) {
+      state = AsyncValue.error(e, stack);
     }
   }
 }

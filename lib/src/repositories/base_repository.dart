@@ -30,6 +30,7 @@ class BaseRepository extends OfflineFirstWithSupabaseRepository {
       url: 'https://ekodhfnrvdovejiblnwe.supabase.co',
       anonKey: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVrb2RoZm5ydmRvdmVqaWJsbndlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzgyMjQ1ODcsImV4cCI6MjA1MzgwMDU4N30.ZlLSvOd4fgmGCmUqxwsFwA7ceSH80slwtf17Zq2fas0',
       httpClient: client,
+      debug:true
     );
 
     final provider = SupabaseProvider(
