@@ -8,6 +8,7 @@ import 'package:go_router/go_router.dart';
 import '../color_theme.dart';
 import '../features/discover/views/discover_root.dart';
 import '../features/discover/views/discover_sub_page.dart';
+import '../features/labs/views/auth_sub_page.dart';
 import '../features/labs/views/labs_root.dart';
 import '../features/labs/views/labs_sub_page.dart';
 import '../features/meal_plans/views/meal_plans_root.dart';
@@ -119,6 +120,13 @@ class _AdaptiveApp2State extends State<AdaptiveApp2> {
                   child: const LabsSubPage(),
                 ),
               ),
+              GoRoute(
+                path: 'auth',
+                pageBuilder: (context, state) => _platformPage(
+                  state: state,
+                  child: const AuthSubPage(),
+                ),
+              )
             ],
             pageBuilder: (context, state) => _platformPage(
               state: state,

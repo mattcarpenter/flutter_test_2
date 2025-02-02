@@ -101,6 +101,19 @@ class Menu extends StatelessWidget {
             onRouteGo('/labs/sub');
           },
         ),
+        MenuItem(
+          index: 6,
+          title: '🧪Auth',
+          icon: CupertinoIcons.settings,
+          isActive: selectedIndex == 7,
+          color: primaryColor,
+          textColor: textColor,
+          activeTextColor: activeTextColor,
+          backgroundColor: backgroundColor,
+          onTap: (_) {
+            onRouteGo('/labs/auth');
+          },
+        ),
       ],
     );
   }
