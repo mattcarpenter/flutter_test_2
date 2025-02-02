@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../models/recipe_folder.model.dart';
 import '../repositories/recipe_folder_repository.dart';
@@ -17,29 +19,34 @@ final recipeFolderRepositoryProvider = Provider<RecipeFolderRepository>((ref) {
 // RecipeFolderNotifier for state management
 class RecipeFolderNotifier extends StateNotifier<AsyncValue<List<RecipeFolder>>> {
   final RecipeFolderRepository _repository;
+  late final StreamSubscription<List<RecipeFolder>> _subscription;
 
   RecipeFolderNotifier(this._repository) : super(const AsyncValue.loading()) {
-    loadFolders();
+    // Instead of manually loading folders, subscribe to Brick's local data stream.
+    _subscription = _repository.watchFolders().listen(
+          (folders) {
+        state = AsyncValue.data(folders);
+      },
+      onError: (error, stack) {
+        state = AsyncValue.error(error, stack);
+      },
+    );
   }
 
-  Future<void> loadFolders() async {
-    try {
-      final folders = await _repository.getAllFolders();
-      state = AsyncValue.data(folders);
-    } catch (e, stack) {
-      state = AsyncValue.error(e, stack);
-    }
+  @override
+  void dispose() {
+    _subscription.cancel();
+    super.dispose();
   }
 
-  Future<void> addFolder(String folderName) async { // ✅ Accept only folderName
+  Future<void> addFolder(String folderName) async {
     try {
-      print('creating folder: $folderName');
-      final newFolder = RecipeFolder.create(folderName); // ✅ Create model inside the notifier
-      print('calling repository...');
+      print('Creating folder: $folderName');
+      final newFolder = RecipeFolder.create(folderName);
+      print('Calling repository...');
       await _repository.addFolder(newFolder);
-      print('repo called. updating state...');
-      state = AsyncValue.data([...state.value ?? [], newFolder]);
-      print('state updated');
+      // No need for manual state update; the subscription will update the state immediately.
+      print('Add operation complete; state will update via subscription.');
     } catch (e, stack) {
       state = AsyncValue.error(e, stack);
     }
@@ -48,7 +55,7 @@ class RecipeFolderNotifier extends StateNotifier<AsyncValue<List<RecipeFolder>>>
   Future<void> deleteFolder(RecipeFolder folder) async {
     try {
       await _repository.deleteFolder(folder);
-      state = AsyncValue.data(state.value!.where((f) => f.id != folder.id).toList());
+      // The subscription will automatically update the state.
     } catch (e, stack) {
       state = AsyncValue.error(e, stack);
     }
@@ -60,4 +67,10 @@ final recipeFolderNotifierProvider =
 StateNotifierProvider<RecipeFolderNotifier, AsyncValue<List<RecipeFolder>>>((ref) {
   final repository = ref.watch(recipeFolderRepositoryProvider);
   return RecipeFolderNotifier(repository);
+});
+
+// A StreamProvider that yields folder snapshots from local SQLite via Brick's built‑in subscription.
+final recipeFolderStreamProvider = StreamProvider<List<RecipeFolder>>((ref) {
+  final repository = ref.watch(recipeFolderRepositoryProvider);
+  return repository.watchFolders();
 });

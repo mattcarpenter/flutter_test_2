@@ -1,3 +1,4 @@
+// folder_list.dart
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -5,50 +6,69 @@ import '../../../providers/recipe_folder_provider.dart';
 import '../../../models/recipe_folder.model.dart';
 
 class FolderList extends ConsumerStatefulWidget {
-  const FolderList({super.key});
+  const FolderList({Key? key}) : super(key: key);
 
   @override
   ConsumerState<FolderList> createState() => _FolderListState();
 }
 
 class _FolderListState extends ConsumerState<FolderList> {
-  final TextEditingController folderNameController = TextEditingController();
-  final FocusNode textFieldFocusNode = FocusNode();
+  late final TextEditingController folderNameController;
+  late final FocusNode textFieldFocusNode;
+
+  @override
+  void initState() {
+    super.initState();
+    folderNameController = TextEditingController();
+    textFieldFocusNode = FocusNode();
+  }
+
+  @override
+  void dispose() {
+    folderNameController.dispose();
+    textFieldFocusNode.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
-    final foldersState = ref.watch(recipeFolderNotifierProvider);
-    final folderNotifier = ref.read(recipeFolderNotifierProvider.notifier);
+    // Listen to the stream of folders
+    final foldersAsyncValue = ref.watch(recipeFolderStreamProvider);
+    // Get the repository for add/delete actions
+    final repository = ref.watch(recipeFolderRepositoryProvider);
 
     return Column(
       children: [
         Expanded(
-          child: foldersState.when(
-            data: (folders) => folders.isEmpty
-                ? const Center(child: Text('No folders available'))
-                : ListView.builder(
-              itemCount: folders.length,
-              itemBuilder: (context, index) {
-                final folder = folders[index];
-                return Card(
-                  child: ListTile(
-                    title: Text(folder.name),
-                    subtitle: folder.parentId != null
-                        ? Text('Parent: ${folder.parentId}')
-                        : null,
-                    trailing: IconButton(
-                      icon: Icon(Icons.delete, color: Colors.red),
-                      onPressed: () => folderNotifier.deleteFolder(folder),
+          child: foldersAsyncValue.when(
+            data: (folders) {
+              if (folders.isEmpty) {
+                return const Center(child: Text('No folders available'));
+              }
+              return ListView.builder(
+                itemCount: folders.length,
+                itemBuilder: (context, index) {
+                  final folder = folders[index];
+                  return Card(
+                    child: ListTile(
+                      title: Text(folder.name),
+                      subtitle: folder.parentId != null
+                          ? Text('Parent: ${folder.parentId}')
+                          : null,
+                      trailing: IconButton(
+                        icon: const Icon(Icons.delete, color: Colors.red),
+                        onPressed: () => repository.deleteFolder(folder),
+                      ),
+                      onTap: () {
+                        // Handle tap if needed
+                      },
                     ),
-                    onTap: () {
-                      // Handle tap (no action for now)
-                    },
-                  ),
-                );
-              },
-            ),
+                  );
+                },
+              );
+            },
             loading: () => const Center(child: CircularProgressIndicator()),
-            error: (error, stackTrace) =>
+            error: (error, stack) =>
                 Center(child: Text('Error: ${error.toString()}')),
           ),
         ),
@@ -68,7 +88,10 @@ class _FolderListState extends ConsumerState<FolderList> {
                 onPressed: () {
                   final folderName = folderNameController.text.trim();
                   if (folderName.isNotEmpty) {
-                    folderNotifier.addFolder(folderName); // ✅ Pass only the name, not the model
+                    // Create a new RecipeFolder model
+                    final newFolder = RecipeFolder.create(folderName);
+                    // Call the repository; the stream will update when done.
+                    repository.addFolder(newFolder);
                     folderNameController.clear();
                   }
                 },

@@ -4,11 +4,11 @@ import 'package:brick_sqlite/db.dart';
 part '20250130101153.migration.dart';
 
 /// All intelligently-generated migrations from all `@Migratable` classes on disk
-final migrations = <Migration>{
-  const Migration20250130101153(),};
+final migrations = <Migration>{const Migration20250130101153()};
 
 /// A consumable database structure including the latest generated migration.
-final schema = Schema(20250130101153, generatorVersion: 1, tables: <SchemaTable>{
+final schema =
+    Schema(20250130101153, generatorVersion: 1, tables: <SchemaTable>{
   SchemaTable('RecipeFolder', columns: <SchemaColumn>{
     SchemaColumn('_brick_id', Column.integer,
         autoincrement: true, nullable: false, isPrimaryKey: true),
