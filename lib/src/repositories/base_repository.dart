@@ -4,7 +4,7 @@ import 'package:brick_sqlite/memory_cache_provider.dart';
 import 'package:brick_supabase/brick_supabase.dart' hide Supabase;
 import 'package:sqflite_common/sqlite_api.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-
+import 'package:brick_offline_first/brick_offline_first.dart';
 import '../../brick/brick.g.dart';
 import '../../brick/db/schema.g.dart';
 
@@ -53,7 +53,7 @@ class BaseRepository extends OfflineFirstWithSupabaseRepository {
 
   // Generic method to fetch all records of any type
   Future<List<T>> getAll<T extends OfflineFirstWithSupabaseModel>() async {
-    return await get<T>();
+    return await get<T>(policy: OfflineFirstGetPolicy.alwaysHydrate);
   }
 
   // Generic method to insert or update any model

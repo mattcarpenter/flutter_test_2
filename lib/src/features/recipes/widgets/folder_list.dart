@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../providers/recipe_folder_provider.dart';
 import '../../../models/recipe_folder.model.dart';
+import '../../../repositories/base_repository.dart';
 
 class FolderList extends ConsumerStatefulWidget {
   const FolderList({Key? key}) : super(key: key);
@@ -21,6 +22,7 @@ class _FolderListState extends ConsumerState<FolderList> {
     super.initState();
     folderNameController = TextEditingController();
     textFieldFocusNode = FocusNode();
+    BaseRepository().getAll<RecipeFolder>();
   }
 
   @override
@@ -32,24 +34,30 @@ class _FolderListState extends ConsumerState<FolderList> {
 
   @override
   Widget build(BuildContext context) {
-    // Listen to the stream of folders
+    // Watch for folder changes and get repository for actions.
     final foldersAsyncValue = ref.watch(recipeFolderStreamProvider);
-    // Get the repository for add/delete actions
     final repository = ref.watch(recipeFolderRepositoryProvider);
 
-    return Column(
-      children: [
-        Expanded(
-          child: foldersAsyncValue.when(
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          // Folder list section.
+          foldersAsyncValue.when(
             data: (folders) {
               if (folders.isEmpty) {
                 return const Center(child: Text('No folders available'));
               }
+              // Use a ListView that does not scroll on its own.
               return ListView.builder(
+                physics: const NeverScrollableScrollPhysics(),
+                shrinkWrap: true,
                 itemCount: folders.length,
                 itemBuilder: (context, index) {
                   final folder = folders[index];
                   return Card(
+                    margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                     child: ListTile(
                       title: Text(folder.name),
                       subtitle: folder.parentId != null
@@ -60,7 +68,7 @@ class _FolderListState extends ConsumerState<FolderList> {
                         onPressed: () => repository.deleteFolder(folder),
                       ),
                       onTap: () {
-                        // Handle tap if needed
+                        // Handle tap if needed.
                       },
                     ),
                   );
@@ -68,39 +76,38 @@ class _FolderListState extends ConsumerState<FolderList> {
               );
             },
             loading: () => const Center(child: CircularProgressIndicator()),
-            error: (error, stack) =>
-                Center(child: Text('Error: ${error.toString()}')),
+            error: (error, stack) => Center(child: Text('Error: ${error.toString()}')),
           ),
-        ),
-        Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Row(
-            children: [
-              Expanded(
-                child: CupertinoTextField(
-                  focusNode: textFieldFocusNode,
-                  controller: folderNameController,
-                  placeholder: 'Enter folder name',
+
+          // Input field and add button.
+          Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Row(
+              children: [
+                Expanded(
+                  child: CupertinoTextField(
+                    focusNode: textFieldFocusNode,
+                    controller: folderNameController,
+                    placeholder: 'Enter folder name',
+                  ),
                 ),
-              ),
-              const SizedBox(width: 8),
-              CupertinoButton.filled(
-                onPressed: () {
-                  final folderName = folderNameController.text.trim();
-                  if (folderName.isNotEmpty) {
-                    // Create a new RecipeFolder model
-                    final newFolder = RecipeFolder.create(folderName);
-                    // Call the repository; the stream will update when done.
-                    repository.addFolder(newFolder);
-                    folderNameController.clear();
-                  }
-                },
-                child: const Text('Add'),
-              ),
-            ],
+                const SizedBox(width: 8),
+                CupertinoButton.filled(
+                  onPressed: () {
+                    final folderName = folderNameController.text.trim();
+                    if (folderName.isNotEmpty) {
+                      final newFolder = RecipeFolder.create(folderName);
+                      repository.addFolder(newFolder);
+                      folderNameController.clear();
+                    }
+                  },
+                  child: const Text('Add'),
+                ),
+              ],
+            ),
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 }
