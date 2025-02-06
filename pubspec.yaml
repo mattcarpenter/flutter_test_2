@@ -35,6 +35,10 @@ dependencies:
   brick_sqlite: ^3.2.2
   uuid: ^4.5.1
   supabase_flutter: ^2.8.3
+  integration_test:
+    sdk: flutter
+  sqflite_common_ffi: ^2.3.4+4
+  flutter_dotenv: ^5.2.1
 
 dev_dependencies:
   flutter_test:
@@ -45,6 +49,7 @@ dev_dependencies:
   build_runner: ^2.4.14
   riverpod_lint: 2.6.3
   brick_offline_first_with_supabase_build: ^1.1.0
+  shared_preferences: any
 
 flutter:
   uses-material-design: true
