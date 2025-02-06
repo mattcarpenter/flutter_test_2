@@ -38,7 +38,7 @@ A new Flutter project.
 [X] Domain model
 [ ] Implement Folders
   [X] Supabase scaffolding
-  [ ] Sort out the role of riverpod vs repository
+  [ ] Sort out the role of riverpod vs repository (solve redundancy and simplify?)
   [ ] Sort out soft deletes (filtering in the query vs in code)
   [X] Fix latency when adding folders
 [ ] Revisit directory structure (mobile vs other platforms - are they necessary, can we consolidate or clean up)
