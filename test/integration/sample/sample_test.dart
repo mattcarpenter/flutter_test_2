@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:integration_test/integration_test.dart';
@@ -29,7 +31,6 @@ void main() async {
     await BaseRepository().initialize();
 
     container = ProviderContainer();
-
     client = Supabase.instance.client;
   });
 
@@ -45,17 +46,24 @@ void main() async {
         password: user1Password,
       );
 
-      // Fetch folders via Riverpod
-      final asyncFolders = container.read(recipeFolderStreamProvider).maybeWhen(
-        data: (folders) => folders,
-        orElse: () => <RecipeFolder>[],
+      await BaseRepository().getAll<RecipeFolder>();
+
+      final completer = Completer<void>();
+
+      final listener = container.listen(
+        recipeFolderStreamProvider,
+            (previous, next) {
+          if (next is AsyncData<List<RecipeFolder>> && next.value.isNotEmpty) {
+            print('✅ Successfully received folders: ${next.value.map((f) => f.name)}');
+
+            expect(next.value.isNotEmpty, isTrue);
+            completer.complete();
+          }
+        },
       );
 
-      // Print for debugging
-      print('Fetched folders: ${asyncFolders.map((f) => f.name).toList()}');
-
-      // Ensure we retrieved at least one folder
-      expect(asyncFolders.isNotEmpty, isTrue);
+      await completer.future;
+      listener.close();
     });
   });
 }
