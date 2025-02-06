@@ -62,13 +62,6 @@ class RecipeFolderNotifier extends StateNotifier<AsyncValue<List<RecipeFolder>>>
   }
 }
 
-// StateNotifierProvider for Recipe Folders
-final recipeFolderNotifierProvider =
-StateNotifierProvider<RecipeFolderNotifier, AsyncValue<List<RecipeFolder>>>((ref) {
-  final repository = ref.watch(recipeFolderRepositoryProvider);
-  return RecipeFolderNotifier(repository);
-});
-
 // A StreamProvider that yields folder snapshots from local SQLite via Brick's built‑in subscription.
 final recipeFolderStreamProvider = StreamProvider<List<RecipeFolder>>((ref) {
   final repository = ref.watch(recipeFolderRepositoryProvider);
