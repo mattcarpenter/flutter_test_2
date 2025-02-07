@@ -1,4 +1,5 @@
 import '../models/recipe_folder.model.dart';
+import 'package:brick_core/query.dart';
 import 'base_repository.dart';
 
 class RecipeFolderRepository {
@@ -21,7 +22,7 @@ class RecipeFolderRepository {
   /// Use Brick’s built‑in subscription method for on-device reactivity.
   /// We filter out records that have been soft-deleted.
   Stream<List<RecipeFolder>> watchFolders() {
-    return _baseRepository.subscribe<RecipeFolder>().map((folders) =>
-        folders.where((folder) => folder.deletedAt == null).toList());
+    final query = Query(where: [const Where('deletedAt').isExactly(null)]);
+    return _baseRepository.subscribe<RecipeFolder>(query: query);
   }
 }
