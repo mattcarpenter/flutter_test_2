@@ -39,9 +39,11 @@ A new Flutter project.
 [ ] Implement Folders
   [X] Supabase scaffolding
   [X] Test boilerplate
-  [ ] Sort out the role of riverpod vs repository (solve redundancy and simplify?)
-  [ ] Sort out soft deletes (filtering in the query vs in code)
+  [X] Sort out the role of riverpod vs repository (solve redundancy and simplify?)
+  [X] Sort out soft deletes (filtering in the query vs in code)
   [X] Fix latency when adding folders
+  [ ] Figure out sharing
+  [ ] Parent/child?
 [ ] Revisit directory structure (mobile vs other platforms - are they necessary, can we consolidate or clean up)
 [ ] Implement Basic Recipes
 [ ] Think about Windows
