@@ -46,16 +46,17 @@ void main() async {
         password: user1Password,
       );
 
+      // Make sure the repository loads all folders from the local DB.
       await BaseRepository().getAll<RecipeFolder>();
 
       final completer = Completer<void>();
 
+      // Listen to the notifier provider instead of the stream provider.
       final listener = container.listen(
-        recipeFolderStreamProvider,
+        recipeFolderNotifierProvider,
             (previous, next) {
           if (next is AsyncData<List<RecipeFolder>> && next.value.isNotEmpty) {
             print('✅ Successfully received folders: ${next.value.map((f) => f.name)}');
-
             expect(next.value.isNotEmpty, isTrue);
             completer.complete();
           }

@@ -35,8 +35,7 @@ class _FolderListState extends ConsumerState<FolderList> {
   @override
   Widget build(BuildContext context) {
     // Watch for folder changes and get repository for actions.
-    final foldersAsyncValue = ref.watch(recipeFolderStreamProvider);
-    final repository = ref.watch(recipeFolderRepositoryProvider);
+    final foldersAsyncValue = ref.watch(recipeFolderNotifierProvider);
 
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 0),
@@ -65,7 +64,9 @@ class _FolderListState extends ConsumerState<FolderList> {
                           : null,
                       trailing: IconButton(
                         icon: const Icon(Icons.delete, color: Colors.red),
-                        onPressed: () => repository.deleteFolder(folder),
+                        onPressed: () => ref
+                            .read(recipeFolderNotifierProvider.notifier)
+                            .deleteFolder(folder),
                       ),
                       onTap: () {
                         // Handle tap if needed.
@@ -96,8 +97,8 @@ class _FolderListState extends ConsumerState<FolderList> {
                   onPressed: () {
                     final folderName = folderNameController.text.trim();
                     if (folderName.isNotEmpty) {
-                      final newFolder = RecipeFolder.create(folderName);
-                      repository.addFolder(newFolder);
+                      ref.read(recipeFolderNotifierProvider.notifier)
+                          .addFolder(folderName);
                       folderNameController.clear();
                     }
                   },
