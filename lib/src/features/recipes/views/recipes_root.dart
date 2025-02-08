@@ -12,19 +12,7 @@ class RecipesTab extends StatelessWidget {
     // No nested Navigator needed—go_router handles sub-routes:
     return AdaptiveSliverPage(
       title: 'Recipes',
-      body: FolderList(), /*Center(
-        child: CupertinoButton.filled(
-          onPressed: () {
-            // Navigate to /shopping/sub with go_router
-            // This will load the ShoppingListSubPage
-            // (configured in the shell route).
-            //
-            // For iOS transitions, see how we used CupertinoPage in go_router.
-            context.go('/recipes/sub');
-          },
-          child: const Text('Hello! Go to Next Page'),
-        ),
-      ),*/
+      body: FolderList(),
       trailing: const Icon(CupertinoIcons.add_circled),
       leading: const Icon(CupertinoIcons.person_2),
     );

@@ -4,6 +4,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:go_router/go_router.dart';
+import 'package:recipe_app/src/features/recipes/views/recipes_folder_page.dart';
 
 import '../color_theme.dart';
 import '../features/discover/views/discover_root.dart';
@@ -14,7 +15,6 @@ import '../features/labs/views/labs_sub_page.dart';
 import '../features/meal_plans/views/meal_plans_root.dart';
 import '../features/meal_plans/views/meal_plans_sub_page.dart';
 import '../features/recipes/views/recipes_root.dart';
-import '../features/recipes/views/recipes_sub_page.dart';
 import '../features/shopping_list/views/shopping_list_root.dart';
 import '../features/shopping_list/views/shopping_list_sub_page.dart';
 import 'main_page_shell.dart';
@@ -173,11 +173,14 @@ class _AdaptiveApp2State extends State<AdaptiveApp2> {
                   path: '/recipes',
                   routes: [
                     GoRoute(
-                      path: 'sub',
-                      pageBuilder: (context, state) => _platformPage(
-                        state: state,
-                        child: const RecipesSubPage(title: 'Sub Page'),
-                      ),
+                      path: 'folder/:parentId',
+                      pageBuilder: (context, state) {
+                        final parentId = state.pathParameters['parentId'];
+                        return _platformPage(
+                          state: state,
+                          child: RecipesFolderPage(parentId: parentId),
+                        );
+                      },
                     ),
                   ],
                   pageBuilder: (context, state) => _platformPage(

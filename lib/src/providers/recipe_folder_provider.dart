@@ -39,13 +39,11 @@ class RecipeFolderNotifier extends StateNotifier<AsyncValue<List<RecipeFolder>>>
     super.dispose();
   }
 
-  Future<void> addFolder(String folderName) async {
+  // Updated addFolder method to accept a RecipeFolder object.
+  Future<void> addFolder(RecipeFolder folder) async {
     try {
-      print('Creating folder: $folderName');
-      final newFolder = RecipeFolder.create(folderName);
-      print('Calling repository...');
-      await _repository.addFolder(newFolder);
-      // No need for manual state update; the subscription will update the state immediately.
+      print('Creating folder: ${folder.name} with parent: ${folder.parentId}');
+      await _repository.addFolder(folder);
       print('Add operation complete; state will update via subscription.');
     } catch (e, stack) {
       state = AsyncValue.error(e, stack);

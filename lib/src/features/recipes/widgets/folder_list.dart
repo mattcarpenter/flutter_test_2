@@ -1,13 +1,15 @@
-// folder_list.dart
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import '../../../providers/recipe_folder_provider.dart';
 import '../../../models/recipe_folder.model.dart';
-import '../../../repositories/base_repository.dart';
 
 class FolderList extends ConsumerStatefulWidget {
-  const FolderList({Key? key}) : super(key: key);
+  /// Optional parent folder id. If null, this list shows root folders.
+  final String? parentId;
+
+  const FolderList({super.key, this.parentId});
 
   @override
   ConsumerState<FolderList> createState() => _FolderListState();
@@ -22,7 +24,6 @@ class _FolderListState extends ConsumerState<FolderList> {
     super.initState();
     folderNameController = TextEditingController();
     textFieldFocusNode = FocusNode();
-    BaseRepository().getAll<RecipeFolder>();
   }
 
   @override
@@ -34,7 +35,7 @@ class _FolderListState extends ConsumerState<FolderList> {
 
   @override
   Widget build(BuildContext context) {
-    // Watch for folder changes and get repository for actions.
+    // Watch for folder changes using StateNotifierProvider.
     final foldersAsyncValue = ref.watch(recipeFolderNotifierProvider);
 
     return Padding(
@@ -42,19 +43,22 @@ class _FolderListState extends ConsumerState<FolderList> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          // Folder list section.
           foldersAsyncValue.when(
             data: (folders) {
-              if (folders.isEmpty) {
+              // Filter folders: if widget.parentId is null, we only show folders with no parent.
+              final filteredFolders = folders
+                  .where((folder) => folder.parentId == widget.parentId)
+                  .toList();
+
+              if (filteredFolders.isEmpty) {
                 return const Center(child: Text('No folders available'));
               }
-              // Use a ListView that does not scroll on its own.
               return ListView.builder(
                 physics: const NeverScrollableScrollPhysics(),
                 shrinkWrap: true,
-                itemCount: folders.length,
+                itemCount: filteredFolders.length,
                 itemBuilder: (context, index) {
-                  final folder = folders[index];
+                  final folder = filteredFolders[index];
                   return Card(
                     margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                     child: ListTile(
@@ -69,7 +73,10 @@ class _FolderListState extends ConsumerState<FolderList> {
                             .deleteFolder(folder),
                       ),
                       onTap: () {
-                        // Handle tap if needed.
+                        // When tapped, navigate to a new FolderList that shows the children.
+                        // For example, use go_router and pass the folder's id as a query parameter.
+                        // You could also use path parameters.
+                        context.push('/recipes/folder/${folder.id}');
                       },
                     ),
                   );
@@ -79,7 +86,6 @@ class _FolderListState extends ConsumerState<FolderList> {
             loading: () => const Center(child: CircularProgressIndicator()),
             error: (error, stack) => Center(child: Text('Error: ${error.toString()}')),
           ),
-
           // Input field and add button.
           Padding(
             padding: const EdgeInsets.all(16.0),
@@ -97,8 +103,12 @@ class _FolderListState extends ConsumerState<FolderList> {
                   onPressed: () {
                     final folderName = folderNameController.text.trim();
                     if (folderName.isNotEmpty) {
-                      ref.read(recipeFolderNotifierProvider.notifier)
-                          .addFolder(folderName);
+                      // Create a new folder using the widget.parentId.
+                      final newFolder = RecipeFolder.create(folderName, parentId: widget.parentId);
+                      // Pass the whole folder object to the notifier.
+                      ref
+                          .read(recipeFolderNotifierProvider.notifier)
+                          .addFolder(newFolder);
                       folderNameController.clear();
                     }
                   },
