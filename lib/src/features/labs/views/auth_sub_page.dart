@@ -1,9 +1,11 @@
 // auth_page.dart
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../../../mobile/utils/adaptive_sliver_page.dart';
+import '../../../providers/user_provider.dart';
 
 class AuthSubPage extends StatefulWidget {
   const AuthSubPage({super.key});
@@ -27,6 +29,9 @@ class _AuthSubPageState extends State<AuthSubPage> {
         email: _emailController.text.trim(),
         password: _passwordController.text.trim(),
       );
+
+      final userRepository = ProviderScope.containerOf(context).read(userRepositoryProvider);
+      await userRepository.getUser(Supabase.instance.client.auth.currentUser!.id);
 
       setState(() {
         _isLoading = false;

@@ -69,3 +69,6 @@ ALTER TABLE shared_permissions ENABLE ROW LEVEL SECURITY;
 ALTER TABLE users ADD COLUMN household_id UUID NULL REFERENCES households(id) ON DELETE SET NULL;
 
 CREATE INDEX idx_users_household_id ON users(household_id);
+
+INSERT INTO users (id, name, email, household_id)
+VALUES ('89f1f71b-d260-4003-89fd-01d82f40d4af', 'Matt Carpenter', 'mattcarpenter@gmail.com', NULL);
