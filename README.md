@@ -44,6 +44,7 @@ A new Flutter project.
   [X] Fix latency when adding folders
   [X] Figure out sharing
   [X] Parent/child?
+  [ ] Better design for folders
   [ ] Implement sharing
 [ ] Revisit directory structure (mobile vs other platforms - are they necessary, can we consolidate or clean up)
 [ ] Implement Basic Recipes
