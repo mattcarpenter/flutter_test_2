@@ -4,14 +4,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:macos_ui/macos_ui.dart';
-import 'package:recipe_app/src/models/recipe_folder.model.dart';
 import 'src/app.dart';
 import 'src/settings/settings_controller.dart';
 import 'src/settings/settings_service.dart';
 import 'src/repositories/base_repository.dart';
 import 'package:sqflite/sqflite.dart' show databaseFactory;
 import 'package:path_provider/path_provider.dart';
-import 'dart:io';
 
 Future<void> _configureMacosWindowUtils() async {
   const config = MacosWindowUtilsConfig(
