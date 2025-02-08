@@ -25,6 +25,7 @@ class _FolderListState extends ConsumerState<FolderList> {
   @override
   void initState() {
     super.initState();
+
     folderNameController = TextEditingController();
     textFieldFocusNode = FocusNode();
   }
@@ -48,6 +49,7 @@ class _FolderListState extends ConsumerState<FolderList> {
         children: [
           foldersAsyncValue.when(
             data: (folders) {
+              print(folders);
               // Filter folders: if widget.parentId is null, we only show folders with no parent.
               final filteredFolders = folders
                   .where((folder) => folder.parentId == widget.parentId)
