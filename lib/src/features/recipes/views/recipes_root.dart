@@ -12,7 +12,7 @@ class RecipesTab extends StatelessWidget {
     // No nested Navigator needed—go_router handles sub-routes:
     return AdaptiveSliverPage(
       title: 'Recipes',
-      body: FolderList(),
+      body: FolderList(currentPageTitle: 'Recipes'),
       trailing: const Icon(CupertinoIcons.add_circled),
       leading: const Icon(CupertinoIcons.person_2),
     );

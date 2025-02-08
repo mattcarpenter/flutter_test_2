@@ -43,7 +43,7 @@ A new Flutter project.
   [X] Sort out soft deletes (filtering in the query vs in code)
   [X] Fix latency when adding folders
   [X] Figure out sharing
-  [ ] Parent/child?
+  [X] Parent/child?
   [ ] Implement sharing
 [ ] Revisit directory structure (mobile vs other platforms - are they necessary, can we consolidate or clean up)
 [ ] Implement Basic Recipes

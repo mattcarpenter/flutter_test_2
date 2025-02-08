@@ -175,10 +175,20 @@ class _AdaptiveApp2State extends State<AdaptiveApp2> {
                     GoRoute(
                       path: 'folder/:parentId',
                       pageBuilder: (context, state) {
+                        // Extract the parent folder id from the path.
                         final parentId = state.pathParameters['parentId'];
+
+                        // Get extra data (if provided) as a Map. Otherwise, use defaults.
+                        final extraData = state.extra as Map<String, String>?;
+                        final folderTitle = extraData?['folderTitle'] ?? 'Folders';
+                        final previousPageTitle = extraData?['previousPageTitle'] ?? 'Recipes';
                         return _platformPage(
                           state: state,
-                          child: RecipesFolderPage(parentId: parentId),
+                          child: RecipesFolderPage(
+                            parentId: parentId,
+                            title: folderTitle,
+                            previousPageTitle: previousPageTitle,
+                          ),
                         );
                       },
                     ),

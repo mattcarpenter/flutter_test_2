@@ -8,8 +8,11 @@ import '../../../models/recipe_folder.model.dart';
 class FolderList extends ConsumerStatefulWidget {
   /// Optional parent folder id. If null, this list shows root folders.
   final String? parentId;
+  /// The title of the current page (e.g. the name of the current folder).
+  final String currentPageTitle;
 
-  const FolderList({super.key, this.parentId});
+  const FolderList({Key? key, this.parentId, required this.currentPageTitle})
+      : super(key: key);
 
   @override
   ConsumerState<FolderList> createState() => _FolderListState();
@@ -73,10 +76,16 @@ class _FolderListState extends ConsumerState<FolderList> {
                             .deleteFolder(folder),
                       ),
                       onTap: () {
-                        // When tapped, navigate to a new FolderList that shows the children.
-                        // For example, use go_router and pass the folder's id as a query parameter.
-                        // You could also use path parameters.
-                        context.push('/recipes/folder/${folder.id}');
+                        // When tapped, navigate to a new folder page.
+                        // The new page should use the tapped folder's name as its title,
+                        // and the back button should display the current page's title.
+                        context.push(
+                          '/recipes/folder/${folder.id}',
+                          extra: {
+                            'folderTitle': folder.name, // New page title.
+                            'previousPageTitle': widget.currentPageTitle, // Back button shows current page title.
+                          },
+                        );
                       },
                     ),
                   );
@@ -84,7 +93,8 @@ class _FolderListState extends ConsumerState<FolderList> {
               );
             },
             loading: () => const Center(child: CircularProgressIndicator()),
-            error: (error, stack) => Center(child: Text('Error: ${error.toString()}')),
+            error: (error, stack) =>
+                Center(child: Text('Error: ${error.toString()}')),
           ),
           // Input field and add button.
           Padding(
@@ -104,7 +114,10 @@ class _FolderListState extends ConsumerState<FolderList> {
                     final folderName = folderNameController.text.trim();
                     if (folderName.isNotEmpty) {
                       // Create a new folder using the widget.parentId.
-                      final newFolder = RecipeFolder.create(folderName, parentId: widget.parentId);
+                      final newFolder = RecipeFolder.create(
+                        folderName,
+                        parentId: widget.parentId,
+                      );
                       // Pass the whole folder object to the notifier.
                       ref
                           .read(recipeFolderNotifierProvider.notifier)

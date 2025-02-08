@@ -6,20 +6,26 @@ import '../widgets/folder_list.dart';
 class RecipesFolderPage extends StatelessWidget {
   final String? parentId;
   final String title;
+  final String previousPageTitle; // New parameter
 
   const RecipesFolderPage({
-    super.key,
+    Key? key,
     this.parentId,
-    this.title = 'Folders',
-  });
+    required this.title,
+    required this.previousPageTitle,
+  }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     return AdaptiveSliverPage(
-      title: title,
-      body: FolderList(parentId: parentId),
+      title: title, // Large title displayed at the top.
+      body: FolderList(
+        parentId: parentId,
+        // Pass the current page’s title down so FolderList can use it.
+        currentPageTitle: title,
+      ),
       trailing: const Icon(CupertinoIcons.add_circled),
-      previousPageTitle: 'Recipes',
+      previousPageTitle: previousPageTitle, // This animates into the back button.
       automaticallyImplyLeading: true,
     );
   }
