@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../../providers/recipe_folder_provider.dart';
 import '../../../models/recipe_folder.model.dart';
+import '../../../repositories/base_repository.dart';
 
 class FolderList extends ConsumerStatefulWidget {
   /// Optional parent folder id. If null, this list shows root folders.
@@ -25,7 +26,8 @@ class _FolderListState extends ConsumerState<FolderList> {
   @override
   void initState() {
     super.initState();
-
+    final baseRepository = ref.read(baseRepositoryProvider);
+    baseRepository.getAll<RecipeFolder>();
     folderNameController = TextEditingController();
     textFieldFocusNode = FocusNode();
   }
@@ -49,7 +51,6 @@ class _FolderListState extends ConsumerState<FolderList> {
         children: [
           foldersAsyncValue.when(
             data: (folders) {
-              print(folders);
               // Filter folders: if widget.parentId is null, we only show folders with no parent.
               final filteredFolders = folders
                   .where((folder) => folder.parentId == widget.parentId)
