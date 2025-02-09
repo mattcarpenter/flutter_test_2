@@ -44,7 +44,10 @@ A new Flutter project.
   [X] Fix latency when adding folders
   [X] Figure out sharing
   [X] Parent/child?
-  [ ] Figure out spacing in grid view
+  [X] Figure out spacing in grid view - we specify how many cols
+  [X] Background color for folders from the theme
+  [ ] Rounded corners for box
+  [ ] Softer blur - maybe we need to use the custom builder for this??
   [ ] Better folder icons
   [ ] Folder label font styles
   [ ] Test folders on Android

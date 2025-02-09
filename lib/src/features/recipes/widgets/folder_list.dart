@@ -65,7 +65,7 @@ class _FolderListState extends ConsumerState<FolderList> {
 
               // Determine crossAxisCount based on screen width.
               final screenWidth = MediaQuery.of(context).size.width;
-              final crossAxisCount = screenWidth < 600 ? 3 : 5;
+              final crossAxisCount = screenWidth < 600 ? 3 : 6;
 
               return GridView.builder(
                 physics: const NeverScrollableScrollPhysics(),
