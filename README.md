@@ -44,7 +44,10 @@ A new Flutter project.
   [X] Fix latency when adding folders
   [X] Figure out sharing
   [X] Parent/child?
-  [ ] Better design for folders https://www.figma.com/design/5913JHbB4dbwyk1isRrE5d/Folder-Icons-(Community)?node-id=42-2002&p=f&t=5QHfyqUa45zjRdEu-0
+  [ ] Figure out spacing in grid view
+  [ ] Better folder icons
+  [ ] Folder label font styles
+  [ ] Test folders on Android
   [ ] Deletion of folders - what happens to descendants
   [ ] Implement sharing
 [ ] Revisit directory structure (mobile vs other platforms - are they necessary, can we consolidate or clean up)
