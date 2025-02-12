@@ -32,16 +32,15 @@ class FolderTile extends StatelessWidget {
             children: [
               SvgPicture.asset(
                 'assets/images/empty_folder.svg',
-                width: 64,
-                height: 64,
+                width: 50,
+                height: 50,
               ),
               const SizedBox(height: 8),
               Text(
                 folderName,
                 overflow: TextOverflow.ellipsis,
-                style: Theme.of(context).textTheme.bodyMedium,
+                style: Theme.of(context).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.bold),
               ),
-              const SizedBox(height: 4),
               Text(
                 '$recipeCount recipes',
                 style: Theme.of(context).textTheme.bodySmall,

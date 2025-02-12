@@ -65,38 +65,48 @@ class _FolderListState extends ConsumerState<FolderList> {
 
               // Determine crossAxisCount based on screen width.
               final screenWidth = MediaQuery.of(context).size.width;
-              final crossAxisCount = screenWidth < 600 ? 3 : 6;
 
-              return GridView.builder(
-                physics: const NeverScrollableScrollPhysics(),
-                shrinkWrap: true,
-                gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: crossAxisCount,
-                  crossAxisSpacing: 8,
-                  mainAxisSpacing: 8,
-                  childAspectRatio: 1,
-                ),
-                itemCount: filteredFolders.length,
-                itemBuilder: (context, index) {
-                  final folder = filteredFolders[index];
-                  return Center(
-                    child: FolderTile(
-                      folderName: folder.name,
-                      recipeCount: 0,
-                      onTap: () {
-                        context.push('/recipes/folder/${folder.id}', extra: {
-                          'folderTitle': folder.name,
-                          'previousPageTitle': widget.currentPageTitle,
-                        });
-                      },
-                      onDelete: () {
-                        ref.read(recipeFolderNotifierProvider.notifier).deleteFolder(folder);
-                      },
+              return LayoutBuilder(
+                builder: (context, constraints) {
+                  // Using a max cross axis extent (say 150 pixels) for responsiveness.
+                  return GridView.builder(
+                    physics: const NeverScrollableScrollPhysics(),
+                    shrinkWrap: true,
+                    gridDelegate: SliverGridDelegateWithMaxCrossAxisExtent(
+                      maxCrossAxisExtent: 150,
+                      crossAxisSpacing: 8,
+                      mainAxisSpacing: 8,
+                      childAspectRatio: 1.0, // Use 1.0; FittedBox will scale if needed.
                     ),
+                    itemCount: filteredFolders.length,
+                    itemBuilder: (context, index) {
+                      final folder = filteredFolders[index];
+                      return Center(
+                        child: FittedBox(
+                          fit: BoxFit.scaleDown,
+                          child: FolderTile(
+                            folderName: folder.name,
+                            recipeCount: 0, // Replace with the actual count if available.
+                            onTap: () {
+                              context.push('/recipes/folder/${folder.id}', extra: {
+                                'folderTitle': folder.name,
+                                'previousPageTitle': widget.currentPageTitle,
+                              });
+                            },
+                            onDelete: () {
+                              ref
+                                  .read(recipeFolderNotifierProvider.notifier)
+                                  .deleteFolder(folder);
+                            },
+                          ),
+                        ),
+                      );
+                    },
                   );
-
                 },
               );
+
+
             },
             loading: () => const Center(child: CircularProgressIndicator()),
             error: (error, stack) =>

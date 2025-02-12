@@ -46,9 +46,9 @@ A new Flutter project.
   [X] Parent/child?
   [X] Figure out spacing in grid view - we specify how many cols
   [X] Background color for folders from the theme
-  [ ] Rounded corners for box
+  [ ] Rounded corners for box 
   [ ] Softer blur - maybe we need to use the custom builder for this??
-  [ ] Better folder icons
+  [ ] Better folder icons https://www.flaticon.com/free-icon/folder_3735057?term=folder&related_id=3735057
   [ ] Folder label font styles
   [ ] Test folders on Android
   [ ] Deletion of folders - what happens to descendants

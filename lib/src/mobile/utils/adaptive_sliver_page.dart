@@ -71,7 +71,16 @@ class AdaptiveSliverPage extends StatelessWidget {
                     child: leading,
                   ) : null,
                 ),
-                SliverFillRemaining(child: Builder(builder: (BuildContext context)  {return body; })),
+                // Wrap your body in a SliverToBoxAdapter and add a spacer at the end.
+                SliverToBoxAdapter(
+                  child: Column(
+                    children: [
+                      body,
+                      // Add extra vertical space to allow scrolling.
+                      const SizedBox(height: 100),
+                    ],
+                  ),
+                )
               ],
             ),
           );

@@ -1,12 +1,14 @@
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import '../../../mobile/utils/adaptive_sliver_page.dart';
 import '../widgets/folder_list.dart';
+import '../widgets/recipe_list.dart' show RecipesList, dummyRecipes;
 
 class RecipesFolderPage extends StatelessWidget {
   final String? parentId;
   final String title;
-  final String previousPageTitle; // New parameter
+  final String previousPageTitle;
 
   const RecipesFolderPage({
     Key? key,
@@ -18,14 +20,33 @@ class RecipesFolderPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return AdaptiveSliverPage(
-      title: title, // Large title displayed at the top.
-      body: FolderList(
-        parentId: parentId,
-        // Pass the current page’s title down so FolderList can use it.
-        currentPageTitle: title,
+      title: title,
+      body: SingleChildScrollView(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Folders list at the top.
+            FolderList(
+              parentId: parentId,
+              currentPageTitle: title,
+            ),
+            const SizedBox(height: 16),
+            // Subheading for recipes.
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              child: Text(
+                'Recipes',
+                style: Theme.of(context).textTheme.titleMedium,
+              ),
+            ),
+            const SizedBox(height: 8),
+            // Recipes grid.
+            RecipesList(recipes: dummyRecipes),
+          ],
+        ),
       ),
       trailing: const Icon(CupertinoIcons.add_circled),
-      previousPageTitle: previousPageTitle, // This animates into the back button.
+      previousPageTitle: previousPageTitle,
       automaticallyImplyLeading: true,
     );
   }
