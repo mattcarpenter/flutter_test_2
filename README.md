@@ -55,6 +55,9 @@ A new Flutter project.
   [ ] Test folders on Android
   [ ] Deletion of folders - what happens to descendants
   [ ] Implement sharing
+[ ] Haptic feedback on context menu long-press
+[ ] Fix breakpoints and show/hide sidebar animations
+[ ] Blue (or red?) back button
 [ ] Revisit directory structure (mobile vs other platforms - are they necessary, can we consolidate or clean up)
 [ ] Implement Basic Recipes
 [ ] Think about Windows
