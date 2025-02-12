@@ -25,6 +25,13 @@ class RecipesFolderPage extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              child: Text(
+                'Folders',
+                style: CupertinoTheme.of(context).textTheme.navLargeTitleTextStyle.copyWith(fontSize: 24, fontWeight: FontWeight.w400)
+              ),
+            ),
             // Folders list at the top.
             FolderList(
               parentId: parentId,
@@ -36,7 +43,7 @@ class RecipesFolderPage extends StatelessWidget {
               padding: const EdgeInsets.symmetric(horizontal: 16),
               child: Text(
                 'Recipes',
-                style: Theme.of(context).textTheme.titleMedium,
+                style: CupertinoTheme.of(context).textTheme.navLargeTitleTextStyle.copyWith(fontSize: 24, fontWeight: FontWeight.w400),
               ),
             ),
             const SizedBox(height: 8),

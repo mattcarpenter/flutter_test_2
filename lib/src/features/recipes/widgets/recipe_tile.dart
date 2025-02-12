@@ -12,8 +12,8 @@ class RecipeTile extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
-        border: Border.all(color: Colors.grey.shade400, width: 1),
-        borderRadius: BorderRadius.circular(8),
+        border: Border.all(color: Colors.grey.shade300, width: 1),
+        borderRadius: BorderRadius.circular(12),
       ),
       clipBehavior: Clip.hardEdge, // Ensures children are clipped to rounded corners.
       child: Column(
