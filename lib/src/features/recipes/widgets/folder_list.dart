@@ -63,48 +63,42 @@ class _FolderListState extends ConsumerState<FolderList> {
                 return const Center(child: Text('No folders available'));
               }
 
-              // Determine crossAxisCount based on screen width.
-              final screenWidth = MediaQuery.of(context).size.width;
-
               return LayoutBuilder(
                 builder: (context, constraints) {
-                  // Using a max cross axis extent (say 150 pixels) for responsiveness.
                   return GridView.builder(
+                    padding: EdgeInsets.all(0),
                     physics: const NeverScrollableScrollPhysics(),
                     shrinkWrap: true,
-                    gridDelegate: SliverGridDelegateWithMaxCrossAxisExtent(
+                    gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
                       maxCrossAxisExtent: 150,
                       crossAxisSpacing: 8,
                       mainAxisSpacing: 8,
-                      childAspectRatio: 1.0, // Use 1.0; FittedBox will scale if needed.
+                      childAspectRatio: 1.07, // Adjusted to match FolderTile's natural ratio.
                     ),
                     itemCount: filteredFolders.length,
                     itemBuilder: (context, index) {
                       final folder = filteredFolders[index];
-                      return Center(
-                        child: FittedBox(
-                          fit: BoxFit.scaleDown,
-                          child: FolderTile(
-                            folderName: folder.name,
-                            recipeCount: 0, // Replace with the actual count if available.
-                            onTap: () {
-                              context.push('/recipes/folder/${folder.id}', extra: {
-                                'folderTitle': folder.name,
-                                'previousPageTitle': widget.currentPageTitle,
-                              });
-                            },
-                            onDelete: () {
-                              ref
-                                  .read(recipeFolderNotifierProvider.notifier)
-                                  .deleteFolder(folder);
-                            },
-                          ),
-                        ),
+                      // Remove the Center wrapper so FolderTile fills the cell.
+                      return FolderTile(
+                        folderName: folder.name,
+                        recipeCount: 0, // Replace with actual count if available.
+                        onTap: () {
+                          context.push('/recipes/folder/${folder.id}', extra: {
+                            'folderTitle': folder.name,
+                            'previousPageTitle': widget.currentPageTitle,
+                          });
+                        },
+                        onDelete: () {
+                          ref
+                              .read(recipeFolderNotifierProvider.notifier)
+                              .deleteFolder(folder);
+                        },
                       );
                     },
                   );
                 },
               );
+
 
 
             },

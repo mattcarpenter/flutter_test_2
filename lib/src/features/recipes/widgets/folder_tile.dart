@@ -26,7 +26,6 @@ class FolderTile extends StatelessWidget {
     // Wrap in IntrinsicWidth and IntrinsicHeight to match content size
     final tileContent = IntrinsicWidth(child: IntrinsicHeight( child: Container(
           color: backgroundColor, // Debug color
-          padding: const EdgeInsets.all(8),
           child: Center(child: Column(
             mainAxisSize: MainAxisSize.min, // Prevent unwanted expansion
             children: [

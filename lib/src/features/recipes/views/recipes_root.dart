@@ -18,11 +18,12 @@ class RecipesTab extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            const SizedBox(height: 8),
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16),
               child: Text(
                 'Folders',
-                style: CupertinoTheme.of(context).textTheme.navLargeTitleTextStyle.copyWith(fontSize: 24, fontWeight: FontWeight.w400)
+                style: CupertinoTheme.of(context).textTheme.navLargeTitleTextStyle.copyWith(fontSize: 20, fontWeight: FontWeight.w600)
               ),
             ),
             FolderList(currentPageTitle: 'Recipes'),
@@ -32,7 +33,7 @@ class RecipesTab extends StatelessWidget {
               padding: const EdgeInsets.symmetric(horizontal: 16),
               child: Text(
                 'Recipes',
-                style: CupertinoTheme.of(context).textTheme.navLargeTitleTextStyle.copyWith(fontSize: 24, fontWeight: FontWeight.w400)
+                style: CupertinoTheme.of(context).textTheme.navLargeTitleTextStyle.copyWith(fontSize: 20, fontWeight: FontWeight.w600)
               ),
             ),
             // Recipes grid.
