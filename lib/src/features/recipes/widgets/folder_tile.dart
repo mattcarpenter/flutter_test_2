@@ -22,9 +22,10 @@ class FolderTile extends StatelessWidget {
     final isDarkMode = CupertinoTheme.of(context).brightness == Brightness.dark;
 
     // Theme Colors
-    final Color backgroundColor = isDarkMode ? CupertinoTheme.of(context).barBackgroundColor : CupertinoTheme.of(context).scaffoldBackgroundColor;
+    final Color backgroundColor =  CupertinoTheme.of(context).scaffoldBackgroundColor;
     // Wrap in IntrinsicWidth and IntrinsicHeight to match content size
-    final tileContent = IntrinsicWidth(child: IntrinsicHeight( child: Container(
+    final tileContent = Container(
+          padding: const EdgeInsets.all(8),
           color: backgroundColor, // Debug color
           child: Center(child: Column(
             mainAxisSize: MainAxisSize.min, // Prevent unwanted expansion
@@ -47,8 +48,6 @@ class FolderTile extends StatelessWidget {
             ],
           ),
         )
-    )
-    )
     );
     if (Platform.isIOS) {
       return CupertinoContextMenu(

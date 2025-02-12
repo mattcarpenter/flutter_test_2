@@ -70,10 +70,10 @@ class _FolderListState extends ConsumerState<FolderList> {
                     physics: const NeverScrollableScrollPhysics(),
                     shrinkWrap: true,
                     gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
-                      maxCrossAxisExtent: 150,
+                      maxCrossAxisExtent: 140,
                       crossAxisSpacing: 8,
                       mainAxisSpacing: 8,
-                      childAspectRatio: 1.07, // Adjusted to match FolderTile's natural ratio.
+                      childAspectRatio: 1, // Adjusted to match FolderTile's natural ratio.
                     ),
                     itemCount: filteredFolders.length,
                     itemBuilder: (context, index) {
