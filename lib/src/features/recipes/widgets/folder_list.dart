@@ -107,7 +107,7 @@ class _FolderListState extends ConsumerState<FolderList> {
                 Center(child: Text('Error: ${error.toString()}')),
           ),
           // Input field and add button.
-          Padding(
+          /*Padding(
             padding: const EdgeInsets.all(16.0),
             child: Row(
               children: [
@@ -139,7 +139,7 @@ class _FolderListState extends ConsumerState<FolderList> {
                 ),
               ],
             ),
-          ),
+          ),*/
         ],
       ),
     );

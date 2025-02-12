@@ -20,10 +20,11 @@ class RecipeTile extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           // Top image placeholder.
-          Container(
+          Image.asset(
+            'assets/images/samples/${recipe.imageName}',
             height: 100,
             width: double.infinity,
-            color: Colors.grey.shade300,
+            fit: BoxFit.cover,
           ),
           const SizedBox(height: 8),
           // Recipe name.
