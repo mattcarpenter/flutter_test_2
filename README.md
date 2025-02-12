@@ -51,6 +51,7 @@ A new Flutter project.
   [X] Better folder icons
   [X] Folder label font styles
   [X] Fix padding for context menu box
+  [ ] Why context menu background blur also blurs context menu on rightmost item?
   [ ] Implement menu for adding folders (replace dummy textbox)
   [ ] Test folders on Android
   [ ] Deletion of folders - what happens to descendants
