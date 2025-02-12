@@ -46,11 +46,11 @@ A new Flutter project.
   [X] Parent/child?
   [X] Figure out spacing in grid view - we specify how many cols
   [X] Background color for folders from the theme
-  [ ] Rounded corners for context menu box 
-  [ ] Softer blur for context menu box - maybe we need to use the custom builder for this??
+  [X] Rounded corners for context menu box 
+  [X] Softer blur for context menu box - maybe we need to use the custom builder for this??
   [X] Better folder icons
   [X] Folder label font styles
-  [ ] Fix padding for context menu box
+  [X] Fix padding for context menu box
   [ ] Implement menu for adding folders (replace dummy textbox)
   [ ] Test folders on Android
   [ ] Deletion of folders - what happens to descendants
