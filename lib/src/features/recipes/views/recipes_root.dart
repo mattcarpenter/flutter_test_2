@@ -2,6 +2,8 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import '../../../mobile/utils/adaptive_sliver_page.dart';
+import '../../../widgets/adaptive_pull_down/adaptive_menu_item.dart';
+import '../../../widgets/adaptive_pull_down/adaptive_pull_down.dart';
 import '../widgets/folder_list.dart';
 import '../widgets/recipe_list.dart';
 
@@ -41,7 +43,21 @@ class RecipesTab extends StatelessWidget {
           ]
         )
       ),
-      trailing: Icon(CupertinoIcons.add_circled),
+      trailing: AdaptivePullDownButton(
+        child: Icon(CupertinoIcons.add_circled),
+        items: [
+          AdaptiveMenuItem(
+            title: 'Add Folder',
+            icon: Icon(CupertinoIcons.folder),
+            onTap: () {}
+          ),
+          AdaptiveMenuItem(
+            title: 'Add Recipe',
+            icon: Icon(CupertinoIcons.book),
+            onTap: () {}
+          )
+        ]
+      ),
       leading: Icon(CupertinoIcons.person_2),
     );
   }
