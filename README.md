@@ -53,7 +53,7 @@ A new Flutter project.
   [X] Fix padding for context menu box
   [ ] Why context menu background blur also blurs context menu on rightmost item?
   [ ] Implement menu for adding folders (replace dummy textbox)
-  [ ] Test folders on Android
+  [X] Test folders on Android
   [ ] Deletion of folders - what happens to descendants
   [ ] Implement sharing
 [ ] Haptic feedback on context menu long-press
