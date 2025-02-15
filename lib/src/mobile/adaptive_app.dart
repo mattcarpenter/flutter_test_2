@@ -4,6 +4,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:go_router/go_router.dart';
+import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
 import 'package:recipe_app/src/features/recipes/views/recipes_folder_page.dart';
 
 import '../color_theme.dart';
@@ -18,6 +19,7 @@ import '../features/recipes/views/recipes_root.dart';
 import '../features/shopping_list/views/shopping_list_root.dart';
 import '../features/shopping_list/views/shopping_list_sub_page.dart';
 import 'main_page_shell.dart';
+import 'package:sheet/route.dart';
 
 bool isTablet(BuildContext context) {
   return MediaQuery.of(context).size.shortestSide >= 600;
@@ -82,6 +84,7 @@ class _AdaptiveApp2State extends State<AdaptiveApp2> {
   /// Create a [GoRouter] instance with shell routing for the bottom tabs.
   GoRouter _createRouter(bool isTablet) {
     // Navigator keys for each tab's separate shell:
+    final _rootNavKey   = GlobalKey<NavigatorState>(debugLabel: 'rootNavKey');
     final _recipesNavKey   = GlobalKey<NavigatorState>(debugLabel: 'recipesNavKey');
     final _shoppingNavKey  = GlobalKey<NavigatorState>(debugLabel: 'shoppingNavKey');
     final _mealPlansNavKey = GlobalKey<NavigatorState>(debugLabel: 'mealPlansNavKey');
@@ -126,7 +129,7 @@ class _AdaptiveApp2State extends State<AdaptiveApp2> {
                   state: state,
                   child: const AuthSubPage(),
                 ),
-              )
+              ),
             ],
             pageBuilder: (context, state) => _platformPage(
               state: state,
@@ -144,13 +147,31 @@ class _AdaptiveApp2State extends State<AdaptiveApp2> {
     return GoRouter(
       debugLogDiagnostics: true,
       initialLocation: '/recipes',
+      navigatorKey: _rootNavKey,
       routes: [
+        GoRoute(
+            path: '/add_folder',
+            pageBuilder: (context, state) => CupertinoSheetPage<void>(
+                child: Container(child: Text("hello world"))
+            )
+        ),
+        ShellRoute(
+          pageBuilder: (context, state, child) {
+            print("RUNNING PAGE BUILDER");
+            return CupertinoExtendedPage(child: child);
+          },
+          routes: [
+
         // ─────────────────────────────────────────────────────────────
         // TOP-LEVEL SHELL: Builds MainPageShell
         // ─────────────────────────────────────────────────────────────
         ShellRoute(
           builder: (context, state, child) {
-            return MainPageShell(child: child);
+            final currentLocation = state.uri.path;
+            print("CURRENT LOCATION: ${currentLocation ?? ''}");
+            final showBottomNavBar = !(currentLocation ?? '').contains('add_folder');
+            print('show bottom nav bar: $showBottomNavBar');
+            return MainPageShell(child: child, showBottomNavBar: true);
           },
           routes: [
             // ─────────────────────────────────────────────────────────
@@ -172,6 +193,13 @@ class _AdaptiveApp2State extends State<AdaptiveApp2> {
                 GoRoute(
                   path: '/recipes',
                   routes: [
+                    GoRoute(
+                      path: 'add_folder',
+                      parentNavigatorKey: _recipesNavKey,
+                      pageBuilder: (context, state) => CupertinoSheetPage<void>(
+                        child: Container(child: Text("hello world"))
+                      )
+                    ),
                     GoRoute(
                       path: 'folder/:parentId',
                       pageBuilder: (context, state) {
@@ -311,7 +339,7 @@ class _AdaptiveApp2State extends State<AdaptiveApp2> {
           ],
         ),
         if (!isTablet) ...nonTabRoutes,
-      ],
+    ])],
     );
   }
 
@@ -321,7 +349,7 @@ class _AdaptiveApp2State extends State<AdaptiveApp2> {
     required Widget child,
   }) {
     if (Platform.isIOS) {
-      return CupertinoPage(
+      return CupertinoExtendedPage(
         child: child,
         key: state.pageKey,
         title: state.name,

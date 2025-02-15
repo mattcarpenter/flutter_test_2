@@ -41,6 +41,8 @@ dependencies:
   flutter_dotenv: ^5.2.1
   test: ^1.25.8
   pull_down_button: ^0.10.2
+  modal_bottom_sheet: ^3.0.0
+  sheet: ^1.0.0
 
 dev_dependencies:
   flutter_test:
