@@ -1,13 +1,12 @@
 import 'dart:io' show Platform;
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 
-/// A shared sliver scaffold that adapts based on the platform.
-/// Large-title on iOS, standard SliverAppBar on Android.
-/// Includes a LayoutBuilder for accessing BoxConstraints.
 class AdaptiveSliverPage extends StatelessWidget {
   final String title;
-  final Widget body;
+  final Widget? body;
+  final List<Widget>? slivers;
   final Widget? trailing;
   final Widget? leading;
   final String? previousPageTitle;
@@ -16,76 +15,74 @@ class AdaptiveSliverPage extends StatelessWidget {
   const AdaptiveSliverPage({
     super.key,
     required this.title,
-    required this.body,
+    this.body,
+    this.slivers,
     this.trailing,
     this.leading,
     this.previousPageTitle,
     this.automaticallyImplyLeading,
   });
 
+  List<Widget> _buildContentSlivers() {
+    if (slivers != null) {
+      return slivers!;
+    } else if (body != null) {
+      return [
+        SliverToBoxAdapter(child: body!),
+        // Optional: extra space at the bottom.
+        const SliverToBoxAdapter(child: SizedBox(height: 100)),
+      ];
+    } else {
+      return [];
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
-    return
-      LayoutBuilder(
+    return LayoutBuilder(
       builder: (context, constraints) {
-        final double screenWidth = MediaQuery
-            .of(context)
-            .size
-            .width;
+        final double screenWidth = MediaQuery.of(context).size.width;
         final double pageWidth = constraints.maxWidth;
-        final bool isTablet = MediaQuery
-            .of(context)
-            .size
-            .shortestSide >= 600;
+        final bool isTablet = MediaQuery.of(context).size.shortestSide >= 600;
 
-        // Same dynamic padding logic
-        final double padding = (screenWidth - pageWidth > 50)
-            ? 0
-            : (isTablet ? 50 - (screenWidth - pageWidth) : 0);
+        // Compute dynamic padding.
+        final double padding =
+        (screenWidth - pageWidth > 50) ? 0 : (isTablet ? 50 - (screenWidth - pageWidth) : 0);
 
         if (Platform.isIOS) {
-          // iOS: Use CupertinoPageScaffold with CupertinoSliverNavigationBar
           return CupertinoPageScaffold(
             child: CustomScrollView(
               keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
               slivers: [
-                leading == null ?
-                CupertinoSliverNavigationBar(
+                // Navigation bar
+                leading == null
+                    ? CupertinoSliverNavigationBar(
                   largeTitle: Text(title),
                   transitionBetweenRoutes: true,
                   previousPageTitle: previousPageTitle,
                   trailing: Padding(
-                    padding: EdgeInsets.symmetric(horizontal: 16),
+                    padding: const EdgeInsets.symmetric(horizontal: 16),
                     child: trailing,
                   ),
                   padding: EdgeInsetsDirectional.only(start: padding),
                   automaticallyImplyLeading: automaticallyImplyLeading ?? false,
-                ) : CupertinoSliverNavigationBar(
+                )
+                    : CupertinoSliverNavigationBar(
                   largeTitle: Text(title),
-                  transitionBetweenRoutes:  true,
+                  transitionBetweenRoutes: true,
                   previousPageTitle: previousPageTitle,
                   trailing: trailing,
                   automaticallyImplyLeading: automaticallyImplyLeading ?? false,
-                  leading: leading != null ? Padding(
+                  leading: Padding(
                     padding: EdgeInsets.symmetric(horizontal: padding),
                     child: leading,
-                  ) : null,
-                ),
-                // Wrap your body in a SliverToBoxAdapter and add a spacer at the end.
-                SliverToBoxAdapter(
-                  child: Column(
-                    children: [
-                      body,
-                      // Add extra vertical space to allow scrolling.
-                      const SizedBox(height: 100),
-                    ],
                   ),
-                )
+                ),
+                ..._buildContentSlivers(),
               ],
             ),
           );
         } else {
-          // Android: Use Scaffold with a SliverAppBar
           return Scaffold(
             body: CustomScrollView(
               keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
@@ -98,14 +95,17 @@ class AdaptiveSliverPage extends StatelessWidget {
                   actions: trailing != null
                       ? [
                     Padding(
-                      padding: const EdgeInsets.only(right: 16.0), // Add padding on the right side
+                      padding: const EdgeInsets.only(right: 16.0),
                       child: trailing,
                     )
                   ]
                       : null,
                   leading: leading,
                 ),
-                SliverFillRemaining(child: body),
+                if (body != null)
+                  SliverFillRemaining(child: body!)
+                else
+                  ..._buildContentSlivers(),
               ],
             ),
           );
@@ -114,3 +114,4 @@ class AdaptiveSliverPage extends StatelessWidget {
     );
   }
 }
+

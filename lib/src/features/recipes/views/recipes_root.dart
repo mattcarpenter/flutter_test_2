@@ -14,11 +14,11 @@ class RecipesTab extends StatelessWidget {
   Widget build(BuildContext context) {
     return AdaptiveSliverPage(
       title: 'Recipes',
-      body: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // Subheading for recipes.
-          Padding(
+      // Instead of a body, we pass in slivers.
+      slivers: [
+        // Header as a sliver.
+        SliverToBoxAdapter(
+          child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16),
             child: Text(
               'Recipes',
@@ -28,25 +28,22 @@ class RecipesTab extends StatelessWidget {
                   .copyWith(fontSize: 20, fontWeight: FontWeight.w600),
             ),
           ),
-          // Recipes grid.
-          RecipesList(recipes: dummyRecipes),
-        ],
-      ),
+        ),
+        // The recipes grid sliver.
+        RecipesList(recipes: dummyRecipes),
+      ],
       trailing: AdaptivePullDownButton(
-        child: Icon(CupertinoIcons.add_circled),
+        child: const Icon(CupertinoIcons.add_circled),
         items: [
           AdaptiveMenuItem(
-              title: 'Add Folder',
-              icon: Icon(CupertinoIcons.folder),
-              onTap: () {}),
+              title: 'Add Folder', icon: const Icon(CupertinoIcons.folder), onTap: () {}),
           AdaptiveMenuItem(
-              title: 'Add Recipe',
-              icon: Icon(CupertinoIcons.book),
-              onTap: () {})
+              title: 'Add Recipe', icon: const Icon(CupertinoIcons.book), onTap: () {})
         ],
       ),
-      leading: Icon(CupertinoIcons.person_2),
+      leading: const Icon(CupertinoIcons.person_2),
     );
   }
 }
+
 
