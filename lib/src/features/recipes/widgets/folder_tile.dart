@@ -4,6 +4,8 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
+import '../../../widgets/extended_clip_rect.dart';
+
 class FolderTile extends StatelessWidget {
   final String folderName;
   final int recipeCount;
@@ -138,7 +140,10 @@ class FolderTile extends StatelessWidget {
           // Wrap the preview in a GestureDetector so that taps are handled.
           return GestureDetector(
             onTap: onTap,
-            child: animatedPreview,
+            child: ExtendedClipRect(
+              extraVerticalPadding: 10.0, // tweak as needed
+              child: animatedPreview,
+            ),
           );
         },
       );

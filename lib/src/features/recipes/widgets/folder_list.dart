@@ -66,6 +66,7 @@ class _FolderListState extends ConsumerState<FolderList> {
               return LayoutBuilder(
                 builder: (context, constraints) {
                   return GridView.builder(
+                    clipBehavior: Clip.none,
                     padding: EdgeInsets.all(0),
                     physics: const NeverScrollableScrollPhysics(),
                     shrinkWrap: true,
