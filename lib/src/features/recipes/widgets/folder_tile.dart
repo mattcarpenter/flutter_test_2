@@ -152,9 +152,23 @@ class FolderTile extends StatelessWidget {
       return GestureDetector(
         onTap: onTap,
         onLongPress: () async {
+          // Get the RenderBox of the current widget
+          final RenderBox button = context.findRenderObject() as RenderBox;
+          // Get position relative to the nearest Overlay
+          final Offset position = button.localToGlobal(
+              Offset.zero,
+              ancestor: Overlay.of(context).context.findRenderObject()
+          );
+          final Size size = button.size;
+
           final selected = await showMenu<String>(
             context: context,
-            position: RelativeRect.fromLTRB(100, 100, 100, 100),
+            position: RelativeRect.fromLTRB(
+              position.dx,
+              position.dy,
+              position.dx + size.width,
+              position.dy + size.height,
+            ),
             items: const [
               PopupMenuItem<String>(
                 value: 'delete',
