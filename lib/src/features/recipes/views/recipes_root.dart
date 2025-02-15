@@ -17,6 +17,9 @@ class RecipesTab extends StatelessWidget {
       title: 'Recipes',
       // Instead of a body, we pass in slivers.
       slivers: [
+        const SliverToBoxAdapter(
+          child: FolderList(currentPageTitle: 'Recipes',)
+        ),
         // Header as a sliver.
         SliverToBoxAdapter(
           child: Padding(
