@@ -12,53 +12,41 @@ class RecipesTab extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // This is the "root" content for `/shopping`.
-    // No nested Navigator needed—go_router handles sub-routes:
     return AdaptiveSliverPage(
       title: 'Recipes',
-      body: SingleChildScrollView(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const SizedBox(height: 8),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16),
-              child: Text(
-                'Folders',
-                style: CupertinoTheme.of(context).textTheme.navLargeTitleTextStyle.copyWith(fontSize: 20, fontWeight: FontWeight.w600)
-              ),
+      body: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Subheading for recipes.
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            child: Text(
+              'Recipes',
+              style: CupertinoTheme.of(context)
+                  .textTheme
+                  .navLargeTitleTextStyle
+                  .copyWith(fontSize: 20, fontWeight: FontWeight.w600),
             ),
-            FolderList(currentPageTitle: 'Recipes'),
-            const SizedBox(height: 16),
-            // Subheading for recipes.
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16),
-              child: Text(
-                'Recipes',
-                style: CupertinoTheme.of(context).textTheme.navLargeTitleTextStyle.copyWith(fontSize: 20, fontWeight: FontWeight.w600)
-              ),
-            ),
-            // Recipes grid.
-            RecipesList(recipes: dummyRecipes),
-          ]
-        )
+          ),
+          // Recipes grid.
+          RecipesList(recipes: dummyRecipes),
+        ],
       ),
       trailing: AdaptivePullDownButton(
         child: Icon(CupertinoIcons.add_circled),
         items: [
           AdaptiveMenuItem(
-            title: 'Add Folder',
-            icon: Icon(CupertinoIcons.folder),
-            onTap: () {}
-          ),
+              title: 'Add Folder',
+              icon: Icon(CupertinoIcons.folder),
+              onTap: () {}),
           AdaptiveMenuItem(
-            title: 'Add Recipe',
-            icon: Icon(CupertinoIcons.book),
-            onTap: () {}
-          )
-        ]
+              title: 'Add Recipe',
+              icon: Icon(CupertinoIcons.book),
+              onTap: () {})
+        ],
       ),
       leading: Icon(CupertinoIcons.person_2),
     );
   }
 }
+
