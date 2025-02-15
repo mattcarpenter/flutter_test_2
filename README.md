@@ -59,7 +59,7 @@ A new Flutter project.
 [ ] Check in on status of scroll bug https://github.com/flutter/flutter/issues/163297
 [ ] Haptic feedback on context menu long-press
 [X] Fix breakpoints and show/hide sidebar animations
-[ ] Android: Overflow issue on recipe cards
+[X] Android: Overflow issue on recipe cards
 [X] Android: Long press context menu on folder tiles incorrect positioning of menu
 [ ] Blue (or red?) back button
 [ ] Revisit directory structure (mobile vs other platforms - are they necessary, can we consolidate or clean up)
