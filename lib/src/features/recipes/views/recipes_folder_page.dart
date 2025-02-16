@@ -21,38 +21,41 @@ class RecipesFolderPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return AdaptiveSliverPage(
       title: title,
-      body: SingleChildScrollView(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const SizedBox(height: 8),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16),
-              child: Text(
-                'Folders',
-                style: CupertinoTheme.of(context).textTheme.navLargeTitleTextStyle.copyWith(fontSize: 24, fontWeight: FontWeight.w400)
-              ),
+      slivers: [
+        SliverToBoxAdapter(
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            child: Text(
+              'Folders',
+              style: CupertinoTheme.of(context)
+                  .textTheme
+                  .navLargeTitleTextStyle
+                  .copyWith(fontSize: 20, fontWeight: FontWeight.w600),
             ),
-            // Folders list at the top.
-            FolderList(
+          ),
+        ),
+        SliverToBoxAdapter(
+            child: FolderList(
               parentId: parentId,
               currentPageTitle: title,
             ),
-            const SizedBox(height: 16),
-            // Subheading for recipes.
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16),
-              child: Text(
-                'Recipes',
-                style: CupertinoTheme.of(context).textTheme.navLargeTitleTextStyle.copyWith(fontSize: 24, fontWeight: FontWeight.w400),
-              ),
-            ),
-            const SizedBox(height: 8),
-            // Recipes grid.
-            RecipesList(recipes: dummyRecipes),
-          ],
         ),
-      ),
+        // Header as a sliver.
+        SliverToBoxAdapter(
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            child: Text(
+              'Recipes',
+              style: CupertinoTheme.of(context)
+                  .textTheme
+                  .navLargeTitleTextStyle
+                  .copyWith(fontSize: 20, fontWeight: FontWeight.w600),
+            ),
+          ),
+        ),
+        // The recipes grid sliver.
+        RecipesList(recipes: dummyRecipes),
+      ],
       trailing: const Icon(CupertinoIcons.add_circled),
       previousPageTitle: previousPageTitle,
       automaticallyImplyLeading: true,
