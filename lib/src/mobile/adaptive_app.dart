@@ -6,6 +6,7 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:go_router/go_router.dart';
 import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
 import 'package:recipe_app/src/features/recipes/views/recipes_folder_page.dart';
+import 'package:recipe_app/src/mobile/utils/adaptive_sheet_page.dart';
 
 import '../color_theme.dart';
 import '../features/discover/views/discover_root.dart';
@@ -151,14 +152,18 @@ class _AdaptiveApp2State extends State<AdaptiveApp2> {
       routes: [
         GoRoute(
             path: '/add_folder',
-            pageBuilder: (context, state) => CupertinoSheetPage<void>(
-                child: Container(child: Text("hello world"))
+            pageBuilder: (context, state) => buildAdaptiveSheetPage<void>(
+              child: Container(child:Text("hello world")),
+              context: context,
+              state: state
             )
         ),
         ShellRoute(
           pageBuilder: (context, state, child) {
-            print("RUNNING PAGE BUILDER");
-            return CupertinoExtendedPage(child: child);
+            if (Platform.isIOS) {
+              return CupertinoExtendedPage(child: child);
+            }
+            return  MaterialExtendedPage(child: child);
           },
           routes: [
 
@@ -195,10 +200,7 @@ class _AdaptiveApp2State extends State<AdaptiveApp2> {
                   routes: [
                     GoRoute(
                       path: 'add_folder',
-                      parentNavigatorKey: _recipesNavKey,
-                      pageBuilder: (context, state) => CupertinoSheetPage<void>(
-                        child: Container(child: Text("hello world"))
-                      )
+                      pageBuilder: (context, state) => _platformPage(state: state, child: Container(child: Text('hello')))
                     ),
                     GoRoute(
                       path: 'folder/:parentId',

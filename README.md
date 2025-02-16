@@ -53,7 +53,8 @@ A new Flutter project.
   [X] Fix padding for context menu box
   [X] Why context menu background blur also blurs context menu on rightmost item?
   [X] Unjank folders
-  [ ] Test modal on android and make adjustments for adaptiveness
+  [X] Test modal on android and make adjustments for adaptiveness
+  [ ] Modal for tablet (add folder)
   [ ] Implement menu for adding folders (replace dummy textbox)
   [X] Test folders on Android
   [ ] Deletion of folders - what happens to descendants
