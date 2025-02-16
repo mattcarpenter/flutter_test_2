@@ -52,7 +52,7 @@ A new Flutter project.
   [X] Folder label font styles
   [X] Fix padding for context menu box
   [X] Why context menu background blur also blurs context menu on rightmost item?
-  [ ] Unjank folders
+  [X] Unjank folders
   [ ] Test modal on android and make adjustments for adaptiveness
   [ ] Implement menu for adding folders (replace dummy textbox)
   [X] Test folders on Android
