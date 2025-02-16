@@ -1,6 +1,7 @@
 import 'dart:io' show Platform;
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../../providers/recipe_folder_provider.dart';
@@ -63,45 +64,36 @@ class _FolderListState extends ConsumerState<FolderList> {
                 return const Center(child: Text('No folders available'));
               }
 
-              return LayoutBuilder(
-                builder: (context, constraints) {
-                  return GridView.builder(
-                    clipBehavior: Clip.none,
-                    padding: EdgeInsets.all(0),
-                    physics: const NeverScrollableScrollPhysics(),
-                    shrinkWrap: true,
-                    gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
-                      maxCrossAxisExtent: 140,
-                      crossAxisSpacing: 8,
-                      mainAxisSpacing: 8,
-                      childAspectRatio: 1, // Adjusted to match FolderTile's natural ratio.
-                    ),
-                    itemCount: filteredFolders.length,
-                    itemBuilder: (context, index) {
-                      final folder = filteredFolders[index];
-                      // Remove the Center wrapper so FolderTile fills the cell.
-                      return FolderTile(
-                        folderName: folder.name,
-                        recipeCount: 0, // Replace with actual count if available.
-                        onTap: () {
-                          context.push('/recipes/folder/${folder.id}', extra: {
-                            'folderTitle': folder.name,
-                            'previousPageTitle': widget.currentPageTitle,
-                          });
-                        },
-                        onDelete: () {
-                          ref
-                              .read(recipeFolderNotifierProvider.notifier)
-                              .deleteFolder(folder);
-                        },
-                      );
+              return GridView.builder(
+                clipBehavior: Clip.none,
+                padding: EdgeInsets.zero,
+                physics: const NeverScrollableScrollPhysics(),
+                shrinkWrap: true,
+                gridDelegate: const FixedFolderGridDelegate(
+                  tileSize: 120, // Fixed size
+                  spacing: 2,
+                ),
+                itemCount: filteredFolders.length,
+                itemBuilder: (context, index) {
+                  final folder = filteredFolders[index];
+                  // Remove the Center wrapper so FolderTile fills the cell.
+                  return FolderTile(
+                    folderName: folder.name,
+                    recipeCount: 0, // Replace with actual count if available.
+                    onTap: () {
+                      context.push('/recipes/folder/${folder.id}', extra: {
+                        'folderTitle': folder.name,
+                        'previousPageTitle': widget.currentPageTitle,
+                      });
+                    },
+                    onDelete: () {
+                      ref
+                          .read(recipeFolderNotifierProvider.notifier)
+                          .deleteFolder(folder);
                     },
                   );
                 },
               );
-
-
-
             },
             loading: () => const Center(child: CircularProgressIndicator()),
             error: (error, stack) =>
@@ -145,4 +137,35 @@ class _FolderListState extends ConsumerState<FolderList> {
       ),
     );
   }
+}
+
+class FixedFolderGridDelegate extends SliverGridDelegate {
+  final double tileSize; // Fixed size for both width and height
+  final double spacing;
+
+  const FixedFolderGridDelegate({
+    this.tileSize = 120,
+    this.spacing = 8,
+  });
+
+  @override
+  SliverGridLayout getLayout(SliverConstraints constraints) {
+    final availableWidth = constraints.crossAxisExtent;
+
+    final int columnCount =
+    ((availableWidth + spacing) / (tileSize + spacing)).floor().clamp(1, double.infinity).toInt();
+
+    return SliverGridRegularTileLayout(
+      crossAxisCount: columnCount,
+      mainAxisStride: tileSize + spacing,
+      crossAxisStride: tileSize + spacing,
+      childMainAxisExtent: tileSize,
+      childCrossAxisExtent: tileSize,
+      reverseCrossAxis: false,
+    );
+  }
+
+  @override
+  bool shouldRelayout(FixedFolderGridDelegate oldDelegate) =>
+      tileSize != oldDelegate.tileSize || spacing != oldDelegate.spacing;
 }
