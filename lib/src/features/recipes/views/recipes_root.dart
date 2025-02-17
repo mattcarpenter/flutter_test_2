@@ -54,7 +54,7 @@ class RecipesTab extends StatelessWidget {
           AdaptiveMenuItem(
               title: 'Add Folder', icon: const Icon(CupertinoIcons.folder), onTap: () {
                 //context.go('/recipes/add_folder');
-                context.push('/recipes/add_folder');
+                context.push('/add_folder');
           }),
           AdaptiveMenuItem(
               title: 'Add Recipe', icon: const Icon(CupertinoIcons.book), onTap: () {})
