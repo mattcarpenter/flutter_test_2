@@ -54,9 +54,11 @@ A new Flutter project.
   [X] Why context menu background blur also blurs context menu on rightmost item?
   [X] Unjank folders
   [X] Test modal on android and make adjustments for adaptiveness
-  [ ] Modal for tablet (add folder) see UIModalPresentationStyle.formSheet or showDialog with constrained dimensions
-  [ ] Implement menu for adding folders (replace dummy textbox)
+  [X] Modal for tablet (add folder) see UIModalPresentationStyle.formSheet or showDialog with constrained dimensions
+  [X] Implement menu for adding folders (replace dummy textbox)
   [X] Test folders on Android
+  [ ] Folder deletion super broken (black screen)
+  [ ] Folder context menu positioning weird on tablet
   [ ] Deletion of folders - what happens to descendants
   [ ] Implement sharing
 [ ] Check in on status of scroll bug https://github.com/flutter/flutter/issues/163297
