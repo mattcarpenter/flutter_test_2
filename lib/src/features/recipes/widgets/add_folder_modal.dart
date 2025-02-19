@@ -19,6 +19,7 @@ void showAddFolderModal(BuildContext context, {
     context: context,
     pageListBuilder: (bottomSheetContext) => [
       AddFolderModalPage.build(
+        context: context,
         parentId: parentId,
         onFolderAdded: (String folderName) {
           // Get the provider container from the modal context.
@@ -41,16 +42,19 @@ class AddFolderModalPage {
   AddFolderModalPage._();
 
   static WoltModalSheetPage build({
+    required BuildContext context,
     String? parentId, // Accept the parentId (for future use or display)
     required Function(String folderName) onFolderAdded,
   }) {
     final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
     final TextEditingController _folderNameController = TextEditingController();
-    // Tracks if the user tried submitting.
     final ValueNotifier<bool> submitted = ValueNotifier<bool>(false);
 
+    final isDarkMode = CupertinoTheme.of(context).brightness == Brightness.dark;
+    final Color backgroundColor = isDarkMode ? CupertinoTheme.of(context).barBackgroundColor : CupertinoTheme.of(context).scaffoldBackgroundColor;
+
     return WoltModalSheetPage(
-      backgroundColor: Colors.white,
+      backgroundColor: backgroundColor,
       stickyActionBar: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
         child: Row(
