@@ -43,6 +43,11 @@ dependencies:
   pull_down_button: ^0.10.2
   modal_bottom_sheet: ^3.0.0
   sheet: ^1.0.0
+  wolt_modal_sheet: ^0.11.0
+  flutter_form_builder: ^9.6.0
+  form_builder_extra_fields: ^11.1.0
+  form_builder_cupertino_fields:
+    path: /Users/matt/repos/form_builder_cupertino_fields
 
 dev_dependencies:
   flutter_test:
@@ -54,6 +59,9 @@ dev_dependencies:
   riverpod_lint: 2.6.3
   brick_offline_first_with_supabase_build: ^1.1.0
   shared_preferences: any
+
+dependency_overrides:
+  intl: ^0.20.2
 
 flutter:
   uses-material-design: true

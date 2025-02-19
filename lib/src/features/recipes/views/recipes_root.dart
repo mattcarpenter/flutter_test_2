@@ -2,9 +2,11 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
+import 'package:wolt_modal_sheet/wolt_modal_sheet.dart';
 import '../../../mobile/utils/adaptive_sliver_page.dart';
 import '../../../widgets/adaptive_pull_down/adaptive_menu_item.dart';
 import '../../../widgets/adaptive_pull_down/adaptive_pull_down.dart';
+import '../widgets/add_folder_modal.dart';
 import '../widgets/folder_list.dart';
 import '../widgets/recipe_list.dart';
 
@@ -53,8 +55,10 @@ class RecipesTab extends StatelessWidget {
         items: [
           AdaptiveMenuItem(
               title: 'Add Folder', icon: const Icon(CupertinoIcons.folder), onTap: () {
-                //context.go('/recipes/add_folder');
-                context.push('/add_folder');
+
+                showAddFolderModal(context);
+
+                //context.push('/add_folder');
           }),
           AdaptiveMenuItem(
               title: 'Add Recipe', icon: const Icon(CupertinoIcons.book), onTap: () {})

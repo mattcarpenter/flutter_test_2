@@ -29,6 +29,9 @@ Page<T> buildAdaptiveSheetPage<T>({
   Widget Function(BuildContext, Widget)? decorationBuilder,
 }) {
   if (Platform.isIOS) {
+
+
+
     if (isTablet(context)) {
       return DialogPage(builder: (context) => child);
     }
