@@ -34,8 +34,8 @@ class RecipeFolder extends OfflineFirstWithSupabaseModel {
   RecipeFolder({
     String? id,
     required this.name,
+    required this.userId,
     this.parentId,
-    this.userId,
     this.householdId,
     this.deletedAt,
   }) : this.id = id ?? const Uuid().v4();

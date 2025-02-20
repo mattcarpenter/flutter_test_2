@@ -57,8 +57,8 @@ A new Flutter project.
   [X] Modal for tablet (add folder) see UIModalPresentationStyle.formSheet or showDialog with constrained dimensions
   [X] Implement menu for adding folders (replace dummy textbox)
   [X] Test folders on Android
-  [ ] Folder deletion super broken (black screen)
-  [ ] Folder context menu positioning weird on tablet
+  [X] Folder deletion super broken (black screen)
+  [X] Folder context menu positioning weird on tablet
   [ ] Deletion of folders - what happens to descendants
   [ ] Implement sharing
 [ ] Check in on status of scroll bug https://github.com/flutter/flutter/issues/163297
