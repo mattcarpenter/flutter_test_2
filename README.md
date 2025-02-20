@@ -36,7 +36,7 @@ A new Flutter project.
   [X] Hack android SliverAppBar to allow padding for leading
 [X] Think about MacOS
 [X] Domain model
-[ ] Implement Folders
+[X] Implement Folders
   [X] Supabase scaffolding
   [X] Test boilerplate
   [X] Sort out the role of riverpod vs repository (solve redundancy and simplify?)
@@ -59,6 +59,12 @@ A new Flutter project.
   [X] Test folders on Android
   [X] Folder deletion super broken (black screen)
   [X] Folder context menu positioning weird on tablet
+[ ] Implement Recipes
+  [ ] Recipe capabilities
+  [ ] Recipe schema & Riverpod
+  [ ] Recipe integration test
+  [ ] Dummy recipe adder UI
+  [ ] Connect recipe list to Riverpod
   [ ] Deletion of folders - what happens to descendants
   [ ] Implement sharing
 [ ] Check in on status of scroll bug https://github.com/flutter/flutter/issues/163297
