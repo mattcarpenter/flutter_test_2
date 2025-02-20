@@ -175,3 +175,5 @@ class _FolderTileContent extends StatelessWidget {
     );
   }
 }
+
+// examples: https://github.com/superlistapp/super_native_extensions/blob/main/super_context_menu/example/lib/main.dart
