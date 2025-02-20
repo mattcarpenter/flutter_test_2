@@ -6,10 +6,12 @@ import 'package:flutter_svg/flutter_svg.dart';
 
 import '../../../widgets/extended_clip_rect.dart';
 
-class FolderTile extends StatelessWidget {
+class FolderTile extends StatefulWidget {
   final String folderName;
   final int recipeCount;
   final VoidCallback onTap;
+  /// Instead of removing the item immediately, the onDelete callback will be called
+  /// after the deletion animation completes.
   final VoidCallback onDelete;
 
   const FolderTile({
@@ -19,6 +21,59 @@ class FolderTile extends StatelessWidget {
     required this.onTap,
     required this.onDelete,
   }) : super(key: key);
+
+  @override
+  _FolderTileState createState() => _FolderTileState();
+}
+
+class _FolderTileState extends State<FolderTile>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _controller;
+  late final Animation<double> _opacityAnimation;
+  late final Animation<double> _scaleAnimation;
+  bool _isDeleting = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      duration: const Duration(milliseconds: 300),
+      vsync: this,
+    );
+
+    final curve = CurvedAnimation(
+      parent: _controller,
+      curve: Curves.easeOutExpo,
+    );
+
+    _opacityAnimation = Tween<double>(begin: 1.0, end: 0.0).animate(curve);
+    _scaleAnimation = Tween<double>(begin: 1.0, end: 0.85).animate(curve);
+
+    _controller.addStatusListener((status) {
+      if (status == AnimationStatus.completed) {
+        widget.onDelete();
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  void _startDeletionAnimation() {
+    if (!_isDeleting) {
+      setState(() {
+        _isDeleting = true;
+      });
+      Future.delayed(const Duration(milliseconds: 400), () {
+        if (mounted) {
+          _controller.forward();
+        }
+      });
+    }
+  }
 
   /// Builds the static content of the tile.
   Widget _buildTileContent(BuildContext context) {
@@ -40,7 +95,7 @@ class FolderTile extends StatelessWidget {
           ),
           const SizedBox(height: 8),
           Text(
-            folderName,
+            widget.folderName,
             overflow: TextOverflow.ellipsis,
             style: Theme.of(context)
                 .textTheme
@@ -48,7 +103,7 @@ class FolderTile extends StatelessWidget {
                 ?.copyWith(fontWeight: FontWeight.bold),
           ),
           Text(
-            '$recipeCount recipes',
+            '${widget.recipeCount} recipes',
             style: Theme.of(context).textTheme.bodySmall,
           ),
         ],
@@ -58,8 +113,9 @@ class FolderTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    Widget content;
     if (Platform.isIOS) {
-      return CupertinoContextMenu.builder(
+      content = CupertinoContextMenu.builder(
         actions: <Widget>[
           Builder(
             builder: (BuildContext actionContext) {
@@ -67,15 +123,15 @@ class FolderTile extends StatelessWidget {
                 child: const Text('Delete'),
                 onPressed: () {
                   Navigator.pop(actionContext);
-                  onDelete();
+                  _startDeletionAnimation();
                 },
               );
             },
           ),
         ],
-        // Use the builder to customize the preview.
+        // Customize the preview.
         builder: (BuildContext previewContext, Animation<double> animation) {
-          // Animate the border radius from normal (12) to the open value.
+          // Animate the border radius.
           final Animation<BorderRadius?> borderRadiusAnimation =
           BorderRadiusTween(
             begin: BorderRadius.circular(12),
@@ -148,30 +204,25 @@ class FolderTile extends StatelessWidget {
             ),
           );
 
-          // Wrap the preview in a GestureDetector so that taps are handled.
           return GestureDetector(
-            onTap: onTap,
+            onTap: widget.onTap,
             child: ExtendedClipRect(
-              extraVerticalPadding: 10.0, // tweak as needed
+              extraVerticalPadding: 10.0,
               child: animatedPreview,
             ),
           );
         },
       );
     } else {
-      // For non-iOS platforms, use the default behavior.
-      return GestureDetector(
-        onTap: onTap,
+      content = GestureDetector(
+        onTap: widget.onTap,
         onLongPress: () async {
-          // Get the RenderBox of the current widget.
           final RenderBox button = context.findRenderObject() as RenderBox;
-          // Get position relative to the nearest Overlay.
           final Offset position = button.localToGlobal(
             Offset.zero,
             ancestor: Overlay.of(context).context.findRenderObject(),
           );
           final Size size = button.size;
-
           final selected = await showMenu<String>(
             context: context,
             position: RelativeRect.fromLTRB(
@@ -188,11 +239,20 @@ class FolderTile extends StatelessWidget {
             ],
           );
           if (selected == 'delete') {
-            onDelete();
+            _startDeletionAnimation();
           }
         },
         child: _buildTileContent(context),
       );
     }
+
+    // Wrap the entire tile in fade and scale transitions.
+    return FadeTransition(
+      opacity: _opacityAnimation,
+      child: ScaleTransition(
+        scale: _scaleAnimation,
+        child: content,
+      ),
+    );
   }
 }
