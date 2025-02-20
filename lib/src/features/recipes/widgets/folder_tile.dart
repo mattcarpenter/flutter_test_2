@@ -23,8 +23,7 @@ class FolderTile extends StatefulWidget {
   _FolderTileState createState() => _FolderTileState();
 }
 
-class _FolderTileState extends State<FolderTile>
-    with SingleTickerProviderStateMixin {
+class _FolderTileState extends State<FolderTile> with SingleTickerProviderStateMixin {
   late final AnimationController _controller;
   late final Animation<double> _opacityAnimation;
   late final Animation<double> _scaleAnimation;
@@ -80,10 +79,10 @@ class _FolderTileState extends State<FolderTile>
         scale: _scaleAnimation,
         child: GestureDetector(
           onTap: widget.onTap,
-          onLongPress: _startDeletionAnimation,
           child: _ComplexContextMenu(
             folderName: widget.folderName,
             recipeCount: widget.recipeCount,
+            onDelete: _startDeletionAnimation,
           ),
         ),
       ),
@@ -94,16 +93,19 @@ class _FolderTileState extends State<FolderTile>
 class _ComplexContextMenu extends StatelessWidget {
   final String folderName;
   final int recipeCount;
+  final VoidCallback onDelete;
 
   const _ComplexContextMenu({
     Key? key,
     required this.folderName,
     required this.recipeCount,
+    required this.onDelete,
   }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     return ContextMenuWidget(
+      // Reuse the common folder tile content for all three states.
       liftBuilder: (context, child) => _FolderTileContent(folderName, recipeCount),
       previewBuilder: (context, child) => _FolderTileContent(folderName, recipeCount, isPreview: true),
       child: _FolderTileContent(folderName, recipeCount, isChild: true),
@@ -111,53 +113,10 @@ class _ComplexContextMenu extends StatelessWidget {
         return Menu(
           children: [
             MenuAction(
-              image: MenuImage.icon(Icons.access_time),
-              title: 'Menu Item 1',
-              callback: () {},
-            ),
-            MenuAction(
-              title: 'Disabled Menu Item',
-              image: MenuImage.icon(Icons.replay_outlined),
-              attributes: const MenuActionAttributes(disabled: true),
-              callback: () {},
-            ),
-            MenuAction(
-              title: 'Destructive Menu Item',
+              title: 'Delete Folder',
               image: MenuImage.icon(Icons.delete),
               attributes: const MenuActionAttributes(destructive: true),
-              callback: () {},
-            ),
-            MenuSeparator(),
-            Menu(title: 'Submenu', children: [
-              MenuAction(title: 'Submenu Item 1', callback: () {}),
-              MenuAction(title: 'Submenu Item 2', callback: () {}),
-            ]),
-            Menu(title: 'Deferred Item Example', children: [
-              MenuAction(title: 'Leading Item', callback: () {}),
-              DeferredMenuElement((_) async {
-                await Future.delayed(const Duration(seconds: 2));
-                return [
-                  MenuSeparator(),
-                  MenuAction(title: 'Lazily Loaded Item', callback: () {}),
-                  Menu(title: 'Lazily Loaded Submenu', children: [
-                    MenuAction(title: 'Submenu Item 1', callback: () {}),
-                    MenuAction(title: 'Submenu Item 2', callback: () {}),
-                  ]),
-                  MenuSeparator(),
-                ];
-              }),
-              MenuAction(title: 'Trailing Item', callback: () {}),
-            ]),
-            MenuSeparator(),
-            MenuAction(
-              title: 'Checked Menu Item',
-              state: MenuActionState.checkOn,
-              callback: () {},
-            ),
-            MenuAction(
-              title: 'Menu Item in Mixed State',
-              state: MenuActionState.checkMixed,
-              callback: () {},
+              callback: onDelete,
             ),
           ],
         );
@@ -216,39 +175,3 @@ class _FolderTileContent extends StatelessWidget {
     );
   }
 }
-
-
-class Item extends StatelessWidget {
-  const Item({
-    super.key,
-    this.color = Colors.blue,
-    required this.child,
-    this.padding = const EdgeInsets.all(14),
-  });
-
-  final EdgeInsets padding;
-  final Color color;
-  final Widget child;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: padding,
-      decoration: BoxDecoration(
-        color: color,
-        borderRadius: BorderRadius.circular(8),
-      ),
-      child: DefaultTextStyle(
-        style: const TextStyle(color: Colors.white),
-        child: child,
-      ),
-    );
-  }
-}
-
-
-// _startDeletionAnimation();
-
-// return GestureDetector(
-//             onTap: widget.onTap,
-//             child
