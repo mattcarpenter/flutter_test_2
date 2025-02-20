@@ -22,8 +22,7 @@ class FolderTile extends StatelessWidget {
 
   /// Builds the static content of the tile.
   Widget _buildTileContent(BuildContext context) {
-    final backgroundColor =
-        CupertinoTheme.of(context).scaffoldBackgroundColor;
+    final backgroundColor = CupertinoTheme.of(context).scaffoldBackgroundColor;
     return Container(
       padding: const EdgeInsets.all(8),
       decoration: BoxDecoration(
@@ -62,16 +61,20 @@ class FolderTile extends StatelessWidget {
     if (Platform.isIOS) {
       return CupertinoContextMenu.builder(
         actions: <Widget>[
-          CupertinoContextMenuAction(
-            child: const Text('Delete'),
-            onPressed: () {
-              Navigator.pop(context);
-              onDelete();
+          Builder(
+            builder: (BuildContext actionContext) {
+              return CupertinoContextMenuAction(
+                child: const Text('Delete'),
+                onPressed: () {
+                  Navigator.pop(actionContext);
+                  onDelete();
+                },
+              );
             },
           ),
         ],
         // Use the builder to customize the preview.
-        builder: (BuildContext context, Animation<double> animation) {
+        builder: (BuildContext previewContext, Animation<double> animation) {
           // Animate the border radius from normal (12) to the open value.
           final Animation<BorderRadius?> borderRadiusAnimation =
           BorderRadiusTween(
@@ -95,8 +98,11 @@ class FolderTile extends StatelessWidget {
           ).animate(
             CurvedAnimation(
               parent: animation,
-              curve: Interval(0.0, CupertinoContextMenu.animationOpensAt,
-                  curve: Curves.easeOut),
+              curve: Interval(
+                0.0,
+                CupertinoContextMenu.animationOpensAt,
+                curve: Curves.easeOut,
+              ),
             ),
           );
 
@@ -108,32 +114,37 @@ class FolderTile extends StatelessWidget {
           }).toList();
 
           // Animate the blur, delaying its start until near the end.
-          final Animation<double> blurAnimation =
-          Tween<double>(begin: 0.0, end: 5.0).animate(
+          final Animation<double> blurAnimation = Tween<double>(
+            begin: 0.0,
+            end: 5.0,
+          ).animate(
             CurvedAnimation(
               parent: animation,
-              curve:
-              Interval(0.8, 1.0, curve: Curves.easeOut), // delay the blur
+              curve: Interval(
+                0.8,
+                1.0,
+                curve: Curves.easeOut,
+              ),
             ),
           );
 
           // Build the preview widget.
           final Widget animatedPreview = BackdropFilter(
-            filter:
-            ui.ImageFilter.blur(sigmaX: blurAnimation.value, sigmaY: blurAnimation.value),
+            filter: ui.ImageFilter.blur(
+              sigmaX: blurAnimation.value,
+              sigmaY: blurAnimation.value,
+            ),
             child: FittedBox(
-                child: Container(
-                  decoration: BoxDecoration(
-                    boxShadow: animatedBoxShadows,
-                  ),
-                  // You can optionally add symmetric padding here if desired.
-                  child: ClipRRect(
-                    borderRadius:
-                    borderRadiusAnimation.value ?? BorderRadius.circular(12),
-                    child: _buildTileContent(context),
-                  ),
+              child: Container(
+                decoration: BoxDecoration(
+                  boxShadow: animatedBoxShadows,
                 ),
-
+                child: ClipRRect(
+                  borderRadius:
+                  borderRadiusAnimation.value ?? BorderRadius.circular(12),
+                  child: _buildTileContent(previewContext),
+                ),
+              ),
             ),
           );
 
@@ -152,12 +163,12 @@ class FolderTile extends StatelessWidget {
       return GestureDetector(
         onTap: onTap,
         onLongPress: () async {
-          // Get the RenderBox of the current widget
+          // Get the RenderBox of the current widget.
           final RenderBox button = context.findRenderObject() as RenderBox;
-          // Get position relative to the nearest Overlay
+          // Get position relative to the nearest Overlay.
           final Offset position = button.localToGlobal(
-              Offset.zero,
-              ancestor: Overlay.of(context).context.findRenderObject()
+            Offset.zero,
+            ancestor: Overlay.of(context).context.findRenderObject(),
           );
           final Size size = button.size;
 

@@ -1,6 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:supabase_flutter/supabase_flutter.dart' as supabase_flutter;
 import 'package:wolt_modal_sheet/wolt_modal_sheet.dart';
 
 import '../../../models/recipe_folder.model.dart';
@@ -25,7 +26,9 @@ void showAddFolderModal(BuildContext context, {
           // Get the provider container from the modal context.
           final container = ProviderScope.containerOf(bottomSheetContext);
           // Construct a RecipeFolder using the folderName and parentId.
-          final folder = RecipeFolder(name: folderName, parentId: parentId);
+          final userId = supabase_flutter.Supabase.instance.client.auth.currentUser?.id;
+
+          final folder = RecipeFolder(name: folderName, parentId: parentId, userId: userId);
           // Use the notifier to add the folder.
           container
               .read(recipeFolderNotifierProvider.notifier)
