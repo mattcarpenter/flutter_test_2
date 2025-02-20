@@ -1,10 +1,7 @@
-import 'dart:io' show Platform;
-import 'dart:ui' as ui; // Needed for ImageFilter.blur
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-
-import '../../../widgets/extended_clip_rect.dart';
+import 'package:super_context_menu/super_context_menu.dart';
 
 class FolderTile extends StatefulWidget {
   final String folderName;
@@ -75,9 +72,117 @@ class _FolderTileState extends State<FolderTile>
     }
   }
 
-  /// Builds the static content of the tile.
-  Widget _buildTileContent(BuildContext context) {
+  @override
+  Widget build(BuildContext context) {
+    return FadeTransition(
+      opacity: _opacityAnimation,
+      child: ScaleTransition(
+        scale: _scaleAnimation,
+        child: GestureDetector(
+          onTap: widget.onTap,
+          onLongPress: _startDeletionAnimation,
+          child: _ComplexContextMenu(
+            folderName: widget.folderName,
+            recipeCount: widget.recipeCount,
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _ComplexContextMenu extends StatelessWidget {
+  final String folderName;
+  final int recipeCount;
+
+  const _ComplexContextMenu({
+    Key? key,
+    required this.folderName,
+    required this.recipeCount,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return ContextMenuWidget(
+      liftBuilder: (context, child) => _FolderTileContent(folderName, recipeCount),
+      previewBuilder: (context, child) => _FolderTileContent(folderName, recipeCount, isPreview: true),
+      child: _FolderTileContent(folderName, recipeCount, isChild: true),
+      menuProvider: (_) {
+        return Menu(
+          children: [
+            MenuAction(
+              image: MenuImage.icon(Icons.access_time),
+              title: 'Menu Item 1',
+              callback: () {},
+            ),
+            MenuAction(
+              title: 'Disabled Menu Item',
+              image: MenuImage.icon(Icons.replay_outlined),
+              attributes: const MenuActionAttributes(disabled: true),
+              callback: () {},
+            ),
+            MenuAction(
+              title: 'Destructive Menu Item',
+              image: MenuImage.icon(Icons.delete),
+              attributes: const MenuActionAttributes(destructive: true),
+              callback: () {},
+            ),
+            MenuSeparator(),
+            Menu(title: 'Submenu', children: [
+              MenuAction(title: 'Submenu Item 1', callback: () {}),
+              MenuAction(title: 'Submenu Item 2', callback: () {}),
+            ]),
+            Menu(title: 'Deferred Item Example', children: [
+              MenuAction(title: 'Leading Item', callback: () {}),
+              DeferredMenuElement((_) async {
+                await Future.delayed(const Duration(seconds: 2));
+                return [
+                  MenuSeparator(),
+                  MenuAction(title: 'Lazily Loaded Item', callback: () {}),
+                  Menu(title: 'Lazily Loaded Submenu', children: [
+                    MenuAction(title: 'Submenu Item 1', callback: () {}),
+                    MenuAction(title: 'Submenu Item 2', callback: () {}),
+                  ]),
+                  MenuSeparator(),
+                ];
+              }),
+              MenuAction(title: 'Trailing Item', callback: () {}),
+            ]),
+            MenuSeparator(),
+            MenuAction(
+              title: 'Checked Menu Item',
+              state: MenuActionState.checkOn,
+              callback: () {},
+            ),
+            MenuAction(
+              title: 'Menu Item in Mixed State',
+              state: MenuActionState.checkMixed,
+              callback: () {},
+            ),
+          ],
+        );
+      },
+    );
+  }
+}
+
+class _FolderTileContent extends StatelessWidget {
+  final String folderName;
+  final int recipeCount;
+  final bool isPreview;
+  final bool isChild;
+
+  const _FolderTileContent(
+      this.folderName,
+      this.recipeCount, {
+        this.isPreview = false,
+        this.isChild = false,
+      });
+
+  @override
+  Widget build(BuildContext context) {
     final backgroundColor = CupertinoTheme.of(context).scaffoldBackgroundColor;
+
     return Container(
       padding: const EdgeInsets.all(8),
       decoration: BoxDecoration(
@@ -95,7 +200,7 @@ class _FolderTileState extends State<FolderTile>
           ),
           const SizedBox(height: 8),
           Text(
-            widget.folderName,
+            folderName,
             overflow: TextOverflow.ellipsis,
             style: Theme.of(context)
                 .textTheme
@@ -103,156 +208,47 @@ class _FolderTileState extends State<FolderTile>
                 ?.copyWith(fontWeight: FontWeight.bold),
           ),
           Text(
-            '${widget.recipeCount} recipes',
+            '$recipeCount recipes',
             style: Theme.of(context).textTheme.bodySmall,
           ),
         ],
       ),
     );
   }
+}
+
+
+class Item extends StatelessWidget {
+  const Item({
+    super.key,
+    this.color = Colors.blue,
+    required this.child,
+    this.padding = const EdgeInsets.all(14),
+  });
+
+  final EdgeInsets padding;
+  final Color color;
+  final Widget child;
 
   @override
   Widget build(BuildContext context) {
-    Widget content;
-    if (Platform.isIOS) {
-      content = CupertinoContextMenu.builder(
-        actions: <Widget>[
-          Builder(
-            builder: (BuildContext actionContext) {
-              return CupertinoContextMenuAction(
-                child: const Text('Delete'),
-                onPressed: () {
-                  Navigator.pop(actionContext);
-                  _startDeletionAnimation();
-                },
-              );
-            },
-          ),
-        ],
-        // Customize the preview.
-        builder: (BuildContext previewContext, Animation<double> animation) {
-          // Animate the border radius.
-          final Animation<BorderRadius?> borderRadiusAnimation =
-          BorderRadiusTween(
-            begin: BorderRadius.circular(12),
-            end: BorderRadius.circular(CupertinoContextMenu.kOpenBorderRadius),
-          ).animate(
-            CurvedAnimation(
-              parent: animation,
-              curve: Interval(
-                CupertinoContextMenu.animationOpensAt,
-                1.0,
-                curve: Curves.easeOut,
-              ),
-            ),
-          );
-
-          // Animate the box shadow opacity.
-          final Animation<double> shadowOpacityAnimation = Tween<double>(
-            begin: 0.0,
-            end: 0.25,
-          ).animate(
-            CurvedAnimation(
-              parent: animation,
-              curve: Interval(
-                0.0,
-                CupertinoContextMenu.animationOpensAt,
-                curve: Curves.easeOut,
-              ),
-            ),
-          );
-
-          final List<BoxShadow> animatedBoxShadows =
-          CupertinoContextMenu.kEndBoxShadow.map((boxShadow) {
-            return boxShadow.copyWith(
-              color: boxShadow.color.withOpacity(shadowOpacityAnimation.value),
-            );
-          }).toList();
-
-          // Animate the blur, delaying its start until near the end.
-          final Animation<double> blurAnimation = Tween<double>(
-            begin: 0.0,
-            end: 5.0,
-          ).animate(
-            CurvedAnimation(
-              parent: animation,
-              curve: Interval(
-                0.8,
-                1.0,
-                curve: Curves.easeOut,
-              ),
-            ),
-          );
-
-          // Build the preview widget.
-          final Widget animatedPreview = BackdropFilter(
-            filter: ui.ImageFilter.blur(
-              sigmaX: blurAnimation.value,
-              sigmaY: blurAnimation.value,
-            ),
-            child: FittedBox(
-              child: Container(
-                decoration: BoxDecoration(
-                  boxShadow: animatedBoxShadows,
-                ),
-                child: ClipRRect(
-                  borderRadius:
-                  borderRadiusAnimation.value ?? BorderRadius.circular(12),
-                  child: _buildTileContent(previewContext),
-                ),
-              ),
-            ),
-          );
-
-          return GestureDetector(
-            onTap: widget.onTap,
-            child: ExtendedClipRect(
-              extraVerticalPadding: 10.0,
-              child: animatedPreview,
-            ),
-          );
-        },
-      );
-    } else {
-      content = GestureDetector(
-        onTap: widget.onTap,
-        onLongPress: () async {
-          final RenderBox button = context.findRenderObject() as RenderBox;
-          final Offset position = button.localToGlobal(
-            Offset.zero,
-            ancestor: Overlay.of(context).context.findRenderObject(),
-          );
-          final Size size = button.size;
-          final selected = await showMenu<String>(
-            context: context,
-            position: RelativeRect.fromLTRB(
-              position.dx,
-              position.dy,
-              position.dx + size.width,
-              position.dy + size.height,
-            ),
-            items: const [
-              PopupMenuItem<String>(
-                value: 'delete',
-                child: Text('Delete'),
-              ),
-            ],
-          );
-          if (selected == 'delete') {
-            _startDeletionAnimation();
-          }
-        },
-        child: _buildTileContent(context),
-      );
-    }
-
-    // Wrap the entire tile in fade and scale transitions.
-    return FadeTransition(
-      opacity: _opacityAnimation,
-      child: ScaleTransition(
-        scale: _scaleAnimation,
-        child: content,
+    return Container(
+      padding: padding,
+      decoration: BoxDecoration(
+        color: color,
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: DefaultTextStyle(
+        style: const TextStyle(color: Colors.white),
+        child: child,
       ),
     );
   }
 }
+
+
+// _startDeletionAnimation();
+
+// return GestureDetector(
+//             onTap: widget.onTap,
+//             child

@@ -6,7 +6,9 @@ list(APPEND FLUTTER_PLUGIN_LIST
   app_links
   bitsdojo_window_windows
   flutter_acrylic
+  irondash_engine_context
   screen_retriever_windows
+  super_native_extensions
   system_theme
   url_launcher_windows
   window_manager
