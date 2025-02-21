@@ -6,17 +6,40 @@ Future<Recipe> _$RecipeFromSupabase(Map<String, dynamic> data,
     OfflineFirstWithSupabaseRepository? repository}) async {
   return Recipe(
       title: data['title'] as String,
-      content: data['content'] as String,
-      id: data['id'] as String?,
-      folderId: data['folder_id'] == null ? null : data['folder_id'] as String?,
-      userId: data['user_id'] == null ? null : data['user_id'] as String?,
-      householdId:
-          data['household_id'] == null ? null : data['household_id'] as String?,
-      deletedAt: data['deleted_at'] == null
+      description:
+          data['description'] == null ? null : data['description'] as String?,
+      rating: data['rating'] as int,
+      language: data['language'] as String,
+      servings: data['servings'] == null ? null : data['servings'] as int?,
+      prepTime: data['prep_time'] == null ? null : data['prep_time'] as int?,
+      cookTime: data['cook_time'] == null ? null : data['cook_time'] as int?,
+      totalTime: data['total_time'] == null ? null : data['total_time'] as int?,
+      source: data['source'] == null ? null : data['source'] as String?,
+      nutrition:
+          data['nutrition'] == null ? null : data['nutrition'] as String?,
+      generalNotes: data['general_notes'] == null
           ? null
-          : data['deleted_at'] == null
+          : data['general_notes'] as String?,
+      userId: data['user_id'] == null ? null : data['user_id'] as String?,
+      folder: data['folder'] == null
+          ? null
+          : await RecipeFolderAdapter().fromSupabase(data['folder'],
+              provider: provider, repository: repository),
+      household: data['household'] == null
+          ? null
+          : await HouseholdAdapter().fromSupabase(data['household'],
+              provider: provider, repository: repository),
+      createdAt: data['created_at'] == null
+          ? null
+          : data['created_at'] == null
               ? null
-              : DateTime.tryParse(data['deleted_at'] as String));
+              : DateTime.tryParse(data['created_at'] as String),
+      updatedAt: data['updated_at'] == null
+          ? null
+          : data['updated_at'] == null
+              ? null
+              : DateTime.tryParse(data['updated_at'] as String),
+      id: data['id'] as String?);
 }
 
 Future<Map<String, dynamic>> _$RecipeToSupabase(Recipe instance,
@@ -24,12 +47,29 @@ Future<Map<String, dynamic>> _$RecipeToSupabase(Recipe instance,
     OfflineFirstWithSupabaseRepository? repository}) async {
   return {
     'title': instance.title,
-    'content': instance.content,
-    'id': instance.id,
-    'folder_id': instance.folderId,
+    'description': instance.description,
+    'rating': instance.rating,
+    'language': instance.language,
+    'servings': instance.servings,
+    'prep_time': instance.prepTime,
+    'cook_time': instance.cookTime,
+    'total_time': instance.totalTime,
+    'source': instance.source,
+    'nutrition': instance.nutrition,
+    'general_notes': instance.generalNotes,
     'user_id': instance.userId,
-    'household_id': instance.householdId,
-    'deleted_at': instance.deletedAt?.toIso8601String()
+    'folder': instance.folder != null
+        ? await RecipeFolderAdapter().toSupabase(instance.folder!,
+            provider: provider, repository: repository)
+        : null,
+    'folder_id': instance.folderId,
+    'household': instance.household != null
+        ? await HouseholdAdapter().toSupabase(instance.household!,
+            provider: provider, repository: repository)
+        : null,
+    'created_at': instance.createdAt?.toIso8601String(),
+    'updated_at': instance.updatedAt?.toIso8601String(),
+    'id': instance.id
   };
 }
 
@@ -38,17 +78,52 @@ Future<Recipe> _$RecipeFromSqlite(Map<String, dynamic> data,
     OfflineFirstWithSupabaseRepository? repository}) async {
   return Recipe(
       title: data['title'] as String,
-      content: data['content'] as String,
-      id: data['id'] as String,
-      folderId: data['folder_id'] == null ? null : data['folder_id'] as String?,
-      userId: data['user_id'] == null ? null : data['user_id'] as String?,
-      householdId:
-          data['household_id'] == null ? null : data['household_id'] as String?,
-      deletedAt: data['deleted_at'] == null
+      description:
+          data['description'] == null ? null : data['description'] as String?,
+      rating: data['rating'] as int,
+      language: data['language'] as String,
+      servings: data['servings'] == null ? null : data['servings'] as int?,
+      prepTime: data['prep_time'] == null ? null : data['prep_time'] as int?,
+      cookTime: data['cook_time'] == null ? null : data['cook_time'] as int?,
+      totalTime: data['total_time'] == null ? null : data['total_time'] as int?,
+      source: data['source'] == null ? null : data['source'] as String?,
+      nutrition:
+          data['nutrition'] == null ? null : data['nutrition'] as String?,
+      generalNotes: data['general_notes'] == null
           ? null
-          : data['deleted_at'] == null
+          : data['general_notes'] as String?,
+      userId: data['user_id'] == null ? null : data['user_id'] as String?,
+      folder: data['folder_RecipeFolder_brick_id'] == null
+          ? null
+          : (data['folder_RecipeFolder_brick_id'] > -1
+              ? (await repository?.getAssociation<RecipeFolder>(
+                  Query.where(
+                      'primaryKey', data['folder_RecipeFolder_brick_id'] as int,
+                      limit1: true),
+                ))
+                  ?.first
+              : null),
+      household: data['household_Household_brick_id'] == null
+          ? null
+          : (data['household_Household_brick_id'] > -1
+              ? (await repository?.getAssociation<Household>(
+                  Query.where(
+                      'primaryKey', data['household_Household_brick_id'] as int,
+                      limit1: true),
+                ))
+                  ?.first
+              : null),
+      createdAt: data['created_at'] == null
+          ? null
+          : data['created_at'] == null
               ? null
-              : DateTime.tryParse(data['deleted_at'] as String))
+              : DateTime.tryParse(data['created_at'] as String),
+      updatedAt: data['updated_at'] == null
+          ? null
+          : data['updated_at'] == null
+              ? null
+              : DateTime.tryParse(data['updated_at'] as String),
+      id: data['id'] as String)
     ..primaryKey = data['_brick_id'] as int;
 }
 
@@ -57,12 +132,30 @@ Future<Map<String, dynamic>> _$RecipeToSqlite(Recipe instance,
     OfflineFirstWithSupabaseRepository? repository}) async {
   return {
     'title': instance.title,
-    'content': instance.content,
-    'id': instance.id,
-    'folder_id': instance.folderId,
+    'description': instance.description,
+    'rating': instance.rating,
+    'language': instance.language,
+    'servings': instance.servings,
+    'prep_time': instance.prepTime,
+    'cook_time': instance.cookTime,
+    'total_time': instance.totalTime,
+    'source': instance.source,
+    'nutrition': instance.nutrition,
+    'general_notes': instance.generalNotes,
     'user_id': instance.userId,
-    'household_id': instance.householdId,
-    'deleted_at': instance.deletedAt?.toIso8601String()
+    'folder_RecipeFolder_brick_id': instance.folder != null
+        ? instance.folder!.primaryKey ??
+            await provider.upsert<RecipeFolder>(instance.folder!,
+                repository: repository)
+        : null,
+    'household_Household_brick_id': instance.household != null
+        ? instance.household!.primaryKey ??
+            await provider.upsert<Household>(instance.household!,
+                repository: repository)
+        : null,
+    'created_at': instance.createdAt?.toIso8601String(),
+    'updated_at': instance.updatedAt?.toIso8601String(),
+    'id': instance.id
   };
 }
 
@@ -80,29 +173,79 @@ class RecipeAdapter extends OfflineFirstWithSupabaseAdapter<Recipe> {
       association: false,
       columnName: 'title',
     ),
-    'content': const RuntimeSupabaseColumnDefinition(
+    'description': const RuntimeSupabaseColumnDefinition(
       association: false,
-      columnName: 'content',
+      columnName: 'description',
     ),
-    'id': const RuntimeSupabaseColumnDefinition(
+    'rating': const RuntimeSupabaseColumnDefinition(
       association: false,
-      columnName: 'id',
+      columnName: 'rating',
     ),
-    'folderId': const RuntimeSupabaseColumnDefinition(
+    'language': const RuntimeSupabaseColumnDefinition(
       association: false,
-      columnName: 'folder_id',
+      columnName: 'language',
+    ),
+    'servings': const RuntimeSupabaseColumnDefinition(
+      association: false,
+      columnName: 'servings',
+    ),
+    'prepTime': const RuntimeSupabaseColumnDefinition(
+      association: false,
+      columnName: 'prep_time',
+    ),
+    'cookTime': const RuntimeSupabaseColumnDefinition(
+      association: false,
+      columnName: 'cook_time',
+    ),
+    'totalTime': const RuntimeSupabaseColumnDefinition(
+      association: false,
+      columnName: 'total_time',
+    ),
+    'source': const RuntimeSupabaseColumnDefinition(
+      association: false,
+      columnName: 'source',
+    ),
+    'nutrition': const RuntimeSupabaseColumnDefinition(
+      association: false,
+      columnName: 'nutrition',
+    ),
+    'generalNotes': const RuntimeSupabaseColumnDefinition(
+      association: false,
+      columnName: 'general_notes',
     ),
     'userId': const RuntimeSupabaseColumnDefinition(
       association: false,
       columnName: 'user_id',
     ),
-    'householdId': const RuntimeSupabaseColumnDefinition(
-      association: false,
-      columnName: 'household_id',
+    'folder': const RuntimeSupabaseColumnDefinition(
+      association: true,
+      columnName: 'folder',
+      associationType: RecipeFolder,
+      associationIsNullable: true,
+      foreignKey: 'folder_id',
     ),
-    'deletedAt': const RuntimeSupabaseColumnDefinition(
+    'folderId': const RuntimeSupabaseColumnDefinition(
       association: false,
-      columnName: 'deleted_at',
+      columnName: 'folder_id',
+    ),
+    'household': const RuntimeSupabaseColumnDefinition(
+      association: true,
+      columnName: 'household',
+      associationType: Household,
+      associationIsNullable: true,
+      foreignKey: 'household_id',
+    ),
+    'createdAt': const RuntimeSupabaseColumnDefinition(
+      association: false,
+      columnName: 'created_at',
+    ),
+    'updatedAt': const RuntimeSupabaseColumnDefinition(
+      association: false,
+      columnName: 'updated_at',
+    ),
+    'id': const RuntimeSupabaseColumnDefinition(
+      association: false,
+      columnName: 'id',
     )
   };
   @override
@@ -125,21 +268,63 @@ class RecipeAdapter extends OfflineFirstWithSupabaseAdapter<Recipe> {
       iterable: false,
       type: String,
     ),
-    'content': const RuntimeSqliteColumnDefinition(
+    'description': const RuntimeSqliteColumnDefinition(
       association: false,
-      columnName: 'content',
+      columnName: 'description',
       iterable: false,
       type: String,
     ),
-    'id': const RuntimeSqliteColumnDefinition(
+    'rating': const RuntimeSqliteColumnDefinition(
       association: false,
-      columnName: 'id',
+      columnName: 'rating',
+      iterable: false,
+      type: int,
+    ),
+    'language': const RuntimeSqliteColumnDefinition(
+      association: false,
+      columnName: 'language',
       iterable: false,
       type: String,
     ),
-    'folderId': const RuntimeSqliteColumnDefinition(
+    'servings': const RuntimeSqliteColumnDefinition(
       association: false,
-      columnName: 'folder_id',
+      columnName: 'servings',
+      iterable: false,
+      type: int,
+    ),
+    'prepTime': const RuntimeSqliteColumnDefinition(
+      association: false,
+      columnName: 'prep_time',
+      iterable: false,
+      type: int,
+    ),
+    'cookTime': const RuntimeSqliteColumnDefinition(
+      association: false,
+      columnName: 'cook_time',
+      iterable: false,
+      type: int,
+    ),
+    'totalTime': const RuntimeSqliteColumnDefinition(
+      association: false,
+      columnName: 'total_time',
+      iterable: false,
+      type: int,
+    ),
+    'source': const RuntimeSqliteColumnDefinition(
+      association: false,
+      columnName: 'source',
+      iterable: false,
+      type: String,
+    ),
+    'nutrition': const RuntimeSqliteColumnDefinition(
+      association: false,
+      columnName: 'nutrition',
+      iterable: false,
+      type: String,
+    ),
+    'generalNotes': const RuntimeSqliteColumnDefinition(
+      association: false,
+      columnName: 'general_notes',
       iterable: false,
       type: String,
     ),
@@ -149,17 +334,35 @@ class RecipeAdapter extends OfflineFirstWithSupabaseAdapter<Recipe> {
       iterable: false,
       type: String,
     ),
-    'householdId': const RuntimeSqliteColumnDefinition(
-      association: false,
-      columnName: 'household_id',
+    'folder': const RuntimeSqliteColumnDefinition(
+      association: true,
+      columnName: 'folder_RecipeFolder_brick_id',
       iterable: false,
-      type: String,
+      type: RecipeFolder,
     ),
-    'deletedAt': const RuntimeSqliteColumnDefinition(
+    'household': const RuntimeSqliteColumnDefinition(
+      association: true,
+      columnName: 'household_Household_brick_id',
+      iterable: false,
+      type: Household,
+    ),
+    'createdAt': const RuntimeSqliteColumnDefinition(
       association: false,
-      columnName: 'deleted_at',
+      columnName: 'created_at',
       iterable: false,
       type: DateTime,
+    ),
+    'updatedAt': const RuntimeSqliteColumnDefinition(
+      association: false,
+      columnName: 'updated_at',
+      iterable: false,
+      type: DateTime,
+    ),
+    'id': const RuntimeSqliteColumnDefinition(
+      association: false,
+      columnName: 'id',
+      iterable: false,
+      type: String,
     )
   };
   @override
