@@ -49,6 +49,7 @@ dependencies:
   form_builder_cupertino_fields:
     path: /Users/matt/repos/form_builder_cupertino_fields
   super_context_menu: ^0.8.24
+  flutter_fast_forms: ^18.0.0
 
 dev_dependencies:
   flutter_test:
