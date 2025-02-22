@@ -64,7 +64,7 @@ A new Flutter project.
   [X] Convert deletedAt to numeric timestamp
   [X] New schemas (drift, powersync, postgres)
   [X] Test it
-  [ ] Clean up database directory
+  [X] Clean up database directory
   [ ] DDLs including RLS
   [ ] Test RLS
   [ ] Figure out integration tests

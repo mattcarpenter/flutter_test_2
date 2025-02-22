@@ -1,7 +1,7 @@
 import 'package:drift/drift.dart';
 import 'package:drift_sqlite_async/drift_sqlite_async.dart';
 import 'package:powersync/powersync.dart' hide Table;
-import 'package:recipe_app/database/recipe_folder.dart';
+import 'package:recipe_app/database/models/recipe_folder.dart';
 import 'package:uuid/uuid.dart';
 
 part 'database.g.dart';

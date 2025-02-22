@@ -3,7 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:powersync/powersync.dart';
 import '../../database/database.dart';
 import '../../database/powersync.dart';
-import '../../database/recipe_folder.dart';
+import '../../database/models/recipe_folder.dart';
 import '../../main.dart';
 
 class RecipeFolderRepository {
