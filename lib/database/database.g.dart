@@ -42,9 +42,9 @@ class $RecipeFoldersTable extends RecipeFolders
   static const VerificationMeta _deletedAtMeta =
       const VerificationMeta('deletedAt');
   @override
-  late final GeneratedColumn<BigInt> deletedAt = GeneratedColumn<BigInt>(
+  late final GeneratedColumn<int> deletedAt = GeneratedColumn<int>(
       'deleted_at', aliasedName, true,
-      type: DriftSqlType.bigInt, requiredDuringInsert: false);
+      type: DriftSqlType.int, requiredDuringInsert: false);
   @override
   List<GeneratedColumn> get $columns =>
       [id, name, userId, parentId, householdId, deletedAt];
@@ -105,7 +105,7 @@ class $RecipeFoldersTable extends RecipeFolders
       householdId: attachedDatabase.typeMapping
           .read(DriftSqlType.string, data['${effectivePrefix}household_id']),
       deletedAt: attachedDatabase.typeMapping
-          .read(DriftSqlType.bigInt, data['${effectivePrefix}deleted_at']),
+          .read(DriftSqlType.int, data['${effectivePrefix}deleted_at']),
     );
   }
 
@@ -122,7 +122,7 @@ class RecipeFolderEntry extends DataClass
   final String? userId;
   final String? parentId;
   final String? householdId;
-  final BigInt? deletedAt;
+  final int? deletedAt;
   const RecipeFolderEntry(
       {required this.id,
       required this.name,
@@ -145,7 +145,7 @@ class RecipeFolderEntry extends DataClass
       map['household_id'] = Variable<String>(householdId);
     }
     if (!nullToAbsent || deletedAt != null) {
-      map['deleted_at'] = Variable<BigInt>(deletedAt);
+      map['deleted_at'] = Variable<int>(deletedAt);
     }
     return map;
   }
@@ -177,7 +177,7 @@ class RecipeFolderEntry extends DataClass
       userId: serializer.fromJson<String?>(json['userId']),
       parentId: serializer.fromJson<String?>(json['parentId']),
       householdId: serializer.fromJson<String?>(json['householdId']),
-      deletedAt: serializer.fromJson<BigInt?>(json['deletedAt']),
+      deletedAt: serializer.fromJson<int?>(json['deletedAt']),
     );
   }
   @override
@@ -189,7 +189,7 @@ class RecipeFolderEntry extends DataClass
       'userId': serializer.toJson<String?>(userId),
       'parentId': serializer.toJson<String?>(parentId),
       'householdId': serializer.toJson<String?>(householdId),
-      'deletedAt': serializer.toJson<BigInt?>(deletedAt),
+      'deletedAt': serializer.toJson<int?>(deletedAt),
     };
   }
 
@@ -199,7 +199,7 @@ class RecipeFolderEntry extends DataClass
           Value<String?> userId = const Value.absent(),
           Value<String?> parentId = const Value.absent(),
           Value<String?> householdId = const Value.absent(),
-          Value<BigInt?> deletedAt = const Value.absent()}) =>
+          Value<int?> deletedAt = const Value.absent()}) =>
       RecipeFolderEntry(
         id: id ?? this.id,
         name: name ?? this.name,
@@ -254,7 +254,7 @@ class RecipeFoldersCompanion extends UpdateCompanion<RecipeFolderEntry> {
   final Value<String?> userId;
   final Value<String?> parentId;
   final Value<String?> householdId;
-  final Value<BigInt?> deletedAt;
+  final Value<int?> deletedAt;
   final Value<int> rowid;
   const RecipeFoldersCompanion({
     this.id = const Value.absent(),
@@ -280,7 +280,7 @@ class RecipeFoldersCompanion extends UpdateCompanion<RecipeFolderEntry> {
     Expression<String>? userId,
     Expression<String>? parentId,
     Expression<String>? householdId,
-    Expression<BigInt>? deletedAt,
+    Expression<int>? deletedAt,
     Expression<int>? rowid,
   }) {
     return RawValuesInsertable({
@@ -300,7 +300,7 @@ class RecipeFoldersCompanion extends UpdateCompanion<RecipeFolderEntry> {
       Value<String?>? userId,
       Value<String?>? parentId,
       Value<String?>? householdId,
-      Value<BigInt?>? deletedAt,
+      Value<int?>? deletedAt,
       Value<int>? rowid}) {
     return RecipeFoldersCompanion(
       id: id ?? this.id,
@@ -332,7 +332,7 @@ class RecipeFoldersCompanion extends UpdateCompanion<RecipeFolderEntry> {
       map['household_id'] = Variable<String>(householdId.value);
     }
     if (deletedAt.present) {
-      map['deleted_at'] = Variable<BigInt>(deletedAt.value);
+      map['deleted_at'] = Variable<int>(deletedAt.value);
     }
     if (rowid.present) {
       map['rowid'] = Variable<int>(rowid.value);
@@ -373,7 +373,7 @@ typedef $$RecipeFoldersTableCreateCompanionBuilder = RecipeFoldersCompanion
   Value<String?> userId,
   Value<String?> parentId,
   Value<String?> householdId,
-  Value<BigInt?> deletedAt,
+  Value<int?> deletedAt,
   Value<int> rowid,
 });
 typedef $$RecipeFoldersTableUpdateCompanionBuilder = RecipeFoldersCompanion
@@ -383,7 +383,7 @@ typedef $$RecipeFoldersTableUpdateCompanionBuilder = RecipeFoldersCompanion
   Value<String?> userId,
   Value<String?> parentId,
   Value<String?> householdId,
-  Value<BigInt?> deletedAt,
+  Value<int?> deletedAt,
   Value<int> rowid,
 });
 
@@ -411,7 +411,7 @@ class $$RecipeFoldersTableFilterComposer
   ColumnFilters<String> get householdId => $composableBuilder(
       column: $table.householdId, builder: (column) => ColumnFilters(column));
 
-  ColumnFilters<BigInt> get deletedAt => $composableBuilder(
+  ColumnFilters<int> get deletedAt => $composableBuilder(
       column: $table.deletedAt, builder: (column) => ColumnFilters(column));
 }
 
@@ -439,7 +439,7 @@ class $$RecipeFoldersTableOrderingComposer
   ColumnOrderings<String> get householdId => $composableBuilder(
       column: $table.householdId, builder: (column) => ColumnOrderings(column));
 
-  ColumnOrderings<BigInt> get deletedAt => $composableBuilder(
+  ColumnOrderings<int> get deletedAt => $composableBuilder(
       column: $table.deletedAt, builder: (column) => ColumnOrderings(column));
 }
 
@@ -467,7 +467,7 @@ class $$RecipeFoldersTableAnnotationComposer
   GeneratedColumn<String> get householdId => $composableBuilder(
       column: $table.householdId, builder: (column) => column);
 
-  GeneratedColumn<BigInt> get deletedAt =>
+  GeneratedColumn<int> get deletedAt =>
       $composableBuilder(column: $table.deletedAt, builder: (column) => column);
 }
 
@@ -502,7 +502,7 @@ class $$RecipeFoldersTableTableManager extends RootTableManager<
             Value<String?> userId = const Value.absent(),
             Value<String?> parentId = const Value.absent(),
             Value<String?> householdId = const Value.absent(),
-            Value<BigInt?> deletedAt = const Value.absent(),
+            Value<int?> deletedAt = const Value.absent(),
             Value<int> rowid = const Value.absent(),
           }) =>
               RecipeFoldersCompanion(
@@ -520,7 +520,7 @@ class $$RecipeFoldersTableTableManager extends RootTableManager<
             Value<String?> userId = const Value.absent(),
             Value<String?> parentId = const Value.absent(),
             Value<String?> householdId = const Value.absent(),
-            Value<BigInt?> deletedAt = const Value.absent(),
+            Value<int?> deletedAt = const Value.absent(),
             Value<int> rowid = const Value.absent(),
           }) =>
               RecipeFoldersCompanion.insert(

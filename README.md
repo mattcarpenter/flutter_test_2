@@ -61,9 +61,13 @@ A new Flutter project.
   [X] Folder context menu positioning weird on tablet
 [ ] Implement Recipes
   [X] Recipe capabilities
-  [ ] Convert deletedAt to numeric timestamp
-  [ ] New schemas (drift, powersync, postgres)
-  [ ] Test it
+  [X] Convert deletedAt to numeric timestamp
+  [X] New schemas (drift, powersync, postgres)
+  [X] Test it
+  [ ] Clean up database directory
+  [ ] DDLs including RLS
+  [ ] Test RLS
+  [ ] Figure out integration tests
   [ ] Recipe schema & Riverpod
   [ ] Recipe integration test
   [ ] Dummy recipe adder UI

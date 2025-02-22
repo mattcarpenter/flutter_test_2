@@ -94,7 +94,7 @@ class _FolderListState extends ConsumerState<FolderList> {
             },
             loading: () => const Center(child: CircularProgressIndicator()),
             error: (error, stack) =>
-                Center(child: Text('Error: ${stack.toString()}')),
+                Center(child: Text('Error: ${error.toString()}')),
           ),
           // Input field and add button.
           /*Padding(

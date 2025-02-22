@@ -9,5 +9,5 @@ class RecipeFolders extends Table {
   TextColumn get userId => text().nullable()();
   TextColumn get parentId => text().nullable()();
   TextColumn get householdId => text().nullable()();
-  Int64Column get deletedAt => int64().nullable()();
+  IntColumn get deletedAt => integer().nullable()();
 }

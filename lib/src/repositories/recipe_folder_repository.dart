@@ -11,9 +11,11 @@ class RecipeFolderRepository {
 
   RecipeFolderRepository(this._db);
 
-  // Watch all recipe folders as a stream.
+  // Watch all recipe folders that are not marked as deleted.
   Stream<List<RecipeFolderEntry>> watchFolders() {
-    return _db.select(_db.recipeFolders).watch();
+    return (_db.select(_db.recipeFolders)
+      ..where((tbl) => tbl.deletedAt.isNull())
+    ).watch();
   }
 
   // Insert a new folder. We use a companion so that the auto-generated fields work properly.
@@ -21,13 +23,16 @@ class RecipeFolderRepository {
     return _db.into(_db.recipeFolders).insert(folder);
   }
 
-  // Delete a folder by its unique id.
+  // Soft delete a folder by updating its deletedAt column.
   Future<int> deleteFolder(String id) {
-    return (_db.delete(_db.recipeFolders)
-      ..where((tbl) => tbl.id.equals(id)))
-        .go();
+    return (_db.update(_db.recipeFolders)
+      ..where((tbl) => tbl.id.equals(id))
+    ).write(RecipeFoldersCompanion(
+      deletedAt: Value(DateTime.now().millisecondsSinceEpoch),
+    ));
   }
 }
+
 
 final recipeFolderRepositoryProvider = Provider<RecipeFolderRepository>((ref) {
   // Ensure the database is ready; if not, throw an exception.
