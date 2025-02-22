@@ -1,28 +1,39 @@
-import '../models/recipe_folder.model.dart';
-import 'package:brick_core/query.dart';
-import 'base_repository.dart';
+import 'package:drift/drift.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:powersync/powersync.dart';
+import '../../database/database.dart';
+import '../../database/powersync.dart';
+import '../../database/recipe_folder.dart';
+import '../../main.dart';
 
 class RecipeFolderRepository {
-  final BaseRepository _baseRepository;
+  final AppDatabase _db;
 
-  RecipeFolderRepository(this._baseRepository);
+  RecipeFolderRepository(this._db);
 
-  Future<void> addFolder(RecipeFolder folder) async {
-    // This triggers Brick’s upsert, which writes to local SQLite immediately.
-    await _baseRepository.add(folder);
+  // Watch all recipe folders as a stream.
+  Stream<List<RecipeFolderEntry>> watchFolders() {
+    return _db.select(_db.recipeFolders).watch();
   }
 
-  Future<void> deleteFolder(RecipeFolder folder) async {
-    // Instead of deleting, update the folder with a deletion timestamp.
-    //final softDeletedFolder = folder.copyWith(deletedAt: DateTime.now());
-    folder.deletedAt = DateTime.now();
-    await _baseRepository.upsert(folder);
+  // Insert a new folder. We use a companion so that the auto-generated fields work properly.
+  Future<int> addFolder(RecipeFoldersCompanion folder) {
+    return _db.into(_db.recipeFolders).insert(folder);
   }
 
-  /// Use Brick’s built‑in subscription method for on-device reactivity.
-  /// We filter out records that have been soft-deleted.
-  Stream<List<RecipeFolder>> watchFolders() {
-    final query = Query(where: [const Where('deletedAt').isExactly(null)]);
-    return _baseRepository.subscribe<RecipeFolder>(query: query);
+  // Delete a folder by its unique id.
+  Future<int> deleteFolder(String id) {
+    return (_db.delete(_db.recipeFolders)
+      ..where((tbl) => tbl.id.equals(id)))
+        .go();
   }
 }
+
+final recipeFolderRepositoryProvider = Provider<RecipeFolderRepository>((ref) {
+  // Ensure the database is ready; if not, throw an exception.
+  //final db = ref.watch(databaseProvider).maybeWhen(
+  //  data: (db) => db,
+  //  orElse: () => throw Exception('Database not initialized'),
+  //);
+  return RecipeFolderRepository(appDb);
+});

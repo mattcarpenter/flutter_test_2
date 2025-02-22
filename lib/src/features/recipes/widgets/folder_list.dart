@@ -1,12 +1,9 @@
-import 'dart:io' show Platform;
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../../providers/recipe_folder_provider.dart';
-import '../../../models/recipe_folder.model.dart';
-import '../../../repositories/base_repository.dart';
 import '../widgets/folder_tile.dart';  // Import the FolderTile widget
 
 class FolderList extends ConsumerStatefulWidget {
@@ -30,8 +27,8 @@ class _FolderListState extends ConsumerState<FolderList> {
   void initState() {
     super.initState();
     // Ensure we load data from SQLite.
-    final baseRepository = ref.read(baseRepositoryProvider);
-    baseRepository.getAll<RecipeFolder>();
+    //final baseRepository = ref.read(baseRepositoryProvider);
+    //baseRepository.getAll<RecipeFolder>();
     folderNameController = TextEditingController();
     textFieldFocusNode = FocusNode();
   }
@@ -89,7 +86,7 @@ class _FolderListState extends ConsumerState<FolderList> {
                     onDelete: () {
                       ref
                           .read(recipeFolderNotifierProvider.notifier)
-                          .deleteFolder(folder);
+                          .deleteFolder(folder.id);
                     },
                   );
                 },
@@ -97,7 +94,7 @@ class _FolderListState extends ConsumerState<FolderList> {
             },
             loading: () => const Center(child: CircularProgressIndicator()),
             error: (error, stack) =>
-                Center(child: Text('Error: ${error.toString()}')),
+                Center(child: Text('Error: ${stack.toString()}')),
           ),
           // Input field and add button.
           /*Padding(

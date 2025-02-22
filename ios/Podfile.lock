@@ -15,12 +15,35 @@ PODS:
     - FlutterMacOS
   - pointer_interceptor_ios (0.0.1):
     - Flutter
+  - powersync-sqlite-core (0.3.10)
+  - powersync_flutter_libs (0.0.1):
+    - Flutter
+    - powersync-sqlite-core (~> 0.3.10)
   - shared_preferences_foundation (0.0.1):
     - Flutter
     - FlutterMacOS
   - sqflite_darwin (0.0.4):
     - Flutter
     - FlutterMacOS
+  - sqlite3 (3.49.1):
+    - sqlite3/common (= 3.49.1)
+  - sqlite3/common (3.49.1)
+  - sqlite3/dbstatvtab (3.49.1):
+    - sqlite3/common
+  - sqlite3/fts5 (3.49.1):
+    - sqlite3/common
+  - sqlite3/perf-threadsafe (3.49.1):
+    - sqlite3/common
+  - sqlite3/rtree (3.49.1):
+    - sqlite3/common
+  - sqlite3_flutter_libs (0.0.1):
+    - Flutter
+    - FlutterMacOS
+    - sqlite3 (~> 3.49.0)
+    - sqlite3/dbstatvtab
+    - sqlite3/fts5
+    - sqlite3/perf-threadsafe
+    - sqlite3/rtree
   - super_native_extensions (0.0.1):
     - Flutter
   - system_theme (0.0.1):
@@ -37,11 +60,18 @@ DEPENDENCIES:
   - irondash_engine_context (from `.symlinks/plugins/irondash_engine_context/ios`)
   - path_provider_foundation (from `.symlinks/plugins/path_provider_foundation/darwin`)
   - pointer_interceptor_ios (from `.symlinks/plugins/pointer_interceptor_ios/ios`)
+  - powersync_flutter_libs (from `.symlinks/plugins/powersync_flutter_libs/ios`)
   - shared_preferences_foundation (from `.symlinks/plugins/shared_preferences_foundation/darwin`)
   - sqflite_darwin (from `.symlinks/plugins/sqflite_darwin/darwin`)
+  - sqlite3_flutter_libs (from `.symlinks/plugins/sqlite3_flutter_libs/darwin`)
   - super_native_extensions (from `.symlinks/plugins/super_native_extensions/ios`)
   - system_theme (from `.symlinks/plugins/system_theme/ios`)
   - url_launcher_ios (from `.symlinks/plugins/url_launcher_ios/ios`)
+
+SPEC REPOS:
+  trunk:
+    - powersync-sqlite-core
+    - sqlite3
 
 EXTERNAL SOURCES:
   app_links:
@@ -60,10 +90,14 @@ EXTERNAL SOURCES:
     :path: ".symlinks/plugins/path_provider_foundation/darwin"
   pointer_interceptor_ios:
     :path: ".symlinks/plugins/pointer_interceptor_ios/ios"
+  powersync_flutter_libs:
+    :path: ".symlinks/plugins/powersync_flutter_libs/ios"
   shared_preferences_foundation:
     :path: ".symlinks/plugins/shared_preferences_foundation/darwin"
   sqflite_darwin:
     :path: ".symlinks/plugins/sqflite_darwin/darwin"
+  sqlite3_flutter_libs:
+    :path: ".symlinks/plugins/sqlite3_flutter_libs/darwin"
   super_native_extensions:
     :path: ".symlinks/plugins/super_native_extensions/ios"
   system_theme:
@@ -80,8 +114,12 @@ SPEC CHECKSUMS:
   irondash_engine_context: 3458bf979b90d616ffb8ae03a150bafe2e860cc9
   path_provider_foundation: 2b6b4c569c0fb62ec74538f866245ac84301af46
   pointer_interceptor_ios: 508241697ff0947f853c061945a8b822463947c1
+  powersync-sqlite-core: c7045a44bb1040485ba46b42a3b0acaed424a5cd
+  powersync_flutter_libs: 1704315ac8bc369b9bebf26db792a225a46b6737
   shared_preferences_foundation: fcdcbc04712aee1108ac7fda236f363274528f78
   sqflite_darwin: 5a7236e3b501866c1c9befc6771dfd73ffb8702d
+  sqlite3: fc1400008a9b3525f5914ed715a5d1af0b8f4983
+  sqlite3_flutter_libs: 069c435986dd4b63461aecd68f4b30be4a9e9daa
   super_native_extensions: 4916b3c627a9c7fffdc48a23a9eca0b1ac228fa7
   system_theme: bfc1b0913d08f38d8c6bbe94b202a58df599d9f7
   url_launcher_ios: 5334b05cef931de560670eeae103fd3e431ac3fe

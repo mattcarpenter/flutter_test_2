@@ -68,7 +68,7 @@ class RecipeFolderAdapter
   RecipeFolderAdapter();
 
   @override
-  final supabaseTableName = 'recipe_folders';
+  final supabaseTableName = 'recipe_folder';
   @override
   final defaultToNull = true;
   @override

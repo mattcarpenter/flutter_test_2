@@ -62,7 +62,6 @@ Future<Map<String, dynamic>> _$RecipeToSupabase(Recipe instance,
         ? await RecipeFolderAdapter().toSupabase(instance.folder!,
             provider: provider, repository: repository)
         : null,
-    'folder_id': instance.folderId,
     'household': instance.household != null
         ? await HouseholdAdapter().toSupabase(instance.household!,
             provider: provider, repository: repository)
@@ -223,10 +222,6 @@ class RecipeAdapter extends OfflineFirstWithSupabaseAdapter<Recipe> {
       associationType: RecipeFolder,
       associationIsNullable: true,
       foreignKey: 'folder_id',
-    ),
-    'folderId': const RuntimeSupabaseColumnDefinition(
-      association: false,
-      columnName: 'folder_id',
     ),
     'household': const RuntimeSupabaseColumnDefinition(
       association: true,

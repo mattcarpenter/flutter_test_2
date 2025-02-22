@@ -1,28 +1,16 @@
 import 'dart:async';
-
+import 'package:drift/drift.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../models/recipe_folder.model.dart';
+import '../../database/database.dart';
 import '../repositories/recipe_folder_repository.dart';
-import '../repositories/base_repository.dart';
 
-// Provide the BaseRepository instance (singleton)
-final baseRepositoryProvider = Provider<BaseRepository>((ref) {
-  return BaseRepository();
-});
-
-// Provide RecipeFolderRepository using BaseRepository
-final recipeFolderRepositoryProvider = Provider<RecipeFolderRepository>((ref) {
-  final baseRepo = ref.watch(baseRepositoryProvider);
-  return RecipeFolderRepository(baseRepo);
-});
-
-// RecipeFolderNotifier for state management
-class RecipeFolderNotifier extends StateNotifier<AsyncValue<List<RecipeFolder>>> {
+// RecipeFolderNotifier manages a list of RecipeFolderEntry.
+class RecipeFolderNotifier extends StateNotifier<AsyncValue<List<RecipeFolderEntry>>> {
   final RecipeFolderRepository _repository;
-  late final StreamSubscription<List<RecipeFolder>> _subscription;
+  late final StreamSubscription<List<RecipeFolderEntry>> _subscription;
 
   RecipeFolderNotifier(this._repository) : super(const AsyncValue.loading()) {
-    // Instead of manually loading folders, subscribe to Brick's local data stream.
+    // Listen to the stream of folders from Drift.
     _subscription = _repository.watchFolders().listen(
           (folders) {
         state = AsyncValue.data(folders);
@@ -39,30 +27,39 @@ class RecipeFolderNotifier extends StateNotifier<AsyncValue<List<RecipeFolder>>>
     super.dispose();
   }
 
-  // Updated addFolder method to accept a RecipeFolder object.
-  Future<void> addFolder(RecipeFolder folder) async {
+  // Add a new folder.
+  Future<void> addFolder({
+    required String name,
+    String? parentId,
+    String? householdId,
+    String? userId,
+  }) async {
     try {
-      print('Creating folder: ${folder.name} with parent: ${folder.parentId}');
-      await _repository.addFolder(folder);
-      print('Add operation complete; state will update via subscription.');
+      // Create a companion for insertion.
+      final companion = RecipeFoldersCompanion.insert(
+        name: name,
+        userId: Value(userId),
+        parentId: Value(parentId),
+        householdId: Value(householdId),
+      );
+      await _repository.addFolder(companion);
     } catch (e, stack) {
       state = AsyncValue.error(e, stack);
     }
   }
 
-  Future<void> deleteFolder(RecipeFolder folder) async {
+  // Delete a folder by id.
+  Future<void> deleteFolder(String id) async {
     try {
-      await _repository.deleteFolder(folder);
-      // The subscription will automatically update the state.
+      await _repository.deleteFolder(id);
     } catch (e, stack) {
       state = AsyncValue.error(e, stack);
     }
   }
 }
 
-// 🔹 StateNotifierProvider to expose the RecipeFolderNotifier
-final recipeFolderNotifierProvider =
-StateNotifierProvider<RecipeFolderNotifier, AsyncValue<List<RecipeFolder>>>(
+// Provider to expose the RecipeFolderNotifier.
+final recipeFolderNotifierProvider = StateNotifierProvider<RecipeFolderNotifier, AsyncValue<List<RecipeFolderEntry>>>(
       (ref) {
     final repository = ref.watch(recipeFolderRepositoryProvider);
     return RecipeFolderNotifier(repository);

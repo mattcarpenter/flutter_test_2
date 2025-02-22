@@ -4,6 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:macos_ui/macos_ui.dart';
+import 'database/database.dart';
+import 'database/powersync.dart';
 import 'src/app.dart';
 import 'src/settings/settings_controller.dart';
 import 'src/settings/settings_service.dart';
@@ -21,9 +23,14 @@ Future<void> _configureMacosWindowUtils() async {
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  await BaseRepository.configure(databaseFactory);
+  // Drift
+  //final connection = await openConnection();
+  //final db = AppDatabase(connection);
+  await openDatabase();
 
-  await BaseRepository().initialize();
+  // Brick / Supabase
+  //await BaseRepository.configure(databaseFactory);
+  //await BaseRepository().initialize();
 
   // Set up the SettingsController, which will glue user settings to multiple
   // Flutter Widgets.
@@ -45,5 +52,15 @@ void main() async {
   // Run the app and pass in the SettingsController. The app listens to the
   // SettingsController for changes, then passes it further down to the
   // SettingsView.
-  runApp(ProviderScope(child: MyApp(settingsController: settingsController)));
+  runApp(ProviderScope(
+      //overrides: [
+      //  databaseProvider.overrideWith((ref) => db),
+      //],
+      child: MyApp(settingsController: settingsController))
+  );
 }
+
+//final databaseProvider = FutureProvider<AppDatabase>((ref) async {
+//  final connection = await openConnection();
+//  return AppDatabase(connection);
+///});

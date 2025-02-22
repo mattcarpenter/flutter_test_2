@@ -60,7 +60,10 @@ A new Flutter project.
   [X] Folder deletion super broken (black screen)
   [X] Folder context menu positioning weird on tablet
 [ ] Implement Recipes
-  [ ] Recipe capabilities
+  [X] Recipe capabilities
+  [ ] Convert deletedAt to numeric timestamp
+  [ ] New schemas (drift, powersync, postgres)
+  [ ] Test it
   [ ] Recipe schema & Riverpod
   [ ] Recipe integration test
   [ ] Dummy recipe adder UI

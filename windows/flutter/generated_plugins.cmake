@@ -7,7 +7,9 @@ list(APPEND FLUTTER_PLUGIN_LIST
   bitsdojo_window_windows
   flutter_acrylic
   irondash_engine_context
+  powersync_flutter_libs
   screen_retriever_windows
+  sqlite3_flutter_libs
   super_native_extensions
   system_theme
   url_launcher_windows

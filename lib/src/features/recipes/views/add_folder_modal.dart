@@ -32,7 +32,7 @@ void showAddFolderModal(BuildContext context, {
           // Use the notifier to add the folder.
           container
               .read(recipeFolderNotifierProvider.notifier)
-              .addFolder(folder);
+              .addFolder(name: folderName, userId: userId, parentId: parentId, );
           // Close the modal, optionally returning the folder name.
           Navigator.of(bottomSheetContext).pop(folderName);
         },

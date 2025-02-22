@@ -30,8 +30,8 @@ class _AuthSubPageState extends State<AuthSubPage> {
         password: _passwordController.text.trim(),
       );
 
-      final userRepository = ProviderScope.containerOf(context).read(userRepositoryProvider);
-      await userRepository.getUser(Supabase.instance.client.auth.currentUser!.id);
+      //final userRepository = ProviderScope.containerOf(context).read(userRepositoryProvider);
+      //await userRepository.getUser(Supabase.instance.client.auth.currentUser!.id);
 
       setState(() {
         _isLoading = false;

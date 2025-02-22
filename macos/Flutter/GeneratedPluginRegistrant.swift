@@ -13,9 +13,11 @@ import irondash_engine_context
 import macos_ui
 import macos_window_utils
 import path_provider_foundation
+import powersync_flutter_libs
 import screen_retriever_macos
 import shared_preferences_foundation
 import sqflite_darwin
+import sqlite3_flutter_libs
 import super_native_extensions
 import system_theme
 import url_launcher_macos
@@ -30,9 +32,11 @@ func RegisterGeneratedPlugins(registry: FlutterPluginRegistry) {
   MacOSUiPlugin.register(with: registry.registrar(forPlugin: "MacOSUiPlugin"))
   MacOSWindowUtilsPlugin.register(with: registry.registrar(forPlugin: "MacOSWindowUtilsPlugin"))
   PathProviderPlugin.register(with: registry.registrar(forPlugin: "PathProviderPlugin"))
+  PowersyncFlutterLibsPlugin.register(with: registry.registrar(forPlugin: "PowersyncFlutterLibsPlugin"))
   ScreenRetrieverMacosPlugin.register(with: registry.registrar(forPlugin: "ScreenRetrieverMacosPlugin"))
   SharedPreferencesPlugin.register(with: registry.registrar(forPlugin: "SharedPreferencesPlugin"))
   SqflitePlugin.register(with: registry.registrar(forPlugin: "SqflitePlugin"))
+  Sqlite3FlutterLibsPlugin.register(with: registry.registrar(forPlugin: "Sqlite3FlutterLibsPlugin"))
   SuperNativeExtensionsPlugin.register(with: registry.registrar(forPlugin: "SuperNativeExtensionsPlugin"))
   SystemThemePlugin.register(with: registry.registrar(forPlugin: "SystemThemePlugin"))
   UrlLauncherPlugin.register(with: registry.registrar(forPlugin: "UrlLauncherPlugin"))

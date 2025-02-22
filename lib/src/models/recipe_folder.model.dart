@@ -5,7 +5,7 @@ import 'package:supabase_flutter/supabase_flutter.dart' as supabase_flutter;
 import 'package:uuid/uuid.dart';
 
 @ConnectOfflineFirstWithSupabase(
-  supabaseConfig: SupabaseSerializable(tableName: 'recipe_folders', onConflict: 'id'),
+  supabaseConfig: SupabaseSerializable(tableName: 'recipe_folder', onConflict: 'id'), // was plural
   sqliteConfig: SqliteSerializable(),
 )
 class RecipeFolder extends OfflineFirstWithSupabaseModel {

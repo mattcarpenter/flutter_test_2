@@ -7,7 +7,9 @@ list(APPEND FLUTTER_PLUGIN_LIST
   flutter_acrylic
   gtk
   irondash_engine_context
+  powersync_flutter_libs
   screen_retriever_linux
+  sqlite3_flutter_libs
   super_native_extensions
   system_theme
   url_launcher_linux
