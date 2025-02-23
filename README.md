@@ -65,8 +65,10 @@ A new Flutter project.
   [X] New schemas (drift, powersync, postgres)
   [X] Test it
   [X] Clean up database directory
-  [ ] DDLs including RLS
-  [ ] Test RLS
+  [X] DDLs including RLS
+  [X] Test RLS
+  [ ] Test Sharing (not household)
+  [ ] Delete folder in household owned by other does not work (RLS looks wrong)
   [ ] Figure out integration tests
   [ ] Recipe schema & Riverpod
   [ ] Recipe integration test

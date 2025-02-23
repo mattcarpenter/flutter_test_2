@@ -10,4 +10,27 @@ bucket_definitions:
     parameters: SELECT request.user_id() as user_id
     data:
       - SELECT * FROM public.recipe_folders WHERE recipe_folders.user_id = bucket.user_id
+      - SELECT * FROM public.recipes WHERE recipes.user_id = bucket.user_id
+  household_data:
+    parameters: SELECT household_id FROM household_members WHERE user_id = request.user_id()
+    data:
+      - SELECT * FROM public.recipe_folders WHERE household_id = bucket.household_id
+      - SELECT * FROM public.recipes WHERE household_id = bucket.household_id
+      #- SELECT * FROM public.recipe_ingredients WHERE household_id = bucket.household_id
+      #- SELECT * FROM public.recipe_steps WHERE household_id = bucket.household_id
+
+    user_data:
+      parameters: SELECT recipe_id FROM recipe_shares WHERE user_id = request.user_id()
+      data:
+        - SELECT * FROM public.recipes WHERE id = bucket.recipe_id
+        #- SELECT * FROM public.recipe_ingredients WHERE recipe_id = bucket.recipe_id
+        #- SELECT * FROM public.recipe_steps WHERE recipe_id = bucket.recipe_id
+
+    folder_data:
+      parameters: SELECT folder_id FROM recipe_folder_shares WHERE user_id = request.user_id()
+      data:
+        - SELECT * FROM public.recipe_folders WHERE id = bucket.folder_id
+        - SELECT * FROM public.recipes WHERE folder_id = bucket.folder_id
+        #- SELECT * FROM public.recipe_ingredients WHERE recipe_id IN (SELECT id FROM public.recipes WHERE folder_id = bucket.folder_id)
+        #- SELECT * FROM public.recipe_steps WHERE recipe_id IN (SELECT id FROM public.recipes WHERE folder_id = bucket.folder_id)
 

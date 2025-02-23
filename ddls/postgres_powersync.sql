@@ -51,3 +51,60 @@ CREATE INDEX IF NOT EXISTS recipes_folder_idx
 
 CREATE INDEX IF NOT EXISTS recipes_household_idx
     ON public.recipes USING btree (household_id) TABLESPACE pg_default;
+
+-- HOUSEHOLDS -------------------------------
+CREATE TABLE public.households (
+                                   id uuid NOT NULL DEFAULT extensions.uuid_generate_v4(),
+                                   name text NOT NULL,
+                                   user_id uuid NOT NULL,
+                                   CONSTRAINT households_pkey PRIMARY KEY (id),
+                                   CONSTRAINT households_user_id_fkey FOREIGN KEY (user_id) REFERENCES auth.users (id) ON DELETE CASCADE
+) TABLESPACE pg_default;
+
+-- HOUSEHOLDS MEMBERS -------------------------------
+CREATE TABLE public.household_members (
+                                          household_id uuid NOT NULL,
+                                          user_id uuid NOT NULL,
+                                          CONSTRAINT household_members_pkey PRIMARY KEY (household_id, user_id),
+                                          CONSTRAINT household_members_household_id_fkey FOREIGN KEY (household_id) REFERENCES public.households (id) ON DELETE CASCADE,
+                                          CONSTRAINT household_members_user_id_fkey FOREIGN KEY (user_id) REFERENCES auth.users (id) ON DELETE CASCADE
+) TABLESPACE pg_default;
+
+CREATE INDEX IF NOT EXISTS household_members_household_idx ON public.household_members USING btree (household_id) TABLESPACE pg_default;
+CREATE INDEX IF NOT EXISTS household_members_user_idx ON public.household_members USING btree (user_id) TABLESPACE pg_default;
+
+-- RECIPE SHARES -------------------------------
+CREATE TABLE public.recipe_shares (
+                                      id uuid NOT NULL DEFAULT extensions.uuid_generate_v4(),
+                                      recipe_id uuid NOT NULL,
+                                      household_id uuid NULL,
+                                      user_id uuid NULL,
+                                      can_edit integer NOT NULL DEFAULT 0,
+                                      CONSTRAINT recipe_shares_pkey PRIMARY KEY (id),
+                                      CONSTRAINT recipe_shares_recipe_id_fkey FOREIGN KEY (recipe_id) REFERENCES public.recipes (id) ON DELETE CASCADE,
+                                      CONSTRAINT recipe_shares_household_id_fkey FOREIGN KEY (household_id) REFERENCES public.households (id) ON DELETE CASCADE,
+                                      CONSTRAINT recipe_shares_user_id_fkey FOREIGN KEY (user_id) REFERENCES auth.users (id) ON DELETE CASCADE
+) TABLESPACE pg_default;
+
+-- Optionally, add indexes to speed up lookups:
+CREATE INDEX IF NOT EXISTS recipe_shares_recipe_idx ON public.recipe_shares (recipe_id);
+CREATE INDEX IF NOT EXISTS recipe_shares_household_idx ON public.recipe_shares (household_id);
+CREATE INDEX IF NOT EXISTS recipe_shares_user_idx ON public.recipe_shares (user_id);
+
+-- RECIPE FOLDER SHARES -------------------------------
+
+CREATE TABLE public.recipe_folder_shares (
+                                             id uuid NOT NULL DEFAULT extensions.uuid_generate_v4(),
+                                             folder_id uuid NOT NULL,
+                                             household_id uuid NULL,
+                                             user_id uuid NULL,
+                                             can_edit integer NOT NULL DEFAULT 0,
+                                             CONSTRAINT recipe_folder_shares_pkey PRIMARY KEY (id),
+                                             CONSTRAINT recipe_folder_shares_folder_id_fkey FOREIGN KEY (folder_id) REFERENCES public.recipe_folders (id) ON DELETE CASCADE,
+                                             CONSTRAINT recipe_folder_shares_household_id_fkey FOREIGN KEY (household_id) REFERENCES public.households (id) ON DELETE CASCADE,
+                                             CONSTRAINT recipe_folder_shares_user_id_fkey FOREIGN KEY (user_id) REFERENCES auth.users (id) ON DELETE CASCADE
+) TABLESPACE pg_default;
+
+CREATE INDEX IF NOT EXISTS recipe_folder_shares_folder_idx ON public.recipe_folder_shares (folder_id);
+CREATE INDEX IF NOT EXISTS recipe_folder_shares_household_idx ON public.recipe_folder_shares (household_id);
+CREATE INDEX IF NOT EXISTS recipe_folder_shares_user_idx ON public.recipe_folder_shares (user_id);

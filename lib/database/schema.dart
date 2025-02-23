@@ -3,10 +3,14 @@ import 'package:powersync/powersync.dart';
 // Define the table name as a constant.
 const recipeFoldersTable = 'recipe_folders';
 const recipesTable = 'recipes';
+const householdsTable = 'households';
+const householdMembersTable = 'household_members';
+const recipeSharesTable = 'recipe_shares';
+const recipeFolderSharesTable = 'recipe_folder_shares';
 
 // Create a schema that includes your RecipeFolder table.
-Schema schema = Schema(([
-  const Table(recipeFoldersTable, [
+Schema schema = const Schema(([
+  Table(recipeFoldersTable, [
     // Define a text column for the ID.
     //Column.text('folder_id'),
     // Define a text column for the folder name.
@@ -44,5 +48,30 @@ Schema schema = Schema(([
   ]/*, indexes: [
     // Example index on 'id'
     Index('id_index', [IndexedColumn('id')]),
-  ]*/)
+  ]*/),
+  Table(householdsTable, [
+    // Household name.
+    Column.text('name'),
+    // The owner/creator user id.
+    Column.text('user_id'),
+    // You can add additional columns (e.g. created_at) if desired.
+  ]),
+  Table(householdMembersTable, [
+    // The household id.
+    Column.text('household_id'),
+    // The user id.
+    Column.text('user_id'),
+  ]),
+  Table(recipeSharesTable, [
+    Column.text('recipe_id'),
+    Column.text('household_id'),
+    Column.text('user_id'),
+    Column.integer('can_edit'),
+  ]),
+  Table(recipeFolderSharesTable, [
+    Column.text('folder_id'),
+    Column.text('household_id'),
+    Column.text('user_id'),
+    Column.integer('can_edit'),
+  ])
 ]));

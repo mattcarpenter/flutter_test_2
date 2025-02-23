@@ -1159,16 +1159,757 @@ class RecipesCompanion extends UpdateCompanion<RecipeEntry> {
   }
 }
 
+class $RecipeSharesTable extends RecipeShares
+    with TableInfo<$RecipeSharesTable, RecipeShareEntry> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $RecipeSharesTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<String> id = GeneratedColumn<String>(
+      'id', aliasedName, false,
+      type: DriftSqlType.string,
+      requiredDuringInsert: false,
+      defaultConstraints: GeneratedColumn.constraintIsAlways('UNIQUE'),
+      clientDefault: () => const Uuid().v4());
+  static const VerificationMeta _recipeIdMeta =
+      const VerificationMeta('recipeId');
+  @override
+  late final GeneratedColumn<String> recipeId = GeneratedColumn<String>(
+      'recipe_id', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _householdIdMeta =
+      const VerificationMeta('householdId');
+  @override
+  late final GeneratedColumn<String> householdId = GeneratedColumn<String>(
+      'household_id', aliasedName, true,
+      type: DriftSqlType.string, requiredDuringInsert: false);
+  static const VerificationMeta _userIdMeta = const VerificationMeta('userId');
+  @override
+  late final GeneratedColumn<String> userId = GeneratedColumn<String>(
+      'user_id', aliasedName, true,
+      type: DriftSqlType.string, requiredDuringInsert: false);
+  static const VerificationMeta _canEditMeta =
+      const VerificationMeta('canEdit');
+  @override
+  late final GeneratedColumn<int> canEdit = GeneratedColumn<int>(
+      'can_edit', aliasedName, false,
+      type: DriftSqlType.int,
+      requiredDuringInsert: false,
+      defaultValue: const Constant(0));
+  @override
+  List<GeneratedColumn> get $columns =>
+      [id, recipeId, householdId, userId, canEdit];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'recipe_shares';
+  @override
+  VerificationContext validateIntegrity(Insertable<RecipeShareEntry> instance,
+      {bool isInserting = false}) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    }
+    if (data.containsKey('recipe_id')) {
+      context.handle(_recipeIdMeta,
+          recipeId.isAcceptableOrUnknown(data['recipe_id']!, _recipeIdMeta));
+    } else if (isInserting) {
+      context.missing(_recipeIdMeta);
+    }
+    if (data.containsKey('household_id')) {
+      context.handle(
+          _householdIdMeta,
+          householdId.isAcceptableOrUnknown(
+              data['household_id']!, _householdIdMeta));
+    }
+    if (data.containsKey('user_id')) {
+      context.handle(_userIdMeta,
+          userId.isAcceptableOrUnknown(data['user_id']!, _userIdMeta));
+    }
+    if (data.containsKey('can_edit')) {
+      context.handle(_canEditMeta,
+          canEdit.isAcceptableOrUnknown(data['can_edit']!, _canEditMeta));
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => const {};
+  @override
+  RecipeShareEntry map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return RecipeShareEntry(
+      id: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}id'])!,
+      recipeId: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}recipe_id'])!,
+      householdId: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}household_id']),
+      userId: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}user_id']),
+      canEdit: attachedDatabase.typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}can_edit'])!,
+    );
+  }
+
+  @override
+  $RecipeSharesTable createAlias(String alias) {
+    return $RecipeSharesTable(attachedDatabase, alias);
+  }
+}
+
+class RecipeShareEntry extends DataClass
+    implements Insertable<RecipeShareEntry> {
+  final String id;
+  final String recipeId;
+  final String? householdId;
+  final String? userId;
+  final int canEdit;
+  const RecipeShareEntry(
+      {required this.id,
+      required this.recipeId,
+      this.householdId,
+      this.userId,
+      required this.canEdit});
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<String>(id);
+    map['recipe_id'] = Variable<String>(recipeId);
+    if (!nullToAbsent || householdId != null) {
+      map['household_id'] = Variable<String>(householdId);
+    }
+    if (!nullToAbsent || userId != null) {
+      map['user_id'] = Variable<String>(userId);
+    }
+    map['can_edit'] = Variable<int>(canEdit);
+    return map;
+  }
+
+  RecipeSharesCompanion toCompanion(bool nullToAbsent) {
+    return RecipeSharesCompanion(
+      id: Value(id),
+      recipeId: Value(recipeId),
+      householdId: householdId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(householdId),
+      userId:
+          userId == null && nullToAbsent ? const Value.absent() : Value(userId),
+      canEdit: Value(canEdit),
+    );
+  }
+
+  factory RecipeShareEntry.fromJson(Map<String, dynamic> json,
+      {ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return RecipeShareEntry(
+      id: serializer.fromJson<String>(json['id']),
+      recipeId: serializer.fromJson<String>(json['recipeId']),
+      householdId: serializer.fromJson<String?>(json['householdId']),
+      userId: serializer.fromJson<String?>(json['userId']),
+      canEdit: serializer.fromJson<int>(json['canEdit']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<String>(id),
+      'recipeId': serializer.toJson<String>(recipeId),
+      'householdId': serializer.toJson<String?>(householdId),
+      'userId': serializer.toJson<String?>(userId),
+      'canEdit': serializer.toJson<int>(canEdit),
+    };
+  }
+
+  RecipeShareEntry copyWith(
+          {String? id,
+          String? recipeId,
+          Value<String?> householdId = const Value.absent(),
+          Value<String?> userId = const Value.absent(),
+          int? canEdit}) =>
+      RecipeShareEntry(
+        id: id ?? this.id,
+        recipeId: recipeId ?? this.recipeId,
+        householdId: householdId.present ? householdId.value : this.householdId,
+        userId: userId.present ? userId.value : this.userId,
+        canEdit: canEdit ?? this.canEdit,
+      );
+  RecipeShareEntry copyWithCompanion(RecipeSharesCompanion data) {
+    return RecipeShareEntry(
+      id: data.id.present ? data.id.value : this.id,
+      recipeId: data.recipeId.present ? data.recipeId.value : this.recipeId,
+      householdId:
+          data.householdId.present ? data.householdId.value : this.householdId,
+      userId: data.userId.present ? data.userId.value : this.userId,
+      canEdit: data.canEdit.present ? data.canEdit.value : this.canEdit,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('RecipeShareEntry(')
+          ..write('id: $id, ')
+          ..write('recipeId: $recipeId, ')
+          ..write('householdId: $householdId, ')
+          ..write('userId: $userId, ')
+          ..write('canEdit: $canEdit')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(id, recipeId, householdId, userId, canEdit);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is RecipeShareEntry &&
+          other.id == this.id &&
+          other.recipeId == this.recipeId &&
+          other.householdId == this.householdId &&
+          other.userId == this.userId &&
+          other.canEdit == this.canEdit);
+}
+
+class RecipeSharesCompanion extends UpdateCompanion<RecipeShareEntry> {
+  final Value<String> id;
+  final Value<String> recipeId;
+  final Value<String?> householdId;
+  final Value<String?> userId;
+  final Value<int> canEdit;
+  final Value<int> rowid;
+  const RecipeSharesCompanion({
+    this.id = const Value.absent(),
+    this.recipeId = const Value.absent(),
+    this.householdId = const Value.absent(),
+    this.userId = const Value.absent(),
+    this.canEdit = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  RecipeSharesCompanion.insert({
+    this.id = const Value.absent(),
+    required String recipeId,
+    this.householdId = const Value.absent(),
+    this.userId = const Value.absent(),
+    this.canEdit = const Value.absent(),
+    this.rowid = const Value.absent(),
+  }) : recipeId = Value(recipeId);
+  static Insertable<RecipeShareEntry> custom({
+    Expression<String>? id,
+    Expression<String>? recipeId,
+    Expression<String>? householdId,
+    Expression<String>? userId,
+    Expression<int>? canEdit,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (recipeId != null) 'recipe_id': recipeId,
+      if (householdId != null) 'household_id': householdId,
+      if (userId != null) 'user_id': userId,
+      if (canEdit != null) 'can_edit': canEdit,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  RecipeSharesCompanion copyWith(
+      {Value<String>? id,
+      Value<String>? recipeId,
+      Value<String?>? householdId,
+      Value<String?>? userId,
+      Value<int>? canEdit,
+      Value<int>? rowid}) {
+    return RecipeSharesCompanion(
+      id: id ?? this.id,
+      recipeId: recipeId ?? this.recipeId,
+      householdId: householdId ?? this.householdId,
+      userId: userId ?? this.userId,
+      canEdit: canEdit ?? this.canEdit,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<String>(id.value);
+    }
+    if (recipeId.present) {
+      map['recipe_id'] = Variable<String>(recipeId.value);
+    }
+    if (householdId.present) {
+      map['household_id'] = Variable<String>(householdId.value);
+    }
+    if (userId.present) {
+      map['user_id'] = Variable<String>(userId.value);
+    }
+    if (canEdit.present) {
+      map['can_edit'] = Variable<int>(canEdit.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('RecipeSharesCompanion(')
+          ..write('id: $id, ')
+          ..write('recipeId: $recipeId, ')
+          ..write('householdId: $householdId, ')
+          ..write('userId: $userId, ')
+          ..write('canEdit: $canEdit, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
+class $HouseholdMembersTable extends HouseholdMembers
+    with TableInfo<$HouseholdMembersTable, HouseholdMemberEntry> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $HouseholdMembersTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _householdIdMeta =
+      const VerificationMeta('householdId');
+  @override
+  late final GeneratedColumn<String> householdId = GeneratedColumn<String>(
+      'household_id', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _userIdMeta = const VerificationMeta('userId');
+  @override
+  late final GeneratedColumn<String> userId = GeneratedColumn<String>(
+      'user_id', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  @override
+  List<GeneratedColumn> get $columns => [householdId, userId];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'household_members';
+  @override
+  VerificationContext validateIntegrity(
+      Insertable<HouseholdMemberEntry> instance,
+      {bool isInserting = false}) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('household_id')) {
+      context.handle(
+          _householdIdMeta,
+          householdId.isAcceptableOrUnknown(
+              data['household_id']!, _householdIdMeta));
+    } else if (isInserting) {
+      context.missing(_householdIdMeta);
+    }
+    if (data.containsKey('user_id')) {
+      context.handle(_userIdMeta,
+          userId.isAcceptableOrUnknown(data['user_id']!, _userIdMeta));
+    } else if (isInserting) {
+      context.missing(_userIdMeta);
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {householdId, userId};
+  @override
+  HouseholdMemberEntry map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return HouseholdMemberEntry(
+      householdId: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}household_id'])!,
+      userId: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}user_id'])!,
+    );
+  }
+
+  @override
+  $HouseholdMembersTable createAlias(String alias) {
+    return $HouseholdMembersTable(attachedDatabase, alias);
+  }
+}
+
+class HouseholdMemberEntry extends DataClass
+    implements Insertable<HouseholdMemberEntry> {
+  final String householdId;
+  final String userId;
+  const HouseholdMemberEntry({required this.householdId, required this.userId});
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['household_id'] = Variable<String>(householdId);
+    map['user_id'] = Variable<String>(userId);
+    return map;
+  }
+
+  HouseholdMembersCompanion toCompanion(bool nullToAbsent) {
+    return HouseholdMembersCompanion(
+      householdId: Value(householdId),
+      userId: Value(userId),
+    );
+  }
+
+  factory HouseholdMemberEntry.fromJson(Map<String, dynamic> json,
+      {ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return HouseholdMemberEntry(
+      householdId: serializer.fromJson<String>(json['householdId']),
+      userId: serializer.fromJson<String>(json['userId']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'householdId': serializer.toJson<String>(householdId),
+      'userId': serializer.toJson<String>(userId),
+    };
+  }
+
+  HouseholdMemberEntry copyWith({String? householdId, String? userId}) =>
+      HouseholdMemberEntry(
+        householdId: householdId ?? this.householdId,
+        userId: userId ?? this.userId,
+      );
+  HouseholdMemberEntry copyWithCompanion(HouseholdMembersCompanion data) {
+    return HouseholdMemberEntry(
+      householdId:
+          data.householdId.present ? data.householdId.value : this.householdId,
+      userId: data.userId.present ? data.userId.value : this.userId,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('HouseholdMemberEntry(')
+          ..write('householdId: $householdId, ')
+          ..write('userId: $userId')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(householdId, userId);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is HouseholdMemberEntry &&
+          other.householdId == this.householdId &&
+          other.userId == this.userId);
+}
+
+class HouseholdMembersCompanion extends UpdateCompanion<HouseholdMemberEntry> {
+  final Value<String> householdId;
+  final Value<String> userId;
+  final Value<int> rowid;
+  const HouseholdMembersCompanion({
+    this.householdId = const Value.absent(),
+    this.userId = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  HouseholdMembersCompanion.insert({
+    required String householdId,
+    required String userId,
+    this.rowid = const Value.absent(),
+  })  : householdId = Value(householdId),
+        userId = Value(userId);
+  static Insertable<HouseholdMemberEntry> custom({
+    Expression<String>? householdId,
+    Expression<String>? userId,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (householdId != null) 'household_id': householdId,
+      if (userId != null) 'user_id': userId,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  HouseholdMembersCompanion copyWith(
+      {Value<String>? householdId, Value<String>? userId, Value<int>? rowid}) {
+    return HouseholdMembersCompanion(
+      householdId: householdId ?? this.householdId,
+      userId: userId ?? this.userId,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (householdId.present) {
+      map['household_id'] = Variable<String>(householdId.value);
+    }
+    if (userId.present) {
+      map['user_id'] = Variable<String>(userId.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('HouseholdMembersCompanion(')
+          ..write('householdId: $householdId, ')
+          ..write('userId: $userId, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
+class $HouseholdsTable extends Households
+    with TableInfo<$HouseholdsTable, HouseholdEntry> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $HouseholdsTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<String> id = GeneratedColumn<String>(
+      'id', aliasedName, false,
+      type: DriftSqlType.string,
+      requiredDuringInsert: false,
+      defaultConstraints: GeneratedColumn.constraintIsAlways('UNIQUE'),
+      clientDefault: () => const Uuid().v4());
+  static const VerificationMeta _nameMeta = const VerificationMeta('name');
+  @override
+  late final GeneratedColumn<String> name = GeneratedColumn<String>(
+      'name', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _userIdMeta = const VerificationMeta('userId');
+  @override
+  late final GeneratedColumn<String> userId = GeneratedColumn<String>(
+      'user_id', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  @override
+  List<GeneratedColumn> get $columns => [id, name, userId];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'households';
+  @override
+  VerificationContext validateIntegrity(Insertable<HouseholdEntry> instance,
+      {bool isInserting = false}) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    }
+    if (data.containsKey('name')) {
+      context.handle(
+          _nameMeta, name.isAcceptableOrUnknown(data['name']!, _nameMeta));
+    } else if (isInserting) {
+      context.missing(_nameMeta);
+    }
+    if (data.containsKey('user_id')) {
+      context.handle(_userIdMeta,
+          userId.isAcceptableOrUnknown(data['user_id']!, _userIdMeta));
+    } else if (isInserting) {
+      context.missing(_userIdMeta);
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => const {};
+  @override
+  HouseholdEntry map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return HouseholdEntry(
+      id: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}id'])!,
+      name: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}name'])!,
+      userId: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}user_id'])!,
+    );
+  }
+
+  @override
+  $HouseholdsTable createAlias(String alias) {
+    return $HouseholdsTable(attachedDatabase, alias);
+  }
+}
+
+class HouseholdEntry extends DataClass implements Insertable<HouseholdEntry> {
+  final String id;
+  final String name;
+  final String userId;
+  const HouseholdEntry(
+      {required this.id, required this.name, required this.userId});
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<String>(id);
+    map['name'] = Variable<String>(name);
+    map['user_id'] = Variable<String>(userId);
+    return map;
+  }
+
+  HouseholdsCompanion toCompanion(bool nullToAbsent) {
+    return HouseholdsCompanion(
+      id: Value(id),
+      name: Value(name),
+      userId: Value(userId),
+    );
+  }
+
+  factory HouseholdEntry.fromJson(Map<String, dynamic> json,
+      {ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return HouseholdEntry(
+      id: serializer.fromJson<String>(json['id']),
+      name: serializer.fromJson<String>(json['name']),
+      userId: serializer.fromJson<String>(json['userId']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<String>(id),
+      'name': serializer.toJson<String>(name),
+      'userId': serializer.toJson<String>(userId),
+    };
+  }
+
+  HouseholdEntry copyWith({String? id, String? name, String? userId}) =>
+      HouseholdEntry(
+        id: id ?? this.id,
+        name: name ?? this.name,
+        userId: userId ?? this.userId,
+      );
+  HouseholdEntry copyWithCompanion(HouseholdsCompanion data) {
+    return HouseholdEntry(
+      id: data.id.present ? data.id.value : this.id,
+      name: data.name.present ? data.name.value : this.name,
+      userId: data.userId.present ? data.userId.value : this.userId,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('HouseholdEntry(')
+          ..write('id: $id, ')
+          ..write('name: $name, ')
+          ..write('userId: $userId')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(id, name, userId);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is HouseholdEntry &&
+          other.id == this.id &&
+          other.name == this.name &&
+          other.userId == this.userId);
+}
+
+class HouseholdsCompanion extends UpdateCompanion<HouseholdEntry> {
+  final Value<String> id;
+  final Value<String> name;
+  final Value<String> userId;
+  final Value<int> rowid;
+  const HouseholdsCompanion({
+    this.id = const Value.absent(),
+    this.name = const Value.absent(),
+    this.userId = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  HouseholdsCompanion.insert({
+    this.id = const Value.absent(),
+    required String name,
+    required String userId,
+    this.rowid = const Value.absent(),
+  })  : name = Value(name),
+        userId = Value(userId);
+  static Insertable<HouseholdEntry> custom({
+    Expression<String>? id,
+    Expression<String>? name,
+    Expression<String>? userId,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (name != null) 'name': name,
+      if (userId != null) 'user_id': userId,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  HouseholdsCompanion copyWith(
+      {Value<String>? id,
+      Value<String>? name,
+      Value<String>? userId,
+      Value<int>? rowid}) {
+    return HouseholdsCompanion(
+      id: id ?? this.id,
+      name: name ?? this.name,
+      userId: userId ?? this.userId,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<String>(id.value);
+    }
+    if (name.present) {
+      map['name'] = Variable<String>(name.value);
+    }
+    if (userId.present) {
+      map['user_id'] = Variable<String>(userId.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('HouseholdsCompanion(')
+          ..write('id: $id, ')
+          ..write('name: $name, ')
+          ..write('userId: $userId, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
 abstract class _$AppDatabase extends GeneratedDatabase {
   _$AppDatabase(QueryExecutor e) : super(e);
   $AppDatabaseManager get managers => $AppDatabaseManager(this);
   late final $RecipeFoldersTable recipeFolders = $RecipeFoldersTable(this);
   late final $RecipesTable recipes = $RecipesTable(this);
+  late final $RecipeSharesTable recipeShares = $RecipeSharesTable(this);
+  late final $HouseholdMembersTable householdMembers =
+      $HouseholdMembersTable(this);
+  late final $HouseholdsTable households = $HouseholdsTable(this);
   @override
   Iterable<TableInfo<Table, Object?>> get allTables =>
       allSchemaEntities.whereType<TableInfo<Table, Object?>>();
   @override
-  List<DatabaseSchemaEntity> get allSchemaEntities => [recipeFolders, recipes];
+  List<DatabaseSchemaEntity> get allSchemaEntities =>
+      [recipeFolders, recipes, recipeShares, householdMembers, households];
 }
 
 typedef $$RecipeFoldersTableCreateCompanionBuilder = RecipeFoldersCompanion
@@ -1705,6 +2446,451 @@ typedef $$RecipesTableProcessedTableManager = ProcessedTableManager<
     (RecipeEntry, BaseReferences<_$AppDatabase, $RecipesTable, RecipeEntry>),
     RecipeEntry,
     PrefetchHooks Function()>;
+typedef $$RecipeSharesTableCreateCompanionBuilder = RecipeSharesCompanion
+    Function({
+  Value<String> id,
+  required String recipeId,
+  Value<String?> householdId,
+  Value<String?> userId,
+  Value<int> canEdit,
+  Value<int> rowid,
+});
+typedef $$RecipeSharesTableUpdateCompanionBuilder = RecipeSharesCompanion
+    Function({
+  Value<String> id,
+  Value<String> recipeId,
+  Value<String?> householdId,
+  Value<String?> userId,
+  Value<int> canEdit,
+  Value<int> rowid,
+});
+
+class $$RecipeSharesTableFilterComposer
+    extends Composer<_$AppDatabase, $RecipeSharesTable> {
+  $$RecipeSharesTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get id => $composableBuilder(
+      column: $table.id, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get recipeId => $composableBuilder(
+      column: $table.recipeId, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get householdId => $composableBuilder(
+      column: $table.householdId, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get userId => $composableBuilder(
+      column: $table.userId, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<int> get canEdit => $composableBuilder(
+      column: $table.canEdit, builder: (column) => ColumnFilters(column));
+}
+
+class $$RecipeSharesTableOrderingComposer
+    extends Composer<_$AppDatabase, $RecipeSharesTable> {
+  $$RecipeSharesTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get id => $composableBuilder(
+      column: $table.id, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get recipeId => $composableBuilder(
+      column: $table.recipeId, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get householdId => $composableBuilder(
+      column: $table.householdId, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get userId => $composableBuilder(
+      column: $table.userId, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<int> get canEdit => $composableBuilder(
+      column: $table.canEdit, builder: (column) => ColumnOrderings(column));
+}
+
+class $$RecipeSharesTableAnnotationComposer
+    extends Composer<_$AppDatabase, $RecipeSharesTable> {
+  $$RecipeSharesTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get recipeId =>
+      $composableBuilder(column: $table.recipeId, builder: (column) => column);
+
+  GeneratedColumn<String> get householdId => $composableBuilder(
+      column: $table.householdId, builder: (column) => column);
+
+  GeneratedColumn<String> get userId =>
+      $composableBuilder(column: $table.userId, builder: (column) => column);
+
+  GeneratedColumn<int> get canEdit =>
+      $composableBuilder(column: $table.canEdit, builder: (column) => column);
+}
+
+class $$RecipeSharesTableTableManager extends RootTableManager<
+    _$AppDatabase,
+    $RecipeSharesTable,
+    RecipeShareEntry,
+    $$RecipeSharesTableFilterComposer,
+    $$RecipeSharesTableOrderingComposer,
+    $$RecipeSharesTableAnnotationComposer,
+    $$RecipeSharesTableCreateCompanionBuilder,
+    $$RecipeSharesTableUpdateCompanionBuilder,
+    (
+      RecipeShareEntry,
+      BaseReferences<_$AppDatabase, $RecipeSharesTable, RecipeShareEntry>
+    ),
+    RecipeShareEntry,
+    PrefetchHooks Function()> {
+  $$RecipeSharesTableTableManager(_$AppDatabase db, $RecipeSharesTable table)
+      : super(TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$RecipeSharesTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$RecipeSharesTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$RecipeSharesTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback: ({
+            Value<String> id = const Value.absent(),
+            Value<String> recipeId = const Value.absent(),
+            Value<String?> householdId = const Value.absent(),
+            Value<String?> userId = const Value.absent(),
+            Value<int> canEdit = const Value.absent(),
+            Value<int> rowid = const Value.absent(),
+          }) =>
+              RecipeSharesCompanion(
+            id: id,
+            recipeId: recipeId,
+            householdId: householdId,
+            userId: userId,
+            canEdit: canEdit,
+            rowid: rowid,
+          ),
+          createCompanionCallback: ({
+            Value<String> id = const Value.absent(),
+            required String recipeId,
+            Value<String?> householdId = const Value.absent(),
+            Value<String?> userId = const Value.absent(),
+            Value<int> canEdit = const Value.absent(),
+            Value<int> rowid = const Value.absent(),
+          }) =>
+              RecipeSharesCompanion.insert(
+            id: id,
+            recipeId: recipeId,
+            householdId: householdId,
+            userId: userId,
+            canEdit: canEdit,
+            rowid: rowid,
+          ),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .toList(),
+          prefetchHooksCallback: null,
+        ));
+}
+
+typedef $$RecipeSharesTableProcessedTableManager = ProcessedTableManager<
+    _$AppDatabase,
+    $RecipeSharesTable,
+    RecipeShareEntry,
+    $$RecipeSharesTableFilterComposer,
+    $$RecipeSharesTableOrderingComposer,
+    $$RecipeSharesTableAnnotationComposer,
+    $$RecipeSharesTableCreateCompanionBuilder,
+    $$RecipeSharesTableUpdateCompanionBuilder,
+    (
+      RecipeShareEntry,
+      BaseReferences<_$AppDatabase, $RecipeSharesTable, RecipeShareEntry>
+    ),
+    RecipeShareEntry,
+    PrefetchHooks Function()>;
+typedef $$HouseholdMembersTableCreateCompanionBuilder
+    = HouseholdMembersCompanion Function({
+  required String householdId,
+  required String userId,
+  Value<int> rowid,
+});
+typedef $$HouseholdMembersTableUpdateCompanionBuilder
+    = HouseholdMembersCompanion Function({
+  Value<String> householdId,
+  Value<String> userId,
+  Value<int> rowid,
+});
+
+class $$HouseholdMembersTableFilterComposer
+    extends Composer<_$AppDatabase, $HouseholdMembersTable> {
+  $$HouseholdMembersTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get householdId => $composableBuilder(
+      column: $table.householdId, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get userId => $composableBuilder(
+      column: $table.userId, builder: (column) => ColumnFilters(column));
+}
+
+class $$HouseholdMembersTableOrderingComposer
+    extends Composer<_$AppDatabase, $HouseholdMembersTable> {
+  $$HouseholdMembersTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get householdId => $composableBuilder(
+      column: $table.householdId, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get userId => $composableBuilder(
+      column: $table.userId, builder: (column) => ColumnOrderings(column));
+}
+
+class $$HouseholdMembersTableAnnotationComposer
+    extends Composer<_$AppDatabase, $HouseholdMembersTable> {
+  $$HouseholdMembersTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get householdId => $composableBuilder(
+      column: $table.householdId, builder: (column) => column);
+
+  GeneratedColumn<String> get userId =>
+      $composableBuilder(column: $table.userId, builder: (column) => column);
+}
+
+class $$HouseholdMembersTableTableManager extends RootTableManager<
+    _$AppDatabase,
+    $HouseholdMembersTable,
+    HouseholdMemberEntry,
+    $$HouseholdMembersTableFilterComposer,
+    $$HouseholdMembersTableOrderingComposer,
+    $$HouseholdMembersTableAnnotationComposer,
+    $$HouseholdMembersTableCreateCompanionBuilder,
+    $$HouseholdMembersTableUpdateCompanionBuilder,
+    (
+      HouseholdMemberEntry,
+      BaseReferences<_$AppDatabase, $HouseholdMembersTable,
+          HouseholdMemberEntry>
+    ),
+    HouseholdMemberEntry,
+    PrefetchHooks Function()> {
+  $$HouseholdMembersTableTableManager(
+      _$AppDatabase db, $HouseholdMembersTable table)
+      : super(TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$HouseholdMembersTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$HouseholdMembersTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$HouseholdMembersTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback: ({
+            Value<String> householdId = const Value.absent(),
+            Value<String> userId = const Value.absent(),
+            Value<int> rowid = const Value.absent(),
+          }) =>
+              HouseholdMembersCompanion(
+            householdId: householdId,
+            userId: userId,
+            rowid: rowid,
+          ),
+          createCompanionCallback: ({
+            required String householdId,
+            required String userId,
+            Value<int> rowid = const Value.absent(),
+          }) =>
+              HouseholdMembersCompanion.insert(
+            householdId: householdId,
+            userId: userId,
+            rowid: rowid,
+          ),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .toList(),
+          prefetchHooksCallback: null,
+        ));
+}
+
+typedef $$HouseholdMembersTableProcessedTableManager = ProcessedTableManager<
+    _$AppDatabase,
+    $HouseholdMembersTable,
+    HouseholdMemberEntry,
+    $$HouseholdMembersTableFilterComposer,
+    $$HouseholdMembersTableOrderingComposer,
+    $$HouseholdMembersTableAnnotationComposer,
+    $$HouseholdMembersTableCreateCompanionBuilder,
+    $$HouseholdMembersTableUpdateCompanionBuilder,
+    (
+      HouseholdMemberEntry,
+      BaseReferences<_$AppDatabase, $HouseholdMembersTable,
+          HouseholdMemberEntry>
+    ),
+    HouseholdMemberEntry,
+    PrefetchHooks Function()>;
+typedef $$HouseholdsTableCreateCompanionBuilder = HouseholdsCompanion Function({
+  Value<String> id,
+  required String name,
+  required String userId,
+  Value<int> rowid,
+});
+typedef $$HouseholdsTableUpdateCompanionBuilder = HouseholdsCompanion Function({
+  Value<String> id,
+  Value<String> name,
+  Value<String> userId,
+  Value<int> rowid,
+});
+
+class $$HouseholdsTableFilterComposer
+    extends Composer<_$AppDatabase, $HouseholdsTable> {
+  $$HouseholdsTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get id => $composableBuilder(
+      column: $table.id, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get name => $composableBuilder(
+      column: $table.name, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get userId => $composableBuilder(
+      column: $table.userId, builder: (column) => ColumnFilters(column));
+}
+
+class $$HouseholdsTableOrderingComposer
+    extends Composer<_$AppDatabase, $HouseholdsTable> {
+  $$HouseholdsTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get id => $composableBuilder(
+      column: $table.id, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get name => $composableBuilder(
+      column: $table.name, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get userId => $composableBuilder(
+      column: $table.userId, builder: (column) => ColumnOrderings(column));
+}
+
+class $$HouseholdsTableAnnotationComposer
+    extends Composer<_$AppDatabase, $HouseholdsTable> {
+  $$HouseholdsTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get name =>
+      $composableBuilder(column: $table.name, builder: (column) => column);
+
+  GeneratedColumn<String> get userId =>
+      $composableBuilder(column: $table.userId, builder: (column) => column);
+}
+
+class $$HouseholdsTableTableManager extends RootTableManager<
+    _$AppDatabase,
+    $HouseholdsTable,
+    HouseholdEntry,
+    $$HouseholdsTableFilterComposer,
+    $$HouseholdsTableOrderingComposer,
+    $$HouseholdsTableAnnotationComposer,
+    $$HouseholdsTableCreateCompanionBuilder,
+    $$HouseholdsTableUpdateCompanionBuilder,
+    (
+      HouseholdEntry,
+      BaseReferences<_$AppDatabase, $HouseholdsTable, HouseholdEntry>
+    ),
+    HouseholdEntry,
+    PrefetchHooks Function()> {
+  $$HouseholdsTableTableManager(_$AppDatabase db, $HouseholdsTable table)
+      : super(TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$HouseholdsTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$HouseholdsTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$HouseholdsTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback: ({
+            Value<String> id = const Value.absent(),
+            Value<String> name = const Value.absent(),
+            Value<String> userId = const Value.absent(),
+            Value<int> rowid = const Value.absent(),
+          }) =>
+              HouseholdsCompanion(
+            id: id,
+            name: name,
+            userId: userId,
+            rowid: rowid,
+          ),
+          createCompanionCallback: ({
+            Value<String> id = const Value.absent(),
+            required String name,
+            required String userId,
+            Value<int> rowid = const Value.absent(),
+          }) =>
+              HouseholdsCompanion.insert(
+            id: id,
+            name: name,
+            userId: userId,
+            rowid: rowid,
+          ),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .toList(),
+          prefetchHooksCallback: null,
+        ));
+}
+
+typedef $$HouseholdsTableProcessedTableManager = ProcessedTableManager<
+    _$AppDatabase,
+    $HouseholdsTable,
+    HouseholdEntry,
+    $$HouseholdsTableFilterComposer,
+    $$HouseholdsTableOrderingComposer,
+    $$HouseholdsTableAnnotationComposer,
+    $$HouseholdsTableCreateCompanionBuilder,
+    $$HouseholdsTableUpdateCompanionBuilder,
+    (
+      HouseholdEntry,
+      BaseReferences<_$AppDatabase, $HouseholdsTable, HouseholdEntry>
+    ),
+    HouseholdEntry,
+    PrefetchHooks Function()>;
 
 class $AppDatabaseManager {
   final _$AppDatabase _db;
@@ -1713,4 +2899,10 @@ class $AppDatabaseManager {
       $$RecipeFoldersTableTableManager(_db, _db.recipeFolders);
   $$RecipesTableTableManager get recipes =>
       $$RecipesTableTableManager(_db, _db.recipes);
+  $$RecipeSharesTableTableManager get recipeShares =>
+      $$RecipeSharesTableTableManager(_db, _db.recipeShares);
+  $$HouseholdMembersTableTableManager get householdMembers =>
+      $$HouseholdMembersTableTableManager(_db, _db.householdMembers);
+  $$HouseholdsTableTableManager get households =>
+      $$HouseholdsTableTableManager(_db, _db.households);
 }
