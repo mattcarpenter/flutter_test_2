@@ -355,15 +355,820 @@ class RecipeFoldersCompanion extends UpdateCompanion<RecipeFolderEntry> {
   }
 }
 
+class $RecipesTable extends Recipes with TableInfo<$RecipesTable, RecipeEntry> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $RecipesTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<String> id = GeneratedColumn<String>(
+      'id', aliasedName, false,
+      type: DriftSqlType.string,
+      requiredDuringInsert: false,
+      defaultConstraints: GeneratedColumn.constraintIsAlways('UNIQUE'),
+      clientDefault: () => const Uuid().v4());
+  static const VerificationMeta _titleMeta = const VerificationMeta('title');
+  @override
+  late final GeneratedColumn<String> title = GeneratedColumn<String>(
+      'title', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _descriptionMeta =
+      const VerificationMeta('description');
+  @override
+  late final GeneratedColumn<String> description = GeneratedColumn<String>(
+      'description', aliasedName, true,
+      type: DriftSqlType.string, requiredDuringInsert: false);
+  static const VerificationMeta _ratingMeta = const VerificationMeta('rating');
+  @override
+  late final GeneratedColumn<int> rating = GeneratedColumn<int>(
+      'rating', aliasedName, false,
+      type: DriftSqlType.int, requiredDuringInsert: true);
+  static const VerificationMeta _languageMeta =
+      const VerificationMeta('language');
+  @override
+  late final GeneratedColumn<String> language = GeneratedColumn<String>(
+      'language', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _servingsMeta =
+      const VerificationMeta('servings');
+  @override
+  late final GeneratedColumn<int> servings = GeneratedColumn<int>(
+      'servings', aliasedName, true,
+      type: DriftSqlType.int, requiredDuringInsert: false);
+  static const VerificationMeta _prepTimeMeta =
+      const VerificationMeta('prepTime');
+  @override
+  late final GeneratedColumn<int> prepTime = GeneratedColumn<int>(
+      'prep_time', aliasedName, true,
+      type: DriftSqlType.int, requiredDuringInsert: false);
+  static const VerificationMeta _cookTimeMeta =
+      const VerificationMeta('cookTime');
+  @override
+  late final GeneratedColumn<int> cookTime = GeneratedColumn<int>(
+      'cook_time', aliasedName, true,
+      type: DriftSqlType.int, requiredDuringInsert: false);
+  static const VerificationMeta _totalTimeMeta =
+      const VerificationMeta('totalTime');
+  @override
+  late final GeneratedColumn<int> totalTime = GeneratedColumn<int>(
+      'total_time', aliasedName, true,
+      type: DriftSqlType.int, requiredDuringInsert: false);
+  static const VerificationMeta _sourceMeta = const VerificationMeta('source');
+  @override
+  late final GeneratedColumn<String> source = GeneratedColumn<String>(
+      'source', aliasedName, true,
+      type: DriftSqlType.string, requiredDuringInsert: false);
+  static const VerificationMeta _nutritionMeta =
+      const VerificationMeta('nutrition');
+  @override
+  late final GeneratedColumn<String> nutrition = GeneratedColumn<String>(
+      'nutrition', aliasedName, true,
+      type: DriftSqlType.string, requiredDuringInsert: false);
+  static const VerificationMeta _generalNotesMeta =
+      const VerificationMeta('generalNotes');
+  @override
+  late final GeneratedColumn<String> generalNotes = GeneratedColumn<String>(
+      'general_notes', aliasedName, true,
+      type: DriftSqlType.string, requiredDuringInsert: false);
+  static const VerificationMeta _userIdMeta = const VerificationMeta('userId');
+  @override
+  late final GeneratedColumn<String> userId = GeneratedColumn<String>(
+      'user_id', aliasedName, true,
+      type: DriftSqlType.string, requiredDuringInsert: false);
+  static const VerificationMeta _folderIdMeta =
+      const VerificationMeta('folderId');
+  @override
+  late final GeneratedColumn<String> folderId = GeneratedColumn<String>(
+      'folder_id', aliasedName, true,
+      type: DriftSqlType.string, requiredDuringInsert: false);
+  static const VerificationMeta _householdIdMeta =
+      const VerificationMeta('householdId');
+  @override
+  late final GeneratedColumn<String> householdId = GeneratedColumn<String>(
+      'household_id', aliasedName, true,
+      type: DriftSqlType.string, requiredDuringInsert: false);
+  static const VerificationMeta _createdAtMeta =
+      const VerificationMeta('createdAt');
+  @override
+  late final GeneratedColumn<int> createdAt = GeneratedColumn<int>(
+      'created_at', aliasedName, true,
+      type: DriftSqlType.int, requiredDuringInsert: false);
+  static const VerificationMeta _updatedAtMeta =
+      const VerificationMeta('updatedAt');
+  @override
+  late final GeneratedColumn<int> updatedAt = GeneratedColumn<int>(
+      'updated_at', aliasedName, true,
+      type: DriftSqlType.int, requiredDuringInsert: false);
+  @override
+  List<GeneratedColumn> get $columns => [
+        id,
+        title,
+        description,
+        rating,
+        language,
+        servings,
+        prepTime,
+        cookTime,
+        totalTime,
+        source,
+        nutrition,
+        generalNotes,
+        userId,
+        folderId,
+        householdId,
+        createdAt,
+        updatedAt
+      ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'recipes';
+  @override
+  VerificationContext validateIntegrity(Insertable<RecipeEntry> instance,
+      {bool isInserting = false}) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    }
+    if (data.containsKey('title')) {
+      context.handle(
+          _titleMeta, title.isAcceptableOrUnknown(data['title']!, _titleMeta));
+    } else if (isInserting) {
+      context.missing(_titleMeta);
+    }
+    if (data.containsKey('description')) {
+      context.handle(
+          _descriptionMeta,
+          description.isAcceptableOrUnknown(
+              data['description']!, _descriptionMeta));
+    }
+    if (data.containsKey('rating')) {
+      context.handle(_ratingMeta,
+          rating.isAcceptableOrUnknown(data['rating']!, _ratingMeta));
+    } else if (isInserting) {
+      context.missing(_ratingMeta);
+    }
+    if (data.containsKey('language')) {
+      context.handle(_languageMeta,
+          language.isAcceptableOrUnknown(data['language']!, _languageMeta));
+    } else if (isInserting) {
+      context.missing(_languageMeta);
+    }
+    if (data.containsKey('servings')) {
+      context.handle(_servingsMeta,
+          servings.isAcceptableOrUnknown(data['servings']!, _servingsMeta));
+    }
+    if (data.containsKey('prep_time')) {
+      context.handle(_prepTimeMeta,
+          prepTime.isAcceptableOrUnknown(data['prep_time']!, _prepTimeMeta));
+    }
+    if (data.containsKey('cook_time')) {
+      context.handle(_cookTimeMeta,
+          cookTime.isAcceptableOrUnknown(data['cook_time']!, _cookTimeMeta));
+    }
+    if (data.containsKey('total_time')) {
+      context.handle(_totalTimeMeta,
+          totalTime.isAcceptableOrUnknown(data['total_time']!, _totalTimeMeta));
+    }
+    if (data.containsKey('source')) {
+      context.handle(_sourceMeta,
+          source.isAcceptableOrUnknown(data['source']!, _sourceMeta));
+    }
+    if (data.containsKey('nutrition')) {
+      context.handle(_nutritionMeta,
+          nutrition.isAcceptableOrUnknown(data['nutrition']!, _nutritionMeta));
+    }
+    if (data.containsKey('general_notes')) {
+      context.handle(
+          _generalNotesMeta,
+          generalNotes.isAcceptableOrUnknown(
+              data['general_notes']!, _generalNotesMeta));
+    }
+    if (data.containsKey('user_id')) {
+      context.handle(_userIdMeta,
+          userId.isAcceptableOrUnknown(data['user_id']!, _userIdMeta));
+    }
+    if (data.containsKey('folder_id')) {
+      context.handle(_folderIdMeta,
+          folderId.isAcceptableOrUnknown(data['folder_id']!, _folderIdMeta));
+    }
+    if (data.containsKey('household_id')) {
+      context.handle(
+          _householdIdMeta,
+          householdId.isAcceptableOrUnknown(
+              data['household_id']!, _householdIdMeta));
+    }
+    if (data.containsKey('created_at')) {
+      context.handle(_createdAtMeta,
+          createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta));
+    }
+    if (data.containsKey('updated_at')) {
+      context.handle(_updatedAtMeta,
+          updatedAt.isAcceptableOrUnknown(data['updated_at']!, _updatedAtMeta));
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => const {};
+  @override
+  RecipeEntry map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return RecipeEntry(
+      id: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}id'])!,
+      title: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}title'])!,
+      description: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}description']),
+      rating: attachedDatabase.typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}rating'])!,
+      language: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}language'])!,
+      servings: attachedDatabase.typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}servings']),
+      prepTime: attachedDatabase.typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}prep_time']),
+      cookTime: attachedDatabase.typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}cook_time']),
+      totalTime: attachedDatabase.typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}total_time']),
+      source: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}source']),
+      nutrition: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}nutrition']),
+      generalNotes: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}general_notes']),
+      userId: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}user_id']),
+      folderId: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}folder_id']),
+      householdId: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}household_id']),
+      createdAt: attachedDatabase.typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}created_at']),
+      updatedAt: attachedDatabase.typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}updated_at']),
+    );
+  }
+
+  @override
+  $RecipesTable createAlias(String alias) {
+    return $RecipesTable(attachedDatabase, alias);
+  }
+}
+
+class RecipeEntry extends DataClass implements Insertable<RecipeEntry> {
+  final String id;
+  final String title;
+  final String? description;
+  final int rating;
+  final String language;
+  final int? servings;
+  final int? prepTime;
+  final int? cookTime;
+  final int? totalTime;
+  final String? source;
+  final String? nutrition;
+  final String? generalNotes;
+  final String? userId;
+  final String? folderId;
+  final String? householdId;
+  final int? createdAt;
+  final int? updatedAt;
+  const RecipeEntry(
+      {required this.id,
+      required this.title,
+      this.description,
+      required this.rating,
+      required this.language,
+      this.servings,
+      this.prepTime,
+      this.cookTime,
+      this.totalTime,
+      this.source,
+      this.nutrition,
+      this.generalNotes,
+      this.userId,
+      this.folderId,
+      this.householdId,
+      this.createdAt,
+      this.updatedAt});
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<String>(id);
+    map['title'] = Variable<String>(title);
+    if (!nullToAbsent || description != null) {
+      map['description'] = Variable<String>(description);
+    }
+    map['rating'] = Variable<int>(rating);
+    map['language'] = Variable<String>(language);
+    if (!nullToAbsent || servings != null) {
+      map['servings'] = Variable<int>(servings);
+    }
+    if (!nullToAbsent || prepTime != null) {
+      map['prep_time'] = Variable<int>(prepTime);
+    }
+    if (!nullToAbsent || cookTime != null) {
+      map['cook_time'] = Variable<int>(cookTime);
+    }
+    if (!nullToAbsent || totalTime != null) {
+      map['total_time'] = Variable<int>(totalTime);
+    }
+    if (!nullToAbsent || source != null) {
+      map['source'] = Variable<String>(source);
+    }
+    if (!nullToAbsent || nutrition != null) {
+      map['nutrition'] = Variable<String>(nutrition);
+    }
+    if (!nullToAbsent || generalNotes != null) {
+      map['general_notes'] = Variable<String>(generalNotes);
+    }
+    if (!nullToAbsent || userId != null) {
+      map['user_id'] = Variable<String>(userId);
+    }
+    if (!nullToAbsent || folderId != null) {
+      map['folder_id'] = Variable<String>(folderId);
+    }
+    if (!nullToAbsent || householdId != null) {
+      map['household_id'] = Variable<String>(householdId);
+    }
+    if (!nullToAbsent || createdAt != null) {
+      map['created_at'] = Variable<int>(createdAt);
+    }
+    if (!nullToAbsent || updatedAt != null) {
+      map['updated_at'] = Variable<int>(updatedAt);
+    }
+    return map;
+  }
+
+  RecipesCompanion toCompanion(bool nullToAbsent) {
+    return RecipesCompanion(
+      id: Value(id),
+      title: Value(title),
+      description: description == null && nullToAbsent
+          ? const Value.absent()
+          : Value(description),
+      rating: Value(rating),
+      language: Value(language),
+      servings: servings == null && nullToAbsent
+          ? const Value.absent()
+          : Value(servings),
+      prepTime: prepTime == null && nullToAbsent
+          ? const Value.absent()
+          : Value(prepTime),
+      cookTime: cookTime == null && nullToAbsent
+          ? const Value.absent()
+          : Value(cookTime),
+      totalTime: totalTime == null && nullToAbsent
+          ? const Value.absent()
+          : Value(totalTime),
+      source:
+          source == null && nullToAbsent ? const Value.absent() : Value(source),
+      nutrition: nutrition == null && nullToAbsent
+          ? const Value.absent()
+          : Value(nutrition),
+      generalNotes: generalNotes == null && nullToAbsent
+          ? const Value.absent()
+          : Value(generalNotes),
+      userId:
+          userId == null && nullToAbsent ? const Value.absent() : Value(userId),
+      folderId: folderId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(folderId),
+      householdId: householdId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(householdId),
+      createdAt: createdAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(createdAt),
+      updatedAt: updatedAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(updatedAt),
+    );
+  }
+
+  factory RecipeEntry.fromJson(Map<String, dynamic> json,
+      {ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return RecipeEntry(
+      id: serializer.fromJson<String>(json['id']),
+      title: serializer.fromJson<String>(json['title']),
+      description: serializer.fromJson<String?>(json['description']),
+      rating: serializer.fromJson<int>(json['rating']),
+      language: serializer.fromJson<String>(json['language']),
+      servings: serializer.fromJson<int?>(json['servings']),
+      prepTime: serializer.fromJson<int?>(json['prepTime']),
+      cookTime: serializer.fromJson<int?>(json['cookTime']),
+      totalTime: serializer.fromJson<int?>(json['totalTime']),
+      source: serializer.fromJson<String?>(json['source']),
+      nutrition: serializer.fromJson<String?>(json['nutrition']),
+      generalNotes: serializer.fromJson<String?>(json['generalNotes']),
+      userId: serializer.fromJson<String?>(json['userId']),
+      folderId: serializer.fromJson<String?>(json['folderId']),
+      householdId: serializer.fromJson<String?>(json['householdId']),
+      createdAt: serializer.fromJson<int?>(json['createdAt']),
+      updatedAt: serializer.fromJson<int?>(json['updatedAt']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<String>(id),
+      'title': serializer.toJson<String>(title),
+      'description': serializer.toJson<String?>(description),
+      'rating': serializer.toJson<int>(rating),
+      'language': serializer.toJson<String>(language),
+      'servings': serializer.toJson<int?>(servings),
+      'prepTime': serializer.toJson<int?>(prepTime),
+      'cookTime': serializer.toJson<int?>(cookTime),
+      'totalTime': serializer.toJson<int?>(totalTime),
+      'source': serializer.toJson<String?>(source),
+      'nutrition': serializer.toJson<String?>(nutrition),
+      'generalNotes': serializer.toJson<String?>(generalNotes),
+      'userId': serializer.toJson<String?>(userId),
+      'folderId': serializer.toJson<String?>(folderId),
+      'householdId': serializer.toJson<String?>(householdId),
+      'createdAt': serializer.toJson<int?>(createdAt),
+      'updatedAt': serializer.toJson<int?>(updatedAt),
+    };
+  }
+
+  RecipeEntry copyWith(
+          {String? id,
+          String? title,
+          Value<String?> description = const Value.absent(),
+          int? rating,
+          String? language,
+          Value<int?> servings = const Value.absent(),
+          Value<int?> prepTime = const Value.absent(),
+          Value<int?> cookTime = const Value.absent(),
+          Value<int?> totalTime = const Value.absent(),
+          Value<String?> source = const Value.absent(),
+          Value<String?> nutrition = const Value.absent(),
+          Value<String?> generalNotes = const Value.absent(),
+          Value<String?> userId = const Value.absent(),
+          Value<String?> folderId = const Value.absent(),
+          Value<String?> householdId = const Value.absent(),
+          Value<int?> createdAt = const Value.absent(),
+          Value<int?> updatedAt = const Value.absent()}) =>
+      RecipeEntry(
+        id: id ?? this.id,
+        title: title ?? this.title,
+        description: description.present ? description.value : this.description,
+        rating: rating ?? this.rating,
+        language: language ?? this.language,
+        servings: servings.present ? servings.value : this.servings,
+        prepTime: prepTime.present ? prepTime.value : this.prepTime,
+        cookTime: cookTime.present ? cookTime.value : this.cookTime,
+        totalTime: totalTime.present ? totalTime.value : this.totalTime,
+        source: source.present ? source.value : this.source,
+        nutrition: nutrition.present ? nutrition.value : this.nutrition,
+        generalNotes:
+            generalNotes.present ? generalNotes.value : this.generalNotes,
+        userId: userId.present ? userId.value : this.userId,
+        folderId: folderId.present ? folderId.value : this.folderId,
+        householdId: householdId.present ? householdId.value : this.householdId,
+        createdAt: createdAt.present ? createdAt.value : this.createdAt,
+        updatedAt: updatedAt.present ? updatedAt.value : this.updatedAt,
+      );
+  RecipeEntry copyWithCompanion(RecipesCompanion data) {
+    return RecipeEntry(
+      id: data.id.present ? data.id.value : this.id,
+      title: data.title.present ? data.title.value : this.title,
+      description:
+          data.description.present ? data.description.value : this.description,
+      rating: data.rating.present ? data.rating.value : this.rating,
+      language: data.language.present ? data.language.value : this.language,
+      servings: data.servings.present ? data.servings.value : this.servings,
+      prepTime: data.prepTime.present ? data.prepTime.value : this.prepTime,
+      cookTime: data.cookTime.present ? data.cookTime.value : this.cookTime,
+      totalTime: data.totalTime.present ? data.totalTime.value : this.totalTime,
+      source: data.source.present ? data.source.value : this.source,
+      nutrition: data.nutrition.present ? data.nutrition.value : this.nutrition,
+      generalNotes: data.generalNotes.present
+          ? data.generalNotes.value
+          : this.generalNotes,
+      userId: data.userId.present ? data.userId.value : this.userId,
+      folderId: data.folderId.present ? data.folderId.value : this.folderId,
+      householdId:
+          data.householdId.present ? data.householdId.value : this.householdId,
+      createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
+      updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('RecipeEntry(')
+          ..write('id: $id, ')
+          ..write('title: $title, ')
+          ..write('description: $description, ')
+          ..write('rating: $rating, ')
+          ..write('language: $language, ')
+          ..write('servings: $servings, ')
+          ..write('prepTime: $prepTime, ')
+          ..write('cookTime: $cookTime, ')
+          ..write('totalTime: $totalTime, ')
+          ..write('source: $source, ')
+          ..write('nutrition: $nutrition, ')
+          ..write('generalNotes: $generalNotes, ')
+          ..write('userId: $userId, ')
+          ..write('folderId: $folderId, ')
+          ..write('householdId: $householdId, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('updatedAt: $updatedAt')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(
+      id,
+      title,
+      description,
+      rating,
+      language,
+      servings,
+      prepTime,
+      cookTime,
+      totalTime,
+      source,
+      nutrition,
+      generalNotes,
+      userId,
+      folderId,
+      householdId,
+      createdAt,
+      updatedAt);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is RecipeEntry &&
+          other.id == this.id &&
+          other.title == this.title &&
+          other.description == this.description &&
+          other.rating == this.rating &&
+          other.language == this.language &&
+          other.servings == this.servings &&
+          other.prepTime == this.prepTime &&
+          other.cookTime == this.cookTime &&
+          other.totalTime == this.totalTime &&
+          other.source == this.source &&
+          other.nutrition == this.nutrition &&
+          other.generalNotes == this.generalNotes &&
+          other.userId == this.userId &&
+          other.folderId == this.folderId &&
+          other.householdId == this.householdId &&
+          other.createdAt == this.createdAt &&
+          other.updatedAt == this.updatedAt);
+}
+
+class RecipesCompanion extends UpdateCompanion<RecipeEntry> {
+  final Value<String> id;
+  final Value<String> title;
+  final Value<String?> description;
+  final Value<int> rating;
+  final Value<String> language;
+  final Value<int?> servings;
+  final Value<int?> prepTime;
+  final Value<int?> cookTime;
+  final Value<int?> totalTime;
+  final Value<String?> source;
+  final Value<String?> nutrition;
+  final Value<String?> generalNotes;
+  final Value<String?> userId;
+  final Value<String?> folderId;
+  final Value<String?> householdId;
+  final Value<int?> createdAt;
+  final Value<int?> updatedAt;
+  final Value<int> rowid;
+  const RecipesCompanion({
+    this.id = const Value.absent(),
+    this.title = const Value.absent(),
+    this.description = const Value.absent(),
+    this.rating = const Value.absent(),
+    this.language = const Value.absent(),
+    this.servings = const Value.absent(),
+    this.prepTime = const Value.absent(),
+    this.cookTime = const Value.absent(),
+    this.totalTime = const Value.absent(),
+    this.source = const Value.absent(),
+    this.nutrition = const Value.absent(),
+    this.generalNotes = const Value.absent(),
+    this.userId = const Value.absent(),
+    this.folderId = const Value.absent(),
+    this.householdId = const Value.absent(),
+    this.createdAt = const Value.absent(),
+    this.updatedAt = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  RecipesCompanion.insert({
+    this.id = const Value.absent(),
+    required String title,
+    this.description = const Value.absent(),
+    required int rating,
+    required String language,
+    this.servings = const Value.absent(),
+    this.prepTime = const Value.absent(),
+    this.cookTime = const Value.absent(),
+    this.totalTime = const Value.absent(),
+    this.source = const Value.absent(),
+    this.nutrition = const Value.absent(),
+    this.generalNotes = const Value.absent(),
+    this.userId = const Value.absent(),
+    this.folderId = const Value.absent(),
+    this.householdId = const Value.absent(),
+    this.createdAt = const Value.absent(),
+    this.updatedAt = const Value.absent(),
+    this.rowid = const Value.absent(),
+  })  : title = Value(title),
+        rating = Value(rating),
+        language = Value(language);
+  static Insertable<RecipeEntry> custom({
+    Expression<String>? id,
+    Expression<String>? title,
+    Expression<String>? description,
+    Expression<int>? rating,
+    Expression<String>? language,
+    Expression<int>? servings,
+    Expression<int>? prepTime,
+    Expression<int>? cookTime,
+    Expression<int>? totalTime,
+    Expression<String>? source,
+    Expression<String>? nutrition,
+    Expression<String>? generalNotes,
+    Expression<String>? userId,
+    Expression<String>? folderId,
+    Expression<String>? householdId,
+    Expression<int>? createdAt,
+    Expression<int>? updatedAt,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (title != null) 'title': title,
+      if (description != null) 'description': description,
+      if (rating != null) 'rating': rating,
+      if (language != null) 'language': language,
+      if (servings != null) 'servings': servings,
+      if (prepTime != null) 'prep_time': prepTime,
+      if (cookTime != null) 'cook_time': cookTime,
+      if (totalTime != null) 'total_time': totalTime,
+      if (source != null) 'source': source,
+      if (nutrition != null) 'nutrition': nutrition,
+      if (generalNotes != null) 'general_notes': generalNotes,
+      if (userId != null) 'user_id': userId,
+      if (folderId != null) 'folder_id': folderId,
+      if (householdId != null) 'household_id': householdId,
+      if (createdAt != null) 'created_at': createdAt,
+      if (updatedAt != null) 'updated_at': updatedAt,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  RecipesCompanion copyWith(
+      {Value<String>? id,
+      Value<String>? title,
+      Value<String?>? description,
+      Value<int>? rating,
+      Value<String>? language,
+      Value<int?>? servings,
+      Value<int?>? prepTime,
+      Value<int?>? cookTime,
+      Value<int?>? totalTime,
+      Value<String?>? source,
+      Value<String?>? nutrition,
+      Value<String?>? generalNotes,
+      Value<String?>? userId,
+      Value<String?>? folderId,
+      Value<String?>? householdId,
+      Value<int?>? createdAt,
+      Value<int?>? updatedAt,
+      Value<int>? rowid}) {
+    return RecipesCompanion(
+      id: id ?? this.id,
+      title: title ?? this.title,
+      description: description ?? this.description,
+      rating: rating ?? this.rating,
+      language: language ?? this.language,
+      servings: servings ?? this.servings,
+      prepTime: prepTime ?? this.prepTime,
+      cookTime: cookTime ?? this.cookTime,
+      totalTime: totalTime ?? this.totalTime,
+      source: source ?? this.source,
+      nutrition: nutrition ?? this.nutrition,
+      generalNotes: generalNotes ?? this.generalNotes,
+      userId: userId ?? this.userId,
+      folderId: folderId ?? this.folderId,
+      householdId: householdId ?? this.householdId,
+      createdAt: createdAt ?? this.createdAt,
+      updatedAt: updatedAt ?? this.updatedAt,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<String>(id.value);
+    }
+    if (title.present) {
+      map['title'] = Variable<String>(title.value);
+    }
+    if (description.present) {
+      map['description'] = Variable<String>(description.value);
+    }
+    if (rating.present) {
+      map['rating'] = Variable<int>(rating.value);
+    }
+    if (language.present) {
+      map['language'] = Variable<String>(language.value);
+    }
+    if (servings.present) {
+      map['servings'] = Variable<int>(servings.value);
+    }
+    if (prepTime.present) {
+      map['prep_time'] = Variable<int>(prepTime.value);
+    }
+    if (cookTime.present) {
+      map['cook_time'] = Variable<int>(cookTime.value);
+    }
+    if (totalTime.present) {
+      map['total_time'] = Variable<int>(totalTime.value);
+    }
+    if (source.present) {
+      map['source'] = Variable<String>(source.value);
+    }
+    if (nutrition.present) {
+      map['nutrition'] = Variable<String>(nutrition.value);
+    }
+    if (generalNotes.present) {
+      map['general_notes'] = Variable<String>(generalNotes.value);
+    }
+    if (userId.present) {
+      map['user_id'] = Variable<String>(userId.value);
+    }
+    if (folderId.present) {
+      map['folder_id'] = Variable<String>(folderId.value);
+    }
+    if (householdId.present) {
+      map['household_id'] = Variable<String>(householdId.value);
+    }
+    if (createdAt.present) {
+      map['created_at'] = Variable<int>(createdAt.value);
+    }
+    if (updatedAt.present) {
+      map['updated_at'] = Variable<int>(updatedAt.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('RecipesCompanion(')
+          ..write('id: $id, ')
+          ..write('title: $title, ')
+          ..write('description: $description, ')
+          ..write('rating: $rating, ')
+          ..write('language: $language, ')
+          ..write('servings: $servings, ')
+          ..write('prepTime: $prepTime, ')
+          ..write('cookTime: $cookTime, ')
+          ..write('totalTime: $totalTime, ')
+          ..write('source: $source, ')
+          ..write('nutrition: $nutrition, ')
+          ..write('generalNotes: $generalNotes, ')
+          ..write('userId: $userId, ')
+          ..write('folderId: $folderId, ')
+          ..write('householdId: $householdId, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
 abstract class _$AppDatabase extends GeneratedDatabase {
   _$AppDatabase(QueryExecutor e) : super(e);
   $AppDatabaseManager get managers => $AppDatabaseManager(this);
   late final $RecipeFoldersTable recipeFolders = $RecipeFoldersTable(this);
+  late final $RecipesTable recipes = $RecipesTable(this);
   @override
   Iterable<TableInfo<Table, Object?>> get allTables =>
       allSchemaEntities.whereType<TableInfo<Table, Object?>>();
   @override
-  List<DatabaseSchemaEntity> get allSchemaEntities => [recipeFolders];
+  List<DatabaseSchemaEntity> get allSchemaEntities => [recipeFolders, recipes];
 }
 
 typedef $$RecipeFoldersTableCreateCompanionBuilder = RecipeFoldersCompanion
@@ -554,10 +1359,358 @@ typedef $$RecipeFoldersTableProcessedTableManager = ProcessedTableManager<
     ),
     RecipeFolderEntry,
     PrefetchHooks Function()>;
+typedef $$RecipesTableCreateCompanionBuilder = RecipesCompanion Function({
+  Value<String> id,
+  required String title,
+  Value<String?> description,
+  required int rating,
+  required String language,
+  Value<int?> servings,
+  Value<int?> prepTime,
+  Value<int?> cookTime,
+  Value<int?> totalTime,
+  Value<String?> source,
+  Value<String?> nutrition,
+  Value<String?> generalNotes,
+  Value<String?> userId,
+  Value<String?> folderId,
+  Value<String?> householdId,
+  Value<int?> createdAt,
+  Value<int?> updatedAt,
+  Value<int> rowid,
+});
+typedef $$RecipesTableUpdateCompanionBuilder = RecipesCompanion Function({
+  Value<String> id,
+  Value<String> title,
+  Value<String?> description,
+  Value<int> rating,
+  Value<String> language,
+  Value<int?> servings,
+  Value<int?> prepTime,
+  Value<int?> cookTime,
+  Value<int?> totalTime,
+  Value<String?> source,
+  Value<String?> nutrition,
+  Value<String?> generalNotes,
+  Value<String?> userId,
+  Value<String?> folderId,
+  Value<String?> householdId,
+  Value<int?> createdAt,
+  Value<int?> updatedAt,
+  Value<int> rowid,
+});
+
+class $$RecipesTableFilterComposer
+    extends Composer<_$AppDatabase, $RecipesTable> {
+  $$RecipesTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get id => $composableBuilder(
+      column: $table.id, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get title => $composableBuilder(
+      column: $table.title, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get description => $composableBuilder(
+      column: $table.description, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<int> get rating => $composableBuilder(
+      column: $table.rating, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get language => $composableBuilder(
+      column: $table.language, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<int> get servings => $composableBuilder(
+      column: $table.servings, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<int> get prepTime => $composableBuilder(
+      column: $table.prepTime, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<int> get cookTime => $composableBuilder(
+      column: $table.cookTime, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<int> get totalTime => $composableBuilder(
+      column: $table.totalTime, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get source => $composableBuilder(
+      column: $table.source, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get nutrition => $composableBuilder(
+      column: $table.nutrition, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get generalNotes => $composableBuilder(
+      column: $table.generalNotes, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get userId => $composableBuilder(
+      column: $table.userId, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get folderId => $composableBuilder(
+      column: $table.folderId, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get householdId => $composableBuilder(
+      column: $table.householdId, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<int> get createdAt => $composableBuilder(
+      column: $table.createdAt, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<int> get updatedAt => $composableBuilder(
+      column: $table.updatedAt, builder: (column) => ColumnFilters(column));
+}
+
+class $$RecipesTableOrderingComposer
+    extends Composer<_$AppDatabase, $RecipesTable> {
+  $$RecipesTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get id => $composableBuilder(
+      column: $table.id, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get title => $composableBuilder(
+      column: $table.title, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get description => $composableBuilder(
+      column: $table.description, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<int> get rating => $composableBuilder(
+      column: $table.rating, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get language => $composableBuilder(
+      column: $table.language, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<int> get servings => $composableBuilder(
+      column: $table.servings, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<int> get prepTime => $composableBuilder(
+      column: $table.prepTime, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<int> get cookTime => $composableBuilder(
+      column: $table.cookTime, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<int> get totalTime => $composableBuilder(
+      column: $table.totalTime, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get source => $composableBuilder(
+      column: $table.source, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get nutrition => $composableBuilder(
+      column: $table.nutrition, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get generalNotes => $composableBuilder(
+      column: $table.generalNotes,
+      builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get userId => $composableBuilder(
+      column: $table.userId, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get folderId => $composableBuilder(
+      column: $table.folderId, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get householdId => $composableBuilder(
+      column: $table.householdId, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<int> get createdAt => $composableBuilder(
+      column: $table.createdAt, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<int> get updatedAt => $composableBuilder(
+      column: $table.updatedAt, builder: (column) => ColumnOrderings(column));
+}
+
+class $$RecipesTableAnnotationComposer
+    extends Composer<_$AppDatabase, $RecipesTable> {
+  $$RecipesTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get title =>
+      $composableBuilder(column: $table.title, builder: (column) => column);
+
+  GeneratedColumn<String> get description => $composableBuilder(
+      column: $table.description, builder: (column) => column);
+
+  GeneratedColumn<int> get rating =>
+      $composableBuilder(column: $table.rating, builder: (column) => column);
+
+  GeneratedColumn<String> get language =>
+      $composableBuilder(column: $table.language, builder: (column) => column);
+
+  GeneratedColumn<int> get servings =>
+      $composableBuilder(column: $table.servings, builder: (column) => column);
+
+  GeneratedColumn<int> get prepTime =>
+      $composableBuilder(column: $table.prepTime, builder: (column) => column);
+
+  GeneratedColumn<int> get cookTime =>
+      $composableBuilder(column: $table.cookTime, builder: (column) => column);
+
+  GeneratedColumn<int> get totalTime =>
+      $composableBuilder(column: $table.totalTime, builder: (column) => column);
+
+  GeneratedColumn<String> get source =>
+      $composableBuilder(column: $table.source, builder: (column) => column);
+
+  GeneratedColumn<String> get nutrition =>
+      $composableBuilder(column: $table.nutrition, builder: (column) => column);
+
+  GeneratedColumn<String> get generalNotes => $composableBuilder(
+      column: $table.generalNotes, builder: (column) => column);
+
+  GeneratedColumn<String> get userId =>
+      $composableBuilder(column: $table.userId, builder: (column) => column);
+
+  GeneratedColumn<String> get folderId =>
+      $composableBuilder(column: $table.folderId, builder: (column) => column);
+
+  GeneratedColumn<String> get householdId => $composableBuilder(
+      column: $table.householdId, builder: (column) => column);
+
+  GeneratedColumn<int> get createdAt =>
+      $composableBuilder(column: $table.createdAt, builder: (column) => column);
+
+  GeneratedColumn<int> get updatedAt =>
+      $composableBuilder(column: $table.updatedAt, builder: (column) => column);
+}
+
+class $$RecipesTableTableManager extends RootTableManager<
+    _$AppDatabase,
+    $RecipesTable,
+    RecipeEntry,
+    $$RecipesTableFilterComposer,
+    $$RecipesTableOrderingComposer,
+    $$RecipesTableAnnotationComposer,
+    $$RecipesTableCreateCompanionBuilder,
+    $$RecipesTableUpdateCompanionBuilder,
+    (RecipeEntry, BaseReferences<_$AppDatabase, $RecipesTable, RecipeEntry>),
+    RecipeEntry,
+    PrefetchHooks Function()> {
+  $$RecipesTableTableManager(_$AppDatabase db, $RecipesTable table)
+      : super(TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$RecipesTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$RecipesTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$RecipesTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback: ({
+            Value<String> id = const Value.absent(),
+            Value<String> title = const Value.absent(),
+            Value<String?> description = const Value.absent(),
+            Value<int> rating = const Value.absent(),
+            Value<String> language = const Value.absent(),
+            Value<int?> servings = const Value.absent(),
+            Value<int?> prepTime = const Value.absent(),
+            Value<int?> cookTime = const Value.absent(),
+            Value<int?> totalTime = const Value.absent(),
+            Value<String?> source = const Value.absent(),
+            Value<String?> nutrition = const Value.absent(),
+            Value<String?> generalNotes = const Value.absent(),
+            Value<String?> userId = const Value.absent(),
+            Value<String?> folderId = const Value.absent(),
+            Value<String?> householdId = const Value.absent(),
+            Value<int?> createdAt = const Value.absent(),
+            Value<int?> updatedAt = const Value.absent(),
+            Value<int> rowid = const Value.absent(),
+          }) =>
+              RecipesCompanion(
+            id: id,
+            title: title,
+            description: description,
+            rating: rating,
+            language: language,
+            servings: servings,
+            prepTime: prepTime,
+            cookTime: cookTime,
+            totalTime: totalTime,
+            source: source,
+            nutrition: nutrition,
+            generalNotes: generalNotes,
+            userId: userId,
+            folderId: folderId,
+            householdId: householdId,
+            createdAt: createdAt,
+            updatedAt: updatedAt,
+            rowid: rowid,
+          ),
+          createCompanionCallback: ({
+            Value<String> id = const Value.absent(),
+            required String title,
+            Value<String?> description = const Value.absent(),
+            required int rating,
+            required String language,
+            Value<int?> servings = const Value.absent(),
+            Value<int?> prepTime = const Value.absent(),
+            Value<int?> cookTime = const Value.absent(),
+            Value<int?> totalTime = const Value.absent(),
+            Value<String?> source = const Value.absent(),
+            Value<String?> nutrition = const Value.absent(),
+            Value<String?> generalNotes = const Value.absent(),
+            Value<String?> userId = const Value.absent(),
+            Value<String?> folderId = const Value.absent(),
+            Value<String?> householdId = const Value.absent(),
+            Value<int?> createdAt = const Value.absent(),
+            Value<int?> updatedAt = const Value.absent(),
+            Value<int> rowid = const Value.absent(),
+          }) =>
+              RecipesCompanion.insert(
+            id: id,
+            title: title,
+            description: description,
+            rating: rating,
+            language: language,
+            servings: servings,
+            prepTime: prepTime,
+            cookTime: cookTime,
+            totalTime: totalTime,
+            source: source,
+            nutrition: nutrition,
+            generalNotes: generalNotes,
+            userId: userId,
+            folderId: folderId,
+            householdId: householdId,
+            createdAt: createdAt,
+            updatedAt: updatedAt,
+            rowid: rowid,
+          ),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .toList(),
+          prefetchHooksCallback: null,
+        ));
+}
+
+typedef $$RecipesTableProcessedTableManager = ProcessedTableManager<
+    _$AppDatabase,
+    $RecipesTable,
+    RecipeEntry,
+    $$RecipesTableFilterComposer,
+    $$RecipesTableOrderingComposer,
+    $$RecipesTableAnnotationComposer,
+    $$RecipesTableCreateCompanionBuilder,
+    $$RecipesTableUpdateCompanionBuilder,
+    (RecipeEntry, BaseReferences<_$AppDatabase, $RecipesTable, RecipeEntry>),
+    RecipeEntry,
+    PrefetchHooks Function()>;
 
 class $AppDatabaseManager {
   final _$AppDatabase _db;
   $AppDatabaseManager(this._db);
   $$RecipeFoldersTableTableManager get recipeFolders =>
       $$RecipeFoldersTableTableManager(_db, _db.recipeFolders);
+  $$RecipesTableTableManager get recipes =>
+      $$RecipesTableTableManager(_db, _db.recipes);
 }

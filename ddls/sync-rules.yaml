@@ -1,0 +1,13 @@
+# Define sync rules to control which data is synced to each user
+# See the docs: https://docs.powersync.com/usage/sync-rules
+bucket_definitions:
+  global:
+    data:
+      # Sync all rows
+      - SELECT * FROM public.recipe_folders
+  by_user:
+    # Only sync rows belonging to the user
+    parameters: SELECT request.user_id() as user_id
+    data:
+      - SELECT * FROM public.recipe_folders WHERE recipe_folders.user_id = bucket.user_id
+
