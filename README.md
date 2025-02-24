@@ -67,13 +67,13 @@ A new Flutter project.
   [X] Clean up database directory
   [X] DDLs including RLS
   [X] Test RLS
-  [ ] Attempt to implement folder sharing
-  [ ] Add trigger that updates household id on share
+  [X] Attempt to implement folder sharing
+  [X] Add trigger that updates household id on share
+  [ ] Test sharing
   [ ] Create an ADR & document current RLS/Policy paradigms
   [ ] Fix recipe schema (userid req, rating not req)
-  [ ] Impl Sharing (not household)
   [X] Delete folder in household owned by other does not work (RLS looks wrong)
-  [ ] Implement Recipe Ingredients and figure out sharing 
+  [ ] Implement Recipe Ingredients and steps (can we use JSON?)
   [ ] Figure out integration tests
   [ ] Recipe schema & Riverpod
   [ ] Recipe integration test
