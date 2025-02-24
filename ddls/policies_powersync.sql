@@ -3,19 +3,292 @@ CREATE POLICY "Users can view their own folders"
     FOR SELECT
     USING (auth.uid() = user_id);
 
-CREATE POLICY "Users can insert their own folders"
-    ON recipe_folders
+CREATE POLICY "Users can insert folders only for households they belong to"
+    ON public.recipe_folders
     FOR INSERT
-    WITH CHECK (auth.uid() = user_id);
+    WITH CHECK (
+    auth.uid() = user_id
+        OR (
+        household_id IS NOT NULL
+            AND EXISTS (
+            SELECT 1
+            FROM public.household_members hm
+            WHERE hm.household_id = recipe_folders.household_id
+              AND hm.user_id = auth.uid()
+              AND hm.is_active = 1
+        )
+        )
+    );
 
-CREATE POLICY "Users can soft delete their own folders"
-    ON recipe_folders
+CREATE POLICY "Users can update folders only for households they belong to"
+    ON public.recipe_folders
     FOR UPDATE
-    USING (auth.uid() = user_id)
-    WITH CHECK (deleted_at IS NULL OR auth.uid() = user_id);
+    USING (
+    auth.uid() = user_id
+        OR (
+        household_id IS NOT NULL
+            AND EXISTS (
+            SELECT 1
+            FROM public.household_members hm
+            WHERE hm.household_id = recipe_folders.household_id
+              AND hm.user_id = auth.uid()
+              AND hm.is_active = 1
+        )
+        )
+    )
+    WITH CHECK (
+    household_id IS NULL
+        OR EXISTS (
+        SELECT 1
+        FROM public.household_members hm
+        WHERE hm.household_id = recipe_folders.household_id
+          AND hm.user_id = auth.uid()
+          AND hm.is_active = 1
+    )
+    );
+
 
 
 -- RECIPES -------------------------------
+CREATE POLICY "Users can view recipes if authorized"
+    ON public.recipes
+    FOR SELECT
+    USING (
+    user_id = auth.uid()
+        OR (
+        household_id IS NOT NULL
+            AND household_id IN (
+            SELECT hm.household_id
+            FROM public.household_members hm
+            WHERE hm.user_id = auth.uid() AND hm.is_active = 1
+        )
+        )
+    );
+CREATE POLICY "Users can insert recipes if authorized"
+    ON public.recipes
+    FOR INSERT
+    WITH CHECK (
+    user_id = auth.uid()
+        AND (
+        household_id IS NULL
+            OR household_id IN (
+            SELECT hm.household_id
+            FROM public.household_members hm
+            WHERE hm.user_id = auth.uid() AND hm.is_active = 1
+        )
+        )
+    );
+CREATE POLICY "Users can update recipes if authorized"
+    ON public.recipes
+    FOR UPDATE
+    USING (
+    user_id = auth.uid()
+        OR (
+        household_id IS NOT NULL
+            AND household_id IN (
+            SELECT hm.household_id
+            FROM public.household_members hm
+            WHERE hm.user_id = auth.uid() AND hm.is_active = 1
+        )
+        )
+    )
+    WITH CHECK (
+    user_id = auth.uid()
+        OR (
+        household_id IS NOT NULL
+            AND household_id IN (
+            SELECT hm.household_id
+            FROM public.household_members hm
+            WHERE hm.user_id = auth.uid() AND hm.is_active = 1
+        )
+        )
+    );
+
+
+-- RECIPE FOLDER ASSIGNMENTS -------------------------------
+CREATE POLICY "Users can insert recipe-folder assignments only if authorized"
+    ON public.recipe_folder_assignments
+    FOR INSERT
+    WITH CHECK (
+    -- The assignment must be owned by the inserting user.
+    auth.uid() = user_id
+
+        -- The referenced recipe must be owned by the user or by a household member.
+        AND EXISTS (
+        SELECT 1
+        FROM public.recipes r
+        WHERE r.id = recipe_folder_assignments.recipe_id
+          AND (
+            r.user_id = auth.uid()
+                OR r.household_id IN (
+                SELECT hm.household_id
+                FROM public.household_members hm
+                WHERE hm.user_id = auth.uid() AND hm.is_active = 1
+            )
+            )
+    )
+
+        -- The referenced folder must be owned by the user or by a household member.
+        AND EXISTS (
+        SELECT 1
+        FROM public.recipe_folders f
+        WHERE f.id = recipe_folder_assignments.folder_id
+          AND (
+            f.user_id = auth.uid()
+                OR f.household_id IN (
+                SELECT hm.household_id
+                FROM public.household_members hm
+                WHERE hm.user_id = auth.uid() AND hm.is_active = 1
+            )
+            )
+    )
+    );
+CREATE POLICY "Users can view recipe-folder assignments if authorized"
+    ON public.recipe_folder_assignments
+    FOR SELECT
+    USING (
+    -- Allow if the assignment is directly owned by the current user.
+    auth.uid() = user_id
+        OR
+    (
+        -- Otherwise, ensure the user has access to both the recipe and folder.
+        EXISTS (
+            SELECT 1
+            FROM public.recipes r
+            WHERE r.id = recipe_folder_assignments.recipe_id
+              AND (
+                r.user_id = auth.uid()
+                    OR r.household_id IN (
+                    SELECT hm.household_id
+                    FROM public.household_members hm
+                    WHERE hm.user_id = auth.uid() AND hm.is_active = 1
+                )
+                )
+        )
+            AND
+        EXISTS (
+            SELECT 1
+            FROM public.recipe_folders f
+            WHERE f.id = recipe_folder_assignments.folder_id
+              AND (
+                f.user_id = auth.uid()
+                    OR f.household_id IN (
+                    SELECT hm.household_id
+                    FROM public.household_members hm
+                    WHERE hm.user_id = auth.uid() AND hm.is_active = 1
+                )
+                )
+        )
+        )
+    );
+CREATE POLICY "Users can update recipe-folder assignments if authorized"
+    ON public.recipe_folder_assignments
+    FOR UPDATE
+    USING (
+    auth.uid() = user_id
+        OR
+    (
+        EXISTS (
+            SELECT 1
+            FROM public.recipes r
+            WHERE r.id = recipe_folder_assignments.recipe_id
+              AND (
+                r.user_id = auth.uid()
+                    OR r.household_id IN (
+                    SELECT hm.household_id
+                    FROM public.household_members hm
+                    WHERE hm.user_id = auth.uid() AND hm.is_active = 1
+                )
+                )
+        )
+            AND
+        EXISTS (
+            SELECT 1
+            FROM public.recipe_folders f
+            WHERE f.id = recipe_folder_assignments.folder_id
+              AND (
+                f.user_id = auth.uid()
+                    OR f.household_id IN (
+                    SELECT hm.household_id
+                    FROM public.household_members hm
+                    WHERE hm.user_id = auth.uid() AND hm.is_active = 1
+                )
+                )
+        )
+        )
+    )
+    WITH CHECK (
+    auth.uid() = user_id
+        OR
+    (
+        EXISTS (
+            SELECT 1
+            FROM public.recipes r
+            WHERE r.id = recipe_folder_assignments.recipe_id
+              AND (
+                r.user_id = auth.uid()
+                    OR r.household_id IN (
+                    SELECT hm.household_id
+                    FROM public.household_members hm
+                    WHERE hm.user_id = auth.uid() AND hm.is_active = 1
+                )
+                )
+        )
+            AND
+        EXISTS (
+            SELECT 1
+            FROM public.recipe_folders f
+            WHERE f.id = recipe_folder_assignments.folder_id
+              AND (
+                f.user_id = auth.uid()
+                    OR f.household_id IN (
+                    SELECT hm.household_id
+                    FROM public.household_members hm
+                    WHERE hm.user_id = auth.uid() AND hm.is_active = 1
+                )
+                )
+        )
+        )
+    );
+CREATE POLICY "Users can delete recipe-folder assignments if authorized"
+    ON public.recipe_folder_assignments
+    FOR DELETE
+    USING (
+    auth.uid() = user_id
+        OR
+    (
+        EXISTS (
+            SELECT 1
+            FROM public.recipes r
+            WHERE r.id = recipe_folder_assignments.recipe_id
+              AND (
+                r.user_id = auth.uid()
+                    OR r.household_id IN (
+                    SELECT hm.household_id
+                    FROM public.household_members hm
+                    WHERE hm.user_id = auth.uid() AND hm.is_active = 1
+                )
+                )
+        )
+            AND
+        EXISTS (
+            SELECT 1
+            FROM public.recipe_folders f
+            WHERE f.id = recipe_folder_assignments.folder_id
+              AND (
+                f.user_id = auth.uid()
+                    OR f.household_id IN (
+                    SELECT hm.household_id
+                    FROM public.household_members hm
+                    WHERE hm.user_id = auth.uid() AND hm.is_active = 1
+                )
+                )
+        )
+        )
+    );
+
+
+
 
 -- Allow users to view only their own recipes.
 CREATE POLICY "Users can view their own recipes"
@@ -62,17 +335,20 @@ CREATE POLICY "Users can update households they own"
 
 -- HOUSEHOLD MEMBERS -------------------------------
 
-CREATE POLICY "Users can view their own membership or members of households they own"
+CREATE POLICY "Users can view active membership rows or their own membership row"
     ON public.household_members
     FOR SELECT
     USING (
-    auth.uid() = user_id
-        OR EXISTS (
-        SELECT 1
-        FROM public.households h
-        WHERE h.id = household_members.household_id
-          AND h.user_id = auth.uid()
-    )
+    (auth.uid() = user_id)
+        OR (
+        is_active = 1
+            AND EXISTS (
+            SELECT 1
+            FROM public.households h
+            WHERE h.id = household_members.household_id
+              AND h.user_id = auth.uid()
+        )
+        )
     );
 
 CREATE POLICY "Users can insert their own membership row"
@@ -86,18 +362,6 @@ CREATE POLICY "Users can update their own membership row"
     USING (auth.uid() = user_id)
     WITH CHECK (auth.uid() = user_id);
 
-CREATE POLICY "Users can delete their own membership or household owners can remove members"
-    ON public.household_members
-    FOR DELETE
-    USING (
-    auth.uid() = user_id
-        OR EXISTS (
-        SELECT 1
-        FROM public.households h
-        WHERE h.id = household_members.household_id
-          AND h.user_id = auth.uid()
-    )
-    );
 
 -- RECIPE SHARES -------------------------------
 
@@ -153,51 +417,65 @@ CREATE POLICY "Users can update recipe_shares relevant to them"
     );
 
 -- RECIPE FOLDER SHARES -------------------------------
-CREATE POLICY "Users can view recipe_folder_shares relevant to them"
+CREATE POLICY "Users can view shared recipe folders"
     ON public.recipe_folder_shares
     FOR SELECT
     USING (
-    (user_id IS NOT NULL AND auth.uid() = user_id)
+    -- The user is the one who shared the folder.
+    sharer_id = auth.uid()
         OR
-    (household_id IS NOT NULL AND EXISTS (
-        SELECT 1 FROM public.household_members hm
-        WHERE hm.household_id = recipe_folder_shares.household_id
-          AND hm.user_id = auth.uid()
-    ))
+        -- The share is directly targeted to the current user.
+    target_user_id = auth.uid()
+        OR
+        -- The share is targeted to a household that the user belongs to.
+    (
+        target_household_id IS NOT NULL
+            AND target_household_id IN (
+            SELECT hm.household_id
+            FROM public.household_members hm
+            WHERE hm.user_id = auth.uid() AND hm.is_active = 1
+        )
+        )
     );
-
-CREATE POLICY "Users can insert recipe_folder_shares for folders they share"
+CREATE POLICY "Users can insert shared recipe folders"
     ON public.recipe_folder_shares
     FOR INSERT
     WITH CHECK (
-    (user_id IS NOT NULL AND auth.uid() = user_id)
-        OR
-    (household_id IS NOT NULL AND EXISTS (
-        SELECT 1 FROM public.household_members hm
-        WHERE hm.household_id = recipe_folder_shares.household_id
-          AND hm.user_id = auth.uid()
-    ))
+    -- Only the sharer (i.e. folder owner) can create a share.
+    sharer_id = auth.uid()
+        AND EXISTS (
+        SELECT 1 FROM public.recipe_folders f
+        WHERE f.id = recipe_folder_shares.folder_id
+          AND (
+            f.user_id = auth.uid()
+                OR (
+                f.household_id IS NOT NULL
+                    AND f.household_id IN (
+                    SELECT hm.household_id
+                    FROM public.household_members hm
+                    WHERE hm.user_id = auth.uid() AND hm.is_active = 1
+                )
+                )
+            )
+    )
     );
 
-CREATE POLICY "Users can update recipe_folder_shares relevant to them"
+CREATE POLICY "Users can update shared recipe folders"
     ON public.recipe_folder_shares
     FOR UPDATE
     USING (
-    (user_id IS NOT NULL AND auth.uid() = user_id)
-        OR
-    (household_id IS NOT NULL AND EXISTS (
-        SELECT 1 FROM public.household_members hm
-        WHERE hm.household_id = recipe_folder_shares.household_id
-          AND hm.user_id = auth.uid()
-    ))
+    -- Only the original sharer can update the share record.
+    sharer_id = auth.uid()
     )
     WITH CHECK (
-    (user_id IS NOT NULL AND auth.uid() = user_id)
-        OR
-    (household_id IS NOT NULL AND EXISTS (
-        SELECT 1 FROM public.household_members hm
-        WHERE hm.household_id = recipe_folder_shares.household_id
-          AND hm.user_id = auth.uid()
-    ))
+    sharer_id = auth.uid()
+    );
+
+CREATE POLICY "Users can delete shared recipe folders"
+    ON public.recipe_folder_shares
+    FOR DELETE
+    USING (
+    -- Only the sharer can delete the share record.
+    sharer_id = auth.uid()
     );
 

@@ -436,12 +436,6 @@ class $RecipesTable extends Recipes with TableInfo<$RecipesTable, RecipeEntry> {
   late final GeneratedColumn<String> userId = GeneratedColumn<String>(
       'user_id', aliasedName, true,
       type: DriftSqlType.string, requiredDuringInsert: false);
-  static const VerificationMeta _folderIdMeta =
-      const VerificationMeta('folderId');
-  @override
-  late final GeneratedColumn<String> folderId = GeneratedColumn<String>(
-      'folder_id', aliasedName, true,
-      type: DriftSqlType.string, requiredDuringInsert: false);
   static const VerificationMeta _householdIdMeta =
       const VerificationMeta('householdId');
   @override
@@ -475,7 +469,6 @@ class $RecipesTable extends Recipes with TableInfo<$RecipesTable, RecipeEntry> {
         nutrition,
         generalNotes,
         userId,
-        folderId,
         householdId,
         createdAt,
         updatedAt
@@ -551,10 +544,6 @@ class $RecipesTable extends Recipes with TableInfo<$RecipesTable, RecipeEntry> {
       context.handle(_userIdMeta,
           userId.isAcceptableOrUnknown(data['user_id']!, _userIdMeta));
     }
-    if (data.containsKey('folder_id')) {
-      context.handle(_folderIdMeta,
-          folderId.isAcceptableOrUnknown(data['folder_id']!, _folderIdMeta));
-    }
     if (data.containsKey('household_id')) {
       context.handle(
           _householdIdMeta,
@@ -604,8 +593,6 @@ class $RecipesTable extends Recipes with TableInfo<$RecipesTable, RecipeEntry> {
           .read(DriftSqlType.string, data['${effectivePrefix}general_notes']),
       userId: attachedDatabase.typeMapping
           .read(DriftSqlType.string, data['${effectivePrefix}user_id']),
-      folderId: attachedDatabase.typeMapping
-          .read(DriftSqlType.string, data['${effectivePrefix}folder_id']),
       householdId: attachedDatabase.typeMapping
           .read(DriftSqlType.string, data['${effectivePrefix}household_id']),
       createdAt: attachedDatabase.typeMapping
@@ -635,7 +622,6 @@ class RecipeEntry extends DataClass implements Insertable<RecipeEntry> {
   final String? nutrition;
   final String? generalNotes;
   final String? userId;
-  final String? folderId;
   final String? householdId;
   final int? createdAt;
   final int? updatedAt;
@@ -653,7 +639,6 @@ class RecipeEntry extends DataClass implements Insertable<RecipeEntry> {
       this.nutrition,
       this.generalNotes,
       this.userId,
-      this.folderId,
       this.householdId,
       this.createdAt,
       this.updatedAt});
@@ -690,9 +675,6 @@ class RecipeEntry extends DataClass implements Insertable<RecipeEntry> {
     }
     if (!nullToAbsent || userId != null) {
       map['user_id'] = Variable<String>(userId);
-    }
-    if (!nullToAbsent || folderId != null) {
-      map['folder_id'] = Variable<String>(folderId);
     }
     if (!nullToAbsent || householdId != null) {
       map['household_id'] = Variable<String>(householdId);
@@ -737,9 +719,6 @@ class RecipeEntry extends DataClass implements Insertable<RecipeEntry> {
           : Value(generalNotes),
       userId:
           userId == null && nullToAbsent ? const Value.absent() : Value(userId),
-      folderId: folderId == null && nullToAbsent
-          ? const Value.absent()
-          : Value(folderId),
       householdId: householdId == null && nullToAbsent
           ? const Value.absent()
           : Value(householdId),
@@ -769,7 +748,6 @@ class RecipeEntry extends DataClass implements Insertable<RecipeEntry> {
       nutrition: serializer.fromJson<String?>(json['nutrition']),
       generalNotes: serializer.fromJson<String?>(json['generalNotes']),
       userId: serializer.fromJson<String?>(json['userId']),
-      folderId: serializer.fromJson<String?>(json['folderId']),
       householdId: serializer.fromJson<String?>(json['householdId']),
       createdAt: serializer.fromJson<int?>(json['createdAt']),
       updatedAt: serializer.fromJson<int?>(json['updatedAt']),
@@ -792,7 +770,6 @@ class RecipeEntry extends DataClass implements Insertable<RecipeEntry> {
       'nutrition': serializer.toJson<String?>(nutrition),
       'generalNotes': serializer.toJson<String?>(generalNotes),
       'userId': serializer.toJson<String?>(userId),
-      'folderId': serializer.toJson<String?>(folderId),
       'householdId': serializer.toJson<String?>(householdId),
       'createdAt': serializer.toJson<int?>(createdAt),
       'updatedAt': serializer.toJson<int?>(updatedAt),
@@ -813,7 +790,6 @@ class RecipeEntry extends DataClass implements Insertable<RecipeEntry> {
           Value<String?> nutrition = const Value.absent(),
           Value<String?> generalNotes = const Value.absent(),
           Value<String?> userId = const Value.absent(),
-          Value<String?> folderId = const Value.absent(),
           Value<String?> householdId = const Value.absent(),
           Value<int?> createdAt = const Value.absent(),
           Value<int?> updatedAt = const Value.absent()}) =>
@@ -832,7 +808,6 @@ class RecipeEntry extends DataClass implements Insertable<RecipeEntry> {
         generalNotes:
             generalNotes.present ? generalNotes.value : this.generalNotes,
         userId: userId.present ? userId.value : this.userId,
-        folderId: folderId.present ? folderId.value : this.folderId,
         householdId: householdId.present ? householdId.value : this.householdId,
         createdAt: createdAt.present ? createdAt.value : this.createdAt,
         updatedAt: updatedAt.present ? updatedAt.value : this.updatedAt,
@@ -855,7 +830,6 @@ class RecipeEntry extends DataClass implements Insertable<RecipeEntry> {
           ? data.generalNotes.value
           : this.generalNotes,
       userId: data.userId.present ? data.userId.value : this.userId,
-      folderId: data.folderId.present ? data.folderId.value : this.folderId,
       householdId:
           data.householdId.present ? data.householdId.value : this.householdId,
       createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
@@ -879,7 +853,6 @@ class RecipeEntry extends DataClass implements Insertable<RecipeEntry> {
           ..write('nutrition: $nutrition, ')
           ..write('generalNotes: $generalNotes, ')
           ..write('userId: $userId, ')
-          ..write('folderId: $folderId, ')
           ..write('householdId: $householdId, ')
           ..write('createdAt: $createdAt, ')
           ..write('updatedAt: $updatedAt')
@@ -902,7 +875,6 @@ class RecipeEntry extends DataClass implements Insertable<RecipeEntry> {
       nutrition,
       generalNotes,
       userId,
-      folderId,
       householdId,
       createdAt,
       updatedAt);
@@ -923,7 +895,6 @@ class RecipeEntry extends DataClass implements Insertable<RecipeEntry> {
           other.nutrition == this.nutrition &&
           other.generalNotes == this.generalNotes &&
           other.userId == this.userId &&
-          other.folderId == this.folderId &&
           other.householdId == this.householdId &&
           other.createdAt == this.createdAt &&
           other.updatedAt == this.updatedAt);
@@ -943,7 +914,6 @@ class RecipesCompanion extends UpdateCompanion<RecipeEntry> {
   final Value<String?> nutrition;
   final Value<String?> generalNotes;
   final Value<String?> userId;
-  final Value<String?> folderId;
   final Value<String?> householdId;
   final Value<int?> createdAt;
   final Value<int?> updatedAt;
@@ -962,7 +932,6 @@ class RecipesCompanion extends UpdateCompanion<RecipeEntry> {
     this.nutrition = const Value.absent(),
     this.generalNotes = const Value.absent(),
     this.userId = const Value.absent(),
-    this.folderId = const Value.absent(),
     this.householdId = const Value.absent(),
     this.createdAt = const Value.absent(),
     this.updatedAt = const Value.absent(),
@@ -982,7 +951,6 @@ class RecipesCompanion extends UpdateCompanion<RecipeEntry> {
     this.nutrition = const Value.absent(),
     this.generalNotes = const Value.absent(),
     this.userId = const Value.absent(),
-    this.folderId = const Value.absent(),
     this.householdId = const Value.absent(),
     this.createdAt = const Value.absent(),
     this.updatedAt = const Value.absent(),
@@ -1004,7 +972,6 @@ class RecipesCompanion extends UpdateCompanion<RecipeEntry> {
     Expression<String>? nutrition,
     Expression<String>? generalNotes,
     Expression<String>? userId,
-    Expression<String>? folderId,
     Expression<String>? householdId,
     Expression<int>? createdAt,
     Expression<int>? updatedAt,
@@ -1024,7 +991,6 @@ class RecipesCompanion extends UpdateCompanion<RecipeEntry> {
       if (nutrition != null) 'nutrition': nutrition,
       if (generalNotes != null) 'general_notes': generalNotes,
       if (userId != null) 'user_id': userId,
-      if (folderId != null) 'folder_id': folderId,
       if (householdId != null) 'household_id': householdId,
       if (createdAt != null) 'created_at': createdAt,
       if (updatedAt != null) 'updated_at': updatedAt,
@@ -1046,7 +1012,6 @@ class RecipesCompanion extends UpdateCompanion<RecipeEntry> {
       Value<String?>? nutrition,
       Value<String?>? generalNotes,
       Value<String?>? userId,
-      Value<String?>? folderId,
       Value<String?>? householdId,
       Value<int?>? createdAt,
       Value<int?>? updatedAt,
@@ -1065,7 +1030,6 @@ class RecipesCompanion extends UpdateCompanion<RecipeEntry> {
       nutrition: nutrition ?? this.nutrition,
       generalNotes: generalNotes ?? this.generalNotes,
       userId: userId ?? this.userId,
-      folderId: folderId ?? this.folderId,
       householdId: householdId ?? this.householdId,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
@@ -1115,9 +1079,6 @@ class RecipesCompanion extends UpdateCompanion<RecipeEntry> {
     if (userId.present) {
       map['user_id'] = Variable<String>(userId.value);
     }
-    if (folderId.present) {
-      map['folder_id'] = Variable<String>(folderId.value);
-    }
     if (householdId.present) {
       map['household_id'] = Variable<String>(householdId.value);
     }
@@ -1149,7 +1110,6 @@ class RecipesCompanion extends UpdateCompanion<RecipeEntry> {
           ..write('nutrition: $nutrition, ')
           ..write('generalNotes: $generalNotes, ')
           ..write('userId: $userId, ')
-          ..write('folderId: $folderId, ')
           ..write('householdId: $householdId, ')
           ..write('createdAt: $createdAt, ')
           ..write('updatedAt: $updatedAt, ')
@@ -1477,6 +1437,14 @@ class $HouseholdMembersTable extends HouseholdMembers
   final GeneratedDatabase attachedDatabase;
   final String? _alias;
   $HouseholdMembersTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<String> id = GeneratedColumn<String>(
+      'id', aliasedName, false,
+      type: DriftSqlType.string,
+      requiredDuringInsert: false,
+      defaultConstraints: GeneratedColumn.constraintIsAlways('UNIQUE'),
+      clientDefault: () => const Uuid().v4());
   static const VerificationMeta _householdIdMeta =
       const VerificationMeta('householdId');
   @override
@@ -1488,8 +1456,16 @@ class $HouseholdMembersTable extends HouseholdMembers
   late final GeneratedColumn<String> userId = GeneratedColumn<String>(
       'user_id', aliasedName, false,
       type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _isActiveMeta =
+      const VerificationMeta('isActive');
   @override
-  List<GeneratedColumn> get $columns => [householdId, userId];
+  late final GeneratedColumn<int> isActive = GeneratedColumn<int>(
+      'is_active', aliasedName, false,
+      type: DriftSqlType.int,
+      requiredDuringInsert: false,
+      defaultValue: const Constant(1));
+  @override
+  List<GeneratedColumn> get $columns => [id, householdId, userId, isActive];
   @override
   String get aliasedName => _alias ?? actualTableName;
   @override
@@ -1501,6 +1477,9 @@ class $HouseholdMembersTable extends HouseholdMembers
       {bool isInserting = false}) {
     final context = VerificationContext();
     final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    }
     if (data.containsKey('household_id')) {
       context.handle(
           _householdIdMeta,
@@ -1515,6 +1494,10 @@ class $HouseholdMembersTable extends HouseholdMembers
     } else if (isInserting) {
       context.missing(_userIdMeta);
     }
+    if (data.containsKey('is_active')) {
+      context.handle(_isActiveMeta,
+          isActive.isAcceptableOrUnknown(data['is_active']!, _isActiveMeta));
+    }
     return context;
   }
 
@@ -1524,10 +1507,14 @@ class $HouseholdMembersTable extends HouseholdMembers
   HouseholdMemberEntry map(Map<String, dynamic> data, {String? tablePrefix}) {
     final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
     return HouseholdMemberEntry(
+      id: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}id'])!,
       householdId: attachedDatabase.typeMapping
           .read(DriftSqlType.string, data['${effectivePrefix}household_id'])!,
       userId: attachedDatabase.typeMapping
           .read(DriftSqlType.string, data['${effectivePrefix}user_id'])!,
+      isActive: attachedDatabase.typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}is_active'])!,
     );
   }
 
@@ -1539,21 +1526,31 @@ class $HouseholdMembersTable extends HouseholdMembers
 
 class HouseholdMemberEntry extends DataClass
     implements Insertable<HouseholdMemberEntry> {
+  final String id;
   final String householdId;
   final String userId;
-  const HouseholdMemberEntry({required this.householdId, required this.userId});
+  final int isActive;
+  const HouseholdMemberEntry(
+      {required this.id,
+      required this.householdId,
+      required this.userId,
+      required this.isActive});
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
+    map['id'] = Variable<String>(id);
     map['household_id'] = Variable<String>(householdId);
     map['user_id'] = Variable<String>(userId);
+    map['is_active'] = Variable<int>(isActive);
     return map;
   }
 
   HouseholdMembersCompanion toCompanion(bool nullToAbsent) {
     return HouseholdMembersCompanion(
+      id: Value(id),
       householdId: Value(householdId),
       userId: Value(userId),
+      isActive: Value(isActive),
     );
   }
 
@@ -1561,83 +1558,112 @@ class HouseholdMemberEntry extends DataClass
       {ValueSerializer? serializer}) {
     serializer ??= driftRuntimeOptions.defaultSerializer;
     return HouseholdMemberEntry(
+      id: serializer.fromJson<String>(json['id']),
       householdId: serializer.fromJson<String>(json['householdId']),
       userId: serializer.fromJson<String>(json['userId']),
+      isActive: serializer.fromJson<int>(json['isActive']),
     );
   }
   @override
   Map<String, dynamic> toJson({ValueSerializer? serializer}) {
     serializer ??= driftRuntimeOptions.defaultSerializer;
     return <String, dynamic>{
+      'id': serializer.toJson<String>(id),
       'householdId': serializer.toJson<String>(householdId),
       'userId': serializer.toJson<String>(userId),
+      'isActive': serializer.toJson<int>(isActive),
     };
   }
 
-  HouseholdMemberEntry copyWith({String? householdId, String? userId}) =>
+  HouseholdMemberEntry copyWith(
+          {String? id, String? householdId, String? userId, int? isActive}) =>
       HouseholdMemberEntry(
+        id: id ?? this.id,
         householdId: householdId ?? this.householdId,
         userId: userId ?? this.userId,
+        isActive: isActive ?? this.isActive,
       );
   HouseholdMemberEntry copyWithCompanion(HouseholdMembersCompanion data) {
     return HouseholdMemberEntry(
+      id: data.id.present ? data.id.value : this.id,
       householdId:
           data.householdId.present ? data.householdId.value : this.householdId,
       userId: data.userId.present ? data.userId.value : this.userId,
+      isActive: data.isActive.present ? data.isActive.value : this.isActive,
     );
   }
 
   @override
   String toString() {
     return (StringBuffer('HouseholdMemberEntry(')
+          ..write('id: $id, ')
           ..write('householdId: $householdId, ')
-          ..write('userId: $userId')
+          ..write('userId: $userId, ')
+          ..write('isActive: $isActive')
           ..write(')'))
         .toString();
   }
 
   @override
-  int get hashCode => Object.hash(householdId, userId);
+  int get hashCode => Object.hash(id, householdId, userId, isActive);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
       (other is HouseholdMemberEntry &&
+          other.id == this.id &&
           other.householdId == this.householdId &&
-          other.userId == this.userId);
+          other.userId == this.userId &&
+          other.isActive == this.isActive);
 }
 
 class HouseholdMembersCompanion extends UpdateCompanion<HouseholdMemberEntry> {
+  final Value<String> id;
   final Value<String> householdId;
   final Value<String> userId;
+  final Value<int> isActive;
   final Value<int> rowid;
   const HouseholdMembersCompanion({
+    this.id = const Value.absent(),
     this.householdId = const Value.absent(),
     this.userId = const Value.absent(),
+    this.isActive = const Value.absent(),
     this.rowid = const Value.absent(),
   });
   HouseholdMembersCompanion.insert({
+    this.id = const Value.absent(),
     required String householdId,
     required String userId,
+    this.isActive = const Value.absent(),
     this.rowid = const Value.absent(),
   })  : householdId = Value(householdId),
         userId = Value(userId);
   static Insertable<HouseholdMemberEntry> custom({
+    Expression<String>? id,
     Expression<String>? householdId,
     Expression<String>? userId,
+    Expression<int>? isActive,
     Expression<int>? rowid,
   }) {
     return RawValuesInsertable({
+      if (id != null) 'id': id,
       if (householdId != null) 'household_id': householdId,
       if (userId != null) 'user_id': userId,
+      if (isActive != null) 'is_active': isActive,
       if (rowid != null) 'rowid': rowid,
     });
   }
 
   HouseholdMembersCompanion copyWith(
-      {Value<String>? householdId, Value<String>? userId, Value<int>? rowid}) {
+      {Value<String>? id,
+      Value<String>? householdId,
+      Value<String>? userId,
+      Value<int>? isActive,
+      Value<int>? rowid}) {
     return HouseholdMembersCompanion(
+      id: id ?? this.id,
       householdId: householdId ?? this.householdId,
       userId: userId ?? this.userId,
+      isActive: isActive ?? this.isActive,
       rowid: rowid ?? this.rowid,
     );
   }
@@ -1645,11 +1671,17 @@ class HouseholdMembersCompanion extends UpdateCompanion<HouseholdMemberEntry> {
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<String>(id.value);
+    }
     if (householdId.present) {
       map['household_id'] = Variable<String>(householdId.value);
     }
     if (userId.present) {
       map['user_id'] = Variable<String>(userId.value);
+    }
+    if (isActive.present) {
+      map['is_active'] = Variable<int>(isActive.value);
     }
     if (rowid.present) {
       map['rowid'] = Variable<int>(rowid.value);
@@ -1660,8 +1692,10 @@ class HouseholdMembersCompanion extends UpdateCompanion<HouseholdMemberEntry> {
   @override
   String toString() {
     return (StringBuffer('HouseholdMembersCompanion(')
+          ..write('id: $id, ')
           ..write('householdId: $householdId, ')
           ..write('userId: $userId, ')
+          ..write('isActive: $isActive, ')
           ..write('rowid: $rowid')
           ..write(')'))
         .toString();
@@ -2114,7 +2148,6 @@ typedef $$RecipesTableCreateCompanionBuilder = RecipesCompanion Function({
   Value<String?> nutrition,
   Value<String?> generalNotes,
   Value<String?> userId,
-  Value<String?> folderId,
   Value<String?> householdId,
   Value<int?> createdAt,
   Value<int?> updatedAt,
@@ -2134,7 +2167,6 @@ typedef $$RecipesTableUpdateCompanionBuilder = RecipesCompanion Function({
   Value<String?> nutrition,
   Value<String?> generalNotes,
   Value<String?> userId,
-  Value<String?> folderId,
   Value<String?> householdId,
   Value<int?> createdAt,
   Value<int?> updatedAt,
@@ -2188,9 +2220,6 @@ class $$RecipesTableFilterComposer
 
   ColumnFilters<String> get userId => $composableBuilder(
       column: $table.userId, builder: (column) => ColumnFilters(column));
-
-  ColumnFilters<String> get folderId => $composableBuilder(
-      column: $table.folderId, builder: (column) => ColumnFilters(column));
 
   ColumnFilters<String> get householdId => $composableBuilder(
       column: $table.householdId, builder: (column) => ColumnFilters(column));
@@ -2251,9 +2280,6 @@ class $$RecipesTableOrderingComposer
   ColumnOrderings<String> get userId => $composableBuilder(
       column: $table.userId, builder: (column) => ColumnOrderings(column));
 
-  ColumnOrderings<String> get folderId => $composableBuilder(
-      column: $table.folderId, builder: (column) => ColumnOrderings(column));
-
   ColumnOrderings<String> get householdId => $composableBuilder(
       column: $table.householdId, builder: (column) => ColumnOrderings(column));
 
@@ -2312,9 +2338,6 @@ class $$RecipesTableAnnotationComposer
   GeneratedColumn<String> get userId =>
       $composableBuilder(column: $table.userId, builder: (column) => column);
 
-  GeneratedColumn<String> get folderId =>
-      $composableBuilder(column: $table.folderId, builder: (column) => column);
-
   GeneratedColumn<String> get householdId => $composableBuilder(
       column: $table.householdId, builder: (column) => column);
 
@@ -2361,7 +2384,6 @@ class $$RecipesTableTableManager extends RootTableManager<
             Value<String?> nutrition = const Value.absent(),
             Value<String?> generalNotes = const Value.absent(),
             Value<String?> userId = const Value.absent(),
-            Value<String?> folderId = const Value.absent(),
             Value<String?> householdId = const Value.absent(),
             Value<int?> createdAt = const Value.absent(),
             Value<int?> updatedAt = const Value.absent(),
@@ -2381,7 +2403,6 @@ class $$RecipesTableTableManager extends RootTableManager<
             nutrition: nutrition,
             generalNotes: generalNotes,
             userId: userId,
-            folderId: folderId,
             householdId: householdId,
             createdAt: createdAt,
             updatedAt: updatedAt,
@@ -2401,7 +2422,6 @@ class $$RecipesTableTableManager extends RootTableManager<
             Value<String?> nutrition = const Value.absent(),
             Value<String?> generalNotes = const Value.absent(),
             Value<String?> userId = const Value.absent(),
-            Value<String?> folderId = const Value.absent(),
             Value<String?> householdId = const Value.absent(),
             Value<int?> createdAt = const Value.absent(),
             Value<int?> updatedAt = const Value.absent(),
@@ -2421,7 +2441,6 @@ class $$RecipesTableTableManager extends RootTableManager<
             nutrition: nutrition,
             generalNotes: generalNotes,
             userId: userId,
-            folderId: folderId,
             householdId: householdId,
             createdAt: createdAt,
             updatedAt: updatedAt,
@@ -2621,14 +2640,18 @@ typedef $$RecipeSharesTableProcessedTableManager = ProcessedTableManager<
     PrefetchHooks Function()>;
 typedef $$HouseholdMembersTableCreateCompanionBuilder
     = HouseholdMembersCompanion Function({
+  Value<String> id,
   required String householdId,
   required String userId,
+  Value<int> isActive,
   Value<int> rowid,
 });
 typedef $$HouseholdMembersTableUpdateCompanionBuilder
     = HouseholdMembersCompanion Function({
+  Value<String> id,
   Value<String> householdId,
   Value<String> userId,
+  Value<int> isActive,
   Value<int> rowid,
 });
 
@@ -2641,11 +2664,17 @@ class $$HouseholdMembersTableFilterComposer
     super.$addJoinBuilderToRootComposer,
     super.$removeJoinBuilderFromRootComposer,
   });
+  ColumnFilters<String> get id => $composableBuilder(
+      column: $table.id, builder: (column) => ColumnFilters(column));
+
   ColumnFilters<String> get householdId => $composableBuilder(
       column: $table.householdId, builder: (column) => ColumnFilters(column));
 
   ColumnFilters<String> get userId => $composableBuilder(
       column: $table.userId, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<int> get isActive => $composableBuilder(
+      column: $table.isActive, builder: (column) => ColumnFilters(column));
 }
 
 class $$HouseholdMembersTableOrderingComposer
@@ -2657,11 +2686,17 @@ class $$HouseholdMembersTableOrderingComposer
     super.$addJoinBuilderToRootComposer,
     super.$removeJoinBuilderFromRootComposer,
   });
+  ColumnOrderings<String> get id => $composableBuilder(
+      column: $table.id, builder: (column) => ColumnOrderings(column));
+
   ColumnOrderings<String> get householdId => $composableBuilder(
       column: $table.householdId, builder: (column) => ColumnOrderings(column));
 
   ColumnOrderings<String> get userId => $composableBuilder(
       column: $table.userId, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<int> get isActive => $composableBuilder(
+      column: $table.isActive, builder: (column) => ColumnOrderings(column));
 }
 
 class $$HouseholdMembersTableAnnotationComposer
@@ -2673,11 +2708,17 @@ class $$HouseholdMembersTableAnnotationComposer
     super.$addJoinBuilderToRootComposer,
     super.$removeJoinBuilderFromRootComposer,
   });
+  GeneratedColumn<String> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
   GeneratedColumn<String> get householdId => $composableBuilder(
       column: $table.householdId, builder: (column) => column);
 
   GeneratedColumn<String> get userId =>
       $composableBuilder(column: $table.userId, builder: (column) => column);
+
+  GeneratedColumn<int> get isActive =>
+      $composableBuilder(column: $table.isActive, builder: (column) => column);
 }
 
 class $$HouseholdMembersTableTableManager extends RootTableManager<
@@ -2708,23 +2749,31 @@ class $$HouseholdMembersTableTableManager extends RootTableManager<
           createComputedFieldComposer: () =>
               $$HouseholdMembersTableAnnotationComposer($db: db, $table: table),
           updateCompanionCallback: ({
+            Value<String> id = const Value.absent(),
             Value<String> householdId = const Value.absent(),
             Value<String> userId = const Value.absent(),
+            Value<int> isActive = const Value.absent(),
             Value<int> rowid = const Value.absent(),
           }) =>
               HouseholdMembersCompanion(
+            id: id,
             householdId: householdId,
             userId: userId,
+            isActive: isActive,
             rowid: rowid,
           ),
           createCompanionCallback: ({
+            Value<String> id = const Value.absent(),
             required String householdId,
             required String userId,
+            Value<int> isActive = const Value.absent(),
             Value<int> rowid = const Value.absent(),
           }) =>
               HouseholdMembersCompanion.insert(
+            id: id,
             householdId: householdId,
             userId: userId,
+            isActive: isActive,
             rowid: rowid,
           ),
           withReferenceMapper: (p0) => p0

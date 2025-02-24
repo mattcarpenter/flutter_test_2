@@ -7,6 +7,7 @@ const householdsTable = 'households';
 const householdMembersTable = 'household_members';
 const recipeSharesTable = 'recipe_shares';
 const recipeFolderSharesTable = 'recipe_folder_shares';
+const recipeFolderAssignmentsTable = 'recipe_folder_assignments';
 
 // Create a schema that includes your RecipeFolder table.
 Schema schema = const Schema(([
@@ -41,14 +42,19 @@ Schema schema = const Schema(([
     Column.text('nutrition'),
     Column.text('general_notes'),
     Column.text('user_id'),
-    Column.text('folder_id'),
+    // Remove folder_id from recipes (or ignore it) – we'll use the mapping table.
+    // Column.text('folder_id'),
     Column.text('household_id'),
     Column.integer('created_at'),
     Column.integer('updated_at'),
-  ]/*, indexes: [
-    // Example index on 'id'
-    Index('id_index', [IndexedColumn('id')]),
-  ]*/),
+  ]/*, indexes: [...] */),
+  Table(recipeFolderAssignmentsTable, [
+    Column.text('recipe_id'),
+    Column.text('folder_id'),
+    // NEW: Add the household_id column.
+    Column.text('household_id'),
+    Column.integer('created_at'),
+  ]),
   Table(householdsTable, [
     // Household name.
     Column.text('name'),
@@ -61,6 +67,8 @@ Schema schema = const Schema(([
     Column.text('household_id'),
     // The user id.
     Column.text('user_id'),
+    // Active flag: 1 (active) or 0 (inactive)
+    Column.integer('is_active'),
   ]),
   Table(recipeSharesTable, [
     Column.text('recipe_id'),
@@ -69,9 +77,12 @@ Schema schema = const Schema(([
     Column.integer('can_edit'),
   ]),
   Table(recipeFolderSharesTable, [
+    Column.text('id'),
     Column.text('folder_id'),
-    Column.text('household_id'),
-    Column.text('user_id'),
+    Column.text('sharer_id'),
+    Column.text('target_user_id'),
+    Column.text('target_household_id'),
     Column.integer('can_edit'),
-  ])
+    Column.integer('created_at'),
+  ]),
 ]));

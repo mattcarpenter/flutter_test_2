@@ -18,8 +18,8 @@ class Recipes extends Table {
   TextColumn get nutrition => text().nullable()();
   TextColumn get generalNotes => text().nullable()();
   TextColumn get userId => text().nullable()();
-  // Store foreign keys as text IDs
-  TextColumn get folderId => text().nullable()();
+  // We no longer rely on folderId here; the association is in the join table.
+  // TextColumn get folderId => text().nullable()();
   TextColumn get householdId => text().nullable()();
   // Timestamps stored as integers (e.g., Unix epoch milliseconds)
   IntColumn get createdAt => integer().nullable()();
