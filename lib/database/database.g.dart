@@ -454,6 +454,17 @@ class $RecipesTable extends Recipes with TableInfo<$RecipesTable, RecipeEntry> {
   late final GeneratedColumn<int> updatedAt = GeneratedColumn<int>(
       'updated_at', aliasedName, true,
       type: DriftSqlType.int, requiredDuringInsert: false);
+  static const VerificationMeta _ingredientsMeta =
+      const VerificationMeta('ingredients');
+  @override
+  late final GeneratedColumn<String> ingredients = GeneratedColumn<String>(
+      'ingredients', aliasedName, true,
+      type: DriftSqlType.string, requiredDuringInsert: false);
+  static const VerificationMeta _stepsMeta = const VerificationMeta('steps');
+  @override
+  late final GeneratedColumn<String> steps = GeneratedColumn<String>(
+      'steps', aliasedName, true,
+      type: DriftSqlType.string, requiredDuringInsert: false);
   @override
   List<GeneratedColumn> get $columns => [
         id,
@@ -471,7 +482,9 @@ class $RecipesTable extends Recipes with TableInfo<$RecipesTable, RecipeEntry> {
         userId,
         householdId,
         createdAt,
-        updatedAt
+        updatedAt,
+        ingredients,
+        steps
       ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -558,6 +571,16 @@ class $RecipesTable extends Recipes with TableInfo<$RecipesTable, RecipeEntry> {
       context.handle(_updatedAtMeta,
           updatedAt.isAcceptableOrUnknown(data['updated_at']!, _updatedAtMeta));
     }
+    if (data.containsKey('ingredients')) {
+      context.handle(
+          _ingredientsMeta,
+          ingredients.isAcceptableOrUnknown(
+              data['ingredients']!, _ingredientsMeta));
+    }
+    if (data.containsKey('steps')) {
+      context.handle(
+          _stepsMeta, steps.isAcceptableOrUnknown(data['steps']!, _stepsMeta));
+    }
     return context;
   }
 
@@ -599,6 +622,10 @@ class $RecipesTable extends Recipes with TableInfo<$RecipesTable, RecipeEntry> {
           .read(DriftSqlType.int, data['${effectivePrefix}created_at']),
       updatedAt: attachedDatabase.typeMapping
           .read(DriftSqlType.int, data['${effectivePrefix}updated_at']),
+      ingredients: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}ingredients']),
+      steps: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}steps']),
     );
   }
 
@@ -625,6 +652,8 @@ class RecipeEntry extends DataClass implements Insertable<RecipeEntry> {
   final String? householdId;
   final int? createdAt;
   final int? updatedAt;
+  final String? ingredients;
+  final String? steps;
   const RecipeEntry(
       {required this.id,
       required this.title,
@@ -641,7 +670,9 @@ class RecipeEntry extends DataClass implements Insertable<RecipeEntry> {
       this.userId,
       this.householdId,
       this.createdAt,
-      this.updatedAt});
+      this.updatedAt,
+      this.ingredients,
+      this.steps});
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
@@ -684,6 +715,12 @@ class RecipeEntry extends DataClass implements Insertable<RecipeEntry> {
     }
     if (!nullToAbsent || updatedAt != null) {
       map['updated_at'] = Variable<int>(updatedAt);
+    }
+    if (!nullToAbsent || ingredients != null) {
+      map['ingredients'] = Variable<String>(ingredients);
+    }
+    if (!nullToAbsent || steps != null) {
+      map['steps'] = Variable<String>(steps);
     }
     return map;
   }
@@ -728,6 +765,11 @@ class RecipeEntry extends DataClass implements Insertable<RecipeEntry> {
       updatedAt: updatedAt == null && nullToAbsent
           ? const Value.absent()
           : Value(updatedAt),
+      ingredients: ingredients == null && nullToAbsent
+          ? const Value.absent()
+          : Value(ingredients),
+      steps:
+          steps == null && nullToAbsent ? const Value.absent() : Value(steps),
     );
   }
 
@@ -751,6 +793,8 @@ class RecipeEntry extends DataClass implements Insertable<RecipeEntry> {
       householdId: serializer.fromJson<String?>(json['householdId']),
       createdAt: serializer.fromJson<int?>(json['createdAt']),
       updatedAt: serializer.fromJson<int?>(json['updatedAt']),
+      ingredients: serializer.fromJson<String?>(json['ingredients']),
+      steps: serializer.fromJson<String?>(json['steps']),
     );
   }
   @override
@@ -773,6 +817,8 @@ class RecipeEntry extends DataClass implements Insertable<RecipeEntry> {
       'householdId': serializer.toJson<String?>(householdId),
       'createdAt': serializer.toJson<int?>(createdAt),
       'updatedAt': serializer.toJson<int?>(updatedAt),
+      'ingredients': serializer.toJson<String?>(ingredients),
+      'steps': serializer.toJson<String?>(steps),
     };
   }
 
@@ -792,7 +838,9 @@ class RecipeEntry extends DataClass implements Insertable<RecipeEntry> {
           Value<String?> userId = const Value.absent(),
           Value<String?> householdId = const Value.absent(),
           Value<int?> createdAt = const Value.absent(),
-          Value<int?> updatedAt = const Value.absent()}) =>
+          Value<int?> updatedAt = const Value.absent(),
+          Value<String?> ingredients = const Value.absent(),
+          Value<String?> steps = const Value.absent()}) =>
       RecipeEntry(
         id: id ?? this.id,
         title: title ?? this.title,
@@ -811,6 +859,8 @@ class RecipeEntry extends DataClass implements Insertable<RecipeEntry> {
         householdId: householdId.present ? householdId.value : this.householdId,
         createdAt: createdAt.present ? createdAt.value : this.createdAt,
         updatedAt: updatedAt.present ? updatedAt.value : this.updatedAt,
+        ingredients: ingredients.present ? ingredients.value : this.ingredients,
+        steps: steps.present ? steps.value : this.steps,
       );
   RecipeEntry copyWithCompanion(RecipesCompanion data) {
     return RecipeEntry(
@@ -834,6 +884,9 @@ class RecipeEntry extends DataClass implements Insertable<RecipeEntry> {
           data.householdId.present ? data.householdId.value : this.householdId,
       createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
       updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
+      ingredients:
+          data.ingredients.present ? data.ingredients.value : this.ingredients,
+      steps: data.steps.present ? data.steps.value : this.steps,
     );
   }
 
@@ -855,7 +908,9 @@ class RecipeEntry extends DataClass implements Insertable<RecipeEntry> {
           ..write('userId: $userId, ')
           ..write('householdId: $householdId, ')
           ..write('createdAt: $createdAt, ')
-          ..write('updatedAt: $updatedAt')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('ingredients: $ingredients, ')
+          ..write('steps: $steps')
           ..write(')'))
         .toString();
   }
@@ -877,7 +932,9 @@ class RecipeEntry extends DataClass implements Insertable<RecipeEntry> {
       userId,
       householdId,
       createdAt,
-      updatedAt);
+      updatedAt,
+      ingredients,
+      steps);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -897,7 +954,9 @@ class RecipeEntry extends DataClass implements Insertable<RecipeEntry> {
           other.userId == this.userId &&
           other.householdId == this.householdId &&
           other.createdAt == this.createdAt &&
-          other.updatedAt == this.updatedAt);
+          other.updatedAt == this.updatedAt &&
+          other.ingredients == this.ingredients &&
+          other.steps == this.steps);
 }
 
 class RecipesCompanion extends UpdateCompanion<RecipeEntry> {
@@ -917,6 +976,8 @@ class RecipesCompanion extends UpdateCompanion<RecipeEntry> {
   final Value<String?> householdId;
   final Value<int?> createdAt;
   final Value<int?> updatedAt;
+  final Value<String?> ingredients;
+  final Value<String?> steps;
   final Value<int> rowid;
   const RecipesCompanion({
     this.id = const Value.absent(),
@@ -935,6 +996,8 @@ class RecipesCompanion extends UpdateCompanion<RecipeEntry> {
     this.householdId = const Value.absent(),
     this.createdAt = const Value.absent(),
     this.updatedAt = const Value.absent(),
+    this.ingredients = const Value.absent(),
+    this.steps = const Value.absent(),
     this.rowid = const Value.absent(),
   });
   RecipesCompanion.insert({
@@ -954,6 +1017,8 @@ class RecipesCompanion extends UpdateCompanion<RecipeEntry> {
     this.householdId = const Value.absent(),
     this.createdAt = const Value.absent(),
     this.updatedAt = const Value.absent(),
+    this.ingredients = const Value.absent(),
+    this.steps = const Value.absent(),
     this.rowid = const Value.absent(),
   })  : title = Value(title),
         rating = Value(rating),
@@ -975,6 +1040,8 @@ class RecipesCompanion extends UpdateCompanion<RecipeEntry> {
     Expression<String>? householdId,
     Expression<int>? createdAt,
     Expression<int>? updatedAt,
+    Expression<String>? ingredients,
+    Expression<String>? steps,
     Expression<int>? rowid,
   }) {
     return RawValuesInsertable({
@@ -994,6 +1061,8 @@ class RecipesCompanion extends UpdateCompanion<RecipeEntry> {
       if (householdId != null) 'household_id': householdId,
       if (createdAt != null) 'created_at': createdAt,
       if (updatedAt != null) 'updated_at': updatedAt,
+      if (ingredients != null) 'ingredients': ingredients,
+      if (steps != null) 'steps': steps,
       if (rowid != null) 'rowid': rowid,
     });
   }
@@ -1015,6 +1084,8 @@ class RecipesCompanion extends UpdateCompanion<RecipeEntry> {
       Value<String?>? householdId,
       Value<int?>? createdAt,
       Value<int?>? updatedAt,
+      Value<String?>? ingredients,
+      Value<String?>? steps,
       Value<int>? rowid}) {
     return RecipesCompanion(
       id: id ?? this.id,
@@ -1033,6 +1104,8 @@ class RecipesCompanion extends UpdateCompanion<RecipeEntry> {
       householdId: householdId ?? this.householdId,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
+      ingredients: ingredients ?? this.ingredients,
+      steps: steps ?? this.steps,
       rowid: rowid ?? this.rowid,
     );
   }
@@ -1088,6 +1161,12 @@ class RecipesCompanion extends UpdateCompanion<RecipeEntry> {
     if (updatedAt.present) {
       map['updated_at'] = Variable<int>(updatedAt.value);
     }
+    if (ingredients.present) {
+      map['ingredients'] = Variable<String>(ingredients.value);
+    }
+    if (steps.present) {
+      map['steps'] = Variable<String>(steps.value);
+    }
     if (rowid.present) {
       map['rowid'] = Variable<int>(rowid.value);
     }
@@ -1113,6 +1192,8 @@ class RecipesCompanion extends UpdateCompanion<RecipeEntry> {
           ..write('householdId: $householdId, ')
           ..write('createdAt: $createdAt, ')
           ..write('updatedAt: $updatedAt, ')
+          ..write('ingredients: $ingredients, ')
+          ..write('steps: $steps, ')
           ..write('rowid: $rowid')
           ..write(')'))
         .toString();
@@ -2151,6 +2232,8 @@ typedef $$RecipesTableCreateCompanionBuilder = RecipesCompanion Function({
   Value<String?> householdId,
   Value<int?> createdAt,
   Value<int?> updatedAt,
+  Value<String?> ingredients,
+  Value<String?> steps,
   Value<int> rowid,
 });
 typedef $$RecipesTableUpdateCompanionBuilder = RecipesCompanion Function({
@@ -2170,6 +2253,8 @@ typedef $$RecipesTableUpdateCompanionBuilder = RecipesCompanion Function({
   Value<String?> householdId,
   Value<int?> createdAt,
   Value<int?> updatedAt,
+  Value<String?> ingredients,
+  Value<String?> steps,
   Value<int> rowid,
 });
 
@@ -2229,6 +2314,12 @@ class $$RecipesTableFilterComposer
 
   ColumnFilters<int> get updatedAt => $composableBuilder(
       column: $table.updatedAt, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get ingredients => $composableBuilder(
+      column: $table.ingredients, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get steps => $composableBuilder(
+      column: $table.steps, builder: (column) => ColumnFilters(column));
 }
 
 class $$RecipesTableOrderingComposer
@@ -2288,6 +2379,12 @@ class $$RecipesTableOrderingComposer
 
   ColumnOrderings<int> get updatedAt => $composableBuilder(
       column: $table.updatedAt, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get ingredients => $composableBuilder(
+      column: $table.ingredients, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get steps => $composableBuilder(
+      column: $table.steps, builder: (column) => ColumnOrderings(column));
 }
 
 class $$RecipesTableAnnotationComposer
@@ -2346,6 +2443,12 @@ class $$RecipesTableAnnotationComposer
 
   GeneratedColumn<int> get updatedAt =>
       $composableBuilder(column: $table.updatedAt, builder: (column) => column);
+
+  GeneratedColumn<String> get ingredients => $composableBuilder(
+      column: $table.ingredients, builder: (column) => column);
+
+  GeneratedColumn<String> get steps =>
+      $composableBuilder(column: $table.steps, builder: (column) => column);
 }
 
 class $$RecipesTableTableManager extends RootTableManager<
@@ -2387,6 +2490,8 @@ class $$RecipesTableTableManager extends RootTableManager<
             Value<String?> householdId = const Value.absent(),
             Value<int?> createdAt = const Value.absent(),
             Value<int?> updatedAt = const Value.absent(),
+            Value<String?> ingredients = const Value.absent(),
+            Value<String?> steps = const Value.absent(),
             Value<int> rowid = const Value.absent(),
           }) =>
               RecipesCompanion(
@@ -2406,6 +2511,8 @@ class $$RecipesTableTableManager extends RootTableManager<
             householdId: householdId,
             createdAt: createdAt,
             updatedAt: updatedAt,
+            ingredients: ingredients,
+            steps: steps,
             rowid: rowid,
           ),
           createCompanionCallback: ({
@@ -2425,6 +2532,8 @@ class $$RecipesTableTableManager extends RootTableManager<
             Value<String?> householdId = const Value.absent(),
             Value<int?> createdAt = const Value.absent(),
             Value<int?> updatedAt = const Value.absent(),
+            Value<String?> ingredients = const Value.absent(),
+            Value<String?> steps = const Value.absent(),
             Value<int> rowid = const Value.absent(),
           }) =>
               RecipesCompanion.insert(
@@ -2444,6 +2553,8 @@ class $$RecipesTableTableManager extends RootTableManager<
             householdId: householdId,
             createdAt: createdAt,
             updatedAt: updatedAt,
+            ingredients: ingredients,
+            steps: steps,
             rowid: rowid,
           ),
           withReferenceMapper: (p0) => p0

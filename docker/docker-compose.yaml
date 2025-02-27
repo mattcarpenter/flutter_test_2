@@ -1,0 +1,90 @@
+version: '3.8'
+
+services:
+  db:
+    container_name: supabase-db
+    image: supabase/postgres:15.8.1.044
+    restart: unless-stopped
+    volumes:
+      - ./volumes/db/data:/var/lib/postgresql/data:Z
+    healthcheck:
+      test: ["CMD", "pg_isready", "-U", "postgres", "-h", "localhost"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    environment:
+      POSTGRES_HOST: /var/run/postgresql
+      POSTGRES_PORT: ${POSTGRES_PORT}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+    command:
+      [
+        "postgres",
+        "-c",
+        "config_file=/etc/postgresql/postgresql.conf",
+        "-c",
+        "log_min_messages=fatal"
+      ]
+
+  supavisor:
+    container_name: supabase-pooler
+    image: supabase/supavisor:2.3.9
+    restart: unless-stopped
+    ports:
+      - ${POSTGRES_PORT}:5432
+    healthcheck:
+      test: ["CMD", "curl", "-sSfL", "--head", "-o", "/dev/null", "http://127.0.0.1:4000/api/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      POSTGRES_PORT: ${POSTGRES_PORT}
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      DATABASE_URL: ecto://supabase_admin:${POSTGRES_PASSWORD}@db:${POSTGRES_PORT}/_supabase
+      API_JWT_SECRET: ${JWT_SECRET}
+    command:
+      [
+        "/bin/sh",
+        "-c",
+        "/app/bin/migrate && /app/bin/supavisor eval \"$$(cat /etc/pooler/pooler.exs)\" && /app/bin/server"
+      ]
+
+  powersync:
+    profiles:
+      - disabled
+    restart: unless-stopped
+    image: journeyapps/powersync-service:latest
+    command: ["start", "-r", "unified"]
+    volumes:
+      - ./config:/config
+    environment:
+      POWERSYNC_CONFIG_PATH: /config/powersync.yaml
+      NODE_OPTIONS: --max-old-space-size=1000
+      PS_DATA_SOURCE_URI: ${PS_DATA_SOURCE_URI}
+      PS_MONGO_URI: mongodb://mongo:27017/powersync_demo
+      PS_JWKS_URL: ${PS_JWKS_URL}
+      PS_PORT: ${PS_PORT}
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "node",
+          "-e",
+          "fetch('http://localhost:${PS_PORT}/probes/liveness').then(r => r.ok ? process.exit(0) : process.exit(1)).catch(() => process.exit(1))"
+        ]
+      interval: 5s
+      timeout: 1s
+      retries: 15
+    ports:
+      - ${PS_PORT}:${PS_PORT}
+    depends_on:
+      supavisor:
+        condition: service_healthy
+
+volumes:
+  db-config:
+  pg_data:
