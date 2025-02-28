@@ -212,5 +212,6 @@ Temporary Items
 *.icloud
 
 /.env
+docker/volumes/db/data
 
 # End of https://www.toptal.com/developers/gitignore/api/macos,flutter,intellij
