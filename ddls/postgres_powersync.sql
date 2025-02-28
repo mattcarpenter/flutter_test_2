@@ -163,3 +163,5 @@ CREATE TABLE public.user_household_shares (
                                               CONSTRAINT uhs_folder_fkey FOREIGN KEY (folder_id) REFERENCES public.recipe_folders (id) ON DELETE CASCADE,
                                               CONSTRAINT uhs_household_fkey FOREIGN KEY (household_id) REFERENCES public.households (id) ON DELETE CASCADE
 );
+
+CREATE PUBLICATION powersync FOR ALL TABLES;
