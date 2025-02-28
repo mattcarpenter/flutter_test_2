@@ -2,8 +2,6 @@ version: '3.8'
 
 services:
   powersync:
-    profiles:
-      - disabled
     restart: unless-stopped
     image: journeyapps/powersync-service:latest
     command: ["start", "-r", "unified"]
