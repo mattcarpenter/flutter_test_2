@@ -77,7 +77,6 @@ Schema schema = const Schema(([
     Column.integer('can_edit'),
   ]),
   Table(recipeFolderSharesTable, [
-    Column.text('id'),
     Column.text('folder_id'),
     Column.text('sharer_id'),
     Column.text('target_user_id'),

@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:macos_ui/macos_ui.dart';
+import 'app_config.dart';
 import 'database/database.dart';
 import 'database/powersync.dart';
 import 'src/app.dart';
@@ -22,6 +23,8 @@ Future<void> _configureMacosWindowUtils() async {
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  await AppConfig.initialize();
 
   // Drift
   //final connection = await openConnection();

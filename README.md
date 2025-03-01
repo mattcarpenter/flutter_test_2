@@ -133,3 +133,7 @@ the `lib/src/localization` directory.
 To support additional languages, please visit the tutorial on
 [Internationalizing Flutter
 apps](https://flutter.dev/docs/development/accessibility-and-localization/internationalization)
+
+## Unit Testing
+
+Need to install some binaries for PowerSync: https://docs.powersync.com/client-sdk-references/flutter/unit-testing
