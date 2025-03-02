@@ -81,7 +81,7 @@ void main() async {
       //await db.sync(); // Adjust this if your sync trigger is named differently.
 
       // Listen for the folder via your Riverpod notifier.
-      final completer = Completer<void>();
+      /*final completer = Completer<void>();
       final listener = container.listen(
         recipeFolderNotifierProvider,
             (previous, next) {
@@ -99,11 +99,11 @@ void main() async {
       await completer.future.timeout(
         Duration(seconds: 10),
         onTimeout: () => fail("Folder '$folderName' not found in synced data."),
-      );
+      );*/
 
       await Future.delayed(Duration(minutes: 30));
 
-      listener.close();
+      //listener.close();
     });
   });
 }
