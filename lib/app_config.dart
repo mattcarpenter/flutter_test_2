@@ -1,5 +1,8 @@
+import 'dart:io';
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:path/path.dart' as p;
 
 class AppConfig {
   // Production fallback values - used when .env file is not available (like in production builds)
@@ -17,11 +20,10 @@ class AppConfig {
     _isTestMode = isTest;
 
     try {
-      // Try to load the env file, but don't fail if it doesn't exist
-      await dotenv.load(fileName: isTest ? ".env.test" : ".env").catchError((e) {
-        // Silently continue if .env file is not found
-        debugPrint("No .env${isTest ? '.test' : ''} file found. Using production values.");
-      });
+      if (isTest) {
+        final envFilePath = p.join(Directory.current.path, '.env.test');
+        await dotenv.load(fileName: envFilePath);
+      };
       _isInitialized = true;
     } catch (e) {
       debugPrint("Error loading environment: $e");

@@ -1,15 +1,23 @@
 // This file performs setup of the PowerSync database
+import 'dart:ffi';
+import 'dart:io';
+
 import 'package:flutter/foundation.dart';
 import 'package:logging/logging.dart';
 import 'package:path/path.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:powersync/powersync.dart';
+import 'package:powersync/sqlite3_open.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+
+import 'package:powersync_core/src/open_factory/abstract_powersync_open_factory.dart';
 
 import '../app_config.dart';
 import 'database.dart';
 import 'supabase.dart';
 import 'schema.dart';
+
+import 'package:path/path.dart' as p;
 
 final log = Logger('powersync-supabase');
 
@@ -144,20 +152,46 @@ String? getUserId() {
   return Supabase.instance.client.auth.currentSession?.user.id;
 }
 
-Future<String> getDatabasePath() async {
+Future<String> getDatabasePath({ bool isTest = false}) async {
   const dbFilename = 'powersync-demo.db';
   // getApplicationSupportDirectory is not supported on Web
   if (kIsWeb) {
     return dbFilename;
   }
+
+  if (isTest) {
+    return p.join(Directory.current.path, 'lib', 'database', 'test.db');
+  }
+
   final dir = await getApplicationSupportDirectory();
   return join(dir.path, dbFilename);
 }
 
-Future<void> openDatabase() async {
+Future<void> openDatabase({bool isTest = false}) async {
+
+  final databasePath = await getDatabasePath(isTest: isTest);
+  print('Opening test database at $databasePath');
+
+  var db;
+
+  if (isTest) {
+    final customSqliteSetup = SqliteConnectionSetup(() {
+      // This callback is executed each time a connection is opened.
+      // It overrides the dynamic library resolution to force use of your custom SQLite.
+        open.overrideForAll(() => DynamicLibrary.open('/Users/matt/repos/sqlite-src-3490100/libsqlite3.dylib'));
+    });
+
+    db = PowerSyncDatabase(
+        schema: schema, path: databasePath, logger: attachedLogger, sqliteSetup: customSqliteSetup);
+  } else {
+    db = PowerSyncDatabase(
+        schema: schema, path: databasePath, logger: attachedLogger);
+  }
+
   // Open the local database
-  db = PowerSyncDatabase(
-      schema: schema, path: await getDatabasePath(), logger: attachedLogger);
+  //db = PowerSyncDatabase(
+  //    schema: schema, path: await getDatabasePath(), logger: attachedLogger);
+
   await db.initialize();
   // Initialize the Drift database
   appDb = AppDatabase(db);

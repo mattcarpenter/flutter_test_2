@@ -1,22 +1,56 @@
 import 'dart:async';
+import 'dart:io';
+import 'dart:ffi';
 import 'package:drift/drift.dart' hide isNotNull;
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:integration_test/integration_test.dart';
+import 'package:powersync/sqlite3.dart';
 import 'package:recipe_app/app_config.dart';
 import 'package:recipe_app/database/database.dart';
 import 'package:recipe_app/database/powersync.dart';
 import 'package:recipe_app/src/providers/recipe_folder_provider.dart';
 import 'package:recipe_app/src/repositories/recipe_folder_repository.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:sqlite3/open.dart' show open;
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:path_provider_platform_interface/path_provider_platform_interface.dart';
+import 'package:path/path.dart' as p;
+
+
+import 'package:ffi/ffi.dart'; // Import ffi for Utf8 support
+import 'package:sqflite_common_ffi/sqflite_ffi.dart' hide openDatabase;
+
 
 import '../../utils/test_utils.dart';
 
 void main() async {
+  print('pid: ${pid}');
   IntegrationTestWidgetsFlutterBinding.ensureInitialized();
+  TestWidgetsFlutterBinding.ensureInitialized();
+
+  final testDbPath = p.join(Directory.current.path, 'database', 'test.db');
+  final dbFile = File(testDbPath);
+  if (await dbFile.exists()) {
+    await dbFile.delete();
+    print('Deleted existing test database file at $testDbPath');
+  }
+
+  //sqfliteFfiInit();
+  // Set the global factory to the FFI implementation
+  //databaseFactory = databaseFactoryFfi;
+
+  //final sqliteLib = DynamicLibrary.open('/opt/homebrew/opt/sqlite/lib/libsqlite3.dylib');
+  DynamicLibrary.open('/Users/matt/repos/sqlite-src-3490100/libsqlite3.dylib');
+  open.overrideForAll(() => DynamicLibrary.open('/Users/matt/repos/sqlite-src-3490100/libsqlite3.dylib'));
+
+  final envFilePath = p.join(Directory.current.path, '.env.test');
+  await dotenv.load(fileName: envFilePath);
+
+  print('env: ${dotenv.env}');
+
+
   SharedPreferences.setMockInitialValues({});
   PathProviderPlatform.instance = FakePathProviderPlatform();
 
@@ -24,14 +58,14 @@ void main() async {
   await AppConfig.initialize(isTest: true);
 
   // Initialize Supabase using your test instance details.
-  await Supabase.initialize(
+  /*await Supabase.initialize(
     url: AppConfig.supabaseUrl,
     anonKey: AppConfig.supabaseAnonKey,
-  );
+  );*/
 
   // Open the local database and connect using the SupabaseConnector.
   // This uses your existing logic (see your supabase.dart file).
-  await openDatabase();
+  await openDatabase(isTest: true);
 
   // Create a Riverpod ProviderContainer for state management.
   final container = ProviderContainer();
@@ -42,10 +76,16 @@ void main() async {
   });
 
   group('Hello World Integration Test', () {
+    setUpAll(() async {
+      final envFilePath = p.join(Directory.current.path, '.env.test');
+      await dotenv.load(fileName: envFilePath);
+    });
+
     testWidgets('Signs in, inserts folder, syncs, and receives data via Riverpod', (tester) async {
+      print('env: ${dotenv.env}');
       // Sign in using test credentials from your .env.test file.
-      final testEmail = dotenv.env['TEST_USER_EMAIL']!;
-      final testPassword = dotenv.env['TEST_USER_PASSWORD']!;
+      final testEmail = dotenv.env['TEST_USER_EMAIL'];
+      final testPassword = dotenv.env['TEST_USER_PASSWORD'] ?? '';
       final authResponse = await Supabase.instance.client.auth
           .signInWithPassword(email: testEmail, password: testPassword);
       expect(authResponse.session, isNotNull,
@@ -86,6 +126,8 @@ void main() async {
         Duration(seconds: 10),
         onTimeout: () => fail("Folder '$folderName' not found in synced data."),
       );
+
+      await Future.delayed(Duration(minutes: 30));
 
       listener.close();
     });

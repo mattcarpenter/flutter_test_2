@@ -215,3 +215,7 @@ Temporary Items
 docker/volumes/db/data
 
 # End of https://www.toptal.com/developers/gitignore/api/macos,flutter,intellij
+
+lib/database/*.db
+lib/database/*.db-shm
+lib/database/*.db-wal
