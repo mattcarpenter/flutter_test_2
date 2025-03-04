@@ -15,6 +15,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:path_provider_platform_interface/path_provider_platform_interface.dart';
 import 'package:path/path.dart' as p;
 
+import '../../utils/supabase_admin.dart';
 import '../../utils/test_utils.dart';
 
 void main() async {
@@ -29,6 +30,8 @@ void main() async {
   group('Hello World Integration Test', () {
     setUpAll(() async {
       await loadEnvVars();
+      await truncateAllTables();
+      await deleteAllUsers();
     });
 
     testWidgets('Signs in, inserts folder, syncs, and receives data via Riverpod', (tester) async {
