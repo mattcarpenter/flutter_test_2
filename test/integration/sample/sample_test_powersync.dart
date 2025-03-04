@@ -19,7 +19,6 @@ import '../../utils/test_utils.dart';
 
 void main() async {
   await initializeTestEnvironment();
-
   final container = ProviderContainer();
 
   tearDownAll(() async {
@@ -29,12 +28,10 @@ void main() async {
 
   group('Hello World Integration Test', () {
     setUpAll(() async {
-      final envFilePath = p.join(Directory.current.path, '.env.test');
-      await dotenv.load(fileName: envFilePath);
+      await loadEnvVars();
     });
 
     testWidgets('Signs in, inserts folder, syncs, and receives data via Riverpod', (tester) async {
-      print('env: ${dotenv.env}');
       // Sign in using test credentials from your .env.test file.
       final testEmail = dotenv.env['TEST_USER_EMAIL'];
       final testPassword = dotenv.env['TEST_USER_PASSWORD'] ?? '';

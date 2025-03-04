@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:integration_test/integration_test.dart';
 import 'package:path_provider_platform_interface/path_provider_platform_interface.dart';
@@ -33,3 +34,7 @@ initializeTestEnvironment() async {
   await openDatabase(isTest: true);
 }
 
+loadEnvVars() async {
+  final envFilePath = p.join(Directory.current.path, '.env.test');
+  await dotenv.load(fileName: envFilePath);
+}
