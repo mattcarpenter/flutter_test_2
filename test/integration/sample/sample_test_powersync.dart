@@ -18,30 +18,8 @@ import 'package:path/path.dart' as p;
 import '../../utils/test_utils.dart';
 
 void main() async {
-  print('pid: ${pid}');
-  IntegrationTestWidgetsFlutterBinding.ensureInitialized();
-  TestWidgetsFlutterBinding.ensureInitialized();
+  await initializeTestEnvironment();
 
-  final testDbPath = p.join(Directory.current.path, 'database', 'test.db');
-  final dbFile = File(testDbPath);
-  if (await dbFile.exists()) {
-    await dbFile.delete();
-    print('Deleted existing test database file at $testDbPath');
-  }
-
-  final envFilePath = p.join(Directory.current.path, '.env.test');
-  await dotenv.load(fileName: envFilePath);
-
-  print('env: ${dotenv.env}');
-
-  SharedPreferences.setMockInitialValues({});
-  PathProviderPlatform.instance = FakePathProviderPlatform();
-
-  await AppConfig.initialize(isTest: true);
-
-  await openDatabase(isTest: true);
-
-  // Create a Riverpod ProviderContainer for state management.
   final container = ProviderContainer();
 
   tearDownAll(() async {

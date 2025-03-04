@@ -216,7 +216,11 @@ Future<void> openDatabase({bool isTest = false}) async {
     } else if (event == AuthChangeEvent.signedOut) {
       // Implicit sign out - disconnect, but don't delete data
       currentConnector = null;
-      await db.disconnect();
+      if (isTest) {
+        await db.disconnectAndClear();
+      } else {
+        await db.disconnect();
+      }
     } else if (event == AuthChangeEvent.tokenRefreshed) {
       // Supabase token refreshed - trigger token refresh for PowerSync.
       currentConnector?.prefetchCredentials();
