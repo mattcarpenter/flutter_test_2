@@ -75,3 +75,28 @@ Future<void> truncateAllTables() async {
     print("Connection closed.");
   }
 }
+
+Future<void> createUser(String email, String password) async {
+  String supabaseUrl = dotenv.env['SUPABASE_URL'] ?? '';
+  String serviceRoleKey = dotenv.env['SUPABASE_SERVICE_ROLE_KEY'] ?? '';
+
+  final response = await http.post(
+    Uri.parse('$supabaseUrl/auth/v1/admin/users'),
+    headers: {
+      'apikey': serviceRoleKey,
+      'Authorization': 'Bearer $serviceRoleKey',
+      'Content-Type': 'application/json',
+    },
+    body: jsonEncode({
+      "email": email,
+      "password": password,
+      "email_confirm": true,
+    }),
+  );
+
+  if (response.statusCode == 200 || response.statusCode == 201) {
+    print("User created successfully: $email");
+  } else {
+    print("Failed to create user");
+  }
+}
