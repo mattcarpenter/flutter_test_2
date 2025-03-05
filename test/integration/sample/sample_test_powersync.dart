@@ -32,93 +32,74 @@ void main() async {
     });
 
     testWidgets('User sees their folders after signing in again', (tester) async {
+      // Create the test user only once.
       await TestUserManager.createTestUser('owner');
-      await TestUserManager.loginAsTestUser('owner');
 
-      // Add a folder
-      await container.read(recipeFolderNotifierProvider.notifier).addFolder(
-        name: "Test Folder",
-        userId: Supabase.instance.client.auth.currentUser!.id,
-      );
+      // First session: log in as "owner", add a folder, and verify it's present.
+      await withTestUser('owner', () async {
+        await container.read(recipeFolderNotifierProvider.notifier).addFolder(
+          name: "Test Folder",
+          userId: Supabase.instance.client.auth.currentUser!.id,
+        );
+        await waitForFolder(
+          container: container,
+          folderName: "Test Folder",
+          expectedCount: 1,
+        );
+      });
 
-      // Ensure state is updated
+      // After logout the local DB should be cleared.
       await waitForProviderValue<List<RecipeFolderEntry>>(
-        container,
-        recipeFolderNotifierProvider,
-            (folders) => folders.any((folder) => folder.name == "Test Folder") && folders.length == 1,
-      );
-
-      // Logout and ensure state is cleared
-      final folderCleared = waitForProviderValue<List<RecipeFolderEntry>>(
         container,
         recipeFolderNotifierProvider,
             (folders) => folders.isEmpty,
       );
-      await TestUserManager.logoutTestUser();
-      await folderCleared;
 
-      // Login again and ensure folder is restored
-      await TestUserManager.loginAsTestUser('owner');
-      await waitForProviderValue<List<RecipeFolderEntry>>(
-        container,
-        recipeFolderNotifierProvider,
-            (folders) => folders.any((folder) => folder.name == "Test Folder") && folders.length == 1,
-      );
+      // Second session: log in again as "owner" and ensure the folder is restored.
+      await withTestUser('owner', () async {
+        await waitForFolder(
+          container: container,
+          folderName: "Test Folder",
+          expectedCount: 1,
+        );
+      });
     });
 
     testWidgets('Users cannot see folders owned by other members', (tester) async {
+      // Create test users once.
       await TestUserManager.createTestUsers(['owner', 'other']);
 
-      // Owner creates folder
-      await TestUserManager.loginAsTestUser('owner');
-      await container.read(recipeFolderNotifierProvider.notifier).addFolder(
-        name: "Owner Folder",
-        userId: Supabase.instance.client.auth.currentUser!.id,
-      );
+      // Owner creates a folder.
+      await withTestUser('owner', () async {
+        await container.read(recipeFolderNotifierProvider.notifier).addFolder(
+          name: "Owner Folder",
+          userId: Supabase.instance.client.auth.currentUser!.id,
+        );
+        // Wait for the folder to be visible.
+        await waitForFolder(container: container, folderName: "Owner Folder", expectedCount: 1);
 
-      // Wait for state to update
-      await waitForProviderValue<List<RecipeFolderEntry>>(
-        container,
-        recipeFolderNotifierProvider,
-            (folders) => folders.any((folder) => folder.name == "Owner Folder") && folders.length == 1,
-      );
+        // Ensure enough time to sync to Supabase
+        await Future.delayed(const Duration(seconds: 1));
+      });
 
-      await Future.delayed(Duration(seconds: 1));
+      // Other user logs in and should not see Owner's folder.
+      await withTestUser('other', () async {
+        // Wait until it's confirmed that "Owner Folder" is not visible.
+        await waitForNoFolder(container: container, folderName: "Owner Folder");
 
-      // Other user logs in; assert they cannot see owner's folder
-      final folderNotVisible = waitForProviderValue<List<RecipeFolderEntry>>(
-        container,
-        recipeFolderNotifierProvider,
-            (folders) => !folders.any((folder) => folder.name == "Owner Folder"),
-      );
-      await TestUserManager.logoutTestUser();
-      await folderNotVisible;
+        // Other user creates their own folder.
+        await container.read(recipeFolderNotifierProvider.notifier).addFolder(
+          name: "Other Folder",
+          userId: Supabase.instance.client.auth.currentUser!.id,
+        );
+        await waitForFolder(container: container, folderName: "Other Folder", expectedCount: 1);
+      });
 
-      await TestUserManager.loginAsTestUser('other');
-
-      // Other user creates a folder and logs out
-      await container.read(recipeFolderNotifierProvider.notifier).addFolder(
-        name: "Other Folder",
-        userId: Supabase.instance.client.auth.currentUser!.id,
-      );
-
-      // Ensure state updated with new folder
-      await waitForProviderValue<List<RecipeFolderEntry>>(
-        container,
-        recipeFolderNotifierProvider,
-            (folders) => folders.any((folder) => folder.name == "Other Folder") && folders.length == 1,
-      );
-
-      await TestUserManager.logoutTestUser();
-
-      // Owner logs back in and asserts they can see their folder
-      final foldersLoaded = waitForProviderValue<List<RecipeFolderEntry>>(
-        container,
-        recipeFolderNotifierProvider,
-            (folders) => folders.any((folder) => folder.name == "Owner Folder") && folders.length == 1,
-      );
-      await TestUserManager.loginAsTestUser('owner');
-      await foldersLoaded;
+      // Owner logs back in and should see their own folder.
+      await withTestUser('owner', () async {
+        await waitForFolder(container: container, folderName: "Owner Folder", expectedCount: 1);
+      });
     });
+
   });
 }

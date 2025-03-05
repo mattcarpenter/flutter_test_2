@@ -7,8 +7,12 @@ import 'package:integration_test/integration_test.dart';
 import 'package:path_provider_platform_interface/path_provider_platform_interface.dart';
 import 'package:path/path.dart' as p;
 import 'package:recipe_app/app_config.dart';
+import 'package:recipe_app/database/database.dart';
 import 'package:recipe_app/database/powersync.dart';
+import 'package:recipe_app/src/providers/recipe_folder_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+
+import 'test_user_manager.dart';
 
 class FakePathProviderPlatform extends PathProviderPlatform {
   @override
@@ -49,9 +53,14 @@ Future<T> waitForProviderValue<T>(
     bool Function(T value) predicate, {
       Duration timeout = const Duration(seconds: 10),
     }) async {
+  // Check the current state first.
+  final current = container.read(provider);
+  if (current is AsyncData<T> && predicate(current.value)) {
+    return current.value;
+  }
+
   final completer = Completer<T>();
 
-  // Listen to provider state changes.
   final listener = container.listen(provider, (previous, next) {
     next.whenOrNull(
       data: (value) {
@@ -67,7 +76,6 @@ Future<T> waitForProviderValue<T>(
     );
   });
 
-  // Wait for the condition to be met.
   final result = await completer.future.timeout(
     timeout,
     onTimeout: () {
@@ -78,8 +86,42 @@ Future<T> waitForProviderValue<T>(
     },
   );
 
-  // Clean up listener after completion.
   listener.close();
   return result;
 }
+
+
+Future<void> withTestUser(String username, Future<void> Function() action) async {
+  await TestUserManager.loginAsTestUser(username);
+  try {
+    await action();
+  } finally {
+    await TestUserManager.logoutTestUser();
+  }
+}
+
+
+Future<void> waitForFolder({
+  required ProviderContainer container,
+  required String folderName,
+  required int expectedCount,
+}) async {
+  await waitForProviderValue<List<RecipeFolderEntry>>(
+    container,
+    recipeFolderNotifierProvider,
+        (folders) => folders.where((f) => f.name == folderName).length == expectedCount,
+  );
+}
+
+Future<void> waitForNoFolder({
+  required ProviderContainer container,
+  required String folderName,
+}) async {
+  await waitForProviderValue<List<RecipeFolderEntry>>(
+    container,
+    recipeFolderNotifierProvider,
+        (folders) => !folders.any((f) => f.name == folderName),
+  );
+}
+
 
