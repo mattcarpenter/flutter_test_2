@@ -55,6 +55,8 @@ Future<T> waitForProviderValue<T>(
     }) async {
   // Check the current state first.
   final current = container.read(provider);
+  final value = current.value;
+  print('waitForProviderValue: initial state: $value');
   if (current is AsyncData<T> && predicate(current.value)) {
     return current.value;
   }
@@ -64,12 +66,14 @@ Future<T> waitForProviderValue<T>(
   final listener = container.listen(provider, (previous, next) {
     next.whenOrNull(
       data: (value) {
+        print('waitForProviderValue: updated state: $value');
         if (predicate(value) && !completer.isCompleted) {
           completer.complete(value);
         }
       },
       error: (error, stack) {
         if (!completer.isCompleted) {
+          print('waitForProviderValue: error: $error');
           completer.completeError(error, stack);
         }
       },
@@ -93,10 +97,14 @@ Future<T> waitForProviderValue<T>(
 
 Future<void> withTestUser(String username, Future<void> Function() action) async {
   await TestUserManager.loginAsTestUser(username);
+  print('Logged in $username');
   try {
     await action();
   } finally {
+    await Future.delayed(const Duration(seconds: 1));
     await TestUserManager.logoutTestUser();
+    await Future.delayed(const Duration(seconds: 1));
+    print('Logged out test user $username');
   }
 }
 

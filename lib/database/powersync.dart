@@ -231,9 +231,3 @@ Future<void> openDatabase({bool isTest = false}) async {
   // See https://docs.powersync.com/usage-examples/full-text-search for more details
   //await configureFts(db);
 }
-
-/// Explicit sign out - clear database and log out.
-Future<void> logout() async {
-  await Supabase.instance.client.auth.signOut();
-  await db.disconnectAndClear();
-}
