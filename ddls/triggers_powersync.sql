@@ -172,3 +172,24 @@ CREATE TRIGGER trg_hm_after_delete
     AFTER DELETE ON public.household_members
     FOR EACH ROW
 EXECUTE FUNCTION update_user_household_shares_after_hm_delete();
+
+CREATE OR REPLACE FUNCTION set_target_household_on_rfs_insert()
+    RETURNS trigger AS $$
+DECLARE
+    household text;
+BEGIN
+    IF NEW.target_household_id IS NULL AND NEW.target_user_id IS NOT NULL THEN
+        SELECT hm.household_id INTO household
+        FROM public.household_members hm
+        WHERE hm.user_id = NEW.target_user_id AND hm.is_active = 1
+        LIMIT 1;
+        NEW.target_household_id := household;
+    END IF;
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER trg_set_target_household_on_rfs_insert
+    BEFORE INSERT ON public.recipe_folder_shares
+    FOR EACH ROW
+EXECUTE FUNCTION set_target_household_on_rfs_insert();

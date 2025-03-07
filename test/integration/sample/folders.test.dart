@@ -2,11 +2,11 @@ import 'dart:async';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:recipe_app/database/database.dart';
-import 'package:recipe_app/database/powersync.dart';
 import 'package:recipe_app/src/providers/recipe_folder_provider.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../../utils/test_household_manager.dart';
+import '../../utils/test_recipe_folder_share_manager.dart';
 import '../../utils/test_user_manager.dart';
 import '../../utils/test_utils.dart';
 
@@ -188,6 +188,132 @@ void main() async {
         await waitForFolder(
           container: container,
           folderName: "Member Folder",
+          expectedCount: 1,
+        );
+      });
+    });
+
+    testWidgets('User can see folders shared with them', (tester) async {
+      // Create test users: "owner" and "member".
+      await TestUserManager.createTestUsers(['owner', 'member']);
+
+      late String memberUserId;
+      late String folderId;
+
+      // Retrieve the member's user id.
+      await withTestUser('member', () async {
+        memberUserId = Supabase.instance.client.auth.currentUser!.id;
+      });
+
+      // Owner logs in to create a folder and share it with the member.
+      await withTestUser('owner', () async {
+        final ownerUserId = Supabase.instance.client.auth.currentUser!.id;
+
+        // Owner creates a folder.
+        await container.read(recipeFolderNotifierProvider.notifier).addFolder(
+          name: "Owner's Folder",
+          userId: ownerUserId,
+        );
+        // Wait until the folder appears in the provider state.
+        await waitForFolder(
+          container: container,
+          folderName: "Owner's Folder",
+          expectedCount: 1,
+        );
+
+        // Retrieve the folder id from the provider state.
+        final folders = container.read(recipeFolderNotifierProvider).value!;
+        final ownerFolder = folders.firstWhere((folder) => folder.name == "Owner's Folder");
+        folderId = ownerFolder.id;
+
+        // Small delay to allow any asynchronous processes to complete.
+        await Future.delayed(const Duration(seconds: 1));
+
+        // Share the folder with the member using the TestRecipeFolderShareManager.
+        await TestRecipeFolderShareManager.createShare(
+          folderId: folderId,
+          sharerId: ownerUserId,
+          targetUserId: memberUserId,
+          canEdit: 1,
+        );
+      });
+
+      // Now, log in as the member and ensure the shared folder is visible.
+      await withTestUser('member', () async {
+        await waitForFolder(
+          container: container,
+          folderName: "Owner's Folder",
+          expectedCount: 1,
+        );
+      });
+    });
+
+    testWidgets('Household Owner and Household Member are in a household; other_member shares a folder with household_owner; household_member can see it', (tester) async {
+      // Create test users.
+      await TestUserManager.createTestUsers(['household_owner', 'household_member', 'other_member']);
+
+      late String householdId;
+      late String householdOwnerId;
+      late String householdMemberId;
+      late String folderId;
+
+      // Step 1: household_owner logs in, creates a household, and we capture the household id.
+      await withTestUser('household_owner', () async {
+        householdOwnerId = Supabase.instance.client.auth.currentUser!.id;
+        final householdData = await TestHouseholdManager.createHousehold('Test Household', householdOwnerId);
+        householdId = householdData['id'] as String;
+      });
+
+      // Step 2: household_member logs in and is added to the household.
+      await withTestUser('household_member', () async {
+        householdMemberId = Supabase.instance.client.auth.currentUser!.id;
+        await TestHouseholdManager.addHouseholdMember(householdId, householdMemberId);
+        await TestHouseholdManager.addHouseholdMember(householdId, householdOwnerId);
+      });
+
+      // Step 3: other_member logs in, creates a folder, and shares it with household_owner.
+      await withTestUser('other_member', () async {
+        final otherMemberId = Supabase.instance.client.auth.currentUser!.id;
+        // Create folder by other_member.
+        await container.read(recipeFolderNotifierProvider.notifier).addFolder(
+          name: "Other Member's Folder",
+          userId: otherMemberId,
+        );
+        await waitForFolder(
+          container: container,
+          folderName: "Other Member's Folder",
+          expectedCount: 1,
+        );
+        // Wait for sync to complete.
+        await Future.delayed(const Duration(seconds: 1));
+        // Retrieve the folder id.
+        final folders = container.read(recipeFolderNotifierProvider).value!;
+        final otherMemberFolder = folders.firstWhere((folder) => folder.name == "Other Member's Folder");
+        folderId = otherMemberFolder.id;
+
+        // Share the folder with household_owner.
+        await TestRecipeFolderShareManager.createShare(
+          folderId: folderId,
+          sharerId: otherMemberId,
+          targetUserId: householdOwnerId,
+          canEdit: 1,
+        );
+      });
+
+      // Step 4: household_member logs in and verifies that they can see the folder shared with household_owner.
+      await withTestUser('household_member', () async {
+        await waitForFolder(
+          container: container,
+          folderName: "Other Member's Folder",
+          expectedCount: 1,
+        );
+      });
+
+      // Step 5: household_owner logs in and verifies that they can see the folder shared with them.
+      await withTestUser('household_owner', () async {
+        await waitForFolder(
+          container: container,
+          folderName: "Other Member's Folder",
           expectedCount: 1,
         );
       });
