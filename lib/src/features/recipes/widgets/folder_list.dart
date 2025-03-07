@@ -8,11 +8,11 @@ import '../widgets/folder_tile.dart';  // Import the FolderTile widget
 
 class FolderList extends ConsumerStatefulWidget {
   /// Optional parent folder id. If null, this list shows root folders.
-  final String? parentId;
+  final String? folderId;
   /// The title of the current page (e.g. the name of the current folder).
   final String currentPageTitle;
 
-  const FolderList({Key? key, this.parentId, required this.currentPageTitle})
+  const FolderList({Key? key, this.folderId, required this.currentPageTitle})
       : super(key: key);
 
   @override
@@ -54,7 +54,7 @@ class _FolderListState extends ConsumerState<FolderList> {
             data: (folders) {
               // Filter folders: if widget.parentId is null, we show root folders.
               final filteredFolders = folders
-                  .where((folder) => folder.parentId == widget.parentId)
+                  .where((folder) => folder.id == widget.folderId)
                   .toList();
 
               if (filteredFolders.isEmpty) {

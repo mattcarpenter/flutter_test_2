@@ -12,27 +12,24 @@ import '../../../widgets/wolt/button/wolt_modal_sheet_close_button.dart';
 import '../../../widgets/wolt/text/modal_sheet_subtitle.dart';
 import '../../../widgets/wolt/text/modal_sheet_title.dart';
 
-void showAddFolderModal(BuildContext context, {
-  String? parentId,
-}) {
+void showAddFolderModal(BuildContext context) {
   WoltModalSheet.show(
     useRootNavigator: true,
     context: context,
     pageListBuilder: (bottomSheetContext) => [
       AddFolderModalPage.build(
         context: context,
-        parentId: parentId,
         onFolderAdded: (String folderName) {
           // Get the provider container from the modal context.
           final container = ProviderScope.containerOf(bottomSheetContext);
-          // Construct a RecipeFolder using the folderName and parentId.
+          // Construct a RecipeFolder using the folderName.
           final userId = supabase_flutter.Supabase.instance.client.auth.currentUser?.id;
 
-          final folder = RecipeFolder(name: folderName, parentId: parentId, userId: userId);
+          final folder = RecipeFolder(name: folderName, userId: userId);
           // Use the notifier to add the folder.
           container
               .read(recipeFolderNotifierProvider.notifier)
-              .addFolder(name: folderName, userId: userId, parentId: parentId, );
+              .addFolder(name: folderName, userId: userId);
           // Close the modal, optionally returning the folder name.
           Navigator.of(bottomSheetContext).pop(folderName);
         },
@@ -46,7 +43,6 @@ class AddFolderModalPage {
 
   static WoltModalSheetPage build({
     required BuildContext context,
-    String? parentId, // Accept the parentId (for future use or display)
     required Function(String folderName) onFolderAdded,
   }) {
     final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
