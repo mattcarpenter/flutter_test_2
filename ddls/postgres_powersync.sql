@@ -23,17 +23,15 @@ CREATE INDEX IF NOT EXISTS household_members_household_idx
 CREATE INDEX IF NOT EXISTS household_members_user_idx
     ON public.household_members USING btree (user_id) TABLESPACE pg_default;
 
--- 3. RECIPE FOLDERS (Depends on households and auth.users; self-reference for parent_id is allowed)
+-- 3. RECIPE FOLDERS (Depends on households and auth.users)
 CREATE TABLE public.recipe_folders (
                                        id uuid NOT NULL DEFAULT extensions.uuid_generate_v4(),
                                        name text NOT NULL,
                                        user_id uuid NULL,
-                                       parent_id uuid NULL,
                                        household_id uuid NULL,
                                        deleted_at bigint NULL,
                                        CONSTRAINT recipe_folders_pkey PRIMARY KEY (id),
                                        CONSTRAINT recipe_folders_household_id_fkey FOREIGN KEY (household_id) REFERENCES public.households (id) ON DELETE CASCADE,
-                                       CONSTRAINT recipe_folders_parent_id_fkey FOREIGN KEY (parent_id) REFERENCES public.recipe_folders (id) ON DELETE SET NULL,
                                        CONSTRAINT recipe_folders_user_id_fkey FOREIGN KEY (user_id) REFERENCES auth.users (id) ON DELETE CASCADE
 ) TABLESPACE pg_default;
 
@@ -41,8 +39,6 @@ CREATE INDEX IF NOT EXISTS recipe_folders_user_idx
     ON public.recipe_folders USING btree (user_id) TABLESPACE pg_default;
 CREATE INDEX IF NOT EXISTS recipe_folders_household_idx
     ON public.recipe_folders USING btree (household_id) TABLESPACE pg_default;
-CREATE INDEX IF NOT EXISTS recipe_folders_parent_idx
-    ON public.recipe_folders USING btree (parent_id) TABLESPACE pg_default;
 
 -- 4. RECIPES (Depends on recipe_folders, households, and auth.users)
 CREATE TABLE public.recipes (

@@ -7,7 +7,6 @@ class RecipeFolders extends Table {
   TextColumn get id => text().clientDefault(() => const Uuid().v4()).unique()();
   TextColumn get name => text()();
   TextColumn get userId => text().nullable()();
-  TextColumn get parentId => text().nullable()();
   TextColumn get householdId => text().nullable()();
   IntColumn get deletedAt => integer().nullable()();
 }
