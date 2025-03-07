@@ -202,7 +202,7 @@ class _AdaptiveApp2State extends State<AdaptiveApp2> {
                       path: 'folder/:parentId',
                       pageBuilder: (context, state) {
                         // Extract the parent folder id from the path.
-                        final parentId = state.pathParameters['parentId'];
+                        final folderId = state.pathParameters['folderId'];
 
                         // Get extra data (if provided) as a Map. Otherwise, use defaults.
                         final extraData = state.extra as Map<String, String>?;
@@ -211,7 +211,7 @@ class _AdaptiveApp2State extends State<AdaptiveApp2> {
                         return _platformPage(
                           state: state,
                           child: RecipesFolderPage(
-                            parentId: parentId,
+                            folderId: folderId,
                             title: folderTitle,
                             previousPageTitle: previousPageTitle,
                           ),

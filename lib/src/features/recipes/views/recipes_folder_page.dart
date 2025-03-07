@@ -9,13 +9,13 @@ import '../widgets/folder_list.dart';
 import '../widgets/recipe_list.dart' show RecipesList, dummyRecipes;
 
 class RecipesFolderPage extends StatelessWidget {
-  final String? parentId;
+  final String? folderId;
   final String title;
   final String previousPageTitle;
 
   const RecipesFolderPage({
     Key? key,
-    this.parentId,
+    this.folderId,
     required this.title,
     required this.previousPageTitle,
   }) : super(key: key);
@@ -32,7 +32,7 @@ class RecipesFolderPage extends StatelessWidget {
         items: [
           AdaptiveMenuItem(
               title: 'Add Folder', icon: const Icon(CupertinoIcons.folder), onTap: () {
-            showAddFolderModal(context, parentId: parentId);
+            showAddFolderModal(context);
           }
           ),
           AdaptiveMenuItem(
