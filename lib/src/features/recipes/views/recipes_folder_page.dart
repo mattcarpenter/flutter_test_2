@@ -25,37 +25,6 @@ class RecipesFolderPage extends StatelessWidget {
     return AdaptiveSliverPage(
       title: title,
       slivers: [
-        SliverToBoxAdapter(
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16),
-            child: Text(
-              'Folders',
-              style: CupertinoTheme.of(context)
-                  .textTheme
-                  .navLargeTitleTextStyle
-                  .copyWith(fontSize: 20, fontWeight: FontWeight.w600),
-            ),
-          ),
-        ),
-        SliverToBoxAdapter(
-            child: FolderList(
-              parentId: parentId,
-              currentPageTitle: title,
-            ),
-        ),
-        // Header as a sliver.
-        SliverToBoxAdapter(
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16),
-            child: Text(
-              'Recipes',
-              style: CupertinoTheme.of(context)
-                  .textTheme
-                  .navLargeTitleTextStyle
-                  .copyWith(fontSize: 20, fontWeight: FontWeight.w600),
-            ),
-          ),
-        ),
         // The recipes grid sliver.
         RecipesList(recipes: dummyRecipes),
       ],
