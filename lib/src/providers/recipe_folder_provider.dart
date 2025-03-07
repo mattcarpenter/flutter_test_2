@@ -39,7 +39,6 @@ class RecipeFolderNotifier extends StateNotifier<AsyncValue<List<RecipeFolderEnt
       final companion = RecipeFoldersCompanion.insert(
         name: name,
         userId: Value(userId),
-        parentId: Value(parentId),
         householdId: Value(householdId),
       );
       await _repository.addFolder(companion);
