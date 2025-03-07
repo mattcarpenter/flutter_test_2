@@ -32,7 +32,7 @@ class RecipesTab extends StatelessWidget {
           ),
         ),
         const SliverToBoxAdapter(
-          child: FolderList(currentPageTitle: 'Recipes',)
+          child: FolderList(currentPageTitle: 'Recipes')
         ),
         // Header as a sliver.
         SliverToBoxAdapter(

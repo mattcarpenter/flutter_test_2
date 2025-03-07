@@ -7,12 +7,10 @@ import '../../../providers/recipe_folder_provider.dart';
 import '../widgets/folder_tile.dart';  // Import the FolderTile widget
 
 class FolderList extends ConsumerStatefulWidget {
-  /// Optional parent folder id. If null, this list shows root folders.
-  final String? folderId;
   /// The title of the current page (e.g. the name of the current folder).
   final String currentPageTitle;
 
-  const FolderList({Key? key, this.folderId, required this.currentPageTitle})
+  const FolderList({Key? key, required this.currentPageTitle})
       : super(key: key);
 
   @override
@@ -53,9 +51,7 @@ class _FolderListState extends ConsumerState<FolderList> {
           foldersAsyncValue.when(
             data: (folders) {
               // Filter folders: if widget.parentId is null, we show root folders.
-              final filteredFolders = folders
-                  .where((folder) => folder.id == widget.folderId)
-                  .toList();
+              final filteredFolders = folders.toList();
 
               if (filteredFolders.isEmpty) {
                 return const Center(child: Text('No folders available'));
