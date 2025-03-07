@@ -27,12 +27,6 @@ class $RecipeFoldersTable extends RecipeFolders
   late final GeneratedColumn<String> userId = GeneratedColumn<String>(
       'user_id', aliasedName, true,
       type: DriftSqlType.string, requiredDuringInsert: false);
-  static const VerificationMeta _parentIdMeta =
-      const VerificationMeta('parentId');
-  @override
-  late final GeneratedColumn<String> parentId = GeneratedColumn<String>(
-      'parent_id', aliasedName, true,
-      type: DriftSqlType.string, requiredDuringInsert: false);
   static const VerificationMeta _householdIdMeta =
       const VerificationMeta('householdId');
   @override
@@ -47,7 +41,7 @@ class $RecipeFoldersTable extends RecipeFolders
       type: DriftSqlType.int, requiredDuringInsert: false);
   @override
   List<GeneratedColumn> get $columns =>
-      [id, name, userId, parentId, householdId, deletedAt];
+      [id, name, userId, householdId, deletedAt];
   @override
   String get aliasedName => _alias ?? actualTableName;
   @override
@@ -70,10 +64,6 @@ class $RecipeFoldersTable extends RecipeFolders
     if (data.containsKey('user_id')) {
       context.handle(_userIdMeta,
           userId.isAcceptableOrUnknown(data['user_id']!, _userIdMeta));
-    }
-    if (data.containsKey('parent_id')) {
-      context.handle(_parentIdMeta,
-          parentId.isAcceptableOrUnknown(data['parent_id']!, _parentIdMeta));
     }
     if (data.containsKey('household_id')) {
       context.handle(
@@ -100,8 +90,6 @@ class $RecipeFoldersTable extends RecipeFolders
           .read(DriftSqlType.string, data['${effectivePrefix}name'])!,
       userId: attachedDatabase.typeMapping
           .read(DriftSqlType.string, data['${effectivePrefix}user_id']),
-      parentId: attachedDatabase.typeMapping
-          .read(DriftSqlType.string, data['${effectivePrefix}parent_id']),
       householdId: attachedDatabase.typeMapping
           .read(DriftSqlType.string, data['${effectivePrefix}household_id']),
       deletedAt: attachedDatabase.typeMapping
@@ -120,14 +108,12 @@ class RecipeFolderEntry extends DataClass
   final String id;
   final String name;
   final String? userId;
-  final String? parentId;
   final String? householdId;
   final int? deletedAt;
   const RecipeFolderEntry(
       {required this.id,
       required this.name,
       this.userId,
-      this.parentId,
       this.householdId,
       this.deletedAt});
   @override
@@ -137,9 +123,6 @@ class RecipeFolderEntry extends DataClass
     map['name'] = Variable<String>(name);
     if (!nullToAbsent || userId != null) {
       map['user_id'] = Variable<String>(userId);
-    }
-    if (!nullToAbsent || parentId != null) {
-      map['parent_id'] = Variable<String>(parentId);
     }
     if (!nullToAbsent || householdId != null) {
       map['household_id'] = Variable<String>(householdId);
@@ -156,9 +139,6 @@ class RecipeFolderEntry extends DataClass
       name: Value(name),
       userId:
           userId == null && nullToAbsent ? const Value.absent() : Value(userId),
-      parentId: parentId == null && nullToAbsent
-          ? const Value.absent()
-          : Value(parentId),
       householdId: householdId == null && nullToAbsent
           ? const Value.absent()
           : Value(householdId),
@@ -175,7 +155,6 @@ class RecipeFolderEntry extends DataClass
       id: serializer.fromJson<String>(json['id']),
       name: serializer.fromJson<String>(json['name']),
       userId: serializer.fromJson<String?>(json['userId']),
-      parentId: serializer.fromJson<String?>(json['parentId']),
       householdId: serializer.fromJson<String?>(json['householdId']),
       deletedAt: serializer.fromJson<int?>(json['deletedAt']),
     );
@@ -187,7 +166,6 @@ class RecipeFolderEntry extends DataClass
       'id': serializer.toJson<String>(id),
       'name': serializer.toJson<String>(name),
       'userId': serializer.toJson<String?>(userId),
-      'parentId': serializer.toJson<String?>(parentId),
       'householdId': serializer.toJson<String?>(householdId),
       'deletedAt': serializer.toJson<int?>(deletedAt),
     };
@@ -197,14 +175,12 @@ class RecipeFolderEntry extends DataClass
           {String? id,
           String? name,
           Value<String?> userId = const Value.absent(),
-          Value<String?> parentId = const Value.absent(),
           Value<String?> householdId = const Value.absent(),
           Value<int?> deletedAt = const Value.absent()}) =>
       RecipeFolderEntry(
         id: id ?? this.id,
         name: name ?? this.name,
         userId: userId.present ? userId.value : this.userId,
-        parentId: parentId.present ? parentId.value : this.parentId,
         householdId: householdId.present ? householdId.value : this.householdId,
         deletedAt: deletedAt.present ? deletedAt.value : this.deletedAt,
       );
@@ -213,7 +189,6 @@ class RecipeFolderEntry extends DataClass
       id: data.id.present ? data.id.value : this.id,
       name: data.name.present ? data.name.value : this.name,
       userId: data.userId.present ? data.userId.value : this.userId,
-      parentId: data.parentId.present ? data.parentId.value : this.parentId,
       householdId:
           data.householdId.present ? data.householdId.value : this.householdId,
       deletedAt: data.deletedAt.present ? data.deletedAt.value : this.deletedAt,
@@ -226,7 +201,6 @@ class RecipeFolderEntry extends DataClass
           ..write('id: $id, ')
           ..write('name: $name, ')
           ..write('userId: $userId, ')
-          ..write('parentId: $parentId, ')
           ..write('householdId: $householdId, ')
           ..write('deletedAt: $deletedAt')
           ..write(')'))
@@ -234,8 +208,7 @@ class RecipeFolderEntry extends DataClass
   }
 
   @override
-  int get hashCode =>
-      Object.hash(id, name, userId, parentId, householdId, deletedAt);
+  int get hashCode => Object.hash(id, name, userId, householdId, deletedAt);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -243,7 +216,6 @@ class RecipeFolderEntry extends DataClass
           other.id == this.id &&
           other.name == this.name &&
           other.userId == this.userId &&
-          other.parentId == this.parentId &&
           other.householdId == this.householdId &&
           other.deletedAt == this.deletedAt);
 }
@@ -252,7 +224,6 @@ class RecipeFoldersCompanion extends UpdateCompanion<RecipeFolderEntry> {
   final Value<String> id;
   final Value<String> name;
   final Value<String?> userId;
-  final Value<String?> parentId;
   final Value<String?> householdId;
   final Value<int?> deletedAt;
   final Value<int> rowid;
@@ -260,7 +231,6 @@ class RecipeFoldersCompanion extends UpdateCompanion<RecipeFolderEntry> {
     this.id = const Value.absent(),
     this.name = const Value.absent(),
     this.userId = const Value.absent(),
-    this.parentId = const Value.absent(),
     this.householdId = const Value.absent(),
     this.deletedAt = const Value.absent(),
     this.rowid = const Value.absent(),
@@ -269,7 +239,6 @@ class RecipeFoldersCompanion extends UpdateCompanion<RecipeFolderEntry> {
     this.id = const Value.absent(),
     required String name,
     this.userId = const Value.absent(),
-    this.parentId = const Value.absent(),
     this.householdId = const Value.absent(),
     this.deletedAt = const Value.absent(),
     this.rowid = const Value.absent(),
@@ -278,7 +247,6 @@ class RecipeFoldersCompanion extends UpdateCompanion<RecipeFolderEntry> {
     Expression<String>? id,
     Expression<String>? name,
     Expression<String>? userId,
-    Expression<String>? parentId,
     Expression<String>? householdId,
     Expression<int>? deletedAt,
     Expression<int>? rowid,
@@ -287,7 +255,6 @@ class RecipeFoldersCompanion extends UpdateCompanion<RecipeFolderEntry> {
       if (id != null) 'id': id,
       if (name != null) 'name': name,
       if (userId != null) 'user_id': userId,
-      if (parentId != null) 'parent_id': parentId,
       if (householdId != null) 'household_id': householdId,
       if (deletedAt != null) 'deleted_at': deletedAt,
       if (rowid != null) 'rowid': rowid,
@@ -298,7 +265,6 @@ class RecipeFoldersCompanion extends UpdateCompanion<RecipeFolderEntry> {
       {Value<String>? id,
       Value<String>? name,
       Value<String?>? userId,
-      Value<String?>? parentId,
       Value<String?>? householdId,
       Value<int?>? deletedAt,
       Value<int>? rowid}) {
@@ -306,7 +272,6 @@ class RecipeFoldersCompanion extends UpdateCompanion<RecipeFolderEntry> {
       id: id ?? this.id,
       name: name ?? this.name,
       userId: userId ?? this.userId,
-      parentId: parentId ?? this.parentId,
       householdId: householdId ?? this.householdId,
       deletedAt: deletedAt ?? this.deletedAt,
       rowid: rowid ?? this.rowid,
@@ -324,9 +289,6 @@ class RecipeFoldersCompanion extends UpdateCompanion<RecipeFolderEntry> {
     }
     if (userId.present) {
       map['user_id'] = Variable<String>(userId.value);
-    }
-    if (parentId.present) {
-      map['parent_id'] = Variable<String>(parentId.value);
     }
     if (householdId.present) {
       map['household_id'] = Variable<String>(householdId.value);
@@ -346,7 +308,6 @@ class RecipeFoldersCompanion extends UpdateCompanion<RecipeFolderEntry> {
           ..write('id: $id, ')
           ..write('name: $name, ')
           ..write('userId: $userId, ')
-          ..write('parentId: $parentId, ')
           ..write('householdId: $householdId, ')
           ..write('deletedAt: $deletedAt, ')
           ..write('rowid: $rowid')
@@ -2032,7 +1993,6 @@ typedef $$RecipeFoldersTableCreateCompanionBuilder = RecipeFoldersCompanion
   Value<String> id,
   required String name,
   Value<String?> userId,
-  Value<String?> parentId,
   Value<String?> householdId,
   Value<int?> deletedAt,
   Value<int> rowid,
@@ -2042,7 +2002,6 @@ typedef $$RecipeFoldersTableUpdateCompanionBuilder = RecipeFoldersCompanion
   Value<String> id,
   Value<String> name,
   Value<String?> userId,
-  Value<String?> parentId,
   Value<String?> householdId,
   Value<int?> deletedAt,
   Value<int> rowid,
@@ -2065,9 +2024,6 @@ class $$RecipeFoldersTableFilterComposer
 
   ColumnFilters<String> get userId => $composableBuilder(
       column: $table.userId, builder: (column) => ColumnFilters(column));
-
-  ColumnFilters<String> get parentId => $composableBuilder(
-      column: $table.parentId, builder: (column) => ColumnFilters(column));
 
   ColumnFilters<String> get householdId => $composableBuilder(
       column: $table.householdId, builder: (column) => ColumnFilters(column));
@@ -2094,9 +2050,6 @@ class $$RecipeFoldersTableOrderingComposer
   ColumnOrderings<String> get userId => $composableBuilder(
       column: $table.userId, builder: (column) => ColumnOrderings(column));
 
-  ColumnOrderings<String> get parentId => $composableBuilder(
-      column: $table.parentId, builder: (column) => ColumnOrderings(column));
-
   ColumnOrderings<String> get householdId => $composableBuilder(
       column: $table.householdId, builder: (column) => ColumnOrderings(column));
 
@@ -2121,9 +2074,6 @@ class $$RecipeFoldersTableAnnotationComposer
 
   GeneratedColumn<String> get userId =>
       $composableBuilder(column: $table.userId, builder: (column) => column);
-
-  GeneratedColumn<String> get parentId =>
-      $composableBuilder(column: $table.parentId, builder: (column) => column);
 
   GeneratedColumn<String> get householdId => $composableBuilder(
       column: $table.householdId, builder: (column) => column);
@@ -2161,7 +2111,6 @@ class $$RecipeFoldersTableTableManager extends RootTableManager<
             Value<String> id = const Value.absent(),
             Value<String> name = const Value.absent(),
             Value<String?> userId = const Value.absent(),
-            Value<String?> parentId = const Value.absent(),
             Value<String?> householdId = const Value.absent(),
             Value<int?> deletedAt = const Value.absent(),
             Value<int> rowid = const Value.absent(),
@@ -2170,7 +2119,6 @@ class $$RecipeFoldersTableTableManager extends RootTableManager<
             id: id,
             name: name,
             userId: userId,
-            parentId: parentId,
             householdId: householdId,
             deletedAt: deletedAt,
             rowid: rowid,
@@ -2179,7 +2127,6 @@ class $$RecipeFoldersTableTableManager extends RootTableManager<
             Value<String> id = const Value.absent(),
             required String name,
             Value<String?> userId = const Value.absent(),
-            Value<String?> parentId = const Value.absent(),
             Value<String?> householdId = const Value.absent(),
             Value<int?> deletedAt = const Value.absent(),
             Value<int> rowid = const Value.absent(),
@@ -2188,7 +2135,6 @@ class $$RecipeFoldersTableTableManager extends RootTableManager<
             id: id,
             name: name,
             userId: userId,
-            parentId: parentId,
             householdId: householdId,
             deletedAt: deletedAt,
             rowid: rowid,
