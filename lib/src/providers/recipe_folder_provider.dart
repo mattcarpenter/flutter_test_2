@@ -30,7 +30,6 @@ class RecipeFolderNotifier extends StateNotifier<AsyncValue<List<RecipeFolderEnt
   // Add a new folder.
   Future<void> addFolder({
     required String name,
-    String? parentId,
     String? householdId,
     String? userId,
   }) async {

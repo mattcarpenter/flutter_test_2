@@ -7,17 +7,7 @@ CREATE POLICY "Users can insert folders only for households they belong to"
     ON public.recipe_folders
     FOR INSERT
     WITH CHECK (
-    auth.uid() = user_id
-        OR (
-        household_id IS NOT NULL
-            AND EXISTS (
-            SELECT 1
-            FROM public.household_members hm
-            WHERE hm.household_id = recipe_folders.household_id
-              AND hm.user_id = auth.uid()
-              AND hm.is_active = 1
-        )
-        )
+      ((uid() = user_id) OR ((household_id IS NOT NULL) AND is_household_member(household_id, uid())))
     );
 
 CREATE POLICY "Users can update folders only for households they belong to"
@@ -27,27 +17,13 @@ CREATE POLICY "Users can update folders only for households they belong to"
     auth.uid() = user_id
         OR (
         household_id IS NOT NULL
-            AND EXISTS (
-            SELECT 1
-            FROM public.household_members hm
-            WHERE hm.household_id = recipe_folders.household_id
-              AND hm.user_id = auth.uid()
-              AND hm.is_active = 1
-        )
+            AND public.is_household_member(household_id, auth.uid())
         )
     )
     WITH CHECK (
     household_id IS NULL
-        OR EXISTS (
-        SELECT 1
-        FROM public.household_members hm
-        WHERE hm.household_id = recipe_folders.household_id
-          AND hm.user_id = auth.uid()
-          AND hm.is_active = 1
-    )
+        OR public.is_household_member(household_id, auth.uid())
     );
-
-
 
 -- RECIPES -------------------------------
 CREATE POLICY "Users can view recipes if authorized"

@@ -69,10 +69,9 @@ A new Flutter project.
   [X] Test RLS
   [X] Attempt to implement folder sharing
   [X] Add trigger that updates household id on share
-  [ ] Regression test app
-  [ ] Design test cases
-  [ ] Implement Test Cases
-    [ ] 
+  [X] Regression test app
+  [X] Design test cases
+  [X] Implement Test Cases
   [X] Create an ADR & document current RLS/Policy paradigms
   [ ] Fix recipe schema (userid req, rating not req)
   [X] Delete folder in household owned by other does not work (RLS looks wrong)
