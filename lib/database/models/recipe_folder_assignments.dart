@@ -6,6 +6,8 @@ class RecipeFolderAssignments extends Table {
   // Surrogate primary key.
   TextColumn get id => text().clientDefault(() => const Uuid().v4()).unique()();
 
+  TextColumn get userId => text()();
+
   // Foreign key referencing a recipe.
   TextColumn get recipeId => text()();
 

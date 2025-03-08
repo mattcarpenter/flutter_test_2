@@ -79,3 +79,11 @@ class RecipeNotifier extends StateNotifier<AsyncValue<List<RecipeWithFolders>>> 
     }
   }
 }
+
+// RecipeNotifier streams a list of RecipeWithFolders.
+// The notifier hides the join logic so that the UI or tests only need to work with the composite model.
+final recipeNotifierProvider =
+StateNotifierProvider<RecipeNotifier, AsyncValue<List<RecipeWithFolders>>>((ref) {
+  final repository = ref.watch(recipeRepositoryProvider);
+  return RecipeNotifier(repository);
+});

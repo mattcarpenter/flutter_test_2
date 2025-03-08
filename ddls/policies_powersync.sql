@@ -33,13 +33,10 @@ CREATE POLICY "Users can view recipes if authorized"
     user_id = auth.uid()
         OR (
         household_id IS NOT NULL
-            AND household_id IN (
-            SELECT hm.household_id
-            FROM public.household_members hm
-            WHERE hm.user_id = auth.uid() AND hm.is_active = 1
-        )
+            AND public.is_household_member(household_id, auth.uid())
         )
     );
+
 CREATE POLICY "Users can insert recipes if authorized"
     ON public.recipes
     FOR INSERT
@@ -47,13 +44,10 @@ CREATE POLICY "Users can insert recipes if authorized"
     user_id = auth.uid()
         AND (
         household_id IS NULL
-            OR household_id IN (
-            SELECT hm.household_id
-            FROM public.household_members hm
-            WHERE hm.user_id = auth.uid() AND hm.is_active = 1
-        )
+            OR (household_id IS NOT NULL AND public.is_household_member(household_id, auth.uid()))
         )
     );
+
 CREATE POLICY "Users can update recipes if authorized"
     ON public.recipes
     FOR UPDATE
@@ -61,24 +55,17 @@ CREATE POLICY "Users can update recipes if authorized"
     user_id = auth.uid()
         OR (
         household_id IS NOT NULL
-            AND household_id IN (
-            SELECT hm.household_id
-            FROM public.household_members hm
-            WHERE hm.user_id = auth.uid() AND hm.is_active = 1
-        )
+            AND public.is_household_member(household_id, auth.uid())
         )
     )
     WITH CHECK (
     user_id = auth.uid()
         OR (
         household_id IS NOT NULL
-            AND household_id IN (
-            SELECT hm.household_id
-            FROM public.household_members hm
-            WHERE hm.user_id = auth.uid() AND hm.is_active = 1
-        )
+            AND public.is_household_member(household_id, auth.uid())
         )
     );
+
 
 
 -- RECIPE FOLDER ASSIGNMENTS -------------------------------
@@ -88,57 +75,49 @@ CREATE POLICY "Users can insert recipe-folder assignments only if authorized"
     WITH CHECK (
     -- The assignment must be owned by the inserting user.
     auth.uid() = user_id
-
-        -- The referenced recipe must be owned by the user or by a household member.
-        AND EXISTS (
+        AND
+        -- The referenced recipe must be owned by the user or by an authorized household member.
+    EXISTS (
         SELECT 1
         FROM public.recipes r
         WHERE r.id = recipe_folder_assignments.recipe_id
           AND (
             r.user_id = auth.uid()
-                OR r.household_id IN (
-                SELECT hm.household_id
-                FROM public.household_members hm
-                WHERE hm.user_id = auth.uid() AND hm.is_active = 1
-            )
+                OR (r.household_id IS NOT NULL
+                AND public.is_household_member(r.household_id, auth.uid()))
             )
     )
-
-        -- The referenced folder must be owned by the user or by a household member.
-        AND EXISTS (
+        AND
+        -- The referenced folder must be owned by the user or by an authorized household member.
+    EXISTS (
         SELECT 1
         FROM public.recipe_folders f
         WHERE f.id = recipe_folder_assignments.folder_id
           AND (
             f.user_id = auth.uid()
-                OR f.household_id IN (
-                SELECT hm.household_id
-                FROM public.household_members hm
-                WHERE hm.user_id = auth.uid() AND hm.is_active = 1
-            )
+                OR (f.household_id IS NOT NULL
+                AND public.is_household_member(f.household_id, auth.uid()))
             )
     )
     );
+
 CREATE POLICY "Users can view recipe-folder assignments if authorized"
     ON public.recipe_folder_assignments
     FOR SELECT
     USING (
-    -- Allow if the assignment is directly owned by the current user.
+    -- Allow if the assignment is directly owned by the current user,
     auth.uid() = user_id
         OR
     (
-        -- Otherwise, ensure the user has access to both the recipe and folder.
+        -- Otherwise, ensure the user has access to both the referenced recipe and folder.
         EXISTS (
             SELECT 1
             FROM public.recipes r
             WHERE r.id = recipe_folder_assignments.recipe_id
               AND (
                 r.user_id = auth.uid()
-                    OR r.household_id IN (
-                    SELECT hm.household_id
-                    FROM public.household_members hm
-                    WHERE hm.user_id = auth.uid() AND hm.is_active = 1
-                )
+                    OR (r.household_id IS NOT NULL
+                    AND public.is_household_member(r.household_id, auth.uid()))
                 )
         )
             AND
@@ -148,15 +127,13 @@ CREATE POLICY "Users can view recipe-folder assignments if authorized"
             WHERE f.id = recipe_folder_assignments.folder_id
               AND (
                 f.user_id = auth.uid()
-                    OR f.household_id IN (
-                    SELECT hm.household_id
-                    FROM public.household_members hm
-                    WHERE hm.user_id = auth.uid() AND hm.is_active = 1
-                )
+                    OR (f.household_id IS NOT NULL
+                    AND public.is_household_member(f.household_id, auth.uid()))
                 )
         )
         )
     );
+
 CREATE POLICY "Users can update recipe-folder assignments if authorized"
     ON public.recipe_folder_assignments
     FOR UPDATE
@@ -170,11 +147,8 @@ CREATE POLICY "Users can update recipe-folder assignments if authorized"
             WHERE r.id = recipe_folder_assignments.recipe_id
               AND (
                 r.user_id = auth.uid()
-                    OR r.household_id IN (
-                    SELECT hm.household_id
-                    FROM public.household_members hm
-                    WHERE hm.user_id = auth.uid() AND hm.is_active = 1
-                )
+                    OR (r.household_id IS NOT NULL
+                    AND public.is_household_member(r.household_id, auth.uid()))
                 )
         )
             AND
@@ -184,11 +158,8 @@ CREATE POLICY "Users can update recipe-folder assignments if authorized"
             WHERE f.id = recipe_folder_assignments.folder_id
               AND (
                 f.user_id = auth.uid()
-                    OR f.household_id IN (
-                    SELECT hm.household_id
-                    FROM public.household_members hm
-                    WHERE hm.user_id = auth.uid() AND hm.is_active = 1
-                )
+                    OR (f.household_id IS NOT NULL
+                    AND public.is_household_member(f.household_id, auth.uid()))
                 )
         )
         )
@@ -203,11 +174,8 @@ CREATE POLICY "Users can update recipe-folder assignments if authorized"
             WHERE r.id = recipe_folder_assignments.recipe_id
               AND (
                 r.user_id = auth.uid()
-                    OR r.household_id IN (
-                    SELECT hm.household_id
-                    FROM public.household_members hm
-                    WHERE hm.user_id = auth.uid() AND hm.is_active = 1
-                )
+                    OR (r.household_id IS NOT NULL
+                    AND public.is_household_member(r.household_id, auth.uid()))
                 )
         )
             AND
@@ -217,15 +185,13 @@ CREATE POLICY "Users can update recipe-folder assignments if authorized"
             WHERE f.id = recipe_folder_assignments.folder_id
               AND (
                 f.user_id = auth.uid()
-                    OR f.household_id IN (
-                    SELECT hm.household_id
-                    FROM public.household_members hm
-                    WHERE hm.user_id = auth.uid() AND hm.is_active = 1
-                )
+                    OR (f.household_id IS NOT NULL
+                    AND public.is_household_member(f.household_id, auth.uid()))
                 )
         )
         )
     );
+
 CREATE POLICY "Users can delete recipe-folder assignments if authorized"
     ON public.recipe_folder_assignments
     FOR DELETE
@@ -239,11 +205,8 @@ CREATE POLICY "Users can delete recipe-folder assignments if authorized"
             WHERE r.id = recipe_folder_assignments.recipe_id
               AND (
                 r.user_id = auth.uid()
-                    OR r.household_id IN (
-                    SELECT hm.household_id
-                    FROM public.household_members hm
-                    WHERE hm.user_id = auth.uid() AND hm.is_active = 1
-                )
+                    OR (r.household_id IS NOT NULL
+                    AND public.is_household_member(r.household_id, auth.uid()))
                 )
         )
             AND
@@ -253,15 +216,13 @@ CREATE POLICY "Users can delete recipe-folder assignments if authorized"
             WHERE f.id = recipe_folder_assignments.folder_id
               AND (
                 f.user_id = auth.uid()
-                    OR f.household_id IN (
-                    SELECT hm.household_id
-                    FROM public.household_members hm
-                    WHERE hm.user_id = auth.uid() AND hm.is_active = 1
-                )
+                    OR (f.household_id IS NOT NULL
+                    AND public.is_household_member(f.household_id, auth.uid()))
                 )
         )
         )
     );
+
 
 
 

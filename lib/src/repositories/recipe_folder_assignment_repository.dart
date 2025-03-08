@@ -1,8 +1,10 @@
 // lib/repositories/recipe_folder_assignment_repository.dart
 
 import 'package:drift/drift.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../database/database.dart';
+import '../../database/powersync.dart';
 
 class RecipeFolderAssignmentRepository {
   final AppDatabase _db;
@@ -33,3 +35,8 @@ class RecipeFolderAssignmentRepository {
     return _db.select(_db.recipeFolderAssignments).watch();
   }
 }
+
+// Provider for the RecipeFolderAssignmentRepository.
+final recipeFolderAssignmentRepositoryProvider = Provider<RecipeFolderAssignmentRepository>((ref) {
+  return RecipeFolderAssignmentRepository(appDb);
+});
