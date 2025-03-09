@@ -9,6 +9,8 @@ import 'models/household_members.dart';
 import 'models/households.dart';
 import 'models/recipe_shares.dart';
 
+import 'converters.dart';
+
 part 'database.g.dart';
 
 @DriftDatabase(tables: [RecipeFolders, Recipes, RecipeShares, HouseholdMembers, Households])

@@ -1,3 +1,5 @@
+// lib/notifiers/recipe_notifier.dart
+
 import 'dart:async';
 import 'package:drift/drift.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -26,7 +28,7 @@ class RecipeNotifier extends StateNotifier<AsyncValue<List<RecipeWithFolders>>> 
     super.dispose();
   }
 
-  // Add a new recipe. Note: Folder assignments can be handled separately.
+  // Add a new recipe.
   Future<void> addRecipe({
     required String title,
     required String language,
@@ -45,8 +47,7 @@ class RecipeNotifier extends StateNotifier<AsyncValue<List<RecipeWithFolders>>> 
     int? updatedAt,
     String? ingredients,
     String? steps,
-    // If you want to handle folder assignments immediately, pass folderIds.
-    List<String> folderIds = const [],
+    List<String>? folderIds,
   }) async {
     try {
       final recipeCompanion = RecipesCompanion.insert(
@@ -67,21 +68,33 @@ class RecipeNotifier extends StateNotifier<AsyncValue<List<RecipeWithFolders>>> 
         updatedAt: Value(updatedAt),
         ingredients: Value(ingredients),
         steps: Value(steps),
+        folderIds: Value(folderIds ?? []),
       );
 
-      // Insert the recipe.
       await _repository.addRecipe(recipeCompanion);
-
-      // If desired, folder assignments can be added here using the
-      // RecipeFolderAssignmentRepository.
     } catch (e) {
       state = AsyncValue.error(e, StackTrace.current);
     }
   }
+
+  // Expose a method to add a folder assignment (i.e. add a folder ID) to a recipe.
+  Future<void> addFolderAssignment({
+    required String recipeId,
+    required String folderId,
+  }) async {
+    await _repository.addFolderToRecipe(recipeId: recipeId, folderId: folderId);
+  }
+
+  // Optionally, expose a method to remove a folder assignment.
+  Future<void> removeFolderAssignment({
+    required String recipeId,
+    required String folderId,
+  }) async {
+    await _repository.removeFolderFromRecipe(recipeId: recipeId, folderId: folderId);
+  }
 }
 
-// RecipeNotifier streams a list of RecipeWithFolders.
-// The notifier hides the join logic so that the UI or tests only need to work with the composite model.
+// Provider for the RecipeNotifier.
 final recipeNotifierProvider =
 StateNotifierProvider<RecipeNotifier, AsyncValue<List<RecipeWithFolders>>>((ref) {
   final repository = ref.watch(recipeRepositoryProvider);

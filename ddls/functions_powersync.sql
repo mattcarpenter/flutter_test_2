@@ -16,3 +16,9 @@ BEGIN
     RETURN member_exists;
 END;
 $$;
+
+CREATE OR REPLACE FUNCTION public.json_to_uuid_array(json_text text)
+    RETURNS uuid[] AS $$
+SELECT COALESCE(array_agg(value::uuid), '{}')
+FROM jsonb_array_elements_text(json_text::jsonb) AS value;
+$$ LANGUAGE sql IMMUTABLE STRICT;

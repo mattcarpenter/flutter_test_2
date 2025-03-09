@@ -1,7 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:recipe_app/src/models/recipe_with_folders.dart';
-import 'package:recipe_app/src/providers/recipe_folder_assignment_provider.dart';
 import 'package:recipe_app/src/providers/recipe_folder_provider.dart';
 import 'package:recipe_app/src/providers/recipe_provider.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -167,13 +166,9 @@ void main() async {
         final recipe = recipes.firstWhere((r) => r.recipe.title == "Pasta").recipe;
 
         // Add the assignment.
-        await container.read(recipeFolderAssignmentNotifierProvider.notifier).addAssignment(
-          recipeId: recipe.id,
-          userId: ownerId,
-          folderId: folderId,
-          householdId: null,
-          createdAt: DateTime.now().millisecondsSinceEpoch,
-        );
+        await container
+            .read(recipeNotifierProvider.notifier)
+            .addFolderAssignment(recipeId: recipe.id, folderId: folderId);
 
         // Little delay to ensure the assignment is synced
         await Future.delayed(const Duration(seconds: 1));
@@ -185,9 +180,9 @@ void main() async {
               (recipes) {
             final matchingRecipe = recipes.firstWhereOrNull((r) => r.recipe.title == "Pasta");
             if (matchingRecipe == null) return false;
-            return matchingRecipe.folderDetails.isNotEmpty &&
-                matchingRecipe.folderDetails.any((detail) =>
-                detail.folder.id == folderId && detail.folder.name == "Dinner");
+            return matchingRecipe.folders.isNotEmpty &&
+                matchingRecipe.folders.any((detail) =>
+                detail.id == folderId && detail.name == "Dinner");
           },
         );
       });
@@ -247,13 +242,9 @@ void main() async {
         final recipe = recipes.firstWhere((r) => r.recipe.title == "Shared Recipe").recipe;
 
         // Add a folder assignment linking the recipe to "Shared Folder".
-        await container.read(recipeFolderAssignmentNotifierProvider.notifier).addAssignment(
-          recipeId: recipe.id,
-          userId: ownerId,
-          folderId: folderId,
-          householdId: null,
-          createdAt: DateTime.now().millisecondsSinceEpoch,
-        );
+        await container
+            .read(recipeNotifierProvider.notifier)
+            .addFolderAssignment(recipeId: recipe.id, folderId: folderId);
 
         // Small delay to ensure the assignment is synced.
         await Future.delayed(const Duration(seconds: 1));
@@ -279,10 +270,10 @@ void main() async {
               (recipes) {
             final matchingRecipe = recipes.firstWhereOrNull((r) => r.recipe.title == "Shared Recipe");
             if (matchingRecipe == null) return false;
-            return matchingRecipe.folderDetails.isNotEmpty &&
-                matchingRecipe.folderDetails.any((detail) =>
-                detail.folder.id == folderId &&
-                    detail.folder.name == "Shared Folder"
+            return matchingRecipe.folders.isNotEmpty &&
+                matchingRecipe.folders.any((detail) =>
+                detail.id == folderId &&
+                    detail.name == "Shared Folder"
                 );
           },
         );

@@ -426,6 +426,13 @@ class $RecipesTable extends Recipes with TableInfo<$RecipesTable, RecipeEntry> {
   late final GeneratedColumn<String> steps = GeneratedColumn<String>(
       'steps', aliasedName, true,
       type: DriftSqlType.string, requiredDuringInsert: false);
+  static const VerificationMeta _folderIdsMeta =
+      const VerificationMeta('folderIds');
+  @override
+  late final GeneratedColumnWithTypeConverter<List<String>?, String> folderIds =
+      GeneratedColumn<String>('folder_ids', aliasedName, true,
+              type: DriftSqlType.string, requiredDuringInsert: false)
+          .withConverter<List<String>?>($RecipesTable.$converterfolderIdsn);
   @override
   List<GeneratedColumn> get $columns => [
         id,
@@ -445,7 +452,8 @@ class $RecipesTable extends Recipes with TableInfo<$RecipesTable, RecipeEntry> {
         createdAt,
         updatedAt,
         ingredients,
-        steps
+        steps,
+        folderIds
       ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -542,11 +550,12 @@ class $RecipesTable extends Recipes with TableInfo<$RecipesTable, RecipeEntry> {
       context.handle(
           _stepsMeta, steps.isAcceptableOrUnknown(data['steps']!, _stepsMeta));
     }
+    context.handle(_folderIdsMeta, const VerificationResult.success());
     return context;
   }
 
   @override
-  Set<GeneratedColumn> get $primaryKey => const {};
+  Set<GeneratedColumn> get $primaryKey => {id};
   @override
   RecipeEntry map(Map<String, dynamic> data, {String? tablePrefix}) {
     final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
@@ -587,6 +596,9 @@ class $RecipesTable extends Recipes with TableInfo<$RecipesTable, RecipeEntry> {
           .read(DriftSqlType.string, data['${effectivePrefix}ingredients']),
       steps: attachedDatabase.typeMapping
           .read(DriftSqlType.string, data['${effectivePrefix}steps']),
+      folderIds: $RecipesTable.$converterfolderIdsn.fromSql(attachedDatabase
+          .typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}folder_ids'])),
     );
   }
 
@@ -594,6 +606,11 @@ class $RecipesTable extends Recipes with TableInfo<$RecipesTable, RecipeEntry> {
   $RecipesTable createAlias(String alias) {
     return $RecipesTable(attachedDatabase, alias);
   }
+
+  static TypeConverter<List<String>, String> $converterfolderIds =
+      StringListTypeConverter();
+  static TypeConverter<List<String>?, String?> $converterfolderIdsn =
+      NullAwareTypeConverter.wrap($converterfolderIds);
 }
 
 class RecipeEntry extends DataClass implements Insertable<RecipeEntry> {
@@ -615,6 +632,7 @@ class RecipeEntry extends DataClass implements Insertable<RecipeEntry> {
   final int? updatedAt;
   final String? ingredients;
   final String? steps;
+  final List<String>? folderIds;
   const RecipeEntry(
       {required this.id,
       required this.title,
@@ -633,7 +651,8 @@ class RecipeEntry extends DataClass implements Insertable<RecipeEntry> {
       this.createdAt,
       this.updatedAt,
       this.ingredients,
-      this.steps});
+      this.steps,
+      this.folderIds});
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
@@ -683,6 +702,10 @@ class RecipeEntry extends DataClass implements Insertable<RecipeEntry> {
     if (!nullToAbsent || steps != null) {
       map['steps'] = Variable<String>(steps);
     }
+    if (!nullToAbsent || folderIds != null) {
+      map['folder_ids'] =
+          Variable<String>($RecipesTable.$converterfolderIdsn.toSql(folderIds));
+    }
     return map;
   }
 
@@ -731,6 +754,9 @@ class RecipeEntry extends DataClass implements Insertable<RecipeEntry> {
           : Value(ingredients),
       steps:
           steps == null && nullToAbsent ? const Value.absent() : Value(steps),
+      folderIds: folderIds == null && nullToAbsent
+          ? const Value.absent()
+          : Value(folderIds),
     );
   }
 
@@ -756,6 +782,7 @@ class RecipeEntry extends DataClass implements Insertable<RecipeEntry> {
       updatedAt: serializer.fromJson<int?>(json['updatedAt']),
       ingredients: serializer.fromJson<String?>(json['ingredients']),
       steps: serializer.fromJson<String?>(json['steps']),
+      folderIds: serializer.fromJson<List<String>?>(json['folderIds']),
     );
   }
   @override
@@ -780,6 +807,7 @@ class RecipeEntry extends DataClass implements Insertable<RecipeEntry> {
       'updatedAt': serializer.toJson<int?>(updatedAt),
       'ingredients': serializer.toJson<String?>(ingredients),
       'steps': serializer.toJson<String?>(steps),
+      'folderIds': serializer.toJson<List<String>?>(folderIds),
     };
   }
 
@@ -801,7 +829,8 @@ class RecipeEntry extends DataClass implements Insertable<RecipeEntry> {
           Value<int?> createdAt = const Value.absent(),
           Value<int?> updatedAt = const Value.absent(),
           Value<String?> ingredients = const Value.absent(),
-          Value<String?> steps = const Value.absent()}) =>
+          Value<String?> steps = const Value.absent(),
+          Value<List<String>?> folderIds = const Value.absent()}) =>
       RecipeEntry(
         id: id ?? this.id,
         title: title ?? this.title,
@@ -822,6 +851,7 @@ class RecipeEntry extends DataClass implements Insertable<RecipeEntry> {
         updatedAt: updatedAt.present ? updatedAt.value : this.updatedAt,
         ingredients: ingredients.present ? ingredients.value : this.ingredients,
         steps: steps.present ? steps.value : this.steps,
+        folderIds: folderIds.present ? folderIds.value : this.folderIds,
       );
   RecipeEntry copyWithCompanion(RecipesCompanion data) {
     return RecipeEntry(
@@ -848,6 +878,7 @@ class RecipeEntry extends DataClass implements Insertable<RecipeEntry> {
       ingredients:
           data.ingredients.present ? data.ingredients.value : this.ingredients,
       steps: data.steps.present ? data.steps.value : this.steps,
+      folderIds: data.folderIds.present ? data.folderIds.value : this.folderIds,
     );
   }
 
@@ -871,7 +902,8 @@ class RecipeEntry extends DataClass implements Insertable<RecipeEntry> {
           ..write('createdAt: $createdAt, ')
           ..write('updatedAt: $updatedAt, ')
           ..write('ingredients: $ingredients, ')
-          ..write('steps: $steps')
+          ..write('steps: $steps, ')
+          ..write('folderIds: $folderIds')
           ..write(')'))
         .toString();
   }
@@ -895,7 +927,8 @@ class RecipeEntry extends DataClass implements Insertable<RecipeEntry> {
       createdAt,
       updatedAt,
       ingredients,
-      steps);
+      steps,
+      folderIds);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -917,7 +950,8 @@ class RecipeEntry extends DataClass implements Insertable<RecipeEntry> {
           other.createdAt == this.createdAt &&
           other.updatedAt == this.updatedAt &&
           other.ingredients == this.ingredients &&
-          other.steps == this.steps);
+          other.steps == this.steps &&
+          other.folderIds == this.folderIds);
 }
 
 class RecipesCompanion extends UpdateCompanion<RecipeEntry> {
@@ -939,6 +973,7 @@ class RecipesCompanion extends UpdateCompanion<RecipeEntry> {
   final Value<int?> updatedAt;
   final Value<String?> ingredients;
   final Value<String?> steps;
+  final Value<List<String>?> folderIds;
   final Value<int> rowid;
   const RecipesCompanion({
     this.id = const Value.absent(),
@@ -959,6 +994,7 @@ class RecipesCompanion extends UpdateCompanion<RecipeEntry> {
     this.updatedAt = const Value.absent(),
     this.ingredients = const Value.absent(),
     this.steps = const Value.absent(),
+    this.folderIds = const Value.absent(),
     this.rowid = const Value.absent(),
   });
   RecipesCompanion.insert({
@@ -980,6 +1016,7 @@ class RecipesCompanion extends UpdateCompanion<RecipeEntry> {
     this.updatedAt = const Value.absent(),
     this.ingredients = const Value.absent(),
     this.steps = const Value.absent(),
+    this.folderIds = const Value.absent(),
     this.rowid = const Value.absent(),
   })  : title = Value(title),
         rating = Value(rating),
@@ -1003,6 +1040,7 @@ class RecipesCompanion extends UpdateCompanion<RecipeEntry> {
     Expression<int>? updatedAt,
     Expression<String>? ingredients,
     Expression<String>? steps,
+    Expression<String>? folderIds,
     Expression<int>? rowid,
   }) {
     return RawValuesInsertable({
@@ -1024,6 +1062,7 @@ class RecipesCompanion extends UpdateCompanion<RecipeEntry> {
       if (updatedAt != null) 'updated_at': updatedAt,
       if (ingredients != null) 'ingredients': ingredients,
       if (steps != null) 'steps': steps,
+      if (folderIds != null) 'folder_ids': folderIds,
       if (rowid != null) 'rowid': rowid,
     });
   }
@@ -1047,6 +1086,7 @@ class RecipesCompanion extends UpdateCompanion<RecipeEntry> {
       Value<int?>? updatedAt,
       Value<String?>? ingredients,
       Value<String?>? steps,
+      Value<List<String>?>? folderIds,
       Value<int>? rowid}) {
     return RecipesCompanion(
       id: id ?? this.id,
@@ -1067,6 +1107,7 @@ class RecipesCompanion extends UpdateCompanion<RecipeEntry> {
       updatedAt: updatedAt ?? this.updatedAt,
       ingredients: ingredients ?? this.ingredients,
       steps: steps ?? this.steps,
+      folderIds: folderIds ?? this.folderIds,
       rowid: rowid ?? this.rowid,
     );
   }
@@ -1128,6 +1169,10 @@ class RecipesCompanion extends UpdateCompanion<RecipeEntry> {
     if (steps.present) {
       map['steps'] = Variable<String>(steps.value);
     }
+    if (folderIds.present) {
+      map['folder_ids'] = Variable<String>(
+          $RecipesTable.$converterfolderIdsn.toSql(folderIds.value));
+    }
     if (rowid.present) {
       map['rowid'] = Variable<int>(rowid.value);
     }
@@ -1155,6 +1200,7 @@ class RecipesCompanion extends UpdateCompanion<RecipeEntry> {
           ..write('updatedAt: $updatedAt, ')
           ..write('ingredients: $ingredients, ')
           ..write('steps: $steps, ')
+          ..write('folderIds: $folderIds, ')
           ..write('rowid: $rowid')
           ..write(')'))
         .toString();
@@ -2180,6 +2226,7 @@ typedef $$RecipesTableCreateCompanionBuilder = RecipesCompanion Function({
   Value<int?> updatedAt,
   Value<String?> ingredients,
   Value<String?> steps,
+  Value<List<String>?> folderIds,
   Value<int> rowid,
 });
 typedef $$RecipesTableUpdateCompanionBuilder = RecipesCompanion Function({
@@ -2201,6 +2248,7 @@ typedef $$RecipesTableUpdateCompanionBuilder = RecipesCompanion Function({
   Value<int?> updatedAt,
   Value<String?> ingredients,
   Value<String?> steps,
+  Value<List<String>?> folderIds,
   Value<int> rowid,
 });
 
@@ -2266,6 +2314,11 @@ class $$RecipesTableFilterComposer
 
   ColumnFilters<String> get steps => $composableBuilder(
       column: $table.steps, builder: (column) => ColumnFilters(column));
+
+  ColumnWithTypeConverterFilters<List<String>?, List<String>, String>
+      get folderIds => $composableBuilder(
+          column: $table.folderIds,
+          builder: (column) => ColumnWithTypeConverterFilters(column));
 }
 
 class $$RecipesTableOrderingComposer
@@ -2331,6 +2384,9 @@ class $$RecipesTableOrderingComposer
 
   ColumnOrderings<String> get steps => $composableBuilder(
       column: $table.steps, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get folderIds => $composableBuilder(
+      column: $table.folderIds, builder: (column) => ColumnOrderings(column));
 }
 
 class $$RecipesTableAnnotationComposer
@@ -2395,6 +2451,9 @@ class $$RecipesTableAnnotationComposer
 
   GeneratedColumn<String> get steps =>
       $composableBuilder(column: $table.steps, builder: (column) => column);
+
+  GeneratedColumnWithTypeConverter<List<String>?, String> get folderIds =>
+      $composableBuilder(column: $table.folderIds, builder: (column) => column);
 }
 
 class $$RecipesTableTableManager extends RootTableManager<
@@ -2438,6 +2497,7 @@ class $$RecipesTableTableManager extends RootTableManager<
             Value<int?> updatedAt = const Value.absent(),
             Value<String?> ingredients = const Value.absent(),
             Value<String?> steps = const Value.absent(),
+            Value<List<String>?> folderIds = const Value.absent(),
             Value<int> rowid = const Value.absent(),
           }) =>
               RecipesCompanion(
@@ -2459,6 +2519,7 @@ class $$RecipesTableTableManager extends RootTableManager<
             updatedAt: updatedAt,
             ingredients: ingredients,
             steps: steps,
+            folderIds: folderIds,
             rowid: rowid,
           ),
           createCompanionCallback: ({
@@ -2480,6 +2541,7 @@ class $$RecipesTableTableManager extends RootTableManager<
             Value<int?> updatedAt = const Value.absent(),
             Value<String?> ingredients = const Value.absent(),
             Value<String?> steps = const Value.absent(),
+            Value<List<String>?> folderIds = const Value.absent(),
             Value<int> rowid = const Value.absent(),
           }) =>
               RecipesCompanion.insert(
@@ -2501,6 +2563,7 @@ class $$RecipesTableTableManager extends RootTableManager<
             updatedAt: updatedAt,
             ingredients: ingredients,
             steps: steps,
+            folderIds: folderIds,
             rowid: rowid,
           ),
           withReferenceMapper: (p0) => p0

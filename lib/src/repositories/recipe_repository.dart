@@ -1,8 +1,9 @@
 // lib/repositories/recipe_repository.dart
 
 import 'dart:async';
+import 'dart:convert';
+import 'package:drift/drift.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-
 import '../../database/database.dart';
 import '../../database/powersync.dart';
 import '../models/recipe_with_folders.dart';
@@ -32,7 +33,44 @@ class RecipeRepository {
     return (_db.delete(_db.recipes)..where((tbl) => tbl.id.equals(id))).go();
   }
 
+  // Helper: Add a folder assignment to a recipe by updating its folder_ids array.
+  Future<void> addFolderToRecipe({
+    required String recipeId,
+    required String folderId,
+  }) async {
+    // Fetch the recipe record.
+    final recipe = await (_db.select(_db.recipes)
+      ..where((tbl) => tbl.id.equals(recipeId)))
+        .getSingle();
+    // Assuming folderIds is converted to List<String> using a custom type converter.
+    final currentFolderIds = recipe.folderIds ?? <String>[];
+    if (!currentFolderIds.contains(folderId)) {
+      final updatedFolderIds = List<String>.from(currentFolderIds)..add(folderId);
+      // Create an updated copy of the recipe.
+      final updatedRecipe = recipe.copyWith(folderIds: Value(updatedFolderIds));
+      await updateRecipe(updatedRecipe);
+    }
+  }
+
+  // Helper: Remove a folder assignment from a recipe.
+  Future<void> removeFolderFromRecipe({
+    required String recipeId,
+    required String folderId,
+  }) async {
+    final recipe = await (_db.select(_db.recipes)
+      ..where((tbl) => tbl.id.equals(recipeId)))
+        .getSingle();
+    final currentFolderIds = recipe.folderIds ?? <String>[];
+    if (currentFolderIds.contains(folderId)) {
+      final updatedFolderIds = List<String>.from(currentFolderIds)..remove(folderId);
+      final updatedRecipe = recipe.copyWith(folderIds: Value(updatedFolderIds));
+      await updateRecipe(updatedRecipe);
+    }
+  }
+
   // Watch recipes along with their folder details.
+  // Update this method if you have a different strategy now to retrieve folder details.
+  // For instance, you may need to join recipes with recipe_folders by checking if folderIds contains the folder's id.
   Stream<List<RecipeWithFolders>> watchRecipesWithFolders() {
     final query = _db.customSelect(
       '''
@@ -42,37 +80,41 @@ class RecipeRepository {
       r.description AS recipe_description,
       r.rating AS recipe_rating,
       r.language AS recipe_language,
-      -- You can select additional recipe columns as needed.
-      
-      a.id AS assignment_id, 
-      a.recipe_id AS assignment_recipe_id, 
-      a.folder_id AS assignment_folder_id,
-      a.user_id AS assignment_user_id, 
-      -- Include household_id if needed:
-      a.household_id AS assignment_household_id,
+      r.servings AS recipe_servings,
+      r.prep_time AS recipe_prep_time,
+      r.cook_time AS recipe_cook_time,
+      r.total_time AS recipe_total_time,
+      r.source AS recipe_source,
+      r.nutrition AS recipe_nutrition,
+      r.general_notes AS recipe_general_notes,
+      r.user_id AS recipe_user_id,
+      r.household_id AS recipe_household_id,
+      r.created_at AS recipe_created_at,
+      r.updated_at AS recipe_updated_at,
+      r.ingredients AS recipe_ingredients,
+      r.steps AS recipe_steps,
+      r.folder_ids AS recipe_folder_ids,
       
       f.id AS folder_id, 
       f.name AS folder_name,
       f.deleted_at AS folder_deleted_at
-      -- Select additional folder columns if necessary.
     FROM recipes r
-    LEFT JOIN recipe_folder_assignments a ON a.recipe_id = r.id
-    LEFT JOIN recipe_folders f ON f.id = a.folder_id
+    LEFT JOIN recipe_folders f 
+      ON f.id IN (SELECT value FROM json_each(r.folder_ids))
     ''',
       readsFrom: {
         _db.recipes,
-        _db.recipeFolderAssignments,
         _db.recipeFolders,
       },
     ).watch();
 
     return query.map((rows) {
-      // Group the rows by recipe id.
+      // Group rows by recipe id.
       final Map<String, RecipeWithFolders> recipeMap = {};
       for (final row in rows) {
         final recipeId = row.read<String>('recipe_id');
-        // Create a composite object for each recipe if not already present.
         if (!recipeMap.containsKey(recipeId)) {
+          // Build the RecipeEntry.
           final recipe = RecipeEntry(
             id: recipeId,
             title: row.read<String>('recipe_title'),
@@ -92,41 +134,26 @@ class RecipeRepository {
             updatedAt: row.read<int?>('recipe_updated_at'),
             ingredients: row.read<String?>('recipe_ingredients'),
             steps: row.read<String?>('recipe_steps'),
+            folderIds: List<String>.from(jsonDecode(row.read<String>('recipe_folder_ids'))),
           );
-          recipeMap[recipeId] = RecipeWithFolders(recipe: recipe, folderDetails: []);
+          recipeMap[recipeId] = RecipeWithFolders(recipe: recipe, folders: []);
         }
-        // If an assignment exists (assignment_id is not null), add folder details.
-        final assignmentId = row.read<String?>('assignment_id');
-        if (assignmentId != null) {
-          final assignment = RecipeFolderAssignmentEntry(
-            id: assignmentId,
-            recipeId: row.read<String>('assignment_recipe_id'),
-            folderId: row.read<String>('assignment_folder_id'),
-            userId: row.read<String>('assignment_user_id'),
-            householdId: row.read<String?>('assignment_household_id'),
-            createdAt: null, // Set if you select created_at column.
+        // If a folder is joined, add it to the composite.
+        final folderId = row.read<String?>('folder_id');
+        if (folderId != null) {
+          final folder = RecipeFolderEntry(
+            id: folderId,
+            name: row.read<String>('folder_name'),
+            deletedAt: row.read<int?>('folder_deleted_at'),
           );
-          final folderId = row.read<String?>('folder_id');
-          if (folderId != null) {
-            final folder = RecipeFolderEntry(
-              id: folderId,
-              name: row.read<String>('folder_name'),
-              deletedAt: row.read<int?>('folder_deleted_at'),
-            );
-            recipeMap[recipeId]!.folderDetails.add(
-              RecipeFolderDetail(assignment: assignment, folder: folder),
-            );
-          }
+          recipeMap[recipeId]!.folders.add(folder);
         }
       }
       return recipeMap.values.toList();
     });
   }
-
-
 }
 
-// Provider for the RecipeRepository.
 final recipeRepositoryProvider = Provider<RecipeRepository>((ref) {
   return RecipeRepository(appDb);
 });

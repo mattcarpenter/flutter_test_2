@@ -1,10 +1,15 @@
 import 'package:drift/drift.dart';
 import 'package:uuid/uuid.dart';
 
+import '../converters.dart';
+
 @DataClassName('RecipeEntry')
 class Recipes extends Table {
   // Primary key with a client-side default UUID.
   TextColumn get id => text().clientDefault(() => const Uuid().v4()).unique()();
+
+  @override
+  Set<Column> get primaryKey => {id};
 
   TextColumn get title => text()();
   TextColumn get description => text().nullable()();
@@ -26,6 +31,7 @@ class Recipes extends Table {
   IntColumn get updatedAt => integer().nullable()();
   TextColumn get ingredients => text().nullable()();
   TextColumn get steps => text().nullable()();
+  TextColumn get folderIds => text().nullable().map(StringListTypeConverter())();
 }
 
 /*
