@@ -5,6 +5,7 @@ import 'package:recipe_app/src/providers/recipe_folder_assignment_provider.dart'
 import 'package:recipe_app/src/providers/recipe_folder_provider.dart';
 import 'package:recipe_app/src/providers/recipe_provider.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import '../../utils/test_recipe_folder_share_manager.dart';
 import '../../utils/test_user_manager.dart';
 import '../../utils/test_utils.dart';
 import 'package:collection/collection.dart';
@@ -191,6 +192,103 @@ void main() async {
         );
       });
     });
+
+    testWidgets('Shared folder shows recipe to member', (tester) async {
+      // Create test users "owner" and "member".
+      await TestUserManager.createTestUsers(['owner', 'member']);
+
+      late String folderId;
+      late String memberId;
+
+      // First, log in as member to capture their user id.
+      await withTestUser('member', () async {
+        memberId = Supabase.instance.client.auth.currentUser!.id;
+      });
+
+      // Now, as the owner, create a folder, recipe, assign the recipe to the folder,
+      // then share that folder with the member.
+      await withTestUser('owner', () async {
+        final ownerId = Supabase.instance.client.auth.currentUser!.id;
+
+        // Create a folder named "Shared Folder".
+        await container.read(recipeFolderNotifierProvider.notifier).addFolder(
+          name: "Shared Folder",
+          userId: ownerId,
+        );
+        await waitForFolder(
+          container: container,
+          folderName: "Shared Folder",
+          expectedCount: 1,
+        );
+        final folders = container.read(recipeFolderNotifierProvider).value!;
+        folderId = folders.firstWhere((f) => f.name == "Shared Folder").id;
+
+        // Small delay to ensure folder sync.
+        await Future.delayed(const Duration(seconds: 1));
+
+        // Create a recipe named "Shared Recipe".
+        await container.read(recipeNotifierProvider.notifier).addRecipe(
+          title: "Shared Recipe",
+          language: "en",
+          rating: 5,
+          description: "Recipe to be shared",
+          userId: ownerId,
+          createdAt: DateTime.now().millisecondsSinceEpoch,
+          updatedAt: DateTime.now().millisecondsSinceEpoch,
+        );
+        await waitForProviderValue<List<RecipeWithFolders>>(
+          container,
+          recipeNotifierProvider,
+              (recipes) => recipes.any((r) => r.recipe.title == "Shared Recipe"),
+        );
+
+        // Retrieve the created recipe.
+        final recipes = container.read(recipeNotifierProvider).value!;
+        final recipe = recipes.firstWhere((r) => r.recipe.title == "Shared Recipe").recipe;
+
+        // Add a folder assignment linking the recipe to "Shared Folder".
+        await container.read(recipeFolderAssignmentNotifierProvider.notifier).addAssignment(
+          recipeId: recipe.id,
+          userId: ownerId,
+          folderId: folderId,
+          householdId: null,
+          createdAt: DateTime.now().millisecondsSinceEpoch,
+        );
+
+        // Small delay to ensure the assignment is synced.
+        await Future.delayed(const Duration(seconds: 1));
+
+        // Share the folder with the member using the TestRecipeFolderShareManager.
+        await TestRecipeFolderShareManager.createShare(
+          folderId: folderId,
+          sharerId: ownerId,
+          targetUserId: memberId,
+          canEdit: 1,
+        );
+
+        // Small delay to allow sharing to sync.
+        await Future.delayed(const Duration(seconds: 1));
+      });
+
+      // Finally, log in as "member" and assert that the shared recipe appears with folder details.
+      await withTestUser('member', () async {
+        await Future.delayed(const Duration(seconds: 5));
+        await waitForProviderValue<List<RecipeWithFolders>>(
+          container,
+          recipeNotifierProvider,
+              (recipes) {
+            final matchingRecipe = recipes.firstWhereOrNull((r) => r.recipe.title == "Shared Recipe");
+            if (matchingRecipe == null) return false;
+            return matchingRecipe.folderDetails.isNotEmpty &&
+                matchingRecipe.folderDetails.any((detail) =>
+                detail.folder.id == folderId &&
+                    detail.folder.name == "Shared Folder"
+                );
+          },
+        );
+      });
+    });
+
 
   });
 }

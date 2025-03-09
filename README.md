@@ -73,6 +73,10 @@ A new Flutter project.
   [X] Design test cases
   [X] Implement Test Cases
   [X] Create an ADR & document current RLS/Policy paradigms
+  [ ] Refactor folder sharing (put in array on folders instead of join table)
+      includes updating tests.
+  [ ] Fix recipe sharing test
+  [ ] Add more recipe sharing tests
   [ ] Fix recipe schema (userid req, rating not req)
   [X] Delete folder in household owned by other does not work (RLS looks wrong)
   [ ] Implement Recipe Ingredients and steps (can we use JSON?)
