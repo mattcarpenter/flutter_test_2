@@ -30,11 +30,11 @@ bucket_definitions:
       - SELECT * FROM public.recipe_folders WHERE id = bucket.folder_id
       - SELECT * FROM public.recipes WHERE bucket.folder_id IN folder_ids
 
-  #shared_folder_household:
-  #  parameters: >
-  #    SELECT folder_id
-  #    FROM public.user_household_shares
-  #    WHERE user_id = request.user_id()
-  #  data:
-  #    - SELECT * FROM public.recipe_folders WHERE id = bucket.folder_id
-  #    - SELECT * FROM public.recipes WHERE folder_id = bucket.folder_id
+  shared_folder_household:
+    parameters: >
+      SELECT folder_id
+      FROM public.user_household_shares
+      WHERE user_id = request.user_id()
+    data:
+      - SELECT * FROM public.recipe_folders WHERE id = bucket.folder_id
+      - SELECT * FROM public.recipes WHERE bucket.folder_id IN folder_ids

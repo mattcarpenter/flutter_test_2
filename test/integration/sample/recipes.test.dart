@@ -363,7 +363,7 @@ void main() async {
         );
       });
 
-      // Step 4: household_owner logs in and verifies that they can see the folder shared with them.
+      // Step 4: household_member logs in and verifies that they can see the folder shared with them.
       await withTestUser('household_member', () async {
         await Future.delayed(const Duration(seconds: 5));
         await waitForFolder(
