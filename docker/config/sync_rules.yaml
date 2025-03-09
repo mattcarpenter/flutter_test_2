@@ -8,7 +8,6 @@ bucket_definitions:
     data:
       - SELECT * FROM public.recipe_folders WHERE recipe_folders.user_id = bucket.user_id
       - SELECT * FROM public.recipes WHERE recipes.user_id = bucket.user_id
-      - SELECT * FROM public.recipe_folder_assignments WHERE recipe_folder_assignments.user_id = bucket.user_id
 
   # Data that belongs to a household the user is an active member of
   belongs_to_household:
@@ -16,7 +15,6 @@ bucket_definitions:
     data:
       - SELECT * FROM public.recipe_folders WHERE household_id = bucket.household_id
       - SELECT * FROM public.recipes WHERE household_id = bucket.household_id
-      - SELECT * FROM public.recipe_folder_assignments WHERE household_id = bucket.household_id
 
   # All members of the user's household
   household_membership:
@@ -30,13 +28,13 @@ bucket_definitions:
     parameters: SELECT folder_id FROM recipe_folder_shares WHERE target_user_id = request.user_id()
     data:
       - SELECT * FROM public.recipe_folders WHERE id = bucket.folder_id
-      - SELECT * FROM public.recipes WHERE bucket.folder_id IN folder_ids_array
+      - SELECT * FROM public.recipes WHERE bucket.folder_id IN folder_ids
 
-  shared_folder_household:
-    parameters: >
-      SELECT folder_id
-      FROM public.user_household_shares
-      WHERE user_id = request.user_id()
-    data:
-      - SELECT * FROM public.recipe_folders WHERE id = bucket.folder_id
-      - SELECT * FROM public.recipes WHERE folder_id = bucket.folder_id
+  #shared_folder_household:
+  #  parameters: >
+  #    SELECT folder_id
+  #    FROM public.user_household_shares
+  #    WHERE user_id = request.user_id()
+  #  data:
+  #    - SELECT * FROM public.recipe_folders WHERE id = bucket.folder_id
+  #    - SELECT * FROM public.recipes WHERE folder_id = bucket.folder_id

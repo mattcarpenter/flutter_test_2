@@ -61,7 +61,6 @@ CREATE TABLE public.recipes (
                                 created_at bigint NULL,
                                 updated_at bigint NULL,
                                 folder_ids text null,
-                                folder_ids_array uuid[] GENERATED ALWAYS AS (public.json_to_uuid_array(folder_ids)) STORED,
                                 CONSTRAINT recipes_pkey PRIMARY KEY (id),
                                 CONSTRAINT recipes_household_id_fkey FOREIGN KEY (household_id) REFERENCES public.households (id) ON DELETE CASCADE,
                                 CONSTRAINT recipes_user_id_fkey FOREIGN KEY (user_id) REFERENCES auth.users (id) ON DELETE CASCADE
