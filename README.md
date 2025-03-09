@@ -79,6 +79,7 @@ A new Flutter project.
   [X] Add more recipe sharing tests
   [ ] Ensure household members can see the other members not just themselves
   [ ] Fix recipe schema (userid req, rating not req)
+  [ ] Reset Hosted supabase and PowerSync
   [X] Delete folder in household owned by other does not work (RLS looks wrong)
   [ ] Implement Recipe Ingredients and steps (can we use JSON?)
   [ ] Figure out integration tests
