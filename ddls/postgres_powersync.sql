@@ -60,9 +60,8 @@ CREATE TABLE public.recipes (
                                 household_id uuid NULL,
                                 created_at bigint NULL,
                                 updated_at bigint NULL,
-                                folder_id uuid,  -- added column required for the FK constraint below
+                                folder_ids uuid[] NULL,
                                 CONSTRAINT recipes_pkey PRIMARY KEY (id),
-                                CONSTRAINT recipes_folder_id_fkey FOREIGN KEY (folder_id) REFERENCES public.recipe_folders (id) ON DELETE SET NULL,
                                 CONSTRAINT recipes_household_id_fkey FOREIGN KEY (household_id) REFERENCES public.households (id) ON DELETE CASCADE,
                                 CONSTRAINT recipes_user_id_fkey FOREIGN KEY (user_id) REFERENCES auth.users (id) ON DELETE CASCADE
 ) TABLESPACE pg_default;

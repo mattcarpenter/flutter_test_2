@@ -49,15 +49,8 @@ Schema schema = const Schema(([
     Column.integer('updated_at'),
     Column.text('ingredients'),
     Column.text('steps'),
+    Column.text('folder_ids'),
   ]/*, indexes: [...] */),
-  Table(recipeFolderAssignmentsTable, [
-    Column.text('recipe_id'),
-    Column.text('folder_id'),
-    Column.text('user_id'),
-    // NEW: Add the household_id column.
-    Column.text('household_id'),
-    Column.integer('created_at'),
-  ]),
   Table(householdsTable, [
     // Household name.
     Column.text('name'),
