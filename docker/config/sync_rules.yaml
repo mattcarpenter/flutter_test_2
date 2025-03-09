@@ -18,9 +18,9 @@ bucket_definitions:
 
   # All members of the user's household
   household_membership:
-    parameters: SELECT household_id, user_id FROM household_members WHERE user_id = request.user_id()
+    parameters: SELECT household_id FROM household_members WHERE user_id = request.user_id()
     data:
-      - SELECT * FROM public.household_members WHERE household_id = bucket.household_id AND user_id = bucket.user_id
+      - SELECT * FROM public.household_members WHERE household_id = bucket.household_id
 
 
   # Shared folders: Direct share where the folder is explicitly shared with the current user.

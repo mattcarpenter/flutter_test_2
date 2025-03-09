@@ -45,7 +45,6 @@ void main() async {
         await container.read(recipeNotifierProvider.notifier).addRecipe(
           title: "Test Recipe",
           language: "en",
-          rating: 5,
           description: "A delicious test recipe",
           userId: ownerId,
           createdAt: DateTime.now().millisecondsSinceEpoch,
@@ -86,7 +85,6 @@ void main() async {
         await container.read(recipeNotifierProvider.notifier).addRecipe(
           title: "Owner Recipe",
           language: "en",
-          rating: 5,
           description: "A recipe by the owner",
           userId: ownerId,
           createdAt: DateTime.now().millisecondsSinceEpoch,
@@ -147,7 +145,6 @@ void main() async {
         await container.read(recipeNotifierProvider.notifier).addRecipe(
           title: "Pasta",
           language: "en",
-          rating: 4,
           description: "Simple pasta recipe",
           userId: ownerId,
           createdAt: DateTime.now().millisecondsSinceEpoch,
@@ -226,7 +223,6 @@ void main() async {
         await container.read(recipeNotifierProvider.notifier).addRecipe(
           title: "Shared Recipe",
           language: "en",
-          rating: 5,
           description: "Recipe to be shared",
           userId: ownerId,
           createdAt: DateTime.now().millisecondsSinceEpoch,
@@ -328,7 +324,6 @@ void main() async {
         await container.read(recipeNotifierProvider.notifier).addRecipe(
           title: "Other Member's Recipe",
           language: "en",
-          rating: 5,
           description: "Recipe to be shared",
           userId: otherMemberId,
           createdAt: DateTime.now().millisecondsSinceEpoch,

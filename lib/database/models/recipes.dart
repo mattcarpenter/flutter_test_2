@@ -13,7 +13,7 @@ class Recipes extends Table {
 
   TextColumn get title => text()();
   TextColumn get description => text().nullable()();
-  IntColumn get rating => integer()();
+  IntColumn get rating => integer().nullable()();
   TextColumn get language => text()();
   IntColumn get servings => integer().nullable()();
   IntColumn get prepTime => integer().nullable()();
@@ -22,7 +22,7 @@ class Recipes extends Table {
   TextColumn get source => text().nullable()();
   TextColumn get nutrition => text().nullable()();
   TextColumn get generalNotes => text().nullable()();
-  TextColumn get userId => text().nullable()();
+  TextColumn get userId => text()();
   // We no longer rely on folderId here; the association is in the join table.
   // TextColumn get folderId => text().nullable()();
   TextColumn get householdId => text().nullable()();

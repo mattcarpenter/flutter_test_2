@@ -77,18 +77,15 @@ A new Flutter project.
       includes updating tests.
   [X] Fix recipe sharing test
   [X] Add more recipe sharing tests
-  [ ] Ensure household members can see the other members not just themselves
-  [ ] Fix recipe schema (userid req, rating not req)
+  [X] Ensure household members can see the other members not just themselves
+  [X] Fix recipe schema (userid req, rating not req)
   [ ] Reset Hosted supabase and PowerSync
+  [ ] Regression test
   [X] Delete folder in household owned by other does not work (RLS looks wrong)
   [ ] Implement Recipe Ingredients and steps (can we use JSON?)
-  [ ] Figure out integration tests
-  [ ] Recipe schema & Riverpod
-  [ ] Recipe integration test
   [ ] Dummy recipe adder UI
-  [ ] Connect recipe list to Riverpod
   [ ] Deletion of folders - what happens to descendants
-  [ ] Implement sharing
+  [X] Implement sharing (backend only)
 [ ] Check in on status of scroll bug https://github.com/flutter/flutter/issues/163297
 [ ] Haptic feedback on context menu long-press
 [X] Fix breakpoints and show/hide sidebar animations
