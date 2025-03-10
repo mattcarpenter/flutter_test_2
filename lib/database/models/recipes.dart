@@ -29,8 +29,8 @@ class Recipes extends Table {
   // Timestamps stored as integers (e.g., Unix epoch milliseconds)
   IntColumn get createdAt => integer().nullable()();
   IntColumn get updatedAt => integer().nullable()();
-  TextColumn get ingredients => text().nullable()();
-  TextColumn get steps => text().nullable()();
+  TextColumn get ingredients => text().map(const IngredientListConverter()).nullable()();
+  TextColumn get steps => text().map(const StepListConverter()).nullable()();
   TextColumn get folderIds => text().nullable().map(StringListTypeConverter())();
 }
 

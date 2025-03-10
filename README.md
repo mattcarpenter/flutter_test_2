@@ -81,7 +81,11 @@ A new Flutter project.
   - [X] Reset Hosted supabase and PowerSync
   - [X] Regression test
   - [X] Delete folder in household owned by other does not work (RLS looks wrong)
-  - [ ] Implement Recipe Ingredients and steps (can we use JSON?)
+  - [ ] Re-collect requirements for ingredients and steps
+  - [ ] Come up with model for ingredients and steps
+  - [ ] Create classes and converters for ingredients and steps
+  - [ ] Create some repo methods for ingredients and steps
+  - [ ] Write tests for ingredients and steps related repo methods
   - [ ] Dummy recipe adder UI
   - [ ] Deletion of folders - what happens to descendants
   - [X] Implement sharing (backend only)
