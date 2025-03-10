@@ -68,38 +68,8 @@ CREATE TABLE public.recipes (
 
 CREATE INDEX IF NOT EXISTS recipes_user_idx
     ON public.recipes USING btree (user_id) TABLESPACE pg_default;
-CREATE INDEX IF NOT EXISTS recipes_folder_idx
-    ON public.recipes USING btree (folder_id) TABLESPACE pg_default;
 CREATE INDEX IF NOT EXISTS recipes_household_idx
     ON public.recipes USING btree (household_id) TABLESPACE pg_default;
-
--- 5. RECIPE FOLDER ASSIGNMENTS (Depends on recipes, recipe_folders, households, auth.users)
-CREATE TABLE public.recipe_folder_assignments (
-                                                  id uuid NOT NULL DEFAULT extensions.uuid_generate_v4(),
-                                                  recipe_id uuid NOT NULL,
-                                                  folder_id uuid NOT NULL,
-                                                  user_id uuid NOT NULL,
-                                                  household_id uuid,
-                                                  created_at bigint NULL,
-                                                  CONSTRAINT recipe_folder_assignments_pkey PRIMARY KEY (id),
-                                                  CONSTRAINT recipe_folder_assignments_recipe_id_fkey FOREIGN KEY (recipe_id)
-                                                      REFERENCES public.recipes (id) ON DELETE CASCADE,
-                                                  CONSTRAINT recipe_folder_assignments_folder_id_fkey FOREIGN KEY (folder_id)
-                                                      REFERENCES public.recipe_folders (id) ON DELETE CASCADE,
-                                                  CONSTRAINT recipe_folder_assignments_household_id_fkey FOREIGN KEY (household_id)
-                                                      REFERENCES public.households (id) ON DELETE CASCADE,
-                                                  CONSTRAINT recipe_folder_assignments_user_id_fkey FOREIGN KEY (user_id)
-                                                      REFERENCES auth.users (id) ON DELETE CASCADE
-) TABLESPACE pg_default;
-
-CREATE INDEX IF NOT EXISTS rfa_recipe_idx
-    ON public.recipe_folder_assignments (recipe_id) TABLESPACE pg_default;
-CREATE INDEX IF NOT EXISTS rfa_folder_idx
-    ON public.recipe_folder_assignments (folder_id) TABLESPACE pg_default;
-CREATE INDEX IF NOT EXISTS rfa_household_idx
-    ON public.recipe_folder_assignments (household_id) TABLESPACE pg_default;
-CREATE INDEX IF NOT EXISTS rfa_user_idx
-    ON public.recipe_folder_assignments (user_id) TABLESPACE pg_default;
 
 -- 6. RECIPE SHARES (Depends on recipes, households, auth.users)
 CREATE TABLE public.recipe_shares (
