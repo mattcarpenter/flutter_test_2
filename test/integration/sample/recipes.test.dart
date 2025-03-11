@@ -92,8 +92,6 @@ void main() async {
         );
 
         await Future.delayed(const Duration(seconds: 1));
-
-        await Future.delayed(const Duration(seconds: 1));
       });
 
       // After logout, the local DB should be cleared.
