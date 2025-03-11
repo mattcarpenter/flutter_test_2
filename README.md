@@ -86,7 +86,10 @@ A new Flutter project.
   - [X] Create classes and converters for ingredients and steps
   - [X] Create some repo methods for ingredients and steps
   - [X] Write tests for ingredients and steps related repo methods
-  - [ ] Dummy recipe adder UI
+  - [X] Initial dummy recipe adder UI
+  - [ ] Troubleshoot saving (black screen)
+  - [ ] Troubleshoot weird controlled input behavior
+  - [ ] Figure out how keyboard should dismiss; start new ADR and add to that
   - [ ] Deletion of folders - what happens to descendants
   - [X] Implement sharing (backend only)
 - [ ] Check in on status of scroll bug https://github.com/flutter/flutter/issues/163297
