@@ -9,6 +9,7 @@ import '../../../widgets/adaptive_pull_down/adaptive_pull_down.dart';
 import 'add_folder_modal.dart';
 import '../widgets/folder_list.dart';
 import '../widgets/recipe_list.dart';
+import 'add_recipe_modal.dart';
 
 class RecipesTab extends StatelessWidget {
   const RecipesTab({super.key});
@@ -58,7 +59,9 @@ class RecipesTab extends StatelessWidget {
             }
           ),
           AdaptiveMenuItem(
-            title: 'Add Recipe', icon: const Icon(CupertinoIcons.book), onTap: () {})
+            title: 'Add Recipe', icon: const Icon(CupertinoIcons.book), onTap: () {
+              showAddRecipeModal(context);
+          })
         ],
         child: const Icon(CupertinoIcons.add_circled),
       ),
