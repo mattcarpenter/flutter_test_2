@@ -84,8 +84,8 @@ A new Flutter project.
   - [X] Re-collect requirements for ingredients and steps
   - [X] Come up with model for ingredients and steps
   - [X] Create classes and converters for ingredients and steps
-  - [ ] Create some repo methods for ingredients and steps
-  - [ ] Write tests for ingredients and steps related repo methods
+  - [X] Create some repo methods for ingredients and steps
+  - [X] Write tests for ingredients and steps related repo methods
   - [ ] Dummy recipe adder UI
   - [ ] Deletion of folders - what happens to descendants
   - [X] Implement sharing (backend only)

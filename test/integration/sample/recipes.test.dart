@@ -409,6 +409,109 @@ void main() async {
       });
     });
 
+    testWidgets('Notifier createIngredientForRecipe and createStepForRecipe work', (tester) async {
+      // Create test user "owner"
+      await TestUserManager.createTestUser('owner');
+
+      await withTestUser('owner', () async {
+        final ownerId = Supabase.instance.client.auth.currentUser!.id;
+
+        // Create a recipe with empty ingredients and steps.
+        await container.read(recipeNotifierProvider.notifier).addRecipe(
+          title: "Test Update Recipe",
+          language: "en",
+          description: "Recipe for update test",
+          userId: ownerId,
+          createdAt: DateTime.now().millisecondsSinceEpoch,
+          updatedAt: DateTime.now().millisecondsSinceEpoch,
+          ingredients: [],
+          steps: [],
+        );
+
+        // Wait for the new recipe to appear.
+        await waitForProviderValue<List<RecipeWithFolders>>(
+          container,
+          recipeNotifierProvider,
+              (recipes) => recipes.any((r) => r.recipe.title == "Test Update Recipe"),
+        );
+
+        // Retrieve the newly created recipe's id.
+        final recipes = container.read(recipeNotifierProvider).value!;
+        final recipe = recipes.firstWhere((r) => r.recipe.title == "Test Update Recipe").recipe;
+
+        // ------------------------
+        // Test adding an ingredient
+        // ------------------------
+        final newIngredient = Ingredient(
+          type: "ingredient",
+          name: "Sugar",
+          note: "Granulated",
+          primaryAmount1Value: "2",
+          primaryAmount1Unit: "tbsp",
+          primaryAmount1Type: "volume",
+          // Leaving optional fields as null.
+          primaryAmount2Value: null,
+          primaryAmount2Unit: null,
+          primaryAmount2Type: null,
+          secondaryAmount1Value: null,
+          secondaryAmount1Unit: null,
+          secondaryAmount1Type: null,
+          secondaryAmount2Value: null,
+          secondaryAmount2Unit: null,
+          secondaryAmount2Type: null,
+        );
+
+        await container.read(recipeNotifierProvider.notifier).createIngredientForRecipe(
+          recipeId: recipe.id,
+          ingredient: newIngredient,
+        );
+
+        // Wait for the updated recipe to include the new ingredient.
+        await waitForProviderValue<List<RecipeWithFolders>>(
+          container,
+          recipeNotifierProvider,
+              (recipes) {
+            final updatedRecipe = recipes.firstWhere((r) => r.recipe.id == recipe.id).recipe;
+            return updatedRecipe.ingredients != null && updatedRecipe.ingredients!.isNotEmpty;
+          },
+        );
+
+        final updatedRecipeAfterIngredient = container.read(recipeNotifierProvider).value!
+            .firstWhere((r) => r.recipe.id == recipe.id).recipe;
+        expect(updatedRecipeAfterIngredient.ingredients, isNotEmpty);
+        expect(updatedRecipeAfterIngredient.ingredients!.first.name, equals("Sugar"));
+
+        // ------------------------
+        // Test adding a step
+        // ------------------------
+        final newStep = Step(
+          type: "step",
+          text: "Stir well.",
+          note: "Ensure sugar is fully dissolved.",
+          timerDurationSeconds: null,
+        );
+
+        await container.read(recipeNotifierProvider.notifier).createStepForRecipe(
+          recipeId: recipe.id,
+          step: newStep,
+        );
+
+        // Wait for the updated recipe to include the new step.
+        await waitForProviderValue<List<RecipeWithFolders>>(
+          container,
+          recipeNotifierProvider,
+              (recipes) {
+            final updatedRecipe = recipes.firstWhere((r) => r.recipe.id == recipe.id).recipe;
+            return updatedRecipe.steps != null && updatedRecipe.steps!.isNotEmpty;
+          },
+        );
+
+        final updatedRecipeAfterStep = container.read(recipeNotifierProvider).value!
+            .firstWhere((r) => r.recipe.id == recipe.id).recipe;
+        expect(updatedRecipeAfterStep.steps, isNotEmpty);
+        expect(updatedRecipeAfterStep.steps!.first.text, equals("Stir well."));
+      });
+    });
 
   });
 }

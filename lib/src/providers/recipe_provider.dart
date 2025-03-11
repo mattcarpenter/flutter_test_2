@@ -94,6 +94,58 @@ class RecipeNotifier extends StateNotifier<AsyncValue<List<RecipeWithFolders>>> 
   }) async {
     await _repository.removeFolderFromRecipe(recipeId: recipeId, folderId: folderId);
   }
+
+  // Batch update ingredients: Update the entire ingredients list for a recipe.
+  Future<void> updateIngredients({
+    required String recipeId,
+    required List<Ingredient> ingredients,
+  }) async {
+    try {
+      await _repository.updateIngredients(recipeId, ingredients);
+    } catch (e, stack) {
+      state = AsyncValue.error(e, stack);
+    }
+  }
+
+  // Batch update steps: Update the entire steps list for a recipe.
+  Future<void> updateSteps({
+    required String recipeId,
+    required List<Step> steps,
+  }) async {
+    try {
+      await _repository.updateSteps(recipeId, steps);
+    } catch (e, stack) {
+      state = AsyncValue.error(e, stack);
+    }
+  }
+
+  // Convenience: Create (append) a new ingredient to a recipe.
+  Future<void> createIngredientForRecipe({
+    required String recipeId,
+    required Ingredient ingredient,
+  }) async {
+    final currentRecipes = state.value;
+    if (currentRecipes == null) return;
+    final index = currentRecipes.indexWhere((r) => r.recipe.id == recipeId);
+    if (index == -1) return;
+    final currentIngredients = currentRecipes[index].recipe.ingredients ?? [];
+    final newIngredients = List<Ingredient>.from(currentIngredients)..add(ingredient);
+    await updateIngredients(recipeId: recipeId, ingredients: newIngredients);
+  }
+
+  // Convenience: Create (append) a new step to a recipe.
+  Future<void> createStepForRecipe({
+    required String recipeId,
+    required Step step,
+  }) async {
+    final currentRecipes = state.value;
+    if (currentRecipes == null) return;
+    final index = currentRecipes.indexWhere((r) => r.recipe.id == recipeId);
+    if (index == -1) return;
+    final currentSteps = currentRecipes[index].recipe.steps ?? [];
+    final newSteps = List<Step>.from(currentSteps)..add(step);
+    await updateSteps(recipeId: recipeId, steps: newSteps);
+  }
 }
 
 // Provider for the RecipeNotifier.

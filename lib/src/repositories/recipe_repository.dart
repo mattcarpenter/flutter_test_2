@@ -6,6 +6,8 @@ import 'package:drift/drift.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../database/converters.dart';
 import '../../database/database.dart';
+import '../../database/models/ingredients.dart';
+import '../../database/models/steps.dart';
 import '../../database/powersync.dart';
 import '../models/recipe_with_folders.dart';
 
@@ -67,6 +69,24 @@ class RecipeRepository {
       final updatedRecipe = recipe.copyWith(folderIds: Value(updatedFolderIds));
       await updateRecipe(updatedRecipe);
     }
+  }
+
+  // Batch update: Replace the entire ingredients package for a recipe.
+  Future<bool> updateIngredients(String recipeId, List<Ingredient> ingredients) async {
+    final recipe = await (_db.select(_db.recipes)
+      ..where((tbl) => tbl.id.equals(recipeId)))
+        .getSingle();
+    final updatedRecipe = recipe.copyWith(ingredients: Value(ingredients));
+    return updateRecipe(updatedRecipe);
+  }
+
+  // Batch update: Replace the entire steps package for a recipe.
+  Future<bool> updateSteps(String recipeId, List<Step> steps) async {
+    final recipe = await (_db.select(_db.recipes)
+      ..where((tbl) => tbl.id.equals(recipeId)))
+        .getSingle();
+    final updatedRecipe = recipe.copyWith(steps: Value(steps));
+    return updateRecipe(updatedRecipe);
   }
 
   // Watch recipes along with their folder details.
