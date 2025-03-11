@@ -4,6 +4,8 @@ import 'dart:async';
 import 'package:drift/drift.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../database/database.dart';
+import '../../database/models/ingredients.dart';
+import '../../database/models/steps.dart';
 import '../models/recipe_with_folders.dart';
 import '../repositories/recipe_repository.dart';
 
@@ -45,8 +47,8 @@ class RecipeNotifier extends StateNotifier<AsyncValue<List<RecipeWithFolders>>> 
     String? householdId,
     int? createdAt,
     int? updatedAt,
-    String? ingredients,
-    String? steps,
+    List<Ingredient>? ingredients,
+    List<Step>? steps,
     List<String>? folderIds,
   }) async {
     try {

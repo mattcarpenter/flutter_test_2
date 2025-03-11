@@ -1,5 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:recipe_app/database/models/ingredients.dart';
+import 'package:recipe_app/database/models/steps.dart';
 import 'package:recipe_app/src/models/recipe_with_folders.dart';
 import 'package:recipe_app/src/providers/recipe_folder_provider.dart';
 import 'package:recipe_app/src/providers/recipe_provider.dart';
@@ -35,13 +37,42 @@ void main() async {
     });
 
 
-    testWidgets('User sees their recipes after signing in again', (tester) async {
+    testWidgets('User sees their recipes with ingredients and steps after signing in again', (tester) async {
       // Create test user "owner"
       await TestUserManager.createTestUser('owner');
 
       // First session: Log in as "owner", add a recipe, and verify it's present.
       await withTestUser('owner', () async {
         final ownerId = Supabase.instance.client.auth.currentUser!.id;
+
+        // Create a test ingredient
+        final testIngredient = Ingredient(
+          type: "ingredient",
+          name: "Flour",
+          note: "All-purpose",
+          primaryAmount1Value: "1",
+          primaryAmount1Unit: "cup",
+          primaryAmount1Type: "volume",
+          primaryAmount2Value: null,
+          primaryAmount2Unit: null,
+          primaryAmount2Type: null,
+          secondaryAmount1Value: null,
+          secondaryAmount1Unit: null,
+          secondaryAmount1Type: null,
+          secondaryAmount2Value: null,
+          secondaryAmount2Unit: null,
+          secondaryAmount2Type: null,
+        );
+
+        // Create a test step
+        final testStep = Step(
+          type: "step",
+          text: "Mix the flour with water.",
+          note: "Use warm water for best results.",
+          timerDurationSeconds: null,
+        );
+
+        // Add the recipe with an ingredient and a step
         await container.read(recipeNotifierProvider.notifier).addRecipe(
           title: "Test Recipe",
           language: "en",
@@ -49,12 +80,19 @@ void main() async {
           userId: ownerId,
           createdAt: DateTime.now().millisecondsSinceEpoch,
           updatedAt: DateTime.now().millisecondsSinceEpoch,
+          ingredients: [testIngredient],  // Add ingredient
+          steps: [testStep],  // Add step
         );
+
+        // Wait for the recipe to be stored in the provider
         await waitForProviderValue<List<RecipeWithFolders>>(
           container,
           recipeNotifierProvider,
               (recipes) => recipes.any((r) => r.recipe.title == "Test Recipe"),
         );
+
+        await Future.delayed(const Duration(seconds: 1));
+
         await Future.delayed(const Duration(seconds: 1));
       });
 
@@ -65,12 +103,16 @@ void main() async {
             (recipes) => recipes.isEmpty,
       );
 
-      // Second session: Log in again as "owner" and ensure the recipe is restored.
+      // Second session: Log in again as "owner" and ensure the recipe (with ingredient & step) is restored.
       await withTestUser('owner', () async {
         await waitForProviderValue<List<RecipeWithFolders>>(
           container,
           recipeNotifierProvider,
-              (recipes) => recipes.any((r) => r.recipe.title == "Test Recipe"),
+              (recipes) => recipes.any((r) =>
+          r.recipe.title == "Test Recipe" &&
+              (r.recipe.ingredients?.isNotEmpty ?? false) &&
+              (r.recipe.steps?.isNotEmpty ?? false)
+          ),
         );
       });
     });

@@ -4,6 +4,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'package:drift/drift.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../database/converters.dart';
 import '../../database/database.dart';
 import '../../database/powersync.dart';
 import '../models/recipe_with_folders.dart';
@@ -132,8 +133,17 @@ class RecipeRepository {
             householdId: row.read<String?>('recipe_household_id'),
             createdAt: row.read<int?>('recipe_created_at'),
             updatedAt: row.read<int?>('recipe_updated_at'),
-            ingredients: row.read<String?>('recipe_ingredients'),
-            steps: row.read<String?>('recipe_steps'),
+
+            // Convert JSON String to List<Ingredient>
+            ingredients: row.read<String?>('recipe_ingredients') != null
+                ? const IngredientListConverter().fromSql(row.read<String>('recipe_ingredients'))
+                : [],
+
+            // Convert JSON String to List<Step>
+            steps: row.read<String?>('recipe_steps') != null
+                ? const StepListConverter().fromSql(row.read<String>('recipe_steps'))
+                : [],
+
             folderIds: List<String>.from(jsonDecode(row.read<String>('recipe_folder_ids'))),
           );
           recipeMap[recipeId] = RecipeWithFolders(recipe: recipe, folders: []);

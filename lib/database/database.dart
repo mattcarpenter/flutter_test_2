@@ -9,6 +9,9 @@ import 'models/household_members.dart';
 import 'models/households.dart';
 import 'models/recipe_shares.dart';
 
+import 'models/ingredients.dart';
+import 'models/steps.dart';
+
 import 'converters.dart';
 
 part 'database.g.dart';
