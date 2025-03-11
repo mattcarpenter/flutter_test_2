@@ -18,4 +18,18 @@ class Step {
 
   factory Step.fromJson(Map<String, dynamic> json) => _$StepFromJson(json);
   Map<String, dynamic> toJson() => _$StepToJson(this);
+
+  Step copyWith({
+    String? type,
+    String? text,
+    String? note,
+    int? timerDurationSeconds,
+  }) {
+    return Step(
+      type: type ?? this.type,
+      text: text ?? this.text,
+      note: note ?? this.note,
+      timerDurationSeconds: timerDurationSeconds ?? this.timerDurationSeconds,
+    );
+  }
 }

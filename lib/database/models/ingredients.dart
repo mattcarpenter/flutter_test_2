@@ -44,4 +44,40 @@ class Ingredient {
 
   factory Ingredient.fromJson(Map<String, dynamic> json) => _$IngredientFromJson(json);
   Map<String, dynamic> toJson() => _$IngredientToJson(this);
+
+  Ingredient copyWith({
+    String? type,
+    String? name,
+    String? note,
+    String? primaryAmount1Value,
+    String? primaryAmount1Unit,
+    String? primaryAmount1Type,
+    String? primaryAmount2Value,
+    String? primaryAmount2Unit,
+    String? primaryAmount2Type,
+    String? secondaryAmount1Value,
+    String? secondaryAmount1Unit,
+    String? secondaryAmount1Type,
+    String? secondaryAmount2Value,
+    String? secondaryAmount2Unit,
+    String? secondaryAmount2Type,
+  }) {
+    return Ingredient(
+      type: type ?? this.type,
+      name: name ?? this.name,
+      note: note ?? this.note,
+      primaryAmount1Value: primaryAmount1Value ?? this.primaryAmount1Value,
+      primaryAmount1Unit: primaryAmount1Unit ?? this.primaryAmount1Unit,
+      primaryAmount1Type: primaryAmount1Type ?? this.primaryAmount1Type,
+      primaryAmount2Value: primaryAmount2Value ?? this.primaryAmount2Value,
+      primaryAmount2Unit: primaryAmount2Unit ?? this.primaryAmount2Unit,
+      primaryAmount2Type: primaryAmount2Type ?? this.primaryAmount2Type,
+      secondaryAmount1Value: secondaryAmount1Value ?? this.secondaryAmount1Value,
+      secondaryAmount1Unit: secondaryAmount1Unit ?? this.secondaryAmount1Unit,
+      secondaryAmount1Type: secondaryAmount1Type ?? this.secondaryAmount1Type,
+      secondaryAmount2Value: secondaryAmount2Value ?? this.secondaryAmount2Value,
+      secondaryAmount2Unit: secondaryAmount2Unit ?? this.secondaryAmount2Unit,
+      secondaryAmount2Type: secondaryAmount2Type ?? this.secondaryAmount2Type,
+    );
+  }
 }

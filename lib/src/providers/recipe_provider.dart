@@ -146,6 +146,14 @@ class RecipeNotifier extends StateNotifier<AsyncValue<List<RecipeWithFolders>>> 
     final newSteps = List<Step>.from(currentSteps)..add(step);
     await updateSteps(recipeId: recipeId, steps: newSteps);
   }
+
+  Future<void> updateRecipe(RecipeEntry updatedRecipe) async {
+    try {
+      await _repository.updateRecipe(updatedRecipe);
+    } catch (e, stack) {
+      state = AsyncValue.error(e, stack);
+    }
+  }
 }
 
 // Provider for the RecipeNotifier.
