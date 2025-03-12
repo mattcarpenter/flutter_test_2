@@ -357,10 +357,38 @@ class RecipeEditorFormState extends ConsumerState<RecipeEditorForm> {
                 physics: const NeverScrollableScrollPhysics(),
                 clipBehavior: Clip.none,
                 proxyDecorator: (child, index, animation) {
-                  return Material(
-                    elevation: 4,
-                    borderRadius: BorderRadius.circular(8),
-                    color: Colors.transparent,
+                  // Use tweens to define the animation ranges
+                  final elevationTween = Tween<double>(begin: 0.0, end: 8.0);
+                  final scaleTween = Tween<double>(begin: 1.0, end: 1.05);
+                  final opacityTween = Tween<double>(begin: 1.0, end: 0.85);
+
+                  // Create a curved animation for more natural feel
+                  final curvedAnimation = CurvedAnimation(
+                    parent: animation,
+                    curve: Curves.easeInOut,
+                  );
+
+                  return AnimatedBuilder(
+                    animation: curvedAnimation,
+                    builder: (context, child) {
+                      final elevation = elevationTween.evaluate(curvedAnimation);
+                      final scale = scaleTween.evaluate(curvedAnimation);
+                      final opacity = opacityTween.evaluate(curvedAnimation);
+
+                      return Transform.scale(
+                        scale: scale,
+                        child: Opacity(
+                          opacity: opacity,
+                          child: Material(
+                            elevation: elevation,
+                            color: Colors.transparent,
+                            borderRadius: BorderRadius.circular(8),
+                            shadowColor: Colors.black.withOpacity(0.5),
+                            child: child,
+                          ),
+                        ),
+                      );
+                    },
                     child: child,
                   );
                 },
@@ -425,10 +453,38 @@ class RecipeEditorFormState extends ConsumerState<RecipeEditorForm> {
                 physics: const NeverScrollableScrollPhysics(),
                 clipBehavior: Clip.none,
                 proxyDecorator: (child, index, animation) {
-                  return Material(
-                    elevation: 4,
-                    borderRadius: BorderRadius.circular(8),
-                    color: Colors.transparent,
+                  // Use tweens to define the animation ranges
+                  final elevationTween = Tween<double>(begin: 0.0, end: 8.0);
+                  final scaleTween = Tween<double>(begin: 1.0, end: 1.05);
+                  final opacityTween = Tween<double>(begin: 1.0, end: 0.85);
+
+                  // Create a curved animation for more natural feel
+                  final curvedAnimation = CurvedAnimation(
+                    parent: animation,
+                    curve: Curves.easeInOut,
+                  );
+
+                  return AnimatedBuilder(
+                    animation: curvedAnimation,
+                    builder: (context, child) {
+                      final elevation = elevationTween.evaluate(curvedAnimation);
+                      final scale = scaleTween.evaluate(curvedAnimation);
+                      final opacity = opacityTween.evaluate(curvedAnimation);
+
+                      return Transform.scale(
+                        scale: scale,
+                        child: Opacity(
+                          opacity: opacity,
+                          child: Material(
+                            elevation: elevation,
+                            color: Colors.transparent,
+                            borderRadius: BorderRadius.circular(8),
+                            shadowColor: Colors.black.withOpacity(0.5),
+                            child: child,
+                          ),
+                        ),
+                      );
+                    },
                     child: child,
                   );
                 },
