@@ -331,6 +331,14 @@ class RecipeEditorFormState extends ConsumerState<RecipeEditorForm> {
               ReorderableListView.builder(
                 shrinkWrap: true,
                 physics: const NeverScrollableScrollPhysics(),
+                // Provide a custom proxyDecorator that returns a Material with zero elevation.
+                proxyDecorator: (child, index, animation) {
+                  return Material(
+                    elevation: 0,
+                    color: Colors.transparent,
+                    child: child,
+                  );
+                },
                 itemCount: _ingredients.length,
                 onReorder: _reorderIngredients,
                 itemBuilder: (context, index) {
@@ -353,7 +361,8 @@ class RecipeEditorFormState extends ConsumerState<RecipeEditorForm> {
                     },
                   );
                 },
-              ),
+              )
+            ,
             Padding(
               padding: const EdgeInsets.symmetric(vertical: 8.0),
               child: Row(
@@ -388,6 +397,13 @@ class RecipeEditorFormState extends ConsumerState<RecipeEditorForm> {
               ReorderableListView.builder(
                 shrinkWrap: true,
                 physics: const NeverScrollableScrollPhysics(),
+                proxyDecorator: (child, index, animation) {
+                  return Material(
+                    elevation: 0,
+                    color: Colors.transparent,
+                    child: child,
+                  );
+                },
                 itemCount: _steps.length,
                 onReorder: _reorderSteps,
                 itemBuilder: (context, index) {
@@ -409,7 +425,8 @@ class RecipeEditorFormState extends ConsumerState<RecipeEditorForm> {
                     },
                   );
                 },
-              ),
+              )
+            ,
             Padding(
               padding: const EdgeInsets.symmetric(vertical: 8.0),
               child: Row(
@@ -567,11 +584,9 @@ class _IngredientListItemState extends State<IngredientListItem> {
                 icon: const Icon(Icons.remove_circle_outline),
                 onPressed: widget.onRemove,
               ),
-              RepaintBoundary(
-                child: ReorderableDragStartListener(
-                  index: widget.index,
-                  child: const Icon(Icons.drag_handle),
-                ),
+              ReorderableDragStartListener(
+                index: widget.index,
+                child: const Icon(Icons.drag_handle),
               ),
             ],
           ),
@@ -626,11 +641,9 @@ class _IngredientListItemState extends State<IngredientListItem> {
               ),
             ),
           ),
-          RepaintBoundary(
-            child: ReorderableDragStartListener(
-              index: widget.index,
-              child: const Icon(Icons.drag_handle),
-            ),
+          ReorderableDragStartListener(
+            index: widget.index,
+            child: const Icon(Icons.drag_handle),
           ),
           const SizedBox(width: 8),
         ],
@@ -736,11 +749,9 @@ class _StepListItemState extends State<StepListItem> {
                 icon: const Icon(Icons.remove_circle_outline),
                 onPressed: widget.onRemove,
               ),
-              RepaintBoundary(
-                child: ReorderableDragStartListener(
-                  index: widget.index,
-                  child: const Icon(Icons.drag_handle),
-                ),
+              ReorderableDragStartListener(
+                index: widget.index,
+                child: const Icon(Icons.drag_handle),
               ),
             ],
           ),
@@ -790,11 +801,9 @@ class _StepListItemState extends State<StepListItem> {
               ),
             ),
           ),
-          RepaintBoundary(
-            child: ReorderableDragStartListener(
-              index: widget.index,
-              child: const Icon(Icons.drag_handle),
-            ),
+          ReorderableDragStartListener(
+            index: widget.index,
+            child: const Icon(Icons.drag_handle),
           ),
           const SizedBox(width: 8),
         ],
