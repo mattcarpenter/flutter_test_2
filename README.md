@@ -87,8 +87,10 @@ A new Flutter project.
   - [X] Create some repo methods for ingredients and steps
   - [X] Write tests for ingredients and steps related repo methods
   - [X] Initial dummy recipe adder UI
-  - [ ] Troubleshoot saving (black screen)
-  - [ ] Troubleshoot weird controlled input behavior
+  - [X] Troubleshoot saving (black screen)
+  - [X] Troubleshoot weird controlled input behavior
+  - [ ] Troubleshoot dragging behavior for ingredients and steps
+  - [ ] Ensure "lift" effect works and timing for long press is not too long
   - [ ] Figure out how keyboard should dismiss; start new ADR and add to that
   - [ ] Deletion of folders - what happens to descendants
   - [X] Implement sharing (backend only)

@@ -140,7 +140,6 @@ class RecipeEditorFormState extends ConsumerState<RecipeEditorForm> {
         await notifier.updateRecipe(updatedRecipe);
       }
 
-      // Optionally call a callback to notify the parent.
       if (widget.onSave != null) {
         widget.onSave!();
       }
@@ -331,7 +330,6 @@ class RecipeEditorFormState extends ConsumerState<RecipeEditorForm> {
               ReorderableListView.builder(
                 shrinkWrap: true,
                 physics: const NeverScrollableScrollPhysics(),
-                // Provide a custom proxyDecorator that returns a Material with zero elevation.
                 proxyDecorator: (child, index, animation) {
                   return Material(
                     elevation: 0,
@@ -361,8 +359,7 @@ class RecipeEditorFormState extends ConsumerState<RecipeEditorForm> {
                     },
                   );
                 },
-              )
-            ,
+              ),
             Padding(
               padding: const EdgeInsets.symmetric(vertical: 8.0),
               child: Row(
@@ -425,8 +422,7 @@ class RecipeEditorFormState extends ConsumerState<RecipeEditorForm> {
                     },
                   );
                 },
-              )
-            ,
+              ),
             Padding(
               padding: const EdgeInsets.symmetric(vertical: 8.0),
               child: Row(
@@ -551,8 +547,7 @@ class _IngredientListItemState extends State<IngredientListItem> {
 
   @override
   Widget build(BuildContext context) {
-    final backgroundColor =
-    _focusNode.hasFocus ? Colors.blue.shade50 : Colors.white;
+    final backgroundColor = _focusNode.hasFocus ? Colors.blue.shade50 : Colors.white;
 
     if (isSection) {
       return Container(
@@ -584,9 +579,17 @@ class _IngredientListItemState extends State<IngredientListItem> {
                 icon: const Icon(Icons.remove_circle_outline),
                 onPressed: widget.onRemove,
               ),
-              ReorderableDragStartListener(
-                index: widget.index,
-                child: const Icon(Icons.drag_handle),
+              GestureDetector(
+                onLongPressStart: (_) {
+                  FocusScope.of(context).unfocus();
+                },
+                child: SizedBox(
+                  width: 40,
+                  child: ReorderableDragStartListener(
+                    index: widget.index,
+                    child: const Icon(Icons.drag_handle),
+                  ),
+                ),
               ),
             ],
           ),
@@ -641,9 +644,17 @@ class _IngredientListItemState extends State<IngredientListItem> {
               ),
             ),
           ),
-          ReorderableDragStartListener(
-            index: widget.index,
-            child: const Icon(Icons.drag_handle),
+          GestureDetector(
+            onLongPressStart: (_) {
+              FocusScope.of(context).unfocus();
+            },
+            child: SizedBox(
+              width: 40,
+              child: ReorderableDragStartListener(
+                index: widget.index,
+                child: const Icon(Icons.drag_handle),
+              ),
+            ),
           ),
           const SizedBox(width: 8),
         ],
@@ -717,8 +728,7 @@ class _StepListItemState extends State<StepListItem> {
 
   @override
   Widget build(BuildContext context) {
-    final backgroundColor =
-    _focusNode.hasFocus ? Colors.blue.shade50 : Colors.white;
+    final backgroundColor = _focusNode.hasFocus ? Colors.blue.shade50 : Colors.white;
     if (isSection) {
       return Container(
         margin: const EdgeInsets.symmetric(vertical: 4.0),
@@ -749,9 +759,17 @@ class _StepListItemState extends State<StepListItem> {
                 icon: const Icon(Icons.remove_circle_outline),
                 onPressed: widget.onRemove,
               ),
-              ReorderableDragStartListener(
-                index: widget.index,
-                child: const Icon(Icons.drag_handle),
+              GestureDetector(
+                onLongPressStart: (_) {
+                  FocusScope.of(context).unfocus();
+                },
+                child: SizedBox(
+                  width: 40,
+                  child: ReorderableDragStartListener(
+                    index: widget.index,
+                    child: const Icon(Icons.drag_handle),
+                  ),
+                ),
               ),
             ],
           ),
@@ -801,9 +819,17 @@ class _StepListItemState extends State<StepListItem> {
               ),
             ),
           ),
-          ReorderableDragStartListener(
-            index: widget.index,
-            child: const Icon(Icons.drag_handle),
+          GestureDetector(
+            onLongPressStart: (_) {
+              FocusScope.of(context).unfocus();
+            },
+            child: SizedBox(
+              width: 40,
+              child: ReorderableDragStartListener(
+                index: widget.index,
+                child: const Icon(Icons.drag_handle),
+              ),
+            ),
           ),
           const SizedBox(width: 8),
         ],
