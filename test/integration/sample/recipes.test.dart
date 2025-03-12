@@ -47,6 +47,7 @@ void main() async {
 
         // Create a test ingredient
         final testIngredient = Ingredient(
+          id: "ingredient1",
           type: "ingredient",
           name: "Flour",
           note: "All-purpose",
@@ -66,6 +67,7 @@ void main() async {
 
         // Create a test step
         final testStep = Step(
+          id: "step1",
           type: "step",
           text: "Mix the flour with water.",
           note: "Use warm water for best results.",
@@ -443,6 +445,7 @@ void main() async {
         // Test adding an ingredient
         // ------------------------
         final newIngredient = Ingredient(
+          id: "ingredient1",
           type: "ingredient",
           name: "Sugar",
           note: "Granulated",
@@ -485,6 +488,7 @@ void main() async {
         // Test adding a step
         // ------------------------
         final newStep = Step(
+          id: "step1",
           type: "step",
           text: "Stir well.",
           note: "Ensure sugar is fully dissolved.",

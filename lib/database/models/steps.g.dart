@@ -7,6 +7,7 @@ part of 'steps.dart';
 // **************************************************************************
 
 Step _$StepFromJson(Map<String, dynamic> json) => Step(
+      id: json['id'] as String,
       type: json['type'] as String,
       text: json['text'] as String,
       note: json['note'] as String?,
@@ -14,6 +15,7 @@ Step _$StepFromJson(Map<String, dynamic> json) => Step(
     );
 
 Map<String, dynamic> _$StepToJson(Step instance) => <String, dynamic>{
+      'id': instance.id,
       'type': instance.type,
       'text': instance.text,
       'note': instance.note,

@@ -30,7 +30,7 @@ class _RecipeEditorFormState extends ConsumerState<RecipeEditorForm> {
   bool _isNewRecipe = false;
   bool _isInitialized = false;
 
-  // Controllers
+  // Controllers for recipe fields
   final _titleController = TextEditingController();
   final _descriptionController = TextEditingController();
   final _servingsController = TextEditingController();
@@ -43,9 +43,10 @@ class _RecipeEditorFormState extends ConsumerState<RecipeEditorForm> {
   List<Ingredient> _ingredients = [];
   List<Step> _steps = [];
 
-  // Focused field trackers
-  int? _focusedIngredientIndex;
-  int? _focusedStepIndex;
+  // Instead of tracking focus manually, we’ll pass an autoFocus flag based on new items.
+  // (When adding an item, we mark it to auto focus; once the field actually gains focus, its own FocusNode will control appearance.)
+  String? _autoFocusIngredientId;
+  String? _autoFocusStepId;
 
   @override
   void initState() {
@@ -71,7 +72,6 @@ class _RecipeEditorFormState extends ConsumerState<RecipeEditorForm> {
       _recipe = widget.initialRecipe!;
       _isNewRecipe = false;
 
-      // Initialize controllers with existing values
       _titleController.text = _recipe.title;
       _descriptionController.text = _recipe.description ?? '';
       _servingsController.text = _recipe.servings?.toString() ?? '';
@@ -80,17 +80,17 @@ class _RecipeEditorFormState extends ConsumerState<RecipeEditorForm> {
       _sourceController.text = _recipe.source ?? '';
       _notesController.text = _recipe.generalNotes ?? '';
 
-      // Initialize lists
-      _ingredients = _recipe.ingredients ?? [] as List<Ingredient>;
-      _steps = _recipe.steps ?? [] as List<Step>;
+      _ingredients = List<Ingredient>.from(_recipe.ingredients ?? []);
+      _steps = List<Step>.from(_recipe.steps ?? []);
     } else {
       // Creating a new recipe
-      final userId = supabase_flutter.Supabase.instance.client.auth.currentUser?.id ?? '';
+      final userId =
+          supabase_flutter.Supabase.instance.client.auth.currentUser?.id ?? '';
 
       _recipe = RecipeEntry(
         id: const Uuid().v4(),
         title: 'New Recipe',
-        language: 'en', // Default language
+        language: 'en',
         userId: userId,
         ingredients: [],
         steps: [],
@@ -100,7 +100,6 @@ class _RecipeEditorFormState extends ConsumerState<RecipeEditorForm> {
       _isNewRecipe = true;
       _titleController.text = _recipe.title;
 
-      // Create the recipe in the database immediately if autoSave is enabled
       if (widget.autoSave) {
         _createInitialRecipe();
       }
@@ -113,7 +112,6 @@ class _RecipeEditorFormState extends ConsumerState<RecipeEditorForm> {
 
   Future<void> _createInitialRecipe() async {
     if (!_isNewRecipe) return;
-
     try {
       final notifier = ref.read(recipeNotifierProvider.notifier);
       await notifier.addRecipe(
@@ -123,24 +121,18 @@ class _RecipeEditorFormState extends ConsumerState<RecipeEditorForm> {
         ingredients: _ingredients,
         steps: _steps,
       );
-
-      // After creation, we're no longer dealing with a "new" recipe
       setState(() {
         _isNewRecipe = false;
       });
     } catch (e) {
       debugPrint('Error creating initial recipe: $e');
-      // We'll allow the user to continue editing and try saving manually
     }
   }
 
   Future<void> _saveRecipe() async {
     if (!_isInitialized) return;
-
     try {
       final notifier = ref.read(recipeNotifierProvider.notifier);
-
-      // Update recipe with current values
       final updatedRecipe = _recipe.copyWith(
         title: _titleController.text,
         description: Value(_descriptionController.text.isEmpty ? null : _descriptionController.text),
@@ -172,7 +164,7 @@ class _RecipeEditorFormState extends ConsumerState<RecipeEditorForm> {
           _isNewRecipe = false;
         });
       } else {
-        await ref.read(recipeNotifierProvider.notifier).updateRecipe(updatedRecipe);
+        await notifier.updateRecipe(updatedRecipe);
       }
 
       if (widget.onSave != null) {
@@ -180,10 +172,8 @@ class _RecipeEditorFormState extends ConsumerState<RecipeEditorForm> {
       }
     } catch (e) {
       debugPrint('Error saving recipe: $e');
-      // Show error message
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Failed to save recipe: $e')),
-      );
+      ScaffoldMessenger.of(context)
+          .showSnackBar(SnackBar(content: Text('Failed to save recipe: $e')));
     }
   }
 
@@ -207,21 +197,21 @@ class _RecipeEditorFormState extends ConsumerState<RecipeEditorForm> {
     }
   }
 
-  // Add an ingredient to the list
+  // --- Ingredient operations ---
   void _addIngredient({bool isSection = false}) {
     final newIngredient = Ingredient(
+      id: const Uuid().v4(),
       type: isSection ? 'section' : 'ingredient',
       name: isSection ? 'New Section' : '',
       primaryAmount1Value: isSection ? null : '',
       primaryAmount1Unit: isSection ? null : 'g',
       primaryAmount1Type: isSection ? null : 'weight',
     );
-
     setState(() {
       _ingredients.add(newIngredient);
-      _focusedIngredientIndex = _ingredients.length - 1;
+      // Mark this new ingredient to auto focus.
+      _autoFocusIngredientId = newIngredient.id;
     });
-
     if (widget.autoSave && !_isNewRecipe) {
       ref.read(recipeNotifierProvider.notifier).updateIngredients(
         recipeId: _recipe.id,
@@ -230,13 +220,11 @@ class _RecipeEditorFormState extends ConsumerState<RecipeEditorForm> {
     }
   }
 
-  // Remove an ingredient from the list
-  void _removeIngredient(int index) {
+  void _removeIngredient(String id) {
     setState(() {
-      _ingredients.removeAt(index);
-      _focusedIngredientIndex = null;
+      _ingredients.removeWhere((ingredient) => ingredient.id == id);
+      if (_autoFocusIngredientId == id) _autoFocusIngredientId = null;
     });
-
     if (widget.autoSave && !_isNewRecipe) {
       ref.read(recipeNotifierProvider.notifier).updateIngredients(
         recipeId: _recipe.id,
@@ -245,12 +233,12 @@ class _RecipeEditorFormState extends ConsumerState<RecipeEditorForm> {
     }
   }
 
-  // Update an ingredient in the list
-  void _updateIngredient(int index, Ingredient updatedIngredient) {
+  void _updateIngredient(String id, Ingredient updatedIngredient) {
+    final index = _ingredients.indexWhere((ingredient) => ingredient.id == id);
+    if (index == -1) return;
     setState(() {
       _ingredients[index] = updatedIngredient;
     });
-
     if (widget.autoSave && !_isNewRecipe) {
       ref.read(recipeNotifierProvider.notifier).updateIngredients(
         recipeId: _recipe.id,
@@ -259,16 +247,12 @@ class _RecipeEditorFormState extends ConsumerState<RecipeEditorForm> {
     }
   }
 
-  // Reorder ingredients
   void _reorderIngredients(int oldIndex, int newIndex) {
     setState(() {
-      if (newIndex > oldIndex) {
-        newIndex -= 1;
-      }
+      if (newIndex > oldIndex) newIndex -= 1;
       final item = _ingredients.removeAt(oldIndex);
       _ingredients.insert(newIndex, item);
     });
-
     if (widget.autoSave && !_isNewRecipe) {
       ref.read(recipeNotifierProvider.notifier).updateIngredients(
         recipeId: _recipe.id,
@@ -277,18 +261,17 @@ class _RecipeEditorFormState extends ConsumerState<RecipeEditorForm> {
     }
   }
 
-  // Add a step to the list
+  // --- Step operations ---
   void _addStep({bool isSection = false}) {
     final newStep = Step(
+      id: const Uuid().v4(),
       type: isSection ? 'section' : 'step',
       text: isSection ? 'New Section' : '',
     );
-
     setState(() {
       _steps.add(newStep);
-      _focusedStepIndex = _steps.length - 1;
+      _autoFocusStepId = newStep.id;
     });
-
     if (widget.autoSave && !_isNewRecipe) {
       ref.read(recipeNotifierProvider.notifier).updateSteps(
         recipeId: _recipe.id,
@@ -297,13 +280,11 @@ class _RecipeEditorFormState extends ConsumerState<RecipeEditorForm> {
     }
   }
 
-  // Remove a step from the list
-  void _removeStep(int index) {
+  void _removeStep(String id) {
     setState(() {
-      _steps.removeAt(index);
-      _focusedStepIndex = null;
+      _steps.removeWhere((step) => step.id == id);
+      if (_autoFocusStepId == id) _autoFocusStepId = null;
     });
-
     if (widget.autoSave && !_isNewRecipe) {
       ref.read(recipeNotifierProvider.notifier).updateSteps(
         recipeId: _recipe.id,
@@ -312,12 +293,12 @@ class _RecipeEditorFormState extends ConsumerState<RecipeEditorForm> {
     }
   }
 
-  // Update a step in the list
-  void _updateStep(int index, Step updatedStep) {
+  void _updateStep(String id, Step updatedStep) {
+    final index = _steps.indexWhere((step) => step.id == id);
+    if (index == -1) return;
     setState(() {
       _steps[index] = updatedStep;
     });
-
     if (widget.autoSave && !_isNewRecipe) {
       ref.read(recipeNotifierProvider.notifier).updateSteps(
         recipeId: _recipe.id,
@@ -326,16 +307,12 @@ class _RecipeEditorFormState extends ConsumerState<RecipeEditorForm> {
     }
   }
 
-  // Reorder steps
   void _reorderSteps(int oldIndex, int newIndex) {
     setState(() {
-      if (newIndex > oldIndex) {
-        newIndex -= 1;
-      }
+      if (newIndex > oldIndex) newIndex -= 1;
       final item = _steps.removeAt(oldIndex);
       _steps.insert(newIndex, item);
     });
-
     if (widget.autoSave && !_isNewRecipe) {
       ref.read(recipeNotifierProvider.notifier).updateSteps(
         recipeId: _recipe.id,
@@ -349,7 +326,6 @@ class _RecipeEditorFormState extends ConsumerState<RecipeEditorForm> {
     if (!_isInitialized) {
       return const Center(child: CircularProgressIndicator());
     }
-
     return SingleChildScrollView(
       child: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -368,13 +344,10 @@ class _RecipeEditorFormState extends ConsumerState<RecipeEditorForm> {
               style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
               onChanged: _updateTitle,
               onEditingComplete: () {
-                if (!widget.autoSave) {
-                  _saveRecipe();
-                }
+                if (!widget.autoSave) _saveRecipe();
               },
             ),
             const SizedBox(height: 16),
-
             // Recipe Description
             CupertinoTextField(
               controller: _descriptionController,
@@ -387,17 +360,13 @@ class _RecipeEditorFormState extends ConsumerState<RecipeEditorForm> {
               maxLines: 3,
               onChanged: _updateDescription,
               onEditingComplete: () {
-                if (!widget.autoSave) {
-                  _saveRecipe();
-                }
+                if (!widget.autoSave) _saveRecipe();
               },
             ),
             const SizedBox(height: 16),
-
             // Recipe Details Row
             Row(
               children: [
-                // Servings
                 Expanded(
                   child: CupertinoTextField(
                     controller: _servingsController,
@@ -409,15 +378,11 @@ class _RecipeEditorFormState extends ConsumerState<RecipeEditorForm> {
                     ),
                     keyboardType: TextInputType.number,
                     onEditingComplete: () {
-                      if (!widget.autoSave) {
-                        _saveRecipe();
-                      }
+                      if (!widget.autoSave) _saveRecipe();
                     },
                   ),
                 ),
                 const SizedBox(width: 8),
-
-                // Prep Time
                 Expanded(
                   child: CupertinoTextField(
                     controller: _prepTimeController,
@@ -429,15 +394,11 @@ class _RecipeEditorFormState extends ConsumerState<RecipeEditorForm> {
                     ),
                     keyboardType: TextInputType.number,
                     onEditingComplete: () {
-                      if (!widget.autoSave) {
-                        _saveRecipe();
-                      }
+                      if (!widget.autoSave) _saveRecipe();
                     },
                   ),
                 ),
                 const SizedBox(width: 8),
-
-                // Cook Time
                 Expanded(
                   child: CupertinoTextField(
                     controller: _cookTimeController,
@@ -449,16 +410,13 @@ class _RecipeEditorFormState extends ConsumerState<RecipeEditorForm> {
                     ),
                     keyboardType: TextInputType.number,
                     onEditingComplete: () {
-                      if (!widget.autoSave) {
-                        _saveRecipe();
-                      }
+                      if (!widget.autoSave) _saveRecipe();
                     },
                   ),
                 ),
               ],
             ),
             const SizedBox(height: 16),
-
             // Source Field
             CupertinoTextField(
               controller: _sourceController,
@@ -469,21 +427,16 @@ class _RecipeEditorFormState extends ConsumerState<RecipeEditorForm> {
                 borderRadius: BorderRadius.circular(8),
               ),
               onEditingComplete: () {
-                if (!widget.autoSave) {
-                  _saveRecipe();
-                }
+                if (!widget.autoSave) _saveRecipe();
               },
             ),
             const SizedBox(height: 24),
-
             // Ingredients Section
             const Text(
               "Ingredients",
               style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 8),
-
-            // Ingredients List
             if (_ingredients.isEmpty)
               const Padding(
                 padding: EdgeInsets.all(16.0),
@@ -498,25 +451,26 @@ class _RecipeEditorFormState extends ConsumerState<RecipeEditorForm> {
                 itemBuilder: (context, index) {
                   final ingredient = _ingredients[index];
                   return IngredientListItem(
-                    key: ValueKey('ingredient_$index'),
-                    ingredient: ingredient,
+                    key: ValueKey(ingredient.id),
                     index: index,
-                    isFocused: _focusedIngredientIndex == index,
-                    onRemove: () => _removeIngredient(index),
-                    onUpdate: (updatedIngredient) => _updateIngredient(index, updatedIngredient),
-                    onAddNext: () {
-                      _addIngredient();
-                    },
-                    onFocus: (isFocused) {
-                      setState(() {
-                        _focusedIngredientIndex = isFocused ? index : null;
-                      });
+                    ingredient: ingredient,
+                    autoFocus: _autoFocusIngredientId == ingredient.id,
+                    onRemove: () => _removeIngredient(ingredient.id),
+                    onUpdate: (updatedIngredient) =>
+                        _updateIngredient(ingredient.id, updatedIngredient),
+                    onAddNext: _addIngredient,
+                    onFocus: (hasFocus) {
+                      // If focus is lost on an auto-focused item, clear the flag.
+                      if (!hasFocus &&
+                          _autoFocusIngredientId == ingredient.id) {
+                        setState(() {
+                          _autoFocusIngredientId = null;
+                        });
+                      }
                     },
                   );
                 },
               ),
-
-            // Add Ingredient/Section Buttons
             Padding(
               padding: const EdgeInsets.symmetric(vertical: 8.0),
               child: Row(
@@ -536,15 +490,12 @@ class _RecipeEditorFormState extends ConsumerState<RecipeEditorForm> {
               ),
             ),
             const SizedBox(height: 24),
-
             // Steps Section
             const Text(
               "Instructions",
               style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 8),
-
-            // Steps List
             if (_steps.isEmpty)
               const Padding(
                 padding: EdgeInsets.all(16.0),
@@ -559,25 +510,24 @@ class _RecipeEditorFormState extends ConsumerState<RecipeEditorForm> {
                 itemBuilder: (context, index) {
                   final step = _steps[index];
                   return StepListItem(
-                    key: ValueKey('step_$index'),
-                    step: step,
+                    key: ValueKey(step.id),
                     index: index,
-                    isFocused: _focusedStepIndex == index,
-                    onRemove: () => _removeStep(index),
-                    onUpdate: (updatedStep) => _updateStep(index, updatedStep),
-                    onAddNext: () {
-                      _addStep();
-                    },
-                    onFocus: (isFocused) {
-                      setState(() {
-                        _focusedStepIndex = isFocused ? index : null;
-                      });
+                    step: step,
+                    autoFocus: _autoFocusStepId == step.id,
+                    onRemove: () => _removeStep(step.id),
+                    onUpdate: (updatedStep) =>
+                        _updateStep(step.id, updatedStep),
+                    onAddNext: _addStep,
+                    onFocus: (hasFocus) {
+                      if (!hasFocus && _autoFocusStepId == step.id) {
+                        setState(() {
+                          _autoFocusStepId = null;
+                        });
+                      }
                     },
                   );
                 },
               ),
-
-            // Add Step/Section Buttons
             Padding(
               padding: const EdgeInsets.symmetric(vertical: 8.0),
               child: Row(
@@ -597,7 +547,6 @@ class _RecipeEditorFormState extends ConsumerState<RecipeEditorForm> {
               ),
             ),
             const SizedBox(height: 24),
-
             // Notes Field
             const Text(
               "Notes",
@@ -614,13 +563,9 @@ class _RecipeEditorFormState extends ConsumerState<RecipeEditorForm> {
               ),
               maxLines: 4,
               onEditingComplete: () {
-                if (!widget.autoSave) {
-                  _saveRecipe();
-                }
+                if (!widget.autoSave) _saveRecipe();
               },
             ),
-
-            // Save Button (only shown if not in autoSave mode)
             if (!widget.autoSave)
               Padding(
                 padding: const EdgeInsets.symmetric(vertical: 16.0),
@@ -636,11 +581,13 @@ class _RecipeEditorFormState extends ConsumerState<RecipeEditorForm> {
   }
 }
 
-// Widget for an Ingredient List Item
-class IngredientListItem extends StatelessWidget {
-  final Ingredient ingredient;
+// --------------------
+// Ingredient List Item
+// --------------------
+class IngredientListItem extends StatefulWidget {
   final int index;
-  final bool isFocused;
+  final Ingredient ingredient;
+  final bool autoFocus;
   final VoidCallback onRemove;
   final Function(Ingredient) onUpdate;
   final VoidCallback onAddNext;
@@ -648,9 +595,9 @@ class IngredientListItem extends StatelessWidget {
 
   const IngredientListItem({
     Key? key,
-    required this.ingredient,
     required this.index,
-    required this.isFocused,
+    required this.ingredient,
+    required this.autoFocus,
     required this.onRemove,
     required this.onUpdate,
     required this.onAddNext,
@@ -658,10 +605,61 @@ class IngredientListItem extends StatelessWidget {
   }) : super(key: key);
 
   @override
-  Widget build(BuildContext context) {
-    final isSection = ingredient.type == 'section';
+  _IngredientListItemState createState() => _IngredientListItemState();
+}
 
-    // For sections, just show a section title field
+class _IngredientListItemState extends State<IngredientListItem> {
+  late TextEditingController _nameController;
+  TextEditingController? _amountController;
+  late FocusNode _focusNode;
+
+  bool get isSection => widget.ingredient.type == 'section';
+
+  @override
+  void initState() {
+    super.initState();
+    _nameController = TextEditingController(text: widget.ingredient.name);
+    if (!isSection) {
+      _amountController = TextEditingController(text: widget.ingredient.primaryAmount1Value ?? '');
+    }
+    _focusNode = FocusNode();
+    _focusNode.addListener(() {
+      widget.onFocus(_focusNode.hasFocus);
+      setState(() {}); // Rebuild to update background color
+    });
+    // Auto-focus if flagged.
+    if (widget.autoFocus) {
+      _focusNode.requestFocus();
+    }
+  }
+
+  @override
+  void didUpdateWidget(covariant IngredientListItem oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.ingredient.name != widget.ingredient.name &&
+        _nameController.text != widget.ingredient.name) {
+      _nameController.text = widget.ingredient.name;
+    }
+    if (!isSection &&
+        oldWidget.ingredient.primaryAmount1Value != widget.ingredient.primaryAmount1Value) {
+      _amountController?.text = widget.ingredient.primaryAmount1Value ?? '';
+    }
+  }
+
+  @override
+  void dispose() {
+    _nameController.dispose();
+    _amountController?.dispose();
+    _focusNode.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    // Use actual focus state to determine background.
+    final backgroundColor =
+    _focusNode.hasFocus ? Colors.blue.shade50 : Colors.white;
+
     if (isSection) {
       return Container(
         margin: const EdgeInsets.symmetric(vertical: 4.0),
@@ -671,29 +669,33 @@ class IngredientListItem extends StatelessWidget {
         ),
         child: ListTile(
           leading: const Icon(Icons.segment),
-          title: TextField(
-            decoration: const InputDecoration(
-              hintText: 'Section name',
-              border: InputBorder.none,
+          title: Focus(
+            focusNode: _focusNode,
+            child: TextField(
+              decoration: const InputDecoration(
+                hintText: 'Section name',
+                border: InputBorder.none,
+              ),
+              controller: _nameController,
+              style: const TextStyle(fontWeight: FontWeight.bold),
+              onChanged: (value) {
+                widget.onUpdate(widget.ingredient.copyWith(name: value));
+              },
             ),
-            controller: TextEditingController(text: ingredient.name),
-            style: const TextStyle(fontWeight: FontWeight.bold),
-            onChanged: (value) {
-              onUpdate(ingredient.copyWith(name: value));
-            },
-            onTap: () => onFocus(true),
-            onEditingComplete: () => onFocus(false),
           ),
           trailing: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
               IconButton(
                 icon: const Icon(Icons.remove_circle_outline),
-                onPressed: onRemove,
+                onPressed: widget.onRemove,
               ),
-              ReorderableDragStartListener(
-                index: index,
-                child: const Icon(Icons.drag_handle),
+              // Use the actual index from widget.index in the drag handle.
+              RepaintBoundary(
+                child: ReorderableDragStartListener(
+                  index: widget.index,
+                  child: const Icon(Icons.drag_handle),
+                ),
               ),
             ],
           ),
@@ -701,27 +703,23 @@ class IngredientListItem extends StatelessWidget {
       );
     }
 
-    // For regular ingredients, show name and amount fields
     return Container(
       margin: const EdgeInsets.symmetric(vertical: 4.0),
       decoration: BoxDecoration(
-        color: isFocused ? Colors.blue.shade50 : Colors.white,
+        color: backgroundColor,
         border: Border.all(color: Colors.grey.shade300),
         borderRadius: BorderRadius.circular(8),
       ),
       child: Row(
         children: [
-          // Remove button
           IconButton(
             icon: const Icon(Icons.remove_circle_outline),
-            onPressed: onRemove,
+            onPressed: widget.onRemove,
           ),
-
-          // Amount field
           SizedBox(
             width: 70,
             child: TextField(
-              controller: TextEditingController(text: ingredient.primaryAmount1Value ?? ''),
+              controller: _amountController,
               decoration: const InputDecoration(
                 hintText: 'Amt',
                 border: InputBorder.none,
@@ -729,37 +727,34 @@ class IngredientListItem extends StatelessWidget {
               ),
               keyboardType: TextInputType.number,
               onChanged: (value) {
-                onUpdate(ingredient.copyWith(primaryAmount1Value: value));
+                widget.onUpdate(widget.ingredient.copyWith(primaryAmount1Value: value));
               },
-              onTap: () => onFocus(true),
             ),
           ),
-
-          // Unit (hardcoded to 'g' for now)
           const Text('g', style: TextStyle(color: Colors.grey)),
           const SizedBox(width: 8),
-
-          // Ingredient name field
           Expanded(
-            child: TextField(
-              controller: TextEditingController(text: ingredient.name),
-              decoration: const InputDecoration(
-                hintText: 'Ingredient name',
-                border: InputBorder.none,
+            child: Focus(
+              focusNode: _focusNode,
+              child: TextField(
+                controller: _nameController,
+                decoration: const InputDecoration(
+                  hintText: 'Ingredient name',
+                  border: InputBorder.none,
+                ),
+                onChanged: (value) {
+                  widget.onUpdate(widget.ingredient.copyWith(name: value));
+                },
+                textInputAction: TextInputAction.next,
+                onSubmitted: (_) => widget.onAddNext(),
               ),
-              onChanged: (value) {
-                onUpdate(ingredient.copyWith(name: value));
-              },
-              onTap: () => onFocus(true),
-              textInputAction: TextInputAction.next,
-              onSubmitted: (_) => onAddNext(),
             ),
           ),
-
-          // Drag handle
-          ReorderableDragStartListener(
-            index: index,
-            child: const Icon(Icons.drag_handle),
+          RepaintBoundary(
+            child: ReorderableDragStartListener(
+              index: widget.index,
+              child: const Icon(Icons.drag_handle),
+            ),
           ),
           const SizedBox(width: 8),
         ],
@@ -768,11 +763,13 @@ class IngredientListItem extends StatelessWidget {
   }
 }
 
-// Widget for a Step List Item
-class StepListItem extends StatelessWidget {
-  final Step step;
+// --------------------
+// Step List Item
+// --------------------
+class StepListItem extends StatefulWidget {
   final int index;
-  final bool isFocused;
+  final Step step;
+  final bool autoFocus;
   final VoidCallback onRemove;
   final Function(Step) onUpdate;
   final VoidCallback onAddNext;
@@ -780,9 +777,9 @@ class StepListItem extends StatelessWidget {
 
   const StepListItem({
     Key? key,
-    required this.step,
     required this.index,
-    required this.isFocused,
+    required this.step,
+    required this.autoFocus,
     required this.onRemove,
     required this.onUpdate,
     required this.onAddNext,
@@ -790,10 +787,49 @@ class StepListItem extends StatelessWidget {
   }) : super(key: key);
 
   @override
-  Widget build(BuildContext context) {
-    final isSection = step.type == 'section';
+  _StepListItemState createState() => _StepListItemState();
+}
 
-    // For sections, just show a section title field
+class _StepListItemState extends State<StepListItem> {
+  late TextEditingController _textController;
+  late FocusNode _focusNode;
+
+  bool get isSection => widget.step.type == 'section';
+
+  @override
+  void initState() {
+    super.initState();
+    _textController = TextEditingController(text: widget.step.text);
+    _focusNode = FocusNode();
+    _focusNode.addListener(() {
+      widget.onFocus(_focusNode.hasFocus);
+      setState(() {});
+    });
+    if (widget.autoFocus) {
+      _focusNode.requestFocus();
+    }
+  }
+
+  @override
+  void didUpdateWidget(covariant StepListItem oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.step.text != widget.step.text &&
+        _textController.text != widget.step.text) {
+      _textController.text = widget.step.text;
+    }
+  }
+
+  @override
+  void dispose() {
+    _textController.dispose();
+    _focusNode.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final backgroundColor =
+    _focusNode.hasFocus ? Colors.blue.shade50 : Colors.white;
     if (isSection) {
       return Container(
         margin: const EdgeInsets.symmetric(vertical: 4.0),
@@ -803,29 +839,32 @@ class StepListItem extends StatelessWidget {
         ),
         child: ListTile(
           leading: const Icon(Icons.segment),
-          title: TextField(
-            decoration: const InputDecoration(
-              hintText: 'Section name',
-              border: InputBorder.none,
+          title: Focus(
+            focusNode: _focusNode,
+            child: TextField(
+              decoration: const InputDecoration(
+                hintText: 'Section name',
+                border: InputBorder.none,
+              ),
+              controller: _textController,
+              style: const TextStyle(fontWeight: FontWeight.bold),
+              onChanged: (value) {
+                widget.onUpdate(widget.step.copyWith(text: value));
+              },
             ),
-            controller: TextEditingController(text: step.text),
-            style: const TextStyle(fontWeight: FontWeight.bold),
-            onChanged: (value) {
-              onUpdate(step.copyWith(text: value));
-            },
-            onTap: () => onFocus(true),
-            onEditingComplete: () => onFocus(false),
           ),
           trailing: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
               IconButton(
                 icon: const Icon(Icons.remove_circle_outline),
-                onPressed: onRemove,
+                onPressed: widget.onRemove,
               ),
-              ReorderableDragStartListener(
-                index: index,
-                child: const Icon(Icons.drag_handle),
+              RepaintBoundary(
+                child: ReorderableDragStartListener(
+                  index: widget.index,
+                  child: const Icon(Icons.drag_handle),
+                ),
               ),
             ],
           ),
@@ -833,66 +872,53 @@ class StepListItem extends StatelessWidget {
       );
     }
 
-    // For regular steps
     return Container(
       margin: const EdgeInsets.symmetric(vertical: 4.0),
       decoration: BoxDecoration(
-        color: isFocused ? Colors.blue.shade50 : Colors.white,
+        color: backgroundColor,
         border: Border.all(color: Colors.grey.shade300),
         borderRadius: BorderRadius.circular(8),
       ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Step number or remove button
           Container(
             width: 40,
             height: 40,
             alignment: Alignment.center,
-            child: isFocused
+            child: _focusNode.hasFocus
                 ? IconButton(
               icon: const Icon(Icons.remove_circle_outline, size: 20),
               padding: EdgeInsets.zero,
-              onPressed: onRemove,
+              onPressed: widget.onRemove,
             )
-                : Text(
-              '${index + 1}',
-              style: const TextStyle(
-                fontWeight: FontWeight.bold,
-                fontSize: 16,
-              ),
-            ),
+                : const SizedBox.shrink(),
           ),
-
-          // Step description field
           Expanded(
-            child: TextField(
-              controller: TextEditingController(text: step.text),
-              decoration: const InputDecoration(
-                hintText: 'Describe this step',
-                border: InputBorder.none,
-                contentPadding: EdgeInsets.symmetric(vertical: 12, horizontal: 8),
+            child: Focus(
+              focusNode: _focusNode,
+              child: TextField(
+                controller: _textController,
+                decoration: const InputDecoration(
+                  hintText: 'Describe this step',
+                  border: InputBorder.none,
+                  contentPadding: EdgeInsets.symmetric(vertical: 12, horizontal: 8),
+                ),
+                maxLines: null,
+                minLines: 2,
+                onChanged: (value) {
+                  widget.onUpdate(widget.step.copyWith(text: value));
+                },
+                textInputAction: TextInputAction.next,
+                onSubmitted: (_) => widget.onAddNext(),
               ),
-              maxLines: null,
-              minLines: 2,
-              onChanged: (value) {
-                onUpdate(step.copyWith(text: value));
-              },
-              onTap: () => onFocus(true),
-              textInputAction: TextInputAction.next,
-              onSubmitted: (_) => onAddNext(),
             ),
           ),
-
-          // Drag handle
-          Column(
-            children: [
-              const SizedBox(height: 12),
-              ReorderableDragStartListener(
-                index: index,
-                child: const Icon(Icons.drag_handle),
-              ),
-            ],
+          RepaintBoundary(
+            child: ReorderableDragStartListener(
+              index: widget.index,
+              child: const Icon(Icons.drag_handle),
+            ),
           ),
           const SizedBox(width: 8),
         ],

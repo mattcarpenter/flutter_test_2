@@ -4,6 +4,7 @@ part 'ingredients.g.dart';
 
 @JsonSerializable()
 class Ingredient {
+  final String id;
   final String type; // "ingredient" or "section"
   final String name;
   final String? note;
@@ -25,6 +26,7 @@ class Ingredient {
   final String? secondaryAmount2Type;
 
   Ingredient({
+    required this.id,
     required this.type,
     required this.name,
     this.note,
@@ -46,6 +48,7 @@ class Ingredient {
   Map<String, dynamic> toJson() => _$IngredientToJson(this);
 
   Ingredient copyWith({
+    String? id,
     String? type,
     String? name,
     String? note,
@@ -63,6 +66,7 @@ class Ingredient {
     String? secondaryAmount2Type,
   }) {
     return Ingredient(
+      id: id ?? this.id,
       type: type ?? this.type,
       name: name ?? this.name,
       note: note ?? this.note,
