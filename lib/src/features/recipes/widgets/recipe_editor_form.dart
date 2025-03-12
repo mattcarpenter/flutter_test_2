@@ -12,20 +12,18 @@ import '../../../providers/recipe_provider.dart';
 class RecipeEditorForm extends ConsumerStatefulWidget {
   final RecipeEntry? initialRecipe; // Null for new recipe, non-null for editing
   final VoidCallback? onSave;
-  final bool autoSave;
 
   const RecipeEditorForm({
     Key? key,
     this.initialRecipe,
     this.onSave,
-    this.autoSave = true,
   }) : super(key: key);
 
   @override
-  ConsumerState<RecipeEditorForm> createState() => _RecipeEditorFormState();
+  ConsumerState<RecipeEditorForm> createState() => RecipeEditorFormState();
 }
 
-class _RecipeEditorFormState extends ConsumerState<RecipeEditorForm> {
+class RecipeEditorFormState extends ConsumerState<RecipeEditorForm> {
   late RecipeEntry _recipe;
   bool _isNewRecipe = false;
   bool _isInitialized = false;
@@ -39,12 +37,11 @@ class _RecipeEditorFormState extends ConsumerState<RecipeEditorForm> {
   final _sourceController = TextEditingController();
   final _notesController = TextEditingController();
 
-  // State for editable lists
+  // Local state for editable lists
   List<Ingredient> _ingredients = [];
   List<Step> _steps = [];
 
-  // Instead of tracking focus manually, we’ll pass an autoFocus flag based on new items.
-  // (When adding an item, we mark it to auto focus; once the field actually gains focus, its own FocusNode will control appearance.)
+  // Flags for auto-focusing new items
   String? _autoFocusIngredientId;
   String? _autoFocusStepId;
 
@@ -68,7 +65,7 @@ class _RecipeEditorFormState extends ConsumerState<RecipeEditorForm> {
 
   void _initializeRecipe() {
     if (widget.initialRecipe != null) {
-      // Editing an existing recipe
+      // Update scenario: pre-populate fields with existing data.
       _recipe = widget.initialRecipe!;
       _isNewRecipe = false;
 
@@ -83,10 +80,8 @@ class _RecipeEditorFormState extends ConsumerState<RecipeEditorForm> {
       _ingredients = List<Ingredient>.from(_recipe.ingredients ?? []);
       _steps = List<Step>.from(_recipe.steps ?? []);
     } else {
-      // Creating a new recipe
-      final userId =
-          supabase_flutter.Supabase.instance.client.auth.currentUser?.id ?? '';
-
+      // New recipe: set up initial local state but do not commit to DB yet.
+      final userId = supabase_flutter.Supabase.instance.client.auth.currentUser?.id ?? '';
       _recipe = RecipeEntry(
         id: const Uuid().v4(),
         title: 'New Recipe',
@@ -96,13 +91,8 @@ class _RecipeEditorFormState extends ConsumerState<RecipeEditorForm> {
         steps: [],
         folderIds: [],
       );
-
       _isNewRecipe = true;
       _titleController.text = _recipe.title;
-
-      if (widget.autoSave) {
-        _createInitialRecipe();
-      }
     }
 
     setState(() {
@@ -110,42 +100,25 @@ class _RecipeEditorFormState extends ConsumerState<RecipeEditorForm> {
     });
   }
 
-  Future<void> _createInitialRecipe() async {
-    if (!_isNewRecipe) return;
-    try {
-      final notifier = ref.read(recipeNotifierProvider.notifier);
-      await notifier.addRecipe(
-        title: _recipe.title,
-        language: _recipe.language,
-        userId: _recipe.userId,
-        ingredients: _ingredients,
-        steps: _steps,
-      );
-      setState(() {
-        _isNewRecipe = false;
-      });
-    } catch (e) {
-      debugPrint('Error creating initial recipe: $e');
-    }
-  }
-
-  Future<void> _saveRecipe() async {
+  Future<void> saveRecipe() async {
     if (!_isInitialized) return;
+
+    // Update the local recipe copy with the current field values.
+    final updatedRecipe = _recipe.copyWith(
+      title: _titleController.text,
+      description: Value(_descriptionController.text.isEmpty ? null : _descriptionController.text),
+      servings: Value(int.tryParse(_servingsController.text)),
+      prepTime: Value(int.tryParse(_prepTimeController.text)),
+      cookTime: Value(int.tryParse(_cookTimeController.text)),
+      source: Value(_sourceController.text.isEmpty ? null : _sourceController.text),
+      generalNotes: Value(_notesController.text.isEmpty ? null : _notesController.text),
+      ingredients: Value(_ingredients),
+      steps: Value(_steps),
+      updatedAt: Value(DateTime.now().millisecondsSinceEpoch),
+    );
+
     try {
       final notifier = ref.read(recipeNotifierProvider.notifier);
-      final updatedRecipe = _recipe.copyWith(
-        title: _titleController.text,
-        description: Value(_descriptionController.text.isEmpty ? null : _descriptionController.text),
-        servings: Value(int.tryParse(_servingsController.text)),
-        prepTime: Value(int.tryParse(_prepTimeController.text)),
-        cookTime: Value(int.tryParse(_cookTimeController.text)),
-        source: Value(_sourceController.text.isEmpty ? null : _sourceController.text),
-        generalNotes: Value(_notesController.text.isEmpty ? null : _notesController.text),
-        ingredients: Value(_ingredients),
-        steps: Value(_steps),
-        updatedAt: Value(DateTime.now().millisecondsSinceEpoch),
-      );
-
       if (_isNewRecipe) {
         await notifier.addRecipe(
           title: updatedRecipe.title,
@@ -167,6 +140,7 @@ class _RecipeEditorFormState extends ConsumerState<RecipeEditorForm> {
         await notifier.updateRecipe(updatedRecipe);
       }
 
+      // Optionally call a callback to notify the parent.
       if (widget.onSave != null) {
         widget.onSave!();
       }
@@ -177,27 +151,7 @@ class _RecipeEditorFormState extends ConsumerState<RecipeEditorForm> {
     }
   }
 
-  void _updateTitle(String value) {
-    if (widget.autoSave && !_isNewRecipe) {
-      final updatedRecipe = _recipe.copyWith(
-        title: value,
-        updatedAt: Value(DateTime.now().millisecondsSinceEpoch),
-      );
-      ref.read(recipeNotifierProvider.notifier).updateRecipe(updatedRecipe);
-    }
-  }
-
-  void _updateDescription(String value) {
-    if (widget.autoSave && !_isNewRecipe) {
-      final updatedRecipe = _recipe.copyWith(
-        description: Value(value.isEmpty ? null : value),
-        updatedAt: Value(DateTime.now().millisecondsSinceEpoch),
-      );
-      ref.read(recipeNotifierProvider.notifier).updateRecipe(updatedRecipe);
-    }
-  }
-
-  // --- Ingredient operations ---
+  // Ingredient operations (only update local state)
   void _addIngredient({bool isSection = false}) {
     final newIngredient = Ingredient(
       id: const Uuid().v4(),
@@ -209,15 +163,8 @@ class _RecipeEditorFormState extends ConsumerState<RecipeEditorForm> {
     );
     setState(() {
       _ingredients.add(newIngredient);
-      // Mark this new ingredient to auto focus.
       _autoFocusIngredientId = newIngredient.id;
     });
-    if (widget.autoSave && !_isNewRecipe) {
-      ref.read(recipeNotifierProvider.notifier).updateIngredients(
-        recipeId: _recipe.id,
-        ingredients: _ingredients,
-      );
-    }
   }
 
   void _removeIngredient(String id) {
@@ -225,12 +172,6 @@ class _RecipeEditorFormState extends ConsumerState<RecipeEditorForm> {
       _ingredients.removeWhere((ingredient) => ingredient.id == id);
       if (_autoFocusIngredientId == id) _autoFocusIngredientId = null;
     });
-    if (widget.autoSave && !_isNewRecipe) {
-      ref.read(recipeNotifierProvider.notifier).updateIngredients(
-        recipeId: _recipe.id,
-        ingredients: _ingredients,
-      );
-    }
   }
 
   void _updateIngredient(String id, Ingredient updatedIngredient) {
@@ -239,12 +180,6 @@ class _RecipeEditorFormState extends ConsumerState<RecipeEditorForm> {
     setState(() {
       _ingredients[index] = updatedIngredient;
     });
-    if (widget.autoSave && !_isNewRecipe) {
-      ref.read(recipeNotifierProvider.notifier).updateIngredients(
-        recipeId: _recipe.id,
-        ingredients: _ingredients,
-      );
-    }
   }
 
   void _reorderIngredients(int oldIndex, int newIndex) {
@@ -253,15 +188,9 @@ class _RecipeEditorFormState extends ConsumerState<RecipeEditorForm> {
       final item = _ingredients.removeAt(oldIndex);
       _ingredients.insert(newIndex, item);
     });
-    if (widget.autoSave && !_isNewRecipe) {
-      ref.read(recipeNotifierProvider.notifier).updateIngredients(
-        recipeId: _recipe.id,
-        ingredients: _ingredients,
-      );
-    }
   }
 
-  // --- Step operations ---
+  // Step operations (only update local state)
   void _addStep({bool isSection = false}) {
     final newStep = Step(
       id: const Uuid().v4(),
@@ -272,12 +201,6 @@ class _RecipeEditorFormState extends ConsumerState<RecipeEditorForm> {
       _steps.add(newStep);
       _autoFocusStepId = newStep.id;
     });
-    if (widget.autoSave && !_isNewRecipe) {
-      ref.read(recipeNotifierProvider.notifier).updateSteps(
-        recipeId: _recipe.id,
-        steps: _steps,
-      );
-    }
   }
 
   void _removeStep(String id) {
@@ -285,12 +208,6 @@ class _RecipeEditorFormState extends ConsumerState<RecipeEditorForm> {
       _steps.removeWhere((step) => step.id == id);
       if (_autoFocusStepId == id) _autoFocusStepId = null;
     });
-    if (widget.autoSave && !_isNewRecipe) {
-      ref.read(recipeNotifierProvider.notifier).updateSteps(
-        recipeId: _recipe.id,
-        steps: _steps,
-      );
-    }
   }
 
   void _updateStep(String id, Step updatedStep) {
@@ -299,12 +216,6 @@ class _RecipeEditorFormState extends ConsumerState<RecipeEditorForm> {
     setState(() {
       _steps[index] = updatedStep;
     });
-    if (widget.autoSave && !_isNewRecipe) {
-      ref.read(recipeNotifierProvider.notifier).updateSteps(
-        recipeId: _recipe.id,
-        steps: _steps,
-      );
-    }
   }
 
   void _reorderSteps(int oldIndex, int newIndex) {
@@ -313,12 +224,6 @@ class _RecipeEditorFormState extends ConsumerState<RecipeEditorForm> {
       final item = _steps.removeAt(oldIndex);
       _steps.insert(newIndex, item);
     });
-    if (widget.autoSave && !_isNewRecipe) {
-      ref.read(recipeNotifierProvider.notifier).updateSteps(
-        recipeId: _recipe.id,
-        steps: _steps,
-      );
-    }
   }
 
   @override
@@ -342,10 +247,6 @@ class _RecipeEditorFormState extends ConsumerState<RecipeEditorForm> {
                 borderRadius: BorderRadius.circular(8),
               ),
               style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-              onChanged: _updateTitle,
-              onEditingComplete: () {
-                if (!widget.autoSave) _saveRecipe();
-              },
             ),
             const SizedBox(height: 16),
             // Recipe Description
@@ -358,10 +259,6 @@ class _RecipeEditorFormState extends ConsumerState<RecipeEditorForm> {
                 borderRadius: BorderRadius.circular(8),
               ),
               maxLines: 3,
-              onChanged: _updateDescription,
-              onEditingComplete: () {
-                if (!widget.autoSave) _saveRecipe();
-              },
             ),
             const SizedBox(height: 16),
             // Recipe Details Row
@@ -377,9 +274,6 @@ class _RecipeEditorFormState extends ConsumerState<RecipeEditorForm> {
                       borderRadius: BorderRadius.circular(8),
                     ),
                     keyboardType: TextInputType.number,
-                    onEditingComplete: () {
-                      if (!widget.autoSave) _saveRecipe();
-                    },
                   ),
                 ),
                 const SizedBox(width: 8),
@@ -393,9 +287,6 @@ class _RecipeEditorFormState extends ConsumerState<RecipeEditorForm> {
                       borderRadius: BorderRadius.circular(8),
                     ),
                     keyboardType: TextInputType.number,
-                    onEditingComplete: () {
-                      if (!widget.autoSave) _saveRecipe();
-                    },
                   ),
                 ),
                 const SizedBox(width: 8),
@@ -409,9 +300,6 @@ class _RecipeEditorFormState extends ConsumerState<RecipeEditorForm> {
                       borderRadius: BorderRadius.circular(8),
                     ),
                     keyboardType: TextInputType.number,
-                    onEditingComplete: () {
-                      if (!widget.autoSave) _saveRecipe();
-                    },
                   ),
                 ),
               ],
@@ -426,9 +314,6 @@ class _RecipeEditorFormState extends ConsumerState<RecipeEditorForm> {
                 border: Border.all(color: Colors.grey.shade400),
                 borderRadius: BorderRadius.circular(8),
               ),
-              onEditingComplete: () {
-                if (!widget.autoSave) _saveRecipe();
-              },
             ),
             const SizedBox(height: 24),
             // Ingredients Section
@@ -460,9 +345,7 @@ class _RecipeEditorFormState extends ConsumerState<RecipeEditorForm> {
                         _updateIngredient(ingredient.id, updatedIngredient),
                     onAddNext: _addIngredient,
                     onFocus: (hasFocus) {
-                      // If focus is lost on an auto-focused item, clear the flag.
-                      if (!hasFocus &&
-                          _autoFocusIngredientId == ingredient.id) {
+                      if (!hasFocus && _autoFocusIngredientId == ingredient.id) {
                         setState(() {
                           _autoFocusIngredientId = null;
                         });
@@ -515,8 +398,7 @@ class _RecipeEditorFormState extends ConsumerState<RecipeEditorForm> {
                     step: step,
                     autoFocus: _autoFocusStepId == step.id,
                     onRemove: () => _removeStep(step.id),
-                    onUpdate: (updatedStep) =>
-                        _updateStep(step.id, updatedStep),
+                    onUpdate: (updatedStep) => _updateStep(step.id, updatedStep),
                     onAddNext: _addStep,
                     onFocus: (hasFocus) {
                       if (!hasFocus && _autoFocusStepId == step.id) {
@@ -562,18 +444,15 @@ class _RecipeEditorFormState extends ConsumerState<RecipeEditorForm> {
                 borderRadius: BorderRadius.circular(8),
               ),
               maxLines: 4,
-              onEditingComplete: () {
-                if (!widget.autoSave) _saveRecipe();
-              },
             ),
-            if (!widget.autoSave)
-              Padding(
-                padding: const EdgeInsets.symmetric(vertical: 16.0),
-                child: ElevatedButton(
-                  onPressed: _saveRecipe,
-                  child: const Text('Save Recipe'),
-                ),
+            // "Done" Button to commit changes
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: 16.0),
+              child: ElevatedButton(
+                onPressed: saveRecipe,
+                child: Text(_isNewRecipe ? 'Create Recipe' : 'Update Recipe'),
               ),
+            ),
           ],
         ),
       ),
@@ -625,9 +504,8 @@ class _IngredientListItemState extends State<IngredientListItem> {
     _focusNode = FocusNode();
     _focusNode.addListener(() {
       widget.onFocus(_focusNode.hasFocus);
-      setState(() {}); // Rebuild to update background color
+      setState(() {}); // rebuild to update background color
     });
-    // Auto-focus if flagged.
     if (widget.autoFocus) {
       _focusNode.requestFocus();
     }
@@ -656,7 +534,6 @@ class _IngredientListItemState extends State<IngredientListItem> {
 
   @override
   Widget build(BuildContext context) {
-    // Use actual focus state to determine background.
     final backgroundColor =
     _focusNode.hasFocus ? Colors.blue.shade50 : Colors.white;
 
@@ -690,7 +567,6 @@ class _IngredientListItemState extends State<IngredientListItem> {
                 icon: const Icon(Icons.remove_circle_outline),
                 onPressed: widget.onRemove,
               ),
-              // Use the actual index from widget.index in the drag handle.
               RepaintBoundary(
                 child: ReorderableDragStartListener(
                   index: widget.index,

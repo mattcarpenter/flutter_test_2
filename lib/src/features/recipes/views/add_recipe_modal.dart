@@ -1,13 +1,10 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:wolt_modal_sheet/wolt_modal_sheet.dart';
 
 import '../../../../database/database.dart';
-import '../../../widgets/wolt/button/wolt_elevated_button.dart';
-import '../../../widgets/wolt/button/wolt_modal_sheet_close_button.dart';
-import '../../../widgets/wolt/text/modal_sheet_title.dart';
 import '../widgets/recipe_editor_form.dart';
+import '../../../widgets/wolt/text/modal_sheet_title.dart';
 
 void showRecipeEditorModal(
     BuildContext context, {
@@ -21,12 +18,11 @@ void showRecipeEditorModal(
     context: context,
     pageListBuilder: (bottomSheetContext) => [
       RecipeEditorModalPage.build(
-        context: context,
+        context: bottomSheetContext, // using bottom sheet context
         recipe: recipe,
         pageTitle: pageTitle,
       ),
     ],
-    // Note: We're not using modalTypeBuilder or maxDialogWidth since they're not supported
   );
 }
 
@@ -43,48 +39,35 @@ class RecipeEditorModalPage {
         ? CupertinoTheme.of(context).barBackgroundColor
         : CupertinoTheme.of(context).scaffoldBackgroundColor;
 
+    // GlobalKey to access the RecipeEditorForm's state.
+    final formKey = GlobalKey<RecipeEditorFormState>();
+
     return WoltModalSheetPage(
       backgroundColor: backgroundColor,
-      trailingNavBarWidget: const WoltModalSheetCloseButton(), // Using trailingNavBarWidget instead of topBarLayerItems
+      // Leading (left) nav bar widget: Cancel button with horizontal padding.
+      leadingNavBarWidget: CupertinoButton(
+        padding: const EdgeInsets.symmetric(horizontal: 16.0),
+        onPressed: () {
+          Navigator.of(context).pop();
+        },
+        child: const Text('Cancel'),
+      ),
+      // Trailing (right) nav bar widget: Create/Update button with horizontal padding.
+      trailingNavBarWidget: CupertinoButton(
+        padding: const EdgeInsets.symmetric(horizontal: 16.0),
+        onPressed: () async {
+          await formKey.currentState?.saveRecipe();
+          Navigator.of(context).pop();
+        },
+        child: Text(recipe == null ? 'Create' : 'Update'),
+      ),
       pageTitle: ModalSheetTitle(pageTitle),
       child: Padding(
-        padding: const EdgeInsets.fromLTRB(16, 16, 16, 80),
+        padding: const EdgeInsets.fromLTRB(16, 16, 16, 16),
         child: RecipeEditorForm(
+          key: formKey,
           initialRecipe: recipe,
-          autoSave: true,
-          onSave: () {
-            Navigator.of(context).pop();
-          },
-        ),
-      ),
-      stickyActionBar: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            // Cancel button closes modal
-            Expanded(
-              child: WoltElevatedButton(
-                theme: WoltElevatedButtonTheme.secondary,
-                onPressed: () {
-                  Navigator.of(context).pop();
-                },
-                enabled: true,
-                child: const Text('Cancel'),
-              ),
-            ),
-            const SizedBox(width: 10),
-            // Done button also closes modal (changes are auto-saved)
-            Expanded(
-              child: WoltElevatedButton(
-                onPressed: () {
-                  Navigator.of(context).pop();
-                },
-                enabled: true,
-                child: const Text('Done'),
-              ),
-            ),
-          ],
+          // onSave is handled by the nav bar button.
         ),
       ),
     );
