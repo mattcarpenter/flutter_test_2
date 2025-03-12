@@ -10,7 +10,7 @@ import '../../../../database/models/steps.dart';
 import '../../../providers/recipe_provider.dart';
 
 class RecipeEditorForm extends ConsumerStatefulWidget {
-  final RecipeEntry? initialRecipe; // Null for new recipe, non-null for editing
+  final RecipeEntry? initialRecipe; // null for new recipe, non-null for editing
   final VoidCallback? onSave;
 
   const RecipeEditorForm({
@@ -65,10 +65,9 @@ class RecipeEditorFormState extends ConsumerState<RecipeEditorForm> {
 
   void _initializeRecipe() {
     if (widget.initialRecipe != null) {
-      // Update scenario: pre-populate fields with existing data.
+      // Update scenario: pre-populate fields.
       _recipe = widget.initialRecipe!;
       _isNewRecipe = false;
-
       _titleController.text = _recipe.title;
       _descriptionController.text = _recipe.description ?? '';
       _servingsController.text = _recipe.servings?.toString() ?? '';
@@ -76,11 +75,10 @@ class RecipeEditorFormState extends ConsumerState<RecipeEditorForm> {
       _cookTimeController.text = _recipe.cookTime?.toString() ?? '';
       _sourceController.text = _recipe.source ?? '';
       _notesController.text = _recipe.generalNotes ?? '';
-
       _ingredients = List<Ingredient>.from(_recipe.ingredients ?? []);
       _steps = List<Step>.from(_recipe.steps ?? []);
     } else {
-      // New recipe: set up initial local state but do not commit to DB yet.
+      // New recipe: initialize local state.
       final userId = supabase_flutter.Supabase.instance.client.auth.currentUser?.id ?? '';
       _recipe = RecipeEntry(
         id: const Uuid().v4(),
@@ -94,7 +92,6 @@ class RecipeEditorFormState extends ConsumerState<RecipeEditorForm> {
       _isNewRecipe = true;
       _titleController.text = _recipe.title;
     }
-
     setState(() {
       _isInitialized = true;
     });
@@ -102,8 +99,6 @@ class RecipeEditorFormState extends ConsumerState<RecipeEditorForm> {
 
   Future<void> saveRecipe() async {
     if (!_isInitialized) return;
-
-    // Update the local recipe copy with the current field values.
     final updatedRecipe = _recipe.copyWith(
       title: _titleController.text,
       description: Value(_descriptionController.text.isEmpty ? null : _descriptionController.text),
@@ -139,18 +134,15 @@ class RecipeEditorFormState extends ConsumerState<RecipeEditorForm> {
       } else {
         await notifier.updateRecipe(updatedRecipe);
       }
-
-      if (widget.onSave != null) {
-        widget.onSave!();
-      }
+      if (widget.onSave != null) widget.onSave!();
     } catch (e) {
       debugPrint('Error saving recipe: $e');
-      ScaffoldMessenger.of(context)
-          .showSnackBar(SnackBar(content: Text('Failed to save recipe: $e')));
+      ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Failed to save recipe: $e')));
     }
   }
 
-  // Ingredient operations (only update local state)
+  // Ingredient operations
   void _addIngredient({bool isSection = false}) {
     final newIngredient = Ingredient(
       id: const Uuid().v4(),
@@ -189,7 +181,7 @@ class RecipeEditorFormState extends ConsumerState<RecipeEditorForm> {
     });
   }
 
-  // Step operations (only update local state)
+  // Step operations
   void _addStep({bool isSection = false}) {
     final newStep = Step(
       id: const Uuid().v4(),
@@ -227,9 +219,7 @@ class RecipeEditorFormState extends ConsumerState<RecipeEditorForm> {
 
   @override
   Widget build(BuildContext context) {
-    if (!_isInitialized) {
-      return const Center(child: CircularProgressIndicator());
-    }
+    if (!_isInitialized) return const Center(child: CircularProgressIndicator());
     return SingleChildScrollView(
       child: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -330,9 +320,11 @@ class RecipeEditorFormState extends ConsumerState<RecipeEditorForm> {
               ReorderableListView.builder(
                 shrinkWrap: true,
                 physics: const NeverScrollableScrollPhysics(),
+                clipBehavior: Clip.none,
                 proxyDecorator: (child, index, animation) {
                   return Material(
-                    elevation: 0,
+                    elevation: 4,
+                    borderRadius: BorderRadius.circular(8),
                     color: Colors.transparent,
                     child: child,
                   );
@@ -394,9 +386,11 @@ class RecipeEditorFormState extends ConsumerState<RecipeEditorForm> {
               ReorderableListView.builder(
                 shrinkWrap: true,
                 physics: const NeverScrollableScrollPhysics(),
+                clipBehavior: Clip.none,
                 proxyDecorator: (child, index, animation) {
                   return Material(
-                    elevation: 0,
+                    elevation: 4,
+                    borderRadius: BorderRadius.circular(8),
                     color: Colors.transparent,
                     child: child,
                   );
@@ -458,7 +452,7 @@ class RecipeEditorFormState extends ConsumerState<RecipeEditorForm> {
               ),
               maxLines: 4,
             ),
-            // "Done" Button to commit changes
+            // Done Button to commit changes
             Padding(
               padding: const EdgeInsets.symmetric(vertical: 16.0),
               child: ElevatedButton(
@@ -517,7 +511,7 @@ class _IngredientListItemState extends State<IngredientListItem> {
     _focusNode = FocusNode();
     _focusNode.addListener(() {
       widget.onFocus(_focusNode.hasFocus);
-      setState(() {}); // rebuild to update background color
+      setState(() {}); // update background color
     });
     if (widget.autoFocus) {
       _focusNode.requestFocus();
@@ -548,7 +542,6 @@ class _IngredientListItemState extends State<IngredientListItem> {
   @override
   Widget build(BuildContext context) {
     final backgroundColor = _focusNode.hasFocus ? Colors.blue.shade50 : Colors.white;
-
     if (isSection) {
       return Container(
         margin: const EdgeInsets.symmetric(vertical: 4.0),
@@ -579,16 +572,11 @@ class _IngredientListItemState extends State<IngredientListItem> {
                 icon: const Icon(Icons.remove_circle_outline),
                 onPressed: widget.onRemove,
               ),
-              GestureDetector(
-                onLongPressStart: (_) {
-                  FocusScope.of(context).unfocus();
-                },
-                child: SizedBox(
-                  width: 40,
-                  child: ReorderableDragStartListener(
-                    index: widget.index,
-                    child: const Icon(Icons.drag_handle),
-                  ),
+              SizedBox(
+                width: 40,
+                child: ReorderableDragStartListener(
+                  index: widget.index,
+                  child: const Icon(Icons.drag_handle),
                 ),
               ),
             ],
@@ -596,7 +584,6 @@ class _IngredientListItemState extends State<IngredientListItem> {
         ),
       );
     }
-
     return Container(
       margin: const EdgeInsets.symmetric(vertical: 4.0),
       decoration: BoxDecoration(
@@ -644,16 +631,11 @@ class _IngredientListItemState extends State<IngredientListItem> {
               ),
             ),
           ),
-          GestureDetector(
-            onLongPressStart: (_) {
-              FocusScope.of(context).unfocus();
-            },
-            child: SizedBox(
-              width: 40,
-              child: ReorderableDragStartListener(
-                index: widget.index,
-                child: const Icon(Icons.drag_handle),
-              ),
+          SizedBox(
+            width: 40,
+            child: ReorderableDragStartListener(
+              index: widget.index,
+              child: const Icon(Icons.drag_handle),
             ),
           ),
           const SizedBox(width: 8),
@@ -759,16 +741,11 @@ class _StepListItemState extends State<StepListItem> {
                 icon: const Icon(Icons.remove_circle_outline),
                 onPressed: widget.onRemove,
               ),
-              GestureDetector(
-                onLongPressStart: (_) {
-                  FocusScope.of(context).unfocus();
-                },
-                child: SizedBox(
-                  width: 40,
-                  child: ReorderableDragStartListener(
-                    index: widget.index,
-                    child: const Icon(Icons.drag_handle),
-                  ),
+              SizedBox(
+                width: 40,
+                child: ReorderableDragStartListener(
+                  index: widget.index,
+                  child: const Icon(Icons.drag_handle),
                 ),
               ),
             ],
@@ -776,7 +753,6 @@ class _StepListItemState extends State<StepListItem> {
         ),
       );
     }
-
     return Container(
       margin: const EdgeInsets.symmetric(vertical: 4.0),
       decoration: BoxDecoration(
@@ -819,16 +795,11 @@ class _StepListItemState extends State<StepListItem> {
               ),
             ),
           ),
-          GestureDetector(
-            onLongPressStart: (_) {
-              FocusScope.of(context).unfocus();
-            },
-            child: SizedBox(
-              width: 40,
-              child: ReorderableDragStartListener(
-                index: widget.index,
-                child: const Icon(Icons.drag_handle),
-              ),
+          SizedBox(
+            width: 40,
+            child: ReorderableDragStartListener(
+              index: widget.index,
+              child: const Icon(Icons.drag_handle),
             ),
           ),
           const SizedBox(width: 8),
