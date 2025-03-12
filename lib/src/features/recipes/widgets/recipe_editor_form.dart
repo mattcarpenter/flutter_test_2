@@ -45,6 +45,10 @@ class RecipeEditorFormState extends ConsumerState<RecipeEditorForm> {
   String? _autoFocusIngredientId;
   String? _autoFocusStepId;
 
+  // Drag operation tracking
+  bool _isDragging = false;
+  FocusNode? _lastFocusedNode;
+
   @override
   void initState() {
     super.initState();
@@ -217,6 +221,37 @@ class RecipeEditorFormState extends ConsumerState<RecipeEditorForm> {
     });
   }
 
+  // Method to handle drag start
+  void _onDragStart() {
+    setState(() {
+      _isDragging = true;
+
+      // Store the currently focused node to restore focus after drag
+      if (FocusScope.of(context).hasFocus) {
+        _lastFocusedNode = FocusManager.instance.primaryFocus;
+        // Unfocus any text fields to prevent the leader-follower error
+        FocusScope.of(context).unfocus();
+      }
+    });
+  }
+
+  // Method to handle drag end
+  void _onDragEnd() {
+    setState(() {
+      _isDragging = false;
+
+      // Restore focus after a short delay to ensure the drag operation is complete
+      if (_lastFocusedNode != null) {
+        Future.delayed(const Duration(milliseconds: 100), () {
+          if (mounted && _lastFocusedNode != null && _lastFocusedNode!.canRequestFocus) {
+            _lastFocusedNode!.requestFocus();
+          }
+          _lastFocusedNode = null;
+        });
+      }
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     if (!_isInitialized) return const Center(child: CircularProgressIndicator());
@@ -329,6 +364,8 @@ class RecipeEditorFormState extends ConsumerState<RecipeEditorForm> {
                     child: child,
                   );
                 },
+                onReorderStart: (_) => _onDragStart(),
+                onReorderEnd: (_) => _onDragEnd(),
                 itemCount: _ingredients.length,
                 onReorder: _reorderIngredients,
                 itemBuilder: (context, index) {
@@ -337,7 +374,7 @@ class RecipeEditorFormState extends ConsumerState<RecipeEditorForm> {
                     key: ValueKey(ingredient.id),
                     index: index,
                     ingredient: ingredient,
-                    autoFocus: _autoFocusIngredientId == ingredient.id,
+                    autoFocus: _autoFocusIngredientId == ingredient.id && !_isDragging,
                     onRemove: () => _removeIngredient(ingredient.id),
                     onUpdate: (updatedIngredient) =>
                         _updateIngredient(ingredient.id, updatedIngredient),
@@ -395,6 +432,8 @@ class RecipeEditorFormState extends ConsumerState<RecipeEditorForm> {
                     child: child,
                   );
                 },
+                onReorderStart: (_) => _onDragStart(),
+                onReorderEnd: (_) => _onDragEnd(),
                 itemCount: _steps.length,
                 onReorder: _reorderSteps,
                 itemBuilder: (context, index) {
@@ -403,7 +442,7 @@ class RecipeEditorFormState extends ConsumerState<RecipeEditorForm> {
                     key: ValueKey(step.id),
                     index: index,
                     step: step,
-                    autoFocus: _autoFocusStepId == step.id,
+                    autoFocus: _autoFocusStepId == step.id && !_isDragging,
                     onRemove: () => _removeStep(step.id),
                     onUpdate: (updatedStep) => _updateStep(step.id, updatedStep),
                     onAddNext: _addStep,
@@ -528,6 +567,11 @@ class _IngredientListItemState extends State<IngredientListItem> {
     if (!isSection &&
         oldWidget.ingredient.primaryAmount1Value != widget.ingredient.primaryAmount1Value) {
       _amountController?.text = widget.ingredient.primaryAmount1Value ?? '';
+    }
+
+    // Handle autofocus change
+    if (!oldWidget.autoFocus && widget.autoFocus) {
+      _focusNode.requestFocus();
     }
   }
 
@@ -698,6 +742,11 @@ class _StepListItemState extends State<StepListItem> {
     if (oldWidget.step.text != widget.step.text &&
         _textController.text != widget.step.text) {
       _textController.text = widget.step.text;
+    }
+
+    // Handle autofocus change
+    if (!oldWidget.autoFocus && widget.autoFocus) {
+      _focusNode.requestFocus();
     }
   }
 
