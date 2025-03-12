@@ -240,15 +240,8 @@ class RecipeEditorFormState extends ConsumerState<RecipeEditorForm> {
     setState(() {
       _isDragging = false;
 
-      // Restore focus after a short delay to ensure the drag operation is complete
-      if (_lastFocusedNode != null) {
-        Future.delayed(const Duration(milliseconds: 100), () {
-          if (mounted && _lastFocusedNode != null && _lastFocusedNode!.canRequestFocus) {
-            _lastFocusedNode!.requestFocus();
-          }
-          _lastFocusedNode = null;
-        });
-      }
+      // Don't restore focus to prevent keyboard from showing up again
+      _lastFocusedNode = null;
     });
   }
 
@@ -358,7 +351,6 @@ class RecipeEditorFormState extends ConsumerState<RecipeEditorForm> {
                 clipBehavior: Clip.none,
                 proxyDecorator: (child, index, animation) {
                   // Use tweens to define the animation ranges
-                  final elevationTween = Tween<double>(begin: 0.0, end: 8.0);
                   final scaleTween = Tween<double>(begin: 1.0, end: 1.05);
                   final opacityTween = Tween<double>(begin: 1.0, end: 0.85);
 
@@ -371,7 +363,6 @@ class RecipeEditorFormState extends ConsumerState<RecipeEditorForm> {
                   return AnimatedBuilder(
                     animation: curvedAnimation,
                     builder: (context, child) {
-                      final elevation = elevationTween.evaluate(curvedAnimation);
                       final scale = scaleTween.evaluate(curvedAnimation);
                       final opacity = opacityTween.evaluate(curvedAnimation);
 
@@ -380,11 +371,22 @@ class RecipeEditorFormState extends ConsumerState<RecipeEditorForm> {
                         child: Opacity(
                           opacity: opacity,
                           child: Material(
-                            elevation: elevation,
-                            color: Colors.transparent,
+                            type: MaterialType.transparency,
                             borderRadius: BorderRadius.circular(8),
-                            shadowColor: Colors.black.withOpacity(0.5),
-                            child: child,
+                            child: DecoratedBox(
+                              decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(8),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: Colors.black.withOpacity(0.2 * animation.value),
+                                    blurRadius: 8.0 * animation.value,
+                                    spreadRadius: 2.0 * animation.value,
+                                    offset: Offset(0, 4.0 * animation.value),
+                                  ),
+                                ],
+                              ),
+                              child: child,
+                            ),
                           ),
                         ),
                       );
@@ -454,7 +456,6 @@ class RecipeEditorFormState extends ConsumerState<RecipeEditorForm> {
                 clipBehavior: Clip.none,
                 proxyDecorator: (child, index, animation) {
                   // Use tweens to define the animation ranges
-                  final elevationTween = Tween<double>(begin: 0.0, end: 8.0);
                   final scaleTween = Tween<double>(begin: 1.0, end: 1.05);
                   final opacityTween = Tween<double>(begin: 1.0, end: 0.85);
 
@@ -467,7 +468,6 @@ class RecipeEditorFormState extends ConsumerState<RecipeEditorForm> {
                   return AnimatedBuilder(
                     animation: curvedAnimation,
                     builder: (context, child) {
-                      final elevation = elevationTween.evaluate(curvedAnimation);
                       final scale = scaleTween.evaluate(curvedAnimation);
                       final opacity = opacityTween.evaluate(curvedAnimation);
 
@@ -476,11 +476,22 @@ class RecipeEditorFormState extends ConsumerState<RecipeEditorForm> {
                         child: Opacity(
                           opacity: opacity,
                           child: Material(
-                            elevation: elevation,
-                            color: Colors.transparent,
+                            type: MaterialType.transparency,
                             borderRadius: BorderRadius.circular(8),
-                            shadowColor: Colors.black.withOpacity(0.5),
-                            child: child,
+                            child: DecoratedBox(
+                              decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(8),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: Colors.black.withOpacity(0.2 * animation.value),
+                                    blurRadius: 8.0 * animation.value,
+                                    spreadRadius: 2.0 * animation.value,
+                                    offset: Offset(0, 4.0 * animation.value),
+                                  ),
+                                ],
+                              ),
+                              child: child,
+                            ),
                           ),
                         ),
                       );
