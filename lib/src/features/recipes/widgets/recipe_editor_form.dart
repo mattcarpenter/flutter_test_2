@@ -3,6 +3,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart' hide Step;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart' as supabase_flutter;
+import 'package:super_context_menu/super_context_menu.dart';
 import 'package:uuid/uuid.dart';
 import '../../../../database/database.dart';
 import '../../../../database/models/ingredients.dart';
@@ -695,61 +696,93 @@ class _IngredientListItemState extends State<IngredientListItem> {
         ),
       );
     }
-    return Container(
-      margin: const EdgeInsets.symmetric(vertical: 4.0),
-      decoration: BoxDecoration(
-        color: backgroundColor,
-        border: Border.all(color: Colors.grey.shade300),
-        borderRadius: BorderRadius.circular(8),
-      ),
-      child: Row(
-        children: [
-          IconButton(
-            icon: const Icon(Icons.remove_circle_outline),
-            onPressed: widget.onRemove,
-          ),
-          SizedBox(
-            width: 70,
-            child: TextField(
-              controller: _amountController,
-              decoration: const InputDecoration(
-                hintText: 'Amt',
-                border: InputBorder.none,
-                contentPadding: EdgeInsets.symmetric(horizontal: 8),
-              ),
-              keyboardType: TextInputType.number,
-              onChanged: (value) {
-                widget.onUpdate(widget.ingredient.copyWith(primaryAmount1Value: value));
+    return ContextMenuWidget(
+      menuProvider: (_) {
+        return Menu(
+          children: [
+            MenuAction(
+              title: 'Convert to section',
+              image: MenuImage.icon(Icons.segment),
+              callback: () {
+                // Convert the ingredient to a section
+                widget.onUpdate(widget.ingredient.copyWith(
+                  type: 'section',
+                  name: widget.ingredient.name.isEmpty ? 'New Section' : widget.ingredient.name,
+                  primaryAmount1Value: null,
+                  primaryAmount1Unit: null,
+                  primaryAmount1Type: null,
+                ));
               },
             ),
-          ),
-          const Text('g', style: TextStyle(color: Colors.grey)),
-          const SizedBox(width: 8),
-          Expanded(
-            child: Focus(
-              focusNode: _focusNode,
-              child: TextField(
-                controller: _nameController,
-                decoration: const InputDecoration(
-                  hintText: 'Ingredient name',
-                  border: InputBorder.none,
+          ],
+        );
+      },
+      child: Stack(
+        children: [
+          Container(
+            margin: const EdgeInsets.symmetric(vertical: 4.0),
+            decoration: BoxDecoration(
+              color: backgroundColor,
+              border: Border.all(color: Colors.grey.shade300),
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: Row(
+              children: [
+                IconButton(
+                  icon: const Icon(Icons.remove_circle_outline),
+                  onPressed: widget.onRemove,
                 ),
-                onChanged: (value) {
-                  widget.onUpdate(widget.ingredient.copyWith(name: value));
-                },
-                textInputAction: TextInputAction.next,
-                onSubmitted: (_) => widget.onAddNext(),
+                SizedBox(
+                  width: 70,
+                  child: TextField(
+                    controller: _amountController,
+                    decoration: const InputDecoration(
+                      hintText: 'Amt',
+                      border: InputBorder.none,
+                      contentPadding: EdgeInsets.symmetric(horizontal: 8),
+                    ),
+                    keyboardType: TextInputType.number,
+                    onChanged: (value) {
+                      widget.onUpdate(widget.ingredient.copyWith(primaryAmount1Value: value));
+                    },
+                  ),
+                ),
+                const Text('g', style: TextStyle(color: Colors.grey)),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Focus(
+                    focusNode: _focusNode,
+                    child: TextField(
+                      controller: _nameController,
+                      decoration: const InputDecoration(
+                        hintText: 'Ingredient name',
+                        border: InputBorder.none,
+                      ),
+                      onChanged: (value) {
+                        widget.onUpdate(widget.ingredient.copyWith(name: value));
+                      },
+                      textInputAction: TextInputAction.next,
+                      onSubmitted: (_) => widget.onAddNext(),
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 48), // Space for the drag handle
+              ],
+            ),
+          ),
+          // Position the drag handle on top so it's clickable
+          Positioned(
+            right: 0,
+            top: 0,
+            bottom: 0,
+            child: SizedBox(
+              width: 40,
+              child: ReorderableDragStartListener(
+                index: widget.index,
+                child: const Icon(Icons.drag_handle),
               ),
             ),
           ),
-          SizedBox(
-            width: 40,
-            child: ReorderableDragStartListener(
-              index: widget.index,
-              child: const Icon(Icons.drag_handle),
-            ),
-          ),
-          const SizedBox(width: 8),
         ],
       ),
     );
@@ -869,56 +902,85 @@ class _StepListItemState extends State<StepListItem> {
         ),
       );
     }
-    return Container(
-      margin: const EdgeInsets.symmetric(vertical: 4.0),
-      decoration: BoxDecoration(
-        color: backgroundColor,
-        border: Border.all(color: Colors.grey.shade300),
-        borderRadius: BorderRadius.circular(8),
-      ),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
+    return ContextMenuWidget(
+      menuProvider: (_) {
+        return Menu(
+          children: [
+            MenuAction(
+              title: 'Convert to section',
+              image: MenuImage.icon(Icons.segment),
+              callback: () {
+                // Convert the step to a section
+                widget.onUpdate(widget.step.copyWith(
+                    type: 'section',
+                    text: widget.step.text.isEmpty ? 'New Section' : widget.step.text
+                ));
+              },
+            ),
+          ],
+        );
+      },
+      child: Stack(
         children: [
           Container(
-            width: 40,
-            height: 40,
-            alignment: Alignment.center,
-            child: _focusNode.hasFocus
-                ? IconButton(
-              icon: const Icon(Icons.remove_circle_outline, size: 20),
-              padding: EdgeInsets.zero,
-              onPressed: widget.onRemove,
-            )
-                : const SizedBox.shrink(),
-          ),
-          Expanded(
-            child: Focus(
-              focusNode: _focusNode,
-              child: TextField(
-                controller: _textController,
-                decoration: const InputDecoration(
-                  hintText: 'Describe this step',
-                  border: InputBorder.none,
-                  contentPadding: EdgeInsets.symmetric(vertical: 12, horizontal: 8),
+            margin: const EdgeInsets.symmetric(vertical: 4.0),
+            decoration: BoxDecoration(
+              color: backgroundColor,
+              border: Border.all(color: Colors.grey.shade300),
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Container(
+                  width: 40,
+                  height: 40,
+                  alignment: Alignment.center,
+                  child: _focusNode.hasFocus
+                      ? IconButton(
+                    icon: const Icon(Icons.remove_circle_outline, size: 20),
+                    padding: EdgeInsets.zero,
+                    onPressed: widget.onRemove,
+                  )
+                      : const SizedBox.shrink(),
                 ),
-                maxLines: null,
-                minLines: 2,
-                onChanged: (value) {
-                  widget.onUpdate(widget.step.copyWith(text: value));
-                },
-                textInputAction: TextInputAction.next,
-                onSubmitted: (_) => widget.onAddNext(),
+                Expanded(
+                  child: Focus(
+                    focusNode: _focusNode,
+                    child: TextField(
+                      controller: _textController,
+                      decoration: const InputDecoration(
+                        hintText: 'Describe this step',
+                        border: InputBorder.none,
+                        contentPadding: EdgeInsets.symmetric(vertical: 12, horizontal: 8),
+                      ),
+                      maxLines: null,
+                      minLines: 2,
+                      onChanged: (value) {
+                        widget.onUpdate(widget.step.copyWith(text: value));
+                      },
+                      textInputAction: TextInputAction.next,
+                      onSubmitted: (_) => widget.onAddNext(),
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 48), // Space for the drag handle
+              ],
+            ),
+          ),
+          // Position the drag handle on top so it's clickable
+          Positioned(
+            right: 0,
+            top: 0,
+            bottom: 0,
+            child: SizedBox(
+              width: 40,
+              child: ReorderableDragStartListener(
+                index: widget.index,
+                child: const Icon(Icons.drag_handle),
               ),
             ),
           ),
-          SizedBox(
-            width: 40,
-            child: ReorderableDragStartListener(
-              index: widget.index,
-              child: const Icon(Icons.drag_handle),
-            ),
-          ),
-          const SizedBox(width: 8),
         ],
       ),
     );
