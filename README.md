@@ -93,8 +93,8 @@ A new Flutter project.
   - [X] Ensure "lift" effect works and timing for long press is not too long
   - [X] Animate fade-out of drop shadow
   - [X] Don't refocus in the text input after drag completes
-  - [ ] Implement context menu showing
-  - [ ] Implement convert to section
+  - [X] Implement context menu showing
+  - [X] Implement convert to section
   - [ ] Split apart widgets
   - [ ] Figure out how keyboard should dismiss; start new ADR and add to that
   - [ ] Deletion of folders - what happens to descendants

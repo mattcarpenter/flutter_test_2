@@ -372,7 +372,7 @@ class RecipeEditorFormState extends ConsumerState<RecipeEditorForm> {
                         child: Opacity(
                           opacity: opacity,
                           child: Material(
-                            type: MaterialType.transparency,
+                            //type: MaterialType.transparency,
                             borderRadius: BorderRadius.circular(8),
                             child: DecoratedBox(
                               decoration: BoxDecoration(
@@ -478,7 +478,7 @@ class RecipeEditorFormState extends ConsumerState<RecipeEditorForm> {
                         child: Opacity(
                           opacity: opacity,
                           child: Material(
-                            type: MaterialType.transparency,
+                            //type: MaterialType.transparency,
                             borderRadius: BorderRadius.circular(8),
                             child: DecoratedBox(
                               decoration: BoxDecoration(
@@ -670,7 +670,7 @@ class _IngredientListItemState extends State<IngredientListItem> {
 
   @override
   Widget build(BuildContext context) {
-    final backgroundColor = _focusNode.hasFocus ? Colors.blue.shade50 : Colors.white;
+    final backgroundColor = Colors.white;
     if (isSection) {
       return Container(
         decoration: BoxDecoration(
@@ -891,7 +891,7 @@ class _StepListItemState extends State<StepListItem> {
 
   @override
   Widget build(BuildContext context) {
-    final backgroundColor = _focusNode.hasFocus ? Colors.blue.shade50 : Colors.white;
+    final backgroundColor = Colors.white;
     if (isSection) {
       return Container(
         decoration: BoxDecoration(
