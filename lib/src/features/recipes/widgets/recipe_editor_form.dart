@@ -379,10 +379,9 @@ class RecipeEditorFormState extends ConsumerState<RecipeEditorForm> {
                                 borderRadius: BorderRadius.circular(8),
                                 boxShadow: [
                                   BoxShadow(
-                                    color: Colors.black.withOpacity(0.2 * animation.value),
-                                    blurRadius: 8.0 * animation.value,
+                                    color: Colors.black.withOpacity(0.09 * animation.value),
+                                    blurRadius: 9.0 * animation.value,
                                     spreadRadius: 2.0 * animation.value,
-                                    offset: Offset(0, 4.0 * animation.value),
                                   ),
                                 ],
                               ),
@@ -401,8 +400,10 @@ class RecipeEditorFormState extends ConsumerState<RecipeEditorForm> {
                 onReorder: _reorderIngredients,
                 itemBuilder: (context, index) {
                   final ingredient = _ingredients[index];
-                  return IngredientListItem(
-                    key: ValueKey(ingredient.id),
+                  return Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 4.0),
+                      key: ValueKey(ingredient.id),
+                      child: IngredientListItem(
                     index: index,
                     ingredient: ingredient,
                     autoFocus: _autoFocusIngredientId == ingredient.id && !_isDragging,
@@ -417,7 +418,7 @@ class RecipeEditorFormState extends ConsumerState<RecipeEditorForm> {
                         });
                       }
                     },
-                  );
+                  ));
                 },
               ),
             Padding(
@@ -484,10 +485,9 @@ class RecipeEditorFormState extends ConsumerState<RecipeEditorForm> {
                                 borderRadius: BorderRadius.circular(8),
                                 boxShadow: [
                                   BoxShadow(
-                                    color: Colors.black.withOpacity(0.2 * animation.value),
-                                    blurRadius: 8.0 * animation.value,
+                                    color: Colors.black.withOpacity(0.09 * animation.value),
+                                    blurRadius: 9.0 * animation.value,
                                     spreadRadius: 2.0 * animation.value,
-                                    offset: Offset(0, 4.0 * animation.value),
                                   ),
                                 ],
                               ),
@@ -506,8 +506,10 @@ class RecipeEditorFormState extends ConsumerState<RecipeEditorForm> {
                 onReorder: _reorderSteps,
                 itemBuilder: (context, index) {
                   final step = _steps[index];
-                  return StepListItem(
-                    key: ValueKey(step.id),
+                  return Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 4.0),
+                      key: ValueKey(step.id),
+                      child: StepListItem(
                     index: index,
                     step: step,
                     autoFocus: _autoFocusStepId == step.id && !_isDragging,
@@ -521,7 +523,7 @@ class RecipeEditorFormState extends ConsumerState<RecipeEditorForm> {
                         });
                       }
                     },
-                  );
+                  ));
                 },
               ),
             Padding(
@@ -671,7 +673,6 @@ class _IngredientListItemState extends State<IngredientListItem> {
     final backgroundColor = _focusNode.hasFocus ? Colors.blue.shade50 : Colors.white;
     if (isSection) {
       return Container(
-        margin: const EdgeInsets.symmetric(vertical: 4.0),
         decoration: BoxDecoration(
           color: Colors.grey.shade200,
           borderRadius: BorderRadius.circular(8),
@@ -736,7 +737,6 @@ class _IngredientListItemState extends State<IngredientListItem> {
       child: Stack(
         children: [
           Container(
-            margin: const EdgeInsets.symmetric(vertical: 4.0),
             decoration: BoxDecoration(
               color: backgroundColor,
               border: Border.all(color: Colors.grey.shade300),
@@ -894,7 +894,6 @@ class _StepListItemState extends State<StepListItem> {
     final backgroundColor = _focusNode.hasFocus ? Colors.blue.shade50 : Colors.white;
     if (isSection) {
       return Container(
-        margin: const EdgeInsets.symmetric(vertical: 4.0),
         decoration: BoxDecoration(
           color: Colors.grey.shade200,
           borderRadius: BorderRadius.circular(8),
@@ -956,7 +955,6 @@ class _StepListItemState extends State<StepListItem> {
       child: Stack(
         children: [
           Container(
-            margin: const EdgeInsets.symmetric(vertical: 4.0),
             decoration: BoxDecoration(
               color: backgroundColor,
               border: Border.all(color: Colors.grey.shade300),
