@@ -608,6 +608,8 @@ class _IngredientListItemState extends State<IngredientListItem> {
 
   bool get isSection => widget.ingredient.type == 'section';
 
+  final GlobalKey _dragHandleKey = GlobalKey();
+
   @override
   void initState() {
     super.initState();
@@ -649,6 +651,19 @@ class _IngredientListItemState extends State<IngredientListItem> {
     _amountController?.dispose();
     _focusNode.dispose();
     super.dispose();
+  }
+
+  bool customContextMenuIsAllowed(Offset location) {
+    final renderObject = _dragHandleKey.currentContext?.findRenderObject();
+    if (renderObject is RenderBox) {
+      final dragHandleRect = renderObject.localToGlobal(Offset.zero) & renderObject.size;
+      // If the location is within the drag handle, disallow the context menu.
+      if (dragHandleRect.contains(location)) {
+        return false;
+      }
+    }
+    // Otherwise, allow the context menu.
+    return true;
   }
 
   @override
@@ -697,6 +712,7 @@ class _IngredientListItemState extends State<IngredientListItem> {
       );
     }
     return ContextMenuWidget(
+      contextMenuIsAllowed: customContextMenuIsAllowed,
       menuProvider: (_) {
         return Menu(
           children: [
@@ -778,6 +794,7 @@ class _IngredientListItemState extends State<IngredientListItem> {
             child: SizedBox(
               width: 40,
               child: ReorderableDragStartListener(
+                key: _dragHandleKey,
                 index: widget.index,
                 child: const Icon(Icons.drag_handle),
               ),
@@ -822,6 +839,8 @@ class _StepListItemState extends State<StepListItem> {
 
   bool get isSection => widget.step.type == 'section';
 
+  final GlobalKey _dragHandleKey = GlobalKey();
+
   @override
   void initState() {
     super.initState();
@@ -855,6 +874,19 @@ class _StepListItemState extends State<StepListItem> {
     _textController.dispose();
     _focusNode.dispose();
     super.dispose();
+  }
+
+  bool customContextMenuIsAllowed(Offset location) {
+    final renderObject = _dragHandleKey.currentContext?.findRenderObject();
+    if (renderObject is RenderBox) {
+      final dragHandleRect = renderObject.localToGlobal(Offset.zero) & renderObject.size;
+      // If the location is within the drag handle, disallow the context menu.
+      if (dragHandleRect.contains(location)) {
+        return false;
+      }
+    }
+    // Otherwise, allow the context menu.
+    return true;
   }
 
   @override
@@ -903,6 +935,7 @@ class _StepListItemState extends State<StepListItem> {
       );
     }
     return ContextMenuWidget(
+      contextMenuIsAllowed: customContextMenuIsAllowed,
       menuProvider: (_) {
         return Menu(
           children: [
@@ -976,6 +1009,7 @@ class _StepListItemState extends State<StepListItem> {
             child: SizedBox(
               width: 40,
               child: ReorderableDragStartListener(
+                key: _dragHandleKey,
                 index: widget.index,
                 child: const Icon(Icons.drag_handle),
               ),
