@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:drift/drift.dart';
 
+import 'models/recipe_images.dart';
 import 'models/steps.dart';
 import 'models/ingredients.dart';
 
@@ -50,5 +51,21 @@ class IngredientListConverter extends TypeConverter<List<Ingredient>, String> {
   @override
   String toSql(List<Ingredient> value) {
     return json.encode(value.map((ingredient) => ingredient.toJson()).toList());
+  }
+}
+
+// JSON Converter for Recipe Images
+class RecipeImageListConverter extends TypeConverter<List<RecipeImage>, String> {
+  const RecipeImageListConverter();
+
+  @override
+  List<RecipeImage> fromSql(String fromDb) {
+    final List<dynamic> decoded = json.decode(fromDb);
+    return decoded.map((item) => RecipeImage.fromJson(item as Map<String, dynamic>)).toList();
+  }
+
+  @override
+  String toSql(List<RecipeImage> value) {
+    return json.encode(value.map((image) => image.toJson()).toList());
   }
 }

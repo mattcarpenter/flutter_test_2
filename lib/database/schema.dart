@@ -50,6 +50,7 @@ Schema schema = const Schema(([
     Column.text('ingredients'),
     Column.text('steps'),
     Column.text('folder_ids'),
+    Column.text('images'),
   ]/*, indexes: [...] */),
   Table(householdsTable, [
     // Household name.

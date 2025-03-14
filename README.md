@@ -95,8 +95,14 @@ A new Flutter project.
   - [X] Don't refocus in the text input after drag completes
   - [X] Implement context menu showing
   - [X] Implement convert to section
-  - [ ] Split apart widgets
-  - [ ] Figure out how keyboard should dismiss; start new ADR and add to that
+  - [X] Split apart widgets
+  - [ ] Design for albums
+  - [ ] Implement albums
+  - [ ] Ensure recipes are created under folders (maybe need a product backlog to give us a folder selector if done outside of folder)
+  - [ ] Implement rough recipe list under folders
+  - [ ] Remove dummy recipes from recipe root page
+  - [ ] Implement rough recipe detail page skeleton and routing
+  - [ ] Add recipe details to details page
   - [ ] Deletion of folders - what happens to descendants
   - [X] Implement sharing (backend only)
 - [ ] Check in on status of scroll bug https://github.com/flutter/flutter/issues/163297
