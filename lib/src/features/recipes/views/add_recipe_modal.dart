@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:wolt_modal_sheet/wolt_modal_sheet.dart';
 
 import '../../../../database/database.dart';
-import '../widgets/recipe_editor_form.dart';
+import '../widgets/recipe_editor_form/recipe_editor_form.dart';
 import '../../../widgets/wolt/text/modal_sheet_title.dart';
 
 void showRecipeEditorModal(
