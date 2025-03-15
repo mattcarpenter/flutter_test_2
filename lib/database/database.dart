@@ -8,15 +8,17 @@ import 'package:uuid/uuid.dart';
 import 'models/household_members.dart';
 import 'models/households.dart';
 import 'models/recipe_shares.dart';
+import 'models/upload_queues.dart';
 
 import 'models/ingredients.dart';
 import 'models/steps.dart';
+import 'models/recipe_images.dart';
 
 import 'converters.dart';
 
 part 'database.g.dart';
 
-@DriftDatabase(tables: [RecipeFolders, Recipes, RecipeShares, HouseholdMembers, Households])
+@DriftDatabase(tables: [RecipeFolders, Recipes, RecipeShares, HouseholdMembers, Households, UploadQueues])
 class AppDatabase extends _$AppDatabase {
   AppDatabase(PowerSyncDatabase db) : super(SqliteAsyncDriftConnection(db));
 

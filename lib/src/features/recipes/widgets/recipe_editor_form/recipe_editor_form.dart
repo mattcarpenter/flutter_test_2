@@ -2,6 +2,7 @@ import 'package:drift/drift.dart' hide Column;
 import 'package:flutter/material.dart' hide Step;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:recipe_app/database/models/steps.dart';
+import 'package:recipe_app/src/features/recipes/widgets/recipe_editor_form/sections/image_picker_section.dart';
 import 'package:supabase_flutter/supabase_flutter.dart' as supabase_flutter;
 import 'package:uuid/uuid.dart';
 
@@ -130,6 +131,7 @@ class RecipeEditorFormState extends ConsumerState<RecipeEditorForm> {
           generalNotes: updatedRecipe.generalNotes,
           ingredients: updatedRecipe.ingredients,
           steps: updatedRecipe.steps,
+          images: updatedRecipe.images,
         );
         setState(() {
           _isNewRecipe = false;
@@ -238,6 +240,17 @@ class RecipeEditorFormState extends ConsumerState<RecipeEditorForm> {
               prepTimeController: _prepTimeController,
               cookTimeController: _cookTimeController,
               sourceController: _sourceController,
+            ),
+
+            const SizedBox(height: 24),
+
+            ImagePickerSection(
+              images: _recipe.images ?? [],
+              onImagesUpdated: (newImages) {
+                setState(() {
+                  _recipe = _recipe.copyWith(images: Value(newImages));
+                });
+              },
             ),
 
             const SizedBox(height: 24),

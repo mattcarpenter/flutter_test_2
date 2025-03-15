@@ -8,9 +8,16 @@ const householdMembersTable = 'household_members';
 const recipeSharesTable = 'recipe_shares';
 const recipeFolderSharesTable = 'recipe_folder_shares';
 const recipeFolderAssignmentsTable = 'recipe_folder_assignments';
+const uploadQueuesTable = 'upload_queues';
 
-// Create a schema that includes your RecipeFolder table.
 Schema schema = const Schema(([
+  Table.localOnly(uploadQueuesTable, [
+    Column.text('file_name'),
+    Column.text('status'),
+    Column.integer('retry_count'),
+    Column.integer('last_try_timestamp'),
+    Column.text('recipe_id'),
+  ]),
   Table(recipeFoldersTable, [
     // Define a text column for the ID.
     //Column.text('folder_id'),

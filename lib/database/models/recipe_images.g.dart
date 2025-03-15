@@ -9,7 +9,7 @@ part of 'recipe_images.dart';
 RecipeImage _$RecipeImageFromJson(Map<String, dynamic> json) => RecipeImage(
       id: json['id'] as String,
       fileName: json['fileName'] as String,
-      localBasePath: json['localBasePath'] as String,
+      uploadStatus: json['uploadStatus'] as String,
       retryCount: (json['retryCount'] as num?)?.toInt(),
       isCover: json['isCover'] as bool?,
     );
@@ -18,7 +18,7 @@ Map<String, dynamic> _$RecipeImageToJson(RecipeImage instance) =>
     <String, dynamic>{
       'id': instance.id,
       'fileName': instance.fileName,
-      'localBasePath': instance.localBasePath,
+      'uploadStatus': instance.uploadStatus,
       'retryCount': instance.retryCount,
       'isCover': instance.isCover,
     };

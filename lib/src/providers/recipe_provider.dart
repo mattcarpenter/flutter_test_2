@@ -5,6 +5,7 @@ import 'package:drift/drift.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../database/database.dart';
 import '../../database/models/ingredients.dart';
+import '../../database/models/recipe_images.dart';
 import '../../database/models/steps.dart';
 import '../models/recipe_with_folders.dart';
 import '../repositories/recipe_repository.dart';
@@ -50,6 +51,7 @@ class RecipeNotifier extends StateNotifier<AsyncValue<List<RecipeWithFolders>>> 
     List<Ingredient>? ingredients,
     List<Step>? steps,
     List<String>? folderIds,
+    List<RecipeImage>? images,
   }) async {
     try {
       final recipeCompanion = RecipesCompanion.insert(
@@ -71,6 +73,7 @@ class RecipeNotifier extends StateNotifier<AsyncValue<List<RecipeWithFolders>>> 
         ingredients: Value(ingredients),
         steps: Value(steps),
         folderIds: Value(folderIds ?? []),
+        images: Value(images),
       );
 
       await _repository.addRecipe(recipeCompanion);

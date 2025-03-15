@@ -5,6 +5,7 @@
 list(APPEND FLUTTER_PLUGIN_LIST
   app_links
   bitsdojo_window_windows
+  file_selector_windows
   flutter_acrylic
   irondash_engine_context
   powersync_flutter_libs
