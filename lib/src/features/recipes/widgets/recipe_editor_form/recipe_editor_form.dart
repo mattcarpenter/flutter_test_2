@@ -143,14 +143,12 @@ class RecipeEditorFormState extends ConsumerState<RecipeEditorForm> {
         await notifier.updateRecipe(updatedRecipe);
       }
 
-      // Add any pending images to the upload queue
+      // Add to the upload queue. If they've already been uploaded it'll be a noop
       for (final image in updatedRecipe.images ?? []) {
-        if (image.uploadStatus == "pending") {
-          ref.read(uploadQueueManagerProvider).addToQueue(
-            fileName: image.fileName,
-            recipeId: updatedRecipe.id,
-          );
-        }
+        ref.read(uploadQueueManagerProvider).addToQueue(
+          fileName: image.fileName,
+          recipeId: updatedRecipe.id,
+        );
       }
 
       if (widget.onSave != null) widget.onSave!();

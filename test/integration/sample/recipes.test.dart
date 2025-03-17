@@ -6,6 +6,7 @@ import 'package:recipe_app/src/models/recipe_with_folders.dart';
 import 'package:recipe_app/src/providers/recipe_folder_provider.dart';
 import 'package:recipe_app/src/providers/recipe_provider.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:uuid/uuid.dart';
 import '../../utils/test_household_manager.dart';
 import '../../utils/test_recipe_folder_share_manager.dart';
 import '../../utils/test_user_manager.dart';
@@ -76,6 +77,7 @@ void main() async {
 
         // Add the recipe with an ingredient and a step
         await container.read(recipeNotifierProvider.notifier).addRecipe(
+          id: const Uuid().v4(),
           title: "Test Recipe",
           language: "en",
           description: "A delicious test recipe",
@@ -125,6 +127,7 @@ void main() async {
       await withTestUser('owner', () async {
         final ownerId = Supabase.instance.client.auth.currentUser!.id;
         await container.read(recipeNotifierProvider.notifier).addRecipe(
+          id: const Uuid().v4(),
           title: "Owner Recipe",
           language: "en",
           description: "A recipe by the owner",
@@ -185,6 +188,7 @@ void main() async {
         await Future.delayed(const Duration(seconds: 1));
 
         await container.read(recipeNotifierProvider.notifier).addRecipe(
+          id: const Uuid().v4(),
           title: "Pasta",
           language: "en",
           description: "Simple pasta recipe",
@@ -263,6 +267,7 @@ void main() async {
 
         // Create a recipe named "Shared Recipe".
         await container.read(recipeNotifierProvider.notifier).addRecipe(
+          id: const Uuid().v4(),
           title: "Shared Recipe",
           language: "en",
           description: "Recipe to be shared",
@@ -364,6 +369,7 @@ void main() async {
 
         // Add a recipe to the folder
         await container.read(recipeNotifierProvider.notifier).addRecipe(
+          id: const Uuid().v4(),
           title: "Other Member's Recipe",
           language: "en",
           description: "Recipe to be shared",
@@ -420,6 +426,7 @@ void main() async {
 
         // Create a recipe with empty ingredients and steps.
         await container.read(recipeNotifierProvider.notifier).addRecipe(
+          id: const Uuid().v4(),
           title: "Test Update Recipe",
           language: "en",
           description: "Recipe for update test",

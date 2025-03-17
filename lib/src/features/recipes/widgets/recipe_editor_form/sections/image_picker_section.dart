@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:flutter_image_compress/flutter_image_compress.dart';
 import 'package:uuid/uuid.dart';
 
 import '../../../../../../database/models/recipe_images.dart';
@@ -86,13 +87,13 @@ class _ImagePickerSectionState extends State<ImagePickerSection> {
     final XFile? image = await _picker.pickImage(source: source);
     if (image == null) return; // User canceled
 
-    final String savedFileName = await _saveImageLocally(File(image.path));
+    final File compressedImage = await _compressImage(File(image.path));
+
+    final String savedFileName = await _saveImageLocally(compressedImage);
 
     final newImage = RecipeImage(
       id: const Uuid().v4(),
       fileName: savedFileName, // Only store filename
-      uploadStatus: 'pending',
-      retryCount: 0
     );
 
     setState(() {
@@ -100,7 +101,27 @@ class _ImagePickerSectionState extends State<ImagePickerSection> {
     });
   }
 
-  /// Saves image to local storage and stores only the filename
+  /// Compress and resize the image before saving
+  Future<File> _compressImage(File file) async {
+    final directory = await getTemporaryDirectory();
+    final String targetPath = '${directory.path}/${const Uuid().v4()}.jpg';
+
+    final XFile? compressedXFile = await FlutterImageCompress.compressAndGetFile(
+      file.absolute.path,
+      targetPath,
+      quality: 90, // Adjust quality
+      minWidth: 1280, // Adjust based on your needs
+      minHeight: 1280,
+    );
+
+    if (compressedXFile == null) {
+      return file; // If compression fails, return original file
+    }
+
+    return File(compressedXFile.path); // Convert XFile to File
+  }
+
+  /// Saves the compressed image to local storage and stores only the filename
   Future<String> _saveImageLocally(File imageFile) async {
     final directory = await getApplicationDocumentsDirectory();
     final String newFileName = '${const Uuid().v4()}.jpg';
@@ -214,7 +235,10 @@ class _ImagePickerSectionState extends State<ImagePickerSection> {
                 future: widget.images[index].getFullPath(),
                 builder: (context, snapshot) {
                   if (!snapshot.hasData) {
-                    return const SizedBox(width: 80, height: 80, child: Center(child: CircularProgressIndicator()));
+                    return const SizedBox(
+                        width: 80,
+                        height: 80,
+                        child: Center(child: CircularProgressIndicator()));
                   }
                   return Stack(
                     children: [
@@ -240,7 +264,8 @@ class _ImagePickerSectionState extends State<ImagePickerSection> {
                               shape: BoxShape.circle,
                               color: Colors.red.withOpacity(0.7),
                             ),
-                            child: const Icon(Icons.close, size: 18, color: Colors.white),
+                            child: const Icon(Icons.close,
+                                size: 18, color: Colors.white),
                           ),
                         ),
                       ),
