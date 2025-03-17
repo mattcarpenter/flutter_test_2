@@ -32,6 +32,12 @@ class RecipeRepository {
     return _db.update(_db.recipes).replace(recipe);
   }
 
+  Future<RecipeEntry?> getRecipeById(String id) {
+    return (_db.select(_db.recipes)
+      ..where((tbl) => tbl.id.equals(id)))
+        .getSingleOrNull();
+  }
+
   // lib/repositories/recipe_repository.dart
   Future<bool> updateImageForRecipe({
     required String recipeId,

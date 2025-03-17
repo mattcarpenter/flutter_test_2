@@ -2,6 +2,7 @@ import 'dart:io';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:nanoid/nanoid.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter_image_compress/flutter_image_compress.dart';
@@ -92,7 +93,7 @@ class _ImagePickerSectionState extends State<ImagePickerSection> {
     final String savedFileName = await _saveImageLocally(compressedImage);
 
     final newImage = RecipeImage(
-      id: const Uuid().v4(),
+      id: nanoid(6),
       fileName: savedFileName, // Only store filename
     );
 

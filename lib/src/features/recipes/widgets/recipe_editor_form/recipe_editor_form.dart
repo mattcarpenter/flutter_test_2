@@ -10,6 +10,7 @@ import 'package:uuid/uuid.dart';
 import '../../../../../database/database.dart';
 import '../../../../../database/models/ingredients.dart';
 import '../../../../providers/recipe_provider.dart';
+import '../../../../repositories/recipe_repository.dart';
 import 'sections/ingredients_section.dart';
 import 'sections/recipe_metadata_section.dart';
 import 'sections/steps_section.dart';
@@ -104,6 +105,7 @@ class RecipeEditorFormState extends ConsumerState<RecipeEditorForm> {
 
   Future<void> saveRecipe() async {
     if (!_isInitialized) return;
+    // Build your updatedRecipe from form state.
     final updatedRecipe = _recipe.copyWith(
       title: _titleController.text,
       description: Value(_descriptionController.text.isEmpty ? null : _descriptionController.text),
@@ -140,11 +142,14 @@ class RecipeEditorFormState extends ConsumerState<RecipeEditorForm> {
           _isNewRecipe = false;
         });
       } else {
-        await notifier.updateRecipe(updatedRecipe);
+        // Merge with current DB state before saving, so that any publicUrls are preserved.
+        final mergedRecipe = await mergeRecipeImagesWithDb(updatedRecipe);
+        await notifier.updateRecipe(mergedRecipe);
       }
 
-      // Add to the upload queue. If they've already been uploaded it'll be a noop
+      // Add any pending images to the upload queue.
       for (final image in updatedRecipe.images ?? []) {
+        // Even if the image was updated by the processor, addToQueue should be a no-op if already uploaded.
         ref.read(uploadQueueManagerProvider).addToQueue(
           fileName: image.fileName,
           recipeId: updatedRecipe.id,
@@ -155,9 +160,11 @@ class RecipeEditorFormState extends ConsumerState<RecipeEditorForm> {
     } catch (e) {
       debugPrint('Error saving recipe: $e');
       ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Failed to save recipe: $e')));
+        SnackBar(content: Text('Failed to save recipe: $e')),
+      );
     }
   }
+
 
   // Ingredient operations
   void _addIngredient({bool isSection = false}) {
@@ -232,6 +239,37 @@ class RecipeEditorFormState extends ConsumerState<RecipeEditorForm> {
       final item = _steps.removeAt(oldIndex);
       _steps.insert(newIndex, item);
     });
+  }
+
+  Future<RecipeEntry> mergeRecipeImagesWithDb(RecipeEntry localRecipe) async {
+    // Fetch the current recipe from the database. Use a repository method or direct DB query.
+    // Here we use a method getRecipeById (you need to implement this in your repository if not already available).
+    final dbRecipe = await ref.read(recipeRepositoryProvider).getRecipeById(localRecipe.id);
+
+    if (dbRecipe == null) {
+      // If no recipe exists in the DB (should not happen for updates), return local state.
+      return localRecipe;
+    }
+
+    // Get image lists from both local and DB.
+    final localImages = localRecipe.images ?? [];
+    final dbImages = dbRecipe.images ?? [];
+
+    // Merge: for each local image, if a matching image (by fileName) exists in the DB with a publicUrl,
+    // update the local image's publicUrl.
+    final mergedImages = localImages.map((localImage) {
+      final matchingDbImage = dbImages.firstWhere(
+            (dbImg) => dbImg.fileName == localImage.fileName,
+        orElse: () => localImage,
+      );
+      if (matchingDbImage.publicUrl != null && matchingDbImage.publicUrl!.isNotEmpty) {
+        return localImage.copyWith(publicUrl: matchingDbImage.publicUrl);
+      }
+      return localImage;
+    }).toList();
+
+    // Return an updated RecipeEntry with the merged images.
+    return localRecipe.copyWith(images: Value(mergedImages));
   }
 
   @override
