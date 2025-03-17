@@ -96,8 +96,8 @@ A new Flutter project.
   - [X] Implement context menu showing
   - [X] Implement convert to section
   - [X] Split apart widgets
-  - [ ] Design for albums
-  - [ ] Implement albums
+  - [X] Design for albums
+  - [X] Implement albums
   - [ ] Ensure recipes are created under folders (maybe need a product backlog to give us a folder selector if done outside of folder)
   - [ ] Implement rough recipe list under folders
   - [ ] Remove dummy recipes from recipe root page
@@ -105,6 +105,8 @@ A new Flutter project.
   - [ ] Add recipe details to details page
   - [ ] Deletion of folders - what happens to descendants
   - [X] Implement sharing (backend only)
+- [ ] Test: will local unauthenticated data get synced after logging in? guessing not because no userId
+- [ ] Implement method to sync uploaded images that were created before auth
 - [ ] Check in on status of scroll bug https://github.com/flutter/flutter/issues/163297
 - [ ] Haptic feedback on context menu long-press
 - [X] Fix breakpoints and show/hide sidebar animations
