@@ -12,35 +12,10 @@ import '../../database/database.dart';
 import '../../database/powersync.dart';
 import '../repositories/upload_queue_repository.dart';
 
-// Stub function simulating an upload to Supabase Storage.
-// Replace with your actual upload logic.
-Future<String> uploadImageToSupabase(File file) async {
-  final supabase = Supabase.instance.client;
-  final bucketName = 'recipe_images';
-
-  final user = supabase.auth.currentUser;
-  if (user == null) {
-    throw Exception("User is not logged in");
-  }
-
-  // Extract the original filename.
-  String originalFilename = path.basename(file.path);
-
-  // Define the file path using the user ID and original filename.
-  final filePath = '${user.id}/$originalFilename';
-
-  // Upload file to Supabase Storage.
-  await supabase.storage.from(bucketName).upload(filePath, file);
-
-  // Get the public URL.
-  final publicUrl = supabase.storage.from(bucketName).getPublicUrl(filePath);
-
-  return publicUrl;
-}
-
 class UploadQueueManager {
   final UploadQueueRepository repository;
   final RecipeRepository recipeRepository;
+  final SupabaseClient supabaseClient;
   final AppDatabase db;
   bool _isProcessing = false;
   Timer? _debounceTimer;
@@ -55,6 +30,7 @@ class UploadQueueManager {
     required this.repository,
     required this.db,
     required this.recipeRepository,
+    required this.supabaseClient,
   }) {
     // Listen to connectivity changes.
     _connectivitySubscription =
@@ -70,6 +46,29 @@ class UploadQueueManager {
   void dispose() {
     _debounceTimer?.cancel();
     _connectivitySubscription?.cancel();
+  }
+
+  Future<String> uploadImageToSupabase(File file) async {
+    final bucketName = 'recipe_images';
+
+    final user = supabaseClient.auth.currentUser;
+    if (user == null) {
+      throw Exception("User is not logged in");
+    }
+
+    // Extract the original filename.
+    String originalFilename = path.basename(file.path);
+
+    // Define the file path using the user ID and original filename.
+    final filePath = '${user.id}/$originalFilename';
+
+    // Upload file to Supabase Storage.
+    await supabaseClient.storage.from(bucketName).upload(filePath, file);
+
+    // Get the public URL.
+    final publicUrl = supabaseClient.storage.from(bucketName).getPublicUrl(filePath);
+
+    return publicUrl;
   }
 
   /// Adds a new image to the upload queue.
@@ -111,8 +110,7 @@ class UploadQueueManager {
     }
 
     // Check if the user is logged in.
-    final supabase = Supabase.instance.client;
-    if (supabase.auth.currentUser == null) {
+    if (supabaseClient.auth.currentUser == null) {
       debugPrint("User not logged in: skipping upload processing.");
       return;
     }
@@ -227,5 +225,5 @@ class UploadQueueManager {
 final uploadQueueManagerProvider = Provider<UploadQueueManager>((ref) {
   final repository = ref.watch(uploadQueueRepositoryProvider);
   final recipeRepository = ref.watch(recipeRepositoryProvider);
-  return UploadQueueManager(repository: repository, db: appDb, recipeRepository: recipeRepository);
+  return UploadQueueManager(repository: repository, db: appDb, recipeRepository: recipeRepository, supabaseClient: Supabase.instance.client);
 });

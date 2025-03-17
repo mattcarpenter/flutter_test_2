@@ -76,6 +76,7 @@ dev_dependencies:
   shared_preferences: any
   drift: ^2.23.1
   drift_dev: ^2.23.1
+  mockito: ^5.4.5
 
 dependency_overrides:
   intl: ^0.20.2
