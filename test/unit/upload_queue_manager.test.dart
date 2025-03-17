@@ -1,3 +1,4 @@
+import 'package:drift/drift.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/annotations.dart';
@@ -8,6 +9,7 @@ import 'package:recipe_app/src/repositories/upload_queue_repository.dart';
 import 'package:recipe_app/src/repositories/recipe_repository.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:fake_async/fake_async.dart';
 
 import 'upload_queue_manager.test.mocks.dart';
 
@@ -197,4 +199,70 @@ void main() {
       },
     );
   });
+
+  test('processQueue sets entry to failed after max retries', () {
+    fakeAsync((async) async {
+      const baseDelayMillis = 2000; // Must match UploadQueueManager's baseDelay
+      const maxRetries = UploadQueueManager.maxRetries;
+
+      var currentEntry = UploadQueueEntry(
+        id: 'entry-max-retries',
+        fileName: 'retry-test.jpg',
+        status: 'pending',
+        retryCount: 0,
+        lastTryTimestamp: 0,
+        recipeId: 'recipe-retry',
+      );
+
+      // Always return our mutable entry list.
+      when(mockQueueRepository.getPendingEntries()).thenAnswer((_) async {
+        if (currentEntry.status == 'pending') return [currentEntry];
+        return [];
+      });
+
+      when(mockQueueRepository.resolveFullPath('retry-test.jpg'))
+          .thenAnswer((_) async => '/fake/path/retry-test.jpg');
+
+      // Always fail the upload to trigger retries.
+      when(mockBucketApi.upload(any, any))
+          .thenThrow(Exception('Simulated upload failure'));
+
+      // Update the current entry each time `updateEntry` is called.
+      when(mockQueueRepository.updateEntry(any)).thenAnswer((invocation) async {
+        currentEntry = invocation.positionalArguments.first as UploadQueueEntry;
+        return true;
+      });
+
+      // Trigger first processing attempt.
+      await manager.processQueue();
+
+      // Simulate exponential backoff retries.
+      for (var retry = 1; retry <= maxRetries; retry++) {
+        // Move time forward past the backoff delay.
+        final backoffDelay = UploadQueueManager.baseDelay * (1 << (retry - 1));
+        async.elapse(backoffMillis(backoff: retry - 1));
+        async.flushMicrotasks();
+        await manager.processQueue();
+      }
+
+      // Verify entry marked as failed.
+      verify(mockQueueRepository.updateEntry(argThat(
+        predicate<UploadQueueEntry>(
+              (entry) => entry.status == 'failed' && entry.retryCount == UploadQueueManager.maxRetries,
+        ),
+      ))).called(1);
+
+      // Verify no more uploads attempted after marking failed.
+      verifyNever(mockRecipeRepository.updateImageForRecipe(
+        recipeId: anyNamed('recipeId'),
+        fileName: anyNamed('fileName'),
+        publicUrl: anyNamed('publicUrl'),
+      ));
+    });
+  });
+}
+
+// Helper to compute exponential backoff milliseconds.
+Duration backoffMillis({required int backoff}) {
+  return Duration(milliseconds: UploadQueueManager.baseDelay.inMilliseconds * (1 << backoff));
 }
