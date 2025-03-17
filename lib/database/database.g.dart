@@ -2069,7 +2069,7 @@ class HouseholdsCompanion extends UpdateCompanion<HouseholdEntry> {
 }
 
 class $UploadQueuesTable extends UploadQueues
-    with TableInfo<$UploadQueuesTable, UploadQueue> {
+    with TableInfo<$UploadQueuesTable, UploadQueueEntry> {
   @override
   final GeneratedDatabase attachedDatabase;
   final String? _alias;
@@ -2113,8 +2113,8 @@ class $UploadQueuesTable extends UploadQueues
       const VerificationMeta('recipeId');
   @override
   late final GeneratedColumn<String> recipeId = GeneratedColumn<String>(
-      'recipe_id', aliasedName, true,
-      type: DriftSqlType.string, requiredDuringInsert: false);
+      'recipe_id', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
   @override
   List<GeneratedColumn> get $columns =>
       [id, fileName, status, retryCount, lastTryTimestamp, recipeId];
@@ -2124,7 +2124,7 @@ class $UploadQueuesTable extends UploadQueues
   String get actualTableName => $name;
   static const String $name = 'upload_queues';
   @override
-  VerificationContext validateIntegrity(Insertable<UploadQueue> instance,
+  VerificationContext validateIntegrity(Insertable<UploadQueueEntry> instance,
       {bool isInserting = false}) {
     final context = VerificationContext();
     final data = instance.toColumns(true);
@@ -2156,16 +2156,18 @@ class $UploadQueuesTable extends UploadQueues
     if (data.containsKey('recipe_id')) {
       context.handle(_recipeIdMeta,
           recipeId.isAcceptableOrUnknown(data['recipe_id']!, _recipeIdMeta));
+    } else if (isInserting) {
+      context.missing(_recipeIdMeta);
     }
     return context;
   }
 
   @override
-  Set<GeneratedColumn> get $primaryKey => const {};
+  Set<GeneratedColumn> get $primaryKey => {id};
   @override
-  UploadQueue map(Map<String, dynamic> data, {String? tablePrefix}) {
+  UploadQueueEntry map(Map<String, dynamic> data, {String? tablePrefix}) {
     final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
-    return UploadQueue(
+    return UploadQueueEntry(
       id: attachedDatabase.typeMapping
           .read(DriftSqlType.string, data['${effectivePrefix}id'])!,
       fileName: attachedDatabase.typeMapping
@@ -2177,7 +2179,7 @@ class $UploadQueuesTable extends UploadQueues
       lastTryTimestamp: attachedDatabase.typeMapping
           .read(DriftSqlType.int, data['${effectivePrefix}last_try_timestamp']),
       recipeId: attachedDatabase.typeMapping
-          .read(DriftSqlType.string, data['${effectivePrefix}recipe_id']),
+          .read(DriftSqlType.string, data['${effectivePrefix}recipe_id'])!,
     );
   }
 
@@ -2187,20 +2189,21 @@ class $UploadQueuesTable extends UploadQueues
   }
 }
 
-class UploadQueue extends DataClass implements Insertable<UploadQueue> {
+class UploadQueueEntry extends DataClass
+    implements Insertable<UploadQueueEntry> {
   final String id;
   final String fileName;
   final String status;
   final int retryCount;
   final int? lastTryTimestamp;
-  final String? recipeId;
-  const UploadQueue(
+  final String recipeId;
+  const UploadQueueEntry(
       {required this.id,
       required this.fileName,
       required this.status,
       required this.retryCount,
       this.lastTryTimestamp,
-      this.recipeId});
+      required this.recipeId});
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
@@ -2211,9 +2214,7 @@ class UploadQueue extends DataClass implements Insertable<UploadQueue> {
     if (!nullToAbsent || lastTryTimestamp != null) {
       map['last_try_timestamp'] = Variable<int>(lastTryTimestamp);
     }
-    if (!nullToAbsent || recipeId != null) {
-      map['recipe_id'] = Variable<String>(recipeId);
-    }
+    map['recipe_id'] = Variable<String>(recipeId);
     return map;
   }
 
@@ -2226,22 +2227,20 @@ class UploadQueue extends DataClass implements Insertable<UploadQueue> {
       lastTryTimestamp: lastTryTimestamp == null && nullToAbsent
           ? const Value.absent()
           : Value(lastTryTimestamp),
-      recipeId: recipeId == null && nullToAbsent
-          ? const Value.absent()
-          : Value(recipeId),
+      recipeId: Value(recipeId),
     );
   }
 
-  factory UploadQueue.fromJson(Map<String, dynamic> json,
+  factory UploadQueueEntry.fromJson(Map<String, dynamic> json,
       {ValueSerializer? serializer}) {
     serializer ??= driftRuntimeOptions.defaultSerializer;
-    return UploadQueue(
+    return UploadQueueEntry(
       id: serializer.fromJson<String>(json['id']),
       fileName: serializer.fromJson<String>(json['fileName']),
       status: serializer.fromJson<String>(json['status']),
       retryCount: serializer.fromJson<int>(json['retryCount']),
       lastTryTimestamp: serializer.fromJson<int?>(json['lastTryTimestamp']),
-      recipeId: serializer.fromJson<String?>(json['recipeId']),
+      recipeId: serializer.fromJson<String>(json['recipeId']),
     );
   }
   @override
@@ -2253,18 +2252,18 @@ class UploadQueue extends DataClass implements Insertable<UploadQueue> {
       'status': serializer.toJson<String>(status),
       'retryCount': serializer.toJson<int>(retryCount),
       'lastTryTimestamp': serializer.toJson<int?>(lastTryTimestamp),
-      'recipeId': serializer.toJson<String?>(recipeId),
+      'recipeId': serializer.toJson<String>(recipeId),
     };
   }
 
-  UploadQueue copyWith(
+  UploadQueueEntry copyWith(
           {String? id,
           String? fileName,
           String? status,
           int? retryCount,
           Value<int?> lastTryTimestamp = const Value.absent(),
-          Value<String?> recipeId = const Value.absent()}) =>
-      UploadQueue(
+          String? recipeId}) =>
+      UploadQueueEntry(
         id: id ?? this.id,
         fileName: fileName ?? this.fileName,
         status: status ?? this.status,
@@ -2272,10 +2271,10 @@ class UploadQueue extends DataClass implements Insertable<UploadQueue> {
         lastTryTimestamp: lastTryTimestamp.present
             ? lastTryTimestamp.value
             : this.lastTryTimestamp,
-        recipeId: recipeId.present ? recipeId.value : this.recipeId,
+        recipeId: recipeId ?? this.recipeId,
       );
-  UploadQueue copyWithCompanion(UploadQueuesCompanion data) {
-    return UploadQueue(
+  UploadQueueEntry copyWithCompanion(UploadQueuesCompanion data) {
+    return UploadQueueEntry(
       id: data.id.present ? data.id.value : this.id,
       fileName: data.fileName.present ? data.fileName.value : this.fileName,
       status: data.status.present ? data.status.value : this.status,
@@ -2290,7 +2289,7 @@ class UploadQueue extends DataClass implements Insertable<UploadQueue> {
 
   @override
   String toString() {
-    return (StringBuffer('UploadQueue(')
+    return (StringBuffer('UploadQueueEntry(')
           ..write('id: $id, ')
           ..write('fileName: $fileName, ')
           ..write('status: $status, ')
@@ -2307,7 +2306,7 @@ class UploadQueue extends DataClass implements Insertable<UploadQueue> {
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
-      (other is UploadQueue &&
+      (other is UploadQueueEntry &&
           other.id == this.id &&
           other.fileName == this.fileName &&
           other.status == this.status &&
@@ -2316,13 +2315,13 @@ class UploadQueue extends DataClass implements Insertable<UploadQueue> {
           other.recipeId == this.recipeId);
 }
 
-class UploadQueuesCompanion extends UpdateCompanion<UploadQueue> {
+class UploadQueuesCompanion extends UpdateCompanion<UploadQueueEntry> {
   final Value<String> id;
   final Value<String> fileName;
   final Value<String> status;
   final Value<int> retryCount;
   final Value<int?> lastTryTimestamp;
-  final Value<String?> recipeId;
+  final Value<String> recipeId;
   final Value<int> rowid;
   const UploadQueuesCompanion({
     this.id = const Value.absent(),
@@ -2339,10 +2338,11 @@ class UploadQueuesCompanion extends UpdateCompanion<UploadQueue> {
     this.status = const Value.absent(),
     this.retryCount = const Value.absent(),
     this.lastTryTimestamp = const Value.absent(),
-    this.recipeId = const Value.absent(),
+    required String recipeId,
     this.rowid = const Value.absent(),
-  }) : fileName = Value(fileName);
-  static Insertable<UploadQueue> custom({
+  })  : fileName = Value(fileName),
+        recipeId = Value(recipeId);
+  static Insertable<UploadQueueEntry> custom({
     Expression<String>? id,
     Expression<String>? fileName,
     Expression<String>? status,
@@ -2368,7 +2368,7 @@ class UploadQueuesCompanion extends UpdateCompanion<UploadQueue> {
       Value<String>? status,
       Value<int>? retryCount,
       Value<int?>? lastTryTimestamp,
-      Value<String?>? recipeId,
+      Value<String>? recipeId,
       Value<int>? rowid}) {
     return UploadQueuesCompanion(
       id: id ?? this.id,
@@ -3502,7 +3502,7 @@ typedef $$UploadQueuesTableCreateCompanionBuilder = UploadQueuesCompanion
   Value<String> status,
   Value<int> retryCount,
   Value<int?> lastTryTimestamp,
-  Value<String?> recipeId,
+  required String recipeId,
   Value<int> rowid,
 });
 typedef $$UploadQueuesTableUpdateCompanionBuilder = UploadQueuesCompanion
@@ -3512,7 +3512,7 @@ typedef $$UploadQueuesTableUpdateCompanionBuilder = UploadQueuesCompanion
   Value<String> status,
   Value<int> retryCount,
   Value<int?> lastTryTimestamp,
-  Value<String?> recipeId,
+  Value<String> recipeId,
   Value<int> rowid,
 });
 
@@ -3605,17 +3605,17 @@ class $$UploadQueuesTableAnnotationComposer
 class $$UploadQueuesTableTableManager extends RootTableManager<
     _$AppDatabase,
     $UploadQueuesTable,
-    UploadQueue,
+    UploadQueueEntry,
     $$UploadQueuesTableFilterComposer,
     $$UploadQueuesTableOrderingComposer,
     $$UploadQueuesTableAnnotationComposer,
     $$UploadQueuesTableCreateCompanionBuilder,
     $$UploadQueuesTableUpdateCompanionBuilder,
     (
-      UploadQueue,
-      BaseReferences<_$AppDatabase, $UploadQueuesTable, UploadQueue>
+      UploadQueueEntry,
+      BaseReferences<_$AppDatabase, $UploadQueuesTable, UploadQueueEntry>
     ),
-    UploadQueue,
+    UploadQueueEntry,
     PrefetchHooks Function()> {
   $$UploadQueuesTableTableManager(_$AppDatabase db, $UploadQueuesTable table)
       : super(TableManagerState(
@@ -3633,7 +3633,7 @@ class $$UploadQueuesTableTableManager extends RootTableManager<
             Value<String> status = const Value.absent(),
             Value<int> retryCount = const Value.absent(),
             Value<int?> lastTryTimestamp = const Value.absent(),
-            Value<String?> recipeId = const Value.absent(),
+            Value<String> recipeId = const Value.absent(),
             Value<int> rowid = const Value.absent(),
           }) =>
               UploadQueuesCompanion(
@@ -3651,7 +3651,7 @@ class $$UploadQueuesTableTableManager extends RootTableManager<
             Value<String> status = const Value.absent(),
             Value<int> retryCount = const Value.absent(),
             Value<int?> lastTryTimestamp = const Value.absent(),
-            Value<String?> recipeId = const Value.absent(),
+            required String recipeId,
             Value<int> rowid = const Value.absent(),
           }) =>
               UploadQueuesCompanion.insert(
@@ -3673,17 +3673,17 @@ class $$UploadQueuesTableTableManager extends RootTableManager<
 typedef $$UploadQueuesTableProcessedTableManager = ProcessedTableManager<
     _$AppDatabase,
     $UploadQueuesTable,
-    UploadQueue,
+    UploadQueueEntry,
     $$UploadQueuesTableFilterComposer,
     $$UploadQueuesTableOrderingComposer,
     $$UploadQueuesTableAnnotationComposer,
     $$UploadQueuesTableCreateCompanionBuilder,
     $$UploadQueuesTableUpdateCompanionBuilder,
     (
-      UploadQueue,
-      BaseReferences<_$AppDatabase, $UploadQueuesTable, UploadQueue>
+      UploadQueueEntry,
+      BaseReferences<_$AppDatabase, $UploadQueuesTable, UploadQueueEntry>
     ),
-    UploadQueue,
+    UploadQueueEntry,
     PrefetchHooks Function()>;
 
 class $AppDatabaseManager {

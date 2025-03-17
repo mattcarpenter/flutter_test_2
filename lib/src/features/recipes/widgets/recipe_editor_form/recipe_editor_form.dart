@@ -3,6 +3,7 @@ import 'package:flutter/material.dart' hide Step;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:recipe_app/database/models/steps.dart';
 import 'package:recipe_app/src/features/recipes/widgets/recipe_editor_form/sections/image_picker_section.dart';
+import 'package:recipe_app/src/managers/upload_queue_manager.dart';
 import 'package:supabase_flutter/supabase_flutter.dart' as supabase_flutter;
 import 'package:uuid/uuid.dart';
 
@@ -113,6 +114,7 @@ class RecipeEditorFormState extends ConsumerState<RecipeEditorForm> {
       generalNotes: Value(_notesController.text.isEmpty ? null : _notesController.text),
       ingredients: Value(_ingredients),
       steps: Value(_steps),
+      images: Value(_recipe.images),
       updatedAt: Value(DateTime.now().millisecondsSinceEpoch),
     );
 
@@ -139,6 +141,17 @@ class RecipeEditorFormState extends ConsumerState<RecipeEditorForm> {
       } else {
         await notifier.updateRecipe(updatedRecipe);
       }
+
+      // Add any pending images to the upload queue
+      for (final image in updatedRecipe.images ?? []) {
+        if (image.uploadStatus == "pending") {
+          ref.read(uploadQueueManagerProvider).addToQueue(
+            fileName: image.fileName,
+            recipeId: updatedRecipe.id,
+          );
+        }
+      }
+
       if (widget.onSave != null) widget.onSave!();
     } catch (e) {
       debugPrint('Error saving recipe: $e');

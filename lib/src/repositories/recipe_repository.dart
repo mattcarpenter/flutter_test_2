@@ -7,6 +7,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../database/converters.dart';
 import '../../database/database.dart';
 import '../../database/models/ingredients.dart';
+import '../../database/models/recipe_images.dart';
 import '../../database/models/steps.dart';
 import '../../database/powersync.dart';
 import '../models/recipe_with_folders.dart';
@@ -30,6 +31,36 @@ class RecipeRepository {
   Future<bool> updateRecipe(RecipeEntry recipe) {
     return _db.update(_db.recipes).replace(recipe);
   }
+
+  // lib/repositories/recipe_repository.dart
+  Future<bool> updateImageForRecipe({
+    required String recipeId,
+    required String fileName,
+    required String publicUrl,
+  }) async {
+    // Query the recipe using recipeId.
+    final recipe = await (_db.select(_db.recipes)
+      ..where((tbl) => tbl.id.equals(recipeId)))
+        .getSingle();
+
+    // Get the current images list.
+    final List<RecipeImage> images = recipe.images ?? [];
+
+    // Update the image that matches fileName.
+    final updatedImages = images.map((img) {
+      if (img.fileName == fileName) {
+        return img.copyWith(publicUrl: publicUrl);
+      }
+      return img;
+    }).toList();
+
+    // Create an updated copy of the recipe.
+    final updatedRecipe = recipe.copyWith(images: Value(updatedImages));
+
+    // Update the recipe in the database.
+    return updateRecipe(updatedRecipe);
+  }
+
 
   // Delete a recipe.
   Future<int> deleteRecipe(String id) {

@@ -8,14 +8,16 @@ class RecipeImage {
   final String id;
   final String fileName;
   final String uploadStatus;
-  final int? retryCount;
+  final int retryCount;
   final bool? isCover;
+  final String? publicUrl;
 
   RecipeImage({
     required this.id,
     required this.fileName,
     required this.uploadStatus,
-    this.retryCount,
+    this.publicUrl,
+    required this.retryCount,
     this.isCover,
   });
 
@@ -27,12 +29,14 @@ class RecipeImage {
     String? fileName,
     String? uploadStatus,
     int? retryCount,
+    String? publicUrl,
   }) {
     return RecipeImage(
       id: id ?? this.id,
       fileName: fileName ?? this.fileName,
       uploadStatus: uploadStatus ?? this.uploadStatus,
       retryCount: retryCount ?? this.retryCount,
+      publicUrl: publicUrl ?? this.publicUrl,
     );
   }
 

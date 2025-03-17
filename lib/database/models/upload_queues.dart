@@ -7,6 +7,9 @@ class UploadQueues extends Table {
   TextColumn get id =>
       text().clientDefault(() => const Uuid().v4()).unique()();
 
+  @override
+  Set<Column> get primaryKey => {id};
+
   // The filename (stored in your app’s documents directory)
   TextColumn get fileName => text()();
 
@@ -20,5 +23,5 @@ class UploadQueues extends Table {
   IntColumn get lastTryTimestamp => integer().nullable()();
 
   // Optional: associated recipe ID (null if the recipe isn’t saved yet)
-  TextColumn get recipeId => text().nullable()();
+  TextColumn get recipeId => text()();
 }

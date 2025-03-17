@@ -92,6 +92,7 @@ class _ImagePickerSectionState extends State<ImagePickerSection> {
       id: const Uuid().v4(),
       fileName: savedFileName, // Only store filename
       uploadStatus: 'pending',
+      retryCount: 0
     );
 
     setState(() {
