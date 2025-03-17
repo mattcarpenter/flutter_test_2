@@ -3,6 +3,7 @@
 import 'dart:async';
 import 'package:drift/drift.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:uuid/uuid.dart';
 import '../../database/database.dart';
 import '../../database/models/ingredients.dart';
 import '../../database/models/recipe_images.dart';
@@ -33,6 +34,7 @@ class RecipeNotifier extends StateNotifier<AsyncValue<List<RecipeWithFolders>>> 
 
   // Add a new recipe.
   Future<void> addRecipe({
+    required String id,
     required String title,
     required String language,
     required String userId,
@@ -55,6 +57,7 @@ class RecipeNotifier extends StateNotifier<AsyncValue<List<RecipeWithFolders>>> 
   }) async {
     try {
       final recipeCompanion = RecipesCompanion.insert(
+        id: Value(id),
         title: title,
         description: Value(description),
         rating: Value(rating),

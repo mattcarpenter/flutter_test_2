@@ -122,6 +122,7 @@ class RecipeEditorFormState extends ConsumerState<RecipeEditorForm> {
       final notifier = ref.read(recipeNotifierProvider.notifier);
       if (_isNewRecipe) {
         await notifier.addRecipe(
+          id: updatedRecipe.id,
           title: updatedRecipe.title,
           description: updatedRecipe.description,
           language: updatedRecipe.language,
