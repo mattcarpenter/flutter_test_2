@@ -93,7 +93,7 @@ class _ImagePickerSectionState extends State<ImagePickerSection> {
     final String savedFileName = await _saveImageLocally(compressedImage);
 
     final newImage = RecipeImage(
-      id: nanoid(6),
+      id: nanoid(10),
       fileName: savedFileName, // Only store filename
     );
 
