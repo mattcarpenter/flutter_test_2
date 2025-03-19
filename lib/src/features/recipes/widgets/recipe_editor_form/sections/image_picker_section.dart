@@ -86,15 +86,21 @@ class _ImagePickerSectionState extends State<ImagePickerSection> {
   /// Handles picking an image from Camera/Gallery
   Future<void> _pickImage(ImageSource source) async {
     final XFile? image = await _picker.pickImage(source: source);
-    if (image == null) return; // User canceled
+    if (image == null) return;
 
-    final File compressedImage = await _compressImage(File(image.path));
+    final uuid = const Uuid().v4();
+    final fullFileName = '${uuid}.jpg';
+    final smallFileName = '${uuid}_small.jpg';
 
-    final String savedFileName = await _saveImageLocally(compressedImage);
+    final File compressedImage = await _compressImage(File(image.path), fullFileName);
+    final File compressedImageSmall = await _compressImage(File(image.path), smallFileName, size: 512);
+
+    final String savedFileName = await _saveImageLocally(compressedImage, fullFileName);
+    await _saveImageLocally(compressedImageSmall, smallFileName);
 
     final newImage = RecipeImage(
       id: nanoid(10),
-      fileName: savedFileName, // Only store filename
+      fileName: savedFileName,
     );
 
     setState(() {
@@ -103,16 +109,17 @@ class _ImagePickerSectionState extends State<ImagePickerSection> {
   }
 
   /// Compress and resize the image before saving
-  Future<File> _compressImage(File file) async {
+  Future<File> _compressImage(File file, String fileName, {int size=1280}) async {
     final directory = await getTemporaryDirectory();
-    final String targetPath = '${directory.path}/${const Uuid().v4()}.jpg';
+    final String targetPath = '${directory.path}/${fileName}.jpg';
 
     final XFile? compressedXFile = await FlutterImageCompress.compressAndGetFile(
       file.absolute.path,
       targetPath,
-      quality: 90, // Adjust quality
-      minWidth: 1280, // Adjust based on your needs
-      minHeight: 1280,
+      quality: 90,
+      minWidth: size,
+      minHeight: size,
+      format: CompressFormat.jpeg
     );
 
     if (compressedXFile == null) {
@@ -123,20 +130,19 @@ class _ImagePickerSectionState extends State<ImagePickerSection> {
   }
 
   /// Saves the compressed image to local storage and stores only the filename
-  Future<String> _saveImageLocally(File imageFile) async {
+  Future<String> _saveImageLocally(File imageFile, String fileName) async {
     final directory = await getApplicationDocumentsDirectory();
-    final String newFileName = '${const Uuid().v4()}.jpg';
-    final String newPath = '${directory.path}/$newFileName';
+    final String newPath = '${directory.path}/$fileName';
 
     await imageFile.copy(newPath);
 
     // Save filename (not full path) in shared preferences
     final prefs = await SharedPreferences.getInstance();
     List<String> storedFiles = prefs.getStringList('local_images') ?? [];
-    storedFiles.add(newFileName);
+    storedFiles.add(fileName);
     await prefs.setStringList('local_images', storedFiles);
 
-    return newFileName; // Return only the filename
+    return fileName;
   }
 
   /// Shows a confirmation prompt before deleting an image

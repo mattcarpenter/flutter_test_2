@@ -158,9 +158,20 @@ class UploadQueueManager {
           final fullPath = await repository.resolveFullPath(entry.fileName);
           final file = File(fullPath);
 
+          // Generate the small version path
+          final fullPathSmall = path.join(
+            path.dirname(fullPath),  // Keep the original directory
+            '${path.basenameWithoutExtension(fullPath)}_small${path.extension(fullPath)}', // Append `_small`
+          );
+
+          final fileSmall = File(fullPathSmall);
+
           // Attempt to upload.
           final uploadedUrl = await uploadImageToSupabase(file);
+          final uploadedUrlSmall = await uploadImageToSupabase(fileSmall);
+
           debugPrint('Upload succeeded: $uploadedUrl');
+          debugPrint('Small uploaded: $uploadedUrlSmall');
 
           // Mark entry as uploaded.
           final uploadedEntry = entry.copyWith(
