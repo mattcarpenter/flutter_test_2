@@ -219,6 +219,107 @@ class RecipeRepository {
       return recipeMap.values.toList();
     });
   }
+
+  // Add this to your RecipeRepository class
+  Stream<List<RecipeWithFolders>> watchRecipesByFolderId(String folderId) {
+    final query = _db.customSelect(
+      '''
+    SELECT 
+      r.id AS recipe_id, 
+      r.title AS recipe_title,
+      r.description AS recipe_description,
+      r.rating AS recipe_rating,
+      r.language AS recipe_language,
+      r.servings AS recipe_servings,
+      r.prep_time AS recipe_prep_time,
+      r.cook_time AS recipe_cook_time,
+      r.total_time AS recipe_total_time,
+      r.source AS recipe_source,
+      r.nutrition AS recipe_nutrition,
+      r.general_notes AS recipe_general_notes,
+      r.user_id AS recipe_user_id,
+      r.household_id AS recipe_household_id,
+      r.created_at AS recipe_created_at,
+      r.updated_at AS recipe_updated_at,
+      r.ingredients AS recipe_ingredients,
+      r.steps AS recipe_steps,
+      r.folder_ids AS recipe_folder_ids,
+      
+      f.id AS folder_id, 
+      f.name AS folder_name,
+      f.deleted_at AS folder_deleted_at
+    FROM recipes r
+    LEFT JOIN recipe_folders f 
+      ON f.id IN (SELECT value FROM json_each(r.folder_ids))
+    WHERE json_array_contains(r.folder_ids, ?)
+    OR (? IS NULL AND r.folder_ids IS NULL)
+    ''',
+      variables: [
+        Variable(folderId),
+        Variable(folderId)
+      ],
+      readsFrom: {
+        _db.recipes,
+        _db.recipeFolders,
+      },
+    ).watch();
+
+    return query.map((rows) {
+      // Group rows by recipe id
+      final Map<String, RecipeWithFolders> recipeMap = {};
+      for (final row in rows) {
+        final recipeId = row.read<String>('recipe_id');
+        if (!recipeMap.containsKey(recipeId)) {
+          // Build the RecipeEntry
+          final recipe = RecipeEntry(
+            id: recipeId,
+            title: row.read<String>('recipe_title'),
+            description: row.read<String?>('recipe_description') ?? '',
+            rating: row.read<int?>('recipe_rating'),
+            language: row.read<String>('recipe_language'),
+            servings: row.read<int?>('recipe_servings'),
+            prepTime: row.read<int?>('recipe_prep_time'),
+            cookTime: row.read<int?>('recipe_cook_time'),
+            totalTime: row.read<int?>('recipe_total_time'),
+            source: row.read<String?>('recipe_source'),
+            nutrition: row.read<String?>('recipe_nutrition'),
+            generalNotes: row.read<String?>('recipe_general_notes'),
+            userId: row.read<String>('recipe_user_id'),
+            householdId: row.read<String?>('recipe_household_id'),
+            createdAt: row.read<int?>('recipe_created_at'),
+            updatedAt: row.read<int?>('recipe_updated_at'),
+
+            // Convert JSON String to List<Ingredient>
+            ingredients: row.read<String?>('recipe_ingredients') != null
+                ? const IngredientListConverter().fromSql(row.read<String>('recipe_ingredients'))
+                : [],
+
+            // Convert JSON String to List<Step>
+            steps: row.read<String?>('recipe_steps') != null
+                ? const StepListConverter().fromSql(row.read<String>('recipe_steps'))
+                : [],
+
+            folderIds: row.read<String?>('recipe_folder_ids') != null
+                ? List<String>.from(jsonDecode(row.read<String>('recipe_folder_ids')))
+                : [],
+          );
+          recipeMap[recipeId] = RecipeWithFolders(recipe: recipe, folders: []);
+        }
+
+        // If a folder is joined, add it to the composite
+        final folderId = row.read<String?>('folder_id');
+        if (folderId != null) {
+          final folder = RecipeFolderEntry(
+            id: folderId,
+            name: row.read<String>('folder_name'),
+            deletedAt: row.read<int?>('folder_deleted_at'),
+          );
+          recipeMap[recipeId]!.folders.add(folder);
+        }
+      }
+      return recipeMap.values.toList();
+    });
+  }
 }
 
 final recipeRepositoryProvider = Provider<RecipeRepository>((ref) {

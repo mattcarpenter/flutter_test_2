@@ -168,3 +168,13 @@ StateNotifierProvider<RecipeNotifier, AsyncValue<List<RecipeWithFolders>>>((ref)
   final repository = ref.watch(recipeRepositoryProvider);
   return RecipeNotifier(repository);
 });
+
+final recipesInFolderProvider = Provider.family<Stream<List<RecipeWithFolders>>, String?>(
+      (ref, folderId) {
+    final repository = ref.watch(recipeRepositoryProvider);
+    if (folderId == null) {
+      return repository.watchRecipesWithFolders();
+    }
+    return repository.watchRecipesByFolderId(folderId);
+  },
+);

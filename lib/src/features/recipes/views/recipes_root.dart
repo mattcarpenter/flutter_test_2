@@ -49,7 +49,7 @@ class RecipesTab extends StatelessWidget {
           ),
         ),
         // The recipes grid sliver.
-        RecipesList(recipes: dummyRecipes),
+        //RecipesList(recipes: dummyRecipes),
       ],
       trailing: AdaptivePullDownButton(
         items: [

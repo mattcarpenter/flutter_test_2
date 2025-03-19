@@ -3,6 +3,8 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/rendering.dart';
 import 'package:recipe_app/src/features/recipes/widgets/recipe_tile.dart';
 
+import '../../../../database/database.dart';
+
 class Recipe {
   final String name;
   final String time;
@@ -27,7 +29,7 @@ final List<Recipe> dummyRecipes = [
 ];
 
 class RecipesList extends StatelessWidget {
-  final List<Recipe> recipes;
+  final List<RecipeEntry> recipes;
 
   const RecipesList({Key? key, required this.recipes}) : super(key: key);
 

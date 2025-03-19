@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
-import './recipe_list.dart' show Recipe;
+
+import '../../../../database/database.dart';
 
 class RecipeTile extends StatelessWidget {
-  final Recipe recipe;
+  final RecipeEntry recipe;
 
   const RecipeTile({Key? key, required this.recipe}) : super(key: key);
 
@@ -32,6 +33,34 @@ class RecipeTile extends StatelessWidget {
         // Compute the dynamic image height
         final imageHeight = tileHeight - fixedContentHeight;
 
+        // Format time display
+        String timeDisplay = 'N/A';
+        if (recipe.totalTime != null) {
+          timeDisplay = '${recipe.totalTime} mins';
+        } else if (recipe.prepTime != null && recipe.cookTime != null) {
+          timeDisplay = '${(recipe.prepTime ?? 0) + (recipe.cookTime ?? 0)} mins';
+        } else if (recipe.prepTime != null) {
+          timeDisplay = '${recipe.prepTime} mins';
+        } else if (recipe.cookTime != null) {
+          timeDisplay = '${recipe.cookTime} mins';
+        }
+
+        // Determine difficulty (placeholder logic - adjust as needed)
+        String difficulty = 'Medium';
+        if (recipe.rating != null) {
+          if (recipe.rating! <= 2) difficulty = 'Easy';
+          else if (recipe.rating! >= 4) difficulty = 'Hard';
+        }
+
+        // Default image name (update this logic based on your actual implementation)
+        String imageName = '1.png';
+        if (recipe.id.hashCode % 6 == 0) imageName = '1.png';
+        else if (recipe.id.hashCode % 6 == 1) imageName = '2.png';
+        else if (recipe.id.hashCode % 6 == 2) imageName = '3.png';
+        else if (recipe.id.hashCode % 6 == 3) imageName = '4.png';
+        else if (recipe.id.hashCode % 6 == 4) imageName = '5.png';
+        else imageName = '6.png';
+
         return Container(
           decoration: BoxDecoration(
             border: Border.all(color: Colors.grey.shade300, width: 1),
@@ -43,7 +72,7 @@ class RecipeTile extends StatelessWidget {
             children: [
               // Image with dynamically computed height
               Image.asset(
-                'assets/images/samples/${recipe.imageName}',
+                'assets/images/samples/${imageName}',
                 height: imageHeight,
                 width: double.infinity,
                 fit: BoxFit.cover,
@@ -55,7 +84,7 @@ class RecipeTile extends StatelessWidget {
                 child: SizedBox(
                   height: recipeNameHeight,
                   child: Text(
-                    recipe.name,
+                    recipe.title,
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                     style: Theme.of(context).textTheme.titleSmall,
@@ -74,7 +103,7 @@ class RecipeTile extends StatelessWidget {
                       children: [
                         Icon(Icons.access_time, size: 14, color: Colors.grey.shade600),
                         const SizedBox(width: 4),
-                        Text(recipe.time, style: Theme.of(context).textTheme.bodySmall),
+                        Text(timeDisplay, style: Theme.of(context).textTheme.bodySmall),
                       ],
                     ),
                     const Spacer(),
@@ -84,7 +113,7 @@ class RecipeTile extends StatelessWidget {
                         color: Colors.grey.shade200,
                         borderRadius: BorderRadius.circular(16),
                       ),
-                      child: Text(recipe.difficulty, style: Theme.of(context).textTheme.bodySmall),
+                      child: Text(difficulty, style: Theme.of(context).textTheme.bodySmall),
                     ),
                   ],
                 )
@@ -96,7 +125,7 @@ class RecipeTile extends StatelessWidget {
                       children: [
                         Icon(Icons.access_time, size: 14, color: Colors.grey.shade600),
                         const SizedBox(width: 4),
-                        Text(recipe.time, style: Theme.of(context).textTheme.bodySmall),
+                        Text(timeDisplay, style: Theme.of(context).textTheme.bodySmall),
                       ],
                     ),
                     const SizedBox(height: 4),
@@ -106,7 +135,7 @@ class RecipeTile extends StatelessWidget {
                         color: Colors.grey.shade200,
                         borderRadius: BorderRadius.circular(16),
                       ),
-                      child: Text(recipe.difficulty, style: Theme.of(context).textTheme.bodySmall),
+                      child: Text(difficulty, style: Theme.of(context).textTheme.bodySmall),
                     ),
                   ],
                 ),
