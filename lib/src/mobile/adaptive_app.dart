@@ -199,7 +199,7 @@ class _AdaptiveApp2State extends State<AdaptiveApp2> {
                   path: '/recipes',
                   routes: [
                     GoRoute(
-                      path: 'folder/:parentId',
+                      path: 'folder/:folderId',
                       pageBuilder: (context, state) {
                         // Extract the parent folder id from the path.
                         final folderId = state.pathParameters['folderId'];

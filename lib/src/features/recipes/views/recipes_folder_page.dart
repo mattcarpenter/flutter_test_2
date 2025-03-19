@@ -7,6 +7,7 @@ import '../../../widgets/adaptive_pull_down/adaptive_pull_down.dart';
 import './add_folder_modal.dart';
 import '../widgets/folder_list.dart';
 import '../widgets/recipe_list.dart' show RecipesList, dummyRecipes;
+import 'add_recipe_modal.dart';
 
 class RecipesFolderPage extends StatelessWidget {
   final String? folderId;
@@ -14,11 +15,11 @@ class RecipesFolderPage extends StatelessWidget {
   final String previousPageTitle;
 
   const RecipesFolderPage({
-    Key? key,
+    super.key,
     this.folderId,
     required this.title,
     required this.previousPageTitle,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -31,12 +32,9 @@ class RecipesFolderPage extends StatelessWidget {
       trailing: AdaptivePullDownButton(
         items: [
           AdaptiveMenuItem(
-              title: 'Add Folder', icon: const Icon(CupertinoIcons.folder), onTap: () {
-            showAddFolderModal(context);
-          }
-          ),
-          AdaptiveMenuItem(
-              title: 'Add Recipe', icon: const Icon(CupertinoIcons.book), onTap: () {})
+              title: 'Add Recipe', icon: const Icon(CupertinoIcons.book), onTap: () {
+                showRecipeEditorModal(context, folderId: folderId);
+          })
         ],
         child: const Icon(CupertinoIcons.add_circled),
       ),

@@ -18,12 +18,14 @@ import 'sections/steps_section.dart';
 class RecipeEditorForm extends ConsumerStatefulWidget {
   final RecipeEntry? initialRecipe; // null for new recipe, non-null for editing
   final VoidCallback? onSave;
+  final String? folderId;
 
   const RecipeEditorForm({
-    Key? key,
+    super.key,
     this.initialRecipe,
     this.onSave,
-  }) : super(key: key);
+    this.folderId,
+  });
 
   @override
   ConsumerState<RecipeEditorForm> createState() => RecipeEditorFormState();
@@ -31,6 +33,7 @@ class RecipeEditorForm extends ConsumerStatefulWidget {
 
 class RecipeEditorFormState extends ConsumerState<RecipeEditorForm> {
   late RecipeEntry _recipe;
+  late String? folderId;
   bool _isNewRecipe = false;
   bool _isInitialized = false;
 
@@ -85,6 +88,7 @@ class RecipeEditorFormState extends ConsumerState<RecipeEditorForm> {
       _steps = List<Step>.from(_recipe.steps ?? []);
     } else {
       // New recipe: initialize local state.
+      final List<String> folderIds = widget.folderId != null ? [widget.folderId!] : [];
       final userId = supabase_flutter.Supabase.instance.client.auth.currentUser?.id ?? '';
       _recipe = RecipeEntry(
         id: const Uuid().v4(),
@@ -93,7 +97,7 @@ class RecipeEditorFormState extends ConsumerState<RecipeEditorForm> {
         userId: userId,
         ingredients: [],
         steps: [],
-        folderIds: [],
+        folderIds: folderIds,
       );
       _isNewRecipe = true;
       _titleController.text = _recipe.title;
@@ -117,6 +121,7 @@ class RecipeEditorFormState extends ConsumerState<RecipeEditorForm> {
       ingredients: Value(_ingredients),
       steps: Value(_steps),
       images: Value(_recipe.images),
+      folderIds: Value(_recipe.folderIds),
       updatedAt: Value(DateTime.now().millisecondsSinceEpoch),
     );
 
@@ -137,6 +142,7 @@ class RecipeEditorFormState extends ConsumerState<RecipeEditorForm> {
           ingredients: updatedRecipe.ingredients,
           steps: updatedRecipe.steps,
           images: updatedRecipe.images,
+          folderIds: updatedRecipe.folderIds,
         );
         setState(() {
           _isNewRecipe = false;

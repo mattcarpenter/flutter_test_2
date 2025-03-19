@@ -10,6 +10,7 @@ void showRecipeEditorModal(
     BuildContext context, {
       RecipeEntry? recipe, // Null for new recipe, non-null for editing
       bool isEditing = false,
+      String? folderId
     }) {
   final pageTitle = isEditing ? 'Edit Recipe' : 'New Recipe';
 
@@ -21,6 +22,7 @@ void showRecipeEditorModal(
         context: bottomSheetContext, // using bottom sheet context
         recipe: recipe,
         pageTitle: pageTitle,
+        folderId: folderId
       ),
     ],
   );
@@ -33,6 +35,7 @@ class RecipeEditorModalPage {
     required BuildContext context,
     RecipeEntry? recipe,
     required String pageTitle,
+    String? folderId,
   }) {
     final isDarkMode = CupertinoTheme.of(context).brightness == Brightness.dark;
     final backgroundColor = isDarkMode
@@ -67,6 +70,7 @@ class RecipeEditorModalPage {
         child: RecipeEditorForm(
           key: formKey,
           initialRecipe: recipe,
+          folderId: folderId
           // onSave is handled by the nav bar button.
         ),
       ),
