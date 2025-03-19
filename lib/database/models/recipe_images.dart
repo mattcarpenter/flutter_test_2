@@ -3,6 +3,8 @@ import 'package:path_provider/path_provider.dart';
 
 part 'recipe_images.g.dart';
 
+enum RecipeImageSize { large, small }
+
 @JsonSerializable()
 class RecipeImage {
   final String id;
@@ -43,5 +45,28 @@ class RecipeImage {
   static Future<String> resolveFullPath(String fileName) async {
     final directory = await getApplicationDocumentsDirectory();
     return '${directory.path}/$fileName';
+  }
+
+  String? getPublicUrlForSize(RecipeImageSize size) {
+    if (size == RecipeImageSize.large) {
+      return this.publicUrl;
+    } else if (this.publicUrl != null) {
+      final uri = Uri.parse(this.publicUrl!);
+      final filename = uri.pathSegments.last;
+      final dotIndex = filename.lastIndexOf('.');
+
+      if (dotIndex != -1) {
+        final newFilename = '${filename.substring(0, dotIndex)}_small${filename.substring(dotIndex)}';
+        return this.publicUrl!.replaceFirst(filename, newFilename);
+      }
+    }
+    return null;
+  }
+
+  static RecipeImage? getCoverImage(List<RecipeImage>? images) {
+    if (images == null || images.isEmpty) {
+      return null;
+    }
+    return images.firstWhere((element) => element.isCover == true, orElse: () => images.first);
   }
 }

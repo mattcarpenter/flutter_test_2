@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 
 import '../../../../database/database.dart';
+import '../../../../database/models/recipe_images.dart';
+import '../../../widgets/local_or_network_image.dart';
 
 class RecipeTile extends StatelessWidget {
   final RecipeEntry recipe;
@@ -24,7 +26,7 @@ class RecipeTile extends StatelessWidget {
         const double detailsHeightDoubleRow = 48.0; // More space if chip wraps
 
         // Check if we have enough space for the time & difficulty on one row
-        final isWideEnoughForOneRow = tileWidth > 140; // Adjust this threshold as needed
+        final isWideEnoughForOneRow = tileWidth > 140;
 
         // Determine actual content height based on layout
         final detailsHeight = isWideEnoughForOneRow ? detailsHeightSingleRow : detailsHeightDoubleRow;
@@ -45,21 +47,16 @@ class RecipeTile extends StatelessWidget {
           timeDisplay = '${recipe.cookTime} mins';
         }
 
-        // Determine difficulty (placeholder logic - adjust as needed)
+        // Determine difficulty
         String difficulty = 'Medium';
         if (recipe.rating != null) {
           if (recipe.rating! <= 2) difficulty = 'Easy';
           else if (recipe.rating! >= 4) difficulty = 'Hard';
         }
 
-        // Default image name (update this logic based on your actual implementation)
-        String imageName = '1.png';
-        if (recipe.id.hashCode % 6 == 0) imageName = '1.png';
-        else if (recipe.id.hashCode % 6 == 1) imageName = '2.png';
-        else if (recipe.id.hashCode % 6 == 2) imageName = '3.png';
-        else if (recipe.id.hashCode % 6 == 3) imageName = '4.png';
-        else if (recipe.id.hashCode % 6 == 4) imageName = '5.png';
-        else imageName = '6.png';
+        // Get the cover image
+        final coverImage = RecipeImage.getCoverImage(recipe.images);
+        final coverImageUrl = coverImage?.getPublicUrlForSize(RecipeImageSize.small) ?? '';
 
         return Container(
           decoration: BoxDecoration(
@@ -70,12 +67,19 @@ class RecipeTile extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Image with dynamically computed height
-              Image.asset(
-                'assets/images/samples/${imageName}',
-                height: imageHeight,
-                width: double.infinity,
-                fit: BoxFit.cover,
+              // Use FutureBuilder to wait for the file path
+              FutureBuilder<String>(
+                future: coverImage?.getFullPath() ?? Future.value(''),
+                builder: (context, snapshot) {
+                  final coverImageFilePath = snapshot.data ?? '';
+                  return LocalOrNetworkImage(
+                    filePath: coverImageFilePath,
+                    url: coverImageUrl,
+                    height: imageHeight,
+                    width: double.infinity,
+                    fit: BoxFit.cover,
+                  );
+                },
               ),
               const SizedBox(height: spacingAboveName),
               // Recipe name (fixed height)

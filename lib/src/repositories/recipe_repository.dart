@@ -152,6 +152,7 @@ class RecipeRepository {
       r.ingredients AS recipe_ingredients,
       r.steps AS recipe_steps,
       r.folder_ids AS recipe_folder_ids,
+      r.images AS recipe_images,
       
       f.id AS folder_id, 
       f.name AS folder_name,
@@ -201,6 +202,10 @@ class RecipeRepository {
                 ? const StepListConverter().fromSql(row.read<String>('recipe_steps'))
                 : [],
 
+            images: row.read<String?>('recipe_images') != null
+                ? const RecipeImageListConverter().fromSql(row.read<String>('recipe_images'))
+                : [],
+
             folderIds: List<String>.from(jsonDecode(row.read<String>('recipe_folder_ids'))),
           );
           recipeMap[recipeId] = RecipeWithFolders(recipe: recipe, folders: []);
@@ -244,6 +249,7 @@ class RecipeRepository {
       r.ingredients AS recipe_ingredients,
       r.steps AS recipe_steps,
       r.folder_ids AS recipe_folder_ids,
+      r.images AS recipe_images,
       
       f.id AS folder_id, 
       f.name AS folder_name,
@@ -301,6 +307,10 @@ class RecipeRepository {
 
             folderIds: row.read<String?>('recipe_folder_ids') != null
                 ? List<String>.from(jsonDecode(row.read<String>('recipe_folder_ids')))
+                : [],
+
+            images: row.read<String?>('recipe_images') != null
+                ? const RecipeImageListConverter().fromSql(row.read<String>('recipe_images'))
                 : [],
           );
           recipeMap[recipeId] = RecipeWithFolders(recipe: recipe, folders: []);

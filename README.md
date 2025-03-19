@@ -98,9 +98,10 @@ A new Flutter project.
   - [X] Split apart widgets
   - [X] Design for albums
   - [X] Implement albums
-  - [ ] Ensure recipes are created under folders (maybe need a product backlog to give us a folder selector if done outside of folder)
-  - [ ] Implement rough recipe list under folders
-  - [ ] Remove dummy recipes from recipe root page
+  - [X] Ensure recipes are created under folders (maybe need a product backlog to give us a folder selector if done outside of folder)
+  - [X] Implement rough recipe list under folders
+  - [X] Remove dummy recipes from recipe root page
+  - [ ] Recipe tile context menu & delete
   - [ ] Implement rough recipe detail page skeleton and routing
   - [ ] Add recipe details to details page
   - [ ] Deletion of folders - what happens to descendants
