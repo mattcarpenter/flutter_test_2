@@ -166,7 +166,7 @@ class RecipeRepository {
     LEFT JOIN recipe_folders f 
       ON f.id IN (SELECT value FROM json_each(r.folder_ids))
     WHERE r.deleted_at IS NULL
-    ORDER BY r.created_at DESC
+    ORDER BY r.created_at, r.id DESC
     ''',
       readsFrom: {
         _db.recipes,
@@ -269,7 +269,7 @@ class RecipeRepository {
     WHERE (json_array_contains(r.folder_ids, ?)
     OR (? IS NULL AND r.folder_ids IS NULL))
     AND r.deleted_at IS NULL
-    ORDER BY r.created_at DESC
+    ORDER BY r.created_at, r.id DESC
     ''',
       variables: [
         Variable(folderId),
