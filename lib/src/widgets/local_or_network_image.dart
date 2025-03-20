@@ -70,7 +70,7 @@ class _LocalOrNetworkImageState extends State<LocalOrNetworkImage> {
     // If we're still loading, show the placeholder
     if (_isLoading) {
       return Shimmer.fromColors(
-        baseColor: Colors.grey[200]!,
+        baseColor: Colors.grey[300]!,
         highlightColor: Colors.grey[100]!,
         child: Container(
           height: widget.height,
@@ -93,6 +93,7 @@ class _LocalOrNetworkImageState extends State<LocalOrNetworkImage> {
     // Otherwise show network image if URL exists
     if (widget.url.isNotEmpty) {
       return CachedNetworkImage(
+        fadeInDuration: const Duration(milliseconds: 100),
         imageUrl: widget.url,
         height: widget.height,
         width: widget.width,
@@ -101,7 +102,7 @@ class _LocalOrNetworkImageState extends State<LocalOrNetworkImage> {
           height: widget.height,
           width: widget.width,
           child: Shimmer.fromColors(
-            baseColor: Colors.grey[200]!,
+            baseColor: Colors.grey[300]!,
             highlightColor: Colors.grey[100]!,
             child: Container(
               height: widget.height,
