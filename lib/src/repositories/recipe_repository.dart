@@ -67,10 +67,14 @@ class RecipeRepository {
     return updateRecipe(updatedRecipe);
   }
 
-
-  // Delete a recipe.
-  Future<int> deleteRecipe(String id) {
-    return (_db.delete(_db.recipes)..where((tbl) => tbl.id.equals(id))).go();
+  // Soft delete a recipe using the deletedAt timestamp
+  Future<bool> deleteRecipe(String id) async {
+    final recipe = await getRecipeById(id);
+    if (recipe != null) {
+      final updatedRecipe = recipe.copyWith(deletedAt: Value(DateTime.now().millisecondsSinceEpoch));
+      return updateRecipe(updatedRecipe);
+    }
+    return false;
   }
 
   // Helper: Add a folder assignment to a recipe by updating its folder_ids array.
@@ -153,6 +157,7 @@ class RecipeRepository {
       r.steps AS recipe_steps,
       r.folder_ids AS recipe_folder_ids,
       r.images AS recipe_images,
+      r.deleted_at AS recipe_deleted_at,
       
       f.id AS folder_id, 
       f.name AS folder_name,
@@ -160,6 +165,7 @@ class RecipeRepository {
     FROM recipes r
     LEFT JOIN recipe_folders f 
       ON f.id IN (SELECT value FROM json_each(r.folder_ids))
+    WHERE r.deleted_at IS NULL
     ''',
       readsFrom: {
         _db.recipes,
@@ -191,6 +197,7 @@ class RecipeRepository {
             householdId: row.read<String?>('recipe_household_id'),
             createdAt: row.read<int?>('recipe_created_at'),
             updatedAt: row.read<int?>('recipe_updated_at'),
+            deletedAt: row.read<int?>('recipe_deleted_at'),
 
             // Convert JSON String to List<Ingredient>
             ingredients: row.read<String?>('recipe_ingredients') != null
@@ -250,6 +257,7 @@ class RecipeRepository {
       r.steps AS recipe_steps,
       r.folder_ids AS recipe_folder_ids,
       r.images AS recipe_images,
+      r.deleted_at AS recipe_deleted_at,
       
       f.id AS folder_id, 
       f.name AS folder_name,
@@ -257,8 +265,9 @@ class RecipeRepository {
     FROM recipes r
     LEFT JOIN recipe_folders f 
       ON f.id IN (SELECT value FROM json_each(r.folder_ids))
-    WHERE json_array_contains(r.folder_ids, ?)
-    OR (? IS NULL AND r.folder_ids IS NULL)
+    WHERE (json_array_contains(r.folder_ids, ?)
+    OR (? IS NULL AND r.folder_ids IS NULL))
+    AND r.deleted_at IS NULL
     ''',
       variables: [
         Variable(folderId),
@@ -294,6 +303,7 @@ class RecipeRepository {
             householdId: row.read<String?>('recipe_household_id'),
             createdAt: row.read<int?>('recipe_created_at'),
             updatedAt: row.read<int?>('recipe_updated_at'),
+            deletedAt: row.read<int?>('recipe_deleted_at'),
 
             // Convert JSON String to List<Ingredient>
             ingredients: row.read<String?>('recipe_ingredients') != null

@@ -675,13 +675,13 @@ class MockRecipeRepository extends _i1.Mock implements _i10.RecipeRepository {
       ) as _i5.Future<bool>);
 
   @override
-  _i5.Future<int> deleteRecipe(String? id) => (super.noSuchMethod(
+  _i5.Future<bool> deleteRecipe(String? id) => (super.noSuchMethod(
         Invocation.method(
           #deleteRecipe,
           [id],
         ),
-        returnValue: _i5.Future<int>.value(0),
-      ) as _i5.Future<int>);
+        returnValue: _i5.Future<bool>.value(false),
+      ) as _i5.Future<bool>);
 
   @override
   _i5.Future<void> addFolderToRecipe({
@@ -757,6 +757,17 @@ class MockRecipeRepository extends _i1.Mock implements _i10.RecipeRepository {
         Invocation.method(
           #watchRecipesWithFolders,
           [],
+        ),
+        returnValue: _i5.Stream<List<_i13.RecipeWithFolders>>.empty(),
+      ) as _i5.Stream<List<_i13.RecipeWithFolders>>);
+
+  @override
+  _i5.Stream<List<_i13.RecipeWithFolders>> watchRecipesByFolderId(
+          String? folderId) =>
+      (super.noSuchMethod(
+        Invocation.method(
+          #watchRecipesByFolderId,
+          [folderId],
         ),
         returnValue: _i5.Stream<List<_i13.RecipeWithFolders>>.empty(),
       ) as _i5.Stream<List<_i13.RecipeWithFolders>>);

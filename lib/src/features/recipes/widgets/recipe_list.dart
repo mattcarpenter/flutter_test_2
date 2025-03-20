@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:recipe_app/src/features/recipes/widgets/recipe_tile.dart';
 
 import '../../../../database/database.dart';
+import '../../../providers/recipe_provider.dart';
 
 class Recipe {
   final String name;
@@ -19,22 +21,13 @@ class Recipe {
   });
 }
 
-final List<Recipe> dummyRecipes = [
-  Recipe(name: 'Spaghetti Bolognese', time: '45 mins', difficulty: 'Medium', imageName: '1.png'),
-  Recipe(name: 'Chicken Curry', time: '60 mins', difficulty: 'Hard', imageName: '2.png'),
-  Recipe(name: 'Grilled Cheese', time: '15 mins', difficulty: 'Easy', imageName: '3.png'),
-  Recipe(name: 'Caesar Salad', time: '20 mins', difficulty: 'Easy', imageName: '4.png'),
-  Recipe(name: 'Beef Stroganoff', time: '50 mins', difficulty: 'Medium', imageName: '5.png'),
-  Recipe(name: 'Vegetable Stir Fry', time: '30 mins', difficulty: 'Easy', imageName: '6.png'),
-];
-
-class RecipesList extends StatelessWidget {
+class RecipesList extends ConsumerWidget {
   final List<RecipeEntry> recipes;
 
   const RecipesList({Key? key, required this.recipes}) : super(key: key);
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     return SliverPadding(
       padding: const EdgeInsets.all(16),
       sliver: SliverGrid(
@@ -42,7 +35,9 @@ class RecipesList extends StatelessWidget {
         delegate: SliverChildBuilderDelegate(
               (BuildContext context, int index) {
             final recipe = recipes[index];
-            return RecipeTile(recipe: recipe);
+            return RecipeTile(key: ValueKey(recipe.id), recipe: recipe, onDelete: () {
+              ref.read(recipeNotifierProvider.notifier).deleteRecipe(recipe.id);
+            });
           },
           childCount: recipes.length,
         ),

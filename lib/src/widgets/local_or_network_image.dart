@@ -2,7 +2,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 
-class LocalOrNetworkImage extends StatelessWidget {
+class LocalOrNetworkImage extends StatefulWidget {
   final String filePath;
   final String url;
   final double? height;
@@ -19,48 +19,99 @@ class LocalOrNetworkImage extends StatelessWidget {
   });
 
   @override
+  State<LocalOrNetworkImage> createState() => _LocalOrNetworkImageState();
+}
+
+class _LocalOrNetworkImageState extends State<LocalOrNetworkImage> {
+  bool? _fileExists;
+  bool _isLoading = true;
+  late File localFile;
+
+  @override
+  void initState() {
+    super.initState();
+    _checkFileExists();
+  }
+
+  @override
+  void didUpdateWidget(LocalOrNetworkImage oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    // Only re-check if the file path changes
+    if (oldWidget.filePath != widget.filePath) {
+      _isLoading = true;
+      _fileExists = null;
+      _checkFileExists();
+    }
+  }
+
+  Future<void> _checkFileExists() async {
+    if (widget.filePath.isEmpty) {
+      setState(() {
+        _fileExists = false;
+        _isLoading = false;
+      });
+      return;
+    }
+
+    localFile = File(widget.filePath);
+    final exists = await localFile.exists();
+
+    if (mounted) {
+      setState(() {
+        _fileExists = exists;
+        _isLoading = false;
+      });
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
-    File localFile = File(filePath);
+    // If we're still loading, show the placeholder
+    if (_isLoading) {
+      return SizedBox(
+        height: widget.height,
+        width: widget.width,
+        child: const Center(child: CircularProgressIndicator()),
+      );
+    }
 
-    return FutureBuilder<bool>(
-      future: localFile.exists(),
-      builder: (context, snapshot) {
-        if (snapshot.connectionState == ConnectionState.waiting) {
-          return SizedBox(
-            height: height,
-            width: width,
-            child: const Center(child: CircularProgressIndicator()),
-          );
-        }
+    // If file exists, show local file
+    if (_fileExists == true) {
+      return Image.file(
+        localFile,
+        height: widget.height,
+        width: widget.width,
+        fit: widget.fit,
+      );
+    }
 
-        if (snapshot.data == true) {
-          // Local file exists, load from disk
-          return Image.file(
-            localFile,
-            height: height,
-            width: width,
-            fit: fit,
-          );
-        } else {
-          // Fallback to network image
-          return CachedNetworkImage(
-            imageUrl: url,
-            height: height,
-            width: width,
-            fit: fit,
-            placeholder: (context, url) => SizedBox(
-              height: height,
-              width: width,
-              child: const Center(child: CircularProgressIndicator()),
-            ),
-            errorWidget: (context, url, error) => SizedBox(
-              height: height,
-              width: width,
-              child: const Center(child: Icon(Icons.error, color: Colors.red)),
-            ),
-          );
-        }
-      },
+    // Otherwise show network image if URL exists
+    if (widget.url.isNotEmpty) {
+      return CachedNetworkImage(
+        imageUrl: widget.url,
+        height: widget.height,
+        width: widget.width,
+        fit: widget.fit,
+        placeholder: (context, url) => SizedBox(
+          height: widget.height,
+          width: widget.width,
+          child: const Center(child: CircularProgressIndicator()),
+        ),
+        errorWidget: (context, url, error) => SizedBox(
+          height: widget.height,
+          width: widget.width,
+          child: const Center(child: Icon(Icons.error, color: Colors.red)),
+        ),
+      );
+    }
+
+    // Fallback when neither local file exists nor URL is provided
+    return SizedBox(
+      height: widget.height,
+      width: widget.width,
+      child: const Center(
+        child: Icon(Icons.no_photography, color: Colors.grey),
+      ),
     );
   }
 }

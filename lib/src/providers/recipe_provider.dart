@@ -160,6 +160,14 @@ class RecipeNotifier extends StateNotifier<AsyncValue<List<RecipeWithFolders>>> 
       state = AsyncValue.error(e, stack);
     }
   }
+
+  Future<void> deleteRecipe(String recipeId) async {
+    try {
+      await _repository.deleteRecipe(recipeId);
+    } catch (e, stack) {
+      state = AsyncValue.error(e, stack);
+    }
+  }
 }
 
 // Provider for the RecipeNotifier.
