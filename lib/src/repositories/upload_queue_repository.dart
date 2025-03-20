@@ -33,6 +33,13 @@ class UploadQueueRepository {
         .get();
   }
 
+  // Delete entry by filename
+  Future<int> deleteEntryByFileName(String fileName) async {
+    return await (_db.delete(_db.uploadQueues)
+      ..where((tbl) => tbl.fileName.equals(fileName)))
+        .go();
+  }
+
   // Update an entry.
   Future<bool> updateEntry(UploadQueueEntry entry) async {
     return await _db.update(_db.uploadQueues).replace(entry);

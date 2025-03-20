@@ -4,13 +4,14 @@ import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:nanoid/nanoid.dart';
 import 'package:path_provider/path_provider.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter_image_compress/flutter_image_compress.dart';
 import 'package:uuid/uuid.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../../../database/models/recipe_images.dart';
+import 'package:recipe_app/src/managers/upload_queue_manager.dart'; // import your manager file
 
-class ImagePickerSection extends StatefulWidget {
+class ImagePickerSection extends ConsumerStatefulWidget {
   final List<RecipeImage> images;
   final Function(List<RecipeImage>) onImagesUpdated;
 
@@ -24,10 +25,9 @@ class ImagePickerSection extends StatefulWidget {
   _ImagePickerSectionState createState() => _ImagePickerSectionState();
 }
 
-class _ImagePickerSectionState extends State<ImagePickerSection> {
+class _ImagePickerSectionState extends ConsumerState<ImagePickerSection> {
   final ImagePicker _picker = ImagePicker();
 
-  /// Opens a platform-adaptive picker for Camera/Gallery
   Future<void> _showImagePickerDialog(BuildContext context) async {
     if (Platform.isIOS) {
       showCupertinoModalPopup(
@@ -83,7 +83,6 @@ class _ImagePickerSectionState extends State<ImagePickerSection> {
     }
   }
 
-  /// Handles picking an image from Camera/Gallery
   Future<void> _pickImage(ImageSource source) async {
     final XFile? image = await _picker.pickImage(source: source);
     if (image == null) return;
@@ -103,13 +102,17 @@ class _ImagePickerSectionState extends State<ImagePickerSection> {
       fileName: savedFileName,
     );
 
+    // Optionally, if you want to add this image to the upload queue immediately:
+    final uploadQueueManager = ref.read(uploadQueueManagerProvider);
+    // For example, if you need the recipe ID, pass it accordingly.
+    // uploadQueueManager.addToQueue(fileName: savedFileName, recipeId: 'your_recipe_id');
+
     setState(() {
       widget.onImagesUpdated([...widget.images, newImage]);
     });
   }
 
-  /// Compress and resize the image before saving
-  Future<File> _compressImage(File file, String fileName, {int size=1280}) async {
+  Future<File> _compressImage(File file, String fileName, {int size = 1280}) async {
     final directory = await getTemporaryDirectory();
     final String targetPath = '${directory.path}/${fileName}.jpg';
 
@@ -119,33 +122,23 @@ class _ImagePickerSectionState extends State<ImagePickerSection> {
       quality: 90,
       minWidth: size,
       minHeight: size,
-      format: CompressFormat.jpeg
+      format: CompressFormat.jpeg,
     );
 
     if (compressedXFile == null) {
-      return file; // If compression fails, return original file
+      return file;
     }
-
-    return File(compressedXFile.path); // Convert XFile to File
+    return File(compressedXFile.path);
   }
 
-  /// Saves the compressed image to local storage and stores only the filename
   Future<String> _saveImageLocally(File imageFile, String fileName) async {
     final directory = await getApplicationDocumentsDirectory();
     final String newPath = '${directory.path}/$fileName';
 
     await imageFile.copy(newPath);
-
-    // Save filename (not full path) in shared preferences
-    final prefs = await SharedPreferences.getInstance();
-    List<String> storedFiles = prefs.getStringList('local_images') ?? [];
-    storedFiles.add(fileName);
-    await prefs.setStringList('local_images', storedFiles);
-
     return fileName;
   }
 
-  /// Shows a confirmation prompt before deleting an image
   Future<void> _confirmDeleteImage(int index) async {
     if (Platform.isIOS) {
       showCupertinoDialog(
@@ -193,29 +186,30 @@ class _ImagePickerSectionState extends State<ImagePickerSection> {
     }
   }
 
-  /// Deletes an image from local storage and updates the list
   void _deleteImage(int index) async {
     final recipeImage = widget.images[index];
     final fullPath = await recipeImage.getFullPath();
 
-    // Delete file from storage
+    // Delete file from storage.
     final file = File(fullPath);
     if (await file.exists()) {
       await file.delete();
     }
 
-    // Remove from list and update UI
+    // Remove filename from the upload queue.
+    final uploadQueueManager = ref.read(uploadQueueManagerProvider);
+    try {
+      await uploadQueueManager.removeFromQueue(recipeImage.fileName);
+    } catch (e) {
+      debugPrint('Error removing image from upload queue: $e');
+    }
+
+    // Update UI.
     setState(() {
       final updatedImages = List<RecipeImage>.from(widget.images);
       updatedImages.removeAt(index);
       widget.onImagesUpdated(updatedImages);
     });
-
-    // Also remove from shared preferences
-    final prefs = await SharedPreferences.getInstance();
-    final storedFiles = prefs.getStringList('local_images') ?? [];
-    storedFiles.remove(recipeImage.fileName);
-    await prefs.setStringList('local_images', storedFiles);
   }
 
   @override
@@ -228,8 +222,6 @@ class _ImagePickerSectionState extends State<ImagePickerSection> {
           style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
         ),
         const SizedBox(height: 8),
-
-        // Horizontally scrolling list of images
         widget.images.isEmpty
             ? const Text("No photos added")
             : SizedBox(
@@ -284,8 +276,6 @@ class _ImagePickerSectionState extends State<ImagePickerSection> {
           ),
         ),
         const SizedBox(height: 12),
-
-        // Add Photo Button
         ElevatedButton.icon(
           onPressed: () => _showImagePickerDialog(context),
           icon: const Icon(Icons.add_a_photo),

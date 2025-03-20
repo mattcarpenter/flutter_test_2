@@ -91,6 +91,11 @@ class UploadQueueManager {
     return id;
   }
 
+  // Remove from queue
+  Future<void> removeFromQueue(String fileName) async {
+    await repository.deleteEntryByFileName(fileName);
+  }
+
   /// Schedules a debounced call to process the queue.
   void _scheduleProcessing({Duration delay = const Duration(seconds: 2)}) {
     _debounceTimer?.cancel();
