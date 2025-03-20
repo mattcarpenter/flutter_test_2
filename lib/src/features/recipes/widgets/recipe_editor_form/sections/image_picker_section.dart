@@ -9,7 +9,9 @@ import 'package:uuid/uuid.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../../../database/models/recipe_images.dart';
-import 'package:recipe_app/src/managers/upload_queue_manager.dart'; // import your manager file
+import 'package:recipe_app/src/managers/upload_queue_manager.dart';
+
+import '../../../../../widgets/local_or_network_image.dart'; // import your manager file
 
 class ImagePickerSection extends ConsumerStatefulWidget {
   final List<RecipeImage> images;
@@ -230,6 +232,8 @@ class _ImagePickerSectionState extends ConsumerState<ImagePickerSection> {
             scrollDirection: Axis.horizontal,
             itemCount: widget.images.length,
             itemBuilder: (context, index) {
+              final recipeImage = widget.images[index];
+              final imageUrl = recipeImage.getPublicUrlForSize(RecipeImageSize.small) ?? '';
               return FutureBuilder<String>(
                 future: widget.images[index].getFullPath(),
                 builder: (context, snapshot) {
@@ -245,10 +249,11 @@ class _ImagePickerSectionState extends ConsumerState<ImagePickerSection> {
                         padding: const EdgeInsets.all(4.0),
                         child: ClipRRect(
                           borderRadius: BorderRadius.circular(8),
-                          child: Image.file(
-                            File(snapshot.data!),
-                            width: 80,
+                          child: LocalOrNetworkImage(
+                            filePath: recipeImage.fileName, // Just pass the file name
+                            url: imageUrl,
                             height: 80,
+                            width: 80,
                             fit: BoxFit.cover,
                           ),
                         ),

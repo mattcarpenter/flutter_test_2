@@ -93,7 +93,9 @@ class _LocalOrNetworkImageState extends State<LocalOrNetworkImage> {
     // Otherwise show network image if URL exists
     if (widget.url.isNotEmpty) {
       return CachedNetworkImage(
-        fadeInDuration: const Duration(milliseconds: 100),
+        fadeInDuration: const Duration(milliseconds: 180),
+        fadeOutDuration: const Duration(milliseconds: 180),
+        fadeOutCurve: Curves.easeOut,
         imageUrl: widget.url,
         height: widget.height,
         width: widget.width,
