@@ -4,27 +4,16 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:recipe_app/src/features/recipes/widgets/recipe_tile.dart';
 
+import 'package:go_router/go_router.dart';
+
 import '../../../../database/database.dart';
 import '../../../providers/recipe_provider.dart';
 
-class Recipe {
-  final String name;
-  final String time;
-  final String difficulty;
-  final String imageName;
-
-  Recipe({
-    required this.name,
-    required this.time,
-    required this.difficulty,
-    required this.imageName,
-  });
-}
-
 class RecipesList extends ConsumerWidget {
   final List<RecipeEntry> recipes;
+  final String currentPageTitle;
 
-  const RecipesList({Key? key, required this.recipes}) : super(key: key);
+  const RecipesList({super.key, required this.recipes, required this.currentPageTitle});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -35,7 +24,13 @@ class RecipesList extends ConsumerWidget {
         delegate: SliverChildBuilderDelegate(
               (BuildContext context, int index) {
             final recipe = recipes[index];
-            return RecipeTile(key: ValueKey(recipe.id), recipe: recipe, onDelete: () {
+            return RecipeTile(key: ValueKey(recipe.id), recipe: recipe,
+                onTap: () {
+                  context.push('/recipes/recipe/${recipe.id}', extra: {
+                    'previousPageTitle': currentPageTitle,
+                  });
+                },
+                onDelete: () {
               ref.read(recipeNotifierProvider.notifier).deleteRecipe(recipe.id);
             });
           },

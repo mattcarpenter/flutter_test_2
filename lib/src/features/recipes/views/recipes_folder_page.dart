@@ -50,7 +50,7 @@ class RecipesFolderPage extends ConsumerWidget {
               );
             }
 
-            return RecipesList(recipes: filteredRecipes);
+            return RecipesList(recipes: filteredRecipes, currentPageTitle: title);
           },
         ),
       ],
