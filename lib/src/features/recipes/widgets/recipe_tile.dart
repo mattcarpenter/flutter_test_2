@@ -5,6 +5,7 @@ import 'package:super_context_menu/super_context_menu.dart';
 import '../../../../database/database.dart';
 import '../../../../database/models/recipe_images.dart';
 import '../../../widgets/local_or_network_image.dart';
+import '../views/add_recipe_modal.dart';
 
 class RecipeTile extends StatefulWidget {
   final RecipeEntry recipe;
@@ -82,6 +83,19 @@ class _RecipeTileState extends State<RecipeTile> with SingleTickerProviderStateM
             menuProvider: (_) {
               return Menu(
                 children: [
+                  // menu action for editing:
+                  MenuAction(
+                    title: 'Edit Recipe',
+                    image: MenuImage.icon(Icons.edit),
+                    callback: () {
+                      // Show the recipe editor modal
+                      Future.delayed(const Duration(milliseconds: 250), () {
+                        if (mounted) {
+                          showRecipeEditorModal(context, recipe: widget.recipe, isEditing: true);
+                        }
+                      });
+                    },
+                  ),
                   MenuAction(
                     title: 'Delete Recipe',
                     image: MenuImage.icon(Icons.delete),
