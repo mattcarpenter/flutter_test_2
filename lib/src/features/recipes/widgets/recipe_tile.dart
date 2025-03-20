@@ -161,12 +161,15 @@ class _RecipeTileState extends State<RecipeTile> with SingleTickerProviderStateM
 
         return Container(
           // Add a solid background color to fix the transparency issue
-          decoration: BoxDecoration(
-            color: Colors.white, // Add background color to ensure opacity
+          foregroundDecoration: BoxDecoration(
             border: Border.all(color: Colors.grey.shade300, width: 1),
             borderRadius: BorderRadius.circular(12),
           ),
-          clipBehavior: Clip.hardEdge,
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(12),
+          ),
+          clipBehavior: Clip.antiAlias,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
