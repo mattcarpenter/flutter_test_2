@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:shimmer/shimmer.dart';
 
 class LocalOrNetworkImage extends StatefulWidget {
   final String filePath;
@@ -68,10 +69,14 @@ class _LocalOrNetworkImageState extends State<LocalOrNetworkImage> {
   Widget build(BuildContext context) {
     // If we're still loading, show the placeholder
     if (_isLoading) {
-      return SizedBox(
-        height: widget.height,
-        width: widget.width,
-        child: const Center(child: CircularProgressIndicator()),
+      return Shimmer.fromColors(
+        baseColor: Colors.grey[200]!,
+        highlightColor: Colors.grey[100]!,
+        child: Container(
+          height: widget.height,
+          width: widget.width,
+          color: Colors.white,
+        ),
       );
     }
 
