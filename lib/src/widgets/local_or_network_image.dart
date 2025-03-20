@@ -100,7 +100,15 @@ class _LocalOrNetworkImageState extends State<LocalOrNetworkImage> {
         placeholder: (context, url) => SizedBox(
           height: widget.height,
           width: widget.width,
-          child: const Center(child: CircularProgressIndicator()),
+          child: Shimmer.fromColors(
+            baseColor: Colors.grey[200]!,
+            highlightColor: Colors.grey[100]!,
+            child: Container(
+              height: widget.height,
+              width: widget.width,
+              color: Colors.white,
+            ),
+          ),
         ),
         errorWidget: (context, url, error) => SizedBox(
           height: widget.height,
