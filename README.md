@@ -116,6 +116,11 @@ A new Flutter project.
   - [ ] Shortlist of designers w/ pros and cons
   - [ ] Requirements for designer (included tags?)
   - [ ] Message designer
+- [ ] Cook mode epic
+- [ ] Inventory epic
+- [ ] Shopping List Epic
+- [ ] Discover epic
+- [ ] Bake mode epic (bakers percentages)
 - [ ] Sync Finalization Epic
   - [ ] Sync local-only data on auth
   - [ ] Implement method to sync uploaded images that were created before auth
