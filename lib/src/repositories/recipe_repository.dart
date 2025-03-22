@@ -342,6 +342,12 @@ class RecipeRepository {
       return recipeMap.values.toList();
     });
   }
+
+  Stream<RecipeEntry?> watchRecipeById(String id) {
+    return (_db.select(_db.recipes)
+      ..where((tbl) => tbl.id.equals(id)))
+        .watchSingleOrNull();
+  }
 }
 
 final recipeRepositoryProvider = Provider<RecipeRepository>((ref) {

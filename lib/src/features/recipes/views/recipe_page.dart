@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../../mobile/utils/adaptive_sliver_page.dart';
 import '../../../widgets/adaptive_pull_down/adaptive_menu_item.dart';
 import '../../../widgets/adaptive_pull_down/adaptive_pull_down.dart';
+import '../widgets/recipe_view/recipe_view.dart';
 
 class RecipePage extends StatelessWidget {
   final String recipeId;
@@ -15,13 +16,11 @@ class RecipePage extends StatelessWidget {
     return AdaptiveSliverPage(
       title: 'Recipe',
       // Instead of a body, we pass in slivers.
-      slivers: const [
+      slivers: [
         SliverToBoxAdapter(
           child: Padding(
             padding: EdgeInsets.symmetric(horizontal: 16),
-            child: Text(
-              'Hello World'
-            ),
+            child: RecipeView(recipeId: recipeId),
           ),
         ),
       ],

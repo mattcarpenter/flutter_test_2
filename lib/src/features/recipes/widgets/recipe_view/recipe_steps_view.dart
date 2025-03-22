@@ -1,0 +1,182 @@
+import 'package:flutter/material.dart' hide Step;
+
+import '../../../../../database/models/steps.dart';
+
+class RecipeStepsView extends StatelessWidget {
+  final List<Step> steps;
+
+  const RecipeStepsView({Key? key, required this.steps}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            Icon(Icons.format_list_numbered, color: Theme.of(context).primaryColor),
+            const SizedBox(width: 8),
+            Text(
+              'Instructions',
+              style: Theme.of(context).textTheme.titleLarge,
+            ),
+          ],
+        ),
+        const SizedBox(height: 12),
+
+        if (steps.isEmpty)
+          const Text('No instructions listed.'),
+
+        ListView.builder(
+          shrinkWrap: true,
+          physics: const NeverScrollableScrollPhysics(),
+          itemCount: steps.length,
+          itemBuilder: (context, index) {
+            final step = steps[index];
+
+            // Section header
+            if (step.type == 'section') {
+              return Padding(
+                padding: const EdgeInsets.only(top: 16.0, bottom: 8.0),
+                child: Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
+                  decoration: BoxDecoration(
+                    color: Colors.grey.shade200,
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Text(
+                    step.text,
+                    style: const TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+              );
+            }
+
+            // Regular step
+            return Padding(
+              padding: const EdgeInsets.symmetric(vertical: 12.0),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // Step number (for non-section steps)
+                  Container(
+                    width: 28,
+                    height: 28,
+                    alignment: Alignment.center,
+                    decoration: BoxDecoration(
+                      color: Theme.of(context).primaryColor,
+                      shape: BoxShape.circle,
+                    ),
+                    child: Text(
+                      '${_getStepNumber(steps, index)}',
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+
+                  // Step content
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        // Step text
+                        Text(
+                          step.text,
+                          style: const TextStyle(fontSize: 16),
+                        ),
+
+                        // Note (if available)
+                        if (step.note != null && step.note!.isNotEmpty) ...[
+                          const SizedBox(height: 8),
+                          Container(
+                            width: double.infinity,
+                            padding: const EdgeInsets.all(8),
+                            decoration: BoxDecoration(
+                              color: Colors.grey.shade50,
+                              borderRadius: BorderRadius.circular(6),
+                              border: Border.all(color: Colors.grey.shade200),
+                            ),
+                            child: Text(
+                              step.note!,
+                              style: TextStyle(
+                                fontStyle: FontStyle.italic,
+                                color: Colors.grey[700],
+                              ),
+                            ),
+                          ),
+                        ],
+
+                        // Timer (if available)
+                        if (step.timerDurationSeconds != null && step.timerDurationSeconds! > 0) ...[
+                          const SizedBox(height: 8),
+                          Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                            decoration: BoxDecoration(
+                              color: Theme.of(context).primaryColor.withOpacity(0.1),
+                              borderRadius: BorderRadius.circular(20),
+                            ),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Icon(
+                                  Icons.timer,
+                                  size: 18,
+                                  color: Theme.of(context).primaryColor,
+                                ),
+                                const SizedBox(width: 4),
+                                Text(
+                                  _formatDuration(step.timerDurationSeconds!),
+                                  style: TextStyle(
+                                    color: Theme.of(context).primaryColor,
+                                    fontWeight: FontWeight.w500,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            );
+          },
+        ),
+      ],
+    );
+  }
+
+  // Calculate the step number (excluding sections)
+  int _getStepNumber(List<Step> steps, int currentIndex) {
+    int number = 1;
+    for (int i = 0; i < currentIndex; i++) {
+      if (steps[i].type != 'section') {
+        number++;
+      }
+    }
+    return number;
+  }
+
+  // Format seconds to mm:ss or hh:mm:ss
+  String _formatDuration(int seconds) {
+    final Duration duration = Duration(seconds: seconds);
+
+    final hours = duration.inHours;
+    final minutes = duration.inMinutes.remainder(60);
+    final secs = duration.inSeconds.remainder(60);
+
+    if (hours > 0) {
+      return '$hours:${minutes.toString().padLeft(2, '0')}:${secs.toString().padLeft(2, '0')}';
+    } else {
+      return '$minutes:${secs.toString().padLeft(2, '0')}';
+    }
+  }
+}
