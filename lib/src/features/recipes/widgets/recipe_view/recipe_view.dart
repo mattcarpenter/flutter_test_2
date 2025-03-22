@@ -119,12 +119,12 @@ class RecipeView extends ConsumerWidget {
               ),
             ],
 
-            const SizedBox(height: 24),
+            const SizedBox(height: 16),
 
             // Ingredients
             RecipeIngredientsView(ingredients: recipe.ingredients ?? []),
 
-            const SizedBox(height: 24),
+            const SizedBox(height: 8),
 
             // Steps
             RecipeStepsView(steps: recipe.steps ?? []),

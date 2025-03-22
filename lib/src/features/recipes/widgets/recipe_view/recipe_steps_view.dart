@@ -22,7 +22,6 @@ class RecipeStepsView extends StatelessWidget {
             ),
           ],
         ),
-        const SizedBox(height: 12),
 
         if (steps.isEmpty)
           const Text('No instructions listed.'),
@@ -37,7 +36,7 @@ class RecipeStepsView extends StatelessWidget {
             // Section header
             if (step.type == 'section') {
               return Padding(
-                padding: const EdgeInsets.only(top: 16.0, bottom: 8.0),
+                padding: const EdgeInsets.only(top: 8.0, bottom: 8.0),
                 child: Container(
                   width: double.infinity,
                   padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 12),

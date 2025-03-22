@@ -22,7 +22,6 @@ class RecipeIngredientsView extends StatelessWidget {
             ),
           ],
         ),
-        const SizedBox(height: 12),
 
         if (ingredients.isEmpty)
           const Text('No ingredients listed.'),
@@ -38,7 +37,7 @@ class RecipeIngredientsView extends StatelessWidget {
             // Section header
             if (ingredient.type == 'section') {
               return Padding(
-                padding: const EdgeInsets.only(top: 16.0, bottom: 8.0),
+                padding: const EdgeInsets.only(top: 8.0, bottom: 8.0),
                 child: Container(
                   width: double.infinity,
                   padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 12),

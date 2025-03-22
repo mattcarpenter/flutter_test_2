@@ -59,6 +59,9 @@ A new Flutter project.
   - [X] Test folders on Android
   - [X] Folder deletion super broken (black screen)
   - [X] Folder context menu positioning weird on tablet
+- [X] Fix breakpoints and show/hide sidebar animations
+- [X] Android: Overflow issue on recipe cards
+- [X] Android: Long press context menu on folder tiles incorrect positioning of menu
 - [ ] Implement Recipes
   - [X] Recipe capabilities
   - [X] Convert deletedAt to numeric timestamp
@@ -101,29 +104,32 @@ A new Flutter project.
   - [X] Ensure recipes are created under folders (maybe need a product backlog to give us a folder selector if done outside of folder)
   - [X] Implement rough recipe list under folders
   - [X] Remove dummy recipes from recipe root page
-  - [ ] Recipe tile context menu & delete
-  - [ ] Implement rough recipe detail page skeleton and routing
-  - [ ] Add recipe details to details page
-  - [ ] Deletion of folders - what happens to descendants
+  - [X] Recipe tile context menu & delete
+  - [X] Implement rough recipe detail page skeleton and routing
+  - [X] Add recipe details to details page
+  - [ ] Fix bug related to image upload attempts after update when token expired
+  - [ ] Implement Uncategorized "Folder"
+  - [ ] Implement folder deletion (recipes go to uncategorized)
   - [X] Implement sharing (backend only)
-- [ ] Test: will local unauthenticated data get synced after logging in? guessing not because no userId
-- [ ] Implement method to sync uploaded images that were created before auth
-- [ ] Check in on status of scroll bug https://github.com/flutter/flutter/issues/163297
-- [ ] Haptic feedback on context menu long-press
-- [X] Fix breakpoints and show/hide sidebar animations
-- [X] Android: Overflow issue on recipe cards
-- [X] Android: Long press context menu on folder tiles incorrect positioning of menu
-- [ ] Blue (or red?) back button
-- [ ] Revisit directory structure (mobile vs other platforms - are they necessary, can we consolidate or clean up)
-- [ ] Implement Basic Recipes
-- [ ] Think about Windows
-- [ ] L10n
-- [ ] Internationalization (default units settings)
-- [ ] Settings page
-- [ ] Transparent navigation sliver background??
-- [ ] Android dark mode colors
-- [ ] Spec for tree nav (look at Notion?)
-- [ ] Finish impl of tree nav (minus nav)
+- [ ] Design Epic
+  - [ ] Build idea board figma and screenshots of current app
+  - [ ] Shortlist of designers w/ pros and cons
+  - [ ] Requirements for designer (included tags?)
+  - [ ] Message designer
+- [ ] Sync Finalization Epic
+  - [ ] Sync local-only data on auth
+  - [ ] Implement method to sync uploaded images that were created before auth
+- [ ] Mobile Platform Design Consistency Epic
+  - [ ] Regression test Android
+  - [ ] Light and Dark Mode
+  - [ ] Inventory widgets that need to be adaptive
+- [ ] Desktop Versions Epic
+- [ ] L10n & Internationalization
+  - [ ] Strings to l10n dictionary
+  - [ ] Requirements for Internationalization (e.g., units)
+- [ ] Settings epic
+- [ ] Sidebar finalization epic
+- [ ] Registration and sign-in epic
 
 ### Thinking
 * macos app.dart will be very similar to mobile app.dart. same for windows.
