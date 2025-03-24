@@ -9,6 +9,7 @@ import 'package:recipe_app/src/repositories/recipe_repository.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:path/path.dart' as path;
 import '../../database/database.dart';
+import '../../database/models/recipe_images.dart';
 import '../../database/powersync.dart';
 import '../repositories/upload_queue_repository.dart';
 
@@ -80,6 +81,19 @@ class UploadQueueManager {
     final existingEntry = await repository.getEntryByFileName(fileName);
     if (existingEntry != null) {
       debugPrint('Entry for file $fileName already exists in the queue.');
+      return 0;
+    }
+
+    // Check if the file actually exists on this device
+    try {
+      final fullPath = await repository.resolveFullPath(fileName);
+      final file = File(fullPath);
+      if (!await file.exists()) {
+        debugPrint('File $fileName does not exist locally, skipping upload queue.');
+        return 0;
+      }
+    } catch (e) {
+      debugPrint('Error checking file existence: $e');
       return 0;
     }
 

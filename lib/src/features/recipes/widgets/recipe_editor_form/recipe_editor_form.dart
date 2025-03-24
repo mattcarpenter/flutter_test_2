@@ -156,10 +156,12 @@ class RecipeEditorFormState extends ConsumerState<RecipeEditorForm> {
       // Add any pending images to the upload queue.
       for (final image in updatedRecipe.images ?? []) {
         // Even if the image was updated by the processor, addToQueue should be a no-op if already uploaded.
-        ref.read(uploadQueueManagerProvider).addToQueue(
-          fileName: image.fileName,
-          recipeId: updatedRecipe.id,
-        );
+        if (image.publicUrl == null) {
+          ref.read(uploadQueueManagerProvider).addToQueue(
+            fileName: image.fileName,
+            recipeId: updatedRecipe.id,
+          );
+        }
       }
 
       if (widget.onSave != null) widget.onSave!();
