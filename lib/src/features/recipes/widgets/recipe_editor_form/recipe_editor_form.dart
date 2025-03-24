@@ -373,13 +373,13 @@ class RecipeEditorFormState extends ConsumerState<RecipeEditorForm> {
             ),
 
             // Save Button
-            Padding(
+            /*Padding(
               padding: const EdgeInsets.symmetric(vertical: 16.0),
               child: ElevatedButton(
                 onPressed: saveRecipe,
                 child: Text(_isNewRecipe ? 'Create Recipe' : 'Update Recipe'),
               ),
-            ),
+            ),*/
           ],
         ),
       ),

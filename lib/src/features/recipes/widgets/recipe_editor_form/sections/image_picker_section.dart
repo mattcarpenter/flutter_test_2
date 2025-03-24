@@ -250,7 +250,7 @@ class _ImagePickerSectionState extends ConsumerState<ImagePickerSection> {
                         child: ClipRRect(
                           borderRadius: BorderRadius.circular(8),
                           child: LocalOrNetworkImage(
-                            filePath: recipeImage.fileName, // Just pass the file name
+                            filePath: snapshot.data ?? '', // Just pass the file name
                             url: imageUrl,
                             height: 80,
                             width: 80,
