@@ -108,7 +108,7 @@ A new Flutter project.
   - [X] Implement rough recipe detail page skeleton and routing
   - [X] Add recipe details to details page
   - [X] Fix bug related to image upload attempts after update when token expired
-  - [ ] Implement Uncategorized "Folder"
+  - [X] Implement Uncategorized "Folder"
   - [ ] Implement folder deletion (recipes go to uncategorized)
   - [X] Implement sharing (backend only)
 - [ ] Design Epic
