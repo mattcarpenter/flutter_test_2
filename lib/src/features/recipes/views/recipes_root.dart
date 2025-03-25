@@ -58,10 +58,14 @@ class RecipesTab extends StatelessWidget {
               showAddFolderModal(context);
             }
           ),
-          /*AdaptiveMenuItem(
-            title: 'Add Recipe', icon: const Icon(CupertinoIcons.book), onTap: () {
-            showRecipeEditorModal(context);
-          })*/
+          AdaptiveMenuItem(
+            title: 'Add Recipe',
+            icon: const Icon(CupertinoIcons.book),
+            onTap: () {
+              // Don't pass folderId for uncategorized folder
+              showRecipeEditorModal(context, folderId: null);
+            },
+          )
         ],
         child: const Icon(CupertinoIcons.add_circled),
       ),
