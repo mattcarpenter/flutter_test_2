@@ -1,6 +1,8 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../../../database/database.dart';
+import '../../../constants/folder_constants.dart';
 import '../../../mobile/utils/adaptive_sliver_page.dart';
 import '../../../providers/recipe_provider.dart';
 import '../../../widgets/adaptive_pull_down/adaptive_menu_item.dart';
@@ -36,13 +38,25 @@ class RecipesFolderPage extends ConsumerWidget {
             child: Center(child: Text('Error: $error')),
           ),
           data: (recipesWithFolders) {
-            // Filter recipes by folder ID
-            final filteredRecipes = folderId == null
-                ? recipesWithFolders.map((r) => r.recipe).toList()
-                : recipesWithFolders
-                .where((r) => r.recipe.folderIds?.contains(folderId) ?? false)
-                .map((r) => r.recipe)
-                .toList();
+            final recipes = recipesWithFolders.map((r) => r.recipe).toList();
+
+            // Filter recipes based on folder ID
+            List<RecipeEntry> filteredRecipes;
+
+            if (folderId == kUncategorizedFolderId) {
+              // Show recipes with no folder assignments
+              filteredRecipes = recipes.where((recipe) {
+                return recipe.folderIds == null || recipe.folderIds!.isEmpty;
+              }).toList();
+            } else if (folderId == null) {
+              // Show all recipes
+              filteredRecipes = recipes;
+            } else {
+              // Show recipes in the specified folder
+              filteredRecipes = recipes
+                  .where((recipe) => recipe.folderIds?.contains(folderId) ?? false)
+                  .toList();
+            }
 
             if (filteredRecipes.isEmpty) {
               return const SliverFillRemaining(
@@ -60,7 +74,9 @@ class RecipesFolderPage extends ConsumerWidget {
             title: 'Add Recipe',
             icon: const Icon(CupertinoIcons.book),
             onTap: () {
-              showRecipeEditorModal(context, folderId: folderId);
+              // Don't pass folderId for uncategorized folder
+              final saveFolderId = folderId == kUncategorizedFolderId ? null : folderId;
+              showRecipeEditorModal(context, folderId: saveFolderId);
             },
           )
         ],

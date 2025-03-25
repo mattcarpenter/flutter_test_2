@@ -216,9 +216,16 @@ class _AdaptiveApp2State extends State<AdaptiveApp2> {
                         final folderId = state.pathParameters['folderId'];
 
                         // Get extra data (if provided) as a Map. Otherwise, use defaults.
-                        final extraData = state.extra as Map<String, String>?;
-                        final folderTitle = extraData?['folderTitle'] ?? 'Folders';
-                        final previousPageTitle = extraData?['previousPageTitle'] ?? 'Recipes';
+                        final extraData = state.extra;
+
+                        final folderTitle = (extraData is Map<String, dynamic> && extraData['folderTitle'] is String)
+                            ? extraData['folderTitle'] as String
+                            : 'Folders';
+
+                        final previousPageTitle = (extraData is Map<String, dynamic> && extraData['previousPageTitle'] is String)
+                            ? extraData['previousPageTitle'] as String
+                            : 'Recipes';
+
                         return _platformPage(
                           state: state,
                           child: RecipesFolderPage(

@@ -107,15 +107,16 @@ A new Flutter project.
   - [X] Recipe tile context menu & delete
   - [X] Implement rough recipe detail page skeleton and routing
   - [X] Add recipe details to details page
-  - [ ] Fix bug related to image upload attempts after update when token expired
+  - [X] Fix bug related to image upload attempts after update when token expired
   - [ ] Implement Uncategorized "Folder"
   - [ ] Implement folder deletion (recipes go to uncategorized)
   - [X] Implement sharing (backend only)
 - [ ] Design Epic
-  - [ ] Build idea board figma and screenshots of current app
-  - [ ] Shortlist of designers w/ pros and cons
-  - [ ] Requirements for designer (included tags?)
-  - [ ] Message designer
+  - [X] Build idea board figma and screenshots of current app
+  - [X] Shortlist of designers w/ pros and cons
+  - [X] Requirements for designer (included tags?)
+  - [X] Message designer
+  - [ ] Begin implementing new design
 - [ ] Cook mode epic
 - [ ] Inventory epic
 - [ ] Shopping List Epic

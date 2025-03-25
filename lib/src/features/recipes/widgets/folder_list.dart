@@ -3,8 +3,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import '../../../../database/database.dart';
+import '../../../constants/folder_constants.dart';
 import '../../../providers/recipe_folder_provider.dart';
-import '../widgets/folder_tile.dart';  // Import the FolderTile widget
+import '../../../providers/recipe_provider.dart';
+import '../widgets/folder_tile.dart';
 
 class FolderList extends ConsumerStatefulWidget {
   /// The title of the current page (e.g. the name of the current folder).
@@ -24,9 +27,6 @@ class _FolderListState extends ConsumerState<FolderList> {
   @override
   void initState() {
     super.initState();
-    // Ensure we load data from SQLite.
-    //final baseRepository = ref.read(baseRepositoryProvider);
-    //baseRepository.getAll<RecipeFolder>();
     folderNameController = TextEditingController();
     textFieldFocusNode = FocusNode();
   }
@@ -43,6 +43,9 @@ class _FolderListState extends ConsumerState<FolderList> {
     // Watch for folder changes using the StateNotifierProvider.
     final foldersAsyncValue = ref.watch(recipeFolderNotifierProvider);
 
+    // Get recipe counts for all folders
+    final folderCounts = ref.watch(recipeFolderCountProvider);
+
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 0),
       child: Column(
@@ -50,12 +53,13 @@ class _FolderListState extends ConsumerState<FolderList> {
         children: [
           foldersAsyncValue.when(
             data: (folders) {
-              // Filter folders: if widget.parentId is null, we show root folders.
-              final filteredFolders = folders.toList();
-
-              if (filteredFolders.isEmpty) {
-                return const Center(child: Text('No folders available'));
-              }
+              // Create a new list with regular folders plus the uncategorized folder
+              final List<dynamic> allFolders = [
+                // Add the virtual "Uncategorized" folder at the beginning
+                _createUncategorizedFolder(),
+                // Add the regular folders
+                ...folders,
+              ];
 
               return GridView.builder(
                 clipBehavior: Clip.none,
@@ -66,23 +70,43 @@ class _FolderListState extends ConsumerState<FolderList> {
                   tileSize: 120, // Fixed size
                   spacing: 2,
                 ),
-                itemCount: filteredFolders.length,
+                itemCount: allFolders.length,
                 itemBuilder: (context, index) {
-                  final folder = filteredFolders[index];
-                  // Remove the Center wrapper so FolderTile fills the cell.
+                  final folder = allFolders[index];
+
+                  // Special handling for uncategorized folder
+                  if (folder is VirtualFolder) {
+                    final count = folderCounts[folder.id] ?? 0;
+                    return FolderTile(
+                      folderName: folder.name,
+                      recipeCount: count,
+                      onTap: () {
+                        context.push('/recipes/folder/${folder.id}', extra: {
+                          'folderTitle': folder.name,
+                          'previousPageTitle': widget.currentPageTitle,
+                        });
+                      },
+                      // No delete option for uncategorized folder
+                      onDelete: () {},
+                    );
+                  }
+
+                  // Regular folder handling
+                  final regularFolder = folder as RecipeFolderEntry;
+                  final count = folderCounts[regularFolder.id] ?? 0;
                   return FolderTile(
-                    folderName: folder.name,
-                    recipeCount: 0, // Replace with actual count if available.
+                    folderName: regularFolder.name,
+                    recipeCount: count,
                     onTap: () {
-                      context.push('/recipes/folder/${folder.id}', extra: {
-                        'folderTitle': folder.name,
+                      context.push('/recipes/folder/${regularFolder.id}', extra: {
+                        'folderTitle': regularFolder.name,
                         'previousPageTitle': widget.currentPageTitle,
                       });
                     },
                     onDelete: () {
                       ref
                           .read(recipeFolderNotifierProvider.notifier)
-                          .deleteFolder(folder.id);
+                          .deleteFolder(regularFolder.id);
                     },
                   );
                 },
@@ -92,44 +116,26 @@ class _FolderListState extends ConsumerState<FolderList> {
             error: (error, stack) =>
                 Center(child: Text('Error: ${error.toString()}')),
           ),
-          // Input field and add button.
-          /*Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Row(
-              children: [
-                Expanded(
-                  child: CupertinoTextField(
-                    focusNode: textFieldFocusNode,
-                    controller: folderNameController,
-                    placeholder: 'Enter folder name',
-                  ),
-                ),
-                const SizedBox(width: 8),
-                CupertinoButton.filled(
-                  onPressed: () {
-                    final folderName = folderNameController.text.trim();
-                    if (folderName.isNotEmpty) {
-                      // Create a new folder using the widget.parentId.
-                      final newFolder = RecipeFolder.create(
-                        folderName,
-                        parentId: widget.parentId,
-                      );
-                      // Pass the whole folder object to the notifier.
-                      ref
-                          .read(recipeFolderNotifierProvider.notifier)
-                          .addFolder(newFolder);
-                      folderNameController.clear();
-                    }
-                  },
-                  child: const Text('Add'),
-                ),
-              ],
-            ),
-          ),*/
         ],
       ),
     );
   }
+
+  // Helper method to create the uncategorized virtual folder
+  VirtualFolder _createUncategorizedFolder() {
+    return VirtualFolder(
+      id: kUncategorizedFolderId,
+      name: kUncategorizedFolderName,
+    );
+  }
+}
+
+/// Class to represent a virtual folder (not stored in the database)
+class VirtualFolder {
+  final String id;
+  final String name;
+
+  VirtualFolder({required this.id, required this.name});
 }
 
 class FixedFolderGridDelegate extends SliverGridDelegate {

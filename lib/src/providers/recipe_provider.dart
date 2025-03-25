@@ -8,6 +8,7 @@ import '../../database/database.dart';
 import '../../database/models/ingredients.dart';
 import '../../database/models/recipe_images.dart';
 import '../../database/models/steps.dart';
+import '../constants/folder_constants.dart';
 import '../models/recipe_with_folders.dart';
 import '../repositories/recipe_repository.dart';
 
@@ -186,3 +187,38 @@ final recipesInFolderProvider = Provider.family<Stream<List<RecipeWithFolders>>,
     return repository.watchRecipesByFolderId(folderId);
   },
 );
+
+/// Provider that returns a map of folder IDs to recipe counts
+final recipeFolderCountProvider = Provider<Map<String, int>>((ref) {
+  final recipesAsyncValue = ref.watch(recipeNotifierProvider);
+
+  // Default empty map
+  Map<String, int> folderCounts = {};
+
+  // Special counter for uncategorized
+  int uncategorizedCount = 0;
+
+  // Process only when we have recipe data
+  recipesAsyncValue.whenData((recipesWithFolders) {
+    final recipes = recipesWithFolders.map((r) => r.recipe).toList();
+
+    // Count uncategorized recipes
+    uncategorizedCount = recipes.where((recipe) {
+      return recipe.folderIds == null || recipe.folderIds!.isEmpty;
+    }).length;
+
+    // Add uncategorized count
+    folderCounts[kUncategorizedFolderId] = uncategorizedCount;
+
+    // Count recipes per folder
+    for (final recipe in recipes) {
+      if (recipe.folderIds != null) {
+        for (final folderId in recipe.folderIds!) {
+          folderCounts[folderId] = (folderCounts[folderId] ?? 0) + 1;
+        }
+      }
+    }
+  });
+
+  return folderCounts;
+});
