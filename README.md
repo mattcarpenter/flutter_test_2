@@ -118,6 +118,7 @@ A new Flutter project.
   - [X] Message designer
   - [ ] Begin implementing new design
 - [ ] Cook mode epic
+  - [ ] Cook mode specs
 - [ ] Inventory epic
 - [ ] Shopping List Epic
 - [ ] Sharing epic
