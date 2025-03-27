@@ -1,6 +1,7 @@
 import 'package:drift/drift.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:powersync/powersync.dart';
+import 'package:recipe_app/src/repositories/recipe_repository.dart';
 import '../../database/database.dart';
 import '../../database/powersync.dart';
 import '../../database/models/recipe_folders.dart';
@@ -30,6 +31,17 @@ class RecipeFolderRepository {
     ).write(RecipeFoldersCompanion(
       deletedAt: Value(DateTime.now().millisecondsSinceEpoch),
     ));
+  }
+
+  Future<void> deleteFolderAndCleanupReferences(String folderId, RecipeRepository recipeRepository) async {
+    // Use a transaction to ensure atomicity
+    return _db.transaction(() async {
+      // First, remove folder ID from all recipes
+      await recipeRepository.removeFolderIdFromAllRecipes(folderId);
+
+      // Then soft-delete the folder
+      await deleteFolder(folderId);
+    });
   }
 }
 

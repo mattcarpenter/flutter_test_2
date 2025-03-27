@@ -348,6 +348,29 @@ class RecipeRepository {
       ..where((tbl) => tbl.id.equals(id)))
         .watchSingleOrNull();
   }
+
+  Future<void> removeFolderIdFromAllRecipes(String folderId) async {
+    // Get all recipes that aren't deleted
+    final recipesQuery = _db.select(_db.recipes)
+      ..where((tbl) => tbl.deletedAt.isNull());
+
+    final recipes = await recipesQuery.get();
+
+    // Filter to recipes that contain this folder ID
+    final recipesToUpdate = recipes.where((recipe) {
+      return recipe.folderIds != null && recipe.folderIds!.contains(folderId);
+    }).toList();
+
+    // Update each recipe by removing the folder ID
+    for (final recipe in recipesToUpdate) {
+      final updatedFolderIds = List<String>.from(recipe.folderIds ?? [])..remove(folderId);
+      final updatedRecipe = recipe.copyWith(
+        folderIds: Value(updatedFolderIds),
+        updatedAt: Value(DateTime.now().millisecondsSinceEpoch),
+      );
+      await updateRecipe(updatedRecipe);
+    }
+  }
 }
 
 final recipeRepositoryProvider = Provider<RecipeRepository>((ref) {

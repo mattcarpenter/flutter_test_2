@@ -3,13 +3,15 @@ import 'package:drift/drift.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../database/database.dart';
 import '../repositories/recipe_folder_repository.dart';
+import '../repositories/recipe_repository.dart';
 
 // RecipeFolderNotifier manages a list of RecipeFolderEntry.
 class RecipeFolderNotifier extends StateNotifier<AsyncValue<List<RecipeFolderEntry>>> {
   final RecipeFolderRepository _repository;
+  final RecipeRepository _recipeRepository;
   late final StreamSubscription<List<RecipeFolderEntry>> _subscription;
 
-  RecipeFolderNotifier(this._repository) : super(const AsyncValue.loading()) {
+  RecipeFolderNotifier(this._repository, this._recipeRepository) : super(const AsyncValue.loading()) {
     // Listen to the stream of folders from Drift.
     _subscription = _repository.watchFolders().listen(
           (folders) {
@@ -49,7 +51,7 @@ class RecipeFolderNotifier extends StateNotifier<AsyncValue<List<RecipeFolderEnt
   // Delete a folder by id.
   Future<void> deleteFolder(String id) async {
     try {
-      await _repository.deleteFolder(id);
+      await _repository.deleteFolderAndCleanupReferences(id, _recipeRepository);
     } catch (e, stack) {
       state = AsyncValue.error(e, stack);
     }
@@ -60,6 +62,7 @@ class RecipeFolderNotifier extends StateNotifier<AsyncValue<List<RecipeFolderEnt
 final recipeFolderNotifierProvider = StateNotifierProvider<RecipeFolderNotifier, AsyncValue<List<RecipeFolderEntry>>>(
       (ref) {
     final repository = ref.watch(recipeFolderRepositoryProvider);
-    return RecipeFolderNotifier(repository);
+    final recipeRepository = ref.watch(recipeRepositoryProvider);
+    return RecipeFolderNotifier(repository, recipeRepository);
   },
 );
