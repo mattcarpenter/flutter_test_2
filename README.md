@@ -62,7 +62,7 @@ A new Flutter project.
 - [X] Fix breakpoints and show/hide sidebar animations
 - [X] Android: Overflow issue on recipe cards
 - [X] Android: Long press context menu on folder tiles incorrect positioning of menu
-- [ ] Implement Recipes
+- [X] Implement Recipes
   - [X] Recipe capabilities
   - [X] Convert deletedAt to numeric timestamp
   - [X] New schemas (drift, powersync, postgres)
@@ -109,7 +109,7 @@ A new Flutter project.
   - [X] Add recipe details to details page
   - [X] Fix bug related to image upload attempts after update when token expired
   - [X] Implement Uncategorized "Folder"
-  - [ ] Implement folder deletion (recipes go to uncategorized)
+  - [X] Implement folder deletion (recipes go to uncategorized)
   - [X] Implement sharing (backend only)
 - [ ] Design Epic
   - [X] Build idea board figma and screenshots of current app
@@ -120,6 +120,8 @@ A new Flutter project.
 - [ ] Cook mode epic
 - [ ] Inventory epic
 - [ ] Shopping List Epic
+- [ ] Sharing epic
+- [ ] Smart folders epic
 - [ ] Discover epic
 - [ ] Bake mode epic (bakers percentages)
 - [ ] Sync Finalization Epic
