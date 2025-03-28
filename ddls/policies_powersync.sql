@@ -269,12 +269,22 @@ CREATE POLICY "Users can view their own cooks"
     );
 
 -- Policy for INSERT: Only allow cooks to be created by the owner or by users who are members of the specified household.
-CREATE POLICY "Users can insert cooks only for households they belong to"
+CREATE POLICY "Users can insert cooks only for recipes they have access to"
     ON public.cooks
     FOR INSERT
     WITH CHECK (
-    auth.uid() = user_id OR
-    (household_id IS NOT NULL AND public.is_household_member(household_id, auth.uid()))
+    (
+        auth.uid() = user_id
+            OR (household_id IS NOT NULL AND public.is_household_member(household_id, auth.uid()))
+        )
+        AND EXISTS (
+        SELECT 1 FROM public.recipes
+        WHERE recipes.id = recipe_id
+          AND (
+            auth.uid() = recipes.user_id
+                OR (recipes.household_id IS NOT NULL AND public.is_household_member(recipes.household_id, auth.uid()))
+            )
+    )
     );
 
 -- Policy for UPDATE: Only allow the owner or household members to update a cook.

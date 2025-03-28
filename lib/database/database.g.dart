@@ -2464,6 +2464,571 @@ class UploadQueuesCompanion extends UpdateCompanion<UploadQueueEntry> {
   }
 }
 
+class $CooksTable extends Cooks with TableInfo<$CooksTable, CookEntry> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $CooksTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<String> id = GeneratedColumn<String>(
+      'id', aliasedName, false,
+      type: DriftSqlType.string,
+      requiredDuringInsert: false,
+      defaultConstraints: GeneratedColumn.constraintIsAlways('UNIQUE'),
+      clientDefault: () => const Uuid().v4());
+  static const VerificationMeta _recipeIdMeta =
+      const VerificationMeta('recipeId');
+  @override
+  late final GeneratedColumn<String> recipeId = GeneratedColumn<String>(
+      'recipe_id', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _userIdMeta = const VerificationMeta('userId');
+  @override
+  late final GeneratedColumn<String> userId = GeneratedColumn<String>(
+      'user_id', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _householdIdMeta =
+      const VerificationMeta('householdId');
+  @override
+  late final GeneratedColumn<String> householdId = GeneratedColumn<String>(
+      'household_id', aliasedName, true,
+      type: DriftSqlType.string, requiredDuringInsert: false);
+  static const VerificationMeta _currentStepIndexMeta =
+      const VerificationMeta('currentStepIndex');
+  @override
+  late final GeneratedColumn<int> currentStepIndex = GeneratedColumn<int>(
+      'current_step_index', aliasedName, false,
+      type: DriftSqlType.int,
+      requiredDuringInsert: false,
+      defaultValue: const Constant(0));
+  static const VerificationMeta _statusMeta = const VerificationMeta('status');
+  @override
+  late final GeneratedColumnWithTypeConverter<CookStatus, String> status =
+      GeneratedColumn<String>('status', aliasedName, false,
+              type: DriftSqlType.string,
+              requiredDuringInsert: false,
+              defaultValue: const Constant('in_progress'))
+          .withConverter<CookStatus>($CooksTable.$converterstatus);
+  static const VerificationMeta _startedAtMeta =
+      const VerificationMeta('startedAt');
+  @override
+  late final GeneratedColumn<int> startedAt = GeneratedColumn<int>(
+      'started_at', aliasedName, true,
+      type: DriftSqlType.int, requiredDuringInsert: false);
+  static const VerificationMeta _finishedAtMeta =
+      const VerificationMeta('finishedAt');
+  @override
+  late final GeneratedColumn<int> finishedAt = GeneratedColumn<int>(
+      'finished_at', aliasedName, true,
+      type: DriftSqlType.int, requiredDuringInsert: false);
+  static const VerificationMeta _updatedAtMeta =
+      const VerificationMeta('updatedAt');
+  @override
+  late final GeneratedColumn<int> updatedAt = GeneratedColumn<int>(
+      'updated_at', aliasedName, true,
+      type: DriftSqlType.int, requiredDuringInsert: false);
+  static const VerificationMeta _ratingMeta = const VerificationMeta('rating');
+  @override
+  late final GeneratedColumn<int> rating = GeneratedColumn<int>(
+      'rating', aliasedName, true,
+      type: DriftSqlType.int, requiredDuringInsert: false);
+  static const VerificationMeta _notesMeta = const VerificationMeta('notes');
+  @override
+  late final GeneratedColumn<String> notes = GeneratedColumn<String>(
+      'notes', aliasedName, true,
+      type: DriftSqlType.string, requiredDuringInsert: false);
+  @override
+  List<GeneratedColumn> get $columns => [
+        id,
+        recipeId,
+        userId,
+        householdId,
+        currentStepIndex,
+        status,
+        startedAt,
+        finishedAt,
+        updatedAt,
+        rating,
+        notes
+      ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'cooks';
+  @override
+  VerificationContext validateIntegrity(Insertable<CookEntry> instance,
+      {bool isInserting = false}) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    }
+    if (data.containsKey('recipe_id')) {
+      context.handle(_recipeIdMeta,
+          recipeId.isAcceptableOrUnknown(data['recipe_id']!, _recipeIdMeta));
+    } else if (isInserting) {
+      context.missing(_recipeIdMeta);
+    }
+    if (data.containsKey('user_id')) {
+      context.handle(_userIdMeta,
+          userId.isAcceptableOrUnknown(data['user_id']!, _userIdMeta));
+    } else if (isInserting) {
+      context.missing(_userIdMeta);
+    }
+    if (data.containsKey('household_id')) {
+      context.handle(
+          _householdIdMeta,
+          householdId.isAcceptableOrUnknown(
+              data['household_id']!, _householdIdMeta));
+    }
+    if (data.containsKey('current_step_index')) {
+      context.handle(
+          _currentStepIndexMeta,
+          currentStepIndex.isAcceptableOrUnknown(
+              data['current_step_index']!, _currentStepIndexMeta));
+    }
+    context.handle(_statusMeta, const VerificationResult.success());
+    if (data.containsKey('started_at')) {
+      context.handle(_startedAtMeta,
+          startedAt.isAcceptableOrUnknown(data['started_at']!, _startedAtMeta));
+    }
+    if (data.containsKey('finished_at')) {
+      context.handle(
+          _finishedAtMeta,
+          finishedAt.isAcceptableOrUnknown(
+              data['finished_at']!, _finishedAtMeta));
+    }
+    if (data.containsKey('updated_at')) {
+      context.handle(_updatedAtMeta,
+          updatedAt.isAcceptableOrUnknown(data['updated_at']!, _updatedAtMeta));
+    }
+    if (data.containsKey('rating')) {
+      context.handle(_ratingMeta,
+          rating.isAcceptableOrUnknown(data['rating']!, _ratingMeta));
+    }
+    if (data.containsKey('notes')) {
+      context.handle(
+          _notesMeta, notes.isAcceptableOrUnknown(data['notes']!, _notesMeta));
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  CookEntry map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return CookEntry(
+      id: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}id'])!,
+      recipeId: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}recipe_id'])!,
+      userId: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}user_id'])!,
+      householdId: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}household_id']),
+      currentStepIndex: attachedDatabase.typeMapping.read(
+          DriftSqlType.int, data['${effectivePrefix}current_step_index'])!,
+      status: $CooksTable.$converterstatus.fromSql(attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}status'])!),
+      startedAt: attachedDatabase.typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}started_at']),
+      finishedAt: attachedDatabase.typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}finished_at']),
+      updatedAt: attachedDatabase.typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}updated_at']),
+      rating: attachedDatabase.typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}rating']),
+      notes: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}notes']),
+    );
+  }
+
+  @override
+  $CooksTable createAlias(String alias) {
+    return $CooksTable(attachedDatabase, alias);
+  }
+
+  static TypeConverter<CookStatus, String> $converterstatus =
+      const CookStatusConverter();
+}
+
+class CookEntry extends DataClass implements Insertable<CookEntry> {
+  final String id;
+  final String recipeId;
+  final String userId;
+  final String? householdId;
+  final int currentStepIndex;
+  final CookStatus status;
+  final int? startedAt;
+  final int? finishedAt;
+  final int? updatedAt;
+  final int? rating;
+  final String? notes;
+  const CookEntry(
+      {required this.id,
+      required this.recipeId,
+      required this.userId,
+      this.householdId,
+      required this.currentStepIndex,
+      required this.status,
+      this.startedAt,
+      this.finishedAt,
+      this.updatedAt,
+      this.rating,
+      this.notes});
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<String>(id);
+    map['recipe_id'] = Variable<String>(recipeId);
+    map['user_id'] = Variable<String>(userId);
+    if (!nullToAbsent || householdId != null) {
+      map['household_id'] = Variable<String>(householdId);
+    }
+    map['current_step_index'] = Variable<int>(currentStepIndex);
+    {
+      map['status'] =
+          Variable<String>($CooksTable.$converterstatus.toSql(status));
+    }
+    if (!nullToAbsent || startedAt != null) {
+      map['started_at'] = Variable<int>(startedAt);
+    }
+    if (!nullToAbsent || finishedAt != null) {
+      map['finished_at'] = Variable<int>(finishedAt);
+    }
+    if (!nullToAbsent || updatedAt != null) {
+      map['updated_at'] = Variable<int>(updatedAt);
+    }
+    if (!nullToAbsent || rating != null) {
+      map['rating'] = Variable<int>(rating);
+    }
+    if (!nullToAbsent || notes != null) {
+      map['notes'] = Variable<String>(notes);
+    }
+    return map;
+  }
+
+  CooksCompanion toCompanion(bool nullToAbsent) {
+    return CooksCompanion(
+      id: Value(id),
+      recipeId: Value(recipeId),
+      userId: Value(userId),
+      householdId: householdId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(householdId),
+      currentStepIndex: Value(currentStepIndex),
+      status: Value(status),
+      startedAt: startedAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(startedAt),
+      finishedAt: finishedAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(finishedAt),
+      updatedAt: updatedAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(updatedAt),
+      rating:
+          rating == null && nullToAbsent ? const Value.absent() : Value(rating),
+      notes:
+          notes == null && nullToAbsent ? const Value.absent() : Value(notes),
+    );
+  }
+
+  factory CookEntry.fromJson(Map<String, dynamic> json,
+      {ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return CookEntry(
+      id: serializer.fromJson<String>(json['id']),
+      recipeId: serializer.fromJson<String>(json['recipeId']),
+      userId: serializer.fromJson<String>(json['userId']),
+      householdId: serializer.fromJson<String?>(json['householdId']),
+      currentStepIndex: serializer.fromJson<int>(json['currentStepIndex']),
+      status: serializer.fromJson<CookStatus>(json['status']),
+      startedAt: serializer.fromJson<int?>(json['startedAt']),
+      finishedAt: serializer.fromJson<int?>(json['finishedAt']),
+      updatedAt: serializer.fromJson<int?>(json['updatedAt']),
+      rating: serializer.fromJson<int?>(json['rating']),
+      notes: serializer.fromJson<String?>(json['notes']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<String>(id),
+      'recipeId': serializer.toJson<String>(recipeId),
+      'userId': serializer.toJson<String>(userId),
+      'householdId': serializer.toJson<String?>(householdId),
+      'currentStepIndex': serializer.toJson<int>(currentStepIndex),
+      'status': serializer.toJson<CookStatus>(status),
+      'startedAt': serializer.toJson<int?>(startedAt),
+      'finishedAt': serializer.toJson<int?>(finishedAt),
+      'updatedAt': serializer.toJson<int?>(updatedAt),
+      'rating': serializer.toJson<int?>(rating),
+      'notes': serializer.toJson<String?>(notes),
+    };
+  }
+
+  CookEntry copyWith(
+          {String? id,
+          String? recipeId,
+          String? userId,
+          Value<String?> householdId = const Value.absent(),
+          int? currentStepIndex,
+          CookStatus? status,
+          Value<int?> startedAt = const Value.absent(),
+          Value<int?> finishedAt = const Value.absent(),
+          Value<int?> updatedAt = const Value.absent(),
+          Value<int?> rating = const Value.absent(),
+          Value<String?> notes = const Value.absent()}) =>
+      CookEntry(
+        id: id ?? this.id,
+        recipeId: recipeId ?? this.recipeId,
+        userId: userId ?? this.userId,
+        householdId: householdId.present ? householdId.value : this.householdId,
+        currentStepIndex: currentStepIndex ?? this.currentStepIndex,
+        status: status ?? this.status,
+        startedAt: startedAt.present ? startedAt.value : this.startedAt,
+        finishedAt: finishedAt.present ? finishedAt.value : this.finishedAt,
+        updatedAt: updatedAt.present ? updatedAt.value : this.updatedAt,
+        rating: rating.present ? rating.value : this.rating,
+        notes: notes.present ? notes.value : this.notes,
+      );
+  CookEntry copyWithCompanion(CooksCompanion data) {
+    return CookEntry(
+      id: data.id.present ? data.id.value : this.id,
+      recipeId: data.recipeId.present ? data.recipeId.value : this.recipeId,
+      userId: data.userId.present ? data.userId.value : this.userId,
+      householdId:
+          data.householdId.present ? data.householdId.value : this.householdId,
+      currentStepIndex: data.currentStepIndex.present
+          ? data.currentStepIndex.value
+          : this.currentStepIndex,
+      status: data.status.present ? data.status.value : this.status,
+      startedAt: data.startedAt.present ? data.startedAt.value : this.startedAt,
+      finishedAt:
+          data.finishedAt.present ? data.finishedAt.value : this.finishedAt,
+      updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
+      rating: data.rating.present ? data.rating.value : this.rating,
+      notes: data.notes.present ? data.notes.value : this.notes,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('CookEntry(')
+          ..write('id: $id, ')
+          ..write('recipeId: $recipeId, ')
+          ..write('userId: $userId, ')
+          ..write('householdId: $householdId, ')
+          ..write('currentStepIndex: $currentStepIndex, ')
+          ..write('status: $status, ')
+          ..write('startedAt: $startedAt, ')
+          ..write('finishedAt: $finishedAt, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('rating: $rating, ')
+          ..write('notes: $notes')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(
+      id,
+      recipeId,
+      userId,
+      householdId,
+      currentStepIndex,
+      status,
+      startedAt,
+      finishedAt,
+      updatedAt,
+      rating,
+      notes);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is CookEntry &&
+          other.id == this.id &&
+          other.recipeId == this.recipeId &&
+          other.userId == this.userId &&
+          other.householdId == this.householdId &&
+          other.currentStepIndex == this.currentStepIndex &&
+          other.status == this.status &&
+          other.startedAt == this.startedAt &&
+          other.finishedAt == this.finishedAt &&
+          other.updatedAt == this.updatedAt &&
+          other.rating == this.rating &&
+          other.notes == this.notes);
+}
+
+class CooksCompanion extends UpdateCompanion<CookEntry> {
+  final Value<String> id;
+  final Value<String> recipeId;
+  final Value<String> userId;
+  final Value<String?> householdId;
+  final Value<int> currentStepIndex;
+  final Value<CookStatus> status;
+  final Value<int?> startedAt;
+  final Value<int?> finishedAt;
+  final Value<int?> updatedAt;
+  final Value<int?> rating;
+  final Value<String?> notes;
+  final Value<int> rowid;
+  const CooksCompanion({
+    this.id = const Value.absent(),
+    this.recipeId = const Value.absent(),
+    this.userId = const Value.absent(),
+    this.householdId = const Value.absent(),
+    this.currentStepIndex = const Value.absent(),
+    this.status = const Value.absent(),
+    this.startedAt = const Value.absent(),
+    this.finishedAt = const Value.absent(),
+    this.updatedAt = const Value.absent(),
+    this.rating = const Value.absent(),
+    this.notes = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  CooksCompanion.insert({
+    this.id = const Value.absent(),
+    required String recipeId,
+    required String userId,
+    this.householdId = const Value.absent(),
+    this.currentStepIndex = const Value.absent(),
+    this.status = const Value.absent(),
+    this.startedAt = const Value.absent(),
+    this.finishedAt = const Value.absent(),
+    this.updatedAt = const Value.absent(),
+    this.rating = const Value.absent(),
+    this.notes = const Value.absent(),
+    this.rowid = const Value.absent(),
+  })  : recipeId = Value(recipeId),
+        userId = Value(userId);
+  static Insertable<CookEntry> custom({
+    Expression<String>? id,
+    Expression<String>? recipeId,
+    Expression<String>? userId,
+    Expression<String>? householdId,
+    Expression<int>? currentStepIndex,
+    Expression<String>? status,
+    Expression<int>? startedAt,
+    Expression<int>? finishedAt,
+    Expression<int>? updatedAt,
+    Expression<int>? rating,
+    Expression<String>? notes,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (recipeId != null) 'recipe_id': recipeId,
+      if (userId != null) 'user_id': userId,
+      if (householdId != null) 'household_id': householdId,
+      if (currentStepIndex != null) 'current_step_index': currentStepIndex,
+      if (status != null) 'status': status,
+      if (startedAt != null) 'started_at': startedAt,
+      if (finishedAt != null) 'finished_at': finishedAt,
+      if (updatedAt != null) 'updated_at': updatedAt,
+      if (rating != null) 'rating': rating,
+      if (notes != null) 'notes': notes,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  CooksCompanion copyWith(
+      {Value<String>? id,
+      Value<String>? recipeId,
+      Value<String>? userId,
+      Value<String?>? householdId,
+      Value<int>? currentStepIndex,
+      Value<CookStatus>? status,
+      Value<int?>? startedAt,
+      Value<int?>? finishedAt,
+      Value<int?>? updatedAt,
+      Value<int?>? rating,
+      Value<String?>? notes,
+      Value<int>? rowid}) {
+    return CooksCompanion(
+      id: id ?? this.id,
+      recipeId: recipeId ?? this.recipeId,
+      userId: userId ?? this.userId,
+      householdId: householdId ?? this.householdId,
+      currentStepIndex: currentStepIndex ?? this.currentStepIndex,
+      status: status ?? this.status,
+      startedAt: startedAt ?? this.startedAt,
+      finishedAt: finishedAt ?? this.finishedAt,
+      updatedAt: updatedAt ?? this.updatedAt,
+      rating: rating ?? this.rating,
+      notes: notes ?? this.notes,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<String>(id.value);
+    }
+    if (recipeId.present) {
+      map['recipe_id'] = Variable<String>(recipeId.value);
+    }
+    if (userId.present) {
+      map['user_id'] = Variable<String>(userId.value);
+    }
+    if (householdId.present) {
+      map['household_id'] = Variable<String>(householdId.value);
+    }
+    if (currentStepIndex.present) {
+      map['current_step_index'] = Variable<int>(currentStepIndex.value);
+    }
+    if (status.present) {
+      map['status'] =
+          Variable<String>($CooksTable.$converterstatus.toSql(status.value));
+    }
+    if (startedAt.present) {
+      map['started_at'] = Variable<int>(startedAt.value);
+    }
+    if (finishedAt.present) {
+      map['finished_at'] = Variable<int>(finishedAt.value);
+    }
+    if (updatedAt.present) {
+      map['updated_at'] = Variable<int>(updatedAt.value);
+    }
+    if (rating.present) {
+      map['rating'] = Variable<int>(rating.value);
+    }
+    if (notes.present) {
+      map['notes'] = Variable<String>(notes.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('CooksCompanion(')
+          ..write('id: $id, ')
+          ..write('recipeId: $recipeId, ')
+          ..write('userId: $userId, ')
+          ..write('householdId: $householdId, ')
+          ..write('currentStepIndex: $currentStepIndex, ')
+          ..write('status: $status, ')
+          ..write('startedAt: $startedAt, ')
+          ..write('finishedAt: $finishedAt, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('rating: $rating, ')
+          ..write('notes: $notes, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
 abstract class _$AppDatabase extends GeneratedDatabase {
   _$AppDatabase(QueryExecutor e) : super(e);
   $AppDatabaseManager get managers => $AppDatabaseManager(this);
@@ -2474,6 +3039,7 @@ abstract class _$AppDatabase extends GeneratedDatabase {
       $HouseholdMembersTable(this);
   late final $HouseholdsTable households = $HouseholdsTable(this);
   late final $UploadQueuesTable uploadQueues = $UploadQueuesTable(this);
+  late final $CooksTable cooks = $CooksTable(this);
   @override
   Iterable<TableInfo<Table, Object?>> get allTables =>
       allSchemaEntities.whereType<TableInfo<Table, Object?>>();
@@ -2484,7 +3050,8 @@ abstract class _$AppDatabase extends GeneratedDatabase {
         recipeShares,
         householdMembers,
         households,
-        uploadQueues
+        uploadQueues,
+        cooks
       ];
 }
 
@@ -3741,6 +4308,264 @@ typedef $$UploadQueuesTableProcessedTableManager = ProcessedTableManager<
     ),
     UploadQueueEntry,
     PrefetchHooks Function()>;
+typedef $$CooksTableCreateCompanionBuilder = CooksCompanion Function({
+  Value<String> id,
+  required String recipeId,
+  required String userId,
+  Value<String?> householdId,
+  Value<int> currentStepIndex,
+  Value<CookStatus> status,
+  Value<int?> startedAt,
+  Value<int?> finishedAt,
+  Value<int?> updatedAt,
+  Value<int?> rating,
+  Value<String?> notes,
+  Value<int> rowid,
+});
+typedef $$CooksTableUpdateCompanionBuilder = CooksCompanion Function({
+  Value<String> id,
+  Value<String> recipeId,
+  Value<String> userId,
+  Value<String?> householdId,
+  Value<int> currentStepIndex,
+  Value<CookStatus> status,
+  Value<int?> startedAt,
+  Value<int?> finishedAt,
+  Value<int?> updatedAt,
+  Value<int?> rating,
+  Value<String?> notes,
+  Value<int> rowid,
+});
+
+class $$CooksTableFilterComposer extends Composer<_$AppDatabase, $CooksTable> {
+  $$CooksTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get id => $composableBuilder(
+      column: $table.id, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get recipeId => $composableBuilder(
+      column: $table.recipeId, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get userId => $composableBuilder(
+      column: $table.userId, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get householdId => $composableBuilder(
+      column: $table.householdId, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<int> get currentStepIndex => $composableBuilder(
+      column: $table.currentStepIndex,
+      builder: (column) => ColumnFilters(column));
+
+  ColumnWithTypeConverterFilters<CookStatus, CookStatus, String> get status =>
+      $composableBuilder(
+          column: $table.status,
+          builder: (column) => ColumnWithTypeConverterFilters(column));
+
+  ColumnFilters<int> get startedAt => $composableBuilder(
+      column: $table.startedAt, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<int> get finishedAt => $composableBuilder(
+      column: $table.finishedAt, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<int> get updatedAt => $composableBuilder(
+      column: $table.updatedAt, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<int> get rating => $composableBuilder(
+      column: $table.rating, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get notes => $composableBuilder(
+      column: $table.notes, builder: (column) => ColumnFilters(column));
+}
+
+class $$CooksTableOrderingComposer
+    extends Composer<_$AppDatabase, $CooksTable> {
+  $$CooksTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get id => $composableBuilder(
+      column: $table.id, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get recipeId => $composableBuilder(
+      column: $table.recipeId, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get userId => $composableBuilder(
+      column: $table.userId, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get householdId => $composableBuilder(
+      column: $table.householdId, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<int> get currentStepIndex => $composableBuilder(
+      column: $table.currentStepIndex,
+      builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get status => $composableBuilder(
+      column: $table.status, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<int> get startedAt => $composableBuilder(
+      column: $table.startedAt, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<int> get finishedAt => $composableBuilder(
+      column: $table.finishedAt, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<int> get updatedAt => $composableBuilder(
+      column: $table.updatedAt, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<int> get rating => $composableBuilder(
+      column: $table.rating, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get notes => $composableBuilder(
+      column: $table.notes, builder: (column) => ColumnOrderings(column));
+}
+
+class $$CooksTableAnnotationComposer
+    extends Composer<_$AppDatabase, $CooksTable> {
+  $$CooksTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get recipeId =>
+      $composableBuilder(column: $table.recipeId, builder: (column) => column);
+
+  GeneratedColumn<String> get userId =>
+      $composableBuilder(column: $table.userId, builder: (column) => column);
+
+  GeneratedColumn<String> get householdId => $composableBuilder(
+      column: $table.householdId, builder: (column) => column);
+
+  GeneratedColumn<int> get currentStepIndex => $composableBuilder(
+      column: $table.currentStepIndex, builder: (column) => column);
+
+  GeneratedColumnWithTypeConverter<CookStatus, String> get status =>
+      $composableBuilder(column: $table.status, builder: (column) => column);
+
+  GeneratedColumn<int> get startedAt =>
+      $composableBuilder(column: $table.startedAt, builder: (column) => column);
+
+  GeneratedColumn<int> get finishedAt => $composableBuilder(
+      column: $table.finishedAt, builder: (column) => column);
+
+  GeneratedColumn<int> get updatedAt =>
+      $composableBuilder(column: $table.updatedAt, builder: (column) => column);
+
+  GeneratedColumn<int> get rating =>
+      $composableBuilder(column: $table.rating, builder: (column) => column);
+
+  GeneratedColumn<String> get notes =>
+      $composableBuilder(column: $table.notes, builder: (column) => column);
+}
+
+class $$CooksTableTableManager extends RootTableManager<
+    _$AppDatabase,
+    $CooksTable,
+    CookEntry,
+    $$CooksTableFilterComposer,
+    $$CooksTableOrderingComposer,
+    $$CooksTableAnnotationComposer,
+    $$CooksTableCreateCompanionBuilder,
+    $$CooksTableUpdateCompanionBuilder,
+    (CookEntry, BaseReferences<_$AppDatabase, $CooksTable, CookEntry>),
+    CookEntry,
+    PrefetchHooks Function()> {
+  $$CooksTableTableManager(_$AppDatabase db, $CooksTable table)
+      : super(TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$CooksTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$CooksTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$CooksTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback: ({
+            Value<String> id = const Value.absent(),
+            Value<String> recipeId = const Value.absent(),
+            Value<String> userId = const Value.absent(),
+            Value<String?> householdId = const Value.absent(),
+            Value<int> currentStepIndex = const Value.absent(),
+            Value<CookStatus> status = const Value.absent(),
+            Value<int?> startedAt = const Value.absent(),
+            Value<int?> finishedAt = const Value.absent(),
+            Value<int?> updatedAt = const Value.absent(),
+            Value<int?> rating = const Value.absent(),
+            Value<String?> notes = const Value.absent(),
+            Value<int> rowid = const Value.absent(),
+          }) =>
+              CooksCompanion(
+            id: id,
+            recipeId: recipeId,
+            userId: userId,
+            householdId: householdId,
+            currentStepIndex: currentStepIndex,
+            status: status,
+            startedAt: startedAt,
+            finishedAt: finishedAt,
+            updatedAt: updatedAt,
+            rating: rating,
+            notes: notes,
+            rowid: rowid,
+          ),
+          createCompanionCallback: ({
+            Value<String> id = const Value.absent(),
+            required String recipeId,
+            required String userId,
+            Value<String?> householdId = const Value.absent(),
+            Value<int> currentStepIndex = const Value.absent(),
+            Value<CookStatus> status = const Value.absent(),
+            Value<int?> startedAt = const Value.absent(),
+            Value<int?> finishedAt = const Value.absent(),
+            Value<int?> updatedAt = const Value.absent(),
+            Value<int?> rating = const Value.absent(),
+            Value<String?> notes = const Value.absent(),
+            Value<int> rowid = const Value.absent(),
+          }) =>
+              CooksCompanion.insert(
+            id: id,
+            recipeId: recipeId,
+            userId: userId,
+            householdId: householdId,
+            currentStepIndex: currentStepIndex,
+            status: status,
+            startedAt: startedAt,
+            finishedAt: finishedAt,
+            updatedAt: updatedAt,
+            rating: rating,
+            notes: notes,
+            rowid: rowid,
+          ),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .toList(),
+          prefetchHooksCallback: null,
+        ));
+}
+
+typedef $$CooksTableProcessedTableManager = ProcessedTableManager<
+    _$AppDatabase,
+    $CooksTable,
+    CookEntry,
+    $$CooksTableFilterComposer,
+    $$CooksTableOrderingComposer,
+    $$CooksTableAnnotationComposer,
+    $$CooksTableCreateCompanionBuilder,
+    $$CooksTableUpdateCompanionBuilder,
+    (CookEntry, BaseReferences<_$AppDatabase, $CooksTable, CookEntry>),
+    CookEntry,
+    PrefetchHooks Function()>;
 
 class $AppDatabaseManager {
   final _$AppDatabase _db;
@@ -3757,4 +4582,6 @@ class $AppDatabaseManager {
       $$HouseholdsTableTableManager(_db, _db.households);
   $$UploadQueuesTableTableManager get uploadQueues =>
       $$UploadQueuesTableTableManager(_db, _db.uploadQueues);
+  $$CooksTableTableManager get cooks =>
+      $$CooksTableTableManager(_db, _db.cooks);
 }

@@ -91,7 +91,6 @@ Schema schema = const Schema(([
     Column.integer('created_at'),
   ]),
   Table(cooksTable, [
-    Column.text('id'),
     Column.text('recipe_id'),
     Column.text('user_id'),
     Column.text('household_id'),
