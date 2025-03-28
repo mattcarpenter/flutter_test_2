@@ -35,6 +35,8 @@ class Cooks extends Table {
 
   IntColumn get rating => integer().nullable()();
 
+  TextColumn get recipeName => text()();
+
   // Notes or other metadata
   TextColumn get notes => text().nullable()();
 

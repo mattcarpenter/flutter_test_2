@@ -20,6 +20,7 @@ class CookRepository {
   Future<String> startCook({
     required String recipeId,
     required String userId,
+    required String recipeName,
     String? householdId,
   }) async {
     final newId = const Uuid().v4();
@@ -29,6 +30,7 @@ class CookRepository {
       recipeId: recipeId,
       userId: userId,
       householdId: Value(householdId),
+      recipeName: recipeName,
       currentStepIndex: Value(0),
       status: const Value(CookStatus.inProgress),
       startedAt: Value(currentTime),

@@ -94,6 +94,7 @@ Schema schema = const Schema(([
     Column.text('recipe_id'),
     Column.text('user_id'),
     Column.text('household_id'),
+    Column.text('recipe_name'),
     Column.integer('current_step_index'),
     Column.text('status'), // Stored values: 'in_progress', 'finished', 'discarded'
     Column.integer('started_at'),

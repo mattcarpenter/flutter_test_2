@@ -56,6 +56,7 @@ void main() async {
         await container.read(cookNotifierProvider.notifier).startCook(
           recipeId: recipeId,
           userId: ownerId,
+          recipeName: 'Recipe A',
         );
 
         await waitForProviderValue<List<CookEntry>>(container, cookNotifierProvider, (cooks) => cooks.isNotEmpty);
@@ -88,6 +89,7 @@ void main() async {
         await container.read(cookNotifierProvider.notifier).startCook(
           recipeId: recipeId,
           userId: id,
+          recipeName: 'Recipe X',
         );
 
         await waitForProviderValue<List<CookEntry>>(container, cookNotifierProvider, (cooks) => cooks.isNotEmpty);
@@ -124,6 +126,7 @@ void main() async {
           recipeId: recipeId,
           userId: ownerId,
           householdId: householdId,
+          recipeName: 'Household Recipe',
         );
 
         await waitForProviderValue<List<CookEntry>>(container, cookNotifierProvider, (cooks) => cooks.isNotEmpty);
@@ -168,6 +171,7 @@ void main() async {
           recipeId: recipeId,
           userId: memberId,
           householdId: householdId,
+          recipeName: 'Member Recipe',
         );
 
         await waitForProviderValue<List<CookEntry>>(container, cookNotifierProvider, (cooks) => cooks.isNotEmpty);
@@ -204,6 +208,7 @@ void main() async {
         await container.read(cookNotifierProvider.notifier).startCook(
           recipeId: recipeId,
           userId: intruderId,
+          recipeName: 'Private Recipe',
         );
 
         // Wait and confirm that no cooks remain after sync fails

@@ -137,6 +137,7 @@ CREATE TABLE public.cooks (
                               recipe_id uuid NOT NULL,
                               user_id uuid NOT NULL,
                               household_id uuid NULL,
+                              recipe_name text NOT NULL,
                               current_step_index integer NOT NULL DEFAULT 0,
                               status text NOT NULL DEFAULT 'in_progress',  -- values: 'in_progress', 'finished', 'discarded'
                               started_at bigint NULL,

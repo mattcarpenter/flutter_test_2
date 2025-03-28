@@ -30,6 +30,7 @@ class CookNotifier extends StateNotifier<AsyncValue<List<CookEntry>>> {
   Future<String> startCook({
     required String recipeId,
     required String userId,
+    required String recipeName,
     String? householdId,
   }) async {
     try {
@@ -37,6 +38,7 @@ class CookNotifier extends StateNotifier<AsyncValue<List<CookEntry>>> {
         recipeId: recipeId,
         userId: userId,
         householdId: householdId,
+        recipeName: recipeName,
       );
       return id;
     } catch (e, stack) {
