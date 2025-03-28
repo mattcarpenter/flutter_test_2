@@ -118,10 +118,10 @@ A new Flutter project.
   - [X] Message designer
   - [ ] Begin implementing new design
 - [ ] Cook mode epic
-  - [ ] Cook mode specs
-  - [ ] design data model
-  - [ ] Implement models, ddls, repos, etc..
-  - [ ] Integration tests
+  - [X] Cook mode specs
+  - [X] design data model
+  - [X] Implement models, ddls, repos, etc..
+  - [X] Integration tests
   - [ ] Start cook button
   - [ ] Investigate dynamic island
 - [ ] Inventory epic
