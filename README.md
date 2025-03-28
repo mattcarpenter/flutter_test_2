@@ -122,6 +122,7 @@ A new Flutter project.
   - [X] design data model
   - [X] Implement models, ddls, repos, etc..
   - [X] Integration tests
+  - [ ] Get cook status (so we can use it in the UI like the button or dynamic island)
   - [ ] Start cook button
   - [ ] Investigate dynamic island
 - [ ] Inventory epic
