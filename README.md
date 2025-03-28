@@ -119,6 +119,11 @@ A new Flutter project.
   - [ ] Begin implementing new design
 - [ ] Cook mode epic
   - [ ] Cook mode specs
+  - [ ] design data model
+  - [ ] Implement models, ddls, repos, etc..
+  - [ ] Integration tests
+  - [ ] Start cook button
+  - [ ] Investigate dynamic island
 - [ ] Inventory epic
 - [ ] Shopping List Epic
 - [ ] Sharing epic
