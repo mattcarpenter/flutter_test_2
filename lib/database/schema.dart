@@ -9,6 +9,7 @@ const recipeSharesTable = 'recipe_shares';
 const recipeFolderSharesTable = 'recipe_folder_shares';
 const recipeFolderAssignmentsTable = 'recipe_folder_assignments';
 const uploadQueuesTable = 'upload_queues';
+const cooksTable = 'cooks';
 
 Schema schema = const Schema(([
   Table.localOnly(uploadQueuesTable, [
@@ -88,5 +89,18 @@ Schema schema = const Schema(([
     Column.text('target_household_id'),
     Column.integer('can_edit'),
     Column.integer('created_at'),
+  ]),
+  Table(cooksTable, [
+    Column.text('id'),
+    Column.text('recipe_id'),
+    Column.text('user_id'),
+    Column.text('household_id'),
+    Column.integer('current_step_index'),
+    Column.text('status'), // Stored values: 'in_progress', 'finished', 'discarded'
+    Column.integer('started_at'),
+    Column.integer('finished_at'),
+    Column.integer('updated_at'),
+    Column.integer('rating'),
+    Column.text('notes'),
   ]),
 ]));

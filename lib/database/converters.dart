@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:drift/drift.dart';
 
+import 'models/cooks.dart';
 import 'models/recipe_images.dart';
 import 'models/steps.dart';
 import 'models/ingredients.dart';
@@ -69,3 +70,33 @@ class RecipeImageListConverter extends TypeConverter<List<RecipeImage>, String> 
     return json.encode(value.map((image) => image.toJson()).toList());
   }
 }
+
+class CookStatusConverter extends TypeConverter<CookStatus, String> {
+  const CookStatusConverter();
+
+  @override
+  CookStatus fromSql(String fromDb) {
+    switch (fromDb) {
+      case 'finished':
+        return CookStatus.finished;
+      case 'discarded':
+        return CookStatus.discarded;
+      default:
+        return CookStatus.inProgress;
+    }
+  }
+
+  @override
+  String toSql(CookStatus value) {
+    switch (value) {
+      case CookStatus.finished:
+        return 'finished';
+      case CookStatus.discarded:
+        return 'discarded';
+      case CookStatus.inProgress:
+      default:
+        return 'in_progress';
+    }
+  }
+}
+

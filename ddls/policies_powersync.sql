@@ -255,3 +255,36 @@ CREATE POLICY "Users can delete shared recipe folders"
     sharer_id = auth.uid()
     );
 
+-- COOKS -------------------------------
+-- Enable RLS on the cooks table
+ALTER TABLE public.cooks ENABLE ROW LEVEL SECURITY;
+
+-- Policy for SELECT: Only the cook owner or household members can view a cook.
+CREATE POLICY "Users can view their own cooks"
+    ON public.cooks
+    FOR SELECT
+    USING (
+    auth.uid() = user_id OR
+    (household_id IS NOT NULL AND public.is_household_member(household_id, auth.uid()))
+    );
+
+-- Policy for INSERT: Only allow cooks to be created by the owner or by users who are members of the specified household.
+CREATE POLICY "Users can insert cooks only for households they belong to"
+    ON public.cooks
+    FOR INSERT
+    WITH CHECK (
+    auth.uid() = user_id OR
+    (household_id IS NOT NULL AND public.is_household_member(household_id, auth.uid()))
+    );
+
+-- Policy for UPDATE: Only allow the owner or household members to update a cook.
+CREATE POLICY "Users can update cooks only for households they belong to"
+    ON public.cooks
+    FOR UPDATE
+    USING (
+    auth.uid() = user_id OR
+    (household_id IS NOT NULL AND public.is_household_member(household_id, auth.uid()))
+    )
+    WITH CHECK (
+    household_id IS NULL OR public.is_household_member(household_id, auth.uid())
+    );

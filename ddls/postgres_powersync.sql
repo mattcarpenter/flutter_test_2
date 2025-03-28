@@ -131,4 +131,32 @@ CREATE TABLE public.user_household_shares (
                                               CONSTRAINT uhs_household_fkey FOREIGN KEY (household_id) REFERENCES public.households (id) ON DELETE CASCADE
 );
 
+-- 9. COOKS (Depends on recipes, households, and auth.users)
+CREATE TABLE public.cooks (
+                              id uuid NOT NULL DEFAULT extensions.uuid_generate_v4(),
+                              recipe_id uuid NOT NULL,
+                              user_id uuid NOT NULL,
+                              household_id uuid NULL,
+                              current_step_index integer NOT NULL DEFAULT 0,
+                              status text NOT NULL DEFAULT 'in_progress',  -- values: 'in_progress', 'finished', 'discarded'
+                              started_at bigint NULL,
+                              finished_at bigint NULL,
+                              updated_at bigint NULL,
+                              rating integer NULL,
+                              notes text NULL,
+                              CONSTRAINT cooks_pkey PRIMARY KEY (id),
+                              CONSTRAINT cooks_recipe_id_fkey FOREIGN KEY (recipe_id)
+                                  REFERENCES public.recipes (id) ON DELETE CASCADE,
+                              CONSTRAINT cooks_user_id_fkey FOREIGN KEY (user_id)
+                                  REFERENCES auth.users (id) ON DELETE CASCADE,
+                              CONSTRAINT cooks_household_id_fkey FOREIGN KEY (household_id)
+                                  REFERENCES public.households (id) ON DELETE CASCADE
+) TABLESPACE pg_default;
+
+CREATE INDEX IF NOT EXISTS cooks_user_idx
+    ON public.cooks USING btree (user_id) TABLESPACE pg_default;
+
+CREATE INDEX IF NOT EXISTS cooks_household_idx
+    ON public.cooks USING btree (household_id) TABLESPACE pg_default;
+
 CREATE PUBLICATION powersync FOR ALL TABLES;

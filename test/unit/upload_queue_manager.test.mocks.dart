@@ -566,6 +566,16 @@ class MockUploadQueueRepository extends _i1.Mock
       ) as _i5.Future<List<_i2.UploadQueueEntry>>);
 
   @override
+  _i5.Future<int> deleteEntryByFileName(String? fileName) =>
+      (super.noSuchMethod(
+        Invocation.method(
+          #deleteEntryByFileName,
+          [fileName],
+        ),
+        returnValue: _i5.Future<int>.value(0),
+      ) as _i5.Future<int>);
+
+  @override
   _i5.Future<bool> updateEntry(_i2.UploadQueueEntry? entry) =>
       (super.noSuchMethod(
         Invocation.method(
@@ -771,6 +781,27 @@ class MockRecipeRepository extends _i1.Mock implements _i10.RecipeRepository {
         ),
         returnValue: _i5.Stream<List<_i13.RecipeWithFolders>>.empty(),
       ) as _i5.Stream<List<_i13.RecipeWithFolders>>);
+
+  @override
+  _i5.Stream<_i2.RecipeEntry?> watchRecipeById(String? id) =>
+      (super.noSuchMethod(
+        Invocation.method(
+          #watchRecipeById,
+          [id],
+        ),
+        returnValue: _i5.Stream<_i2.RecipeEntry?>.empty(),
+      ) as _i5.Stream<_i2.RecipeEntry?>);
+
+  @override
+  _i5.Future<void> removeFolderIdFromAllRecipes(String? folderId) =>
+      (super.noSuchMethod(
+        Invocation.method(
+          #removeFolderIdFromAllRecipes,
+          [folderId],
+        ),
+        returnValue: _i5.Future<void>.value(),
+        returnValueForMissingStub: _i5.Future<void>.value(),
+      ) as _i5.Future<void>);
 }
 
 /// A class which mocks [AppDatabase].
