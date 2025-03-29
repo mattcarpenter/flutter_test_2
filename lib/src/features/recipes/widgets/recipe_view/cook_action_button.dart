@@ -3,6 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:recipe_app/src/providers/cook_provider.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
+import '../cook_modal/cook_modal.dart';
+
 class CookActionButton extends ConsumerWidget {
   final String recipeId;
   final String recipeName;
@@ -38,12 +40,13 @@ class CookActionButton extends ConsumerWidget {
           );
         }
 
-        // Show your modal here, passing cookId
-        /*showModalBottomSheet(
-          context: context,
-          isScrollControlled: true,
-          builder: (_) => CookModal(cookId: cookId),
-        );*/
+        if (context.mounted) {
+          showCookModal(
+            context,
+            cookId: cookId,
+            recipeId: recipeId,
+          );
+        }
       },
       child: Text(buttonText),
     );
