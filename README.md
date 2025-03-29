@@ -122,9 +122,16 @@ A new Flutter project.
   - [X] design data model
   - [X] Implement models, ddls, repos, etc..
   - [X] Integration tests
-  - [ ] Get cook status (so we can use it in the UI like the button or dynamic island)
-  - [ ] Start cook button
+  - [X] Get cook status (so we can use it in the UI like the button or dynamic island)
+  - [X] Start cook button
+  - [ ] Implement rough cook mode
+  - [ ] Implement add recipe (depends on search epic)
   - [ ] Investigate dynamic island
+- [ ] Search epic
+  - [ ] UX Research
+  - [ ] Consult GPT on tag storage
+  - [ ] Consult GPT on FTS
+  - [ ] Consult GPT on implementation (both use cases - recipe search and add recipe for cook mode)
 - [ ] Bugs
   - [ ] Image bug (does not show in recipe detail page when anonymous)
 - [ ] Inventory epic
