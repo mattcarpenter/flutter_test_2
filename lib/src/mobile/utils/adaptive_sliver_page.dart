@@ -56,7 +56,10 @@ class AdaptiveSliverPage extends StatelessWidget {
               slivers: [
                 // Navigation bar
                 leading == null
-                    ? CupertinoSliverNavigationBar(
+                    ? CupertinoSliverNavigationBar.search(
+                  /* experiment with search */
+
+                  /* end experiment with search */
                   largeTitle: Text(title),
                   transitionBetweenRoutes: true,
                   previousPageTitle: previousPageTitle,
