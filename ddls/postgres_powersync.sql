@@ -135,7 +135,7 @@ CREATE TABLE public.user_household_shares (
 CREATE TABLE public.cooks (
                               id uuid NOT NULL DEFAULT extensions.uuid_generate_v4(),
                               recipe_id uuid NOT NULL,
-                              user_id uuid NOT NULL,
+                              user_id uuid NULL,
                               household_id uuid NULL,
                               recipe_name text NOT NULL,
                               current_step_index integer NOT NULL DEFAULT 0,

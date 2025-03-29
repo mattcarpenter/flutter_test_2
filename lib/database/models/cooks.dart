@@ -18,7 +18,7 @@ class Cooks extends Table {
 
   // Foreign keys / associations
   TextColumn get recipeId => text()();       // References Recipes
-  TextColumn get userId => text()();         // The user who initiated the cook
+  TextColumn get userId => text().nullable()();         // The user who initiated the cook
   TextColumn get householdId => text().nullable()(); // Optional household-sharing context
 
   // Progress tracking

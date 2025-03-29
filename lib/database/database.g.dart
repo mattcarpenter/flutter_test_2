@@ -2486,8 +2486,8 @@ class $CooksTable extends Cooks with TableInfo<$CooksTable, CookEntry> {
   static const VerificationMeta _userIdMeta = const VerificationMeta('userId');
   @override
   late final GeneratedColumn<String> userId = GeneratedColumn<String>(
-      'user_id', aliasedName, false,
-      type: DriftSqlType.string, requiredDuringInsert: true);
+      'user_id', aliasedName, true,
+      type: DriftSqlType.string, requiredDuringInsert: false);
   static const VerificationMeta _householdIdMeta =
       const VerificationMeta('householdId');
   @override
@@ -2581,8 +2581,6 @@ class $CooksTable extends Cooks with TableInfo<$CooksTable, CookEntry> {
     if (data.containsKey('user_id')) {
       context.handle(_userIdMeta,
           userId.isAcceptableOrUnknown(data['user_id']!, _userIdMeta));
-    } else if (isInserting) {
-      context.missing(_userIdMeta);
     }
     if (data.containsKey('household_id')) {
       context.handle(
@@ -2641,7 +2639,7 @@ class $CooksTable extends Cooks with TableInfo<$CooksTable, CookEntry> {
       recipeId: attachedDatabase.typeMapping
           .read(DriftSqlType.string, data['${effectivePrefix}recipe_id'])!,
       userId: attachedDatabase.typeMapping
-          .read(DriftSqlType.string, data['${effectivePrefix}user_id'])!,
+          .read(DriftSqlType.string, data['${effectivePrefix}user_id']),
       householdId: attachedDatabase.typeMapping
           .read(DriftSqlType.string, data['${effectivePrefix}household_id']),
       currentStepIndex: attachedDatabase.typeMapping.read(
@@ -2675,7 +2673,7 @@ class $CooksTable extends Cooks with TableInfo<$CooksTable, CookEntry> {
 class CookEntry extends DataClass implements Insertable<CookEntry> {
   final String id;
   final String recipeId;
-  final String userId;
+  final String? userId;
   final String? householdId;
   final int currentStepIndex;
   final CookStatus status;
@@ -2688,7 +2686,7 @@ class CookEntry extends DataClass implements Insertable<CookEntry> {
   const CookEntry(
       {required this.id,
       required this.recipeId,
-      required this.userId,
+      this.userId,
       this.householdId,
       required this.currentStepIndex,
       required this.status,
@@ -2703,7 +2701,9 @@ class CookEntry extends DataClass implements Insertable<CookEntry> {
     final map = <String, Expression>{};
     map['id'] = Variable<String>(id);
     map['recipe_id'] = Variable<String>(recipeId);
-    map['user_id'] = Variable<String>(userId);
+    if (!nullToAbsent || userId != null) {
+      map['user_id'] = Variable<String>(userId);
+    }
     if (!nullToAbsent || householdId != null) {
       map['household_id'] = Variable<String>(householdId);
     }
@@ -2735,7 +2735,8 @@ class CookEntry extends DataClass implements Insertable<CookEntry> {
     return CooksCompanion(
       id: Value(id),
       recipeId: Value(recipeId),
-      userId: Value(userId),
+      userId:
+          userId == null && nullToAbsent ? const Value.absent() : Value(userId),
       householdId: householdId == null && nullToAbsent
           ? const Value.absent()
           : Value(householdId),
@@ -2764,7 +2765,7 @@ class CookEntry extends DataClass implements Insertable<CookEntry> {
     return CookEntry(
       id: serializer.fromJson<String>(json['id']),
       recipeId: serializer.fromJson<String>(json['recipeId']),
-      userId: serializer.fromJson<String>(json['userId']),
+      userId: serializer.fromJson<String?>(json['userId']),
       householdId: serializer.fromJson<String?>(json['householdId']),
       currentStepIndex: serializer.fromJson<int>(json['currentStepIndex']),
       status: serializer.fromJson<CookStatus>(json['status']),
@@ -2782,7 +2783,7 @@ class CookEntry extends DataClass implements Insertable<CookEntry> {
     return <String, dynamic>{
       'id': serializer.toJson<String>(id),
       'recipeId': serializer.toJson<String>(recipeId),
-      'userId': serializer.toJson<String>(userId),
+      'userId': serializer.toJson<String?>(userId),
       'householdId': serializer.toJson<String?>(householdId),
       'currentStepIndex': serializer.toJson<int>(currentStepIndex),
       'status': serializer.toJson<CookStatus>(status),
@@ -2798,7 +2799,7 @@ class CookEntry extends DataClass implements Insertable<CookEntry> {
   CookEntry copyWith(
           {String? id,
           String? recipeId,
-          String? userId,
+          Value<String?> userId = const Value.absent(),
           Value<String?> householdId = const Value.absent(),
           int? currentStepIndex,
           CookStatus? status,
@@ -2811,7 +2812,7 @@ class CookEntry extends DataClass implements Insertable<CookEntry> {
       CookEntry(
         id: id ?? this.id,
         recipeId: recipeId ?? this.recipeId,
-        userId: userId ?? this.userId,
+        userId: userId.present ? userId.value : this.userId,
         householdId: householdId.present ? householdId.value : this.householdId,
         currentStepIndex: currentStepIndex ?? this.currentStepIndex,
         status: status ?? this.status,
@@ -2898,7 +2899,7 @@ class CookEntry extends DataClass implements Insertable<CookEntry> {
 class CooksCompanion extends UpdateCompanion<CookEntry> {
   final Value<String> id;
   final Value<String> recipeId;
-  final Value<String> userId;
+  final Value<String?> userId;
   final Value<String?> householdId;
   final Value<int> currentStepIndex;
   final Value<CookStatus> status;
@@ -2927,7 +2928,7 @@ class CooksCompanion extends UpdateCompanion<CookEntry> {
   CooksCompanion.insert({
     this.id = const Value.absent(),
     required String recipeId,
-    required String userId,
+    this.userId = const Value.absent(),
     this.householdId = const Value.absent(),
     this.currentStepIndex = const Value.absent(),
     this.status = const Value.absent(),
@@ -2939,7 +2940,6 @@ class CooksCompanion extends UpdateCompanion<CookEntry> {
     this.notes = const Value.absent(),
     this.rowid = const Value.absent(),
   })  : recipeId = Value(recipeId),
-        userId = Value(userId),
         recipeName = Value(recipeName);
   static Insertable<CookEntry> custom({
     Expression<String>? id,
@@ -2976,7 +2976,7 @@ class CooksCompanion extends UpdateCompanion<CookEntry> {
   CooksCompanion copyWith(
       {Value<String>? id,
       Value<String>? recipeId,
-      Value<String>? userId,
+      Value<String?>? userId,
       Value<String?>? householdId,
       Value<int>? currentStepIndex,
       Value<CookStatus>? status,
@@ -4353,7 +4353,7 @@ typedef $$UploadQueuesTableProcessedTableManager = ProcessedTableManager<
 typedef $$CooksTableCreateCompanionBuilder = CooksCompanion Function({
   Value<String> id,
   required String recipeId,
-  required String userId,
+  Value<String?> userId,
   Value<String?> householdId,
   Value<int> currentStepIndex,
   Value<CookStatus> status,
@@ -4368,7 +4368,7 @@ typedef $$CooksTableCreateCompanionBuilder = CooksCompanion Function({
 typedef $$CooksTableUpdateCompanionBuilder = CooksCompanion Function({
   Value<String> id,
   Value<String> recipeId,
-  Value<String> userId,
+  Value<String?> userId,
   Value<String?> householdId,
   Value<int> currentStepIndex,
   Value<CookStatus> status,
@@ -4547,7 +4547,7 @@ class $$CooksTableTableManager extends RootTableManager<
           updateCompanionCallback: ({
             Value<String> id = const Value.absent(),
             Value<String> recipeId = const Value.absent(),
-            Value<String> userId = const Value.absent(),
+            Value<String?> userId = const Value.absent(),
             Value<String?> householdId = const Value.absent(),
             Value<int> currentStepIndex = const Value.absent(),
             Value<CookStatus> status = const Value.absent(),
@@ -4577,7 +4577,7 @@ class $$CooksTableTableManager extends RootTableManager<
           createCompanionCallback: ({
             Value<String> id = const Value.absent(),
             required String recipeId,
-            required String userId,
+            Value<String?> userId = const Value.absent(),
             Value<String?> householdId = const Value.absent(),
             Value<int> currentStepIndex = const Value.absent(),
             Value<CookStatus> status = const Value.absent(),

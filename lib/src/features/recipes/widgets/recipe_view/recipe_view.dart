@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:recipe_app/src/features/recipes/widgets/recipe_view/cook_action_button.dart';
 import 'package:recipe_app/src/features/recipes/widgets/recipe_view/recipe_image_gallery.dart';
 import 'package:recipe_app/src/features/recipes/widgets/recipe_view/recipe_ingredients_view.dart';
 import 'package:recipe_app/src/features/recipes/widgets/recipe_view/recipe_steps_view.dart';
@@ -63,6 +64,10 @@ class RecipeView extends ConsumerWidget {
                 style: Theme.of(context).textTheme.bodyLarge,
               ),
             ],
+
+            const SizedBox(height: 16),
+
+            CookActionButton(recipeId: recipe.id, recipeName: recipe.title),
 
             const SizedBox(height: 16),
 

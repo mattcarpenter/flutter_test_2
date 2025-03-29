@@ -1,8 +1,10 @@
 import 'dart:async';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../database/database.dart';
+import '../../database/models/cooks.dart';
 import '../../database/powersync.dart';
 import '../repositories/cook_repository.dart';
+import 'package:collection/collection.dart';
 
 /// [CookNotifier] manages a list of [CookEntry] records.
 class CookNotifier extends StateNotifier<AsyncValue<List<CookEntry>>> {
@@ -29,8 +31,8 @@ class CookNotifier extends StateNotifier<AsyncValue<List<CookEntry>>> {
   /// Starts a new cook session.
   Future<String> startCook({
     required String recipeId,
-    required String userId,
     required String recipeName,
+    String? userId,
     String? householdId,
   }) async {
     try {
@@ -96,3 +98,20 @@ final cookNotifierProvider = StateNotifierProvider<CookNotifier, AsyncValue<List
     return CookNotifier(repository);
   },
 );
+
+// Returns only cooks with status == in_progress
+final inProgressCooksProvider = Provider<List<CookEntry>>((ref) {
+  final allCooks = ref.watch(cookNotifierProvider).value ?? [];
+  return allCooks.where((c) => c.status == CookStatus.inProgress).toList();
+});
+
+// Returns the first in-progress cook for a specific recipe
+final activeCookForRecipeProvider = Provider.family<CookEntry?, String>((ref, recipeId) {
+  final activeCooks = ref.watch(inProgressCooksProvider);
+  return activeCooks.firstWhereOrNull((cook) => cook.recipeId == recipeId);
+});
+
+// Returns true if any in-progress cook exists for the given recipe
+final hasActiveCookForRecipeProvider = Provider.family<bool, String>((ref, recipeId) {
+  return ref.watch(activeCookForRecipeProvider(recipeId)) != null;
+});

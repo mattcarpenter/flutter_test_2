@@ -19,8 +19,8 @@ class CookRepository {
   /// Returns the new cook's ID.
   Future<String> startCook({
     required String recipeId,
-    required String userId,
     required String recipeName,
+    String? userId,
     String? householdId,
   }) async {
     final newId = const Uuid().v4();
@@ -28,7 +28,7 @@ class CookRepository {
     final cook = CooksCompanion.insert(
       id: Value(newId),
       recipeId: recipeId,
-      userId: userId,
+      userId: Value(userId),
       householdId: Value(householdId),
       recipeName: recipeName,
       currentStepIndex: Value(0),

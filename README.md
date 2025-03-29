@@ -125,6 +125,8 @@ A new Flutter project.
   - [ ] Get cook status (so we can use it in the UI like the button or dynamic island)
   - [ ] Start cook button
   - [ ] Investigate dynamic island
+- [ ] Bugs
+  - [ ] Image bug (does not show in recipe detail page when anonymous)
 - [ ] Inventory epic
 - [ ] Shopping List Epic
 - [ ] Sharing epic
