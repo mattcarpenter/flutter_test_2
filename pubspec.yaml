@@ -65,6 +65,7 @@ dependencies:
   nanoid: ^1.0.0
   cached_network_image: ^3.4.1
   shimmer: ^3.0.0
+  super_cupertino_navigation_bar: ^2.1.2
 
 dev_dependencies:
   flutter_test:
