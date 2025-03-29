@@ -4,6 +4,7 @@ import 'package:recipe_app/database/models/steps.dart' as recipe_steps;
 import 'package:recipe_app/database/models/ingredients.dart';
 import 'package:recipe_app/src/providers/cook_provider.dart';
 import '../../../../../database/database.dart';
+import '../../../../../database/models/cooks.dart';
 import '../../../../widgets/wolt/button/wolt_elevated_button.dart';
 import '../recipe_view/recipe_view.dart';
 import 'ingredients_sheet.dart';
@@ -323,7 +324,7 @@ class _CookContentState extends ConsumerState<CookContent> {
               // Discard the cook
               ref.read(cookNotifierProvider.notifier).updateCook(
                 cookId: widget.cookId,
-                notes: 'Discarded by user',
+                status: CookStatus.discarded,
               );
 
               Navigator.of(dialogContext).pop(); // Close dialog

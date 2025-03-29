@@ -72,6 +72,7 @@ class CookNotifier extends StateNotifier<AsyncValue<List<CookEntry>>> {
     int? rating,
     String? notes,
     int? currentStepIndex,
+    CookStatus? status,
   }) async {
     try {
       await _repository.updateCook(
@@ -79,6 +80,7 @@ class CookNotifier extends StateNotifier<AsyncValue<List<CookEntry>>> {
         rating: rating,
         notes: notes,
         currentStepIndex: currentStepIndex,
+        status: status,
       );
     } catch (e, stack) {
       state = AsyncValue.error(e, stack);

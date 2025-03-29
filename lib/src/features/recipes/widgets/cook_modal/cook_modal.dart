@@ -9,11 +9,11 @@ void showCookModal(BuildContext context, {
   WoltModalSheet.show(
     useRootNavigator: true,
     context: context,
-    //modalTypeBuilder: (_) => WoltModalType.bottomSheet,
     pageListBuilder: (modalContext) {
       return [
         WoltModalSheetPage(
           hasTopBarLayer: true,
+          forceMaxHeight: true,
           leadingNavBarWidget: GestureDetector(
             onTap: () => Navigator.of(modalContext).pop(),
             child: const Icon(Icons.close),

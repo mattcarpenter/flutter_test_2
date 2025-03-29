@@ -63,12 +63,14 @@ class CookRepository {
     int? rating,
     String? notes,
     int? currentStepIndex,
+    CookStatus? status,
   }) async {
     await (_db.update(_db.cooks)..where((tbl) => tbl.id.equals(cookId))).write(
       CooksCompanion(
         rating: rating != null ? Value(rating) : const Value.absent(),
         notes: notes != null ? Value(notes) : const Value.absent(),
         currentStepIndex: currentStepIndex != null ? Value(currentStepIndex) : const Value.absent(),
+        status: status != null ? Value(status) : const Value.absent(),
       ),
     );
   }
