@@ -23,10 +23,23 @@ class CookContent extends ConsumerStatefulWidget {
   }) : super(key: key);
 
   @override
-  ConsumerState<CookContent> createState() => _CookContentState();
+  ConsumerState<CookContent> createState() => CookContentState();
 }
 
-class _CookContentState extends ConsumerState<CookContent> {
+class CookContentState extends ConsumerState<CookContent> {
+  List<Ingredient>? _ingredients;
+
+  // Public methods that can be called from the parent
+  void showIngredientsSheet() {
+    if (_ingredients != null) {
+      showIngredientsModal(context, _ingredients!);
+    }
+  }
+
+  void showFinishDialog() {
+    _showFinishDialog();
+  }
+
   @override
   Widget build(BuildContext context) {
     // Get the cook entry from the provider
@@ -40,36 +53,41 @@ class _CookContentState extends ConsumerState<CookContent> {
     // Get the recipe details
     final recipeAsync = ref.watch(recipeByIdStreamProvider(widget.recipeId));
 
-    return recipeAsync.when(
-      loading: () => _buildLoadingContent(),
-      error: (error, _) => _buildErrorContent(error.toString()),
-      data: (recipe) {
-        if (recipe == null) {
-          return _buildErrorContent("Recipe not found");
-        }
+    // Add fixed height to the entire content to avoid flex/expanded issues
+    return SizedBox(
+      height: MediaQuery.of(context).size.height * 0.75,
+      child: recipeAsync.when(
+        loading: () => _buildLoadingContent(),
+        error: (error, _) => _buildErrorContent(error.toString()),
+        data: (recipe) {
+          if (recipe == null) {
+            return _buildErrorContent("Recipe not found");
+          }
 
-        // Get the steps and ingredients from the recipe
-        final steps = recipe.steps ?? [];
-        final ingredients = recipe.ingredients ?? [];
+          // Get the steps and ingredients from the recipe
+          final steps = recipe.steps ?? [];
+          final ingredients = recipe.ingredients ?? [];
+          _ingredients = ingredients; // Store for action buttons
 
-        // Get the current step index from the cook or default to 0
-        final currentStepIndex = cook?.currentStepIndex ?? 0;
+          // Get the current step index from the cook or default to 0
+          final currentStepIndex = cook?.currentStepIndex ?? 0;
 
-        // Ensure we have a valid step index and handle empty steps list
-        if (steps.isEmpty) {
-          return _buildErrorContent("No steps found for this recipe");
-        }
+          // Ensure we have a valid step index and handle empty steps list
+          if (steps.isEmpty) {
+            return _buildErrorContent("No steps found for this recipe");
+          }
 
-        final validStepIndex = currentStepIndex.clamp(0, steps.length - 1);
+          final validStepIndex = currentStepIndex.clamp(0, steps.length - 1);
 
-        return _buildStepContent(
-          recipe: recipe,
-          steps: steps,
-          ingredients: ingredients,
-          currentStepIndex: validStepIndex.toInt(),
-          totalSteps: steps.length,
-        );
-      },
+          return _buildStepContent(
+            recipe: recipe,
+            steps: steps,
+            ingredients: ingredients,
+            currentStepIndex: validStepIndex.toInt(),
+            totalSteps: steps.length,
+          );
+        },
+      ),
     );
   }
 
@@ -123,33 +141,16 @@ class _CookContentState extends ConsumerState<CookContent> {
       }
     }
 
-    return Stack(
+    return Column(
+      mainAxisSize: MainAxisSize.max, // Take all available height
       children: [
-        // Main content with padding at the bottom for action bar
-        SingleChildScrollView(
-          padding: const EdgeInsets.fromLTRB(16, 0, 16, 100),
+        // Top section - Step number and section
+        Padding(
+          padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Top actions row - Ingredients button and Finish button
-              Row(
-                mainAxisAlignment: MainAxisAlignment.end,
-                children: [
-                  // Ingredients button
-                  IconButton(
-                    icon: const Icon(Icons.list),
-                    tooltip: 'Ingredients',
-                    onPressed: () => _showIngredientsSheet(context, ingredients),
-                  ),
-                  // Finish button
-                  TextButton(
-                    onPressed: () => _showFinishDialog(),
-                    child: const Text('Finish'),
-                  ),
-                ],
-              ),
-
-              // Section title
+              // Section title if available
               if (sectionTitle.isNotEmpty) ...[
                 Text(
                   sectionTitle,
@@ -162,7 +163,7 @@ class _CookContentState extends ConsumerState<CookContent> {
                 const SizedBox(height: 8),
               ],
 
-              // Step number and progress
+              // Step number and progress indicator
               Text(
                 'Step ${currentStepIndex + 1} of $totalSteps',
                 style: const TextStyle(
@@ -170,118 +171,122 @@ class _CookContentState extends ConsumerState<CookContent> {
                   fontWeight: FontWeight.w500,
                 ),
               ),
-              const SizedBox(height: 16),
+            ],
+          ),
+        ),
 
-              // Step instruction
-              Text(
+        // Middle section - Use Flexible instead of Expanded for better behavior
+        Flexible(
+          fit: FlexFit.tight, // This is important for proper sizing
+          child: Center(
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 20),
+              child: Text(
                 currentStep.text,
                 style: const TextStyle(fontSize: 18),
+                textAlign: TextAlign.center,
               ),
-              const SizedBox(height: 24),
+            ),
+          ),
+        ),
 
-              // Recipe card(s)
+        // Bottom section - Recipe cards and navigation buttons
+        Padding(
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              // Recipe cards - smaller height as requested
               SizedBox(
-                height: 120,
+                height: 70, // Reduced height
                 child: ListView(
                   scrollDirection: Axis.horizontal,
                   children: [
                     // Current recipe card
                     Container(
-                      width: 200,
-                      margin: const EdgeInsets.only(right: 16),
+                      width: 180,
+                      margin: const EdgeInsets.only(right: 12),
                       decoration: BoxDecoration(
                         color: Colors.grey.shade200,
                         borderRadius: BorderRadius.circular(12),
+                        border: Border.all(color: Theme.of(context).primaryColor, width: 2),
                       ),
-                      padding: const EdgeInsets.all(12),
+                      padding: const EdgeInsets.all(10),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          Text(
-                            recipe.title,
-                            style: const TextStyle(
-                              fontWeight: FontWeight.bold,
-                              fontSize: 16,
+                          Expanded(
+                            child: Text(
+                              recipe.title,
+                              style: const TextStyle(
+                                fontWeight: FontWeight.bold,
+                                fontSize: 14,
+                              ),
+                              maxLines: 2,
+                              overflow: TextOverflow.ellipsis,
                             ),
-                            maxLines: 2,
-                            overflow: TextOverflow.ellipsis,
                           ),
-                          const Text('Now cooking'),
+                          const Text('Now cooking',
+                              style: TextStyle(fontSize: 12, color: Colors.grey)),
                         ],
                       ),
                     ),
 
-                    // "Add another recipe" card
+                    // "Add another recipe" card (smaller)
                     Container(
-                      width: 120,
+                      width: 80,
                       decoration: BoxDecoration(
                         border: Border.all(color: Colors.grey.shade300),
                         borderRadius: BorderRadius.circular(12),
                       ),
-                      child: const Center(
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Icon(Icons.add_circle_outline),
-                            SizedBox(height: 8),
-                            Text('Add Recipe'),
-                          ],
-                        ),
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(Icons.add_circle_outline,
+                              size: 16, color: Colors.grey.shade600),
+                          const SizedBox(height: 4),
+                          Text('Add Recipe',
+                              style: TextStyle(fontSize: 11, color: Colors.grey.shade700)),
+                        ],
                       ),
                     ),
                   ],
                 ),
               ),
 
-              // Extra padding at the bottom
-              const SizedBox(height: 40),
-            ],
-          ),
-        ),
+              const SizedBox(height: 16),
 
-        // Bottom navigation buttons
-        Positioned(
-          left: 0,
-          right: 0,
-          bottom: 0,
-          child: Container(
-            color: Theme.of(context).scaffoldBackgroundColor,
-            padding: const EdgeInsets.all(16),
-            child: Row(
-              children: [
-                // Back button
-                if (!isFirstStep)
+              // Navigation buttons - Always show 2 equal width buttons
+              Row(
+                children: [
+                  // Previous button (disabled when on first step)
                   Expanded(
                     child: WoltElevatedButton(
                       theme: WoltElevatedButtonTheme.secondary,
-                      onPressed: () => _updateStep(currentStepIndex - 1),
+                      onPressed: isFirstStep ? () {} : () => _updateStep(currentStepIndex - 1),
+                      enabled: !isFirstStep,
                       child: const Text('Previous'),
                     ),
                   ),
-
-                if (!isFirstStep && !isLastStep)
                   const SizedBox(width: 16),
 
-                // Next button
-                if (!isLastStep)
+                  // Next/Complete button
                   Expanded(
                     child: WoltElevatedButton(
-                      onPressed: () => _updateStep(currentStepIndex + 1),
-                      child: const Text('Next'),
+                      onPressed: () {
+                        if (isLastStep) {
+                          _showFinishDialog();
+                        } else {
+                          _updateStep(currentStepIndex + 1);
+                        }
+                      },
+                      child: Text(isLastStep ? 'Complete' : 'Next'),
                     ),
                   ),
-
-                // Complete button when on the last step
-                if (isLastStep)
-                  Expanded(
-                    child: WoltElevatedButton(
-                      onPressed: () => _showFinishDialog(),
-                      child: const Text('Complete'),
-                    ),
-                  ),
-              ],
-            ),
+                ],
+              ),
+            ],
           ),
         ),
       ],
@@ -335,9 +340,5 @@ class _CookContentState extends ConsumerState<CookContent> {
         ],
       ),
     );
-  }
-
-  void _showIngredientsSheet(BuildContext context, List<Ingredient> ingredients) {
-    showIngredientsModal(context, ingredients);
   }
 }
