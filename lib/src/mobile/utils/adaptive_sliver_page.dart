@@ -81,38 +81,6 @@ class AdaptiveSliverPage extends StatelessWidget {
                 )
               )
           );
-          /*return CupertinoPageScaffold(
-            child: CustomScrollView(
-              keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
-              slivers: [
-                // Navigation bar
-                leading == null
-                    ? CupertinoSliverNavigationBar(
-                  largeTitle: Text(title),
-                  transitionBetweenRoutes: true,
-                  previousPageTitle: previousPageTitle,
-                  trailing: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 16),
-                    child: trailing,
-                  ),
-                  padding: EdgeInsetsDirectional.only(start: padding),
-                  automaticallyImplyLeading: automaticallyImplyLeading ?? false,
-                )
-                    : CupertinoSliverNavigationBar(
-                  largeTitle: Text(title),
-                  transitionBetweenRoutes: true,
-                  previousPageTitle: previousPageTitle,
-                  trailing: trailing,
-                  automaticallyImplyLeading: automaticallyImplyLeading ?? false,
-                  leading: Padding(
-                    padding: EdgeInsets.symmetric(horizontal: padding),
-                    child: leading,
-                  ),
-                ),
-                ..._buildContentSlivers(),
-              ],
-            ),
-          );*/
         } else {
           return Scaffold(
             body: CustomScrollView(
