@@ -29,6 +29,7 @@ class RecipesFolderPage extends ConsumerWidget {
 
     return AdaptiveSliverPage(
       title: title,
+      searchEnabled: true,
       slivers: [
         recipesAsyncValue.when(
           loading: () => const SliverFillRemaining(

@@ -18,6 +18,7 @@ class RecipesTab extends StatelessWidget {
   Widget build(BuildContext context) {
     return AdaptiveSliverPage(
       title: 'Recipes',
+      searchEnabled: true,
       // Instead of a body, we pass in slivers.
       slivers: [
         SliverToBoxAdapter(
