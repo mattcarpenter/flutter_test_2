@@ -1,12 +1,18 @@
 import 'dart:io' show Platform;
 import 'package:flutter/cupertino.dart';
-import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:super_cupertino_navigation_bar/super_cupertino_navigation_bar.dart';
 
-/// Dummy SearchDelegate implementation.
-class DummySearchDelegate extends SearchDelegate<String> {
-  final List<String> dummyData = ['Item 1', 'Item 2', 'Item 3', 'Item 4'];
+/// A custom SearchDelegate that defers building suggestions/results
+/// to the provided searchResultsBuilder.
+class AdaptiveSearchDelegate extends SearchDelegate<String> {
+  final Widget Function(BuildContext context, String query)? searchResultsBuilder;
+  final ValueChanged<String>? onSearchChanged;
+
+  AdaptiveSearchDelegate({
+    this.searchResultsBuilder,
+    this.onSearchChanged,
+  });
 
   @override
   List<Widget> buildActions(BuildContext context) {
@@ -16,9 +22,10 @@ class DummySearchDelegate extends SearchDelegate<String> {
           icon: Icon(Icons.clear),
           onPressed: () {
             query = '';
+            onSearchChanged?.call(query);
             showSuggestions(context);
           },
-        ),
+        )
     ];
   }
 
@@ -32,27 +39,23 @@ class DummySearchDelegate extends SearchDelegate<String> {
 
   @override
   Widget buildSuggestions(BuildContext context) {
-    final suggestions = dummyData
-        .where((item) => item.toLowerCase().contains(query.toLowerCase()))
-        .toList();
-    return ListView.builder(
-      itemCount: suggestions.length,
-      itemBuilder: (context, index) => ListTile(
-        title: Text(suggestions[index]),
-        onTap: () => close(context, suggestions[index]),
-      ),
-    );
+    onSearchChanged?.call(query);
+    if (searchResultsBuilder != null) {
+      return searchResultsBuilder!(context, query);
+    }
+    return Container();
   }
 
   @override
   Widget buildResults(BuildContext context) {
-    return Center(
-      child: Text('You selected: $query'),
-    );
+    if (searchResultsBuilder != null) {
+      return searchResultsBuilder!(context, query);
+    }
+    return Center(child: Text('No results'));
   }
 }
 
-class AdaptiveSliverPage extends StatelessWidget {
+class AdaptiveSliverPage extends StatefulWidget {
   final String title;
   final Widget? body;
   final List<Widget>? slivers;
@@ -60,7 +63,14 @@ class AdaptiveSliverPage extends StatelessWidget {
   final Widget? leading;
   final String? previousPageTitle;
   final bool? automaticallyImplyLeading;
-  final bool searchEnabled; // New property
+  final bool searchEnabled;
+
+  /// Called to build the search results widget tree.
+  /// It receives the current search query.
+  final Widget Function(BuildContext context, String query)? searchResultsBuilder;
+
+  /// Optional callback when the search query changes.
+  final ValueChanged<String>? onSearchChanged;
 
   const AdaptiveSliverPage({
     Key? key,
@@ -71,15 +81,24 @@ class AdaptiveSliverPage extends StatelessWidget {
     this.leading,
     this.previousPageTitle,
     this.automaticallyImplyLeading,
-    this.searchEnabled = false, // Default to true
+    this.searchEnabled = false,
+    this.searchResultsBuilder,
+    this.onSearchChanged,
   }) : super(key: key);
 
+  @override
+  _AdaptiveSliverPageState createState() => _AdaptiveSliverPageState();
+}
+
+class _AdaptiveSliverPageState extends State<AdaptiveSliverPage> {
+  String _searchQuery = '';
+
   List<Widget> _buildContentSlivers() {
-    if (slivers != null) {
-      return slivers!;
-    } else if (body != null) {
+    if (widget.slivers != null) {
+      return widget.slivers!;
+    } else if (widget.body != null) {
       return [
-        SliverToBoxAdapter(child: body!),
+        SliverToBoxAdapter(child: widget.body!),
         // Optional: extra space at the bottom.
         const SliverToBoxAdapter(child: SizedBox(height: 100)),
       ];
@@ -90,90 +109,105 @@ class AdaptiveSliverPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        final double screenWidth = MediaQuery.of(context).size.width;
-        final double pageWidth = constraints.maxWidth;
-        final bool isTablet = MediaQuery.of(context).size.shortestSide >= 600;
-        final scaffoldColor = CupertinoTheme.of(context).scaffoldBackgroundColor;
+    return LayoutBuilder(builder: (context, constraints) {
+      final double screenWidth = MediaQuery.of(context).size.width;
+      final double pageWidth = constraints.maxWidth;
+      final bool isTablet = MediaQuery.of(context).size.shortestSide >= 600;
+      final scaffoldColor = CupertinoTheme.of(context).scaffoldBackgroundColor;
 
-        // Compute dynamic padding.
-        final double padding =
-        (screenWidth - pageWidth > 50) ? 0 : (isTablet ? 50 - (screenWidth - pageWidth) : 0);
+      // Compute dynamic padding.
+      final double padding = (screenWidth - pageWidth > 50)
+          ? 0
+          : (isTablet ? 50 - (screenWidth - pageWidth) : 0);
 
-        if (Platform.isIOS) {
-          // iOS branch remains unchanged.
-          return Scaffold(
-            backgroundColor: scaffoldColor,
-            body: SuperScaffold(
-              appBar: SuperAppBar(
-                title: Text(title),
-                largeTitle: SuperLargeTitle(
-                  enabled: true,
-                  largeTitle: title,
-                ),
-                previousPageTitle: previousPageTitle ?? "",
-                leading: leading,
-                actions: trailing,
-                searchBar: SuperSearchBar(
-                  enabled: searchEnabled,
-                  onChanged: (query) {
-                    // Search Bar Changes
-                  },
-                  onSubmitted: (query) {
-                    // On Search Bar submitted
-                  },
-                  // Add other search bar properties as needed
-                ),
+      if (Platform.isIOS) {
+        // For iOS, we leverage SuperSearchBar.
+        return Scaffold(
+          backgroundColor: scaffoldColor,
+          body: SuperScaffold(
+            appBar: SuperAppBar(
+              title: Text(widget.title),
+              largeTitle: SuperLargeTitle(
+                enabled: true,
+                largeTitle: widget.title,
               ),
-              body: CustomScrollView(
-                slivers: _buildContentSlivers(),
+              previousPageTitle: widget.previousPageTitle ?? "",
+              leading: widget.leading,
+              actions: widget.trailing,
+              searchBar: SuperSearchBar(
+                enabled: widget.searchEnabled,
+                onChanged: (query) {
+                  setState(() {
+                    _searchQuery = query;
+                  });
+                  widget.onSearchChanged?.call(query);
+                },
+                onSubmitted: (query) {
+                  setState(() {
+                    _searchQuery = query;
+                  });
+                  widget.onSearchChanged?.call(query);
+                },
+                // The searchResult here is built using your provided builder.
+                searchResult: widget.searchResultsBuilder != null
+                    ? widget.searchResultsBuilder!(context, _searchQuery)
+                    : Container(),
               ),
             ),
-          );
-        } else {
-          // Material branch with injected search icon when searchEnabled is true.
-          List<Widget> actionsList = [];
-          if (searchEnabled) {
-            actionsList.add(
-              IconButton(
-                icon: Icon(Icons.search),
-                onPressed: () {
-                  showSearch(context: context, delegate: DummySearchDelegate());
-                },
-              ),
-            );
-          }
-          if (trailing != null) {
-            actionsList.add(
-              Padding(
-                padding: const EdgeInsets.only(right: 16.0),
-                child: trailing,
-              ),
-            );
-          }
-
-          return Scaffold(
             body: CustomScrollView(
-              keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
-              slivers: [
-                SliverAppBar(
-                  title: Text(title),
-                  floating: true,
-                  pinned: true,
-                  leadingPadding: isTablet ? EdgeInsetsDirectional.only(start: padding) : null,
-                  actions: actionsList.isNotEmpty ? actionsList : null,
-                  leading: leading,
-                ),
-                if (body != null)
-                  SliverFillRemaining(child: body!)
-                else
-                  ..._buildContentSlivers(),
-              ],
+              slivers: _buildContentSlivers(),
+            ),
+          ),
+        );
+      } else {
+        // For Material (Android), we inject a search icon that calls showSearch.
+        List<Widget> actionsList = [];
+        if (widget.searchEnabled) {
+          actionsList.add(
+            IconButton(
+              icon: Icon(Icons.search),
+              onPressed: () {
+                showSearch(
+                  context: context,
+                  delegate: AdaptiveSearchDelegate(
+                    searchResultsBuilder: widget.searchResultsBuilder,
+                    onSearchChanged: widget.onSearchChanged,
+                  ),
+                );
+              },
             ),
           );
         }
-      },
-    );
+        if (widget.trailing != null) {
+          actionsList.add(
+            Padding(
+              padding: const EdgeInsets.only(right: 16.0),
+              child: widget.trailing!,
+            ),
+          );
+        }
+
+        return Scaffold(
+          body: CustomScrollView(
+            keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
+            slivers: [
+              SliverAppBar(
+                title: Text(widget.title),
+                floating: true,
+                pinned: true,
+                leadingPadding:
+                isTablet ? EdgeInsetsDirectional.only(start: padding) : null,
+                actions: actionsList.isNotEmpty ? actionsList : null,
+                leading: widget.leading,
+              ),
+              if (widget.body != null)
+                SliverFillRemaining(child: widget.body!)
+              else
+                ..._buildContentSlivers(),
+            ],
+          ),
+        );
+      }
+    });
   }
 }

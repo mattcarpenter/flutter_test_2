@@ -14,6 +14,7 @@ import 'package:powersync_core/src/open_factory/abstract_powersync_open_factory.
 
 import '../app_config.dart';
 import 'database.dart';
+import 'fts_setup.dart';
 import 'supabase.dart';
 import 'schema.dart';
 
@@ -229,5 +230,5 @@ Future<void> openDatabase({bool isTest = false}) async {
 
   // Demo using SQLite Full-Text Search with PowerSync.
   // See https://docs.powersync.com/usage-examples/full-text-search for more details
-  //await configureFts(db);
+  await configureFts(db);
 }
