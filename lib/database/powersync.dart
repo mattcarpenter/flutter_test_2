@@ -13,6 +13,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:powersync_core/src/open_factory/abstract_powersync_open_factory.dart';
 
 import '../app_config.dart';
+import 'custom_open_factory.dart';
 import 'database.dart';
 import 'fts_setup.dart';
 import 'supabase.dart';
@@ -173,7 +174,7 @@ Future<void> openDatabase({bool isTest = false}) async {
   final databasePath = await getDatabasePath(isTest: isTest);
   print('Opening test database at $databasePath');
 
-  var db;
+  PowerSyncDatabase db;
 
   if (isTest) {
     final customSqliteSetup = SqliteConnectionSetup(() {
@@ -185,8 +186,9 @@ Future<void> openDatabase({bool isTest = false}) async {
     db = PowerSyncDatabase(
         schema: schema, path: databasePath, logger: attachedLogger, sqliteSetup: customSqliteSetup);
   } else {
-    db = PowerSyncDatabase(
-        schema: schema, path: databasePath, logger: attachedLogger);
+    db = PowerSyncDatabase.withFactory(CustomOpenFactory(path: databasePath), schema: schema, logger: attachedLogger);
+    /*db = PowerSyncDatabase(
+        schema: schema, path: databasePath, logger: attachedLogger);*/
   }
 
   // Open the local database

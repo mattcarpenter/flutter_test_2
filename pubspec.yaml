@@ -54,7 +54,7 @@ dependencies:
   drift: ^2.23.1
   drift_flutter: ^0.2.4
   powersync: ^1.11.3
-  sqlite3_flutter_libs: ^0.5.5
+  sqlite3_flutter_libs: ^0.5.32
   sqlite3: ^2.0.0
   postgres: ^3.5.4
   json_annotation: ^4.9.0
@@ -66,6 +66,7 @@ dependencies:
   cached_network_image: ^3.4.1
   shimmer: ^3.0.0
   super_cupertino_navigation_bar: ^2.1.2
+  porter_2_stemmer: ^3.0.2
 
 dev_dependencies:
   flutter_test:
