@@ -10,6 +10,8 @@ import '../../database/models/ingredients.dart';
 import '../../database/models/recipe_images.dart';
 import '../../database/models/steps.dart';
 import '../../database/powersync.dart';
+import '../../utils/language.dart';
+import '../../utils/mecab_wrapper.dart';
 import '../models/recipe_with_folders.dart';
 
 class RecipeRepository {
@@ -371,8 +373,105 @@ class RecipeRepository {
       await updateRecipe(updatedRecipe);
     }
   }
+
+  Future<List<RecipeEntry>> searchRecipes(String query) async {
+    if (containsJapanese(query)) {
+      // Use MeCab to tokenize the Japanese query
+      final terms = MecabWrapper().segment(query).split(' ').where((t) => t.isNotEmpty).toList();
+
+      if (terms.isEmpty) return [];
+
+      // First query: all terms must match (AND)
+      final andConditions = terms.map((t) => "r.title LIKE '%$t%' OR r.description LIKE '%$t%'").join(" AND ");
+      final andResults = await _db.customSelect(
+        '''
+      SELECT * FROM recipes r 
+      WHERE r.deleted_at IS NULL AND ($andConditions)
+      ORDER BY r.created_at DESC
+      ''',
+        readsFrom: {_db.recipes},
+      ).get().then((rows) => rows.map(_rowToRecipe).toList());
+
+      // Second query: any term matches (OR)
+      final orConditions = terms.map((t) => "r.title LIKE '%$t%' OR r.description LIKE '%$t%'").join(" OR ");
+      final orResults = await _db.customSelect(
+        '''
+      SELECT * FROM recipes r 
+      WHERE r.deleted_at IS NULL AND ($orConditions)
+      ORDER BY r.created_at DESC
+      ''',
+        readsFrom: {_db.recipes},
+      ).get().then((rows) => rows.map(_rowToRecipe).toList());
+
+      // Combine, keeping order and removing duplicates
+      final all = [...andResults];
+      for (var r in orResults) {
+        if (!all.any((e) => e.id == r.id)) {
+          all.add(r);
+        }
+      }
+      return all;
+    } else {
+      final sanitized = sanitizeFtsQuery(query);
+      final prefixed = '$sanitized*';
+
+      // Use FTS for English
+      final results = await _db.customSelect(
+        '''
+  SELECT r.* FROM fts_recipes
+  JOIN recipes r ON fts_recipes.id = r.id
+  WHERE fts_recipes MATCH ? AND r.deleted_at IS NULL
+  ORDER BY rank
+  ''',
+        variables: [Variable(prefixed)],
+        readsFrom: {_db.recipes},
+      ).get();
+
+      return results.map(_rowToRecipe).toList();
+    }
+  }
+
+  RecipeEntry _rowToRecipe(QueryRow row) {
+    return RecipeEntry(
+      id: row.read<String>('id'),
+      title: row.read<String>('title'),
+      description: row.read<String?>('description') ?? '',
+      rating: row.read<int?>('rating'),
+      language: row.read<String>('language'),
+      servings: row.read<int?>('servings'),
+      prepTime: row.read<int?>('prep_time'),
+      cookTime: row.read<int?>('cook_time'),
+      totalTime: row.read<int?>('total_time'),
+      source: row.read<String?>('source'),
+      nutrition: row.read<String?>('nutrition'),
+      generalNotes: row.read<String?>('general_notes'),
+      userId: row.read<String>('user_id'),
+      householdId: row.read<String?>('household_id'),
+      createdAt: row.read<int?>('created_at'),
+      updatedAt: row.read<int?>('updated_at'),
+      deletedAt: row.read<int?>('deleted_at'),
+      ingredients: row.read<String?>('ingredients') != null
+          ? const IngredientListConverter().fromSql(row.read<String>('ingredients'))
+          : [],
+      steps: row.read<String?>('steps') != null
+          ? const StepListConverter().fromSql(row.read<String>('steps'))
+          : [],
+      images: row.read<String?>('images') != null
+          ? const RecipeImageListConverter().fromSql(row.read<String>('images'))
+          : [],
+      folderIds: row.read<String?>('folder_ids') != null
+          ? List<String>.from(jsonDecode(row.read<String>('folder_ids')))
+          : [],
+    );
+  }
+
 }
 
 final recipeRepositoryProvider = Provider<RecipeRepository>((ref) {
   return RecipeRepository(appDb);
 });
+
+String sanitizeFtsQuery(String query) {
+  // Allow letters, numbers, spaces, and Japanese characters. Remove everything else.
+  return query.replaceAll(RegExp(r'[^\w\s\u3040-\u30FF\u4E00-\u9FFF]'), '');
+}

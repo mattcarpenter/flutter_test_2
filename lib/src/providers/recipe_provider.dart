@@ -222,3 +222,79 @@ final recipeFolderCountProvider = Provider<Map<String, int>>((ref) {
 
   return folderCounts;
 });
+
+class RecipeSearchState {
+  final List<RecipeEntry> results;
+  final bool isLoading;
+  final Object? error;
+
+  RecipeSearchState({
+    required this.results,
+    this.isLoading = false,
+    this.error,
+  });
+
+  RecipeSearchState copyWith({
+    List<RecipeEntry>? results,
+    bool? isLoading,
+    Object? error,
+  }) {
+    return RecipeSearchState(
+      results: results ?? this.results,
+      isLoading: isLoading ?? this.isLoading,
+      error: error,
+    );
+  }
+}
+
+final recipeSearchNotifierProvider =
+NotifierProvider<RecipeSearchNotifier, RecipeSearchState>(
+    RecipeSearchNotifier.new);
+
+class RecipeSearchNotifier extends Notifier<RecipeSearchState> {
+  Timer? _loadingTimer;
+  int _searchId = 0;
+
+  @override
+  RecipeSearchState build() {
+    return RecipeSearchState(results: [], isLoading: false);
+  }
+
+  Future<void> search(String query) async {
+    // Cancel previous timer immediately
+    _loadingTimer?.cancel();
+    final currentSearchId = ++_searchId;
+
+    if (query.isEmpty) {
+      state = state.copyWith(results: [], isLoading: false, error: null);
+      return;
+    }
+
+    // Schedule loading indicator to appear after a delay
+    _loadingTimer = Timer(const Duration(milliseconds: 250), () {
+      if (_searchId == currentSearchId) {
+        state = state.copyWith(isLoading: true);
+      }
+    });
+
+    try {
+      final results = await ref.read(recipeRepositoryProvider).searchRecipes(query);
+
+      // Immediately cancel timer upon receiving results
+      _loadingTimer?.cancel();
+
+      // Only apply if this is still the most recent query
+      if (_searchId == currentSearchId) {
+        state = state.copyWith(results: results, isLoading: false, error: null);
+      }
+    } catch (e) {
+      _loadingTimer?.cancel();
+
+      if (_searchId == currentSearchId) {
+        state = state.copyWith(isLoading: false, error: e);
+      }
+    }
+  }
+}
+
+
