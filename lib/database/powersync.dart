@@ -169,7 +169,7 @@ Future<String> getDatabasePath({ bool isTest = false}) async {
   return join(dir.path, dbFilename);
 }
 
-Future<void> openDatabase({bool isTest = false, String? dictPath}) async {
+Future<void> openDatabase({bool isTest = false}) async {
 
   final databasePath = await getDatabasePath(isTest: isTest);
   print('Opening test database at $databasePath');
@@ -186,7 +186,7 @@ Future<void> openDatabase({bool isTest = false, String? dictPath}) async {
     db = PowerSyncDatabase(
         schema: schema, path: databasePath, logger: attachedLogger, sqliteSetup: customSqliteSetup);
   } else {
-    db = PowerSyncDatabase.withFactory(CustomOpenFactory(path: databasePath, dictPath: dictPath), schema: schema, logger: attachedLogger);
+    db = PowerSyncDatabase.withFactory(CustomOpenFactory(path: databasePath), schema: schema, logger: attachedLogger);
     /*db = PowerSyncDatabase(
         schema: schema, path: databasePath, logger: attachedLogger);*/
   }

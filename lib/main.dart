@@ -25,15 +25,11 @@ Future<void> _configureMacosWindowUtils() async {
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  await MecabWrapper().initialize();
+  MecabWrapper().initialize();
 
   await AppConfig.initialize();
 
-  // Drift
-  //final connection = await openConnection();
-  //final db = AppDatabase(connection);
-  final dictPath = MecabWrapper().dictPath;
-  await openDatabase(dictPath: dictPath);
+  await openDatabase();
 
   // Brick / Supabase
   //await BaseRepository.configure(databaseFactory);

@@ -2,8 +2,6 @@ import 'package:powersync/powersync.dart';
 import 'package:powersync/sqlite_async.dart';
 import 'package:recipe_app/database/schema.dart';
 
-import 'fts_helpers.dart';
-
 /// Enum to indicate which SQL extraction style to use.
 /// In this simple example both types produce the same SQL.
 enum ExtractType { columnOnly, columnInOperation }
@@ -17,16 +15,16 @@ Future<void> configureFts(PowerSyncDatabase db) async {
 
 /// Wraps a raw json_extract call in a call to our UDF "preprocess".
 String _createExtract(String jsonColumnName, String columnName) =>
-    "preprocessFtsText(json_extract($jsonColumnName, '\$.$columnName'))";
+    "json_extract($jsonColumnName, '\$.$columnName')";
 
 /// Custom extraction for our recipe table.
 /// For 'steps' and 'ingredients', flatten the JSON array by concatenating
 /// specific fields, each wrapped in a call to preprocess().
 String generateRecipeJsonExtract(String jsonColumnName, String columnName) {
   if (columnName == 'steps') {
-    return "(SELECT group_concat(trim(coalesce(preprocessFtsText(json_extract(value, '\$.text')), '') || ' ' || coalesce(preprocessFtsText(json_extract(value, '\$.note')), '')), ' ') FROM json_each(json_extract($jsonColumnName, '\$.steps')))";
+    return "(SELECT group_concat(trim(coalesce(json_extract(value, '\$.text'), '') || ' ' || coalesce(json_extract(value, '\$.note'), '')), ' ') FROM json_each(json_extract($jsonColumnName, '\$.steps')))";
   } else if (columnName == 'ingredients') {
-    return "(SELECT group_concat(trim(coalesce(preprocessFtsText(json_extract(value, '\$.name')), '') || ' ' || coalesce(preprocessFtsText(json_extract(value, '\$.note')), '')), ' ') FROM json_each(json_extract($jsonColumnName, '\$.ingredients')))";
+    return "(SELECT group_concat(trim(coalesce(json_extract(value, '\$.name'), '') || ' ' || coalesce(json_extract(value, '\$.note'), '')), ' ') FROM json_each(json_extract($jsonColumnName, '\$.ingredients')))";
   } else {
     return _createExtract(jsonColumnName, columnName);
   }

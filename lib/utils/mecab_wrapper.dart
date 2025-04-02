@@ -15,20 +15,7 @@ class MecabWrapper {
 
   final Mecab _tagger = Mecab();
   bool _isInitialized = false;
-  String? dictPath;
-
-  void syncInitialize(String? path) {
-    if (path == null) return;
-    if (_isInitialized) return;
-
-    final charBin = File(p.join(path, 'char.bin'));
-    if (!charBin.existsSync()) {
-      throw Exception('ipadic not found at $path — did you call initialize()?');
-    }
-
-    _tagger.initWithIpadicDir(path, false);
-    _isInitialized = true;
-  }
+  String? _dictPath;
 
   /// Ensure mecab is initialized with the dictionary.
   Future<void> initialize() async {
@@ -36,14 +23,14 @@ class MecabWrapper {
 
     final appDir = await getApplicationSupportDirectory();
     final dictDir = Directory(p.join(appDir.path, 'ipadic'));
-    dictPath = dictDir.path;
+    _dictPath = dictDir.path;
 
     // If the dict is not yet unpacked, do it
     if (!dictDir.existsSync()) {
       await _decompressAssetTarXz('ipadic.tar.xz', appDir.path);
     }
 
-    _tagger.initWithIpadicDir(dictPath!, false);
+    _tagger.initWithIpadicDir(_dictPath!, false);
     _isInitialized = true;
   }
 
@@ -51,7 +38,7 @@ class MecabWrapper {
   /// (ensure initialize() is awaited before using this!)
   String segment(String text) {
     if (!_isInitialized) {
-      return "";
+      return text;
     }
 
     final tokens = _tagger.parse(text);
@@ -79,6 +66,23 @@ class MecabWrapper {
       } else {
         Directory(filePath).createSync(recursive: true);
       }
+    }
+  }
+
+  String tokenizeJapaneseText(String input) {
+    input = input.trim();
+    if (input.isEmpty) return '';
+
+    bool containsJapanese = input.runes.any((int rune) {
+      return (rune >= 0x3040 && rune <= 0x309F) || // Hiragana
+          (rune >= 0x30A0 && rune <= 0x30FF) || // Katakana
+          (rune >= 0x4E00 && rune <= 0x9FBF);   // Kanji
+    });
+
+    if (containsJapanese) {
+      return segment(input);
+    } else {
+      return input.trim();
     }
   }
 }
