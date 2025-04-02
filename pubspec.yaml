@@ -67,6 +67,9 @@ dependencies:
   shimmer: ^3.0.0
   super_cupertino_navigation_bar: ^2.1.2
   porter_2_stemmer: ^3.0.2
+  characters: ^1.4.0
+  mecab_dart: ^0.1.6
+  archive: ^4.0.5
 
 dev_dependencies:
   flutter_test:
@@ -96,3 +99,4 @@ flutter:
     # Add assets from the images directory to the application.
     - assets/images/
     - assets/images/samples/
+    - assets/ipadic.tar.xz

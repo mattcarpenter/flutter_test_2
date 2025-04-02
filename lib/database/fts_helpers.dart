@@ -1,6 +1,6 @@
 import 'package:porter_2_stemmer/porter_2_stemmer.dart';
 import 'package:recipe_app/database/powersync.dart';
-
+import '../utils/mecab_wrapper.dart';
 import '../utils/tiny_segmenter.dart'; // for accessing "db"
 
 final Porter2Stemmer _stemmer = Porter2Stemmer();
@@ -13,19 +13,23 @@ final TinySegmenter _segmenter = TinySegmenter();
 /// Otherwise, if not provided, the function detects Japanese characters in [input]
 /// and applies TinySegmenter if needed; else it applies the Porter2 stemmer.
 String preprocessText(String input) {
+  input = input.trim();
+  if (input.isEmpty) return '';
+
   bool containsJapanese = input.runes.any((int rune) {
-    // Hiragana: U+3040 to U+309F, Katakana: U+30A0 to U+30FF, Kanji: U+4E00 to U+9FBF
-    return (rune >= 0x3040 && rune <= 0x309F) ||
-        (rune >= 0x30A0 && rune <= 0x30FF) ||
-        (rune >= 0x4E00 && rune <= 0x9FBF);
+    return (rune >= 0x3040 && rune <= 0x309F) || // Hiragana
+        (rune >= 0x30A0 && rune <= 0x30FF) || // Katakana
+        (rune >= 0x4E00 && rune <= 0x9FBF);   // Kanji
   });
+
   if (containsJapanese) {
-    return _segmenter.tokenize(input).join(' ');
+    return MecabWrapper().segment(input);
   } else {
     return input
         .split(RegExp(r'\s+'))
         .map((word) => _stemmer.stem(word))
-        .join(' ');
+        .join(' ')
+        .trim();
   }
 }
 

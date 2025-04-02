@@ -1,3 +1,5 @@
+import 'package:characters/characters.dart';
+
 class TinySegmenter {
   var _patterns, _chartype;
   var _BIAS;
@@ -304,7 +306,7 @@ class TinySegmenter {
     var result = [];
     var seg = ["B3", "B2", "B1"];
     var ctype = ["O", "O", "O"];
-    for (var c in text.splitChars()) {
+    for (var c in Characters(text).toList()) {
       seg.add(c);
       ctype.add(this._ctype(c));
     }

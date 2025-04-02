@@ -4,8 +4,11 @@ import 'package:powersync/sqlite3_common.dart';
 import 'package:powersync/sqlite_async.dart';
 import 'package:recipe_app/database/fts_helpers.dart';
 
+import '../utils/mecab_wrapper.dart';
+
 class CustomOpenFactory extends PowerSyncOpenFactory {
-  CustomOpenFactory({required super.path, super.sqliteOptions});
+  final String? dictPath;
+  CustomOpenFactory({required super.path, super.sqliteOptions, this.dictPath});
 
   @override
   CommonDatabase open(SqliteOpenOptions options) {
@@ -19,6 +22,7 @@ class CustomOpenFactory extends PowerSyncOpenFactory {
       function: (args) {
         try {
         final input = args[0] as String;
+        MecabWrapper().syncInitialize(dictPath);
         return preprocessText(input);
         } catch (e) {
           print(e);

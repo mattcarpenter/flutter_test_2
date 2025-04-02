@@ -34,6 +34,8 @@ PODS:
   - Mantle (2.2.0):
     - Mantle/extobjc (= 2.2.0)
   - Mantle/extobjc (2.2.0)
+  - mecab_dart (0.0.1):
+    - Flutter
   - path_provider_foundation (0.0.1):
     - Flutter
     - FlutterMacOS
@@ -94,6 +96,7 @@ DEPENDENCIES:
   - image_picker_ios (from `.symlinks/plugins/image_picker_ios/ios`)
   - integration_test (from `.symlinks/plugins/integration_test/ios`)
   - irondash_engine_context (from `.symlinks/plugins/irondash_engine_context/ios`)
+  - mecab_dart (from `.symlinks/plugins/mecab_dart/ios`)
   - path_provider_foundation (from `.symlinks/plugins/path_provider_foundation/darwin`)
   - pointer_interceptor_ios (from `.symlinks/plugins/pointer_interceptor_ios/ios`)
   - powersync_flutter_libs (from `.symlinks/plugins/powersync_flutter_libs/ios`)
@@ -132,6 +135,8 @@ EXTERNAL SOURCES:
     :path: ".symlinks/plugins/integration_test/ios"
   irondash_engine_context:
     :path: ".symlinks/plugins/irondash_engine_context/ios"
+  mecab_dart:
+    :path: ".symlinks/plugins/mecab_dart/ios"
   path_provider_foundation:
     :path: ".symlinks/plugins/path_provider_foundation/darwin"
   pointer_interceptor_ios:
@@ -163,6 +168,7 @@ SPEC CHECKSUMS:
   irondash_engine_context: 3458bf979b90d616ffb8ae03a150bafe2e860cc9
   libwebp: 02b23773aedb6ff1fd38cec7a77b81414c6842a8
   Mantle: c5aa8794a29a022dfbbfc9799af95f477a69b62d
+  mecab_dart: 7491d01a31ed6c39b99c7c1c086d5c84a839e593
   path_provider_foundation: 2b6b4c569c0fb62ec74538f866245ac84301af46
   pointer_interceptor_ios: 508241697ff0947f853c061945a8b822463947c1
   powersync-sqlite-core: c7045a44bb1040485ba46b42a3b0acaed424a5cd

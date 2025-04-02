@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:macos_ui/macos_ui.dart';
+import 'package:recipe_app/utils/mecab_wrapper.dart';
 import 'app_config.dart';
 import 'database/database.dart';
 import 'database/powersync.dart';
@@ -24,12 +25,15 @@ Future<void> _configureMacosWindowUtils() async {
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
+  await MecabWrapper().initialize();
+
   await AppConfig.initialize();
 
   // Drift
   //final connection = await openConnection();
   //final db = AppDatabase(connection);
-  await openDatabase();
+  final dictPath = MecabWrapper().dictPath;
+  await openDatabase(dictPath: dictPath);
 
   // Brick / Supabase
   //await BaseRepository.configure(databaseFactory);

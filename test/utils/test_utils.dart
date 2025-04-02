@@ -19,6 +19,11 @@ class FakePathProviderPlatform extends PathProviderPlatform {
   Future<String?> getApplicationSupportPath() async {
     return Directory.systemTemp.path;
   }
+
+  @override
+  Future<String?> getApplicationDocumentsPath() async {
+    return Directory.systemTemp.path;
+  }
 }
 
 resetDatabase () async {
