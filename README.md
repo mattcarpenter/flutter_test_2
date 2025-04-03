@@ -129,7 +129,6 @@ A new Flutter project.
   - [ ] Investigate dynamic island
 - [ ] Search epic
   - [X] UX Research
-  - [ ] Consult GPT on tag storage
   - [X] Consult GPT on FTS
   - [X] Consult GPT on implementation (both use cases - recipe search and add recipe for cook mode)
   - [X] Search implemented - no selection handlers yet
@@ -137,6 +136,7 @@ A new Flutter project.
 - [ ] Bugs
   - [ ] Image bug (does not show in recipe detail page when anonymous)
 - [ ] Inventory epic
+- [ ] Tags Epic
 - [ ] Shopping List Epic
 - [ ] Sharing epic
 - [ ] Smart folders epic

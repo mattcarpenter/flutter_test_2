@@ -33,7 +33,10 @@ class AdaptiveSearchDelegate extends SearchDelegate<String> {
   Widget buildLeading(BuildContext context) {
     return IconButton(
       icon: Icon(Icons.arrow_back),
-      onPressed: () => close(context, ''),
+      onPressed: () {
+        // First close search, then allow navigation context to resume
+        close(context, '');
+      },
     );
   }
 
@@ -149,6 +152,7 @@ class _AdaptiveSliverPageState extends State<AdaptiveSliverPage> {
                   widget.onSearchChanged?.call(query);
                 },
                 // The searchResult here is built using your provided builder.
+                // For iOS search, we need to make sure the builder gets a proper context
                 searchResult: widget.searchResultsBuilder != null
                     ? widget.searchResultsBuilder!(context, _searchQuery)
                     : Container(),

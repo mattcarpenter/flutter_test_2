@@ -6,8 +6,9 @@ import '../../../providers/recipe_provider.dart';
 
 class RecipeSearchResults extends ConsumerWidget {
   final String? folderId;
+  final void Function(RecipeEntry)? onResultSelected;
 
-  const RecipeSearchResults({super.key, this.folderId});
+  const RecipeSearchResults({super.key, this.folderId, this.onResultSelected});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -44,7 +45,16 @@ class RecipeSearchResults extends ConsumerWidget {
           title: Text(recipe.title),
           subtitle: Text(recipe.description ?? ''),
           onTap: () {
-            // navigate to recipe detail
+            if (onResultSelected != null) {
+              // Save recipe to pass to callback
+              final selectedRecipe = recipe;
+              
+              // Use Future.delayed to ensure the search UI can close
+              // before navigation occurs
+              Future.microtask(() {
+                onResultSelected!(selectedRecipe);
+              });
+            }
           },
         );
       },

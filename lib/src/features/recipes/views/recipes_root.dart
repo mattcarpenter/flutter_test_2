@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -22,7 +24,14 @@ class RecipesTab extends ConsumerWidget {
     return AdaptiveSliverPage(
       title: 'Recipes',
       searchEnabled: true,
-      searchResultsBuilder: (context, query) => const RecipeSearchResults(),
+      searchResultsBuilder: (context, query) => RecipeSearchResults(
+        onResultSelected: (recipe) {
+          // Then navigate
+          context.push('/recipes/recipe/${recipe.id}', extra: {
+            'previousPageTitle': 'Recipes',
+          });
+        },
+      ),
       onSearchChanged: (query) {
         WidgetsBinding.instance.addPostFrameCallback((_) {
           ref.read(recipeSearchNotifierProvider.notifier).search(query);
