@@ -8,6 +8,7 @@ import '../../../providers/recipe_provider.dart';
 import '../../../widgets/adaptive_pull_down/adaptive_menu_item.dart';
 import '../../../widgets/adaptive_pull_down/adaptive_pull_down.dart';
 import '../widgets/recipe_list.dart';
+import '../widgets/recipe_search_results.dart';
 import 'add_recipe_modal.dart';
 
 class RecipesFolderPage extends ConsumerWidget {
@@ -30,6 +31,12 @@ class RecipesFolderPage extends ConsumerWidget {
     return AdaptiveSliverPage(
       title: title,
       searchEnabled: true,
+      searchResultsBuilder: (context, query) => RecipeSearchResults(folderId: folderId),
+      onSearchChanged: (query) {
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          ref.read(recipeSearchNotifierProvider.notifier).search(query);
+        });
+      },
       slivers: [
         recipesAsyncValue.when(
           loading: () => const SliverFillRemaining(

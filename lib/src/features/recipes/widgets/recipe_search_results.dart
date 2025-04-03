@@ -1,10 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../database/database.dart';
+import '../../../constants/folder_constants.dart';
 import '../../../providers/recipe_provider.dart';
 
 class RecipeSearchResults extends ConsumerWidget {
-  const RecipeSearchResults({super.key});
+  final String? folderId;
+
+  const RecipeSearchResults({super.key, this.folderId});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -14,7 +17,15 @@ class RecipeSearchResults extends ConsumerWidget {
       return Center(child: Text('Error: ${searchState.error}'));
     }
 
-    final results = searchState.results;
+    List<RecipeEntry> results = searchState.results;
+
+    if (folderId != null) {
+      if (folderId == kUncategorizedFolderId) {
+        results = results.where((r) => r.folderIds?.isEmpty ?? true).toList();
+      } else {
+        results = results.where((r) => r.folderIds?.contains(folderId) ?? false).toList();
+      }
+    }
 
     if (results.isEmpty && searchState.isLoading) {
       return const Center(child: CircularProgressIndicator());

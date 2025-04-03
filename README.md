@@ -128,10 +128,12 @@ A new Flutter project.
   - [ ] Implement add recipe (depends on search epic)
   - [ ] Investigate dynamic island
 - [ ] Search epic
-  - [ ] UX Research
+  - [X] UX Research
   - [ ] Consult GPT on tag storage
-  - [ ] Consult GPT on FTS
-  - [ ] Consult GPT on implementation (both use cases - recipe search and add recipe for cook mode)
+  - [X] Consult GPT on FTS
+  - [X] Consult GPT on implementation (both use cases - recipe search and add recipe for cook mode)
+  - [X] Search implemented - no selection handlers yet
+  - [ ] Tap search result to navigate to recipe
 - [ ] Bugs
   - [ ] Image bug (does not show in recipe detail page when anonymous)
 - [ ] Inventory epic
