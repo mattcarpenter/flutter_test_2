@@ -25,8 +25,8 @@ class RecipesTab extends ConsumerWidget {
       title: 'Recipes',
       searchEnabled: true,
       searchResultsBuilder: (context, query) => RecipeSearchResults(
-        onResultSelected: (recipe) {
-          // Then navigate
+        onResultSelected: (recipe) async {
+          FocusScope.of(context).unfocus();
           context.push('/recipes/recipe/${recipe.id}', extra: {
             'previousPageTitle': 'Recipes',
           });

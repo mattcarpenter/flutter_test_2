@@ -46,14 +46,7 @@ class RecipeSearchResults extends ConsumerWidget {
           subtitle: Text(recipe.description ?? ''),
           onTap: () {
             if (onResultSelected != null) {
-              // Save recipe to pass to callback
-              final selectedRecipe = recipe;
-              
-              // Use Future.delayed to ensure the search UI can close
-              // before navigation occurs
-              Future.microtask(() {
-                onResultSelected!(selectedRecipe);
-              });
+              onResultSelected!(recipe);
             }
           },
         );

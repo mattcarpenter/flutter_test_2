@@ -124,8 +124,56 @@ class _AdaptiveSliverPageState extends State<AdaptiveSliverPage> {
           : (isTablet ? 50 - (screenWidth - pageWidth) : 0);
 
       if (Platform.isIOS) {
+        return CupertinoPageScaffold(
+          child: CustomScrollView(
+            keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
+            slivers: [
+              // Navigation bar
+              widget.leading == null
+                  ? CupertinoSliverNavigationBar.search(
+                searchField: CupertinoSearchTextField(
+                  autofocus: true,
+                  placeholder: true ? 'Enter search text' : 'Search',
+                  onChanged: (String value) {
+                    setState(() {
+                    });
+                  },
+                ),
+                largeTitle: Text(widget.title),
+                transitionBetweenRoutes: true,
+                previousPageTitle: widget.previousPageTitle,
+                trailing: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  child: widget.trailing,
+                ),
+                padding: EdgeInsetsDirectional.only(start: padding),
+                automaticallyImplyLeading: widget.automaticallyImplyLeading ?? false,
+              )
+                  : CupertinoSliverNavigationBar.search(
+                searchField: CupertinoSearchTextField(
+                  autofocus: true,
+                  placeholder: true ? 'Enter search text' : 'Search',
+                  onChanged: (String value) {
+                    setState(() {
+                    });
+                  },
+                ),
+                largeTitle: Text(widget.title),
+                transitionBetweenRoutes: true,
+                previousPageTitle: widget.previousPageTitle,
+                trailing: widget.trailing,
+                automaticallyImplyLeading: widget.automaticallyImplyLeading ?? false,
+                leading: Padding(
+                  padding: EdgeInsets.symmetric(horizontal: padding),
+                  child: widget.leading,
+                ),
+              ),
+              ..._buildContentSlivers(),
+            ],
+          ),
+        );
         // For iOS, we leverage SuperSearchBar.
-        return Scaffold(
+        /*return Scaffold(
           backgroundColor: scaffoldColor,
           body: SuperScaffold(
             appBar: SuperAppBar(
@@ -162,7 +210,7 @@ class _AdaptiveSliverPageState extends State<AdaptiveSliverPage> {
               slivers: _buildContentSlivers(),
             ),
           ),
-        );
+        );*/
       } else {
         // For Material (Android), we inject a search icon that calls showSearch.
         List<Widget> actionsList = [];
