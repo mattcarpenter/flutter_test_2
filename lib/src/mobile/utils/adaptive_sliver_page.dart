@@ -72,7 +72,7 @@ class AdaptiveSliverPage extends StatefulWidget {
   final Widget Function(BuildContext context, String query)? searchResultsBuilder;
   final ValueChanged<String>? onSearchChanged;
 
-  const AdaptiveSliverPage({
+  AdaptiveSliverPage({
     Key? key,
     required this.title,
     this.body,
@@ -81,10 +81,11 @@ class AdaptiveSliverPage extends StatefulWidget {
     this.leading,
     this.previousPageTitle,
     this.automaticallyImplyLeading,
-    this.searchEnabled = false,
+    bool? searchEnabled,
     this.searchResultsBuilder,
     this.onSearchChanged,
-  }) : super(key: key);
+  }) : this.searchEnabled = searchEnabled ?? (searchResultsBuilder != null),
+       super(key: key);
 
   @override
   _AdaptiveSliverPageState createState() => _AdaptiveSliverPageState();
@@ -93,6 +94,7 @@ class AdaptiveSliverPage extends StatefulWidget {
 class _AdaptiveSliverPageState extends State<AdaptiveSliverPage> {
   late final TextEditingController _controller;
   String _searchQuery = '';
+  bool _searchIsActive = false;
 
   @override
   void initState() {
@@ -128,6 +130,17 @@ class _AdaptiveSliverPageState extends State<AdaptiveSliverPage> {
     }
   }
 
+  Widget _buildSearchResultsSliver() {
+    if (widget.searchResultsBuilder != null) {
+      return SliverFillRemaining(
+        child: widget.searchResultsBuilder!(context, _searchQuery)
+      );
+    }
+    return const SliverFillRemaining(
+      child: Center(child: Text('No search results'))
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return LayoutBuilder(builder: (context, constraints) {
@@ -149,8 +162,14 @@ class _AdaptiveSliverPageState extends State<AdaptiveSliverPage> {
                   ? CupertinoSliverNavigationBar.search(
                 searchField: CupertinoSearchTextField(
                   controller: _controller,
-                  placeholder: 'Enter search text',
-                  autofocus: true,
+                  placeholder: _searchIsActive ? 'Enter search text' : 'Search',
+                  autofocus: _searchIsActive,
+                  onChanged: (value) {
+                    setState(() {
+                      _searchQuery = value;
+                    });
+                    widget.onSearchChanged?.call(value);
+                  },
                 ),
                 largeTitle: Text(widget.title),
                 transitionBetweenRoutes: true,
@@ -161,12 +180,25 @@ class _AdaptiveSliverPageState extends State<AdaptiveSliverPage> {
                 ),
                 padding: EdgeInsetsDirectional.only(start: padding),
                 automaticallyImplyLeading: widget.automaticallyImplyLeading ?? false,
+                onSearchableBottomTap: widget.searchEnabled && widget.searchResultsBuilder != null
+                    ? (value) {
+                        setState(() {
+                          _searchIsActive = value;
+                        });
+                      }
+                    : null,
               )
                   : CupertinoSliverNavigationBar.search(
                 searchField: CupertinoSearchTextField(
                   controller: _controller,
-                  placeholder: 'Enter search text',
-                  autofocus: true,
+                  placeholder: _searchIsActive ? 'Enter search text' : 'Search',
+                  autofocus: _searchIsActive,
+                  onChanged: (value) {
+                    setState(() {
+                      _searchQuery = value;
+                    });
+                    widget.onSearchChanged?.call(value);
+                  },
                 ),
                 largeTitle: Text(widget.title),
                 transitionBetweenRoutes: true,
@@ -177,8 +209,19 @@ class _AdaptiveSliverPageState extends State<AdaptiveSliverPage> {
                   padding: EdgeInsets.symmetric(horizontal: padding),
                   child: widget.leading,
                 ),
+                onSearchableBottomTap: widget.searchEnabled && widget.searchResultsBuilder != null
+                    ? (value) {
+                        setState(() {
+                          _searchIsActive = value;
+                        });
+                      }
+                    : null,
               ),
-              ..._buildContentSlivers(),
+              // Show search results when search is active, otherwise show normal content
+              if (_searchIsActive && widget.searchResultsBuilder != null)
+                _buildSearchResultsSliver()
+              else
+                ..._buildContentSlivers(),
             ],
           ),
         );
