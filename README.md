@@ -124,7 +124,7 @@ A new Flutter project.
   - [X] Integration tests
   - [X] Get cook status (so we can use it in the UI like the button or dynamic island)
   - [X] Start cook button
-  - [ ] Implement rough cook mode
+  - [X] Implement rough cook mode
   - [ ] Implement add recipe (depends on search epic)
   - [ ] Investigate dynamic island
 - [ ] Search epic
@@ -132,7 +132,7 @@ A new Flutter project.
   - [X] Consult GPT on FTS
   - [X] Consult GPT on implementation (both use cases - recipe search and add recipe for cook mode)
   - [X] Search implemented - no selection handlers yet
-  - [ ] Tap search result to navigate to recipe
+  - [X] Tap search result to navigate to recipe
 - [ ] Bugs
   - [ ] Image bug (does not show in recipe detail page when anonymous)
 - [ ] Inventory epic
