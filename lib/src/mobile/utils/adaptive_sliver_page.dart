@@ -12,7 +12,10 @@ class AdaptiveSearchDelegate extends SearchDelegate<String> {
   AdaptiveSearchDelegate({
     this.searchResultsBuilder,
     this.onSearchChanged,
-  });
+    String defaultQuery = '',
+  }) {
+    query = defaultQuery;
+  }
 
   @override
   List<Widget> buildActions(BuildContext context) {
@@ -34,7 +37,6 @@ class AdaptiveSearchDelegate extends SearchDelegate<String> {
     return IconButton(
       icon: Icon(Icons.arrow_back),
       onPressed: () {
-        // First close search, then allow navigation context to resume
         close(context, '');
       },
     );
@@ -67,12 +69,7 @@ class AdaptiveSliverPage extends StatefulWidget {
   final String? previousPageTitle;
   final bool? automaticallyImplyLeading;
   final bool searchEnabled;
-
-  /// Called to build the search results widget tree.
-  /// It receives the current search query.
   final Widget Function(BuildContext context, String query)? searchResultsBuilder;
-
-  /// Optional callback when the search query changes.
   final ValueChanged<String>? onSearchChanged;
 
   const AdaptiveSliverPage({
@@ -94,7 +91,29 @@ class AdaptiveSliverPage extends StatefulWidget {
 }
 
 class _AdaptiveSliverPageState extends State<AdaptiveSliverPage> {
+  late final TextEditingController _controller;
   String _searchQuery = '';
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = TextEditingController(text: _searchQuery);
+    _controller.addListener(() {
+      final newQuery = _controller.text;
+      if (newQuery != _searchQuery) {
+        setState(() {
+          _searchQuery = newQuery;
+        });
+        widget.onSearchChanged?.call(newQuery);
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
 
   List<Widget> _buildContentSlivers() {
     if (widget.slivers != null) {
@@ -102,7 +121,6 @@ class _AdaptiveSliverPageState extends State<AdaptiveSliverPage> {
     } else if (widget.body != null) {
       return [
         SliverToBoxAdapter(child: widget.body!),
-        // Optional: extra space at the bottom.
         const SliverToBoxAdapter(child: SizedBox(height: 100)),
       ];
     } else {
@@ -118,7 +136,6 @@ class _AdaptiveSliverPageState extends State<AdaptiveSliverPage> {
       final bool isTablet = MediaQuery.of(context).size.shortestSide >= 600;
       final scaffoldColor = CupertinoTheme.of(context).scaffoldBackgroundColor;
 
-      // Compute dynamic padding.
       final double padding = (screenWidth - pageWidth > 50)
           ? 0
           : (isTablet ? 50 - (screenWidth - pageWidth) : 0);
@@ -128,16 +145,12 @@ class _AdaptiveSliverPageState extends State<AdaptiveSliverPage> {
           child: CustomScrollView(
             keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
             slivers: [
-              // Navigation bar
               widget.leading == null
                   ? CupertinoSliverNavigationBar.search(
                 searchField: CupertinoSearchTextField(
+                  controller: _controller,
+                  placeholder: 'Enter search text',
                   autofocus: true,
-                  placeholder: true ? 'Enter search text' : 'Search',
-                  onChanged: (String value) {
-                    setState(() {
-                    });
-                  },
                 ),
                 largeTitle: Text(widget.title),
                 transitionBetweenRoutes: true,
@@ -151,12 +164,9 @@ class _AdaptiveSliverPageState extends State<AdaptiveSliverPage> {
               )
                   : CupertinoSliverNavigationBar.search(
                 searchField: CupertinoSearchTextField(
+                  controller: _controller,
+                  placeholder: 'Enter search text',
                   autofocus: true,
-                  placeholder: true ? 'Enter search text' : 'Search',
-                  onChanged: (String value) {
-                    setState(() {
-                    });
-                  },
                 ),
                 largeTitle: Text(widget.title),
                 transitionBetweenRoutes: true,
@@ -172,47 +182,7 @@ class _AdaptiveSliverPageState extends State<AdaptiveSliverPage> {
             ],
           ),
         );
-        // For iOS, we leverage SuperSearchBar.
-        /*return Scaffold(
-          backgroundColor: scaffoldColor,
-          body: SuperScaffold(
-            appBar: SuperAppBar(
-              title: Text(widget.title),
-              largeTitle: SuperLargeTitle(
-                enabled: true,
-                largeTitle: widget.title,
-              ),
-              previousPageTitle: widget.previousPageTitle ?? "",
-              leading: widget.leading,
-              actions: widget.trailing,
-              searchBar: SuperSearchBar(
-                enabled: widget.searchEnabled,
-                onChanged: (query) {
-                  setState(() {
-                    _searchQuery = query;
-                  });
-                  widget.onSearchChanged?.call(query);
-                },
-                onSubmitted: (query) {
-                  setState(() {
-                    _searchQuery = query;
-                  });
-                  widget.onSearchChanged?.call(query);
-                },
-                // The searchResult here is built using your provided builder.
-                // For iOS search, we need to make sure the builder gets a proper context
-                searchResult: widget.searchResultsBuilder != null
-                    ? widget.searchResultsBuilder!(context, _searchQuery)
-                    : Container(),
-              ),
-            ),
-            body: CustomScrollView(
-              slivers: _buildContentSlivers(),
-            ),
-          ),
-        );*/
       } else {
-        // For Material (Android), we inject a search icon that calls showSearch.
         List<Widget> actionsList = [];
         if (widget.searchEnabled) {
           actionsList.add(
@@ -224,6 +194,7 @@ class _AdaptiveSliverPageState extends State<AdaptiveSliverPage> {
                   delegate: AdaptiveSearchDelegate(
                     searchResultsBuilder: widget.searchResultsBuilder,
                     onSearchChanged: widget.onSearchChanged,
+                    defaultQuery: _searchQuery,
                   ),
                 );
               },
