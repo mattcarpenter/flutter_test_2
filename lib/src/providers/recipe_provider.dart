@@ -247,7 +247,13 @@ class RecipeSearchState {
   }
 }
 
+// Main search provider for the app
 final recipeSearchNotifierProvider =
+NotifierProvider<RecipeSearchNotifier, RecipeSearchState>(
+    RecipeSearchNotifier.new);
+    
+// Dedicated search provider for the cook modal
+final cookModalRecipeSearchProvider =
 NotifierProvider<RecipeSearchNotifier, RecipeSearchState>(
     RecipeSearchNotifier.new);
 

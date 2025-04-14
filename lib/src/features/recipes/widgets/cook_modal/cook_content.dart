@@ -3,11 +3,13 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:recipe_app/database/models/steps.dart' as recipe_steps;
 import 'package:recipe_app/database/models/ingredients.dart';
 import 'package:recipe_app/src/providers/cook_provider.dart';
+import 'package:recipe_app/src/providers/recipe_provider.dart';
 import '../../../../../database/database.dart';
 import '../../../../../database/models/cooks.dart';
 import '../../../../widgets/wolt/button/wolt_elevated_button.dart';
 import '../recipe_view/recipe_view.dart';
 import 'ingredients_sheet.dart';
+import 'add_recipe_search_modal.dart';
 import 'package:collection/collection.dart';
 
 class CookContent extends ConsumerStatefulWidget {
@@ -234,21 +236,24 @@ class CookContentState extends ConsumerState<CookContent> {
                     ),
 
                     // "Add another recipe" card (smaller)
-                    Container(
-                      width: 80,
-                      decoration: BoxDecoration(
-                        border: Border.all(color: Colors.grey.shade300),
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Icon(Icons.add_circle_outline,
-                              size: 16, color: Colors.grey.shade600),
-                          const SizedBox(height: 4),
-                          Text('Add Recipe',
-                              style: TextStyle(fontSize: 11, color: Colors.grey.shade700)),
-                        ],
+                    GestureDetector(
+                      onTap: _showAddRecipeModal,
+                      child: Container(
+                        width: 80,
+                        decoration: BoxDecoration(
+                          border: Border.all(color: Colors.grey.shade300),
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(Icons.add_circle_outline,
+                                size: 16, color: Colors.grey.shade600),
+                            const SizedBox(height: 4),
+                            Text('Add Recipe',
+                                style: TextStyle(fontSize: 11, color: Colors.grey.shade700)),
+                          ],
+                        ),
                       ),
                     ),
                   ],
@@ -340,5 +345,9 @@ class CookContentState extends ConsumerState<CookContent> {
         ],
       ),
     );
+  }
+
+  void _showAddRecipeModal() {
+    showAddRecipeSearchModal(context, cookId: widget.cookId);
   }
 }
