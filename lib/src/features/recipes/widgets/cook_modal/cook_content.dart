@@ -3,24 +3,23 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:recipe_app/database/models/steps.dart' as recipe_steps;
 import 'package:recipe_app/database/models/ingredients.dart';
 import 'package:recipe_app/src/providers/cook_provider.dart';
-import 'package:recipe_app/src/providers/recipe_provider.dart';
+import 'package:recipe_app/src/providers/recipe_provider.dart' as recipe_provider;
 import '../../../../../database/database.dart';
 import '../../../../../database/models/cooks.dart';
 import '../../../../widgets/wolt/button/wolt_elevated_button.dart';
-import '../recipe_view/recipe_view.dart';
 import 'ingredients_sheet.dart';
 import 'add_recipe_search_modal.dart';
 import 'package:collection/collection.dart';
 
 class CookContent extends ConsumerStatefulWidget {
-  final String cookId;
-  final String recipeId;
+  final String initialCookId;
+  final String initialRecipeId;
   final BuildContext modalContext;
 
   const CookContent({
     Key? key,
-    required this.cookId,
-    required this.recipeId,
+    required this.initialCookId,
+    required this.initialRecipeId,
     required this.modalContext,
   }) : super(key: key);
 
@@ -43,17 +42,40 @@ class CookContentState extends ConsumerState<CookContent> {
   }
 
   @override
+  void initState() {
+    super.initState();
+    // Set the initial active cook
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      ref.read(activeCookInModalProvider.notifier).state = widget.initialCookId;
+    });
+  }
+
+  @override
   Widget build(BuildContext context) {
-    // Get the cook entry from the provider
+    // Get the active cook ID from our state provider
+    final activeCookId = ref.watch(activeCookInModalProvider);
+    
+    // Get all in-progress cooks
     final cooksAsyncValue = ref.watch(cookNotifierProvider);
-    final CookEntry? cook = cooksAsyncValue.when(
+    
+    // Find the currently active cook
+    final CookEntry? activeCook = cooksAsyncValue.when(
       loading: () => null,
       error: (_, __) => null,
-      data: (cooks) => cooks.firstWhereOrNull((c) => c.id == widget.cookId),
+      data: (cooks) => cooks.firstWhereOrNull((c) => c.id == activeCookId),
+    );
+    
+    // Get all in-progress cooks for the recipe list
+    final List<CookEntry> inProgressCooks = cooksAsyncValue.when(
+      loading: () => [],
+      error: (_, __) => [],
+      data: (cooks) => cooks.where((c) => c.status == CookStatus.inProgress).toList(),
     );
 
-    // Get the recipe details
-    final recipeAsync = ref.watch(recipeByIdStreamProvider(widget.recipeId));
+    // Get the active recipe details
+    final String activeRecipeId = activeCook?.recipeId ?? widget.initialRecipeId;
+    // Explicitly using the provider from recipe_provider.dart
+    final recipeAsync = ref.watch(recipe_provider.recipeByIdStreamProvider(activeRecipeId));
 
     // Add fixed height to the entire content to avoid flex/expanded issues
     return SizedBox(
@@ -71,8 +93,8 @@ class CookContentState extends ConsumerState<CookContent> {
           final ingredients = recipe.ingredients ?? [];
           _ingredients = ingredients; // Store for action buttons
 
-          // Get the current step index from the cook or default to 0
-          final currentStepIndex = cook?.currentStepIndex ?? 0;
+          // Get the current step index from the activeCook or default to 0
+          final currentStepIndex = activeCook?.currentStepIndex ?? 0;
 
           // Ensure we have a valid step index and handle empty steps list
           if (steps.isEmpty) {
@@ -87,6 +109,8 @@ class CookContentState extends ConsumerState<CookContent> {
             ingredients: ingredients,
             currentStepIndex: validStepIndex.toInt(),
             totalSteps: steps.length,
+            inProgressCooks: inProgressCooks,
+            activeCookId: activeCookId,
           );
         },
       ),
@@ -128,6 +152,8 @@ class CookContentState extends ConsumerState<CookContent> {
     required List<Ingredient> ingredients,
     required int currentStepIndex,
     required int totalSteps,
+    required List<CookEntry> inProgressCooks,
+    required String? activeCookId,
   }) {
     // Find the current step
     final isFirstStep = currentStepIndex == 0;
@@ -198,44 +224,61 @@ class CookContentState extends ConsumerState<CookContent> {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              // Recipe cards - smaller height as requested
+              // Recipe cards - horizontal scrollable list
               SizedBox(
                 height: 70, // Reduced height
                 child: ListView(
                   scrollDirection: Axis.horizontal,
                   children: [
-                    // Current recipe card
-                    Container(
-                      width: 180,
-                      margin: const EdgeInsets.only(right: 12),
-                      decoration: BoxDecoration(
-                        color: Colors.grey.shade200,
-                        borderRadius: BorderRadius.circular(12),
-                        border: Border.all(color: Theme.of(context).primaryColor, width: 2),
-                      ),
-                      padding: const EdgeInsets.all(10),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Expanded(
-                            child: Text(
-                              recipe.title,
-                              style: const TextStyle(
-                                fontWeight: FontWeight.bold,
-                                fontSize: 14,
-                              ),
-                              maxLines: 2,
-                              overflow: TextOverflow.ellipsis,
+                    // Active cooks as recipe cards
+                    ...inProgressCooks.map((cook) {
+                      final isActive = cook.id == activeCookId;
+                      return GestureDetector(
+                        onTap: () {
+                          // Switch to this cook
+                          ref.read(activeCookInModalProvider.notifier).state = cook.id;
+                        },
+                        child: Container(
+                          width: 180,
+                          margin: const EdgeInsets.only(right: 12),
+                          decoration: BoxDecoration(
+                            color: Colors.grey.shade200,
+                            borderRadius: BorderRadius.circular(12),
+                            border: Border.all(
+                              color: isActive ? Theme.of(context).primaryColor : Colors.grey.shade300,
+                              width: isActive ? 2 : 1,
                             ),
                           ),
-                          const Text('Now cooking',
-                              style: TextStyle(fontSize: 12, color: Colors.grey)),
-                        ],
-                      ),
-                    ),
+                          padding: const EdgeInsets.all(10),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Expanded(
+                                child: Text(
+                                  cook.recipeName,
+                                  style: TextStyle(
+                                    fontWeight: isActive ? FontWeight.bold : FontWeight.normal,
+                                    fontSize: 14,
+                                  ),
+                                  maxLines: 2,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                              ),
+                              Text(
+                                isActive ? 'Now cooking' : 'Tap to switch',
+                                style: TextStyle(
+                                  fontSize: 12, 
+                                  color: isActive ? Theme.of(context).primaryColor : Colors.grey
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      );
+                    }).toList(),
 
-                    // "Add another recipe" card (smaller)
+                    // "Add another recipe" card
                     GestureDetector(
                       onTap: _showAddRecipeModal,
                       child: Container(
@@ -299,13 +342,26 @@ class CookContentState extends ConsumerState<CookContent> {
   }
 
   void _updateStep(int newIndex) {
-    ref.read(cookNotifierProvider.notifier).updateCook(
-      cookId: widget.cookId,
-      currentStepIndex: newIndex,
-    );
+    final activeCookId = ref.read(activeCookInModalProvider);
+    if (activeCookId != null) {
+      ref.read(cookNotifierProvider.notifier).updateCook(
+        cookId: activeCookId,
+        currentStepIndex: newIndex,
+      );
+    }
   }
 
   void _showFinishDialog() {
+    final activeCookId = ref.read(activeCookInModalProvider);
+    if (activeCookId == null) return;
+    
+    // Get all in-progress cooks for next cook selection
+    final List<CookEntry> inProgressCooks = ref.read(cookNotifierProvider)
+        .maybeWhen(
+          data: (cooks) => cooks.where((c) => c.status == CookStatus.inProgress).toList(),
+          orElse: () => [],
+        );
+    
     showDialog(
       context: context,
       builder: (dialogContext) => AlertDialog(
@@ -318,11 +374,21 @@ class CookContentState extends ConsumerState<CookContent> {
 
               // Save the cook
               ref.read(cookNotifierProvider.notifier).finishCook(
-                cookId: widget.cookId,
+                cookId: activeCookId,
               );
 
-              // Close modal
-              Navigator.of(widget.modalContext).pop();
+              // Find next cook to switch to
+              final remainingCooks = inProgressCooks
+                  .where((cook) => cook.id != activeCookId)
+                  .toList();
+                  
+              if (remainingCooks.isNotEmpty) {
+                // Switch to another cook if available
+                ref.read(activeCookInModalProvider.notifier).state = remainingCooks.first.id;
+              } else {
+                // No more cooks, close the modal
+                Navigator.of(widget.modalContext).pop();
+              }
             },
             child: const Text('Save to My Cooks'),
           ),
@@ -333,12 +399,24 @@ class CookContentState extends ConsumerState<CookContent> {
             onPressed: () {
               // Discard the cook
               ref.read(cookNotifierProvider.notifier).updateCook(
-                cookId: widget.cookId,
+                cookId: activeCookId,
                 status: CookStatus.discarded,
               );
 
+              // Find next cook to switch to
+              final remainingCooks = inProgressCooks
+                  .where((cook) => cook.id != activeCookId)
+                  .toList();
+                  
               Navigator.of(dialogContext).pop(); // Close dialog
-              Navigator.of(widget.modalContext).pop(); // Close modal
+              
+              if (remainingCooks.isNotEmpty) {
+                // Switch to another cook if available
+                ref.read(activeCookInModalProvider.notifier).state = remainingCooks.first.id;
+              } else {
+                // No more cooks, close the modal
+                Navigator.of(widget.modalContext).pop();
+              }
             },
             child: const Text('Discard'),
           ),
@@ -348,6 +426,6 @@ class CookContentState extends ConsumerState<CookContent> {
   }
 
   void _showAddRecipeModal() {
-    showAddRecipeSearchModal(context, cookId: widget.cookId);
+    showAddRecipeSearchModal(context, cookId: widget.initialCookId);
   }
 }

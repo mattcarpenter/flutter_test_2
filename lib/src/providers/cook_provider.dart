@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../database/database.dart';
 import '../../database/models/cooks.dart';
 import '../../database/powersync.dart';
@@ -117,3 +118,15 @@ final activeCookForRecipeProvider = Provider.family<CookEntry?, String>((ref, re
 final hasActiveCookForRecipeProvider = Provider.family<bool, String>((ref, recipeId) {
   return ref.watch(activeCookForRecipeProvider(recipeId)) != null;
 });
+
+// Current active user ID from Supabase
+final userIdProvider = Provider<String?>((ref) {
+  try {
+    return Supabase.instance.client.auth.currentUser?.id;
+  } catch (e) {
+    return null;
+  }
+});
+
+// Track which cook ID is currently active in the cook modal
+final activeCookInModalProvider = StateProvider<String?>((ref) => null);

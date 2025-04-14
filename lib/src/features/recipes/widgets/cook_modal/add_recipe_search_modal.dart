@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:recipe_app/src/providers/recipe_provider.dart';
+import 'package:recipe_app/src/providers/recipe_provider.dart' as recipe_provider;
+import 'package:recipe_app/src/providers/cook_provider.dart';
 import 'package:wolt_modal_sheet/wolt_modal_sheet.dart';
 import '../../../../../database/database.dart';
 import 'cook_modal_search_results.dart';
@@ -59,7 +60,7 @@ class _AddRecipeSearchContentState extends ConsumerState<AddRecipeSearchContent>
     // Clear any previous search results and request focus
     WidgetsBinding.instance.addPostFrameCallback((_) {
       // Reset the search state to empty
-      ref.read(cookModalRecipeSearchProvider.notifier).search('');
+      ref.read(recipe_provider.cookModalRecipeSearchProvider.notifier).search('');
       // Focus the search input
       _searchFocusNode.requestFocus();
     });
@@ -73,20 +74,28 @@ class _AddRecipeSearchContentState extends ConsumerState<AddRecipeSearchContent>
   }
 
   void _onSearchChanged(String query) {
-    ref.read(cookModalRecipeSearchProvider.notifier).search(query);
+    ref.read(recipe_provider.cookModalRecipeSearchProvider.notifier).search(query);
   }
 
   void _onRecipeSelected(RecipeEntry recipe) {
-    // TODO: Add the selected recipe to the current cook
-    print('Selected recipe: ${recipe.title}');
-
-    // Close the modal once selected
-    Navigator.of(widget.modalContext).pop();
+    // Add the selected recipe to cook session
+    final cookNotifier = ref.read(cookNotifierProvider.notifier);
+    final userId = ref.read(userIdProvider);
+    
+    // Create a new cook for the selected recipe
+    cookNotifier.startCook(
+      recipeId: recipe.id,
+      recipeName: recipe.title,
+      userId: userId,
+    ).then((_) {
+      // Close the modal once selected
+      Navigator.of(widget.modalContext).pop();
+    });
   }
 
   @override
   Widget build(BuildContext context) {
-    final searchState = ref.watch(cookModalRecipeSearchProvider);
+    final searchState = ref.watch(recipe_provider.cookModalRecipeSearchProvider);
 
     return SizedBox(
       height: MediaQuery.of(context).size.height * 0.7,

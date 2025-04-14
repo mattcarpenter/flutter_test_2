@@ -223,6 +223,12 @@ final recipeFolderCountProvider = Provider<Map<String, int>>((ref) {
   return folderCounts;
 });
 
+// Stream provider for a single recipe by ID
+final recipeByIdStreamProvider = StreamProvider.family<RecipeEntry?, String>((ref, recipeId) {
+  final repository = ref.watch(recipeRepositoryProvider);
+  return repository.watchRecipeById(recipeId);
+});
+
 class RecipeSearchState {
   final List<RecipeEntry> results;
   final bool isLoading;

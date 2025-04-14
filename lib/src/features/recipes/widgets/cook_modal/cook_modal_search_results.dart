@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../../database/database.dart';
-import '../../../../providers/recipe_provider.dart';
+import '../../../../providers/recipe_provider.dart' as recipe_provider;
 
 class CookModalSearchResults extends ConsumerWidget {
   final void Function(RecipeEntry) onResultSelected;
@@ -13,7 +13,7 @@ class CookModalSearchResults extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final searchState = ref.watch(cookModalRecipeSearchProvider);
+    final searchState = ref.watch(recipe_provider.cookModalRecipeSearchProvider);
 
     if (searchState.error != null) {
       return Center(child: Text('Error: ${searchState.error}'));
