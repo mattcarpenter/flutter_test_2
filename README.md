@@ -125,8 +125,7 @@ A new Flutter project.
   - [X] Get cook status (so we can use it in the UI like the button or dynamic island)
   - [X] Start cook button
   - [X] Implement rough cook mode
-  - [ ] Implement add recipe (depends on search epic)
-  - [ ] Investigate dynamic island
+  - [X] Implement add recipe (depends on search epic)
 - [ ] Search epic
   - [X] UX Research
   - [X] Consult GPT on FTS
@@ -156,6 +155,7 @@ A new Flutter project.
 - [ ] Settings epic
 - [ ] Sidebar finalization epic
 - [ ] Registration and sign-in epic
+- [ ] Dynamic island for cook mode
 
 ### Thinking
 * macos app.dart will be very similar to mobile app.dart. same for windows.
