@@ -3071,6 +3071,1728 @@ class CooksCompanion extends UpdateCompanion<CookEntry> {
   }
 }
 
+class $PantryItemsTable extends PantryItems
+    with TableInfo<$PantryItemsTable, PantryItemEntry> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $PantryItemsTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<String> id = GeneratedColumn<String>(
+      'id', aliasedName, false,
+      type: DriftSqlType.string,
+      requiredDuringInsert: false,
+      clientDefault: () => const Uuid().v4());
+  static const VerificationMeta _nameMeta = const VerificationMeta('name');
+  @override
+  late final GeneratedColumn<String> name = GeneratedColumn<String>(
+      'name', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _inStockMeta =
+      const VerificationMeta('inStock');
+  @override
+  late final GeneratedColumn<bool> inStock = GeneratedColumn<bool>(
+      'in_stock', aliasedName, false,
+      type: DriftSqlType.bool,
+      requiredDuringInsert: false,
+      defaultConstraints:
+          GeneratedColumn.constraintIsAlways('CHECK ("in_stock" IN (0, 1))'),
+      defaultValue: const Constant(true));
+  static const VerificationMeta _userIdMeta = const VerificationMeta('userId');
+  @override
+  late final GeneratedColumn<String> userId = GeneratedColumn<String>(
+      'user_id', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _householdIdMeta =
+      const VerificationMeta('householdId');
+  @override
+  late final GeneratedColumn<String> householdId = GeneratedColumn<String>(
+      'household_id', aliasedName, true,
+      type: DriftSqlType.string, requiredDuringInsert: false);
+  static const VerificationMeta _createdAtMeta =
+      const VerificationMeta('createdAt');
+  @override
+  late final GeneratedColumn<int> createdAt = GeneratedColumn<int>(
+      'created_at', aliasedName, true,
+      type: DriftSqlType.int, requiredDuringInsert: false);
+  static const VerificationMeta _updatedAtMeta =
+      const VerificationMeta('updatedAt');
+  @override
+  late final GeneratedColumn<int> updatedAt = GeneratedColumn<int>(
+      'updated_at', aliasedName, true,
+      type: DriftSqlType.int, requiredDuringInsert: false);
+  static const VerificationMeta _deletedAtMeta =
+      const VerificationMeta('deletedAt');
+  @override
+  late final GeneratedColumn<int> deletedAt = GeneratedColumn<int>(
+      'deleted_at', aliasedName, true,
+      type: DriftSqlType.int, requiredDuringInsert: false);
+  @override
+  List<GeneratedColumn> get $columns =>
+      [id, name, inStock, userId, householdId, createdAt, updatedAt, deletedAt];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'pantry_items';
+  @override
+  VerificationContext validateIntegrity(Insertable<PantryItemEntry> instance,
+      {bool isInserting = false}) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    }
+    if (data.containsKey('name')) {
+      context.handle(
+          _nameMeta, name.isAcceptableOrUnknown(data['name']!, _nameMeta));
+    } else if (isInserting) {
+      context.missing(_nameMeta);
+    }
+    if (data.containsKey('in_stock')) {
+      context.handle(_inStockMeta,
+          inStock.isAcceptableOrUnknown(data['in_stock']!, _inStockMeta));
+    }
+    if (data.containsKey('user_id')) {
+      context.handle(_userIdMeta,
+          userId.isAcceptableOrUnknown(data['user_id']!, _userIdMeta));
+    } else if (isInserting) {
+      context.missing(_userIdMeta);
+    }
+    if (data.containsKey('household_id')) {
+      context.handle(
+          _householdIdMeta,
+          householdId.isAcceptableOrUnknown(
+              data['household_id']!, _householdIdMeta));
+    }
+    if (data.containsKey('created_at')) {
+      context.handle(_createdAtMeta,
+          createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta));
+    }
+    if (data.containsKey('updated_at')) {
+      context.handle(_updatedAtMeta,
+          updatedAt.isAcceptableOrUnknown(data['updated_at']!, _updatedAtMeta));
+    }
+    if (data.containsKey('deleted_at')) {
+      context.handle(_deletedAtMeta,
+          deletedAt.isAcceptableOrUnknown(data['deleted_at']!, _deletedAtMeta));
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  PantryItemEntry map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return PantryItemEntry(
+      id: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}id'])!,
+      name: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}name'])!,
+      inStock: attachedDatabase.typeMapping
+          .read(DriftSqlType.bool, data['${effectivePrefix}in_stock'])!,
+      userId: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}user_id'])!,
+      householdId: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}household_id']),
+      createdAt: attachedDatabase.typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}created_at']),
+      updatedAt: attachedDatabase.typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}updated_at']),
+      deletedAt: attachedDatabase.typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}deleted_at']),
+    );
+  }
+
+  @override
+  $PantryItemsTable createAlias(String alias) {
+    return $PantryItemsTable(attachedDatabase, alias);
+  }
+}
+
+class PantryItemEntry extends DataClass implements Insertable<PantryItemEntry> {
+  final String id;
+  final String name;
+  final bool inStock;
+  final String userId;
+  final String? householdId;
+  final int? createdAt;
+  final int? updatedAt;
+  final int? deletedAt;
+  const PantryItemEntry(
+      {required this.id,
+      required this.name,
+      required this.inStock,
+      required this.userId,
+      this.householdId,
+      this.createdAt,
+      this.updatedAt,
+      this.deletedAt});
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<String>(id);
+    map['name'] = Variable<String>(name);
+    map['in_stock'] = Variable<bool>(inStock);
+    map['user_id'] = Variable<String>(userId);
+    if (!nullToAbsent || householdId != null) {
+      map['household_id'] = Variable<String>(householdId);
+    }
+    if (!nullToAbsent || createdAt != null) {
+      map['created_at'] = Variable<int>(createdAt);
+    }
+    if (!nullToAbsent || updatedAt != null) {
+      map['updated_at'] = Variable<int>(updatedAt);
+    }
+    if (!nullToAbsent || deletedAt != null) {
+      map['deleted_at'] = Variable<int>(deletedAt);
+    }
+    return map;
+  }
+
+  PantryItemsCompanion toCompanion(bool nullToAbsent) {
+    return PantryItemsCompanion(
+      id: Value(id),
+      name: Value(name),
+      inStock: Value(inStock),
+      userId: Value(userId),
+      householdId: householdId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(householdId),
+      createdAt: createdAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(createdAt),
+      updatedAt: updatedAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(updatedAt),
+      deletedAt: deletedAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(deletedAt),
+    );
+  }
+
+  factory PantryItemEntry.fromJson(Map<String, dynamic> json,
+      {ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return PantryItemEntry(
+      id: serializer.fromJson<String>(json['id']),
+      name: serializer.fromJson<String>(json['name']),
+      inStock: serializer.fromJson<bool>(json['inStock']),
+      userId: serializer.fromJson<String>(json['userId']),
+      householdId: serializer.fromJson<String?>(json['householdId']),
+      createdAt: serializer.fromJson<int?>(json['createdAt']),
+      updatedAt: serializer.fromJson<int?>(json['updatedAt']),
+      deletedAt: serializer.fromJson<int?>(json['deletedAt']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<String>(id),
+      'name': serializer.toJson<String>(name),
+      'inStock': serializer.toJson<bool>(inStock),
+      'userId': serializer.toJson<String>(userId),
+      'householdId': serializer.toJson<String?>(householdId),
+      'createdAt': serializer.toJson<int?>(createdAt),
+      'updatedAt': serializer.toJson<int?>(updatedAt),
+      'deletedAt': serializer.toJson<int?>(deletedAt),
+    };
+  }
+
+  PantryItemEntry copyWith(
+          {String? id,
+          String? name,
+          bool? inStock,
+          String? userId,
+          Value<String?> householdId = const Value.absent(),
+          Value<int?> createdAt = const Value.absent(),
+          Value<int?> updatedAt = const Value.absent(),
+          Value<int?> deletedAt = const Value.absent()}) =>
+      PantryItemEntry(
+        id: id ?? this.id,
+        name: name ?? this.name,
+        inStock: inStock ?? this.inStock,
+        userId: userId ?? this.userId,
+        householdId: householdId.present ? householdId.value : this.householdId,
+        createdAt: createdAt.present ? createdAt.value : this.createdAt,
+        updatedAt: updatedAt.present ? updatedAt.value : this.updatedAt,
+        deletedAt: deletedAt.present ? deletedAt.value : this.deletedAt,
+      );
+  PantryItemEntry copyWithCompanion(PantryItemsCompanion data) {
+    return PantryItemEntry(
+      id: data.id.present ? data.id.value : this.id,
+      name: data.name.present ? data.name.value : this.name,
+      inStock: data.inStock.present ? data.inStock.value : this.inStock,
+      userId: data.userId.present ? data.userId.value : this.userId,
+      householdId:
+          data.householdId.present ? data.householdId.value : this.householdId,
+      createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
+      updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
+      deletedAt: data.deletedAt.present ? data.deletedAt.value : this.deletedAt,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('PantryItemEntry(')
+          ..write('id: $id, ')
+          ..write('name: $name, ')
+          ..write('inStock: $inStock, ')
+          ..write('userId: $userId, ')
+          ..write('householdId: $householdId, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('deletedAt: $deletedAt')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(
+      id, name, inStock, userId, householdId, createdAt, updatedAt, deletedAt);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is PantryItemEntry &&
+          other.id == this.id &&
+          other.name == this.name &&
+          other.inStock == this.inStock &&
+          other.userId == this.userId &&
+          other.householdId == this.householdId &&
+          other.createdAt == this.createdAt &&
+          other.updatedAt == this.updatedAt &&
+          other.deletedAt == this.deletedAt);
+}
+
+class PantryItemsCompanion extends UpdateCompanion<PantryItemEntry> {
+  final Value<String> id;
+  final Value<String> name;
+  final Value<bool> inStock;
+  final Value<String> userId;
+  final Value<String?> householdId;
+  final Value<int?> createdAt;
+  final Value<int?> updatedAt;
+  final Value<int?> deletedAt;
+  final Value<int> rowid;
+  const PantryItemsCompanion({
+    this.id = const Value.absent(),
+    this.name = const Value.absent(),
+    this.inStock = const Value.absent(),
+    this.userId = const Value.absent(),
+    this.householdId = const Value.absent(),
+    this.createdAt = const Value.absent(),
+    this.updatedAt = const Value.absent(),
+    this.deletedAt = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  PantryItemsCompanion.insert({
+    this.id = const Value.absent(),
+    required String name,
+    this.inStock = const Value.absent(),
+    required String userId,
+    this.householdId = const Value.absent(),
+    this.createdAt = const Value.absent(),
+    this.updatedAt = const Value.absent(),
+    this.deletedAt = const Value.absent(),
+    this.rowid = const Value.absent(),
+  })  : name = Value(name),
+        userId = Value(userId);
+  static Insertable<PantryItemEntry> custom({
+    Expression<String>? id,
+    Expression<String>? name,
+    Expression<bool>? inStock,
+    Expression<String>? userId,
+    Expression<String>? householdId,
+    Expression<int>? createdAt,
+    Expression<int>? updatedAt,
+    Expression<int>? deletedAt,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (name != null) 'name': name,
+      if (inStock != null) 'in_stock': inStock,
+      if (userId != null) 'user_id': userId,
+      if (householdId != null) 'household_id': householdId,
+      if (createdAt != null) 'created_at': createdAt,
+      if (updatedAt != null) 'updated_at': updatedAt,
+      if (deletedAt != null) 'deleted_at': deletedAt,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  PantryItemsCompanion copyWith(
+      {Value<String>? id,
+      Value<String>? name,
+      Value<bool>? inStock,
+      Value<String>? userId,
+      Value<String?>? householdId,
+      Value<int?>? createdAt,
+      Value<int?>? updatedAt,
+      Value<int?>? deletedAt,
+      Value<int>? rowid}) {
+    return PantryItemsCompanion(
+      id: id ?? this.id,
+      name: name ?? this.name,
+      inStock: inStock ?? this.inStock,
+      userId: userId ?? this.userId,
+      householdId: householdId ?? this.householdId,
+      createdAt: createdAt ?? this.createdAt,
+      updatedAt: updatedAt ?? this.updatedAt,
+      deletedAt: deletedAt ?? this.deletedAt,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<String>(id.value);
+    }
+    if (name.present) {
+      map['name'] = Variable<String>(name.value);
+    }
+    if (inStock.present) {
+      map['in_stock'] = Variable<bool>(inStock.value);
+    }
+    if (userId.present) {
+      map['user_id'] = Variable<String>(userId.value);
+    }
+    if (householdId.present) {
+      map['household_id'] = Variable<String>(householdId.value);
+    }
+    if (createdAt.present) {
+      map['created_at'] = Variable<int>(createdAt.value);
+    }
+    if (updatedAt.present) {
+      map['updated_at'] = Variable<int>(updatedAt.value);
+    }
+    if (deletedAt.present) {
+      map['deleted_at'] = Variable<int>(deletedAt.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('PantryItemsCompanion(')
+          ..write('id: $id, ')
+          ..write('name: $name, ')
+          ..write('inStock: $inStock, ')
+          ..write('userId: $userId, ')
+          ..write('householdId: $householdId, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('deletedAt: $deletedAt, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
+class $RecipeIngredientTermOverridesTable extends RecipeIngredientTermOverrides
+    with
+        TableInfo<$RecipeIngredientTermOverridesTable,
+            RecipeIngredientTermOverrideEntry> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $RecipeIngredientTermOverridesTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _recipeIdMeta =
+      const VerificationMeta('recipeId');
+  @override
+  late final GeneratedColumn<String> recipeId = GeneratedColumn<String>(
+      'recipe_id', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _termMeta = const VerificationMeta('term');
+  @override
+  late final GeneratedColumn<String> term = GeneratedColumn<String>(
+      'term', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _pantryItemIdMeta =
+      const VerificationMeta('pantryItemId');
+  @override
+  late final GeneratedColumn<String> pantryItemId = GeneratedColumn<String>(
+      'pantry_item_id', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _userIdMeta = const VerificationMeta('userId');
+  @override
+  late final GeneratedColumn<String> userId = GeneratedColumn<String>(
+      'user_id', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _householdIdMeta =
+      const VerificationMeta('householdId');
+  @override
+  late final GeneratedColumn<String> householdId = GeneratedColumn<String>(
+      'household_id', aliasedName, true,
+      type: DriftSqlType.string, requiredDuringInsert: false);
+  @override
+  List<GeneratedColumn> get $columns =>
+      [recipeId, term, pantryItemId, userId, householdId];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'recipe_ingredient_term_overrides';
+  @override
+  VerificationContext validateIntegrity(
+      Insertable<RecipeIngredientTermOverrideEntry> instance,
+      {bool isInserting = false}) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('recipe_id')) {
+      context.handle(_recipeIdMeta,
+          recipeId.isAcceptableOrUnknown(data['recipe_id']!, _recipeIdMeta));
+    } else if (isInserting) {
+      context.missing(_recipeIdMeta);
+    }
+    if (data.containsKey('term')) {
+      context.handle(
+          _termMeta, term.isAcceptableOrUnknown(data['term']!, _termMeta));
+    } else if (isInserting) {
+      context.missing(_termMeta);
+    }
+    if (data.containsKey('pantry_item_id')) {
+      context.handle(
+          _pantryItemIdMeta,
+          pantryItemId.isAcceptableOrUnknown(
+              data['pantry_item_id']!, _pantryItemIdMeta));
+    } else if (isInserting) {
+      context.missing(_pantryItemIdMeta);
+    }
+    if (data.containsKey('user_id')) {
+      context.handle(_userIdMeta,
+          userId.isAcceptableOrUnknown(data['user_id']!, _userIdMeta));
+    } else if (isInserting) {
+      context.missing(_userIdMeta);
+    }
+    if (data.containsKey('household_id')) {
+      context.handle(
+          _householdIdMeta,
+          householdId.isAcceptableOrUnknown(
+              data['household_id']!, _householdIdMeta));
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {recipeId, term};
+  @override
+  RecipeIngredientTermOverrideEntry map(Map<String, dynamic> data,
+      {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return RecipeIngredientTermOverrideEntry(
+      recipeId: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}recipe_id'])!,
+      term: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}term'])!,
+      pantryItemId: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}pantry_item_id'])!,
+      userId: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}user_id'])!,
+      householdId: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}household_id']),
+    );
+  }
+
+  @override
+  $RecipeIngredientTermOverridesTable createAlias(String alias) {
+    return $RecipeIngredientTermOverridesTable(attachedDatabase, alias);
+  }
+}
+
+class RecipeIngredientTermOverrideEntry extends DataClass
+    implements Insertable<RecipeIngredientTermOverrideEntry> {
+  final String recipeId;
+  final String term;
+  final String pantryItemId;
+  final String userId;
+  final String? householdId;
+  const RecipeIngredientTermOverrideEntry(
+      {required this.recipeId,
+      required this.term,
+      required this.pantryItemId,
+      required this.userId,
+      this.householdId});
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['recipe_id'] = Variable<String>(recipeId);
+    map['term'] = Variable<String>(term);
+    map['pantry_item_id'] = Variable<String>(pantryItemId);
+    map['user_id'] = Variable<String>(userId);
+    if (!nullToAbsent || householdId != null) {
+      map['household_id'] = Variable<String>(householdId);
+    }
+    return map;
+  }
+
+  RecipeIngredientTermOverridesCompanion toCompanion(bool nullToAbsent) {
+    return RecipeIngredientTermOverridesCompanion(
+      recipeId: Value(recipeId),
+      term: Value(term),
+      pantryItemId: Value(pantryItemId),
+      userId: Value(userId),
+      householdId: householdId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(householdId),
+    );
+  }
+
+  factory RecipeIngredientTermOverrideEntry.fromJson(Map<String, dynamic> json,
+      {ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return RecipeIngredientTermOverrideEntry(
+      recipeId: serializer.fromJson<String>(json['recipeId']),
+      term: serializer.fromJson<String>(json['term']),
+      pantryItemId: serializer.fromJson<String>(json['pantryItemId']),
+      userId: serializer.fromJson<String>(json['userId']),
+      householdId: serializer.fromJson<String?>(json['householdId']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'recipeId': serializer.toJson<String>(recipeId),
+      'term': serializer.toJson<String>(term),
+      'pantryItemId': serializer.toJson<String>(pantryItemId),
+      'userId': serializer.toJson<String>(userId),
+      'householdId': serializer.toJson<String?>(householdId),
+    };
+  }
+
+  RecipeIngredientTermOverrideEntry copyWith(
+          {String? recipeId,
+          String? term,
+          String? pantryItemId,
+          String? userId,
+          Value<String?> householdId = const Value.absent()}) =>
+      RecipeIngredientTermOverrideEntry(
+        recipeId: recipeId ?? this.recipeId,
+        term: term ?? this.term,
+        pantryItemId: pantryItemId ?? this.pantryItemId,
+        userId: userId ?? this.userId,
+        householdId: householdId.present ? householdId.value : this.householdId,
+      );
+  RecipeIngredientTermOverrideEntry copyWithCompanion(
+      RecipeIngredientTermOverridesCompanion data) {
+    return RecipeIngredientTermOverrideEntry(
+      recipeId: data.recipeId.present ? data.recipeId.value : this.recipeId,
+      term: data.term.present ? data.term.value : this.term,
+      pantryItemId: data.pantryItemId.present
+          ? data.pantryItemId.value
+          : this.pantryItemId,
+      userId: data.userId.present ? data.userId.value : this.userId,
+      householdId:
+          data.householdId.present ? data.householdId.value : this.householdId,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('RecipeIngredientTermOverrideEntry(')
+          ..write('recipeId: $recipeId, ')
+          ..write('term: $term, ')
+          ..write('pantryItemId: $pantryItemId, ')
+          ..write('userId: $userId, ')
+          ..write('householdId: $householdId')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode =>
+      Object.hash(recipeId, term, pantryItemId, userId, householdId);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is RecipeIngredientTermOverrideEntry &&
+          other.recipeId == this.recipeId &&
+          other.term == this.term &&
+          other.pantryItemId == this.pantryItemId &&
+          other.userId == this.userId &&
+          other.householdId == this.householdId);
+}
+
+class RecipeIngredientTermOverridesCompanion
+    extends UpdateCompanion<RecipeIngredientTermOverrideEntry> {
+  final Value<String> recipeId;
+  final Value<String> term;
+  final Value<String> pantryItemId;
+  final Value<String> userId;
+  final Value<String?> householdId;
+  final Value<int> rowid;
+  const RecipeIngredientTermOverridesCompanion({
+    this.recipeId = const Value.absent(),
+    this.term = const Value.absent(),
+    this.pantryItemId = const Value.absent(),
+    this.userId = const Value.absent(),
+    this.householdId = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  RecipeIngredientTermOverridesCompanion.insert({
+    required String recipeId,
+    required String term,
+    required String pantryItemId,
+    required String userId,
+    this.householdId = const Value.absent(),
+    this.rowid = const Value.absent(),
+  })  : recipeId = Value(recipeId),
+        term = Value(term),
+        pantryItemId = Value(pantryItemId),
+        userId = Value(userId);
+  static Insertable<RecipeIngredientTermOverrideEntry> custom({
+    Expression<String>? recipeId,
+    Expression<String>? term,
+    Expression<String>? pantryItemId,
+    Expression<String>? userId,
+    Expression<String>? householdId,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (recipeId != null) 'recipe_id': recipeId,
+      if (term != null) 'term': term,
+      if (pantryItemId != null) 'pantry_item_id': pantryItemId,
+      if (userId != null) 'user_id': userId,
+      if (householdId != null) 'household_id': householdId,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  RecipeIngredientTermOverridesCompanion copyWith(
+      {Value<String>? recipeId,
+      Value<String>? term,
+      Value<String>? pantryItemId,
+      Value<String>? userId,
+      Value<String?>? householdId,
+      Value<int>? rowid}) {
+    return RecipeIngredientTermOverridesCompanion(
+      recipeId: recipeId ?? this.recipeId,
+      term: term ?? this.term,
+      pantryItemId: pantryItemId ?? this.pantryItemId,
+      userId: userId ?? this.userId,
+      householdId: householdId ?? this.householdId,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (recipeId.present) {
+      map['recipe_id'] = Variable<String>(recipeId.value);
+    }
+    if (term.present) {
+      map['term'] = Variable<String>(term.value);
+    }
+    if (pantryItemId.present) {
+      map['pantry_item_id'] = Variable<String>(pantryItemId.value);
+    }
+    if (userId.present) {
+      map['user_id'] = Variable<String>(userId.value);
+    }
+    if (householdId.present) {
+      map['household_id'] = Variable<String>(householdId.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('RecipeIngredientTermOverridesCompanion(')
+          ..write('recipeId: $recipeId, ')
+          ..write('term: $term, ')
+          ..write('pantryItemId: $pantryItemId, ')
+          ..write('userId: $userId, ')
+          ..write('householdId: $householdId, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
+class $ShoppingListItemsTable extends ShoppingListItems
+    with TableInfo<$ShoppingListItemsTable, ShoppingListItemEntry> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $ShoppingListItemsTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<String> id = GeneratedColumn<String>(
+      'id', aliasedName, false,
+      type: DriftSqlType.string,
+      requiredDuringInsert: false,
+      clientDefault: () => const Uuid().v4());
+  static const VerificationMeta _shoppingListIdMeta =
+      const VerificationMeta('shoppingListId');
+  @override
+  late final GeneratedColumn<String> shoppingListId = GeneratedColumn<String>(
+      'shopping_list_id', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _nameMeta = const VerificationMeta('name');
+  @override
+  late final GeneratedColumn<String> name = GeneratedColumn<String>(
+      'name', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _normalizedTermsMeta =
+      const VerificationMeta('normalizedTerms');
+  @override
+  late final GeneratedColumnWithTypeConverter<List<String>?, String>
+      normalizedTerms = GeneratedColumn<String>(
+              'normalized_terms', aliasedName, true,
+              type: DriftSqlType.string, requiredDuringInsert: false)
+          .withConverter<List<String>?>(
+              $ShoppingListItemsTable.$converternormalizedTermsn);
+  static const VerificationMeta _sourceRecipeIdMeta =
+      const VerificationMeta('sourceRecipeId');
+  @override
+  late final GeneratedColumn<String> sourceRecipeId = GeneratedColumn<String>(
+      'source_recipe_id', aliasedName, true,
+      type: DriftSqlType.string, requiredDuringInsert: false);
+  static const VerificationMeta _amountMeta = const VerificationMeta('amount');
+  @override
+  late final GeneratedColumn<double> amount = GeneratedColumn<double>(
+      'amount', aliasedName, true,
+      type: DriftSqlType.double, requiredDuringInsert: false);
+  static const VerificationMeta _unitMeta = const VerificationMeta('unit');
+  @override
+  late final GeneratedColumn<String> unit = GeneratedColumn<String>(
+      'unit', aliasedName, true,
+      type: DriftSqlType.string, requiredDuringInsert: false);
+  static const VerificationMeta _boughtMeta = const VerificationMeta('bought');
+  @override
+  late final GeneratedColumn<bool> bought = GeneratedColumn<bool>(
+      'bought', aliasedName, false,
+      type: DriftSqlType.bool,
+      requiredDuringInsert: false,
+      defaultConstraints:
+          GeneratedColumn.constraintIsAlways('CHECK ("bought" IN (0, 1))'),
+      defaultValue: const Constant(false));
+  static const VerificationMeta _userIdMeta = const VerificationMeta('userId');
+  @override
+  late final GeneratedColumn<String> userId = GeneratedColumn<String>(
+      'user_id', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _householdIdMeta =
+      const VerificationMeta('householdId');
+  @override
+  late final GeneratedColumn<String> householdId = GeneratedColumn<String>(
+      'household_id', aliasedName, true,
+      type: DriftSqlType.string, requiredDuringInsert: false);
+  static const VerificationMeta _createdAtMeta =
+      const VerificationMeta('createdAt');
+  @override
+  late final GeneratedColumn<int> createdAt = GeneratedColumn<int>(
+      'created_at', aliasedName, true,
+      type: DriftSqlType.int, requiredDuringInsert: false);
+  static const VerificationMeta _updatedAtMeta =
+      const VerificationMeta('updatedAt');
+  @override
+  late final GeneratedColumn<int> updatedAt = GeneratedColumn<int>(
+      'updated_at', aliasedName, true,
+      type: DriftSqlType.int, requiredDuringInsert: false);
+  @override
+  List<GeneratedColumn> get $columns => [
+        id,
+        shoppingListId,
+        name,
+        normalizedTerms,
+        sourceRecipeId,
+        amount,
+        unit,
+        bought,
+        userId,
+        householdId,
+        createdAt,
+        updatedAt
+      ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'shopping_list_items';
+  @override
+  VerificationContext validateIntegrity(
+      Insertable<ShoppingListItemEntry> instance,
+      {bool isInserting = false}) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    }
+    if (data.containsKey('shopping_list_id')) {
+      context.handle(
+          _shoppingListIdMeta,
+          shoppingListId.isAcceptableOrUnknown(
+              data['shopping_list_id']!, _shoppingListIdMeta));
+    } else if (isInserting) {
+      context.missing(_shoppingListIdMeta);
+    }
+    if (data.containsKey('name')) {
+      context.handle(
+          _nameMeta, name.isAcceptableOrUnknown(data['name']!, _nameMeta));
+    } else if (isInserting) {
+      context.missing(_nameMeta);
+    }
+    context.handle(_normalizedTermsMeta, const VerificationResult.success());
+    if (data.containsKey('source_recipe_id')) {
+      context.handle(
+          _sourceRecipeIdMeta,
+          sourceRecipeId.isAcceptableOrUnknown(
+              data['source_recipe_id']!, _sourceRecipeIdMeta));
+    }
+    if (data.containsKey('amount')) {
+      context.handle(_amountMeta,
+          amount.isAcceptableOrUnknown(data['amount']!, _amountMeta));
+    }
+    if (data.containsKey('unit')) {
+      context.handle(
+          _unitMeta, unit.isAcceptableOrUnknown(data['unit']!, _unitMeta));
+    }
+    if (data.containsKey('bought')) {
+      context.handle(_boughtMeta,
+          bought.isAcceptableOrUnknown(data['bought']!, _boughtMeta));
+    }
+    if (data.containsKey('user_id')) {
+      context.handle(_userIdMeta,
+          userId.isAcceptableOrUnknown(data['user_id']!, _userIdMeta));
+    } else if (isInserting) {
+      context.missing(_userIdMeta);
+    }
+    if (data.containsKey('household_id')) {
+      context.handle(
+          _householdIdMeta,
+          householdId.isAcceptableOrUnknown(
+              data['household_id']!, _householdIdMeta));
+    }
+    if (data.containsKey('created_at')) {
+      context.handle(_createdAtMeta,
+          createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta));
+    }
+    if (data.containsKey('updated_at')) {
+      context.handle(_updatedAtMeta,
+          updatedAt.isAcceptableOrUnknown(data['updated_at']!, _updatedAtMeta));
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  ShoppingListItemEntry map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return ShoppingListItemEntry(
+      id: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}id'])!,
+      shoppingListId: attachedDatabase.typeMapping.read(
+          DriftSqlType.string, data['${effectivePrefix}shopping_list_id'])!,
+      name: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}name'])!,
+      normalizedTerms: $ShoppingListItemsTable.$converternormalizedTermsn
+          .fromSql(attachedDatabase.typeMapping.read(
+              DriftSqlType.string, data['${effectivePrefix}normalized_terms'])),
+      sourceRecipeId: attachedDatabase.typeMapping.read(
+          DriftSqlType.string, data['${effectivePrefix}source_recipe_id']),
+      amount: attachedDatabase.typeMapping
+          .read(DriftSqlType.double, data['${effectivePrefix}amount']),
+      unit: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}unit']),
+      bought: attachedDatabase.typeMapping
+          .read(DriftSqlType.bool, data['${effectivePrefix}bought'])!,
+      userId: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}user_id'])!,
+      householdId: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}household_id']),
+      createdAt: attachedDatabase.typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}created_at']),
+      updatedAt: attachedDatabase.typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}updated_at']),
+    );
+  }
+
+  @override
+  $ShoppingListItemsTable createAlias(String alias) {
+    return $ShoppingListItemsTable(attachedDatabase, alias);
+  }
+
+  static TypeConverter<List<String>, String> $converternormalizedTerms =
+      StringListTypeConverter();
+  static TypeConverter<List<String>?, String?> $converternormalizedTermsn =
+      NullAwareTypeConverter.wrap($converternormalizedTerms);
+}
+
+class ShoppingListItemEntry extends DataClass
+    implements Insertable<ShoppingListItemEntry> {
+  final String id;
+  final String shoppingListId;
+  final String name;
+  final List<String>? normalizedTerms;
+  final String? sourceRecipeId;
+  final double? amount;
+  final String? unit;
+  final bool bought;
+  final String userId;
+  final String? householdId;
+  final int? createdAt;
+  final int? updatedAt;
+  const ShoppingListItemEntry(
+      {required this.id,
+      required this.shoppingListId,
+      required this.name,
+      this.normalizedTerms,
+      this.sourceRecipeId,
+      this.amount,
+      this.unit,
+      required this.bought,
+      required this.userId,
+      this.householdId,
+      this.createdAt,
+      this.updatedAt});
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<String>(id);
+    map['shopping_list_id'] = Variable<String>(shoppingListId);
+    map['name'] = Variable<String>(name);
+    if (!nullToAbsent || normalizedTerms != null) {
+      map['normalized_terms'] = Variable<String>($ShoppingListItemsTable
+          .$converternormalizedTermsn
+          .toSql(normalizedTerms));
+    }
+    if (!nullToAbsent || sourceRecipeId != null) {
+      map['source_recipe_id'] = Variable<String>(sourceRecipeId);
+    }
+    if (!nullToAbsent || amount != null) {
+      map['amount'] = Variable<double>(amount);
+    }
+    if (!nullToAbsent || unit != null) {
+      map['unit'] = Variable<String>(unit);
+    }
+    map['bought'] = Variable<bool>(bought);
+    map['user_id'] = Variable<String>(userId);
+    if (!nullToAbsent || householdId != null) {
+      map['household_id'] = Variable<String>(householdId);
+    }
+    if (!nullToAbsent || createdAt != null) {
+      map['created_at'] = Variable<int>(createdAt);
+    }
+    if (!nullToAbsent || updatedAt != null) {
+      map['updated_at'] = Variable<int>(updatedAt);
+    }
+    return map;
+  }
+
+  ShoppingListItemsCompanion toCompanion(bool nullToAbsent) {
+    return ShoppingListItemsCompanion(
+      id: Value(id),
+      shoppingListId: Value(shoppingListId),
+      name: Value(name),
+      normalizedTerms: normalizedTerms == null && nullToAbsent
+          ? const Value.absent()
+          : Value(normalizedTerms),
+      sourceRecipeId: sourceRecipeId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(sourceRecipeId),
+      amount:
+          amount == null && nullToAbsent ? const Value.absent() : Value(amount),
+      unit: unit == null && nullToAbsent ? const Value.absent() : Value(unit),
+      bought: Value(bought),
+      userId: Value(userId),
+      householdId: householdId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(householdId),
+      createdAt: createdAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(createdAt),
+      updatedAt: updatedAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(updatedAt),
+    );
+  }
+
+  factory ShoppingListItemEntry.fromJson(Map<String, dynamic> json,
+      {ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return ShoppingListItemEntry(
+      id: serializer.fromJson<String>(json['id']),
+      shoppingListId: serializer.fromJson<String>(json['shoppingListId']),
+      name: serializer.fromJson<String>(json['name']),
+      normalizedTerms:
+          serializer.fromJson<List<String>?>(json['normalizedTerms']),
+      sourceRecipeId: serializer.fromJson<String?>(json['sourceRecipeId']),
+      amount: serializer.fromJson<double?>(json['amount']),
+      unit: serializer.fromJson<String?>(json['unit']),
+      bought: serializer.fromJson<bool>(json['bought']),
+      userId: serializer.fromJson<String>(json['userId']),
+      householdId: serializer.fromJson<String?>(json['householdId']),
+      createdAt: serializer.fromJson<int?>(json['createdAt']),
+      updatedAt: serializer.fromJson<int?>(json['updatedAt']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<String>(id),
+      'shoppingListId': serializer.toJson<String>(shoppingListId),
+      'name': serializer.toJson<String>(name),
+      'normalizedTerms': serializer.toJson<List<String>?>(normalizedTerms),
+      'sourceRecipeId': serializer.toJson<String?>(sourceRecipeId),
+      'amount': serializer.toJson<double?>(amount),
+      'unit': serializer.toJson<String?>(unit),
+      'bought': serializer.toJson<bool>(bought),
+      'userId': serializer.toJson<String>(userId),
+      'householdId': serializer.toJson<String?>(householdId),
+      'createdAt': serializer.toJson<int?>(createdAt),
+      'updatedAt': serializer.toJson<int?>(updatedAt),
+    };
+  }
+
+  ShoppingListItemEntry copyWith(
+          {String? id,
+          String? shoppingListId,
+          String? name,
+          Value<List<String>?> normalizedTerms = const Value.absent(),
+          Value<String?> sourceRecipeId = const Value.absent(),
+          Value<double?> amount = const Value.absent(),
+          Value<String?> unit = const Value.absent(),
+          bool? bought,
+          String? userId,
+          Value<String?> householdId = const Value.absent(),
+          Value<int?> createdAt = const Value.absent(),
+          Value<int?> updatedAt = const Value.absent()}) =>
+      ShoppingListItemEntry(
+        id: id ?? this.id,
+        shoppingListId: shoppingListId ?? this.shoppingListId,
+        name: name ?? this.name,
+        normalizedTerms: normalizedTerms.present
+            ? normalizedTerms.value
+            : this.normalizedTerms,
+        sourceRecipeId:
+            sourceRecipeId.present ? sourceRecipeId.value : this.sourceRecipeId,
+        amount: amount.present ? amount.value : this.amount,
+        unit: unit.present ? unit.value : this.unit,
+        bought: bought ?? this.bought,
+        userId: userId ?? this.userId,
+        householdId: householdId.present ? householdId.value : this.householdId,
+        createdAt: createdAt.present ? createdAt.value : this.createdAt,
+        updatedAt: updatedAt.present ? updatedAt.value : this.updatedAt,
+      );
+  ShoppingListItemEntry copyWithCompanion(ShoppingListItemsCompanion data) {
+    return ShoppingListItemEntry(
+      id: data.id.present ? data.id.value : this.id,
+      shoppingListId: data.shoppingListId.present
+          ? data.shoppingListId.value
+          : this.shoppingListId,
+      name: data.name.present ? data.name.value : this.name,
+      normalizedTerms: data.normalizedTerms.present
+          ? data.normalizedTerms.value
+          : this.normalizedTerms,
+      sourceRecipeId: data.sourceRecipeId.present
+          ? data.sourceRecipeId.value
+          : this.sourceRecipeId,
+      amount: data.amount.present ? data.amount.value : this.amount,
+      unit: data.unit.present ? data.unit.value : this.unit,
+      bought: data.bought.present ? data.bought.value : this.bought,
+      userId: data.userId.present ? data.userId.value : this.userId,
+      householdId:
+          data.householdId.present ? data.householdId.value : this.householdId,
+      createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
+      updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('ShoppingListItemEntry(')
+          ..write('id: $id, ')
+          ..write('shoppingListId: $shoppingListId, ')
+          ..write('name: $name, ')
+          ..write('normalizedTerms: $normalizedTerms, ')
+          ..write('sourceRecipeId: $sourceRecipeId, ')
+          ..write('amount: $amount, ')
+          ..write('unit: $unit, ')
+          ..write('bought: $bought, ')
+          ..write('userId: $userId, ')
+          ..write('householdId: $householdId, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('updatedAt: $updatedAt')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(
+      id,
+      shoppingListId,
+      name,
+      normalizedTerms,
+      sourceRecipeId,
+      amount,
+      unit,
+      bought,
+      userId,
+      householdId,
+      createdAt,
+      updatedAt);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is ShoppingListItemEntry &&
+          other.id == this.id &&
+          other.shoppingListId == this.shoppingListId &&
+          other.name == this.name &&
+          other.normalizedTerms == this.normalizedTerms &&
+          other.sourceRecipeId == this.sourceRecipeId &&
+          other.amount == this.amount &&
+          other.unit == this.unit &&
+          other.bought == this.bought &&
+          other.userId == this.userId &&
+          other.householdId == this.householdId &&
+          other.createdAt == this.createdAt &&
+          other.updatedAt == this.updatedAt);
+}
+
+class ShoppingListItemsCompanion
+    extends UpdateCompanion<ShoppingListItemEntry> {
+  final Value<String> id;
+  final Value<String> shoppingListId;
+  final Value<String> name;
+  final Value<List<String>?> normalizedTerms;
+  final Value<String?> sourceRecipeId;
+  final Value<double?> amount;
+  final Value<String?> unit;
+  final Value<bool> bought;
+  final Value<String> userId;
+  final Value<String?> householdId;
+  final Value<int?> createdAt;
+  final Value<int?> updatedAt;
+  final Value<int> rowid;
+  const ShoppingListItemsCompanion({
+    this.id = const Value.absent(),
+    this.shoppingListId = const Value.absent(),
+    this.name = const Value.absent(),
+    this.normalizedTerms = const Value.absent(),
+    this.sourceRecipeId = const Value.absent(),
+    this.amount = const Value.absent(),
+    this.unit = const Value.absent(),
+    this.bought = const Value.absent(),
+    this.userId = const Value.absent(),
+    this.householdId = const Value.absent(),
+    this.createdAt = const Value.absent(),
+    this.updatedAt = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  ShoppingListItemsCompanion.insert({
+    this.id = const Value.absent(),
+    required String shoppingListId,
+    required String name,
+    this.normalizedTerms = const Value.absent(),
+    this.sourceRecipeId = const Value.absent(),
+    this.amount = const Value.absent(),
+    this.unit = const Value.absent(),
+    this.bought = const Value.absent(),
+    required String userId,
+    this.householdId = const Value.absent(),
+    this.createdAt = const Value.absent(),
+    this.updatedAt = const Value.absent(),
+    this.rowid = const Value.absent(),
+  })  : shoppingListId = Value(shoppingListId),
+        name = Value(name),
+        userId = Value(userId);
+  static Insertable<ShoppingListItemEntry> custom({
+    Expression<String>? id,
+    Expression<String>? shoppingListId,
+    Expression<String>? name,
+    Expression<String>? normalizedTerms,
+    Expression<String>? sourceRecipeId,
+    Expression<double>? amount,
+    Expression<String>? unit,
+    Expression<bool>? bought,
+    Expression<String>? userId,
+    Expression<String>? householdId,
+    Expression<int>? createdAt,
+    Expression<int>? updatedAt,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (shoppingListId != null) 'shopping_list_id': shoppingListId,
+      if (name != null) 'name': name,
+      if (normalizedTerms != null) 'normalized_terms': normalizedTerms,
+      if (sourceRecipeId != null) 'source_recipe_id': sourceRecipeId,
+      if (amount != null) 'amount': amount,
+      if (unit != null) 'unit': unit,
+      if (bought != null) 'bought': bought,
+      if (userId != null) 'user_id': userId,
+      if (householdId != null) 'household_id': householdId,
+      if (createdAt != null) 'created_at': createdAt,
+      if (updatedAt != null) 'updated_at': updatedAt,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  ShoppingListItemsCompanion copyWith(
+      {Value<String>? id,
+      Value<String>? shoppingListId,
+      Value<String>? name,
+      Value<List<String>?>? normalizedTerms,
+      Value<String?>? sourceRecipeId,
+      Value<double?>? amount,
+      Value<String?>? unit,
+      Value<bool>? bought,
+      Value<String>? userId,
+      Value<String?>? householdId,
+      Value<int?>? createdAt,
+      Value<int?>? updatedAt,
+      Value<int>? rowid}) {
+    return ShoppingListItemsCompanion(
+      id: id ?? this.id,
+      shoppingListId: shoppingListId ?? this.shoppingListId,
+      name: name ?? this.name,
+      normalizedTerms: normalizedTerms ?? this.normalizedTerms,
+      sourceRecipeId: sourceRecipeId ?? this.sourceRecipeId,
+      amount: amount ?? this.amount,
+      unit: unit ?? this.unit,
+      bought: bought ?? this.bought,
+      userId: userId ?? this.userId,
+      householdId: householdId ?? this.householdId,
+      createdAt: createdAt ?? this.createdAt,
+      updatedAt: updatedAt ?? this.updatedAt,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<String>(id.value);
+    }
+    if (shoppingListId.present) {
+      map['shopping_list_id'] = Variable<String>(shoppingListId.value);
+    }
+    if (name.present) {
+      map['name'] = Variable<String>(name.value);
+    }
+    if (normalizedTerms.present) {
+      map['normalized_terms'] = Variable<String>($ShoppingListItemsTable
+          .$converternormalizedTermsn
+          .toSql(normalizedTerms.value));
+    }
+    if (sourceRecipeId.present) {
+      map['source_recipe_id'] = Variable<String>(sourceRecipeId.value);
+    }
+    if (amount.present) {
+      map['amount'] = Variable<double>(amount.value);
+    }
+    if (unit.present) {
+      map['unit'] = Variable<String>(unit.value);
+    }
+    if (bought.present) {
+      map['bought'] = Variable<bool>(bought.value);
+    }
+    if (userId.present) {
+      map['user_id'] = Variable<String>(userId.value);
+    }
+    if (householdId.present) {
+      map['household_id'] = Variable<String>(householdId.value);
+    }
+    if (createdAt.present) {
+      map['created_at'] = Variable<int>(createdAt.value);
+    }
+    if (updatedAt.present) {
+      map['updated_at'] = Variable<int>(updatedAt.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('ShoppingListItemsCompanion(')
+          ..write('id: $id, ')
+          ..write('shoppingListId: $shoppingListId, ')
+          ..write('name: $name, ')
+          ..write('normalizedTerms: $normalizedTerms, ')
+          ..write('sourceRecipeId: $sourceRecipeId, ')
+          ..write('amount: $amount, ')
+          ..write('unit: $unit, ')
+          ..write('bought: $bought, ')
+          ..write('userId: $userId, ')
+          ..write('householdId: $householdId, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
+class $ShoppingListsTable extends ShoppingLists
+    with TableInfo<$ShoppingListsTable, ShoppingListEntry> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $ShoppingListsTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<String> id = GeneratedColumn<String>(
+      'id', aliasedName, false,
+      type: DriftSqlType.string,
+      requiredDuringInsert: false,
+      clientDefault: () => const Uuid().v4());
+  static const VerificationMeta _nameMeta = const VerificationMeta('name');
+  @override
+  late final GeneratedColumn<String> name = GeneratedColumn<String>(
+      'name', aliasedName, true,
+      type: DriftSqlType.string, requiredDuringInsert: false);
+  static const VerificationMeta _userIdMeta = const VerificationMeta('userId');
+  @override
+  late final GeneratedColumn<String> userId = GeneratedColumn<String>(
+      'user_id', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _householdIdMeta =
+      const VerificationMeta('householdId');
+  @override
+  late final GeneratedColumn<String> householdId = GeneratedColumn<String>(
+      'household_id', aliasedName, true,
+      type: DriftSqlType.string, requiredDuringInsert: false);
+  static const VerificationMeta _createdAtMeta =
+      const VerificationMeta('createdAt');
+  @override
+  late final GeneratedColumn<int> createdAt = GeneratedColumn<int>(
+      'created_at', aliasedName, true,
+      type: DriftSqlType.int, requiredDuringInsert: false);
+  static const VerificationMeta _updatedAtMeta =
+      const VerificationMeta('updatedAt');
+  @override
+  late final GeneratedColumn<int> updatedAt = GeneratedColumn<int>(
+      'updated_at', aliasedName, true,
+      type: DriftSqlType.int, requiredDuringInsert: false);
+  @override
+  List<GeneratedColumn> get $columns =>
+      [id, name, userId, householdId, createdAt, updatedAt];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'shopping_lists';
+  @override
+  VerificationContext validateIntegrity(Insertable<ShoppingListEntry> instance,
+      {bool isInserting = false}) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    }
+    if (data.containsKey('name')) {
+      context.handle(
+          _nameMeta, name.isAcceptableOrUnknown(data['name']!, _nameMeta));
+    }
+    if (data.containsKey('user_id')) {
+      context.handle(_userIdMeta,
+          userId.isAcceptableOrUnknown(data['user_id']!, _userIdMeta));
+    } else if (isInserting) {
+      context.missing(_userIdMeta);
+    }
+    if (data.containsKey('household_id')) {
+      context.handle(
+          _householdIdMeta,
+          householdId.isAcceptableOrUnknown(
+              data['household_id']!, _householdIdMeta));
+    }
+    if (data.containsKey('created_at')) {
+      context.handle(_createdAtMeta,
+          createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta));
+    }
+    if (data.containsKey('updated_at')) {
+      context.handle(_updatedAtMeta,
+          updatedAt.isAcceptableOrUnknown(data['updated_at']!, _updatedAtMeta));
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  ShoppingListEntry map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return ShoppingListEntry(
+      id: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}id'])!,
+      name: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}name']),
+      userId: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}user_id'])!,
+      householdId: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}household_id']),
+      createdAt: attachedDatabase.typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}created_at']),
+      updatedAt: attachedDatabase.typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}updated_at']),
+    );
+  }
+
+  @override
+  $ShoppingListsTable createAlias(String alias) {
+    return $ShoppingListsTable(attachedDatabase, alias);
+  }
+}
+
+class ShoppingListEntry extends DataClass
+    implements Insertable<ShoppingListEntry> {
+  final String id;
+  final String? name;
+  final String userId;
+  final String? householdId;
+  final int? createdAt;
+  final int? updatedAt;
+  const ShoppingListEntry(
+      {required this.id,
+      this.name,
+      required this.userId,
+      this.householdId,
+      this.createdAt,
+      this.updatedAt});
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<String>(id);
+    if (!nullToAbsent || name != null) {
+      map['name'] = Variable<String>(name);
+    }
+    map['user_id'] = Variable<String>(userId);
+    if (!nullToAbsent || householdId != null) {
+      map['household_id'] = Variable<String>(householdId);
+    }
+    if (!nullToAbsent || createdAt != null) {
+      map['created_at'] = Variable<int>(createdAt);
+    }
+    if (!nullToAbsent || updatedAt != null) {
+      map['updated_at'] = Variable<int>(updatedAt);
+    }
+    return map;
+  }
+
+  ShoppingListsCompanion toCompanion(bool nullToAbsent) {
+    return ShoppingListsCompanion(
+      id: Value(id),
+      name: name == null && nullToAbsent ? const Value.absent() : Value(name),
+      userId: Value(userId),
+      householdId: householdId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(householdId),
+      createdAt: createdAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(createdAt),
+      updatedAt: updatedAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(updatedAt),
+    );
+  }
+
+  factory ShoppingListEntry.fromJson(Map<String, dynamic> json,
+      {ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return ShoppingListEntry(
+      id: serializer.fromJson<String>(json['id']),
+      name: serializer.fromJson<String?>(json['name']),
+      userId: serializer.fromJson<String>(json['userId']),
+      householdId: serializer.fromJson<String?>(json['householdId']),
+      createdAt: serializer.fromJson<int?>(json['createdAt']),
+      updatedAt: serializer.fromJson<int?>(json['updatedAt']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<String>(id),
+      'name': serializer.toJson<String?>(name),
+      'userId': serializer.toJson<String>(userId),
+      'householdId': serializer.toJson<String?>(householdId),
+      'createdAt': serializer.toJson<int?>(createdAt),
+      'updatedAt': serializer.toJson<int?>(updatedAt),
+    };
+  }
+
+  ShoppingListEntry copyWith(
+          {String? id,
+          Value<String?> name = const Value.absent(),
+          String? userId,
+          Value<String?> householdId = const Value.absent(),
+          Value<int?> createdAt = const Value.absent(),
+          Value<int?> updatedAt = const Value.absent()}) =>
+      ShoppingListEntry(
+        id: id ?? this.id,
+        name: name.present ? name.value : this.name,
+        userId: userId ?? this.userId,
+        householdId: householdId.present ? householdId.value : this.householdId,
+        createdAt: createdAt.present ? createdAt.value : this.createdAt,
+        updatedAt: updatedAt.present ? updatedAt.value : this.updatedAt,
+      );
+  ShoppingListEntry copyWithCompanion(ShoppingListsCompanion data) {
+    return ShoppingListEntry(
+      id: data.id.present ? data.id.value : this.id,
+      name: data.name.present ? data.name.value : this.name,
+      userId: data.userId.present ? data.userId.value : this.userId,
+      householdId:
+          data.householdId.present ? data.householdId.value : this.householdId,
+      createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
+      updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('ShoppingListEntry(')
+          ..write('id: $id, ')
+          ..write('name: $name, ')
+          ..write('userId: $userId, ')
+          ..write('householdId: $householdId, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('updatedAt: $updatedAt')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode =>
+      Object.hash(id, name, userId, householdId, createdAt, updatedAt);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is ShoppingListEntry &&
+          other.id == this.id &&
+          other.name == this.name &&
+          other.userId == this.userId &&
+          other.householdId == this.householdId &&
+          other.createdAt == this.createdAt &&
+          other.updatedAt == this.updatedAt);
+}
+
+class ShoppingListsCompanion extends UpdateCompanion<ShoppingListEntry> {
+  final Value<String> id;
+  final Value<String?> name;
+  final Value<String> userId;
+  final Value<String?> householdId;
+  final Value<int?> createdAt;
+  final Value<int?> updatedAt;
+  final Value<int> rowid;
+  const ShoppingListsCompanion({
+    this.id = const Value.absent(),
+    this.name = const Value.absent(),
+    this.userId = const Value.absent(),
+    this.householdId = const Value.absent(),
+    this.createdAt = const Value.absent(),
+    this.updatedAt = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  ShoppingListsCompanion.insert({
+    this.id = const Value.absent(),
+    this.name = const Value.absent(),
+    required String userId,
+    this.householdId = const Value.absent(),
+    this.createdAt = const Value.absent(),
+    this.updatedAt = const Value.absent(),
+    this.rowid = const Value.absent(),
+  }) : userId = Value(userId);
+  static Insertable<ShoppingListEntry> custom({
+    Expression<String>? id,
+    Expression<String>? name,
+    Expression<String>? userId,
+    Expression<String>? householdId,
+    Expression<int>? createdAt,
+    Expression<int>? updatedAt,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (name != null) 'name': name,
+      if (userId != null) 'user_id': userId,
+      if (householdId != null) 'household_id': householdId,
+      if (createdAt != null) 'created_at': createdAt,
+      if (updatedAt != null) 'updated_at': updatedAt,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  ShoppingListsCompanion copyWith(
+      {Value<String>? id,
+      Value<String?>? name,
+      Value<String>? userId,
+      Value<String?>? householdId,
+      Value<int?>? createdAt,
+      Value<int?>? updatedAt,
+      Value<int>? rowid}) {
+    return ShoppingListsCompanion(
+      id: id ?? this.id,
+      name: name ?? this.name,
+      userId: userId ?? this.userId,
+      householdId: householdId ?? this.householdId,
+      createdAt: createdAt ?? this.createdAt,
+      updatedAt: updatedAt ?? this.updatedAt,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<String>(id.value);
+    }
+    if (name.present) {
+      map['name'] = Variable<String>(name.value);
+    }
+    if (userId.present) {
+      map['user_id'] = Variable<String>(userId.value);
+    }
+    if (householdId.present) {
+      map['household_id'] = Variable<String>(householdId.value);
+    }
+    if (createdAt.present) {
+      map['created_at'] = Variable<int>(createdAt.value);
+    }
+    if (updatedAt.present) {
+      map['updated_at'] = Variable<int>(updatedAt.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('ShoppingListsCompanion(')
+          ..write('id: $id, ')
+          ..write('name: $name, ')
+          ..write('userId: $userId, ')
+          ..write('householdId: $householdId, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
 abstract class _$AppDatabase extends GeneratedDatabase {
   _$AppDatabase(QueryExecutor e) : super(e);
   $AppDatabaseManager get managers => $AppDatabaseManager(this);
@@ -3082,6 +4804,12 @@ abstract class _$AppDatabase extends GeneratedDatabase {
   late final $HouseholdsTable households = $HouseholdsTable(this);
   late final $UploadQueuesTable uploadQueues = $UploadQueuesTable(this);
   late final $CooksTable cooks = $CooksTable(this);
+  late final $PantryItemsTable pantryItems = $PantryItemsTable(this);
+  late final $RecipeIngredientTermOverridesTable recipeIngredientTermOverrides =
+      $RecipeIngredientTermOverridesTable(this);
+  late final $ShoppingListItemsTable shoppingListItems =
+      $ShoppingListItemsTable(this);
+  late final $ShoppingListsTable shoppingLists = $ShoppingListsTable(this);
   @override
   Iterable<TableInfo<Table, Object?>> get allTables =>
       allSchemaEntities.whereType<TableInfo<Table, Object?>>();
@@ -3093,7 +4821,11 @@ abstract class _$AppDatabase extends GeneratedDatabase {
         householdMembers,
         households,
         uploadQueues,
-        cooks
+        cooks,
+        pantryItems,
+        recipeIngredientTermOverrides,
+        shoppingListItems,
+        shoppingLists
       ];
 }
 
@@ -4623,6 +6355,883 @@ typedef $$CooksTableProcessedTableManager = ProcessedTableManager<
     (CookEntry, BaseReferences<_$AppDatabase, $CooksTable, CookEntry>),
     CookEntry,
     PrefetchHooks Function()>;
+typedef $$PantryItemsTableCreateCompanionBuilder = PantryItemsCompanion
+    Function({
+  Value<String> id,
+  required String name,
+  Value<bool> inStock,
+  required String userId,
+  Value<String?> householdId,
+  Value<int?> createdAt,
+  Value<int?> updatedAt,
+  Value<int?> deletedAt,
+  Value<int> rowid,
+});
+typedef $$PantryItemsTableUpdateCompanionBuilder = PantryItemsCompanion
+    Function({
+  Value<String> id,
+  Value<String> name,
+  Value<bool> inStock,
+  Value<String> userId,
+  Value<String?> householdId,
+  Value<int?> createdAt,
+  Value<int?> updatedAt,
+  Value<int?> deletedAt,
+  Value<int> rowid,
+});
+
+class $$PantryItemsTableFilterComposer
+    extends Composer<_$AppDatabase, $PantryItemsTable> {
+  $$PantryItemsTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get id => $composableBuilder(
+      column: $table.id, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get name => $composableBuilder(
+      column: $table.name, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<bool> get inStock => $composableBuilder(
+      column: $table.inStock, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get userId => $composableBuilder(
+      column: $table.userId, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get householdId => $composableBuilder(
+      column: $table.householdId, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<int> get createdAt => $composableBuilder(
+      column: $table.createdAt, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<int> get updatedAt => $composableBuilder(
+      column: $table.updatedAt, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<int> get deletedAt => $composableBuilder(
+      column: $table.deletedAt, builder: (column) => ColumnFilters(column));
+}
+
+class $$PantryItemsTableOrderingComposer
+    extends Composer<_$AppDatabase, $PantryItemsTable> {
+  $$PantryItemsTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get id => $composableBuilder(
+      column: $table.id, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get name => $composableBuilder(
+      column: $table.name, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<bool> get inStock => $composableBuilder(
+      column: $table.inStock, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get userId => $composableBuilder(
+      column: $table.userId, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get householdId => $composableBuilder(
+      column: $table.householdId, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<int> get createdAt => $composableBuilder(
+      column: $table.createdAt, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<int> get updatedAt => $composableBuilder(
+      column: $table.updatedAt, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<int> get deletedAt => $composableBuilder(
+      column: $table.deletedAt, builder: (column) => ColumnOrderings(column));
+}
+
+class $$PantryItemsTableAnnotationComposer
+    extends Composer<_$AppDatabase, $PantryItemsTable> {
+  $$PantryItemsTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get name =>
+      $composableBuilder(column: $table.name, builder: (column) => column);
+
+  GeneratedColumn<bool> get inStock =>
+      $composableBuilder(column: $table.inStock, builder: (column) => column);
+
+  GeneratedColumn<String> get userId =>
+      $composableBuilder(column: $table.userId, builder: (column) => column);
+
+  GeneratedColumn<String> get householdId => $composableBuilder(
+      column: $table.householdId, builder: (column) => column);
+
+  GeneratedColumn<int> get createdAt =>
+      $composableBuilder(column: $table.createdAt, builder: (column) => column);
+
+  GeneratedColumn<int> get updatedAt =>
+      $composableBuilder(column: $table.updatedAt, builder: (column) => column);
+
+  GeneratedColumn<int> get deletedAt =>
+      $composableBuilder(column: $table.deletedAt, builder: (column) => column);
+}
+
+class $$PantryItemsTableTableManager extends RootTableManager<
+    _$AppDatabase,
+    $PantryItemsTable,
+    PantryItemEntry,
+    $$PantryItemsTableFilterComposer,
+    $$PantryItemsTableOrderingComposer,
+    $$PantryItemsTableAnnotationComposer,
+    $$PantryItemsTableCreateCompanionBuilder,
+    $$PantryItemsTableUpdateCompanionBuilder,
+    (
+      PantryItemEntry,
+      BaseReferences<_$AppDatabase, $PantryItemsTable, PantryItemEntry>
+    ),
+    PantryItemEntry,
+    PrefetchHooks Function()> {
+  $$PantryItemsTableTableManager(_$AppDatabase db, $PantryItemsTable table)
+      : super(TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$PantryItemsTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$PantryItemsTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$PantryItemsTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback: ({
+            Value<String> id = const Value.absent(),
+            Value<String> name = const Value.absent(),
+            Value<bool> inStock = const Value.absent(),
+            Value<String> userId = const Value.absent(),
+            Value<String?> householdId = const Value.absent(),
+            Value<int?> createdAt = const Value.absent(),
+            Value<int?> updatedAt = const Value.absent(),
+            Value<int?> deletedAt = const Value.absent(),
+            Value<int> rowid = const Value.absent(),
+          }) =>
+              PantryItemsCompanion(
+            id: id,
+            name: name,
+            inStock: inStock,
+            userId: userId,
+            householdId: householdId,
+            createdAt: createdAt,
+            updatedAt: updatedAt,
+            deletedAt: deletedAt,
+            rowid: rowid,
+          ),
+          createCompanionCallback: ({
+            Value<String> id = const Value.absent(),
+            required String name,
+            Value<bool> inStock = const Value.absent(),
+            required String userId,
+            Value<String?> householdId = const Value.absent(),
+            Value<int?> createdAt = const Value.absent(),
+            Value<int?> updatedAt = const Value.absent(),
+            Value<int?> deletedAt = const Value.absent(),
+            Value<int> rowid = const Value.absent(),
+          }) =>
+              PantryItemsCompanion.insert(
+            id: id,
+            name: name,
+            inStock: inStock,
+            userId: userId,
+            householdId: householdId,
+            createdAt: createdAt,
+            updatedAt: updatedAt,
+            deletedAt: deletedAt,
+            rowid: rowid,
+          ),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .toList(),
+          prefetchHooksCallback: null,
+        ));
+}
+
+typedef $$PantryItemsTableProcessedTableManager = ProcessedTableManager<
+    _$AppDatabase,
+    $PantryItemsTable,
+    PantryItemEntry,
+    $$PantryItemsTableFilterComposer,
+    $$PantryItemsTableOrderingComposer,
+    $$PantryItemsTableAnnotationComposer,
+    $$PantryItemsTableCreateCompanionBuilder,
+    $$PantryItemsTableUpdateCompanionBuilder,
+    (
+      PantryItemEntry,
+      BaseReferences<_$AppDatabase, $PantryItemsTable, PantryItemEntry>
+    ),
+    PantryItemEntry,
+    PrefetchHooks Function()>;
+typedef $$RecipeIngredientTermOverridesTableCreateCompanionBuilder
+    = RecipeIngredientTermOverridesCompanion Function({
+  required String recipeId,
+  required String term,
+  required String pantryItemId,
+  required String userId,
+  Value<String?> householdId,
+  Value<int> rowid,
+});
+typedef $$RecipeIngredientTermOverridesTableUpdateCompanionBuilder
+    = RecipeIngredientTermOverridesCompanion Function({
+  Value<String> recipeId,
+  Value<String> term,
+  Value<String> pantryItemId,
+  Value<String> userId,
+  Value<String?> householdId,
+  Value<int> rowid,
+});
+
+class $$RecipeIngredientTermOverridesTableFilterComposer
+    extends Composer<_$AppDatabase, $RecipeIngredientTermOverridesTable> {
+  $$RecipeIngredientTermOverridesTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get recipeId => $composableBuilder(
+      column: $table.recipeId, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get term => $composableBuilder(
+      column: $table.term, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get pantryItemId => $composableBuilder(
+      column: $table.pantryItemId, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get userId => $composableBuilder(
+      column: $table.userId, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get householdId => $composableBuilder(
+      column: $table.householdId, builder: (column) => ColumnFilters(column));
+}
+
+class $$RecipeIngredientTermOverridesTableOrderingComposer
+    extends Composer<_$AppDatabase, $RecipeIngredientTermOverridesTable> {
+  $$RecipeIngredientTermOverridesTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get recipeId => $composableBuilder(
+      column: $table.recipeId, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get term => $composableBuilder(
+      column: $table.term, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get pantryItemId => $composableBuilder(
+      column: $table.pantryItemId,
+      builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get userId => $composableBuilder(
+      column: $table.userId, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get householdId => $composableBuilder(
+      column: $table.householdId, builder: (column) => ColumnOrderings(column));
+}
+
+class $$RecipeIngredientTermOverridesTableAnnotationComposer
+    extends Composer<_$AppDatabase, $RecipeIngredientTermOverridesTable> {
+  $$RecipeIngredientTermOverridesTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get recipeId =>
+      $composableBuilder(column: $table.recipeId, builder: (column) => column);
+
+  GeneratedColumn<String> get term =>
+      $composableBuilder(column: $table.term, builder: (column) => column);
+
+  GeneratedColumn<String> get pantryItemId => $composableBuilder(
+      column: $table.pantryItemId, builder: (column) => column);
+
+  GeneratedColumn<String> get userId =>
+      $composableBuilder(column: $table.userId, builder: (column) => column);
+
+  GeneratedColumn<String> get householdId => $composableBuilder(
+      column: $table.householdId, builder: (column) => column);
+}
+
+class $$RecipeIngredientTermOverridesTableTableManager extends RootTableManager<
+    _$AppDatabase,
+    $RecipeIngredientTermOverridesTable,
+    RecipeIngredientTermOverrideEntry,
+    $$RecipeIngredientTermOverridesTableFilterComposer,
+    $$RecipeIngredientTermOverridesTableOrderingComposer,
+    $$RecipeIngredientTermOverridesTableAnnotationComposer,
+    $$RecipeIngredientTermOverridesTableCreateCompanionBuilder,
+    $$RecipeIngredientTermOverridesTableUpdateCompanionBuilder,
+    (
+      RecipeIngredientTermOverrideEntry,
+      BaseReferences<_$AppDatabase, $RecipeIngredientTermOverridesTable,
+          RecipeIngredientTermOverrideEntry>
+    ),
+    RecipeIngredientTermOverrideEntry,
+    PrefetchHooks Function()> {
+  $$RecipeIngredientTermOverridesTableTableManager(
+      _$AppDatabase db, $RecipeIngredientTermOverridesTable table)
+      : super(TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$RecipeIngredientTermOverridesTableFilterComposer(
+                  $db: db, $table: table),
+          createOrderingComposer: () =>
+              $$RecipeIngredientTermOverridesTableOrderingComposer(
+                  $db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$RecipeIngredientTermOverridesTableAnnotationComposer(
+                  $db: db, $table: table),
+          updateCompanionCallback: ({
+            Value<String> recipeId = const Value.absent(),
+            Value<String> term = const Value.absent(),
+            Value<String> pantryItemId = const Value.absent(),
+            Value<String> userId = const Value.absent(),
+            Value<String?> householdId = const Value.absent(),
+            Value<int> rowid = const Value.absent(),
+          }) =>
+              RecipeIngredientTermOverridesCompanion(
+            recipeId: recipeId,
+            term: term,
+            pantryItemId: pantryItemId,
+            userId: userId,
+            householdId: householdId,
+            rowid: rowid,
+          ),
+          createCompanionCallback: ({
+            required String recipeId,
+            required String term,
+            required String pantryItemId,
+            required String userId,
+            Value<String?> householdId = const Value.absent(),
+            Value<int> rowid = const Value.absent(),
+          }) =>
+              RecipeIngredientTermOverridesCompanion.insert(
+            recipeId: recipeId,
+            term: term,
+            pantryItemId: pantryItemId,
+            userId: userId,
+            householdId: householdId,
+            rowid: rowid,
+          ),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .toList(),
+          prefetchHooksCallback: null,
+        ));
+}
+
+typedef $$RecipeIngredientTermOverridesTableProcessedTableManager
+    = ProcessedTableManager<
+        _$AppDatabase,
+        $RecipeIngredientTermOverridesTable,
+        RecipeIngredientTermOverrideEntry,
+        $$RecipeIngredientTermOverridesTableFilterComposer,
+        $$RecipeIngredientTermOverridesTableOrderingComposer,
+        $$RecipeIngredientTermOverridesTableAnnotationComposer,
+        $$RecipeIngredientTermOverridesTableCreateCompanionBuilder,
+        $$RecipeIngredientTermOverridesTableUpdateCompanionBuilder,
+        (
+          RecipeIngredientTermOverrideEntry,
+          BaseReferences<_$AppDatabase, $RecipeIngredientTermOverridesTable,
+              RecipeIngredientTermOverrideEntry>
+        ),
+        RecipeIngredientTermOverrideEntry,
+        PrefetchHooks Function()>;
+typedef $$ShoppingListItemsTableCreateCompanionBuilder
+    = ShoppingListItemsCompanion Function({
+  Value<String> id,
+  required String shoppingListId,
+  required String name,
+  Value<List<String>?> normalizedTerms,
+  Value<String?> sourceRecipeId,
+  Value<double?> amount,
+  Value<String?> unit,
+  Value<bool> bought,
+  required String userId,
+  Value<String?> householdId,
+  Value<int?> createdAt,
+  Value<int?> updatedAt,
+  Value<int> rowid,
+});
+typedef $$ShoppingListItemsTableUpdateCompanionBuilder
+    = ShoppingListItemsCompanion Function({
+  Value<String> id,
+  Value<String> shoppingListId,
+  Value<String> name,
+  Value<List<String>?> normalizedTerms,
+  Value<String?> sourceRecipeId,
+  Value<double?> amount,
+  Value<String?> unit,
+  Value<bool> bought,
+  Value<String> userId,
+  Value<String?> householdId,
+  Value<int?> createdAt,
+  Value<int?> updatedAt,
+  Value<int> rowid,
+});
+
+class $$ShoppingListItemsTableFilterComposer
+    extends Composer<_$AppDatabase, $ShoppingListItemsTable> {
+  $$ShoppingListItemsTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get id => $composableBuilder(
+      column: $table.id, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get shoppingListId => $composableBuilder(
+      column: $table.shoppingListId,
+      builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get name => $composableBuilder(
+      column: $table.name, builder: (column) => ColumnFilters(column));
+
+  ColumnWithTypeConverterFilters<List<String>?, List<String>, String>
+      get normalizedTerms => $composableBuilder(
+          column: $table.normalizedTerms,
+          builder: (column) => ColumnWithTypeConverterFilters(column));
+
+  ColumnFilters<String> get sourceRecipeId => $composableBuilder(
+      column: $table.sourceRecipeId,
+      builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<double> get amount => $composableBuilder(
+      column: $table.amount, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get unit => $composableBuilder(
+      column: $table.unit, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<bool> get bought => $composableBuilder(
+      column: $table.bought, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get userId => $composableBuilder(
+      column: $table.userId, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get householdId => $composableBuilder(
+      column: $table.householdId, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<int> get createdAt => $composableBuilder(
+      column: $table.createdAt, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<int> get updatedAt => $composableBuilder(
+      column: $table.updatedAt, builder: (column) => ColumnFilters(column));
+}
+
+class $$ShoppingListItemsTableOrderingComposer
+    extends Composer<_$AppDatabase, $ShoppingListItemsTable> {
+  $$ShoppingListItemsTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get id => $composableBuilder(
+      column: $table.id, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get shoppingListId => $composableBuilder(
+      column: $table.shoppingListId,
+      builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get name => $composableBuilder(
+      column: $table.name, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get normalizedTerms => $composableBuilder(
+      column: $table.normalizedTerms,
+      builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get sourceRecipeId => $composableBuilder(
+      column: $table.sourceRecipeId,
+      builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<double> get amount => $composableBuilder(
+      column: $table.amount, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get unit => $composableBuilder(
+      column: $table.unit, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<bool> get bought => $composableBuilder(
+      column: $table.bought, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get userId => $composableBuilder(
+      column: $table.userId, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get householdId => $composableBuilder(
+      column: $table.householdId, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<int> get createdAt => $composableBuilder(
+      column: $table.createdAt, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<int> get updatedAt => $composableBuilder(
+      column: $table.updatedAt, builder: (column) => ColumnOrderings(column));
+}
+
+class $$ShoppingListItemsTableAnnotationComposer
+    extends Composer<_$AppDatabase, $ShoppingListItemsTable> {
+  $$ShoppingListItemsTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get shoppingListId => $composableBuilder(
+      column: $table.shoppingListId, builder: (column) => column);
+
+  GeneratedColumn<String> get name =>
+      $composableBuilder(column: $table.name, builder: (column) => column);
+
+  GeneratedColumnWithTypeConverter<List<String>?, String> get normalizedTerms =>
+      $composableBuilder(
+          column: $table.normalizedTerms, builder: (column) => column);
+
+  GeneratedColumn<String> get sourceRecipeId => $composableBuilder(
+      column: $table.sourceRecipeId, builder: (column) => column);
+
+  GeneratedColumn<double> get amount =>
+      $composableBuilder(column: $table.amount, builder: (column) => column);
+
+  GeneratedColumn<String> get unit =>
+      $composableBuilder(column: $table.unit, builder: (column) => column);
+
+  GeneratedColumn<bool> get bought =>
+      $composableBuilder(column: $table.bought, builder: (column) => column);
+
+  GeneratedColumn<String> get userId =>
+      $composableBuilder(column: $table.userId, builder: (column) => column);
+
+  GeneratedColumn<String> get householdId => $composableBuilder(
+      column: $table.householdId, builder: (column) => column);
+
+  GeneratedColumn<int> get createdAt =>
+      $composableBuilder(column: $table.createdAt, builder: (column) => column);
+
+  GeneratedColumn<int> get updatedAt =>
+      $composableBuilder(column: $table.updatedAt, builder: (column) => column);
+}
+
+class $$ShoppingListItemsTableTableManager extends RootTableManager<
+    _$AppDatabase,
+    $ShoppingListItemsTable,
+    ShoppingListItemEntry,
+    $$ShoppingListItemsTableFilterComposer,
+    $$ShoppingListItemsTableOrderingComposer,
+    $$ShoppingListItemsTableAnnotationComposer,
+    $$ShoppingListItemsTableCreateCompanionBuilder,
+    $$ShoppingListItemsTableUpdateCompanionBuilder,
+    (
+      ShoppingListItemEntry,
+      BaseReferences<_$AppDatabase, $ShoppingListItemsTable,
+          ShoppingListItemEntry>
+    ),
+    ShoppingListItemEntry,
+    PrefetchHooks Function()> {
+  $$ShoppingListItemsTableTableManager(
+      _$AppDatabase db, $ShoppingListItemsTable table)
+      : super(TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$ShoppingListItemsTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$ShoppingListItemsTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$ShoppingListItemsTableAnnotationComposer(
+                  $db: db, $table: table),
+          updateCompanionCallback: ({
+            Value<String> id = const Value.absent(),
+            Value<String> shoppingListId = const Value.absent(),
+            Value<String> name = const Value.absent(),
+            Value<List<String>?> normalizedTerms = const Value.absent(),
+            Value<String?> sourceRecipeId = const Value.absent(),
+            Value<double?> amount = const Value.absent(),
+            Value<String?> unit = const Value.absent(),
+            Value<bool> bought = const Value.absent(),
+            Value<String> userId = const Value.absent(),
+            Value<String?> householdId = const Value.absent(),
+            Value<int?> createdAt = const Value.absent(),
+            Value<int?> updatedAt = const Value.absent(),
+            Value<int> rowid = const Value.absent(),
+          }) =>
+              ShoppingListItemsCompanion(
+            id: id,
+            shoppingListId: shoppingListId,
+            name: name,
+            normalizedTerms: normalizedTerms,
+            sourceRecipeId: sourceRecipeId,
+            amount: amount,
+            unit: unit,
+            bought: bought,
+            userId: userId,
+            householdId: householdId,
+            createdAt: createdAt,
+            updatedAt: updatedAt,
+            rowid: rowid,
+          ),
+          createCompanionCallback: ({
+            Value<String> id = const Value.absent(),
+            required String shoppingListId,
+            required String name,
+            Value<List<String>?> normalizedTerms = const Value.absent(),
+            Value<String?> sourceRecipeId = const Value.absent(),
+            Value<double?> amount = const Value.absent(),
+            Value<String?> unit = const Value.absent(),
+            Value<bool> bought = const Value.absent(),
+            required String userId,
+            Value<String?> householdId = const Value.absent(),
+            Value<int?> createdAt = const Value.absent(),
+            Value<int?> updatedAt = const Value.absent(),
+            Value<int> rowid = const Value.absent(),
+          }) =>
+              ShoppingListItemsCompanion.insert(
+            id: id,
+            shoppingListId: shoppingListId,
+            name: name,
+            normalizedTerms: normalizedTerms,
+            sourceRecipeId: sourceRecipeId,
+            amount: amount,
+            unit: unit,
+            bought: bought,
+            userId: userId,
+            householdId: householdId,
+            createdAt: createdAt,
+            updatedAt: updatedAt,
+            rowid: rowid,
+          ),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .toList(),
+          prefetchHooksCallback: null,
+        ));
+}
+
+typedef $$ShoppingListItemsTableProcessedTableManager = ProcessedTableManager<
+    _$AppDatabase,
+    $ShoppingListItemsTable,
+    ShoppingListItemEntry,
+    $$ShoppingListItemsTableFilterComposer,
+    $$ShoppingListItemsTableOrderingComposer,
+    $$ShoppingListItemsTableAnnotationComposer,
+    $$ShoppingListItemsTableCreateCompanionBuilder,
+    $$ShoppingListItemsTableUpdateCompanionBuilder,
+    (
+      ShoppingListItemEntry,
+      BaseReferences<_$AppDatabase, $ShoppingListItemsTable,
+          ShoppingListItemEntry>
+    ),
+    ShoppingListItemEntry,
+    PrefetchHooks Function()>;
+typedef $$ShoppingListsTableCreateCompanionBuilder = ShoppingListsCompanion
+    Function({
+  Value<String> id,
+  Value<String?> name,
+  required String userId,
+  Value<String?> householdId,
+  Value<int?> createdAt,
+  Value<int?> updatedAt,
+  Value<int> rowid,
+});
+typedef $$ShoppingListsTableUpdateCompanionBuilder = ShoppingListsCompanion
+    Function({
+  Value<String> id,
+  Value<String?> name,
+  Value<String> userId,
+  Value<String?> householdId,
+  Value<int?> createdAt,
+  Value<int?> updatedAt,
+  Value<int> rowid,
+});
+
+class $$ShoppingListsTableFilterComposer
+    extends Composer<_$AppDatabase, $ShoppingListsTable> {
+  $$ShoppingListsTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get id => $composableBuilder(
+      column: $table.id, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get name => $composableBuilder(
+      column: $table.name, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get userId => $composableBuilder(
+      column: $table.userId, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get householdId => $composableBuilder(
+      column: $table.householdId, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<int> get createdAt => $composableBuilder(
+      column: $table.createdAt, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<int> get updatedAt => $composableBuilder(
+      column: $table.updatedAt, builder: (column) => ColumnFilters(column));
+}
+
+class $$ShoppingListsTableOrderingComposer
+    extends Composer<_$AppDatabase, $ShoppingListsTable> {
+  $$ShoppingListsTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get id => $composableBuilder(
+      column: $table.id, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get name => $composableBuilder(
+      column: $table.name, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get userId => $composableBuilder(
+      column: $table.userId, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get householdId => $composableBuilder(
+      column: $table.householdId, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<int> get createdAt => $composableBuilder(
+      column: $table.createdAt, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<int> get updatedAt => $composableBuilder(
+      column: $table.updatedAt, builder: (column) => ColumnOrderings(column));
+}
+
+class $$ShoppingListsTableAnnotationComposer
+    extends Composer<_$AppDatabase, $ShoppingListsTable> {
+  $$ShoppingListsTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get name =>
+      $composableBuilder(column: $table.name, builder: (column) => column);
+
+  GeneratedColumn<String> get userId =>
+      $composableBuilder(column: $table.userId, builder: (column) => column);
+
+  GeneratedColumn<String> get householdId => $composableBuilder(
+      column: $table.householdId, builder: (column) => column);
+
+  GeneratedColumn<int> get createdAt =>
+      $composableBuilder(column: $table.createdAt, builder: (column) => column);
+
+  GeneratedColumn<int> get updatedAt =>
+      $composableBuilder(column: $table.updatedAt, builder: (column) => column);
+}
+
+class $$ShoppingListsTableTableManager extends RootTableManager<
+    _$AppDatabase,
+    $ShoppingListsTable,
+    ShoppingListEntry,
+    $$ShoppingListsTableFilterComposer,
+    $$ShoppingListsTableOrderingComposer,
+    $$ShoppingListsTableAnnotationComposer,
+    $$ShoppingListsTableCreateCompanionBuilder,
+    $$ShoppingListsTableUpdateCompanionBuilder,
+    (
+      ShoppingListEntry,
+      BaseReferences<_$AppDatabase, $ShoppingListsTable, ShoppingListEntry>
+    ),
+    ShoppingListEntry,
+    PrefetchHooks Function()> {
+  $$ShoppingListsTableTableManager(_$AppDatabase db, $ShoppingListsTable table)
+      : super(TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$ShoppingListsTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$ShoppingListsTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$ShoppingListsTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback: ({
+            Value<String> id = const Value.absent(),
+            Value<String?> name = const Value.absent(),
+            Value<String> userId = const Value.absent(),
+            Value<String?> householdId = const Value.absent(),
+            Value<int?> createdAt = const Value.absent(),
+            Value<int?> updatedAt = const Value.absent(),
+            Value<int> rowid = const Value.absent(),
+          }) =>
+              ShoppingListsCompanion(
+            id: id,
+            name: name,
+            userId: userId,
+            householdId: householdId,
+            createdAt: createdAt,
+            updatedAt: updatedAt,
+            rowid: rowid,
+          ),
+          createCompanionCallback: ({
+            Value<String> id = const Value.absent(),
+            Value<String?> name = const Value.absent(),
+            required String userId,
+            Value<String?> householdId = const Value.absent(),
+            Value<int?> createdAt = const Value.absent(),
+            Value<int?> updatedAt = const Value.absent(),
+            Value<int> rowid = const Value.absent(),
+          }) =>
+              ShoppingListsCompanion.insert(
+            id: id,
+            name: name,
+            userId: userId,
+            householdId: householdId,
+            createdAt: createdAt,
+            updatedAt: updatedAt,
+            rowid: rowid,
+          ),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .toList(),
+          prefetchHooksCallback: null,
+        ));
+}
+
+typedef $$ShoppingListsTableProcessedTableManager = ProcessedTableManager<
+    _$AppDatabase,
+    $ShoppingListsTable,
+    ShoppingListEntry,
+    $$ShoppingListsTableFilterComposer,
+    $$ShoppingListsTableOrderingComposer,
+    $$ShoppingListsTableAnnotationComposer,
+    $$ShoppingListsTableCreateCompanionBuilder,
+    $$ShoppingListsTableUpdateCompanionBuilder,
+    (
+      ShoppingListEntry,
+      BaseReferences<_$AppDatabase, $ShoppingListsTable, ShoppingListEntry>
+    ),
+    ShoppingListEntry,
+    PrefetchHooks Function()>;
 
 class $AppDatabaseManager {
   final _$AppDatabase _db;
@@ -4641,4 +7250,14 @@ class $AppDatabaseManager {
       $$UploadQueuesTableTableManager(_db, _db.uploadQueues);
   $$CooksTableTableManager get cooks =>
       $$CooksTableTableManager(_db, _db.cooks);
+  $$PantryItemsTableTableManager get pantryItems =>
+      $$PantryItemsTableTableManager(_db, _db.pantryItems);
+  $$RecipeIngredientTermOverridesTableTableManager
+      get recipeIngredientTermOverrides =>
+          $$RecipeIngredientTermOverridesTableTableManager(
+              _db, _db.recipeIngredientTermOverrides);
+  $$ShoppingListItemsTableTableManager get shoppingListItems =>
+      $$ShoppingListItemsTableTableManager(_db, _db.shoppingListItems);
+  $$ShoppingListsTableTableManager get shoppingLists =>
+      $$ShoppingListsTableTableManager(_db, _db.shoppingLists);
 }

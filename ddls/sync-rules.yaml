@@ -39,7 +39,7 @@ bucket_definitions:
       - SELECT * FROM public.recipe_folders WHERE id = bucket.folder_id
       - SELECT * FROM public.recipes WHERE bucket.folder_id IN folder_ids
 
-    # Cooks that belong to the user.
+  # Cooks that belong to the user.
   cooks_belongs_to_user:
     parameters: SELECT request.user_id() as user_id
     data:
@@ -50,3 +50,44 @@ bucket_definitions:
     parameters: SELECT household_id FROM household_members WHERE user_id = request.user_id() AND is_active = 1
     data:
       - SELECT * FROM public.cooks WHERE household_id = bucket.household_id
+
+  # Pantry and shopping list related
+  pantry_items_belongs_to_user:
+    parameters: SELECT request.user_id() as user_id
+    data:
+      - SELECT * FROM public.pantry_items WHERE user_id = bucket.user_id
+
+  pantry_items_belongs_to_household:
+    parameters: SELECT household_id FROM household_members WHERE user_id = request.user_id() AND is_active = 1
+    data:
+      - SELECT * FROM public.pantry_items WHERE household_id = bucket.household_id
+
+  recipe_ingredient_term_overrides_belongs_to_user:
+    parameters: SELECT request.user_id() as user_id
+    data:
+      - SELECT * FROM public.recipe_ingredient_term_overrides WHERE user_id = bucket.user_id
+
+  recipe_ingredient_term_overrides_belongs_to_household:
+    parameters: SELECT household_id FROM household_members WHERE user_id = request.user_id() AND is_active = 1
+    data:
+      - SELECT * FROM public.recipe_ingredient_term_overrides WHERE household_id = bucket.household_id
+
+  shopping_lists_belongs_to_user:
+    parameters: SELECT request.user_id() as user_id
+    data:
+      - SELECT * FROM public.shopping_lists WHERE user_id = bucket.user_id
+
+  shopping_lists_belongs_to_household:
+    parameters: SELECT household_id FROM household_members WHERE user_id = request.user_id() AND is_active = 1
+    data:
+      - SELECT * FROM public.shopping_lists WHERE household_id = bucket.household_id
+
+  shopping_list_items_belongs_to_user:
+    parameters: SELECT request.user_id() as user_id
+    data:
+      - SELECT * FROM public.shopping_list_items WHERE user_id = bucket.user_id
+
+  shopping_list_items_belongs_to_household:
+    parameters: SELECT household_id FROM household_members WHERE user_id = request.user_id() AND is_active = 1
+    data:
+      - SELECT * FROM public.shopping_list_items WHERE household_id = bucket.household_id

@@ -147,7 +147,7 @@ CREATE POLICY "Enable delete for owners of entities"
     EXISTS (
         SELECT 1 FROM recipe_folders
         WHERE id = shared_permissions.entity_id
-          AND shared_permissions.entity_type = 'recipe_folder'
+          AND shared_permissions.entity_type = 'recipe_fold er'
           AND recipe_folders.user_id = auth.uid()
     ) OR
     EXISTS (
@@ -158,3 +158,119 @@ CREATE POLICY "Enable delete for owners of entities"
     )
     );
 
+---- Pantry and Shopping List
+CREATE POLICY "Users can view their own pantry items"
+    ON pantry_items
+    FOR SELECT
+    USING (
+    auth.uid() = user_id
+        OR (household_id IS NOT NULL AND is_household_member(household_id, auth.uid()))
+    );
+
+CREATE POLICY "Users can insert pantry items"
+    ON pantry_items
+    FOR INSERT
+    WITH CHECK (
+    auth.uid() = user_id
+        OR (household_id IS NOT NULL AND is_household_member(household_id, auth.uid()))
+    );
+
+CREATE POLICY "Users can update pantry items"
+    ON pantry_items
+    FOR UPDATE
+    USING (
+    auth.uid() = user_id
+        OR (household_id IS NOT NULL AND is_household_member(household_id, auth.uid()))
+    )
+    WITH CHECK (
+    household_id IS NULL OR is_household_member(household_id, auth.uid())
+    );
+
+CREATE POLICY "Users can view their own shopping lists"
+    ON shopping_lists
+    FOR SELECT
+    USING (
+    auth.uid() = user_id
+        OR (household_id IS NOT NULL AND is_household_member(household_id, auth.uid()))
+    );
+
+CREATE POLICY "Users can insert shopping lists"
+    ON shopping_lists
+    FOR INSERT
+    WITH CHECK (
+    auth.uid() = user_id
+        OR (household_id IS NOT NULL AND is_household_member(household_id, auth.uid()))
+    );
+
+CREATE POLICY "Users can update shopping lists"
+    ON shopping_lists
+    FOR UPDATE
+    USING (
+    auth.uid() = user_id
+        OR (household_id IS NOT NULL AND is_household_member(household_id, auth.uid()))
+    )
+    WITH CHECK (
+    household_id IS NULL OR is_household_member(household_id, auth.uid())
+    );
+
+CREATE POLICY "Users can view shopping list items"
+    ON shopping_list_items
+    FOR SELECT
+    USING (
+    auth.uid() = user_id
+        OR (household_id IS NOT NULL AND is_household_member(household_id, auth.uid()))
+    );
+
+CREATE POLICY "Users can insert shopping list items"
+    ON shopping_list_items
+    FOR INSERT
+    WITH CHECK (
+    auth.uid() = user_id
+        OR (household_id IS NOT NULL AND is_household_member(household_id, auth.uid()))
+    );
+
+CREATE POLICY "Users can update shopping list items"
+    ON shopping_list_items
+    FOR UPDATE
+    USING (
+    auth.uid() = user_id
+        OR (household_id IS NOT NULL AND is_household_member(household_id, auth.uid()))
+    )
+    WITH CHECK (
+    household_id IS NULL OR is_household_member(household_id, auth.uid())
+    );
+
+CREATE POLICY "Users can view recipe ingredient term overrides"
+    ON recipe_ingredient_term_overrides
+    FOR SELECT
+    USING (
+    auth.uid() = user_id
+        OR (household_id IS NOT NULL AND is_household_member(household_id, auth.uid()))
+    );
+
+CREATE POLICY "Users can insert recipe ingredient term overrides"
+    ON recipe_ingredient_term_overrides
+    FOR INSERT
+    WITH CHECK (
+    auth.uid() = user_id
+        OR (household_id IS NOT NULL AND is_household_member(household_id, auth.uid()))
+    );
+
+CREATE POLICY "Users can update recipe ingredient term overrides"
+    ON recipe_ingredient_term_overrides
+    FOR UPDATE
+    USING (
+    auth.uid() = user_id
+        OR (household_id IS NOT NULL AND is_household_member(household_id, auth.uid()))
+    )
+    WITH CHECK (
+    household_id IS NULL OR is_household_member(household_id, auth.uid())
+    );
+
+CREATE POLICY "Users can delete recipe ingredient term overrides"
+    ON recipe_ingredient_term_overrides
+    FOR DELETE
+    USING (
+    auth.uid() = user_id
+        OR (household_id IS NOT NULL AND is_household_member(household_id, auth.uid()))
+    );

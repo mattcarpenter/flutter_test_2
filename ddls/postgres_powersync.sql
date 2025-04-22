@@ -160,4 +160,83 @@ CREATE INDEX IF NOT EXISTS cooks_user_idx
 CREATE INDEX IF NOT EXISTS cooks_household_idx
     ON public.cooks USING btree (household_id) TABLESPACE pg_default;
 
+-- pantry and shopping list
+
+CREATE TABLE public.pantry_items (
+                                     id uuid NOT NULL DEFAULT extensions.uuid_generate_v4(),
+                                     name text NOT NULL,
+                                     in_stock integer NOT NULL DEFAULT 1,
+                                     user_id uuid NOT NULL,
+                                     household_id uuid NULL,
+                                     created_at bigint NULL,
+                                     updated_at bigint NULL,
+                                     deleted_at bigint NULL,
+                                     CONSTRAINT pantry_items_pkey PRIMARY KEY (id),
+                                     CONSTRAINT pantry_items_user_id_fkey FOREIGN KEY (user_id) REFERENCES auth.users (id) ON DELETE CASCADE,
+                                     CONSTRAINT pantry_items_household_id_fkey FOREIGN KEY (household_id) REFERENCES public.households (id) ON DELETE CASCADE
+);
+
+CREATE INDEX IF NOT EXISTS pantry_items_user_idx ON public.pantry_items (user_id);
+CREATE INDEX IF NOT EXISTS pantry_items_household_idx ON public.pantry_items (household_id);
+
+CREATE TABLE public.recipe_ingredient_term_overrides (
+                                                         id uuid NOT NULL DEFAULT extensions.uuid_generate_v4(),
+                                                         recipe_id uuid NOT NULL,
+                                                         term text NOT NULL,
+                                                         pantry_item_id uuid NOT NULL,
+                                                         user_id uuid NOT NULL,
+                                                         household_id uuid NULL,
+                                                         CONSTRAINT recipe_ingredient_term_overrides_pkey PRIMARY KEY (id),
+                                                         CONSTRAINT recipe_ingredient_term_overrides_recipe_id_fkey FOREIGN KEY (recipe_id) REFERENCES public.recipes (id) ON DELETE CASCADE,
+                                                         CONSTRAINT recipe_ingredient_term_overrides_pantry_item_id_fkey FOREIGN KEY (pantry_item_id) REFERENCES public.pantry_items (id) ON DELETE CASCADE,
+                                                         CONSTRAINT recipe_ingredient_term_overrides_user_id_fkey FOREIGN KEY (user_id) REFERENCES auth.users (id) ON DELETE CASCADE,
+                                                         CONSTRAINT recipe_ingredient_term_overrides_household_id_fkey FOREIGN KEY (household_id) REFERENCES public.households (id) ON DELETE CASCADE
+);
+
+CREATE INDEX IF NOT EXISTS recipe_ingredient_term_overrides_recipe_idx ON public.recipe_ingredient_term_overrides (recipe_id);
+CREATE INDEX IF NOT EXISTS recipe_ingredient_term_overrides_pantry_idx ON public.recipe_ingredient_term_overrides (pantry_item_id);
+CREATE INDEX IF NOT EXISTS recipe_ingredient_term_overrides_user_idx ON public.recipe_ingredient_term_overrides (user_id);
+CREATE INDEX IF NOT EXISTS recipe_ingredient_term_overrides_household_idx ON public.recipe_ingredient_term_overrides (household_id);
+
+CREATE TABLE public.shopping_lists (
+                                       id uuid NOT NULL DEFAULT extensions.uuid_generate_v4(),
+                                       name text NULL,
+                                       user_id uuid NOT NULL,
+                                       household_id uuid NULL,
+                                       created_at bigint NULL,
+                                       updated_at bigint NULL,
+                                       deleted_at bigint NULL,
+                                       CONSTRAINT shopping_lists_pkey PRIMARY KEY (id),
+                                       CONSTRAINT shopping_lists_user_id_fkey FOREIGN KEY (user_id) REFERENCES auth.users (id) ON DELETE CASCADE,
+                                       CONSTRAINT shopping_lists_household_id_fkey FOREIGN KEY (household_id) REFERENCES public.households (id) ON DELETE CASCADE
+);
+
+CREATE INDEX IF NOT EXISTS shopping_lists_user_idx ON public.shopping_lists (user_id);
+CREATE INDEX IF NOT EXISTS shopping_lists_household_idx ON public.shopping_lists (household_id);
+
+CREATE TABLE public.shopping_list_items (
+                                            id uuid NOT NULL DEFAULT extensions.uuid_generate_v4(),
+                                            shopping_list_id uuid NOT NULL,
+                                            name text NOT NULL,
+                                            normalized_terms text NULL,
+                                            source_recipe_id uuid NULL,
+                                            amount double precision NULL,
+                                            unit text NULL,
+                                            bought integer NOT NULL DEFAULT 0,
+                                            user_id uuid NOT NULL,
+                                            household_id uuid NULL,
+                                            created_at bigint NULL,
+                                            updated_at bigint NULL,
+                                            CONSTRAINT shopping_list_items_pkey PRIMARY KEY (id),
+                                            CONSTRAINT shopping_list_items_list_id_fkey FOREIGN KEY (shopping_list_id) REFERENCES public.shopping_lists (id) ON DELETE CASCADE,
+                                            CONSTRAINT shopping_list_items_source_recipe_id_fkey FOREIGN KEY (source_recipe_id) REFERENCES public.recipes (id) ON DELETE CASCADE,
+                                            CONSTRAINT shopping_list_items_user_id_fkey FOREIGN KEY (user_id) REFERENCES auth.users (id) ON DELETE CASCADE,
+                                            CONSTRAINT shopping_list_items_household_id_fkey FOREIGN KEY (household_id) REFERENCES public.households (id) ON DELETE CASCADE
+);
+
+CREATE INDEX IF NOT EXISTS shopping_list_items_list_idx ON public.shopping_list_items (shopping_list_id);
+CREATE INDEX IF NOT EXISTS shopping_list_items_recipe_idx ON public.shopping_list_items (source_recipe_id);
+CREATE INDEX IF NOT EXISTS shopping_list_items_user_idx ON public.shopping_list_items (user_id);
+CREATE INDEX IF NOT EXISTS shopping_list_items_household_idx ON public.shopping_list_items (household_id);
+
 CREATE PUBLICATION powersync FOR ALL TABLES;

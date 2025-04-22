@@ -10,6 +10,10 @@ const recipeFolderSharesTable = 'recipe_folder_shares';
 const recipeFolderAssignmentsTable = 'recipe_folder_assignments';
 const uploadQueuesTable = 'upload_queues';
 const cooksTable = 'cooks';
+const pantryItemsTable = 'pantry_items';
+const recipeIngredientTermOverridesTable = 'recipe_ingredient_term_overrides';
+const shoppingListsTable = 'shopping_lists';
+const shoppingListItemsTable = 'shopping_list_items';
 
 Schema schema = const Schema(([
   Table.localOnly(uploadQueuesTable, [
@@ -20,23 +24,12 @@ Schema schema = const Schema(([
     Column.text('recipe_id'),
   ]),
   Table(recipeFoldersTable, [
-    // Define a text column for the ID.
-    //Column.text('folder_id'),
-    // Define a text column for the folder name.
     Column.text('name'),
-    // Define optional text columns for user, parent, and household associations.
     Column.text('user_id'),
     Column.text('parent_id'),
     Column.text('household_id'),
-    // Define a column for the deletion timestamp. If Powersync doesn’t have a built-in
-    // DateTime column, consider storing the timestamp as ISO8601 text.
     Column.integer('deleted_at'),
-  ]/*,
-  // You can add indexes if you want to enforce uniqueness or speed up lookups.
-  indexes: [
-    // This index on 'id' can help with lookups. (Uniqueness should be enforced in your app.)
-    Index('id_index', [IndexedColumn('folder_id')])
-  ]*/),
+  ]),
   Table(recipesTable, [
     Column.text('title'),
     Column.text('description'),
@@ -50,8 +43,6 @@ Schema schema = const Schema(([
     Column.text('nutrition'),
     Column.text('general_notes'),
     Column.text('user_id'),
-    // Remove folder_id from recipes (or ignore it) – we'll use the mapping table.
-    // Column.text('folder_id'),
     Column.text('household_id'),
     Column.integer('created_at'),
     Column.integer('updated_at'),
@@ -60,20 +51,14 @@ Schema schema = const Schema(([
     Column.text('steps'),
     Column.text('folder_ids'),
     Column.text('images'),
-  ]/*, indexes: [...] */),
+  ]),
   Table(householdsTable, [
-    // Household name.
     Column.text('name'),
-    // The owner/creator user id.
     Column.text('user_id'),
-    // You can add additional columns (e.g. created_at) if desired.
   ]),
   Table(householdMembersTable, [
-    // The household id.
     Column.text('household_id'),
-    // The user id.
     Column.text('user_id'),
-    // Active flag: 1 (active) or 0 (inactive)
     Column.integer('is_active'),
   ]),
   Table(recipeSharesTable, [
@@ -96,11 +81,48 @@ Schema schema = const Schema(([
     Column.text('household_id'),
     Column.text('recipe_name'),
     Column.integer('current_step_index'),
-    Column.text('status'), // Stored values: 'in_progress', 'finished', 'discarded'
+    Column.text('status'),
     Column.integer('started_at'),
     Column.integer('finished_at'),
     Column.integer('updated_at'),
     Column.integer('rating'),
     Column.text('notes'),
+  ]),
+  Table(pantryItemsTable, [
+    Column.text('name'),
+    Column.integer('in_stock'),
+    Column.text('user_id'),
+    Column.text('household_id'),
+    Column.integer('created_at'),
+    Column.integer('updated_at'),
+    Column.integer('deleted_at'),
+  ]),
+  Table(recipeIngredientTermOverridesTable, [
+    Column.text('recipe_id'),
+    Column.text('term'),
+    Column.text('pantry_item_id'),
+    Column.text('user_id'),
+    Column.text('household_id'),
+  ]),
+  Table(shoppingListsTable, [
+    Column.text('name'),
+    Column.text('user_id'),
+    Column.text('household_id'),
+    Column.integer('created_at'),
+    Column.integer('updated_at'),
+    Column.integer('deleted_at'),
+  ]),
+  Table(shoppingListItemsTable, [
+    Column.text('shopping_list_id'),
+    Column.text('name'),
+    Column.text('normalized_terms'),
+    Column.text('source_recipe_id'),
+    Column.real('amount'),
+    Column.text('unit'),
+    Column.integer('bought'),
+    Column.integer('created_at'),
+    Column.integer('updated_at'),
+    Column.text('user_id'),
+    Column.text('household_id'),
   ]),
 ]));

@@ -134,6 +134,7 @@ A new Flutter project.
   - [X] Tap search result to navigate to recipe
 - [ ] Bugs
   - [ ] Image bug (does not show in recipe detail page when anonymous)
+  - [ ] user_household_shares has no RLS policies. RLS currently disabled
 - [ ] Inventory epic
 - [ ] Tags Epic
 - [ ] Shopping List Epic
