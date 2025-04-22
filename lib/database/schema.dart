@@ -103,6 +103,8 @@ Schema schema = const Schema(([
     Column.text('pantry_item_id'),
     Column.text('user_id'),
     Column.text('household_id'),
+    Column.integer('deleted_at'),
+    Column.integer('created_at'),
   ]),
   Table(shoppingListsTable, [
     Column.text('name'),
@@ -122,6 +124,7 @@ Schema schema = const Schema(([
     Column.integer('bought'),
     Column.integer('created_at'),
     Column.integer('updated_at'),
+    Column.integer('deleted_at'),
     Column.text('user_id'),
     Column.text('household_id'),
   ]),

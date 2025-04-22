@@ -8,7 +8,7 @@ class PantryItems extends Table {
 
   TextColumn get name       => text()();                     // “Kewpie Mayo”
   BoolColumn  get inStock   => boolean().withDefault(const Constant(true))();
-  TextColumn  get userId    => text()();                     // or householdId if multi‑tenant
+  TextColumn  get userId    => text().nullable()();                     // or householdId if multi‑tenant
   TextColumn  get householdId => text().nullable()();
 
   IntColumn   get createdAt => integer().nullable()();

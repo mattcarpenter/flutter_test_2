@@ -3102,8 +3102,8 @@ class $PantryItemsTable extends PantryItems
   static const VerificationMeta _userIdMeta = const VerificationMeta('userId');
   @override
   late final GeneratedColumn<String> userId = GeneratedColumn<String>(
-      'user_id', aliasedName, false,
-      type: DriftSqlType.string, requiredDuringInsert: true);
+      'user_id', aliasedName, true,
+      type: DriftSqlType.string, requiredDuringInsert: false);
   static const VerificationMeta _householdIdMeta =
       const VerificationMeta('householdId');
   @override
@@ -3157,8 +3157,6 @@ class $PantryItemsTable extends PantryItems
     if (data.containsKey('user_id')) {
       context.handle(_userIdMeta,
           userId.isAcceptableOrUnknown(data['user_id']!, _userIdMeta));
-    } else if (isInserting) {
-      context.missing(_userIdMeta);
     }
     if (data.containsKey('household_id')) {
       context.handle(
@@ -3194,7 +3192,7 @@ class $PantryItemsTable extends PantryItems
       inStock: attachedDatabase.typeMapping
           .read(DriftSqlType.bool, data['${effectivePrefix}in_stock'])!,
       userId: attachedDatabase.typeMapping
-          .read(DriftSqlType.string, data['${effectivePrefix}user_id'])!,
+          .read(DriftSqlType.string, data['${effectivePrefix}user_id']),
       householdId: attachedDatabase.typeMapping
           .read(DriftSqlType.string, data['${effectivePrefix}household_id']),
       createdAt: attachedDatabase.typeMapping
@@ -3216,7 +3214,7 @@ class PantryItemEntry extends DataClass implements Insertable<PantryItemEntry> {
   final String id;
   final String name;
   final bool inStock;
-  final String userId;
+  final String? userId;
   final String? householdId;
   final int? createdAt;
   final int? updatedAt;
@@ -3225,7 +3223,7 @@ class PantryItemEntry extends DataClass implements Insertable<PantryItemEntry> {
       {required this.id,
       required this.name,
       required this.inStock,
-      required this.userId,
+      this.userId,
       this.householdId,
       this.createdAt,
       this.updatedAt,
@@ -3236,7 +3234,9 @@ class PantryItemEntry extends DataClass implements Insertable<PantryItemEntry> {
     map['id'] = Variable<String>(id);
     map['name'] = Variable<String>(name);
     map['in_stock'] = Variable<bool>(inStock);
-    map['user_id'] = Variable<String>(userId);
+    if (!nullToAbsent || userId != null) {
+      map['user_id'] = Variable<String>(userId);
+    }
     if (!nullToAbsent || householdId != null) {
       map['household_id'] = Variable<String>(householdId);
     }
@@ -3257,7 +3257,8 @@ class PantryItemEntry extends DataClass implements Insertable<PantryItemEntry> {
       id: Value(id),
       name: Value(name),
       inStock: Value(inStock),
-      userId: Value(userId),
+      userId:
+          userId == null && nullToAbsent ? const Value.absent() : Value(userId),
       householdId: householdId == null && nullToAbsent
           ? const Value.absent()
           : Value(householdId),
@@ -3280,7 +3281,7 @@ class PantryItemEntry extends DataClass implements Insertable<PantryItemEntry> {
       id: serializer.fromJson<String>(json['id']),
       name: serializer.fromJson<String>(json['name']),
       inStock: serializer.fromJson<bool>(json['inStock']),
-      userId: serializer.fromJson<String>(json['userId']),
+      userId: serializer.fromJson<String?>(json['userId']),
       householdId: serializer.fromJson<String?>(json['householdId']),
       createdAt: serializer.fromJson<int?>(json['createdAt']),
       updatedAt: serializer.fromJson<int?>(json['updatedAt']),
@@ -3294,7 +3295,7 @@ class PantryItemEntry extends DataClass implements Insertable<PantryItemEntry> {
       'id': serializer.toJson<String>(id),
       'name': serializer.toJson<String>(name),
       'inStock': serializer.toJson<bool>(inStock),
-      'userId': serializer.toJson<String>(userId),
+      'userId': serializer.toJson<String?>(userId),
       'householdId': serializer.toJson<String?>(householdId),
       'createdAt': serializer.toJson<int?>(createdAt),
       'updatedAt': serializer.toJson<int?>(updatedAt),
@@ -3306,7 +3307,7 @@ class PantryItemEntry extends DataClass implements Insertable<PantryItemEntry> {
           {String? id,
           String? name,
           bool? inStock,
-          String? userId,
+          Value<String?> userId = const Value.absent(),
           Value<String?> householdId = const Value.absent(),
           Value<int?> createdAt = const Value.absent(),
           Value<int?> updatedAt = const Value.absent(),
@@ -3315,7 +3316,7 @@ class PantryItemEntry extends DataClass implements Insertable<PantryItemEntry> {
         id: id ?? this.id,
         name: name ?? this.name,
         inStock: inStock ?? this.inStock,
-        userId: userId ?? this.userId,
+        userId: userId.present ? userId.value : this.userId,
         householdId: householdId.present ? householdId.value : this.householdId,
         createdAt: createdAt.present ? createdAt.value : this.createdAt,
         updatedAt: updatedAt.present ? updatedAt.value : this.updatedAt,
@@ -3371,7 +3372,7 @@ class PantryItemsCompanion extends UpdateCompanion<PantryItemEntry> {
   final Value<String> id;
   final Value<String> name;
   final Value<bool> inStock;
-  final Value<String> userId;
+  final Value<String?> userId;
   final Value<String?> householdId;
   final Value<int?> createdAt;
   final Value<int?> updatedAt;
@@ -3392,14 +3393,13 @@ class PantryItemsCompanion extends UpdateCompanion<PantryItemEntry> {
     this.id = const Value.absent(),
     required String name,
     this.inStock = const Value.absent(),
-    required String userId,
+    this.userId = const Value.absent(),
     this.householdId = const Value.absent(),
     this.createdAt = const Value.absent(),
     this.updatedAt = const Value.absent(),
     this.deletedAt = const Value.absent(),
     this.rowid = const Value.absent(),
-  })  : name = Value(name),
-        userId = Value(userId);
+  }) : name = Value(name);
   static Insertable<PantryItemEntry> custom({
     Expression<String>? id,
     Expression<String>? name,
@@ -3428,7 +3428,7 @@ class PantryItemsCompanion extends UpdateCompanion<PantryItemEntry> {
       {Value<String>? id,
       Value<String>? name,
       Value<bool>? inStock,
-      Value<String>? userId,
+      Value<String?>? userId,
       Value<String?>? householdId,
       Value<int?>? createdAt,
       Value<int?>? updatedAt,
@@ -3525,17 +3525,29 @@ class $RecipeIngredientTermOverridesTable extends RecipeIngredientTermOverrides
   static const VerificationMeta _userIdMeta = const VerificationMeta('userId');
   @override
   late final GeneratedColumn<String> userId = GeneratedColumn<String>(
-      'user_id', aliasedName, false,
-      type: DriftSqlType.string, requiredDuringInsert: true);
+      'user_id', aliasedName, true,
+      type: DriftSqlType.string, requiredDuringInsert: false);
   static const VerificationMeta _householdIdMeta =
       const VerificationMeta('householdId');
   @override
   late final GeneratedColumn<String> householdId = GeneratedColumn<String>(
       'household_id', aliasedName, true,
       type: DriftSqlType.string, requiredDuringInsert: false);
+  static const VerificationMeta _deletedAtMeta =
+      const VerificationMeta('deletedAt');
+  @override
+  late final GeneratedColumn<int> deletedAt = GeneratedColumn<int>(
+      'deleted_at', aliasedName, true,
+      type: DriftSqlType.int, requiredDuringInsert: false);
+  static const VerificationMeta _createdAtMeta =
+      const VerificationMeta('createdAt');
+  @override
+  late final GeneratedColumn<int> createdAt = GeneratedColumn<int>(
+      'created_at', aliasedName, true,
+      type: DriftSqlType.int, requiredDuringInsert: false);
   @override
   List<GeneratedColumn> get $columns =>
-      [recipeId, term, pantryItemId, userId, householdId];
+      [recipeId, term, pantryItemId, userId, householdId, deletedAt, createdAt];
   @override
   String get aliasedName => _alias ?? actualTableName;
   @override
@@ -3570,14 +3582,20 @@ class $RecipeIngredientTermOverridesTable extends RecipeIngredientTermOverrides
     if (data.containsKey('user_id')) {
       context.handle(_userIdMeta,
           userId.isAcceptableOrUnknown(data['user_id']!, _userIdMeta));
-    } else if (isInserting) {
-      context.missing(_userIdMeta);
     }
     if (data.containsKey('household_id')) {
       context.handle(
           _householdIdMeta,
           householdId.isAcceptableOrUnknown(
               data['household_id']!, _householdIdMeta));
+    }
+    if (data.containsKey('deleted_at')) {
+      context.handle(_deletedAtMeta,
+          deletedAt.isAcceptableOrUnknown(data['deleted_at']!, _deletedAtMeta));
+    }
+    if (data.containsKey('created_at')) {
+      context.handle(_createdAtMeta,
+          createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta));
     }
     return context;
   }
@@ -3596,9 +3614,13 @@ class $RecipeIngredientTermOverridesTable extends RecipeIngredientTermOverrides
       pantryItemId: attachedDatabase.typeMapping
           .read(DriftSqlType.string, data['${effectivePrefix}pantry_item_id'])!,
       userId: attachedDatabase.typeMapping
-          .read(DriftSqlType.string, data['${effectivePrefix}user_id'])!,
+          .read(DriftSqlType.string, data['${effectivePrefix}user_id']),
       householdId: attachedDatabase.typeMapping
           .read(DriftSqlType.string, data['${effectivePrefix}household_id']),
+      deletedAt: attachedDatabase.typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}deleted_at']),
+      createdAt: attachedDatabase.typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}created_at']),
     );
   }
 
@@ -3613,23 +3635,35 @@ class RecipeIngredientTermOverrideEntry extends DataClass
   final String recipeId;
   final String term;
   final String pantryItemId;
-  final String userId;
+  final String? userId;
   final String? householdId;
+  final int? deletedAt;
+  final int? createdAt;
   const RecipeIngredientTermOverrideEntry(
       {required this.recipeId,
       required this.term,
       required this.pantryItemId,
-      required this.userId,
-      this.householdId});
+      this.userId,
+      this.householdId,
+      this.deletedAt,
+      this.createdAt});
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
     map['recipe_id'] = Variable<String>(recipeId);
     map['term'] = Variable<String>(term);
     map['pantry_item_id'] = Variable<String>(pantryItemId);
-    map['user_id'] = Variable<String>(userId);
+    if (!nullToAbsent || userId != null) {
+      map['user_id'] = Variable<String>(userId);
+    }
     if (!nullToAbsent || householdId != null) {
       map['household_id'] = Variable<String>(householdId);
+    }
+    if (!nullToAbsent || deletedAt != null) {
+      map['deleted_at'] = Variable<int>(deletedAt);
+    }
+    if (!nullToAbsent || createdAt != null) {
+      map['created_at'] = Variable<int>(createdAt);
     }
     return map;
   }
@@ -3639,10 +3673,17 @@ class RecipeIngredientTermOverrideEntry extends DataClass
       recipeId: Value(recipeId),
       term: Value(term),
       pantryItemId: Value(pantryItemId),
-      userId: Value(userId),
+      userId:
+          userId == null && nullToAbsent ? const Value.absent() : Value(userId),
       householdId: householdId == null && nullToAbsent
           ? const Value.absent()
           : Value(householdId),
+      deletedAt: deletedAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(deletedAt),
+      createdAt: createdAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(createdAt),
     );
   }
 
@@ -3653,8 +3694,10 @@ class RecipeIngredientTermOverrideEntry extends DataClass
       recipeId: serializer.fromJson<String>(json['recipeId']),
       term: serializer.fromJson<String>(json['term']),
       pantryItemId: serializer.fromJson<String>(json['pantryItemId']),
-      userId: serializer.fromJson<String>(json['userId']),
+      userId: serializer.fromJson<String?>(json['userId']),
       householdId: serializer.fromJson<String?>(json['householdId']),
+      deletedAt: serializer.fromJson<int?>(json['deletedAt']),
+      createdAt: serializer.fromJson<int?>(json['createdAt']),
     );
   }
   @override
@@ -3664,8 +3707,10 @@ class RecipeIngredientTermOverrideEntry extends DataClass
       'recipeId': serializer.toJson<String>(recipeId),
       'term': serializer.toJson<String>(term),
       'pantryItemId': serializer.toJson<String>(pantryItemId),
-      'userId': serializer.toJson<String>(userId),
+      'userId': serializer.toJson<String?>(userId),
       'householdId': serializer.toJson<String?>(householdId),
+      'deletedAt': serializer.toJson<int?>(deletedAt),
+      'createdAt': serializer.toJson<int?>(createdAt),
     };
   }
 
@@ -3673,14 +3718,18 @@ class RecipeIngredientTermOverrideEntry extends DataClass
           {String? recipeId,
           String? term,
           String? pantryItemId,
-          String? userId,
-          Value<String?> householdId = const Value.absent()}) =>
+          Value<String?> userId = const Value.absent(),
+          Value<String?> householdId = const Value.absent(),
+          Value<int?> deletedAt = const Value.absent(),
+          Value<int?> createdAt = const Value.absent()}) =>
       RecipeIngredientTermOverrideEntry(
         recipeId: recipeId ?? this.recipeId,
         term: term ?? this.term,
         pantryItemId: pantryItemId ?? this.pantryItemId,
-        userId: userId ?? this.userId,
+        userId: userId.present ? userId.value : this.userId,
         householdId: householdId.present ? householdId.value : this.householdId,
+        deletedAt: deletedAt.present ? deletedAt.value : this.deletedAt,
+        createdAt: createdAt.present ? createdAt.value : this.createdAt,
       );
   RecipeIngredientTermOverrideEntry copyWithCompanion(
       RecipeIngredientTermOverridesCompanion data) {
@@ -3693,6 +3742,8 @@ class RecipeIngredientTermOverrideEntry extends DataClass
       userId: data.userId.present ? data.userId.value : this.userId,
       householdId:
           data.householdId.present ? data.householdId.value : this.householdId,
+      deletedAt: data.deletedAt.present ? data.deletedAt.value : this.deletedAt,
+      createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
     );
   }
 
@@ -3703,14 +3754,16 @@ class RecipeIngredientTermOverrideEntry extends DataClass
           ..write('term: $term, ')
           ..write('pantryItemId: $pantryItemId, ')
           ..write('userId: $userId, ')
-          ..write('householdId: $householdId')
+          ..write('householdId: $householdId, ')
+          ..write('deletedAt: $deletedAt, ')
+          ..write('createdAt: $createdAt')
           ..write(')'))
         .toString();
   }
 
   @override
-  int get hashCode =>
-      Object.hash(recipeId, term, pantryItemId, userId, householdId);
+  int get hashCode => Object.hash(
+      recipeId, term, pantryItemId, userId, householdId, deletedAt, createdAt);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -3719,7 +3772,9 @@ class RecipeIngredientTermOverrideEntry extends DataClass
           other.term == this.term &&
           other.pantryItemId == this.pantryItemId &&
           other.userId == this.userId &&
-          other.householdId == this.householdId);
+          other.householdId == this.householdId &&
+          other.deletedAt == this.deletedAt &&
+          other.createdAt == this.createdAt);
 }
 
 class RecipeIngredientTermOverridesCompanion
@@ -3727,8 +3782,10 @@ class RecipeIngredientTermOverridesCompanion
   final Value<String> recipeId;
   final Value<String> term;
   final Value<String> pantryItemId;
-  final Value<String> userId;
+  final Value<String?> userId;
   final Value<String?> householdId;
+  final Value<int?> deletedAt;
+  final Value<int?> createdAt;
   final Value<int> rowid;
   const RecipeIngredientTermOverridesCompanion({
     this.recipeId = const Value.absent(),
@@ -3736,25 +3793,30 @@ class RecipeIngredientTermOverridesCompanion
     this.pantryItemId = const Value.absent(),
     this.userId = const Value.absent(),
     this.householdId = const Value.absent(),
+    this.deletedAt = const Value.absent(),
+    this.createdAt = const Value.absent(),
     this.rowid = const Value.absent(),
   });
   RecipeIngredientTermOverridesCompanion.insert({
     required String recipeId,
     required String term,
     required String pantryItemId,
-    required String userId,
+    this.userId = const Value.absent(),
     this.householdId = const Value.absent(),
+    this.deletedAt = const Value.absent(),
+    this.createdAt = const Value.absent(),
     this.rowid = const Value.absent(),
   })  : recipeId = Value(recipeId),
         term = Value(term),
-        pantryItemId = Value(pantryItemId),
-        userId = Value(userId);
+        pantryItemId = Value(pantryItemId);
   static Insertable<RecipeIngredientTermOverrideEntry> custom({
     Expression<String>? recipeId,
     Expression<String>? term,
     Expression<String>? pantryItemId,
     Expression<String>? userId,
     Expression<String>? householdId,
+    Expression<int>? deletedAt,
+    Expression<int>? createdAt,
     Expression<int>? rowid,
   }) {
     return RawValuesInsertable({
@@ -3763,6 +3825,8 @@ class RecipeIngredientTermOverridesCompanion
       if (pantryItemId != null) 'pantry_item_id': pantryItemId,
       if (userId != null) 'user_id': userId,
       if (householdId != null) 'household_id': householdId,
+      if (deletedAt != null) 'deleted_at': deletedAt,
+      if (createdAt != null) 'created_at': createdAt,
       if (rowid != null) 'rowid': rowid,
     });
   }
@@ -3771,8 +3835,10 @@ class RecipeIngredientTermOverridesCompanion
       {Value<String>? recipeId,
       Value<String>? term,
       Value<String>? pantryItemId,
-      Value<String>? userId,
+      Value<String?>? userId,
       Value<String?>? householdId,
+      Value<int?>? deletedAt,
+      Value<int?>? createdAt,
       Value<int>? rowid}) {
     return RecipeIngredientTermOverridesCompanion(
       recipeId: recipeId ?? this.recipeId,
@@ -3780,6 +3846,8 @@ class RecipeIngredientTermOverridesCompanion
       pantryItemId: pantryItemId ?? this.pantryItemId,
       userId: userId ?? this.userId,
       householdId: householdId ?? this.householdId,
+      deletedAt: deletedAt ?? this.deletedAt,
+      createdAt: createdAt ?? this.createdAt,
       rowid: rowid ?? this.rowid,
     );
   }
@@ -3802,6 +3870,12 @@ class RecipeIngredientTermOverridesCompanion
     if (householdId.present) {
       map['household_id'] = Variable<String>(householdId.value);
     }
+    if (deletedAt.present) {
+      map['deleted_at'] = Variable<int>(deletedAt.value);
+    }
+    if (createdAt.present) {
+      map['created_at'] = Variable<int>(createdAt.value);
+    }
     if (rowid.present) {
       map['rowid'] = Variable<int>(rowid.value);
     }
@@ -3816,6 +3890,8 @@ class RecipeIngredientTermOverridesCompanion
           ..write('pantryItemId: $pantryItemId, ')
           ..write('userId: $userId, ')
           ..write('householdId: $householdId, ')
+          ..write('deletedAt: $deletedAt, ')
+          ..write('createdAt: $createdAt, ')
           ..write('rowid: $rowid')
           ..write(')'))
         .toString();
@@ -3883,8 +3959,8 @@ class $ShoppingListItemsTable extends ShoppingListItems
   static const VerificationMeta _userIdMeta = const VerificationMeta('userId');
   @override
   late final GeneratedColumn<String> userId = GeneratedColumn<String>(
-      'user_id', aliasedName, false,
-      type: DriftSqlType.string, requiredDuringInsert: true);
+      'user_id', aliasedName, true,
+      type: DriftSqlType.string, requiredDuringInsert: false);
   static const VerificationMeta _householdIdMeta =
       const VerificationMeta('householdId');
   @override
@@ -3903,6 +3979,12 @@ class $ShoppingListItemsTable extends ShoppingListItems
   late final GeneratedColumn<int> updatedAt = GeneratedColumn<int>(
       'updated_at', aliasedName, true,
       type: DriftSqlType.int, requiredDuringInsert: false);
+  static const VerificationMeta _deletedAtMeta =
+      const VerificationMeta('deletedAt');
+  @override
+  late final GeneratedColumn<int> deletedAt = GeneratedColumn<int>(
+      'deleted_at', aliasedName, true,
+      type: DriftSqlType.int, requiredDuringInsert: false);
   @override
   List<GeneratedColumn> get $columns => [
         id,
@@ -3916,7 +3998,8 @@ class $ShoppingListItemsTable extends ShoppingListItems
         userId,
         householdId,
         createdAt,
-        updatedAt
+        updatedAt,
+        deletedAt
       ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -3968,8 +4051,6 @@ class $ShoppingListItemsTable extends ShoppingListItems
     if (data.containsKey('user_id')) {
       context.handle(_userIdMeta,
           userId.isAcceptableOrUnknown(data['user_id']!, _userIdMeta));
-    } else if (isInserting) {
-      context.missing(_userIdMeta);
     }
     if (data.containsKey('household_id')) {
       context.handle(
@@ -3984,6 +4065,10 @@ class $ShoppingListItemsTable extends ShoppingListItems
     if (data.containsKey('updated_at')) {
       context.handle(_updatedAtMeta,
           updatedAt.isAcceptableOrUnknown(data['updated_at']!, _updatedAtMeta));
+    }
+    if (data.containsKey('deleted_at')) {
+      context.handle(_deletedAtMeta,
+          deletedAt.isAcceptableOrUnknown(data['deleted_at']!, _deletedAtMeta));
     }
     return context;
   }
@@ -4012,13 +4097,15 @@ class $ShoppingListItemsTable extends ShoppingListItems
       bought: attachedDatabase.typeMapping
           .read(DriftSqlType.bool, data['${effectivePrefix}bought'])!,
       userId: attachedDatabase.typeMapping
-          .read(DriftSqlType.string, data['${effectivePrefix}user_id'])!,
+          .read(DriftSqlType.string, data['${effectivePrefix}user_id']),
       householdId: attachedDatabase.typeMapping
           .read(DriftSqlType.string, data['${effectivePrefix}household_id']),
       createdAt: attachedDatabase.typeMapping
           .read(DriftSqlType.int, data['${effectivePrefix}created_at']),
       updatedAt: attachedDatabase.typeMapping
           .read(DriftSqlType.int, data['${effectivePrefix}updated_at']),
+      deletedAt: attachedDatabase.typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}deleted_at']),
     );
   }
 
@@ -4043,10 +4130,11 @@ class ShoppingListItemEntry extends DataClass
   final double? amount;
   final String? unit;
   final bool bought;
-  final String userId;
+  final String? userId;
   final String? householdId;
   final int? createdAt;
   final int? updatedAt;
+  final int? deletedAt;
   const ShoppingListItemEntry(
       {required this.id,
       required this.shoppingListId,
@@ -4056,10 +4144,11 @@ class ShoppingListItemEntry extends DataClass
       this.amount,
       this.unit,
       required this.bought,
-      required this.userId,
+      this.userId,
       this.householdId,
       this.createdAt,
-      this.updatedAt});
+      this.updatedAt,
+      this.deletedAt});
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
@@ -4081,7 +4170,9 @@ class ShoppingListItemEntry extends DataClass
       map['unit'] = Variable<String>(unit);
     }
     map['bought'] = Variable<bool>(bought);
-    map['user_id'] = Variable<String>(userId);
+    if (!nullToAbsent || userId != null) {
+      map['user_id'] = Variable<String>(userId);
+    }
     if (!nullToAbsent || householdId != null) {
       map['household_id'] = Variable<String>(householdId);
     }
@@ -4090,6 +4181,9 @@ class ShoppingListItemEntry extends DataClass
     }
     if (!nullToAbsent || updatedAt != null) {
       map['updated_at'] = Variable<int>(updatedAt);
+    }
+    if (!nullToAbsent || deletedAt != null) {
+      map['deleted_at'] = Variable<int>(deletedAt);
     }
     return map;
   }
@@ -4109,7 +4203,8 @@ class ShoppingListItemEntry extends DataClass
           amount == null && nullToAbsent ? const Value.absent() : Value(amount),
       unit: unit == null && nullToAbsent ? const Value.absent() : Value(unit),
       bought: Value(bought),
-      userId: Value(userId),
+      userId:
+          userId == null && nullToAbsent ? const Value.absent() : Value(userId),
       householdId: householdId == null && nullToAbsent
           ? const Value.absent()
           : Value(householdId),
@@ -4119,6 +4214,9 @@ class ShoppingListItemEntry extends DataClass
       updatedAt: updatedAt == null && nullToAbsent
           ? const Value.absent()
           : Value(updatedAt),
+      deletedAt: deletedAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(deletedAt),
     );
   }
 
@@ -4135,10 +4233,11 @@ class ShoppingListItemEntry extends DataClass
       amount: serializer.fromJson<double?>(json['amount']),
       unit: serializer.fromJson<String?>(json['unit']),
       bought: serializer.fromJson<bool>(json['bought']),
-      userId: serializer.fromJson<String>(json['userId']),
+      userId: serializer.fromJson<String?>(json['userId']),
       householdId: serializer.fromJson<String?>(json['householdId']),
       createdAt: serializer.fromJson<int?>(json['createdAt']),
       updatedAt: serializer.fromJson<int?>(json['updatedAt']),
+      deletedAt: serializer.fromJson<int?>(json['deletedAt']),
     );
   }
   @override
@@ -4153,10 +4252,11 @@ class ShoppingListItemEntry extends DataClass
       'amount': serializer.toJson<double?>(amount),
       'unit': serializer.toJson<String?>(unit),
       'bought': serializer.toJson<bool>(bought),
-      'userId': serializer.toJson<String>(userId),
+      'userId': serializer.toJson<String?>(userId),
       'householdId': serializer.toJson<String?>(householdId),
       'createdAt': serializer.toJson<int?>(createdAt),
       'updatedAt': serializer.toJson<int?>(updatedAt),
+      'deletedAt': serializer.toJson<int?>(deletedAt),
     };
   }
 
@@ -4169,10 +4269,11 @@ class ShoppingListItemEntry extends DataClass
           Value<double?> amount = const Value.absent(),
           Value<String?> unit = const Value.absent(),
           bool? bought,
-          String? userId,
+          Value<String?> userId = const Value.absent(),
           Value<String?> householdId = const Value.absent(),
           Value<int?> createdAt = const Value.absent(),
-          Value<int?> updatedAt = const Value.absent()}) =>
+          Value<int?> updatedAt = const Value.absent(),
+          Value<int?> deletedAt = const Value.absent()}) =>
       ShoppingListItemEntry(
         id: id ?? this.id,
         shoppingListId: shoppingListId ?? this.shoppingListId,
@@ -4185,10 +4286,11 @@ class ShoppingListItemEntry extends DataClass
         amount: amount.present ? amount.value : this.amount,
         unit: unit.present ? unit.value : this.unit,
         bought: bought ?? this.bought,
-        userId: userId ?? this.userId,
+        userId: userId.present ? userId.value : this.userId,
         householdId: householdId.present ? householdId.value : this.householdId,
         createdAt: createdAt.present ? createdAt.value : this.createdAt,
         updatedAt: updatedAt.present ? updatedAt.value : this.updatedAt,
+        deletedAt: deletedAt.present ? deletedAt.value : this.deletedAt,
       );
   ShoppingListItemEntry copyWithCompanion(ShoppingListItemsCompanion data) {
     return ShoppingListItemEntry(
@@ -4211,6 +4313,7 @@ class ShoppingListItemEntry extends DataClass
           data.householdId.present ? data.householdId.value : this.householdId,
       createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
       updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
+      deletedAt: data.deletedAt.present ? data.deletedAt.value : this.deletedAt,
     );
   }
 
@@ -4228,7 +4331,8 @@ class ShoppingListItemEntry extends DataClass
           ..write('userId: $userId, ')
           ..write('householdId: $householdId, ')
           ..write('createdAt: $createdAt, ')
-          ..write('updatedAt: $updatedAt')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('deletedAt: $deletedAt')
           ..write(')'))
         .toString();
   }
@@ -4246,7 +4350,8 @@ class ShoppingListItemEntry extends DataClass
       userId,
       householdId,
       createdAt,
-      updatedAt);
+      updatedAt,
+      deletedAt);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -4262,7 +4367,8 @@ class ShoppingListItemEntry extends DataClass
           other.userId == this.userId &&
           other.householdId == this.householdId &&
           other.createdAt == this.createdAt &&
-          other.updatedAt == this.updatedAt);
+          other.updatedAt == this.updatedAt &&
+          other.deletedAt == this.deletedAt);
 }
 
 class ShoppingListItemsCompanion
@@ -4275,10 +4381,11 @@ class ShoppingListItemsCompanion
   final Value<double?> amount;
   final Value<String?> unit;
   final Value<bool> bought;
-  final Value<String> userId;
+  final Value<String?> userId;
   final Value<String?> householdId;
   final Value<int?> createdAt;
   final Value<int?> updatedAt;
+  final Value<int?> deletedAt;
   final Value<int> rowid;
   const ShoppingListItemsCompanion({
     this.id = const Value.absent(),
@@ -4293,6 +4400,7 @@ class ShoppingListItemsCompanion
     this.householdId = const Value.absent(),
     this.createdAt = const Value.absent(),
     this.updatedAt = const Value.absent(),
+    this.deletedAt = const Value.absent(),
     this.rowid = const Value.absent(),
   });
   ShoppingListItemsCompanion.insert({
@@ -4304,14 +4412,14 @@ class ShoppingListItemsCompanion
     this.amount = const Value.absent(),
     this.unit = const Value.absent(),
     this.bought = const Value.absent(),
-    required String userId,
+    this.userId = const Value.absent(),
     this.householdId = const Value.absent(),
     this.createdAt = const Value.absent(),
     this.updatedAt = const Value.absent(),
+    this.deletedAt = const Value.absent(),
     this.rowid = const Value.absent(),
   })  : shoppingListId = Value(shoppingListId),
-        name = Value(name),
-        userId = Value(userId);
+        name = Value(name);
   static Insertable<ShoppingListItemEntry> custom({
     Expression<String>? id,
     Expression<String>? shoppingListId,
@@ -4325,6 +4433,7 @@ class ShoppingListItemsCompanion
     Expression<String>? householdId,
     Expression<int>? createdAt,
     Expression<int>? updatedAt,
+    Expression<int>? deletedAt,
     Expression<int>? rowid,
   }) {
     return RawValuesInsertable({
@@ -4340,6 +4449,7 @@ class ShoppingListItemsCompanion
       if (householdId != null) 'household_id': householdId,
       if (createdAt != null) 'created_at': createdAt,
       if (updatedAt != null) 'updated_at': updatedAt,
+      if (deletedAt != null) 'deleted_at': deletedAt,
       if (rowid != null) 'rowid': rowid,
     });
   }
@@ -4353,10 +4463,11 @@ class ShoppingListItemsCompanion
       Value<double?>? amount,
       Value<String?>? unit,
       Value<bool>? bought,
-      Value<String>? userId,
+      Value<String?>? userId,
       Value<String?>? householdId,
       Value<int?>? createdAt,
       Value<int?>? updatedAt,
+      Value<int?>? deletedAt,
       Value<int>? rowid}) {
     return ShoppingListItemsCompanion(
       id: id ?? this.id,
@@ -4371,6 +4482,7 @@ class ShoppingListItemsCompanion
       householdId: householdId ?? this.householdId,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
+      deletedAt: deletedAt ?? this.deletedAt,
       rowid: rowid ?? this.rowid,
     );
   }
@@ -4416,6 +4528,9 @@ class ShoppingListItemsCompanion
     if (updatedAt.present) {
       map['updated_at'] = Variable<int>(updatedAt.value);
     }
+    if (deletedAt.present) {
+      map['deleted_at'] = Variable<int>(deletedAt.value);
+    }
     if (rowid.present) {
       map['rowid'] = Variable<int>(rowid.value);
     }
@@ -4437,6 +4552,7 @@ class ShoppingListItemsCompanion
           ..write('householdId: $householdId, ')
           ..write('createdAt: $createdAt, ')
           ..write('updatedAt: $updatedAt, ')
+          ..write('deletedAt: $deletedAt, ')
           ..write('rowid: $rowid')
           ..write(')'))
         .toString();
@@ -4464,8 +4580,8 @@ class $ShoppingListsTable extends ShoppingLists
   static const VerificationMeta _userIdMeta = const VerificationMeta('userId');
   @override
   late final GeneratedColumn<String> userId = GeneratedColumn<String>(
-      'user_id', aliasedName, false,
-      type: DriftSqlType.string, requiredDuringInsert: true);
+      'user_id', aliasedName, true,
+      type: DriftSqlType.string, requiredDuringInsert: false);
   static const VerificationMeta _householdIdMeta =
       const VerificationMeta('householdId');
   @override
@@ -4484,9 +4600,15 @@ class $ShoppingListsTable extends ShoppingLists
   late final GeneratedColumn<int> updatedAt = GeneratedColumn<int>(
       'updated_at', aliasedName, true,
       type: DriftSqlType.int, requiredDuringInsert: false);
+  static const VerificationMeta _deletedAtMeta =
+      const VerificationMeta('deletedAt');
+  @override
+  late final GeneratedColumn<int> deletedAt = GeneratedColumn<int>(
+      'deleted_at', aliasedName, true,
+      type: DriftSqlType.int, requiredDuringInsert: false);
   @override
   List<GeneratedColumn> get $columns =>
-      [id, name, userId, householdId, createdAt, updatedAt];
+      [id, name, userId, householdId, createdAt, updatedAt, deletedAt];
   @override
   String get aliasedName => _alias ?? actualTableName;
   @override
@@ -4507,8 +4629,6 @@ class $ShoppingListsTable extends ShoppingLists
     if (data.containsKey('user_id')) {
       context.handle(_userIdMeta,
           userId.isAcceptableOrUnknown(data['user_id']!, _userIdMeta));
-    } else if (isInserting) {
-      context.missing(_userIdMeta);
     }
     if (data.containsKey('household_id')) {
       context.handle(
@@ -4524,6 +4644,10 @@ class $ShoppingListsTable extends ShoppingLists
       context.handle(_updatedAtMeta,
           updatedAt.isAcceptableOrUnknown(data['updated_at']!, _updatedAtMeta));
     }
+    if (data.containsKey('deleted_at')) {
+      context.handle(_deletedAtMeta,
+          deletedAt.isAcceptableOrUnknown(data['deleted_at']!, _deletedAtMeta));
+    }
     return context;
   }
 
@@ -4538,13 +4662,15 @@ class $ShoppingListsTable extends ShoppingLists
       name: attachedDatabase.typeMapping
           .read(DriftSqlType.string, data['${effectivePrefix}name']),
       userId: attachedDatabase.typeMapping
-          .read(DriftSqlType.string, data['${effectivePrefix}user_id'])!,
+          .read(DriftSqlType.string, data['${effectivePrefix}user_id']),
       householdId: attachedDatabase.typeMapping
           .read(DriftSqlType.string, data['${effectivePrefix}household_id']),
       createdAt: attachedDatabase.typeMapping
           .read(DriftSqlType.int, data['${effectivePrefix}created_at']),
       updatedAt: attachedDatabase.typeMapping
           .read(DriftSqlType.int, data['${effectivePrefix}updated_at']),
+      deletedAt: attachedDatabase.typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}deleted_at']),
     );
   }
 
@@ -4558,17 +4684,19 @@ class ShoppingListEntry extends DataClass
     implements Insertable<ShoppingListEntry> {
   final String id;
   final String? name;
-  final String userId;
+  final String? userId;
   final String? householdId;
   final int? createdAt;
   final int? updatedAt;
+  final int? deletedAt;
   const ShoppingListEntry(
       {required this.id,
       this.name,
-      required this.userId,
+      this.userId,
       this.householdId,
       this.createdAt,
-      this.updatedAt});
+      this.updatedAt,
+      this.deletedAt});
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
@@ -4576,7 +4704,9 @@ class ShoppingListEntry extends DataClass
     if (!nullToAbsent || name != null) {
       map['name'] = Variable<String>(name);
     }
-    map['user_id'] = Variable<String>(userId);
+    if (!nullToAbsent || userId != null) {
+      map['user_id'] = Variable<String>(userId);
+    }
     if (!nullToAbsent || householdId != null) {
       map['household_id'] = Variable<String>(householdId);
     }
@@ -4586,6 +4716,9 @@ class ShoppingListEntry extends DataClass
     if (!nullToAbsent || updatedAt != null) {
       map['updated_at'] = Variable<int>(updatedAt);
     }
+    if (!nullToAbsent || deletedAt != null) {
+      map['deleted_at'] = Variable<int>(deletedAt);
+    }
     return map;
   }
 
@@ -4593,7 +4726,8 @@ class ShoppingListEntry extends DataClass
     return ShoppingListsCompanion(
       id: Value(id),
       name: name == null && nullToAbsent ? const Value.absent() : Value(name),
-      userId: Value(userId),
+      userId:
+          userId == null && nullToAbsent ? const Value.absent() : Value(userId),
       householdId: householdId == null && nullToAbsent
           ? const Value.absent()
           : Value(householdId),
@@ -4603,6 +4737,9 @@ class ShoppingListEntry extends DataClass
       updatedAt: updatedAt == null && nullToAbsent
           ? const Value.absent()
           : Value(updatedAt),
+      deletedAt: deletedAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(deletedAt),
     );
   }
 
@@ -4612,10 +4749,11 @@ class ShoppingListEntry extends DataClass
     return ShoppingListEntry(
       id: serializer.fromJson<String>(json['id']),
       name: serializer.fromJson<String?>(json['name']),
-      userId: serializer.fromJson<String>(json['userId']),
+      userId: serializer.fromJson<String?>(json['userId']),
       householdId: serializer.fromJson<String?>(json['householdId']),
       createdAt: serializer.fromJson<int?>(json['createdAt']),
       updatedAt: serializer.fromJson<int?>(json['updatedAt']),
+      deletedAt: serializer.fromJson<int?>(json['deletedAt']),
     );
   }
   @override
@@ -4624,27 +4762,30 @@ class ShoppingListEntry extends DataClass
     return <String, dynamic>{
       'id': serializer.toJson<String>(id),
       'name': serializer.toJson<String?>(name),
-      'userId': serializer.toJson<String>(userId),
+      'userId': serializer.toJson<String?>(userId),
       'householdId': serializer.toJson<String?>(householdId),
       'createdAt': serializer.toJson<int?>(createdAt),
       'updatedAt': serializer.toJson<int?>(updatedAt),
+      'deletedAt': serializer.toJson<int?>(deletedAt),
     };
   }
 
   ShoppingListEntry copyWith(
           {String? id,
           Value<String?> name = const Value.absent(),
-          String? userId,
+          Value<String?> userId = const Value.absent(),
           Value<String?> householdId = const Value.absent(),
           Value<int?> createdAt = const Value.absent(),
-          Value<int?> updatedAt = const Value.absent()}) =>
+          Value<int?> updatedAt = const Value.absent(),
+          Value<int?> deletedAt = const Value.absent()}) =>
       ShoppingListEntry(
         id: id ?? this.id,
         name: name.present ? name.value : this.name,
-        userId: userId ?? this.userId,
+        userId: userId.present ? userId.value : this.userId,
         householdId: householdId.present ? householdId.value : this.householdId,
         createdAt: createdAt.present ? createdAt.value : this.createdAt,
         updatedAt: updatedAt.present ? updatedAt.value : this.updatedAt,
+        deletedAt: deletedAt.present ? deletedAt.value : this.deletedAt,
       );
   ShoppingListEntry copyWithCompanion(ShoppingListsCompanion data) {
     return ShoppingListEntry(
@@ -4655,6 +4796,7 @@ class ShoppingListEntry extends DataClass
           data.householdId.present ? data.householdId.value : this.householdId,
       createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
       updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
+      deletedAt: data.deletedAt.present ? data.deletedAt.value : this.deletedAt,
     );
   }
 
@@ -4666,14 +4808,15 @@ class ShoppingListEntry extends DataClass
           ..write('userId: $userId, ')
           ..write('householdId: $householdId, ')
           ..write('createdAt: $createdAt, ')
-          ..write('updatedAt: $updatedAt')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('deletedAt: $deletedAt')
           ..write(')'))
         .toString();
   }
 
   @override
-  int get hashCode =>
-      Object.hash(id, name, userId, householdId, createdAt, updatedAt);
+  int get hashCode => Object.hash(
+      id, name, userId, householdId, createdAt, updatedAt, deletedAt);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -4683,16 +4826,18 @@ class ShoppingListEntry extends DataClass
           other.userId == this.userId &&
           other.householdId == this.householdId &&
           other.createdAt == this.createdAt &&
-          other.updatedAt == this.updatedAt);
+          other.updatedAt == this.updatedAt &&
+          other.deletedAt == this.deletedAt);
 }
 
 class ShoppingListsCompanion extends UpdateCompanion<ShoppingListEntry> {
   final Value<String> id;
   final Value<String?> name;
-  final Value<String> userId;
+  final Value<String?> userId;
   final Value<String?> householdId;
   final Value<int?> createdAt;
   final Value<int?> updatedAt;
+  final Value<int?> deletedAt;
   final Value<int> rowid;
   const ShoppingListsCompanion({
     this.id = const Value.absent(),
@@ -4701,17 +4846,19 @@ class ShoppingListsCompanion extends UpdateCompanion<ShoppingListEntry> {
     this.householdId = const Value.absent(),
     this.createdAt = const Value.absent(),
     this.updatedAt = const Value.absent(),
+    this.deletedAt = const Value.absent(),
     this.rowid = const Value.absent(),
   });
   ShoppingListsCompanion.insert({
     this.id = const Value.absent(),
     this.name = const Value.absent(),
-    required String userId,
+    this.userId = const Value.absent(),
     this.householdId = const Value.absent(),
     this.createdAt = const Value.absent(),
     this.updatedAt = const Value.absent(),
+    this.deletedAt = const Value.absent(),
     this.rowid = const Value.absent(),
-  }) : userId = Value(userId);
+  });
   static Insertable<ShoppingListEntry> custom({
     Expression<String>? id,
     Expression<String>? name,
@@ -4719,6 +4866,7 @@ class ShoppingListsCompanion extends UpdateCompanion<ShoppingListEntry> {
     Expression<String>? householdId,
     Expression<int>? createdAt,
     Expression<int>? updatedAt,
+    Expression<int>? deletedAt,
     Expression<int>? rowid,
   }) {
     return RawValuesInsertable({
@@ -4728,6 +4876,7 @@ class ShoppingListsCompanion extends UpdateCompanion<ShoppingListEntry> {
       if (householdId != null) 'household_id': householdId,
       if (createdAt != null) 'created_at': createdAt,
       if (updatedAt != null) 'updated_at': updatedAt,
+      if (deletedAt != null) 'deleted_at': deletedAt,
       if (rowid != null) 'rowid': rowid,
     });
   }
@@ -4735,10 +4884,11 @@ class ShoppingListsCompanion extends UpdateCompanion<ShoppingListEntry> {
   ShoppingListsCompanion copyWith(
       {Value<String>? id,
       Value<String?>? name,
-      Value<String>? userId,
+      Value<String?>? userId,
       Value<String?>? householdId,
       Value<int?>? createdAt,
       Value<int?>? updatedAt,
+      Value<int?>? deletedAt,
       Value<int>? rowid}) {
     return ShoppingListsCompanion(
       id: id ?? this.id,
@@ -4747,6 +4897,7 @@ class ShoppingListsCompanion extends UpdateCompanion<ShoppingListEntry> {
       householdId: householdId ?? this.householdId,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
+      deletedAt: deletedAt ?? this.deletedAt,
       rowid: rowid ?? this.rowid,
     );
   }
@@ -4772,6 +4923,9 @@ class ShoppingListsCompanion extends UpdateCompanion<ShoppingListEntry> {
     if (updatedAt.present) {
       map['updated_at'] = Variable<int>(updatedAt.value);
     }
+    if (deletedAt.present) {
+      map['deleted_at'] = Variable<int>(deletedAt.value);
+    }
     if (rowid.present) {
       map['rowid'] = Variable<int>(rowid.value);
     }
@@ -4787,6 +4941,7 @@ class ShoppingListsCompanion extends UpdateCompanion<ShoppingListEntry> {
           ..write('householdId: $householdId, ')
           ..write('createdAt: $createdAt, ')
           ..write('updatedAt: $updatedAt, ')
+          ..write('deletedAt: $deletedAt, ')
           ..write('rowid: $rowid')
           ..write(')'))
         .toString();
@@ -6360,7 +6515,7 @@ typedef $$PantryItemsTableCreateCompanionBuilder = PantryItemsCompanion
   Value<String> id,
   required String name,
   Value<bool> inStock,
-  required String userId,
+  Value<String?> userId,
   Value<String?> householdId,
   Value<int?> createdAt,
   Value<int?> updatedAt,
@@ -6372,7 +6527,7 @@ typedef $$PantryItemsTableUpdateCompanionBuilder = PantryItemsCompanion
   Value<String> id,
   Value<String> name,
   Value<bool> inStock,
-  Value<String> userId,
+  Value<String?> userId,
   Value<String?> householdId,
   Value<int?> createdAt,
   Value<int?> updatedAt,
@@ -6511,7 +6666,7 @@ class $$PantryItemsTableTableManager extends RootTableManager<
             Value<String> id = const Value.absent(),
             Value<String> name = const Value.absent(),
             Value<bool> inStock = const Value.absent(),
-            Value<String> userId = const Value.absent(),
+            Value<String?> userId = const Value.absent(),
             Value<String?> householdId = const Value.absent(),
             Value<int?> createdAt = const Value.absent(),
             Value<int?> updatedAt = const Value.absent(),
@@ -6533,7 +6688,7 @@ class $$PantryItemsTableTableManager extends RootTableManager<
             Value<String> id = const Value.absent(),
             required String name,
             Value<bool> inStock = const Value.absent(),
-            required String userId,
+            Value<String?> userId = const Value.absent(),
             Value<String?> householdId = const Value.absent(),
             Value<int?> createdAt = const Value.absent(),
             Value<int?> updatedAt = const Value.absent(),
@@ -6578,8 +6733,10 @@ typedef $$RecipeIngredientTermOverridesTableCreateCompanionBuilder
   required String recipeId,
   required String term,
   required String pantryItemId,
-  required String userId,
+  Value<String?> userId,
   Value<String?> householdId,
+  Value<int?> deletedAt,
+  Value<int?> createdAt,
   Value<int> rowid,
 });
 typedef $$RecipeIngredientTermOverridesTableUpdateCompanionBuilder
@@ -6587,8 +6744,10 @@ typedef $$RecipeIngredientTermOverridesTableUpdateCompanionBuilder
   Value<String> recipeId,
   Value<String> term,
   Value<String> pantryItemId,
-  Value<String> userId,
+  Value<String?> userId,
   Value<String?> householdId,
+  Value<int?> deletedAt,
+  Value<int?> createdAt,
   Value<int> rowid,
 });
 
@@ -6615,6 +6774,12 @@ class $$RecipeIngredientTermOverridesTableFilterComposer
 
   ColumnFilters<String> get householdId => $composableBuilder(
       column: $table.householdId, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<int> get deletedAt => $composableBuilder(
+      column: $table.deletedAt, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<int> get createdAt => $composableBuilder(
+      column: $table.createdAt, builder: (column) => ColumnFilters(column));
 }
 
 class $$RecipeIngredientTermOverridesTableOrderingComposer
@@ -6641,6 +6806,12 @@ class $$RecipeIngredientTermOverridesTableOrderingComposer
 
   ColumnOrderings<String> get householdId => $composableBuilder(
       column: $table.householdId, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<int> get deletedAt => $composableBuilder(
+      column: $table.deletedAt, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<int> get createdAt => $composableBuilder(
+      column: $table.createdAt, builder: (column) => ColumnOrderings(column));
 }
 
 class $$RecipeIngredientTermOverridesTableAnnotationComposer
@@ -6666,6 +6837,12 @@ class $$RecipeIngredientTermOverridesTableAnnotationComposer
 
   GeneratedColumn<String> get householdId => $composableBuilder(
       column: $table.householdId, builder: (column) => column);
+
+  GeneratedColumn<int> get deletedAt =>
+      $composableBuilder(column: $table.deletedAt, builder: (column) => column);
+
+  GeneratedColumn<int> get createdAt =>
+      $composableBuilder(column: $table.createdAt, builder: (column) => column);
 }
 
 class $$RecipeIngredientTermOverridesTableTableManager extends RootTableManager<
@@ -6702,8 +6879,10 @@ class $$RecipeIngredientTermOverridesTableTableManager extends RootTableManager<
             Value<String> recipeId = const Value.absent(),
             Value<String> term = const Value.absent(),
             Value<String> pantryItemId = const Value.absent(),
-            Value<String> userId = const Value.absent(),
+            Value<String?> userId = const Value.absent(),
             Value<String?> householdId = const Value.absent(),
+            Value<int?> deletedAt = const Value.absent(),
+            Value<int?> createdAt = const Value.absent(),
             Value<int> rowid = const Value.absent(),
           }) =>
               RecipeIngredientTermOverridesCompanion(
@@ -6712,14 +6891,18 @@ class $$RecipeIngredientTermOverridesTableTableManager extends RootTableManager<
             pantryItemId: pantryItemId,
             userId: userId,
             householdId: householdId,
+            deletedAt: deletedAt,
+            createdAt: createdAt,
             rowid: rowid,
           ),
           createCompanionCallback: ({
             required String recipeId,
             required String term,
             required String pantryItemId,
-            required String userId,
+            Value<String?> userId = const Value.absent(),
             Value<String?> householdId = const Value.absent(),
+            Value<int?> deletedAt = const Value.absent(),
+            Value<int?> createdAt = const Value.absent(),
             Value<int> rowid = const Value.absent(),
           }) =>
               RecipeIngredientTermOverridesCompanion.insert(
@@ -6728,6 +6911,8 @@ class $$RecipeIngredientTermOverridesTableTableManager extends RootTableManager<
             pantryItemId: pantryItemId,
             userId: userId,
             householdId: householdId,
+            deletedAt: deletedAt,
+            createdAt: createdAt,
             rowid: rowid,
           ),
           withReferenceMapper: (p0) => p0
@@ -6764,10 +6949,11 @@ typedef $$ShoppingListItemsTableCreateCompanionBuilder
   Value<double?> amount,
   Value<String?> unit,
   Value<bool> bought,
-  required String userId,
+  Value<String?> userId,
   Value<String?> householdId,
   Value<int?> createdAt,
   Value<int?> updatedAt,
+  Value<int?> deletedAt,
   Value<int> rowid,
 });
 typedef $$ShoppingListItemsTableUpdateCompanionBuilder
@@ -6780,10 +6966,11 @@ typedef $$ShoppingListItemsTableUpdateCompanionBuilder
   Value<double?> amount,
   Value<String?> unit,
   Value<bool> bought,
-  Value<String> userId,
+  Value<String?> userId,
   Value<String?> householdId,
   Value<int?> createdAt,
   Value<int?> updatedAt,
+  Value<int?> deletedAt,
   Value<int> rowid,
 });
 
@@ -6835,6 +7022,9 @@ class $$ShoppingListItemsTableFilterComposer
 
   ColumnFilters<int> get updatedAt => $composableBuilder(
       column: $table.updatedAt, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<int> get deletedAt => $composableBuilder(
+      column: $table.deletedAt, builder: (column) => ColumnFilters(column));
 }
 
 class $$ShoppingListItemsTableOrderingComposer
@@ -6884,6 +7074,9 @@ class $$ShoppingListItemsTableOrderingComposer
 
   ColumnOrderings<int> get updatedAt => $composableBuilder(
       column: $table.updatedAt, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<int> get deletedAt => $composableBuilder(
+      column: $table.deletedAt, builder: (column) => ColumnOrderings(column));
 }
 
 class $$ShoppingListItemsTableAnnotationComposer
@@ -6931,6 +7124,9 @@ class $$ShoppingListItemsTableAnnotationComposer
 
   GeneratedColumn<int> get updatedAt =>
       $composableBuilder(column: $table.updatedAt, builder: (column) => column);
+
+  GeneratedColumn<int> get deletedAt =>
+      $composableBuilder(column: $table.deletedAt, builder: (column) => column);
 }
 
 class $$ShoppingListItemsTableTableManager extends RootTableManager<
@@ -6970,10 +7166,11 @@ class $$ShoppingListItemsTableTableManager extends RootTableManager<
             Value<double?> amount = const Value.absent(),
             Value<String?> unit = const Value.absent(),
             Value<bool> bought = const Value.absent(),
-            Value<String> userId = const Value.absent(),
+            Value<String?> userId = const Value.absent(),
             Value<String?> householdId = const Value.absent(),
             Value<int?> createdAt = const Value.absent(),
             Value<int?> updatedAt = const Value.absent(),
+            Value<int?> deletedAt = const Value.absent(),
             Value<int> rowid = const Value.absent(),
           }) =>
               ShoppingListItemsCompanion(
@@ -6989,6 +7186,7 @@ class $$ShoppingListItemsTableTableManager extends RootTableManager<
             householdId: householdId,
             createdAt: createdAt,
             updatedAt: updatedAt,
+            deletedAt: deletedAt,
             rowid: rowid,
           ),
           createCompanionCallback: ({
@@ -7000,10 +7198,11 @@ class $$ShoppingListItemsTableTableManager extends RootTableManager<
             Value<double?> amount = const Value.absent(),
             Value<String?> unit = const Value.absent(),
             Value<bool> bought = const Value.absent(),
-            required String userId,
+            Value<String?> userId = const Value.absent(),
             Value<String?> householdId = const Value.absent(),
             Value<int?> createdAt = const Value.absent(),
             Value<int?> updatedAt = const Value.absent(),
+            Value<int?> deletedAt = const Value.absent(),
             Value<int> rowid = const Value.absent(),
           }) =>
               ShoppingListItemsCompanion.insert(
@@ -7019,6 +7218,7 @@ class $$ShoppingListItemsTableTableManager extends RootTableManager<
             householdId: householdId,
             createdAt: createdAt,
             updatedAt: updatedAt,
+            deletedAt: deletedAt,
             rowid: rowid,
           ),
           withReferenceMapper: (p0) => p0
@@ -7048,20 +7248,22 @@ typedef $$ShoppingListsTableCreateCompanionBuilder = ShoppingListsCompanion
     Function({
   Value<String> id,
   Value<String?> name,
-  required String userId,
+  Value<String?> userId,
   Value<String?> householdId,
   Value<int?> createdAt,
   Value<int?> updatedAt,
+  Value<int?> deletedAt,
   Value<int> rowid,
 });
 typedef $$ShoppingListsTableUpdateCompanionBuilder = ShoppingListsCompanion
     Function({
   Value<String> id,
   Value<String?> name,
-  Value<String> userId,
+  Value<String?> userId,
   Value<String?> householdId,
   Value<int?> createdAt,
   Value<int?> updatedAt,
+  Value<int?> deletedAt,
   Value<int> rowid,
 });
 
@@ -7091,6 +7293,9 @@ class $$ShoppingListsTableFilterComposer
 
   ColumnFilters<int> get updatedAt => $composableBuilder(
       column: $table.updatedAt, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<int> get deletedAt => $composableBuilder(
+      column: $table.deletedAt, builder: (column) => ColumnFilters(column));
 }
 
 class $$ShoppingListsTableOrderingComposer
@@ -7119,6 +7324,9 @@ class $$ShoppingListsTableOrderingComposer
 
   ColumnOrderings<int> get updatedAt => $composableBuilder(
       column: $table.updatedAt, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<int> get deletedAt => $composableBuilder(
+      column: $table.deletedAt, builder: (column) => ColumnOrderings(column));
 }
 
 class $$ShoppingListsTableAnnotationComposer
@@ -7147,6 +7355,9 @@ class $$ShoppingListsTableAnnotationComposer
 
   GeneratedColumn<int> get updatedAt =>
       $composableBuilder(column: $table.updatedAt, builder: (column) => column);
+
+  GeneratedColumn<int> get deletedAt =>
+      $composableBuilder(column: $table.deletedAt, builder: (column) => column);
 }
 
 class $$ShoppingListsTableTableManager extends RootTableManager<
@@ -7177,10 +7388,11 @@ class $$ShoppingListsTableTableManager extends RootTableManager<
           updateCompanionCallback: ({
             Value<String> id = const Value.absent(),
             Value<String?> name = const Value.absent(),
-            Value<String> userId = const Value.absent(),
+            Value<String?> userId = const Value.absent(),
             Value<String?> householdId = const Value.absent(),
             Value<int?> createdAt = const Value.absent(),
             Value<int?> updatedAt = const Value.absent(),
+            Value<int?> deletedAt = const Value.absent(),
             Value<int> rowid = const Value.absent(),
           }) =>
               ShoppingListsCompanion(
@@ -7190,15 +7402,17 @@ class $$ShoppingListsTableTableManager extends RootTableManager<
             householdId: householdId,
             createdAt: createdAt,
             updatedAt: updatedAt,
+            deletedAt: deletedAt,
             rowid: rowid,
           ),
           createCompanionCallback: ({
             Value<String> id = const Value.absent(),
             Value<String?> name = const Value.absent(),
-            required String userId,
+            Value<String?> userId = const Value.absent(),
             Value<String?> householdId = const Value.absent(),
             Value<int?> createdAt = const Value.absent(),
             Value<int?> updatedAt = const Value.absent(),
+            Value<int?> deletedAt = const Value.absent(),
             Value<int> rowid = const Value.absent(),
           }) =>
               ShoppingListsCompanion.insert(
@@ -7208,6 +7422,7 @@ class $$ShoppingListsTableTableManager extends RootTableManager<
             householdId: householdId,
             createdAt: createdAt,
             updatedAt: updatedAt,
+            deletedAt: deletedAt,
             rowid: rowid,
           ),
           withReferenceMapper: (p0) => p0

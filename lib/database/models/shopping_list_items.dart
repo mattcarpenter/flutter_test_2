@@ -31,10 +31,11 @@ class ShoppingListItems extends Table {
   BoolColumn get bought =>
       boolean().withDefault(const Constant(false))();
 
-  TextColumn get userId => text()();
+  TextColumn get userId => text().nullable()();
   TextColumn get householdId => text().nullable()();
 
   // Timestamps
   IntColumn get createdAt => integer().nullable()();
   IntColumn get updatedAt => integer().nullable()();
+  IntColumn get deletedAt => integer().nullable()(); // Soft delete
 }
