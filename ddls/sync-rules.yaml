@@ -91,3 +91,14 @@ bucket_definitions:
     parameters: SELECT household_id FROM household_members WHERE user_id = request.user_id() AND is_active = 1
     data:
       - SELECT * FROM public.shopping_list_items WHERE household_id = bucket.household_id
+
+  pantry_item_terms_belongs_to_user:
+    parameters: SELECT request.user_id() as user_id
+    data:
+      - SELECT * FROM public.pantry_item_terms WHERE user_id = bucket.user_id
+
+  pantry_item_terms_belongs_to_household:
+    parameters: SELECT household_id FROM household_members WHERE user_id = request.user_id() AND is_active = 1
+    data:
+      - SELECT * FROM public.pantry_item_terms WHERE household_id = bucket.household_id
+

@@ -15,12 +15,3 @@ class PantryItems extends Table {
   IntColumn   get updatedAt => integer().nullable()();
   IntColumn   get deletedAt => integer().nullable()();
 }
-
-@DataClassName('PantryItemTermEntry')
-class PantryItemTerms extends Table {
-  TextColumn get pantryItemId => text()();                   // FK → PantryItems.id
-  TextColumn get term         => text()();                   // e.g. “mayonnaise”
-  TextColumn get source       => text().withDefault(const Constant('user'))(); // "user" | "ai" | "inferred"
-
-  @override Set<Column> get primaryKey => {pantryItemId, term};
-}

@@ -3497,6 +3497,241 @@ class PantryItemsCompanion extends UpdateCompanion<PantryItemEntry> {
   }
 }
 
+class $PantryItemTermsTable extends PantryItemTerms
+    with TableInfo<$PantryItemTermsTable, PantryItemTermEntry> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $PantryItemTermsTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _pantryItemIdMeta =
+      const VerificationMeta('pantryItemId');
+  @override
+  late final GeneratedColumn<String> pantryItemId = GeneratedColumn<String>(
+      'pantry_item_id', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _termMeta = const VerificationMeta('term');
+  @override
+  late final GeneratedColumn<String> term = GeneratedColumn<String>(
+      'term', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _sourceMeta = const VerificationMeta('source');
+  @override
+  late final GeneratedColumn<String> source = GeneratedColumn<String>(
+      'source', aliasedName, false,
+      type: DriftSqlType.string,
+      requiredDuringInsert: false,
+      defaultValue: const Constant('user'));
+  @override
+  List<GeneratedColumn> get $columns => [pantryItemId, term, source];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'pantry_item_terms';
+  @override
+  VerificationContext validateIntegrity(
+      Insertable<PantryItemTermEntry> instance,
+      {bool isInserting = false}) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('pantry_item_id')) {
+      context.handle(
+          _pantryItemIdMeta,
+          pantryItemId.isAcceptableOrUnknown(
+              data['pantry_item_id']!, _pantryItemIdMeta));
+    } else if (isInserting) {
+      context.missing(_pantryItemIdMeta);
+    }
+    if (data.containsKey('term')) {
+      context.handle(
+          _termMeta, term.isAcceptableOrUnknown(data['term']!, _termMeta));
+    } else if (isInserting) {
+      context.missing(_termMeta);
+    }
+    if (data.containsKey('source')) {
+      context.handle(_sourceMeta,
+          source.isAcceptableOrUnknown(data['source']!, _sourceMeta));
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {pantryItemId, term};
+  @override
+  PantryItemTermEntry map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return PantryItemTermEntry(
+      pantryItemId: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}pantry_item_id'])!,
+      term: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}term'])!,
+      source: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}source'])!,
+    );
+  }
+
+  @override
+  $PantryItemTermsTable createAlias(String alias) {
+    return $PantryItemTermsTable(attachedDatabase, alias);
+  }
+}
+
+class PantryItemTermEntry extends DataClass
+    implements Insertable<PantryItemTermEntry> {
+  final String pantryItemId;
+  final String term;
+  final String source;
+  const PantryItemTermEntry(
+      {required this.pantryItemId, required this.term, required this.source});
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['pantry_item_id'] = Variable<String>(pantryItemId);
+    map['term'] = Variable<String>(term);
+    map['source'] = Variable<String>(source);
+    return map;
+  }
+
+  PantryItemTermsCompanion toCompanion(bool nullToAbsent) {
+    return PantryItemTermsCompanion(
+      pantryItemId: Value(pantryItemId),
+      term: Value(term),
+      source: Value(source),
+    );
+  }
+
+  factory PantryItemTermEntry.fromJson(Map<String, dynamic> json,
+      {ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return PantryItemTermEntry(
+      pantryItemId: serializer.fromJson<String>(json['pantryItemId']),
+      term: serializer.fromJson<String>(json['term']),
+      source: serializer.fromJson<String>(json['source']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'pantryItemId': serializer.toJson<String>(pantryItemId),
+      'term': serializer.toJson<String>(term),
+      'source': serializer.toJson<String>(source),
+    };
+  }
+
+  PantryItemTermEntry copyWith(
+          {String? pantryItemId, String? term, String? source}) =>
+      PantryItemTermEntry(
+        pantryItemId: pantryItemId ?? this.pantryItemId,
+        term: term ?? this.term,
+        source: source ?? this.source,
+      );
+  PantryItemTermEntry copyWithCompanion(PantryItemTermsCompanion data) {
+    return PantryItemTermEntry(
+      pantryItemId: data.pantryItemId.present
+          ? data.pantryItemId.value
+          : this.pantryItemId,
+      term: data.term.present ? data.term.value : this.term,
+      source: data.source.present ? data.source.value : this.source,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('PantryItemTermEntry(')
+          ..write('pantryItemId: $pantryItemId, ')
+          ..write('term: $term, ')
+          ..write('source: $source')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(pantryItemId, term, source);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is PantryItemTermEntry &&
+          other.pantryItemId == this.pantryItemId &&
+          other.term == this.term &&
+          other.source == this.source);
+}
+
+class PantryItemTermsCompanion extends UpdateCompanion<PantryItemTermEntry> {
+  final Value<String> pantryItemId;
+  final Value<String> term;
+  final Value<String> source;
+  final Value<int> rowid;
+  const PantryItemTermsCompanion({
+    this.pantryItemId = const Value.absent(),
+    this.term = const Value.absent(),
+    this.source = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  PantryItemTermsCompanion.insert({
+    required String pantryItemId,
+    required String term,
+    this.source = const Value.absent(),
+    this.rowid = const Value.absent(),
+  })  : pantryItemId = Value(pantryItemId),
+        term = Value(term);
+  static Insertable<PantryItemTermEntry> custom({
+    Expression<String>? pantryItemId,
+    Expression<String>? term,
+    Expression<String>? source,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (pantryItemId != null) 'pantry_item_id': pantryItemId,
+      if (term != null) 'term': term,
+      if (source != null) 'source': source,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  PantryItemTermsCompanion copyWith(
+      {Value<String>? pantryItemId,
+      Value<String>? term,
+      Value<String>? source,
+      Value<int>? rowid}) {
+    return PantryItemTermsCompanion(
+      pantryItemId: pantryItemId ?? this.pantryItemId,
+      term: term ?? this.term,
+      source: source ?? this.source,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (pantryItemId.present) {
+      map['pantry_item_id'] = Variable<String>(pantryItemId.value);
+    }
+    if (term.present) {
+      map['term'] = Variable<String>(term.value);
+    }
+    if (source.present) {
+      map['source'] = Variable<String>(source.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('PantryItemTermsCompanion(')
+          ..write('pantryItemId: $pantryItemId, ')
+          ..write('term: $term, ')
+          ..write('source: $source, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
 class $RecipeIngredientTermOverridesTable extends RecipeIngredientTermOverrides
     with
         TableInfo<$RecipeIngredientTermOverridesTable,
@@ -4960,6 +5195,8 @@ abstract class _$AppDatabase extends GeneratedDatabase {
   late final $UploadQueuesTable uploadQueues = $UploadQueuesTable(this);
   late final $CooksTable cooks = $CooksTable(this);
   late final $PantryItemsTable pantryItems = $PantryItemsTable(this);
+  late final $PantryItemTermsTable pantryItemTerms =
+      $PantryItemTermsTable(this);
   late final $RecipeIngredientTermOverridesTable recipeIngredientTermOverrides =
       $RecipeIngredientTermOverridesTable(this);
   late final $ShoppingListItemsTable shoppingListItems =
@@ -4978,6 +5215,7 @@ abstract class _$AppDatabase extends GeneratedDatabase {
         uploadQueues,
         cooks,
         pantryItems,
+        pantryItemTerms,
         recipeIngredientTermOverrides,
         shoppingListItems,
         shoppingLists
@@ -6728,6 +6966,151 @@ typedef $$PantryItemsTableProcessedTableManager = ProcessedTableManager<
     ),
     PantryItemEntry,
     PrefetchHooks Function()>;
+typedef $$PantryItemTermsTableCreateCompanionBuilder = PantryItemTermsCompanion
+    Function({
+  required String pantryItemId,
+  required String term,
+  Value<String> source,
+  Value<int> rowid,
+});
+typedef $$PantryItemTermsTableUpdateCompanionBuilder = PantryItemTermsCompanion
+    Function({
+  Value<String> pantryItemId,
+  Value<String> term,
+  Value<String> source,
+  Value<int> rowid,
+});
+
+class $$PantryItemTermsTableFilterComposer
+    extends Composer<_$AppDatabase, $PantryItemTermsTable> {
+  $$PantryItemTermsTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get pantryItemId => $composableBuilder(
+      column: $table.pantryItemId, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get term => $composableBuilder(
+      column: $table.term, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get source => $composableBuilder(
+      column: $table.source, builder: (column) => ColumnFilters(column));
+}
+
+class $$PantryItemTermsTableOrderingComposer
+    extends Composer<_$AppDatabase, $PantryItemTermsTable> {
+  $$PantryItemTermsTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get pantryItemId => $composableBuilder(
+      column: $table.pantryItemId,
+      builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get term => $composableBuilder(
+      column: $table.term, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get source => $composableBuilder(
+      column: $table.source, builder: (column) => ColumnOrderings(column));
+}
+
+class $$PantryItemTermsTableAnnotationComposer
+    extends Composer<_$AppDatabase, $PantryItemTermsTable> {
+  $$PantryItemTermsTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get pantryItemId => $composableBuilder(
+      column: $table.pantryItemId, builder: (column) => column);
+
+  GeneratedColumn<String> get term =>
+      $composableBuilder(column: $table.term, builder: (column) => column);
+
+  GeneratedColumn<String> get source =>
+      $composableBuilder(column: $table.source, builder: (column) => column);
+}
+
+class $$PantryItemTermsTableTableManager extends RootTableManager<
+    _$AppDatabase,
+    $PantryItemTermsTable,
+    PantryItemTermEntry,
+    $$PantryItemTermsTableFilterComposer,
+    $$PantryItemTermsTableOrderingComposer,
+    $$PantryItemTermsTableAnnotationComposer,
+    $$PantryItemTermsTableCreateCompanionBuilder,
+    $$PantryItemTermsTableUpdateCompanionBuilder,
+    (
+      PantryItemTermEntry,
+      BaseReferences<_$AppDatabase, $PantryItemTermsTable, PantryItemTermEntry>
+    ),
+    PantryItemTermEntry,
+    PrefetchHooks Function()> {
+  $$PantryItemTermsTableTableManager(
+      _$AppDatabase db, $PantryItemTermsTable table)
+      : super(TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$PantryItemTermsTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$PantryItemTermsTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$PantryItemTermsTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback: ({
+            Value<String> pantryItemId = const Value.absent(),
+            Value<String> term = const Value.absent(),
+            Value<String> source = const Value.absent(),
+            Value<int> rowid = const Value.absent(),
+          }) =>
+              PantryItemTermsCompanion(
+            pantryItemId: pantryItemId,
+            term: term,
+            source: source,
+            rowid: rowid,
+          ),
+          createCompanionCallback: ({
+            required String pantryItemId,
+            required String term,
+            Value<String> source = const Value.absent(),
+            Value<int> rowid = const Value.absent(),
+          }) =>
+              PantryItemTermsCompanion.insert(
+            pantryItemId: pantryItemId,
+            term: term,
+            source: source,
+            rowid: rowid,
+          ),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .toList(),
+          prefetchHooksCallback: null,
+        ));
+}
+
+typedef $$PantryItemTermsTableProcessedTableManager = ProcessedTableManager<
+    _$AppDatabase,
+    $PantryItemTermsTable,
+    PantryItemTermEntry,
+    $$PantryItemTermsTableFilterComposer,
+    $$PantryItemTermsTableOrderingComposer,
+    $$PantryItemTermsTableAnnotationComposer,
+    $$PantryItemTermsTableCreateCompanionBuilder,
+    $$PantryItemTermsTableUpdateCompanionBuilder,
+    (
+      PantryItemTermEntry,
+      BaseReferences<_$AppDatabase, $PantryItemTermsTable, PantryItemTermEntry>
+    ),
+    PantryItemTermEntry,
+    PrefetchHooks Function()>;
 typedef $$RecipeIngredientTermOverridesTableCreateCompanionBuilder
     = RecipeIngredientTermOverridesCompanion Function({
   required String recipeId,
@@ -7467,6 +7850,8 @@ class $AppDatabaseManager {
       $$CooksTableTableManager(_db, _db.cooks);
   $$PantryItemsTableTableManager get pantryItems =>
       $$PantryItemsTableTableManager(_db, _db.pantryItems);
+  $$PantryItemTermsTableTableManager get pantryItemTerms =>
+      $$PantryItemTermsTableTableManager(_db, _db.pantryItemTerms);
   $$RecipeIngredientTermOverridesTableTableManager
       get recipeIngredientTermOverrides =>
           $$RecipeIngredientTermOverridesTableTableManager(
