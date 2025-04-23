@@ -64,6 +64,7 @@ class ShoppingListRepository {
     String? sourceRecipeId,
     double? amount,
     String? unit,
+    bool? bought,
   }) async {
     final newId = const Uuid().v4();
     final now = DateTime.now().millisecondsSinceEpoch;
@@ -76,6 +77,7 @@ class ShoppingListRepository {
       normalizedTerms: Value(normalizedTerms),
       sourceRecipeId: Value(sourceRecipeId),
       amount: Value(amount),
+      bought: Value(bought ?? false),
       unit: Value(unit),
       createdAt: Value(now),
       updatedAt: Value(now),

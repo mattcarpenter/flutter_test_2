@@ -1,7 +1,6 @@
 import 'package:drift/drift.dart';
 import 'package:uuid/uuid.dart';
 import '../../database/database.dart';
-import '../../database/models/pantry_items.dart';
 
 class PantryRepository {
   final AppDatabase _db;
