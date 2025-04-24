@@ -177,18 +177,9 @@ Future<void> openDatabase({bool isTest = false}) async {
   PowerSyncDatabase db;
 
   if (isTest) {
-    final customSqliteSetup = SqliteConnectionSetup(() {
-      // This callback is executed each time a connection is opened.
-      // It overrides the dynamic library resolution to force use of your custom SQLite.
-        open.overrideForAll(() => DynamicLibrary.open('/Users/matt/repos/sqlite-src-3490100/libsqlite3.dylib'));
-    });
-
-    db = PowerSyncDatabase(
-        schema: schema, path: databasePath, logger: attachedLogger, sqliteSetup: customSqliteSetup);
+    db = PowerSyncDatabase.withFactory(CustomOpenFactoryForTest(path: databasePath), schema: schema, logger: attachedLogger);
   } else {
     db = PowerSyncDatabase.withFactory(CustomOpenFactory(path: databasePath), schema: schema, logger: attachedLogger);
-    /*db = PowerSyncDatabase(
-        schema: schema, path: databasePath, logger: attachedLogger);*/
   }
 
   // Open the local database
