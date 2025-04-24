@@ -10,6 +10,9 @@ enum ExtractType { columnOnly, columnInOperation }
 Future<void> configureFts(PowerSyncDatabase db) async {
   final migrations = SqliteMigrations();
   migrations.add(createFtsMigrationForRecipes());
+  migrations.add(createMigrationForRecipeIngredientTerms());
+  migrations.add(createMigrationForPantryItemTerms());
+  migrations.add(createMigrationForIngredientTermOverrides());
   await migrations.migrate(db);
 }
 
@@ -36,6 +39,53 @@ String generateRecipeJsonExtracts(
   return columns
       .map((column) => generateRecipeJsonExtract(jsonColumnName, column))
       .join(', ');
+}
+
+SqliteMigration createMigrationForRecipeIngredientTerms() {
+  return SqliteMigration(4, (tx) async {
+    await tx.execute('''
+      CREATE TABLE IF NOT EXISTS recipe_ingredient_terms (
+        recipe_id TEXT NOT NULL,
+        ingredient_id TEXT NOT NULL,
+        term TEXT NOT NULL,
+        order INTEGER NOT NULL,
+        created_at INTEGER,
+        PRIMARY KEY (recipe_id, ingredient_id, term)
+      );
+    ''');
+  });
+}
+
+SqliteMigration createMigrationForPantryItemTerms() {
+  return SqliteMigration(4, (tx) async {
+    await tx.execute('''
+      CREATE TABLE IF NOT EXISTS pantry_item_terms (
+        pantry_item_id TEXT NOT NULL,
+        term TEXT NOT NULL,
+        order INTEGER NOT NULL,
+        source TEXT DEFAULT 'user',
+        created_at INTEGER,
+        PRIMARY KEY (pantry_item_id, term)
+      );
+    ''');
+  });
+}
+
+SqliteMigration createMigrationForIngredientTermOverrides() {
+  return SqliteMigration(4, (tx) async {
+    await tx.execute('''
+      CREATE TABLE IF NOT EXISTS ingredient_term_overrides (
+        id TEXT PRIMARY KEY,
+        user_id TEXT,
+        household_id TEXT,
+        recipe_id TEXT,
+        input_term TEXT NOT NULL,
+        mapped_term TEXT NOT NULL,
+        is_exclusive INTEGER DEFAULT 0,
+        created_at INTEGER
+      );
+    ''');
+  });
 }
 
 /// Creates an FTS migration for the "recipes" table.

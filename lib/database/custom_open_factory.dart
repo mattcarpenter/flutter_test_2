@@ -27,3 +27,4 @@ class CustomOpenFactoryForTest extends PowerSyncOpenFactory {
     return db;
   }
 }
+
