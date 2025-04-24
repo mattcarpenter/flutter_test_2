@@ -96,6 +96,7 @@ Schema schema = const Schema(([
     Column.integer('created_at'),
     Column.integer('updated_at'),
     Column.integer('deleted_at'),
+    Column.text('terms'),
   ]),
   Table(recipeIngredientTermOverridesTable, [
     Column.text('recipe_id'),

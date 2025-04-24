@@ -1,6 +1,8 @@
 import 'package:drift/drift.dart';
 import 'package:uuid/uuid.dart';
+import '../../database/converters.dart';
 import '../../database/database.dart';
+import '../../database/models/pantry_item_terms.dart';
 
 class PantryRepository {
   final AppDatabase _db;
@@ -19,9 +21,12 @@ class PantryRepository {
     bool inStock = true,
     String? userId,
     String? householdId,
+    List<PantryItemTerm>? terms,
   }) async {
     final newId = const Uuid().v4();
     final now = DateTime.now().millisecondsSinceEpoch;
+
+    const converter = const PantryItemTermListConverter();
     final companion = PantryItemsCompanion.insert(
       id: Value(newId),
       name: name,
@@ -30,7 +35,9 @@ class PantryRepository {
       householdId: Value(householdId),
       createdAt: Value(now),
       updatedAt: Value(now),
+      terms: terms != null ? Value(terms) : const Value.absent(),
     );
+
     await _db.into(_db.pantryItems).insert(companion);
     return newId;
   }
@@ -40,13 +47,17 @@ class PantryRepository {
     required String id,
     String? name,
     bool? inStock,
+    List<PantryItemTerm>? terms,
   }) {
     final now = DateTime.now().millisecondsSinceEpoch;
+
     final companion = PantryItemsCompanion(
       name: name != null ? Value(name) : const Value.absent(),
       inStock: inStock != null ? Value(inStock) : const Value.absent(),
       updatedAt: Value(now),
+      terms: terms != null ? Value(terms) : const Value.absent(),
     );
+
     return (_db.update(_db.pantryItems)..where((t) => t.id.equals(id)))
         .write(companion);
   }

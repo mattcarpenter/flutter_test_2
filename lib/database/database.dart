@@ -18,6 +18,7 @@ import 'models/upload_queues.dart';
 import 'models/ingredients.dart';
 import 'models/steps.dart';
 import 'models/recipe_images.dart';
+import 'models/pantry_item_terms.dart';
 
 import 'converters.dart';
 

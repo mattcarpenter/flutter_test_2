@@ -13,6 +13,7 @@ Future<void> configureFts(PowerSyncDatabase db) async {
   migrations.add(createMigrationForRecipeIngredientTerms());
   migrations.add(createMigrationForPantryItemTerms());
   migrations.add(createMigrationForIngredientTermOverrides());
+  migrations.add(createMigrationForTermsTriggers());
   await migrations.migrate(db);
 }
 
@@ -48,7 +49,7 @@ SqliteMigration createMigrationForRecipeIngredientTerms() {
         recipe_id TEXT NOT NULL,
         ingredient_id TEXT NOT NULL,
         term TEXT NOT NULL,
-        order INTEGER NOT NULL,
+        sort INTEGER NOT NULL,
         created_at INTEGER,
         PRIMARY KEY (recipe_id, ingredient_id, term)
       );
@@ -57,12 +58,12 @@ SqliteMigration createMigrationForRecipeIngredientTerms() {
 }
 
 SqliteMigration createMigrationForPantryItemTerms() {
-  return SqliteMigration(4, (tx) async {
+  return SqliteMigration(5, (tx) async {
     await tx.execute('''
       CREATE TABLE IF NOT EXISTS pantry_item_terms (
         pantry_item_id TEXT NOT NULL,
         term TEXT NOT NULL,
-        order INTEGER NOT NULL,
+        sort INTEGER NOT NULL,
         source TEXT DEFAULT 'user',
         created_at INTEGER,
         PRIMARY KEY (pantry_item_id, term)
@@ -72,7 +73,7 @@ SqliteMigration createMigrationForPantryItemTerms() {
 }
 
 SqliteMigration createMigrationForIngredientTermOverrides() {
-  return SqliteMigration(4, (tx) async {
+  return SqliteMigration(6, (tx) async {
     await tx.execute('''
       CREATE TABLE IF NOT EXISTS ingredient_term_overrides (
         id TEXT PRIMARY KEY,
@@ -150,3 +151,69 @@ SqliteMigration createFtsMigrationForRecipes() {
     ''');
   });
 }
+
+SqliteMigration createMigrationForTermsTriggers() {
+  final recipeTableName = 'recipes';
+  final pantryTableName = 'pantry_items';
+
+  final recipeInternalName = schema.tables.firstWhere((t) => t.name == recipeTableName).internalName;
+  final pantryInternalName = schema.tables.firstWhere((t) => t.name == pantryTableName).internalName;
+
+  return SqliteMigration(7, (tx) async {
+    await tx.execute('''
+      CREATE TRIGGER IF NOT EXISTS insert_recipe_ingredient_terms
+      AFTER INSERT ON $recipeInternalName
+      BEGIN
+        DELETE FROM recipe_ingredient_terms WHERE recipe_id = NEW.id;
+        INSERT INTO recipe_ingredient_terms (recipe_id, ingredient_id, term, sort)
+        SELECT
+          NEW.id,
+          json_extract(ingredient.value, '\$.id'),
+          json_extract(term.value, '\$.value'),
+          json_extract(term.value, '\$.sort')
+        FROM json_each(json_extract(NEW.data, '\$.ingredients')) AS ingredient,
+             json_each(json_extract(ingredient.value, '\$.terms')) AS term;
+      END;
+
+      CREATE TRIGGER IF NOT EXISTS update_recipe_ingredient_terms
+      AFTER UPDATE ON $recipeInternalName
+      BEGIN
+        DELETE FROM recipe_ingredient_terms WHERE recipe_id = NEW.id;
+        INSERT INTO recipe_ingredient_terms (recipe_id, ingredient_id, term, sort)
+        SELECT
+          NEW.id,
+          json_extract(ingredient.value, '\$.id'),
+          json_extract(term.value, '\$.value'),
+          json_extract(term.value, '\$.sort')
+        FROM json_each(json_extract(NEW.data, '\$.ingredients')) AS ingredient,
+             json_each(json_extract(ingredient.value, '\$.terms')) AS term;
+      END;
+
+      CREATE TRIGGER IF NOT EXISTS insert_pantry_item_terms
+      AFTER INSERT ON $pantryInternalName
+      BEGIN
+        DELETE FROM pantry_item_terms WHERE pantry_item_id = NEW.id;
+        INSERT INTO pantry_item_terms (pantry_item_id, term, sort)
+        SELECT
+          NEW.id,
+          json_extract(term.value, '\$.value'),
+          json_extract(term.value, '\$.sort')
+        FROM json_each(json_extract(NEW.data, '\$.terms')) AS term;
+      END;
+
+      CREATE TRIGGER IF NOT EXISTS update_pantry_item_terms
+      AFTER UPDATE ON $pantryInternalName
+      BEGIN
+        DELETE FROM pantry_item_terms WHERE pantry_item_id = NEW.id;
+        INSERT INTO pantry_item_terms (pantry_item_id, term, sort)
+        SELECT
+          NEW.id,
+          json_extract(term.value, '\$.value'),
+          json_extract(term.value, '\$.sort')
+        FROM json_each(json_extract(NEW.data, '\$.terms')) AS term;
+      END;
+    ''');
+  });
+}
+
+

@@ -3128,9 +3128,25 @@ class $PantryItemsTable extends PantryItems
   late final GeneratedColumn<int> deletedAt = GeneratedColumn<int>(
       'deleted_at', aliasedName, true,
       type: DriftSqlType.int, requiredDuringInsert: false);
+  static const VerificationMeta _termsMeta = const VerificationMeta('terms');
   @override
-  List<GeneratedColumn> get $columns =>
-      [id, name, inStock, userId, householdId, createdAt, updatedAt, deletedAt];
+  late final GeneratedColumnWithTypeConverter<List<PantryItemTerm>?, String>
+      terms = GeneratedColumn<String>('terms', aliasedName, true,
+              type: DriftSqlType.string, requiredDuringInsert: false)
+          .withConverter<List<PantryItemTerm>?>(
+              $PantryItemsTable.$convertertermsn);
+  @override
+  List<GeneratedColumn> get $columns => [
+        id,
+        name,
+        inStock,
+        userId,
+        householdId,
+        createdAt,
+        updatedAt,
+        deletedAt,
+        terms
+      ];
   @override
   String get aliasedName => _alias ?? actualTableName;
   @override
@@ -3176,6 +3192,7 @@ class $PantryItemsTable extends PantryItems
       context.handle(_deletedAtMeta,
           deletedAt.isAcceptableOrUnknown(data['deleted_at']!, _deletedAtMeta));
     }
+    context.handle(_termsMeta, const VerificationResult.success());
     return context;
   }
 
@@ -3201,6 +3218,9 @@ class $PantryItemsTable extends PantryItems
           .read(DriftSqlType.int, data['${effectivePrefix}updated_at']),
       deletedAt: attachedDatabase.typeMapping
           .read(DriftSqlType.int, data['${effectivePrefix}deleted_at']),
+      terms: $PantryItemsTable.$convertertermsn.fromSql(attachedDatabase
+          .typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}terms'])),
     );
   }
 
@@ -3208,6 +3228,11 @@ class $PantryItemsTable extends PantryItems
   $PantryItemsTable createAlias(String alias) {
     return $PantryItemsTable(attachedDatabase, alias);
   }
+
+  static TypeConverter<List<PantryItemTerm>, String> $converterterms =
+      const PantryItemTermListConverter();
+  static TypeConverter<List<PantryItemTerm>?, String?> $convertertermsn =
+      NullAwareTypeConverter.wrap($converterterms);
 }
 
 class PantryItemEntry extends DataClass implements Insertable<PantryItemEntry> {
@@ -3219,6 +3244,7 @@ class PantryItemEntry extends DataClass implements Insertable<PantryItemEntry> {
   final int? createdAt;
   final int? updatedAt;
   final int? deletedAt;
+  final List<PantryItemTerm>? terms;
   const PantryItemEntry(
       {required this.id,
       required this.name,
@@ -3227,7 +3253,8 @@ class PantryItemEntry extends DataClass implements Insertable<PantryItemEntry> {
       this.householdId,
       this.createdAt,
       this.updatedAt,
-      this.deletedAt});
+      this.deletedAt,
+      this.terms});
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
@@ -3248,6 +3275,10 @@ class PantryItemEntry extends DataClass implements Insertable<PantryItemEntry> {
     }
     if (!nullToAbsent || deletedAt != null) {
       map['deleted_at'] = Variable<int>(deletedAt);
+    }
+    if (!nullToAbsent || terms != null) {
+      map['terms'] =
+          Variable<String>($PantryItemsTable.$convertertermsn.toSql(terms));
     }
     return map;
   }
@@ -3271,6 +3302,8 @@ class PantryItemEntry extends DataClass implements Insertable<PantryItemEntry> {
       deletedAt: deletedAt == null && nullToAbsent
           ? const Value.absent()
           : Value(deletedAt),
+      terms:
+          terms == null && nullToAbsent ? const Value.absent() : Value(terms),
     );
   }
 
@@ -3286,6 +3319,7 @@ class PantryItemEntry extends DataClass implements Insertable<PantryItemEntry> {
       createdAt: serializer.fromJson<int?>(json['createdAt']),
       updatedAt: serializer.fromJson<int?>(json['updatedAt']),
       deletedAt: serializer.fromJson<int?>(json['deletedAt']),
+      terms: serializer.fromJson<List<PantryItemTerm>?>(json['terms']),
     );
   }
   @override
@@ -3300,6 +3334,7 @@ class PantryItemEntry extends DataClass implements Insertable<PantryItemEntry> {
       'createdAt': serializer.toJson<int?>(createdAt),
       'updatedAt': serializer.toJson<int?>(updatedAt),
       'deletedAt': serializer.toJson<int?>(deletedAt),
+      'terms': serializer.toJson<List<PantryItemTerm>?>(terms),
     };
   }
 
@@ -3311,7 +3346,8 @@ class PantryItemEntry extends DataClass implements Insertable<PantryItemEntry> {
           Value<String?> householdId = const Value.absent(),
           Value<int?> createdAt = const Value.absent(),
           Value<int?> updatedAt = const Value.absent(),
-          Value<int?> deletedAt = const Value.absent()}) =>
+          Value<int?> deletedAt = const Value.absent(),
+          Value<List<PantryItemTerm>?> terms = const Value.absent()}) =>
       PantryItemEntry(
         id: id ?? this.id,
         name: name ?? this.name,
@@ -3321,6 +3357,7 @@ class PantryItemEntry extends DataClass implements Insertable<PantryItemEntry> {
         createdAt: createdAt.present ? createdAt.value : this.createdAt,
         updatedAt: updatedAt.present ? updatedAt.value : this.updatedAt,
         deletedAt: deletedAt.present ? deletedAt.value : this.deletedAt,
+        terms: terms.present ? terms.value : this.terms,
       );
   PantryItemEntry copyWithCompanion(PantryItemsCompanion data) {
     return PantryItemEntry(
@@ -3333,6 +3370,7 @@ class PantryItemEntry extends DataClass implements Insertable<PantryItemEntry> {
       createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
       updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
       deletedAt: data.deletedAt.present ? data.deletedAt.value : this.deletedAt,
+      terms: data.terms.present ? data.terms.value : this.terms,
     );
   }
 
@@ -3346,14 +3384,15 @@ class PantryItemEntry extends DataClass implements Insertable<PantryItemEntry> {
           ..write('householdId: $householdId, ')
           ..write('createdAt: $createdAt, ')
           ..write('updatedAt: $updatedAt, ')
-          ..write('deletedAt: $deletedAt')
+          ..write('deletedAt: $deletedAt, ')
+          ..write('terms: $terms')
           ..write(')'))
         .toString();
   }
 
   @override
-  int get hashCode => Object.hash(
-      id, name, inStock, userId, householdId, createdAt, updatedAt, deletedAt);
+  int get hashCode => Object.hash(id, name, inStock, userId, householdId,
+      createdAt, updatedAt, deletedAt, terms);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -3365,7 +3404,8 @@ class PantryItemEntry extends DataClass implements Insertable<PantryItemEntry> {
           other.householdId == this.householdId &&
           other.createdAt == this.createdAt &&
           other.updatedAt == this.updatedAt &&
-          other.deletedAt == this.deletedAt);
+          other.deletedAt == this.deletedAt &&
+          other.terms == this.terms);
 }
 
 class PantryItemsCompanion extends UpdateCompanion<PantryItemEntry> {
@@ -3377,6 +3417,7 @@ class PantryItemsCompanion extends UpdateCompanion<PantryItemEntry> {
   final Value<int?> createdAt;
   final Value<int?> updatedAt;
   final Value<int?> deletedAt;
+  final Value<List<PantryItemTerm>?> terms;
   final Value<int> rowid;
   const PantryItemsCompanion({
     this.id = const Value.absent(),
@@ -3387,6 +3428,7 @@ class PantryItemsCompanion extends UpdateCompanion<PantryItemEntry> {
     this.createdAt = const Value.absent(),
     this.updatedAt = const Value.absent(),
     this.deletedAt = const Value.absent(),
+    this.terms = const Value.absent(),
     this.rowid = const Value.absent(),
   });
   PantryItemsCompanion.insert({
@@ -3398,6 +3440,7 @@ class PantryItemsCompanion extends UpdateCompanion<PantryItemEntry> {
     this.createdAt = const Value.absent(),
     this.updatedAt = const Value.absent(),
     this.deletedAt = const Value.absent(),
+    this.terms = const Value.absent(),
     this.rowid = const Value.absent(),
   }) : name = Value(name);
   static Insertable<PantryItemEntry> custom({
@@ -3409,6 +3452,7 @@ class PantryItemsCompanion extends UpdateCompanion<PantryItemEntry> {
     Expression<int>? createdAt,
     Expression<int>? updatedAt,
     Expression<int>? deletedAt,
+    Expression<String>? terms,
     Expression<int>? rowid,
   }) {
     return RawValuesInsertable({
@@ -3420,6 +3464,7 @@ class PantryItemsCompanion extends UpdateCompanion<PantryItemEntry> {
       if (createdAt != null) 'created_at': createdAt,
       if (updatedAt != null) 'updated_at': updatedAt,
       if (deletedAt != null) 'deleted_at': deletedAt,
+      if (terms != null) 'terms': terms,
       if (rowid != null) 'rowid': rowid,
     });
   }
@@ -3433,6 +3478,7 @@ class PantryItemsCompanion extends UpdateCompanion<PantryItemEntry> {
       Value<int?>? createdAt,
       Value<int?>? updatedAt,
       Value<int?>? deletedAt,
+      Value<List<PantryItemTerm>?>? terms,
       Value<int>? rowid}) {
     return PantryItemsCompanion(
       id: id ?? this.id,
@@ -3443,6 +3489,7 @@ class PantryItemsCompanion extends UpdateCompanion<PantryItemEntry> {
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
       deletedAt: deletedAt ?? this.deletedAt,
+      terms: terms ?? this.terms,
       rowid: rowid ?? this.rowid,
     );
   }
@@ -3474,6 +3521,10 @@ class PantryItemsCompanion extends UpdateCompanion<PantryItemEntry> {
     if (deletedAt.present) {
       map['deleted_at'] = Variable<int>(deletedAt.value);
     }
+    if (terms.present) {
+      map['terms'] = Variable<String>(
+          $PantryItemsTable.$convertertermsn.toSql(terms.value));
+    }
     if (rowid.present) {
       map['rowid'] = Variable<int>(rowid.value);
     }
@@ -3491,6 +3542,7 @@ class PantryItemsCompanion extends UpdateCompanion<PantryItemEntry> {
           ..write('createdAt: $createdAt, ')
           ..write('updatedAt: $updatedAt, ')
           ..write('deletedAt: $deletedAt, ')
+          ..write('terms: $terms, ')
           ..write('rowid: $rowid')
           ..write(')'))
         .toString();
@@ -6520,6 +6572,7 @@ typedef $$PantryItemsTableCreateCompanionBuilder = PantryItemsCompanion
   Value<int?> createdAt,
   Value<int?> updatedAt,
   Value<int?> deletedAt,
+  Value<List<PantryItemTerm>?> terms,
   Value<int> rowid,
 });
 typedef $$PantryItemsTableUpdateCompanionBuilder = PantryItemsCompanion
@@ -6532,6 +6585,7 @@ typedef $$PantryItemsTableUpdateCompanionBuilder = PantryItemsCompanion
   Value<int?> createdAt,
   Value<int?> updatedAt,
   Value<int?> deletedAt,
+  Value<List<PantryItemTerm>?> terms,
   Value<int> rowid,
 });
 
@@ -6567,6 +6621,12 @@ class $$PantryItemsTableFilterComposer
 
   ColumnFilters<int> get deletedAt => $composableBuilder(
       column: $table.deletedAt, builder: (column) => ColumnFilters(column));
+
+  ColumnWithTypeConverterFilters<List<PantryItemTerm>?, List<PantryItemTerm>,
+          String>
+      get terms => $composableBuilder(
+          column: $table.terms,
+          builder: (column) => ColumnWithTypeConverterFilters(column));
 }
 
 class $$PantryItemsTableOrderingComposer
@@ -6601,6 +6661,9 @@ class $$PantryItemsTableOrderingComposer
 
   ColumnOrderings<int> get deletedAt => $composableBuilder(
       column: $table.deletedAt, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get terms => $composableBuilder(
+      column: $table.terms, builder: (column) => ColumnOrderings(column));
 }
 
 class $$PantryItemsTableAnnotationComposer
@@ -6635,6 +6698,9 @@ class $$PantryItemsTableAnnotationComposer
 
   GeneratedColumn<int> get deletedAt =>
       $composableBuilder(column: $table.deletedAt, builder: (column) => column);
+
+  GeneratedColumnWithTypeConverter<List<PantryItemTerm>?, String> get terms =>
+      $composableBuilder(column: $table.terms, builder: (column) => column);
 }
 
 class $$PantryItemsTableTableManager extends RootTableManager<
@@ -6671,6 +6737,7 @@ class $$PantryItemsTableTableManager extends RootTableManager<
             Value<int?> createdAt = const Value.absent(),
             Value<int?> updatedAt = const Value.absent(),
             Value<int?> deletedAt = const Value.absent(),
+            Value<List<PantryItemTerm>?> terms = const Value.absent(),
             Value<int> rowid = const Value.absent(),
           }) =>
               PantryItemsCompanion(
@@ -6682,6 +6749,7 @@ class $$PantryItemsTableTableManager extends RootTableManager<
             createdAt: createdAt,
             updatedAt: updatedAt,
             deletedAt: deletedAt,
+            terms: terms,
             rowid: rowid,
           ),
           createCompanionCallback: ({
@@ -6693,6 +6761,7 @@ class $$PantryItemsTableTableManager extends RootTableManager<
             Value<int?> createdAt = const Value.absent(),
             Value<int?> updatedAt = const Value.absent(),
             Value<int?> deletedAt = const Value.absent(),
+            Value<List<PantryItemTerm>?> terms = const Value.absent(),
             Value<int> rowid = const Value.absent(),
           }) =>
               PantryItemsCompanion.insert(
@@ -6704,6 +6773,7 @@ class $$PantryItemsTableTableManager extends RootTableManager<
             createdAt: createdAt,
             updatedAt: updatedAt,
             deletedAt: deletedAt,
+            terms: terms,
             rowid: rowid,
           ),
           withReferenceMapper: (p0) => p0

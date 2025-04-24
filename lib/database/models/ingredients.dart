@@ -1,5 +1,5 @@
 import 'package:json_annotation/json_annotation.dart';
-import 'terms.dart';
+import 'ingredient_terms.dart';
 
 part 'ingredients.g.dart';
 

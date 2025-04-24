@@ -1,12 +1,13 @@
 import 'dart:convert';
 
 import 'package:drift/drift.dart';
+import 'package:recipe_app/database/models/pantry_item_terms.dart';
 
 import 'models/cooks.dart';
+import 'models/ingredient_terms.dart';
 import 'models/recipe_images.dart';
 import 'models/steps.dart';
 import 'models/ingredients.dart';
-import 'models/terms.dart';
 
 class StringListTypeConverter extends TypeConverter<List<String>, String> {
   @override
@@ -116,6 +117,25 @@ class IngredientTermListConverter extends TypeConverter<List<IngredientTerm>, St
 
   @override
   String toSql(List<IngredientTerm> value) {
+    return json.encode(value.map((term) => term.toJson()).toList());
+  }
+}
+
+class PantryItemTermListConverter extends TypeConverter<List<PantryItemTerm>, String> {
+  const PantryItemTermListConverter();
+
+  @override
+  List<PantryItemTerm> fromSql(String fromDb) {
+    try {
+      final List<dynamic> decoded = json.decode(fromDb);
+      return decoded.map((item) => PantryItemTerm.fromJson(item as Map<String, dynamic>)).toList();
+    } catch (_) {
+      return [];
+    }
+  }
+
+  @override
+  String toSql(List<PantryItemTerm> value) {
     return json.encode(value.map((term) => term.toJson()).toList());
   }
 }
