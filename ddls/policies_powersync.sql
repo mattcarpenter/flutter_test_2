@@ -415,29 +415,3 @@ CREATE POLICY "Users can delete recipe ingredient term overrides"
     auth.uid() = user_id
         OR (household_id IS NOT NULL AND is_household_member(household_id, auth.uid()))
     );
-
-CREATE POLICY "Users can view pantry item terms"
-    ON public.pantry_item_terms
-    FOR SELECT
-    USING (
-    auth.uid() = user_id OR
-    (household_id IS NOT NULL AND public.is_household_member(household_id, auth.uid()))
-    );
-CREATE POLICY "Users can insert pantry item terms"
-    ON public.pantry_item_terms
-    FOR INSERT
-    WITH CHECK (
-    auth.uid() = user_id OR
-    (household_id IS NOT NULL AND public.is_household_member(household_id, auth.uid()))
-    );
-
-CREATE POLICY "Users can update pantry item terms"
-    ON public.pantry_item_terms
-    FOR UPDATE
-    USING (
-    auth.uid() = user_id OR
-    (household_id IS NOT NULL AND public.is_household_member(household_id, auth.uid()))
-    )
-    WITH CHECK (
-    household_id IS NULL OR public.is_household_member(household_id, auth.uid())
-    );

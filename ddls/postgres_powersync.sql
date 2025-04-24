@@ -242,22 +242,4 @@ CREATE INDEX IF NOT EXISTS shopping_list_items_recipe_idx ON public.shopping_lis
 CREATE INDEX IF NOT EXISTS shopping_list_items_user_idx ON public.shopping_list_items (user_id);
 CREATE INDEX IF NOT EXISTS shopping_list_items_household_idx ON public.shopping_list_items (household_id);
 
-CREATE TABLE public.pantry_item_terms (
-        id uuid NOT NULL DEFAULT extensions.uuid_generate_v4(),
-        term text NOT NULL,
-        source text NOT NULL,
-        user_id uuid NOT NULL,
-        household_id uuid NULL,
-        created_at bigint NULL,
-        updated_at bigint NULL,
-        deleted_at bigint NULL,
-        CONSTRAINT pantry_item_terms_pkey PRIMARY KEY (id),
-        CONSTRAINT pantry_item_terms_user_id_fkey FOREIGN KEY (user_id) REFERENCES auth.users (id) ON DELETE CASCADE,
-        CONSTRAINT pantry_item_terms_household_id_fkey FOREIGN KEY (household_id) REFERENCES public.households (id) ON DELETE CASCADE
-);
-
-CREATE INDEX IF NOT EXISTS pantry_item_terms_user_idx ON public.pantry_item_terms (user_id);
-CREATE INDEX IF NOT EXISTS pantry_item_terms_household_idx ON public.pantry_item_terms (household_id);
-CREATE INDEX IF NOT EXISTS pantry_item_terms_term_idx ON public.pantry_item_terms (term);
-
 CREATE PUBLICATION powersync FOR ALL TABLES;

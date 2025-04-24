@@ -24,7 +24,7 @@ import 'converters.dart';
 
 part 'database.g.dart';
 
-@DriftDatabase(tables: [RecipeFolders, Recipes, RecipeShares, HouseholdMembers, Households, UploadQueues, Cooks, PantryItems, PantryItemTerms, RecipeIngredientTermOverrides, ShoppingListItems, ShoppingLists])
+@DriftDatabase(tables: [RecipeFolders, Recipes, RecipeShares, HouseholdMembers, Households, UploadQueues, Cooks, PantryItems, RecipeIngredientTermOverrides, ShoppingListItems, ShoppingLists])
 class AppDatabase extends _$AppDatabase {
   AppDatabase(PowerSyncDatabase db) : super(SqliteAsyncDriftConnection(db));
 

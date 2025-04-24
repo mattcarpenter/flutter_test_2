@@ -11,7 +11,6 @@ const recipeFolderAssignmentsTable = 'recipe_folder_assignments';
 const uploadQueuesTable = 'upload_queues';
 const cooksTable = 'cooks';
 const pantryItemsTable = 'pantry_items';
-const pantryItemTermsTable = 'pantry_item_terms';
 const recipeIngredientTermOverridesTable = 'recipe_ingredient_term_overrides';
 const shoppingListsTable = 'shopping_lists';
 const shoppingListItemsTable = 'shopping_list_items';
@@ -129,13 +128,4 @@ Schema schema = const Schema(([
     Column.text('user_id'),
     Column.text('household_id'),
   ]),
-  Table(pantryItemTermsTable, [
-    Column.text('term'),
-    Column.text('source'),
-    Column.text('user_id'),
-    Column.text('household_id'),
-    Column.integer('created_at'),
-    Column.integer('updated_at'),
-    Column.integer('deleted_at'),
-  ])
 ]));
