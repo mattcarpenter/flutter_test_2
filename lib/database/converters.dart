@@ -6,6 +6,7 @@ import 'models/cooks.dart';
 import 'models/recipe_images.dart';
 import 'models/steps.dart';
 import 'models/ingredients.dart';
+import 'models/terms.dart';
 
 class StringListTypeConverter extends TypeConverter<List<String>, String> {
   @override
@@ -100,3 +101,21 @@ class CookStatusConverter extends TypeConverter<CookStatus, String> {
   }
 }
 
+class IngredientTermListConverter extends TypeConverter<List<IngredientTerm>, String> {
+  const IngredientTermListConverter();
+
+  @override
+  List<IngredientTerm> fromSql(String fromDb) {
+    try {
+      final List<dynamic> decoded = json.decode(fromDb);
+      return decoded.map((item) => IngredientTerm.fromJson(item as Map<String, dynamic>)).toList();
+    } catch (_) {
+      return [];
+    }
+  }
+
+  @override
+  String toSql(List<IngredientTerm> value) {
+    return json.encode(value.map((term) => term.toJson()).toList());
+  }
+}

@@ -23,6 +23,9 @@ Ingredient _$IngredientFromJson(Map<String, dynamic> json) => Ingredient(
       secondaryAmount2Value: json['secondaryAmount2Value'] as String?,
       secondaryAmount2Unit: json['secondaryAmount2Unit'] as String?,
       secondaryAmount2Type: json['secondaryAmount2Type'] as String?,
+      terms: (json['terms'] as List<dynamic>?)
+          ?.map((e) => IngredientTerm.fromJson(e as Map<String, dynamic>))
+          .toList(),
     );
 
 Map<String, dynamic> _$IngredientToJson(Ingredient instance) =>
@@ -43,4 +46,5 @@ Map<String, dynamic> _$IngredientToJson(Ingredient instance) =>
       'secondaryAmount2Value': instance.secondaryAmount2Value,
       'secondaryAmount2Unit': instance.secondaryAmount2Unit,
       'secondaryAmount2Type': instance.secondaryAmount2Type,
+      'terms': instance.terms,
     };

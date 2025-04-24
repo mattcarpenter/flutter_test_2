@@ -1,4 +1,5 @@
 import 'package:json_annotation/json_annotation.dart';
+import 'terms.dart';
 
 part 'ingredients.g.dart';
 
@@ -25,6 +26,8 @@ class Ingredient {
   final String? secondaryAmount2Unit;
   final String? secondaryAmount2Type;
 
+  final List<IngredientTerm>? terms; // Optional terms attached to this ingredient
+
   Ingredient({
     required this.id,
     required this.type,
@@ -42,6 +45,7 @@ class Ingredient {
     this.secondaryAmount2Value,
     this.secondaryAmount2Unit,
     this.secondaryAmount2Type,
+    this.terms,
   });
 
   factory Ingredient.fromJson(Map<String, dynamic> json) => _$IngredientFromJson(json);
@@ -64,6 +68,7 @@ class Ingredient {
     String? secondaryAmount2Value,
     String? secondaryAmount2Unit,
     String? secondaryAmount2Type,
+    List<IngredientTerm>? terms,
   }) {
     return Ingredient(
       id: id ?? this.id,
@@ -82,6 +87,7 @@ class Ingredient {
       secondaryAmount2Value: secondaryAmount2Value ?? this.secondaryAmount2Value,
       secondaryAmount2Unit: secondaryAmount2Unit ?? this.secondaryAmount2Unit,
       secondaryAmount2Type: secondaryAmount2Type ?? this.secondaryAmount2Type,
+      terms: terms ?? this.terms,
     );
   }
 }
