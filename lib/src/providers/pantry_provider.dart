@@ -47,41 +47,6 @@ class PantryNotifier
       _repo.deleteItem(id);
 }
 
-/// Manages the list of terms for a single pantry item.
-class PantryItemTermsNotifier extends StateNotifier<
-    AsyncValue<List<PantryItemTermEntry>>> {
-  final PantryRepository _repo;
-  final String pantryItemId;
-  late final StreamSubscription<List<PantryItemTermEntry>> _sub;
-
-  PantryItemTermsNotifier(this._repo, this.pantryItemId)
-      : super(const AsyncValue.loading()) {
-    _sub = _repo.watchTerms(pantryItemId).listen(
-          (terms) => state = AsyncValue.data(terms),
-      onError: (e, st) => state = AsyncValue.error(e, st),
-    );
-  }
-
-  @override
-  void dispose() {
-    _sub.cancel();
-    super.dispose();
-  }
-
-  Future<void> addTerm(String term, {String source = 'user'}) =>
-      _repo.addTerm(
-        pantryItemId: pantryItemId,
-        term: term,
-        source: source,
-      );
-
-  Future<void> deleteTerm(String term) =>
-      _repo.deleteTerm(
-        pantryItemId: pantryItemId,
-        term: term,
-      );
-}
-
 /// Expose the [PantryRepository].
 final pantryRepositoryProvider =
 Provider<PantryRepository>((ref) => PantryRepository(appDb));
@@ -92,14 +57,5 @@ StateNotifierProvider<PantryNotifier, AsyncValue<List<PantryItemEntry>>>(
       (ref) {
     final repo = ref.watch(pantryRepositoryProvider);
     return PantryNotifier(repo);
-  },
-);
-
-/// Expose the terms for a particular pantry item.
-final pantryItemTermsProvider = StateNotifierProvider
-    .family<PantryItemTermsNotifier, AsyncValue<List<PantryItemTermEntry>>, String>(
-      (ref, pantryItemId) {
-    final repo = ref.watch(pantryRepositoryProvider);
-    return PantryItemTermsNotifier(repo, pantryItemId);
   },
 );

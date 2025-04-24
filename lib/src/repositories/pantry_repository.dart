@@ -57,36 +57,4 @@ class PantryRepository {
     return (_db.update(_db.pantryItems)..where((t) => t.id.equals(id)))
         .write(PantryItemsCompanion(deletedAt: Value(now)));
   }
-
-  /// Watch all terms for a given pantry item.
-  Stream<List<PantryItemTermEntry>> watchTerms(String pantryItemId) {
-    return (_db.select(_db.pantryItemTerms)
-      ..where((t) => t.pantryItemId.equals(pantryItemId)))
-        .watch();
-  }
-
-  /// Add a term to a pantry item.
-  Future<void> addTerm({
-    required String pantryItemId,
-    required String term,
-    String source = 'user',
-  }) {
-    final companion = PantryItemTermsCompanion.insert(
-      pantryItemId: pantryItemId,
-      term: term,
-      source: Value(source),
-    );
-    return _db.into(_db.pantryItemTerms).insert(companion);
-  }
-
-  /// Remove a term from a pantry item.
-  Future<void> deleteTerm({
-    required String pantryItemId,
-    required String term,
-  }) {
-    return (_db.delete(_db.pantryItemTerms)
-      ..where((t) =>
-      t.pantryItemId.equals(pantryItemId) & t.term.equals(term)))
-        .go();
-  }
 }
