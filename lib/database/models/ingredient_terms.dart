@@ -10,13 +10,11 @@ class IngredientTerm {
   final String value;
   final String source; // "user", "ai", or "inferred"
   final int sort;
-  final bool exclusive;
 
   IngredientTerm({
     required this.value,
     required this.source,
     required this.sort,
-    required this.exclusive,
   });
 
   factory IngredientTerm.fromJson(Map<String, dynamic> json) =>

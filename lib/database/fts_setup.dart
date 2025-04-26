@@ -174,7 +174,9 @@ SqliteMigration createMigrationForTermsTriggers() {
         FROM json_each(json_extract(NEW.data, '\$.ingredients')) AS ingredient,
              json_each(json_extract(ingredient.value, '\$.terms')) AS term;
       END;
+    ''');
 
+    await tx.execute('''
       CREATE TRIGGER IF NOT EXISTS update_recipe_ingredient_terms
       AFTER UPDATE ON $recipeInternalName
       BEGIN
@@ -188,7 +190,9 @@ SqliteMigration createMigrationForTermsTriggers() {
         FROM json_each(json_extract(NEW.data, '\$.ingredients')) AS ingredient,
              json_each(json_extract(ingredient.value, '\$.terms')) AS term;
       END;
+    ''');
 
+    await tx.execute('''
       CREATE TRIGGER IF NOT EXISTS insert_pantry_item_terms
       AFTER INSERT ON $pantryInternalName
       BEGIN
@@ -200,7 +204,9 @@ SqliteMigration createMigrationForTermsTriggers() {
           json_extract(term.value, '\$.sort')
         FROM json_each(json_extract(NEW.data, '\$.terms')) AS term;
       END;
+    ''');
 
+    await tx.execute('''
       CREATE TRIGGER IF NOT EXISTS update_pantry_item_terms
       AFTER UPDATE ON $pantryInternalName
       BEGIN
@@ -215,5 +221,6 @@ SqliteMigration createMigrationForTermsTriggers() {
     ''');
   });
 }
+
 
 

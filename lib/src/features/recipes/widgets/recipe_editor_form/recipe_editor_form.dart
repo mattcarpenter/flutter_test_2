@@ -8,6 +8,7 @@ import 'package:supabase_flutter/supabase_flutter.dart' as supabase_flutter;
 import 'package:uuid/uuid.dart';
 
 import '../../../../../database/database.dart';
+import '../../../../../database/models/ingredient_terms.dart';
 import '../../../../../database/models/ingredients.dart';
 import '../../../../providers/recipe_provider.dart';
 import '../../../../repositories/recipe_repository.dart';
@@ -150,7 +151,31 @@ class RecipeEditorFormState extends ConsumerState<RecipeEditorForm> {
       } else {
         // Merge with current DB state before saving, so that any publicUrls are preserved.
         final mergedRecipe = await mergeRecipeImagesWithDb(updatedRecipe);
-        await notifier.updateRecipe(mergedRecipe);
+
+        final updatedIngredients = (mergedRecipe.ingredients ?? []).map((ingredient) {
+          final name = ingredient.name;
+          return ingredient.copyWith(
+            terms: [
+              IngredientTerm(
+                value: name,
+                sort: 0,
+                source: 'test',
+              ),
+              IngredientTerm(
+                value: '$name foo',
+                sort: 1,
+                source: 'test',
+              ),
+            ],
+          );
+        }).toList();
+
+        // Now update the recipe with the new ingredients
+        final finalMergedRecipe = mergedRecipe.copyWith(
+          ingredients: Value(updatedIngredients),
+        );
+
+        await notifier.updateRecipe(finalMergedRecipe); // was mergedRecipe
       }
 
       // Add any pending images to the upload queue.

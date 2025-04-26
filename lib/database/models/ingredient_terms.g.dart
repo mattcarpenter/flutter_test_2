@@ -11,7 +11,6 @@ IngredientTerm _$IngredientTermFromJson(Map<String, dynamic> json) =>
       value: json['value'] as String,
       source: json['source'] as String,
       sort: (json['sort'] as num).toInt(),
-      exclusive: json['exclusive'] as bool,
     );
 
 Map<String, dynamic> _$IngredientTermToJson(IngredientTerm instance) =>
@@ -19,5 +18,4 @@ Map<String, dynamic> _$IngredientTermToJson(IngredientTerm instance) =>
       'value': instance.value,
       'source': instance.source,
       'sort': instance.sort,
-      'exclusive': instance.exclusive,
     };
