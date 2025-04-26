@@ -11,7 +11,7 @@ const recipeFolderAssignmentsTable = 'recipe_folder_assignments';
 const uploadQueuesTable = 'upload_queues';
 const cooksTable = 'cooks';
 const pantryItemsTable = 'pantry_items';
-const recipeIngredientTermOverridesTable = 'recipe_ingredient_term_overrides';
+const ingredientTermOverridesTable = 'ingredient_term_overrides';
 const shoppingListsTable = 'shopping_lists';
 const shoppingListItemsTable = 'shopping_list_items';
 
@@ -98,10 +98,9 @@ Schema schema = const Schema(([
     Column.integer('deleted_at'),
     Column.text('terms'),
   ]),
-  Table(recipeIngredientTermOverridesTable, [
-    Column.text('recipe_id'),
-    Column.text('term'),
-    Column.text('pantry_item_id'),
+  Table(ingredientTermOverridesTable, [
+    Column.text('mapped_term'),
+    Column.text('input_term'),
     Column.text('user_id'),
     Column.text('household_id'),
     Column.integer('deleted_at'),

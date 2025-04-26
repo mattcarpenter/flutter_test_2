@@ -3549,14 +3549,12 @@ class PantryItemsCompanion extends UpdateCompanion<PantryItemEntry> {
   }
 }
 
-class $RecipeIngredientTermOverridesTable extends RecipeIngredientTermOverrides
-    with
-        TableInfo<$RecipeIngredientTermOverridesTable,
-            RecipeIngredientTermOverrideEntry> {
+class $IngredientTermOverridesTable extends IngredientTermOverrides
+    with TableInfo<$IngredientTermOverridesTable, IngredientTermOverrideEntry> {
   @override
   final GeneratedDatabase attachedDatabase;
   final String? _alias;
-  $RecipeIngredientTermOverridesTable(this.attachedDatabase, [this._alias]);
+  $IngredientTermOverridesTable(this.attachedDatabase, [this._alias]);
   static const VerificationMeta _idMeta = const VerificationMeta('id');
   @override
   late final GeneratedColumn<String> id = GeneratedColumn<String>(
@@ -3565,22 +3563,17 @@ class $RecipeIngredientTermOverridesTable extends RecipeIngredientTermOverrides
       requiredDuringInsert: false,
       defaultConstraints: GeneratedColumn.constraintIsAlways('UNIQUE'),
       clientDefault: () => const Uuid().v4());
-  static const VerificationMeta _recipeIdMeta =
-      const VerificationMeta('recipeId');
+  static const VerificationMeta _inputTermMeta =
+      const VerificationMeta('inputTerm');
   @override
-  late final GeneratedColumn<String> recipeId = GeneratedColumn<String>(
-      'recipe_id', aliasedName, false,
+  late final GeneratedColumn<String> inputTerm = GeneratedColumn<String>(
+      'input_term', aliasedName, false,
       type: DriftSqlType.string, requiredDuringInsert: true);
-  static const VerificationMeta _termMeta = const VerificationMeta('term');
+  static const VerificationMeta _mappedTermMeta =
+      const VerificationMeta('mappedTerm');
   @override
-  late final GeneratedColumn<String> term = GeneratedColumn<String>(
-      'term', aliasedName, false,
-      type: DriftSqlType.string, requiredDuringInsert: true);
-  static const VerificationMeta _pantryItemIdMeta =
-      const VerificationMeta('pantryItemId');
-  @override
-  late final GeneratedColumn<String> pantryItemId = GeneratedColumn<String>(
-      'pantry_item_id', aliasedName, false,
+  late final GeneratedColumn<String> mappedTerm = GeneratedColumn<String>(
+      'mapped_term', aliasedName, false,
       type: DriftSqlType.string, requiredDuringInsert: true);
   static const VerificationMeta _userIdMeta = const VerificationMeta('userId');
   @override
@@ -3593,62 +3586,48 @@ class $RecipeIngredientTermOverridesTable extends RecipeIngredientTermOverrides
   late final GeneratedColumn<String> householdId = GeneratedColumn<String>(
       'household_id', aliasedName, true,
       type: DriftSqlType.string, requiredDuringInsert: false);
-  static const VerificationMeta _deletedAtMeta =
-      const VerificationMeta('deletedAt');
-  @override
-  late final GeneratedColumn<int> deletedAt = GeneratedColumn<int>(
-      'deleted_at', aliasedName, true,
-      type: DriftSqlType.int, requiredDuringInsert: false);
   static const VerificationMeta _createdAtMeta =
       const VerificationMeta('createdAt');
   @override
   late final GeneratedColumn<int> createdAt = GeneratedColumn<int>(
       'created_at', aliasedName, true,
       type: DriftSqlType.int, requiredDuringInsert: false);
+  static const VerificationMeta _deletedAtMeta =
+      const VerificationMeta('deletedAt');
   @override
-  List<GeneratedColumn> get $columns => [
-        id,
-        recipeId,
-        term,
-        pantryItemId,
-        userId,
-        householdId,
-        deletedAt,
-        createdAt
-      ];
+  late final GeneratedColumn<int> deletedAt = GeneratedColumn<int>(
+      'deleted_at', aliasedName, true,
+      type: DriftSqlType.int, requiredDuringInsert: false);
+  @override
+  List<GeneratedColumn> get $columns =>
+      [id, inputTerm, mappedTerm, userId, householdId, createdAt, deletedAt];
   @override
   String get aliasedName => _alias ?? actualTableName;
   @override
   String get actualTableName => $name;
-  static const String $name = 'recipe_ingredient_term_overrides';
+  static const String $name = 'ingredient_term_overrides';
   @override
   VerificationContext validateIntegrity(
-      Insertable<RecipeIngredientTermOverrideEntry> instance,
+      Insertable<IngredientTermOverrideEntry> instance,
       {bool isInserting = false}) {
     final context = VerificationContext();
     final data = instance.toColumns(true);
     if (data.containsKey('id')) {
       context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
     }
-    if (data.containsKey('recipe_id')) {
-      context.handle(_recipeIdMeta,
-          recipeId.isAcceptableOrUnknown(data['recipe_id']!, _recipeIdMeta));
+    if (data.containsKey('input_term')) {
+      context.handle(_inputTermMeta,
+          inputTerm.isAcceptableOrUnknown(data['input_term']!, _inputTermMeta));
     } else if (isInserting) {
-      context.missing(_recipeIdMeta);
+      context.missing(_inputTermMeta);
     }
-    if (data.containsKey('term')) {
+    if (data.containsKey('mapped_term')) {
       context.handle(
-          _termMeta, term.isAcceptableOrUnknown(data['term']!, _termMeta));
+          _mappedTermMeta,
+          mappedTerm.isAcceptableOrUnknown(
+              data['mapped_term']!, _mappedTermMeta));
     } else if (isInserting) {
-      context.missing(_termMeta);
-    }
-    if (data.containsKey('pantry_item_id')) {
-      context.handle(
-          _pantryItemIdMeta,
-          pantryItemId.isAcceptableOrUnknown(
-              data['pantry_item_id']!, _pantryItemIdMeta));
-    } else if (isInserting) {
-      context.missing(_pantryItemIdMeta);
+      context.missing(_mappedTermMeta);
     }
     if (data.containsKey('user_id')) {
       context.handle(_userIdMeta,
@@ -3660,122 +3639,115 @@ class $RecipeIngredientTermOverridesTable extends RecipeIngredientTermOverrides
           householdId.isAcceptableOrUnknown(
               data['household_id']!, _householdIdMeta));
     }
-    if (data.containsKey('deleted_at')) {
-      context.handle(_deletedAtMeta,
-          deletedAt.isAcceptableOrUnknown(data['deleted_at']!, _deletedAtMeta));
-    }
     if (data.containsKey('created_at')) {
       context.handle(_createdAtMeta,
           createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta));
+    }
+    if (data.containsKey('deleted_at')) {
+      context.handle(_deletedAtMeta,
+          deletedAt.isAcceptableOrUnknown(data['deleted_at']!, _deletedAtMeta));
     }
     return context;
   }
 
   @override
-  Set<GeneratedColumn> get $primaryKey => {recipeId, term};
+  Set<GeneratedColumn> get $primaryKey => const {};
   @override
-  RecipeIngredientTermOverrideEntry map(Map<String, dynamic> data,
+  IngredientTermOverrideEntry map(Map<String, dynamic> data,
       {String? tablePrefix}) {
     final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
-    return RecipeIngredientTermOverrideEntry(
+    return IngredientTermOverrideEntry(
       id: attachedDatabase.typeMapping
           .read(DriftSqlType.string, data['${effectivePrefix}id'])!,
-      recipeId: attachedDatabase.typeMapping
-          .read(DriftSqlType.string, data['${effectivePrefix}recipe_id'])!,
-      term: attachedDatabase.typeMapping
-          .read(DriftSqlType.string, data['${effectivePrefix}term'])!,
-      pantryItemId: attachedDatabase.typeMapping
-          .read(DriftSqlType.string, data['${effectivePrefix}pantry_item_id'])!,
+      inputTerm: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}input_term'])!,
+      mappedTerm: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}mapped_term'])!,
       userId: attachedDatabase.typeMapping
           .read(DriftSqlType.string, data['${effectivePrefix}user_id']),
       householdId: attachedDatabase.typeMapping
           .read(DriftSqlType.string, data['${effectivePrefix}household_id']),
-      deletedAt: attachedDatabase.typeMapping
-          .read(DriftSqlType.int, data['${effectivePrefix}deleted_at']),
       createdAt: attachedDatabase.typeMapping
           .read(DriftSqlType.int, data['${effectivePrefix}created_at']),
+      deletedAt: attachedDatabase.typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}deleted_at']),
     );
   }
 
   @override
-  $RecipeIngredientTermOverridesTable createAlias(String alias) {
-    return $RecipeIngredientTermOverridesTable(attachedDatabase, alias);
+  $IngredientTermOverridesTable createAlias(String alias) {
+    return $IngredientTermOverridesTable(attachedDatabase, alias);
   }
 }
 
-class RecipeIngredientTermOverrideEntry extends DataClass
-    implements Insertable<RecipeIngredientTermOverrideEntry> {
+class IngredientTermOverrideEntry extends DataClass
+    implements Insertable<IngredientTermOverrideEntry> {
   final String id;
-  final String recipeId;
-  final String term;
-  final String pantryItemId;
+  final String inputTerm;
+  final String mappedTerm;
   final String? userId;
   final String? householdId;
-  final int? deletedAt;
   final int? createdAt;
-  const RecipeIngredientTermOverrideEntry(
+  final int? deletedAt;
+  const IngredientTermOverrideEntry(
       {required this.id,
-      required this.recipeId,
-      required this.term,
-      required this.pantryItemId,
+      required this.inputTerm,
+      required this.mappedTerm,
       this.userId,
       this.householdId,
-      this.deletedAt,
-      this.createdAt});
+      this.createdAt,
+      this.deletedAt});
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
     map['id'] = Variable<String>(id);
-    map['recipe_id'] = Variable<String>(recipeId);
-    map['term'] = Variable<String>(term);
-    map['pantry_item_id'] = Variable<String>(pantryItemId);
+    map['input_term'] = Variable<String>(inputTerm);
+    map['mapped_term'] = Variable<String>(mappedTerm);
     if (!nullToAbsent || userId != null) {
       map['user_id'] = Variable<String>(userId);
     }
     if (!nullToAbsent || householdId != null) {
       map['household_id'] = Variable<String>(householdId);
     }
-    if (!nullToAbsent || deletedAt != null) {
-      map['deleted_at'] = Variable<int>(deletedAt);
-    }
     if (!nullToAbsent || createdAt != null) {
       map['created_at'] = Variable<int>(createdAt);
+    }
+    if (!nullToAbsent || deletedAt != null) {
+      map['deleted_at'] = Variable<int>(deletedAt);
     }
     return map;
   }
 
-  RecipeIngredientTermOverridesCompanion toCompanion(bool nullToAbsent) {
-    return RecipeIngredientTermOverridesCompanion(
+  IngredientTermOverridesCompanion toCompanion(bool nullToAbsent) {
+    return IngredientTermOverridesCompanion(
       id: Value(id),
-      recipeId: Value(recipeId),
-      term: Value(term),
-      pantryItemId: Value(pantryItemId),
+      inputTerm: Value(inputTerm),
+      mappedTerm: Value(mappedTerm),
       userId:
           userId == null && nullToAbsent ? const Value.absent() : Value(userId),
       householdId: householdId == null && nullToAbsent
           ? const Value.absent()
           : Value(householdId),
-      deletedAt: deletedAt == null && nullToAbsent
-          ? const Value.absent()
-          : Value(deletedAt),
       createdAt: createdAt == null && nullToAbsent
           ? const Value.absent()
           : Value(createdAt),
+      deletedAt: deletedAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(deletedAt),
     );
   }
 
-  factory RecipeIngredientTermOverrideEntry.fromJson(Map<String, dynamic> json,
+  factory IngredientTermOverrideEntry.fromJson(Map<String, dynamic> json,
       {ValueSerializer? serializer}) {
     serializer ??= driftRuntimeOptions.defaultSerializer;
-    return RecipeIngredientTermOverrideEntry(
+    return IngredientTermOverrideEntry(
       id: serializer.fromJson<String>(json['id']),
-      recipeId: serializer.fromJson<String>(json['recipeId']),
-      term: serializer.fromJson<String>(json['term']),
-      pantryItemId: serializer.fromJson<String>(json['pantryItemId']),
+      inputTerm: serializer.fromJson<String>(json['inputTerm']),
+      mappedTerm: serializer.fromJson<String>(json['mappedTerm']),
       userId: serializer.fromJson<String?>(json['userId']),
       householdId: serializer.fromJson<String?>(json['householdId']),
-      deletedAt: serializer.fromJson<int?>(json['deletedAt']),
       createdAt: serializer.fromJson<int?>(json['createdAt']),
+      deletedAt: serializer.fromJson<int?>(json['deletedAt']),
     );
   }
   @override
@@ -3783,162 +3755,147 @@ class RecipeIngredientTermOverrideEntry extends DataClass
     serializer ??= driftRuntimeOptions.defaultSerializer;
     return <String, dynamic>{
       'id': serializer.toJson<String>(id),
-      'recipeId': serializer.toJson<String>(recipeId),
-      'term': serializer.toJson<String>(term),
-      'pantryItemId': serializer.toJson<String>(pantryItemId),
+      'inputTerm': serializer.toJson<String>(inputTerm),
+      'mappedTerm': serializer.toJson<String>(mappedTerm),
       'userId': serializer.toJson<String?>(userId),
       'householdId': serializer.toJson<String?>(householdId),
-      'deletedAt': serializer.toJson<int?>(deletedAt),
       'createdAt': serializer.toJson<int?>(createdAt),
+      'deletedAt': serializer.toJson<int?>(deletedAt),
     };
   }
 
-  RecipeIngredientTermOverrideEntry copyWith(
+  IngredientTermOverrideEntry copyWith(
           {String? id,
-          String? recipeId,
-          String? term,
-          String? pantryItemId,
+          String? inputTerm,
+          String? mappedTerm,
           Value<String?> userId = const Value.absent(),
           Value<String?> householdId = const Value.absent(),
-          Value<int?> deletedAt = const Value.absent(),
-          Value<int?> createdAt = const Value.absent()}) =>
-      RecipeIngredientTermOverrideEntry(
+          Value<int?> createdAt = const Value.absent(),
+          Value<int?> deletedAt = const Value.absent()}) =>
+      IngredientTermOverrideEntry(
         id: id ?? this.id,
-        recipeId: recipeId ?? this.recipeId,
-        term: term ?? this.term,
-        pantryItemId: pantryItemId ?? this.pantryItemId,
+        inputTerm: inputTerm ?? this.inputTerm,
+        mappedTerm: mappedTerm ?? this.mappedTerm,
         userId: userId.present ? userId.value : this.userId,
         householdId: householdId.present ? householdId.value : this.householdId,
-        deletedAt: deletedAt.present ? deletedAt.value : this.deletedAt,
         createdAt: createdAt.present ? createdAt.value : this.createdAt,
+        deletedAt: deletedAt.present ? deletedAt.value : this.deletedAt,
       );
-  RecipeIngredientTermOverrideEntry copyWithCompanion(
-      RecipeIngredientTermOverridesCompanion data) {
-    return RecipeIngredientTermOverrideEntry(
+  IngredientTermOverrideEntry copyWithCompanion(
+      IngredientTermOverridesCompanion data) {
+    return IngredientTermOverrideEntry(
       id: data.id.present ? data.id.value : this.id,
-      recipeId: data.recipeId.present ? data.recipeId.value : this.recipeId,
-      term: data.term.present ? data.term.value : this.term,
-      pantryItemId: data.pantryItemId.present
-          ? data.pantryItemId.value
-          : this.pantryItemId,
+      inputTerm: data.inputTerm.present ? data.inputTerm.value : this.inputTerm,
+      mappedTerm:
+          data.mappedTerm.present ? data.mappedTerm.value : this.mappedTerm,
       userId: data.userId.present ? data.userId.value : this.userId,
       householdId:
           data.householdId.present ? data.householdId.value : this.householdId,
-      deletedAt: data.deletedAt.present ? data.deletedAt.value : this.deletedAt,
       createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
+      deletedAt: data.deletedAt.present ? data.deletedAt.value : this.deletedAt,
     );
   }
 
   @override
   String toString() {
-    return (StringBuffer('RecipeIngredientTermOverrideEntry(')
+    return (StringBuffer('IngredientTermOverrideEntry(')
           ..write('id: $id, ')
-          ..write('recipeId: $recipeId, ')
-          ..write('term: $term, ')
-          ..write('pantryItemId: $pantryItemId, ')
+          ..write('inputTerm: $inputTerm, ')
+          ..write('mappedTerm: $mappedTerm, ')
           ..write('userId: $userId, ')
           ..write('householdId: $householdId, ')
-          ..write('deletedAt: $deletedAt, ')
-          ..write('createdAt: $createdAt')
+          ..write('createdAt: $createdAt, ')
+          ..write('deletedAt: $deletedAt')
           ..write(')'))
         .toString();
   }
 
   @override
-  int get hashCode => Object.hash(id, recipeId, term, pantryItemId, userId,
-      householdId, deletedAt, createdAt);
+  int get hashCode => Object.hash(
+      id, inputTerm, mappedTerm, userId, householdId, createdAt, deletedAt);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
-      (other is RecipeIngredientTermOverrideEntry &&
+      (other is IngredientTermOverrideEntry &&
           other.id == this.id &&
-          other.recipeId == this.recipeId &&
-          other.term == this.term &&
-          other.pantryItemId == this.pantryItemId &&
+          other.inputTerm == this.inputTerm &&
+          other.mappedTerm == this.mappedTerm &&
           other.userId == this.userId &&
           other.householdId == this.householdId &&
-          other.deletedAt == this.deletedAt &&
-          other.createdAt == this.createdAt);
+          other.createdAt == this.createdAt &&
+          other.deletedAt == this.deletedAt);
 }
 
-class RecipeIngredientTermOverridesCompanion
-    extends UpdateCompanion<RecipeIngredientTermOverrideEntry> {
+class IngredientTermOverridesCompanion
+    extends UpdateCompanion<IngredientTermOverrideEntry> {
   final Value<String> id;
-  final Value<String> recipeId;
-  final Value<String> term;
-  final Value<String> pantryItemId;
+  final Value<String> inputTerm;
+  final Value<String> mappedTerm;
   final Value<String?> userId;
   final Value<String?> householdId;
-  final Value<int?> deletedAt;
   final Value<int?> createdAt;
+  final Value<int?> deletedAt;
   final Value<int> rowid;
-  const RecipeIngredientTermOverridesCompanion({
+  const IngredientTermOverridesCompanion({
     this.id = const Value.absent(),
-    this.recipeId = const Value.absent(),
-    this.term = const Value.absent(),
-    this.pantryItemId = const Value.absent(),
+    this.inputTerm = const Value.absent(),
+    this.mappedTerm = const Value.absent(),
     this.userId = const Value.absent(),
     this.householdId = const Value.absent(),
-    this.deletedAt = const Value.absent(),
     this.createdAt = const Value.absent(),
+    this.deletedAt = const Value.absent(),
     this.rowid = const Value.absent(),
   });
-  RecipeIngredientTermOverridesCompanion.insert({
+  IngredientTermOverridesCompanion.insert({
     this.id = const Value.absent(),
-    required String recipeId,
-    required String term,
-    required String pantryItemId,
+    required String inputTerm,
+    required String mappedTerm,
     this.userId = const Value.absent(),
     this.householdId = const Value.absent(),
-    this.deletedAt = const Value.absent(),
     this.createdAt = const Value.absent(),
+    this.deletedAt = const Value.absent(),
     this.rowid = const Value.absent(),
-  })  : recipeId = Value(recipeId),
-        term = Value(term),
-        pantryItemId = Value(pantryItemId);
-  static Insertable<RecipeIngredientTermOverrideEntry> custom({
+  })  : inputTerm = Value(inputTerm),
+        mappedTerm = Value(mappedTerm);
+  static Insertable<IngredientTermOverrideEntry> custom({
     Expression<String>? id,
-    Expression<String>? recipeId,
-    Expression<String>? term,
-    Expression<String>? pantryItemId,
+    Expression<String>? inputTerm,
+    Expression<String>? mappedTerm,
     Expression<String>? userId,
     Expression<String>? householdId,
-    Expression<int>? deletedAt,
     Expression<int>? createdAt,
+    Expression<int>? deletedAt,
     Expression<int>? rowid,
   }) {
     return RawValuesInsertable({
       if (id != null) 'id': id,
-      if (recipeId != null) 'recipe_id': recipeId,
-      if (term != null) 'term': term,
-      if (pantryItemId != null) 'pantry_item_id': pantryItemId,
+      if (inputTerm != null) 'input_term': inputTerm,
+      if (mappedTerm != null) 'mapped_term': mappedTerm,
       if (userId != null) 'user_id': userId,
       if (householdId != null) 'household_id': householdId,
-      if (deletedAt != null) 'deleted_at': deletedAt,
       if (createdAt != null) 'created_at': createdAt,
+      if (deletedAt != null) 'deleted_at': deletedAt,
       if (rowid != null) 'rowid': rowid,
     });
   }
 
-  RecipeIngredientTermOverridesCompanion copyWith(
+  IngredientTermOverridesCompanion copyWith(
       {Value<String>? id,
-      Value<String>? recipeId,
-      Value<String>? term,
-      Value<String>? pantryItemId,
+      Value<String>? inputTerm,
+      Value<String>? mappedTerm,
       Value<String?>? userId,
       Value<String?>? householdId,
-      Value<int?>? deletedAt,
       Value<int?>? createdAt,
+      Value<int?>? deletedAt,
       Value<int>? rowid}) {
-    return RecipeIngredientTermOverridesCompanion(
+    return IngredientTermOverridesCompanion(
       id: id ?? this.id,
-      recipeId: recipeId ?? this.recipeId,
-      term: term ?? this.term,
-      pantryItemId: pantryItemId ?? this.pantryItemId,
+      inputTerm: inputTerm ?? this.inputTerm,
+      mappedTerm: mappedTerm ?? this.mappedTerm,
       userId: userId ?? this.userId,
       householdId: householdId ?? this.householdId,
-      deletedAt: deletedAt ?? this.deletedAt,
       createdAt: createdAt ?? this.createdAt,
+      deletedAt: deletedAt ?? this.deletedAt,
       rowid: rowid ?? this.rowid,
     );
   }
@@ -3949,14 +3906,11 @@ class RecipeIngredientTermOverridesCompanion
     if (id.present) {
       map['id'] = Variable<String>(id.value);
     }
-    if (recipeId.present) {
-      map['recipe_id'] = Variable<String>(recipeId.value);
+    if (inputTerm.present) {
+      map['input_term'] = Variable<String>(inputTerm.value);
     }
-    if (term.present) {
-      map['term'] = Variable<String>(term.value);
-    }
-    if (pantryItemId.present) {
-      map['pantry_item_id'] = Variable<String>(pantryItemId.value);
+    if (mappedTerm.present) {
+      map['mapped_term'] = Variable<String>(mappedTerm.value);
     }
     if (userId.present) {
       map['user_id'] = Variable<String>(userId.value);
@@ -3964,11 +3918,11 @@ class RecipeIngredientTermOverridesCompanion
     if (householdId.present) {
       map['household_id'] = Variable<String>(householdId.value);
     }
-    if (deletedAt.present) {
-      map['deleted_at'] = Variable<int>(deletedAt.value);
-    }
     if (createdAt.present) {
       map['created_at'] = Variable<int>(createdAt.value);
+    }
+    if (deletedAt.present) {
+      map['deleted_at'] = Variable<int>(deletedAt.value);
     }
     if (rowid.present) {
       map['rowid'] = Variable<int>(rowid.value);
@@ -3978,15 +3932,14 @@ class RecipeIngredientTermOverridesCompanion
 
   @override
   String toString() {
-    return (StringBuffer('RecipeIngredientTermOverridesCompanion(')
+    return (StringBuffer('IngredientTermOverridesCompanion(')
           ..write('id: $id, ')
-          ..write('recipeId: $recipeId, ')
-          ..write('term: $term, ')
-          ..write('pantryItemId: $pantryItemId, ')
+          ..write('inputTerm: $inputTerm, ')
+          ..write('mappedTerm: $mappedTerm, ')
           ..write('userId: $userId, ')
           ..write('householdId: $householdId, ')
-          ..write('deletedAt: $deletedAt, ')
           ..write('createdAt: $createdAt, ')
+          ..write('deletedAt: $deletedAt, ')
           ..write('rowid: $rowid')
           ..write(')'))
         .toString();
@@ -5055,8 +5008,8 @@ abstract class _$AppDatabase extends GeneratedDatabase {
   late final $UploadQueuesTable uploadQueues = $UploadQueuesTable(this);
   late final $CooksTable cooks = $CooksTable(this);
   late final $PantryItemsTable pantryItems = $PantryItemsTable(this);
-  late final $RecipeIngredientTermOverridesTable recipeIngredientTermOverrides =
-      $RecipeIngredientTermOverridesTable(this);
+  late final $IngredientTermOverridesTable ingredientTermOverrides =
+      $IngredientTermOverridesTable(this);
   late final $ShoppingListItemsTable shoppingListItems =
       $ShoppingListItemsTable(this);
   late final $ShoppingListsTable shoppingLists = $ShoppingListsTable(this);
@@ -5073,7 +5026,7 @@ abstract class _$AppDatabase extends GeneratedDatabase {
         uploadQueues,
         cooks,
         pantryItems,
-        recipeIngredientTermOverrides,
+        ingredientTermOverrides,
         shoppingListItems,
         shoppingLists
       ];
@@ -6841,34 +6794,32 @@ typedef $$PantryItemsTableProcessedTableManager = ProcessedTableManager<
     ),
     PantryItemEntry,
     PrefetchHooks Function()>;
-typedef $$RecipeIngredientTermOverridesTableCreateCompanionBuilder
-    = RecipeIngredientTermOverridesCompanion Function({
+typedef $$IngredientTermOverridesTableCreateCompanionBuilder
+    = IngredientTermOverridesCompanion Function({
   Value<String> id,
-  required String recipeId,
-  required String term,
-  required String pantryItemId,
+  required String inputTerm,
+  required String mappedTerm,
   Value<String?> userId,
   Value<String?> householdId,
-  Value<int?> deletedAt,
   Value<int?> createdAt,
+  Value<int?> deletedAt,
   Value<int> rowid,
 });
-typedef $$RecipeIngredientTermOverridesTableUpdateCompanionBuilder
-    = RecipeIngredientTermOverridesCompanion Function({
+typedef $$IngredientTermOverridesTableUpdateCompanionBuilder
+    = IngredientTermOverridesCompanion Function({
   Value<String> id,
-  Value<String> recipeId,
-  Value<String> term,
-  Value<String> pantryItemId,
+  Value<String> inputTerm,
+  Value<String> mappedTerm,
   Value<String?> userId,
   Value<String?> householdId,
-  Value<int?> deletedAt,
   Value<int?> createdAt,
+  Value<int?> deletedAt,
   Value<int> rowid,
 });
 
-class $$RecipeIngredientTermOverridesTableFilterComposer
-    extends Composer<_$AppDatabase, $RecipeIngredientTermOverridesTable> {
-  $$RecipeIngredientTermOverridesTableFilterComposer({
+class $$IngredientTermOverridesTableFilterComposer
+    extends Composer<_$AppDatabase, $IngredientTermOverridesTable> {
+  $$IngredientTermOverridesTableFilterComposer({
     required super.$db,
     required super.$table,
     super.joinBuilder,
@@ -6878,14 +6829,11 @@ class $$RecipeIngredientTermOverridesTableFilterComposer
   ColumnFilters<String> get id => $composableBuilder(
       column: $table.id, builder: (column) => ColumnFilters(column));
 
-  ColumnFilters<String> get recipeId => $composableBuilder(
-      column: $table.recipeId, builder: (column) => ColumnFilters(column));
+  ColumnFilters<String> get inputTerm => $composableBuilder(
+      column: $table.inputTerm, builder: (column) => ColumnFilters(column));
 
-  ColumnFilters<String> get term => $composableBuilder(
-      column: $table.term, builder: (column) => ColumnFilters(column));
-
-  ColumnFilters<String> get pantryItemId => $composableBuilder(
-      column: $table.pantryItemId, builder: (column) => ColumnFilters(column));
+  ColumnFilters<String> get mappedTerm => $composableBuilder(
+      column: $table.mappedTerm, builder: (column) => ColumnFilters(column));
 
   ColumnFilters<String> get userId => $composableBuilder(
       column: $table.userId, builder: (column) => ColumnFilters(column));
@@ -6893,16 +6841,16 @@ class $$RecipeIngredientTermOverridesTableFilterComposer
   ColumnFilters<String> get householdId => $composableBuilder(
       column: $table.householdId, builder: (column) => ColumnFilters(column));
 
-  ColumnFilters<int> get deletedAt => $composableBuilder(
-      column: $table.deletedAt, builder: (column) => ColumnFilters(column));
-
   ColumnFilters<int> get createdAt => $composableBuilder(
       column: $table.createdAt, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<int> get deletedAt => $composableBuilder(
+      column: $table.deletedAt, builder: (column) => ColumnFilters(column));
 }
 
-class $$RecipeIngredientTermOverridesTableOrderingComposer
-    extends Composer<_$AppDatabase, $RecipeIngredientTermOverridesTable> {
-  $$RecipeIngredientTermOverridesTableOrderingComposer({
+class $$IngredientTermOverridesTableOrderingComposer
+    extends Composer<_$AppDatabase, $IngredientTermOverridesTable> {
+  $$IngredientTermOverridesTableOrderingComposer({
     required super.$db,
     required super.$table,
     super.joinBuilder,
@@ -6912,15 +6860,11 @@ class $$RecipeIngredientTermOverridesTableOrderingComposer
   ColumnOrderings<String> get id => $composableBuilder(
       column: $table.id, builder: (column) => ColumnOrderings(column));
 
-  ColumnOrderings<String> get recipeId => $composableBuilder(
-      column: $table.recipeId, builder: (column) => ColumnOrderings(column));
+  ColumnOrderings<String> get inputTerm => $composableBuilder(
+      column: $table.inputTerm, builder: (column) => ColumnOrderings(column));
 
-  ColumnOrderings<String> get term => $composableBuilder(
-      column: $table.term, builder: (column) => ColumnOrderings(column));
-
-  ColumnOrderings<String> get pantryItemId => $composableBuilder(
-      column: $table.pantryItemId,
-      builder: (column) => ColumnOrderings(column));
+  ColumnOrderings<String> get mappedTerm => $composableBuilder(
+      column: $table.mappedTerm, builder: (column) => ColumnOrderings(column));
 
   ColumnOrderings<String> get userId => $composableBuilder(
       column: $table.userId, builder: (column) => ColumnOrderings(column));
@@ -6928,16 +6872,16 @@ class $$RecipeIngredientTermOverridesTableOrderingComposer
   ColumnOrderings<String> get householdId => $composableBuilder(
       column: $table.householdId, builder: (column) => ColumnOrderings(column));
 
-  ColumnOrderings<int> get deletedAt => $composableBuilder(
-      column: $table.deletedAt, builder: (column) => ColumnOrderings(column));
-
   ColumnOrderings<int> get createdAt => $composableBuilder(
       column: $table.createdAt, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<int> get deletedAt => $composableBuilder(
+      column: $table.deletedAt, builder: (column) => ColumnOrderings(column));
 }
 
-class $$RecipeIngredientTermOverridesTableAnnotationComposer
-    extends Composer<_$AppDatabase, $RecipeIngredientTermOverridesTable> {
-  $$RecipeIngredientTermOverridesTableAnnotationComposer({
+class $$IngredientTermOverridesTableAnnotationComposer
+    extends Composer<_$AppDatabase, $IngredientTermOverridesTable> {
+  $$IngredientTermOverridesTableAnnotationComposer({
     required super.$db,
     required super.$table,
     super.joinBuilder,
@@ -6947,14 +6891,11 @@ class $$RecipeIngredientTermOverridesTableAnnotationComposer
   GeneratedColumn<String> get id =>
       $composableBuilder(column: $table.id, builder: (column) => column);
 
-  GeneratedColumn<String> get recipeId =>
-      $composableBuilder(column: $table.recipeId, builder: (column) => column);
+  GeneratedColumn<String> get inputTerm =>
+      $composableBuilder(column: $table.inputTerm, builder: (column) => column);
 
-  GeneratedColumn<String> get term =>
-      $composableBuilder(column: $table.term, builder: (column) => column);
-
-  GeneratedColumn<String> get pantryItemId => $composableBuilder(
-      column: $table.pantryItemId, builder: (column) => column);
+  GeneratedColumn<String> get mappedTerm => $composableBuilder(
+      column: $table.mappedTerm, builder: (column) => column);
 
   GeneratedColumn<String> get userId =>
       $composableBuilder(column: $table.userId, builder: (column) => column);
@@ -6962,85 +6903,81 @@ class $$RecipeIngredientTermOverridesTableAnnotationComposer
   GeneratedColumn<String> get householdId => $composableBuilder(
       column: $table.householdId, builder: (column) => column);
 
-  GeneratedColumn<int> get deletedAt =>
-      $composableBuilder(column: $table.deletedAt, builder: (column) => column);
-
   GeneratedColumn<int> get createdAt =>
       $composableBuilder(column: $table.createdAt, builder: (column) => column);
+
+  GeneratedColumn<int> get deletedAt =>
+      $composableBuilder(column: $table.deletedAt, builder: (column) => column);
 }
 
-class $$RecipeIngredientTermOverridesTableTableManager extends RootTableManager<
+class $$IngredientTermOverridesTableTableManager extends RootTableManager<
     _$AppDatabase,
-    $RecipeIngredientTermOverridesTable,
-    RecipeIngredientTermOverrideEntry,
-    $$RecipeIngredientTermOverridesTableFilterComposer,
-    $$RecipeIngredientTermOverridesTableOrderingComposer,
-    $$RecipeIngredientTermOverridesTableAnnotationComposer,
-    $$RecipeIngredientTermOverridesTableCreateCompanionBuilder,
-    $$RecipeIngredientTermOverridesTableUpdateCompanionBuilder,
+    $IngredientTermOverridesTable,
+    IngredientTermOverrideEntry,
+    $$IngredientTermOverridesTableFilterComposer,
+    $$IngredientTermOverridesTableOrderingComposer,
+    $$IngredientTermOverridesTableAnnotationComposer,
+    $$IngredientTermOverridesTableCreateCompanionBuilder,
+    $$IngredientTermOverridesTableUpdateCompanionBuilder,
     (
-      RecipeIngredientTermOverrideEntry,
-      BaseReferences<_$AppDatabase, $RecipeIngredientTermOverridesTable,
-          RecipeIngredientTermOverrideEntry>
+      IngredientTermOverrideEntry,
+      BaseReferences<_$AppDatabase, $IngredientTermOverridesTable,
+          IngredientTermOverrideEntry>
     ),
-    RecipeIngredientTermOverrideEntry,
+    IngredientTermOverrideEntry,
     PrefetchHooks Function()> {
-  $$RecipeIngredientTermOverridesTableTableManager(
-      _$AppDatabase db, $RecipeIngredientTermOverridesTable table)
+  $$IngredientTermOverridesTableTableManager(
+      _$AppDatabase db, $IngredientTermOverridesTable table)
       : super(TableManagerState(
           db: db,
           table: table,
           createFilteringComposer: () =>
-              $$RecipeIngredientTermOverridesTableFilterComposer(
+              $$IngredientTermOverridesTableFilterComposer(
                   $db: db, $table: table),
           createOrderingComposer: () =>
-              $$RecipeIngredientTermOverridesTableOrderingComposer(
+              $$IngredientTermOverridesTableOrderingComposer(
                   $db: db, $table: table),
           createComputedFieldComposer: () =>
-              $$RecipeIngredientTermOverridesTableAnnotationComposer(
+              $$IngredientTermOverridesTableAnnotationComposer(
                   $db: db, $table: table),
           updateCompanionCallback: ({
             Value<String> id = const Value.absent(),
-            Value<String> recipeId = const Value.absent(),
-            Value<String> term = const Value.absent(),
-            Value<String> pantryItemId = const Value.absent(),
+            Value<String> inputTerm = const Value.absent(),
+            Value<String> mappedTerm = const Value.absent(),
             Value<String?> userId = const Value.absent(),
             Value<String?> householdId = const Value.absent(),
-            Value<int?> deletedAt = const Value.absent(),
             Value<int?> createdAt = const Value.absent(),
+            Value<int?> deletedAt = const Value.absent(),
             Value<int> rowid = const Value.absent(),
           }) =>
-              RecipeIngredientTermOverridesCompanion(
+              IngredientTermOverridesCompanion(
             id: id,
-            recipeId: recipeId,
-            term: term,
-            pantryItemId: pantryItemId,
+            inputTerm: inputTerm,
+            mappedTerm: mappedTerm,
             userId: userId,
             householdId: householdId,
-            deletedAt: deletedAt,
             createdAt: createdAt,
+            deletedAt: deletedAt,
             rowid: rowid,
           ),
           createCompanionCallback: ({
             Value<String> id = const Value.absent(),
-            required String recipeId,
-            required String term,
-            required String pantryItemId,
+            required String inputTerm,
+            required String mappedTerm,
             Value<String?> userId = const Value.absent(),
             Value<String?> householdId = const Value.absent(),
-            Value<int?> deletedAt = const Value.absent(),
             Value<int?> createdAt = const Value.absent(),
+            Value<int?> deletedAt = const Value.absent(),
             Value<int> rowid = const Value.absent(),
           }) =>
-              RecipeIngredientTermOverridesCompanion.insert(
+              IngredientTermOverridesCompanion.insert(
             id: id,
-            recipeId: recipeId,
-            term: term,
-            pantryItemId: pantryItemId,
+            inputTerm: inputTerm,
+            mappedTerm: mappedTerm,
             userId: userId,
             householdId: householdId,
-            deletedAt: deletedAt,
             createdAt: createdAt,
+            deletedAt: deletedAt,
             rowid: rowid,
           ),
           withReferenceMapper: (p0) => p0
@@ -7050,22 +6987,22 @@ class $$RecipeIngredientTermOverridesTableTableManager extends RootTableManager<
         ));
 }
 
-typedef $$RecipeIngredientTermOverridesTableProcessedTableManager
+typedef $$IngredientTermOverridesTableProcessedTableManager
     = ProcessedTableManager<
         _$AppDatabase,
-        $RecipeIngredientTermOverridesTable,
-        RecipeIngredientTermOverrideEntry,
-        $$RecipeIngredientTermOverridesTableFilterComposer,
-        $$RecipeIngredientTermOverridesTableOrderingComposer,
-        $$RecipeIngredientTermOverridesTableAnnotationComposer,
-        $$RecipeIngredientTermOverridesTableCreateCompanionBuilder,
-        $$RecipeIngredientTermOverridesTableUpdateCompanionBuilder,
+        $IngredientTermOverridesTable,
+        IngredientTermOverrideEntry,
+        $$IngredientTermOverridesTableFilterComposer,
+        $$IngredientTermOverridesTableOrderingComposer,
+        $$IngredientTermOverridesTableAnnotationComposer,
+        $$IngredientTermOverridesTableCreateCompanionBuilder,
+        $$IngredientTermOverridesTableUpdateCompanionBuilder,
         (
-          RecipeIngredientTermOverrideEntry,
-          BaseReferences<_$AppDatabase, $RecipeIngredientTermOverridesTable,
-              RecipeIngredientTermOverrideEntry>
+          IngredientTermOverrideEntry,
+          BaseReferences<_$AppDatabase, $IngredientTermOverridesTable,
+              IngredientTermOverrideEntry>
         ),
-        RecipeIngredientTermOverrideEntry,
+        IngredientTermOverrideEntry,
         PrefetchHooks Function()>;
 typedef $$ShoppingListItemsTableCreateCompanionBuilder
     = ShoppingListItemsCompanion Function({
@@ -7595,10 +7532,9 @@ class $AppDatabaseManager {
       $$CooksTableTableManager(_db, _db.cooks);
   $$PantryItemsTableTableManager get pantryItems =>
       $$PantryItemsTableTableManager(_db, _db.pantryItems);
-  $$RecipeIngredientTermOverridesTableTableManager
-      get recipeIngredientTermOverrides =>
-          $$RecipeIngredientTermOverridesTableTableManager(
-              _db, _db.recipeIngredientTermOverrides);
+  $$IngredientTermOverridesTableTableManager get ingredientTermOverrides =>
+      $$IngredientTermOverridesTableTableManager(
+          _db, _db.ingredientTermOverrides);
   $$ShoppingListItemsTableTableManager get shoppingListItems =>
       $$ShoppingListItemsTableTableManager(_db, _db.shoppingListItems);
   $$ShoppingListsTableTableManager get shoppingLists =>

@@ -121,9 +121,9 @@ class _Fake$PantryItemsTable_7 extends _i1.SmartFake
         );
 }
 
-class _Fake$RecipeIngredientTermOverridesTable_8 extends _i1.SmartFake
-    implements _i2.$RecipeIngredientTermOverridesTable {
-  _Fake$RecipeIngredientTermOverridesTable_8(
+class _Fake$IngredientTermOverridesTable_8 extends _i1.SmartFake
+    implements _i2.$IngredientTermOverridesTable {
+  _Fake$IngredientTermOverridesTable_8(
     Object parent,
     Invocation parentInvocation,
   ) : super(
@@ -956,14 +956,14 @@ class MockAppDatabase extends _i1.Mock implements _i2.AppDatabase {
       ) as _i2.$PantryItemsTable);
 
   @override
-  _i2.$RecipeIngredientTermOverridesTable get recipeIngredientTermOverrides =>
+  _i2.$IngredientTermOverridesTable get ingredientTermOverrides =>
       (super.noSuchMethod(
-        Invocation.getter(#recipeIngredientTermOverrides),
-        returnValue: _Fake$RecipeIngredientTermOverridesTable_8(
+        Invocation.getter(#ingredientTermOverrides),
+        returnValue: _Fake$IngredientTermOverridesTable_8(
           this,
-          Invocation.getter(#recipeIngredientTermOverrides),
+          Invocation.getter(#ingredientTermOverrides),
         ),
-      ) as _i2.$RecipeIngredientTermOverridesTable);
+      ) as _i2.$IngredientTermOverridesTable);
 
   @override
   _i2.$ShoppingListItemsTable get shoppingListItems => (super.noSuchMethod(

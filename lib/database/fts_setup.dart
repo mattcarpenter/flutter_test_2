@@ -76,13 +76,12 @@ SqliteMigration createMigrationForPantryItemTerms() {
 SqliteMigration createMigrationForIngredientTermOverrides() {
   return SqliteMigration(6, (tx) async {
     await tx.execute('''
-      CREATE TABLE IF NOT EXISTS ingredient_term_overrides (
+      CREATE TABLE ingredient_term_overrides_flattened (
         id TEXT PRIMARY KEY,
-        user_id TEXT,
-        household_id TEXT,
-        recipe_id TEXT,
         input_term TEXT NOT NULL,
         mapped_term TEXT NOT NULL,
+        user_id TEXT,
+        household_id TEXT,
         created_at INTEGER,
         deleted_at INTEGER
       );
@@ -224,7 +223,7 @@ SqliteMigration createMigrationForTermsTriggers() {
 }
 
 SqliteMigration createMigrationForIngredientTermOverrideTriggers() {
-  const overridesTableName = 'recipe_ingredient_term_overrides';
+  const overridesTableName = 'ingredient_term_overrides';
   final overridesInternalName = schema.tables.firstWhere((t) => t.name == overridesTableName).internalName;
 
   return SqliteMigration(8, (tx) async {
@@ -232,15 +231,16 @@ SqliteMigration createMigrationForIngredientTermOverrideTriggers() {
       CREATE TRIGGER IF NOT EXISTS insert_ingredient_term_overrides
       AFTER INSERT ON $overridesInternalName
       BEGIN
-        DELETE FROM ingredient_term_overrides WHERE recipe_id = json_extract(NEW.data, '\$.recipeId') AND input_term = json_extract(NEW.data, '\$.term');
-        INSERT INTO ingredient_term_overrides (id, user_id, household_id, recipe_id, input_term, mapped_term, created_at)
+        DELETE FROM ingredient_term_overrides_flattened
+        WHERE id = NEW.id;
+
+        INSERT INTO ingredient_term_overrides_flattened (id, input_term, mapped_term, user_id, household_id, created_at)
         VALUES (
           NEW.id,
-          json_extract(NEW.data, '\$.userId'),
-          json_extract(NEW.data, '\$.householdId'),
-          json_extract(NEW.data, '\$.recipeId'),
-          json_extract(NEW.data, '\$.term'),
-          json_extract(NEW.data, '\$.pantryItemId'),
+          json_extract(NEW.data, '\$.input_term'),
+          json_extract(NEW.data, '\$.mapped_term'),
+          json_extract(NEW.data, '\$.user_id'),
+          json_extract(NEW.data, '\$.household_id'),
           strftime('%s','now') * 1000
         );
       END;
@@ -250,21 +250,23 @@ SqliteMigration createMigrationForIngredientTermOverrideTriggers() {
       CREATE TRIGGER IF NOT EXISTS update_ingredient_term_overrides
       AFTER UPDATE ON $overridesInternalName
       BEGIN
-        DELETE FROM ingredient_term_overrides WHERE recipe_id = json_extract(NEW.data, '\$.recipeId') AND input_term = json_extract(NEW.data, '\$.term');
-        INSERT INTO ingredient_term_overrides (id, user_id, household_id, recipe_id, input_term, mapped_term, created_at)
+        DELETE FROM ingredient_term_overrides_flattened
+        WHERE id = NEW.id;
+
+        INSERT INTO ingredient_term_overrides_flattened (id, input_term, mapped_term, user_id, household_id, created_at)
         VALUES (
           NEW.id,
-          json_extract(NEW.data, '\$.userId'),
-          json_extract(NEW.data, '\$.householdId'),
-          json_extract(NEW.data, '\$.recipeId'),
-          json_extract(NEW.data, '\$.term'),
-          json_extract(NEW.data, '\$.pantryItemId'),
+          json_extract(NEW.data, '\$.input_term'),
+          json_extract(NEW.data, '\$.mapped_term'),
+          json_extract(NEW.data, '\$.user_id'),
+          json_extract(NEW.data, '\$.household_id'),
           strftime('%s','now') * 1000
         );
       END;
     ''');
   });
 }
+
 
 
 
