@@ -3557,6 +3557,14 @@ class $RecipeIngredientTermOverridesTable extends RecipeIngredientTermOverrides
   final GeneratedDatabase attachedDatabase;
   final String? _alias;
   $RecipeIngredientTermOverridesTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<String> id = GeneratedColumn<String>(
+      'id', aliasedName, false,
+      type: DriftSqlType.string,
+      requiredDuringInsert: false,
+      defaultConstraints: GeneratedColumn.constraintIsAlways('UNIQUE'),
+      clientDefault: () => const Uuid().v4());
   static const VerificationMeta _recipeIdMeta =
       const VerificationMeta('recipeId');
   @override
@@ -3598,8 +3606,16 @@ class $RecipeIngredientTermOverridesTable extends RecipeIngredientTermOverrides
       'created_at', aliasedName, true,
       type: DriftSqlType.int, requiredDuringInsert: false);
   @override
-  List<GeneratedColumn> get $columns =>
-      [recipeId, term, pantryItemId, userId, householdId, deletedAt, createdAt];
+  List<GeneratedColumn> get $columns => [
+        id,
+        recipeId,
+        term,
+        pantryItemId,
+        userId,
+        householdId,
+        deletedAt,
+        createdAt
+      ];
   @override
   String get aliasedName => _alias ?? actualTableName;
   @override
@@ -3611,6 +3627,9 @@ class $RecipeIngredientTermOverridesTable extends RecipeIngredientTermOverrides
       {bool isInserting = false}) {
     final context = VerificationContext();
     final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    }
     if (data.containsKey('recipe_id')) {
       context.handle(_recipeIdMeta,
           recipeId.isAcceptableOrUnknown(data['recipe_id']!, _recipeIdMeta));
@@ -3659,6 +3678,8 @@ class $RecipeIngredientTermOverridesTable extends RecipeIngredientTermOverrides
       {String? tablePrefix}) {
     final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
     return RecipeIngredientTermOverrideEntry(
+      id: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}id'])!,
       recipeId: attachedDatabase.typeMapping
           .read(DriftSqlType.string, data['${effectivePrefix}recipe_id'])!,
       term: attachedDatabase.typeMapping
@@ -3684,6 +3705,7 @@ class $RecipeIngredientTermOverridesTable extends RecipeIngredientTermOverrides
 
 class RecipeIngredientTermOverrideEntry extends DataClass
     implements Insertable<RecipeIngredientTermOverrideEntry> {
+  final String id;
   final String recipeId;
   final String term;
   final String pantryItemId;
@@ -3692,7 +3714,8 @@ class RecipeIngredientTermOverrideEntry extends DataClass
   final int? deletedAt;
   final int? createdAt;
   const RecipeIngredientTermOverrideEntry(
-      {required this.recipeId,
+      {required this.id,
+      required this.recipeId,
       required this.term,
       required this.pantryItemId,
       this.userId,
@@ -3702,6 +3725,7 @@ class RecipeIngredientTermOverrideEntry extends DataClass
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
+    map['id'] = Variable<String>(id);
     map['recipe_id'] = Variable<String>(recipeId);
     map['term'] = Variable<String>(term);
     map['pantry_item_id'] = Variable<String>(pantryItemId);
@@ -3722,6 +3746,7 @@ class RecipeIngredientTermOverrideEntry extends DataClass
 
   RecipeIngredientTermOverridesCompanion toCompanion(bool nullToAbsent) {
     return RecipeIngredientTermOverridesCompanion(
+      id: Value(id),
       recipeId: Value(recipeId),
       term: Value(term),
       pantryItemId: Value(pantryItemId),
@@ -3743,6 +3768,7 @@ class RecipeIngredientTermOverrideEntry extends DataClass
       {ValueSerializer? serializer}) {
     serializer ??= driftRuntimeOptions.defaultSerializer;
     return RecipeIngredientTermOverrideEntry(
+      id: serializer.fromJson<String>(json['id']),
       recipeId: serializer.fromJson<String>(json['recipeId']),
       term: serializer.fromJson<String>(json['term']),
       pantryItemId: serializer.fromJson<String>(json['pantryItemId']),
@@ -3756,6 +3782,7 @@ class RecipeIngredientTermOverrideEntry extends DataClass
   Map<String, dynamic> toJson({ValueSerializer? serializer}) {
     serializer ??= driftRuntimeOptions.defaultSerializer;
     return <String, dynamic>{
+      'id': serializer.toJson<String>(id),
       'recipeId': serializer.toJson<String>(recipeId),
       'term': serializer.toJson<String>(term),
       'pantryItemId': serializer.toJson<String>(pantryItemId),
@@ -3767,7 +3794,8 @@ class RecipeIngredientTermOverrideEntry extends DataClass
   }
 
   RecipeIngredientTermOverrideEntry copyWith(
-          {String? recipeId,
+          {String? id,
+          String? recipeId,
           String? term,
           String? pantryItemId,
           Value<String?> userId = const Value.absent(),
@@ -3775,6 +3803,7 @@ class RecipeIngredientTermOverrideEntry extends DataClass
           Value<int?> deletedAt = const Value.absent(),
           Value<int?> createdAt = const Value.absent()}) =>
       RecipeIngredientTermOverrideEntry(
+        id: id ?? this.id,
         recipeId: recipeId ?? this.recipeId,
         term: term ?? this.term,
         pantryItemId: pantryItemId ?? this.pantryItemId,
@@ -3786,6 +3815,7 @@ class RecipeIngredientTermOverrideEntry extends DataClass
   RecipeIngredientTermOverrideEntry copyWithCompanion(
       RecipeIngredientTermOverridesCompanion data) {
     return RecipeIngredientTermOverrideEntry(
+      id: data.id.present ? data.id.value : this.id,
       recipeId: data.recipeId.present ? data.recipeId.value : this.recipeId,
       term: data.term.present ? data.term.value : this.term,
       pantryItemId: data.pantryItemId.present
@@ -3802,6 +3832,7 @@ class RecipeIngredientTermOverrideEntry extends DataClass
   @override
   String toString() {
     return (StringBuffer('RecipeIngredientTermOverrideEntry(')
+          ..write('id: $id, ')
           ..write('recipeId: $recipeId, ')
           ..write('term: $term, ')
           ..write('pantryItemId: $pantryItemId, ')
@@ -3814,12 +3845,13 @@ class RecipeIngredientTermOverrideEntry extends DataClass
   }
 
   @override
-  int get hashCode => Object.hash(
-      recipeId, term, pantryItemId, userId, householdId, deletedAt, createdAt);
+  int get hashCode => Object.hash(id, recipeId, term, pantryItemId, userId,
+      householdId, deletedAt, createdAt);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
       (other is RecipeIngredientTermOverrideEntry &&
+          other.id == this.id &&
           other.recipeId == this.recipeId &&
           other.term == this.term &&
           other.pantryItemId == this.pantryItemId &&
@@ -3831,6 +3863,7 @@ class RecipeIngredientTermOverrideEntry extends DataClass
 
 class RecipeIngredientTermOverridesCompanion
     extends UpdateCompanion<RecipeIngredientTermOverrideEntry> {
+  final Value<String> id;
   final Value<String> recipeId;
   final Value<String> term;
   final Value<String> pantryItemId;
@@ -3840,6 +3873,7 @@ class RecipeIngredientTermOverridesCompanion
   final Value<int?> createdAt;
   final Value<int> rowid;
   const RecipeIngredientTermOverridesCompanion({
+    this.id = const Value.absent(),
     this.recipeId = const Value.absent(),
     this.term = const Value.absent(),
     this.pantryItemId = const Value.absent(),
@@ -3850,6 +3884,7 @@ class RecipeIngredientTermOverridesCompanion
     this.rowid = const Value.absent(),
   });
   RecipeIngredientTermOverridesCompanion.insert({
+    this.id = const Value.absent(),
     required String recipeId,
     required String term,
     required String pantryItemId,
@@ -3862,6 +3897,7 @@ class RecipeIngredientTermOverridesCompanion
         term = Value(term),
         pantryItemId = Value(pantryItemId);
   static Insertable<RecipeIngredientTermOverrideEntry> custom({
+    Expression<String>? id,
     Expression<String>? recipeId,
     Expression<String>? term,
     Expression<String>? pantryItemId,
@@ -3872,6 +3908,7 @@ class RecipeIngredientTermOverridesCompanion
     Expression<int>? rowid,
   }) {
     return RawValuesInsertable({
+      if (id != null) 'id': id,
       if (recipeId != null) 'recipe_id': recipeId,
       if (term != null) 'term': term,
       if (pantryItemId != null) 'pantry_item_id': pantryItemId,
@@ -3884,7 +3921,8 @@ class RecipeIngredientTermOverridesCompanion
   }
 
   RecipeIngredientTermOverridesCompanion copyWith(
-      {Value<String>? recipeId,
+      {Value<String>? id,
+      Value<String>? recipeId,
       Value<String>? term,
       Value<String>? pantryItemId,
       Value<String?>? userId,
@@ -3893,6 +3931,7 @@ class RecipeIngredientTermOverridesCompanion
       Value<int?>? createdAt,
       Value<int>? rowid}) {
     return RecipeIngredientTermOverridesCompanion(
+      id: id ?? this.id,
       recipeId: recipeId ?? this.recipeId,
       term: term ?? this.term,
       pantryItemId: pantryItemId ?? this.pantryItemId,
@@ -3907,6 +3946,9 @@ class RecipeIngredientTermOverridesCompanion
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<String>(id.value);
+    }
     if (recipeId.present) {
       map['recipe_id'] = Variable<String>(recipeId.value);
     }
@@ -3937,6 +3979,7 @@ class RecipeIngredientTermOverridesCompanion
   @override
   String toString() {
     return (StringBuffer('RecipeIngredientTermOverridesCompanion(')
+          ..write('id: $id, ')
           ..write('recipeId: $recipeId, ')
           ..write('term: $term, ')
           ..write('pantryItemId: $pantryItemId, ')
@@ -6800,6 +6843,7 @@ typedef $$PantryItemsTableProcessedTableManager = ProcessedTableManager<
     PrefetchHooks Function()>;
 typedef $$RecipeIngredientTermOverridesTableCreateCompanionBuilder
     = RecipeIngredientTermOverridesCompanion Function({
+  Value<String> id,
   required String recipeId,
   required String term,
   required String pantryItemId,
@@ -6811,6 +6855,7 @@ typedef $$RecipeIngredientTermOverridesTableCreateCompanionBuilder
 });
 typedef $$RecipeIngredientTermOverridesTableUpdateCompanionBuilder
     = RecipeIngredientTermOverridesCompanion Function({
+  Value<String> id,
   Value<String> recipeId,
   Value<String> term,
   Value<String> pantryItemId,
@@ -6830,6 +6875,9 @@ class $$RecipeIngredientTermOverridesTableFilterComposer
     super.$addJoinBuilderToRootComposer,
     super.$removeJoinBuilderFromRootComposer,
   });
+  ColumnFilters<String> get id => $composableBuilder(
+      column: $table.id, builder: (column) => ColumnFilters(column));
+
   ColumnFilters<String> get recipeId => $composableBuilder(
       column: $table.recipeId, builder: (column) => ColumnFilters(column));
 
@@ -6861,6 +6909,9 @@ class $$RecipeIngredientTermOverridesTableOrderingComposer
     super.$addJoinBuilderToRootComposer,
     super.$removeJoinBuilderFromRootComposer,
   });
+  ColumnOrderings<String> get id => $composableBuilder(
+      column: $table.id, builder: (column) => ColumnOrderings(column));
+
   ColumnOrderings<String> get recipeId => $composableBuilder(
       column: $table.recipeId, builder: (column) => ColumnOrderings(column));
 
@@ -6893,6 +6944,9 @@ class $$RecipeIngredientTermOverridesTableAnnotationComposer
     super.$addJoinBuilderToRootComposer,
     super.$removeJoinBuilderFromRootComposer,
   });
+  GeneratedColumn<String> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
   GeneratedColumn<String> get recipeId =>
       $composableBuilder(column: $table.recipeId, builder: (column) => column);
 
@@ -6946,6 +7000,7 @@ class $$RecipeIngredientTermOverridesTableTableManager extends RootTableManager<
               $$RecipeIngredientTermOverridesTableAnnotationComposer(
                   $db: db, $table: table),
           updateCompanionCallback: ({
+            Value<String> id = const Value.absent(),
             Value<String> recipeId = const Value.absent(),
             Value<String> term = const Value.absent(),
             Value<String> pantryItemId = const Value.absent(),
@@ -6956,6 +7011,7 @@ class $$RecipeIngredientTermOverridesTableTableManager extends RootTableManager<
             Value<int> rowid = const Value.absent(),
           }) =>
               RecipeIngredientTermOverridesCompanion(
+            id: id,
             recipeId: recipeId,
             term: term,
             pantryItemId: pantryItemId,
@@ -6966,6 +7022,7 @@ class $$RecipeIngredientTermOverridesTableTableManager extends RootTableManager<
             rowid: rowid,
           ),
           createCompanionCallback: ({
+            Value<String> id = const Value.absent(),
             required String recipeId,
             required String term,
             required String pantryItemId,
@@ -6976,6 +7033,7 @@ class $$RecipeIngredientTermOverridesTableTableManager extends RootTableManager<
             Value<int> rowid = const Value.absent(),
           }) =>
               RecipeIngredientTermOverridesCompanion.insert(
+            id: id,
             recipeId: recipeId,
             term: term,
             pantryItemId: pantryItemId,
