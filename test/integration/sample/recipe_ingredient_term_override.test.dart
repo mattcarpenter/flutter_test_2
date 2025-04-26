@@ -34,12 +34,11 @@ void main() async {
       await withTestUser('owner', () async {
         final userId = Supabase.instance.client.auth.currentUser!.id;
 
-        final newRecipeId = const Uuid().v4();
-        final newPantryItemId = const Uuid().v4();
+        final recipeId = const Uuid().v4();
 
         // Create real recipe
         await container.read(recipeNotifierProvider.notifier).addRecipe(
-          id: newRecipeId,
+          id: recipeId,
           title: "Test Recipe for Override",
           language: "en",
           userId: userId,
@@ -50,40 +49,39 @@ void main() async {
         await waitForProviderValue<List<RecipeWithFolders>>(
           container,
           recipeNotifierProvider,
-              (recipes) => recipes.any((r) => r.recipe.id == newRecipeId),
+              (recipes) => recipes.any((r) => r.recipe.id == recipeId),
         );
 
-        // Create real pantry item
-        await container.read(pantryItemsProvider.notifier).addItem(
+        // Create real pantry item and capture the ID
+        final pantryItemId = await container.read(pantryItemsProvider.notifier).addItem(
           name: "Test Pantry Item",
           userId: userId,
-          householdId: null,
         );
 
         await waitForProviderValue<List<PantryItemEntry>>(
           container,
           pantryItemsProvider,
-              (items) => items.any((item) => item.name == "Test Pantry Item"),
+              (items) => items.any((item) => item.id == pantryItemId),
         );
 
         // Add override
         final notifier = container.read(
-          recipeIngredientTermOverrideNotifierProvider(newRecipeId).notifier,
+          recipeIngredientTermOverrideNotifierProvider(recipeId).notifier,
         );
 
         const term = "shallot";
 
         await notifier.addOverride(
-          recipeId: newRecipeId,
+          recipeId: recipeId,
           term: term,
-          pantryItemId: newPantryItemId,
+          pantryItemId: pantryItemId, // <-- correct!
           userId: userId,
         );
 
-        // Confirm it exists
+        // Confirm override exists
         final overrides = await waitForProviderValue<List<RecipeIngredientTermOverrideEntry>>(
           container,
-          recipeIngredientTermOverrideNotifierProvider(newRecipeId),
+          recipeIngredientTermOverrideNotifierProvider(recipeId),
               (overrides) => overrides.any((o) => o.term == term),
         );
 
@@ -96,12 +94,11 @@ void main() async {
       await withTestUser('owner', () async {
         final userId = Supabase.instance.client.auth.currentUser!.id;
 
-        final newRecipeId = const Uuid().v4();
-        final newPantryItemId = const Uuid().v4();
+        final recipeId = const Uuid().v4();
 
         // Create real recipe
         await container.read(recipeNotifierProvider.notifier).addRecipe(
-          id: newRecipeId,
+          id: recipeId,
           title: "Test Recipe for Deletion",
           language: "en",
           userId: userId,
@@ -112,39 +109,38 @@ void main() async {
         await waitForProviderValue<List<RecipeWithFolders>>(
           container,
           recipeNotifierProvider,
-              (recipes) => recipes.any((r) => r.recipe.id == newRecipeId),
+              (recipes) => recipes.any((r) => r.recipe.id == recipeId),
         );
 
-        // Create real pantry item
-        await container.read(pantryItemsProvider.notifier).addItem(
+        // Create real pantry item and capture ID
+        final pantryItemId = await container.read(pantryItemsProvider.notifier).addItem(
           name: "Test Pantry Item 2",
           userId: userId,
-          householdId: null,
         );
 
         await waitForProviderValue<List<PantryItemEntry>>(
           container,
           pantryItemsProvider,
-              (items) => items.any((item) => item.name == "Test Pantry Item 2"),
+              (items) => items.any((item) => item.id == pantryItemId),
         );
 
         // Add override
         final notifier = container.read(
-          recipeIngredientTermOverrideNotifierProvider(newRecipeId).notifier,
+          recipeIngredientTermOverrideNotifierProvider(recipeId).notifier,
         );
 
         const term = "onion";
 
         await notifier.addOverride(
-          recipeId: newRecipeId,
+          recipeId: recipeId,
           term: term,
-          pantryItemId: newPantryItemId,
+          pantryItemId: pantryItemId, // <-- correct!
           userId: userId,
         );
 
         final overrides = await waitForProviderValue<List<RecipeIngredientTermOverrideEntry>>(
           container,
-          recipeIngredientTermOverrideNotifierProvider(newRecipeId),
+          recipeIngredientTermOverrideNotifierProvider(recipeId),
               (overrides) => overrides.any((o) => o.term == term),
         );
 
@@ -156,7 +152,7 @@ void main() async {
         // Confirm deletion
         final afterDeleteOverrides = await waitForProviderValue<List<RecipeIngredientTermOverrideEntry>>(
           container,
-          recipeIngredientTermOverrideNotifierProvider(newRecipeId),
+          recipeIngredientTermOverrideNotifierProvider(recipeId),
               (overrides) => overrides.every((o) => o.term != term),
         );
 

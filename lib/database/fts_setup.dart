@@ -14,6 +14,7 @@ Future<void> configureFts(PowerSyncDatabase db) async {
   migrations.add(createMigrationForPantryItemTerms());
   migrations.add(createMigrationForIngredientTermOverrides());
   migrations.add(createMigrationForTermsTriggers());
+  migrations.add(createMigrationForIngredientTermOverrideTriggers());
   await migrations.migrate(db);
 }
 
@@ -82,8 +83,8 @@ SqliteMigration createMigrationForIngredientTermOverrides() {
         recipe_id TEXT,
         input_term TEXT NOT NULL,
         mapped_term TEXT NOT NULL,
-        is_exclusive INTEGER DEFAULT 0,
-        created_at INTEGER
+        created_at INTEGER,
+        deleted_at INTEGER
       );
     ''');
   });
@@ -221,6 +222,52 @@ SqliteMigration createMigrationForTermsTriggers() {
     ''');
   });
 }
+
+SqliteMigration createMigrationForIngredientTermOverrideTriggers() {
+  const overridesTableName = 'recipe_ingredient_term_overrides';
+  final overridesInternalName = schema.tables.firstWhere((t) => t.name == overridesTableName).internalName;
+
+  return SqliteMigration(8, (tx) async {
+    await tx.execute('''
+      CREATE TRIGGER IF NOT EXISTS insert_ingredient_term_overrides
+      AFTER INSERT ON $overridesInternalName
+      BEGIN
+        DELETE FROM ingredient_term_overrides WHERE recipe_id = json_extract(NEW.data, '\$.recipeId') AND input_term = json_extract(NEW.data, '\$.term');
+        INSERT INTO ingredient_term_overrides (id, user_id, household_id, recipe_id, input_term, mapped_term, created_at)
+        VALUES (
+          NEW.id,
+          json_extract(NEW.data, '\$.userId'),
+          json_extract(NEW.data, '\$.householdId'),
+          json_extract(NEW.data, '\$.recipeId'),
+          json_extract(NEW.data, '\$.term'),
+          json_extract(NEW.data, '\$.pantryItemId'),
+          strftime('%s','now') * 1000
+        );
+      END;
+    ''');
+
+    await tx.execute('''
+      CREATE TRIGGER IF NOT EXISTS update_ingredient_term_overrides
+      AFTER UPDATE ON $overridesInternalName
+      BEGIN
+        DELETE FROM ingredient_term_overrides WHERE recipe_id = json_extract(NEW.data, '\$.recipeId') AND input_term = json_extract(NEW.data, '\$.term');
+        INSERT INTO ingredient_term_overrides (id, user_id, household_id, recipe_id, input_term, mapped_term, created_at)
+        VALUES (
+          NEW.id,
+          json_extract(NEW.data, '\$.userId'),
+          json_extract(NEW.data, '\$.householdId'),
+          json_extract(NEW.data, '\$.recipeId'),
+          json_extract(NEW.data, '\$.term'),
+          json_extract(NEW.data, '\$.pantryItemId'),
+          strftime('%s','now') * 1000
+        );
+      END;
+    ''');
+  });
+}
+
+
+
 
 
 
