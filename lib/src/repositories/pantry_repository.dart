@@ -22,6 +22,11 @@ class PantryRepository {
     String? userId,
     String? householdId,
     List<PantryItemTerm>? terms,
+    String? unit,
+    double? quantity,
+    String? baseUnit,
+    double? baseQuantity,
+    double? price,
   }) async {
     final newId = const Uuid().v4();
     final now = DateTime.now().millisecondsSinceEpoch;
@@ -33,6 +38,11 @@ class PantryRepository {
       inStock: Value(inStock),
       userId: Value(userId),
       householdId: Value(householdId),
+      unit: Value(unit),
+      quantity: Value(quantity),
+      baseUnit: Value(baseUnit),
+      baseQuantity: Value(baseQuantity),
+      price: Value(price),
       createdAt: Value(now),
       updatedAt: Value(now),
       terms: terms != null ? Value(terms) : const Value.absent(),
@@ -48,12 +58,22 @@ class PantryRepository {
     String? name,
     bool? inStock,
     List<PantryItemTerm>? terms,
+    String? unit,
+    double? quantity,
+    String? baseUnit,
+    double? baseQuantity,
+    double? price,
   }) {
     final now = DateTime.now().millisecondsSinceEpoch;
 
     final companion = PantryItemsCompanion(
       name: name != null ? Value(name) : const Value.absent(),
       inStock: inStock != null ? Value(inStock) : const Value.absent(),
+      unit: unit != null ? Value(unit) : const Value.absent(),
+      quantity: quantity != null ? Value(quantity) : const Value.absent(),
+      baseUnit: baseUnit != null ? Value(baseUnit) : const Value.absent(),
+      baseQuantity: baseQuantity != null ? Value(baseQuantity) : const Value.absent(),
+      price: price != null ? Value(price) : const Value.absent(),
       updatedAt: Value(now),
       terms: terms != null ? Value(terms) : const Value.absent(),
     );

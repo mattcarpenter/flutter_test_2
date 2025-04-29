@@ -415,3 +415,39 @@ CREATE POLICY "Users can delete recipe ingredient term overrides"
     auth.uid() = user_id
         OR (household_id IS NOT NULL AND is_household_member(household_id, auth.uid()))
     );
+
+-- CONVERTERS -----------------------------------------------
+CREATE POLICY "Users can view their own converters"
+    ON converters
+    FOR SELECT
+    USING (
+    auth.uid() = user_id
+        OR (household_id IS NOT NULL AND is_household_member(household_id, auth.uid()))
+    );
+
+CREATE POLICY "Users can insert converters"
+    ON converters
+    FOR INSERT
+    WITH CHECK (
+    auth.uid() = user_id
+        OR (household_id IS NOT NULL AND is_household_member(household_id, auth.uid()))
+    );
+
+CREATE POLICY "Users can update converters"
+    ON converters
+    FOR UPDATE
+    USING (
+    auth.uid() = user_id
+        OR (household_id IS NOT NULL AND is_household_member(household_id, auth.uid()))
+    )
+    WITH CHECK (
+    household_id IS NULL OR is_household_member(household_id, auth.uid())
+    );
+
+CREATE POLICY "Users can delete converters"
+    ON converters
+    FOR DELETE
+    USING (
+    auth.uid() = user_id
+        OR (household_id IS NOT NULL AND is_household_member(household_id, auth.uid()))
+    );

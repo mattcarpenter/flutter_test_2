@@ -168,6 +168,11 @@ CREATE TABLE public.pantry_items (
                                      in_stock integer NOT NULL DEFAULT 1,
                                      user_id uuid NOT NULL,
                                      household_id uuid NULL,
+                                     unit text NULL,
+                                     quantity double precision NULL,
+                                     base_unit text NULL,
+                                     base_quantity double precision NULL,
+                                     price double precision NULL,
                                      created_at bigint NULL,
                                      updated_at bigint NULL,
                                      deleted_at bigint NULL,
@@ -242,5 +247,27 @@ CREATE INDEX IF NOT EXISTS shopping_list_items_list_idx ON public.shopping_list_
 CREATE INDEX IF NOT EXISTS shopping_list_items_recipe_idx ON public.shopping_list_items (source_recipe_id);
 CREATE INDEX IF NOT EXISTS shopping_list_items_user_idx ON public.shopping_list_items (user_id);
 CREATE INDEX IF NOT EXISTS shopping_list_items_household_idx ON public.shopping_list_items (household_id);
+
+CREATE TABLE public.converters (
+                                   id uuid NOT NULL DEFAULT extensions.uuid_generate_v4(),
+                                   term text NOT NULL,
+                                   from_unit text NOT NULL,
+                                   to_base_unit text NOT NULL,
+                                   conversion_factor double precision NOT NULL,
+                                   is_approximate integer NOT NULL DEFAULT 0,
+                                   notes text NULL,
+                                   user_id uuid NOT NULL,
+                                   household_id uuid NULL,
+                                   created_at bigint NULL,
+                                   updated_at bigint NULL,
+                                   deleted_at bigint NULL,
+                                   CONSTRAINT converters_pkey PRIMARY KEY (id),
+                                   CONSTRAINT converters_user_id_fkey FOREIGN KEY (user_id) REFERENCES auth.users (id) ON DELETE CASCADE,
+                                   CONSTRAINT converters_household_id_fkey FOREIGN KEY (household_id) REFERENCES public.households (id) ON DELETE CASCADE
+);
+
+CREATE INDEX IF NOT EXISTS converters_term_idx ON public.converters (term);
+CREATE INDEX IF NOT EXISTS converters_user_idx ON public.converters (user_id);
+CREATE INDEX IF NOT EXISTS converters_household_idx ON public.converters (household_id);
 
 CREATE PUBLICATION powersync FOR ALL TABLES;
