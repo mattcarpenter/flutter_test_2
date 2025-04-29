@@ -13,6 +13,7 @@ import 'package:recipe_app/src/providers/pantry_provider.dart';
 import 'package:recipe_app/src/providers/recipe_provider.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:uuid/uuid.dart';
+import '../../utils/test_household_manager.dart';
 import '../../utils/test_utils.dart';
 import '../../utils/test_user_manager.dart';
 
@@ -346,5 +347,309 @@ void main() async {
       });
     });
 
+    testWidgets('Materialized terms are recreated when user logs out and back in', (tester) async {
+      // Create test user
+      await TestUserManager.createTestUser('owner');
+
+      String recipeId = '';
+      String pantryItemId = '';
+
+      // First session: Create recipe and pantry item with terms, then verify they exist in materialized tables
+      await withTestUser('owner', () async {
+        final userId = Supabase.instance.client.auth.currentUser!.id;
+
+        // Create a recipe with ingredients that have terms
+        recipeId = const Uuid().v4();
+        final onionTerms = [
+          IngredientTerm(value: "onion", source: "ai", sort: 1),
+          IngredientTerm(value: "yellow onion", source: "ai", sort: 2),
+        ];
+
+        final ingredients = [
+          Ingredient(
+            id: "ing_1",
+            type: "ingredient",
+            name: "Diced Yellow Onion",
+            note: "Medium sized",
+            primaryAmount1Value: "1",
+            primaryAmount1Unit: "whole",
+            primaryAmount1Type: "count",
+            terms: onionTerms,
+          ),
+        ];
+
+        await container.read(recipeNotifierProvider.notifier).addRecipe(
+          id: recipeId,
+          title: "Persistence Test Recipe",
+          language: "en",
+          description: "Testing persistence",
+          userId: userId,
+          createdAt: DateTime.now().millisecondsSinceEpoch,
+          updatedAt: DateTime.now().millisecondsSinceEpoch,
+          ingredients: ingredients,
+        );
+
+        // Wait for the recipe to be stored
+        await waitForProviderValue<List<RecipeWithFolders>>(
+          container,
+          recipeNotifierProvider,
+          (recipes) => recipes.any((r) => r.recipe.title == "Persistence Test Recipe"),
+        );
+
+        // Create a pantry item with terms
+        final appleTerms = [
+          PantryItemTerm(value: "apple", source: "user", sort: 1),
+          PantryItemTerm(value: "green apple", source: "user", sort: 2),
+        ];
+
+        // Add a pantry item
+        pantryItemId = await container.read(pantryItemsProvider.notifier).addItem(
+          name: "Green Apples",
+          inStock: true,
+          userId: userId,
+        );
+
+        // Wait for the pantry item to be stored
+        await waitForProviderValue<List<PantryItemEntry>>(
+          container,
+          pantryItemsProvider,
+          (items) => items.any((item) => item.name == "Green Apples"),
+        );
+
+        // Update the pantry item to add terms
+        await appDb.update(appDb.pantryItems).replace(
+          PantryItemsCompanion(
+            id: Value(pantryItemId),
+            name: const Value("Green Apples"),
+            inStock: const Value(true),
+            userId: Value(userId),
+            terms: Value(appleTerms),
+          ),
+        );
+
+        // Allow some time for triggers to execute and data to sync to server
+        await Future.delayed(const Duration(seconds: 1));
+
+        // Verify the materialized terms exist before logout
+        final recipeMaterializedTerms = await appDb.customSelect(
+          '''
+          SELECT COUNT(*) as count FROM recipe_ingredient_terms 
+          WHERE recipe_id = ?
+          ''',
+          variables: [Variable.withString(recipeId)],
+        ).getSingle();
+
+        final pantryMaterializedTerms = await appDb.customSelect(
+          '''
+          SELECT COUNT(*) as count FROM pantry_item_terms 
+          WHERE pantry_item_id = ?
+          ''',
+          variables: [Variable.withString(pantryItemId)],
+        ).getSingle();
+
+        expect(recipeMaterializedTerms.read<int>('count'), 2);
+        expect(pantryMaterializedTerms.read<int>('count'), 2);
+      });
+
+      // At this point, user is logged out. Local DB is cleared.
+
+      // Log back in and check that materialized tables are recreated
+      await withTestUser('owner', () async {
+        // Wait for data to sync back from server
+        await Future.delayed(const Duration(seconds: 1));
+
+        // Verify the recipe and pantry item are back
+        await waitForProviderValue<List<RecipeWithFolders>>(
+          container,
+          recipeNotifierProvider,
+          (recipes) => recipes.any((r) => r.recipe.title == "Persistence Test Recipe"),
+        );
+
+        await waitForProviderValue<List<PantryItemEntry>>(
+          container,
+          pantryItemsProvider,
+          (items) => items.any((item) => item.name == "Green Apples"),
+        );
+
+        // Now verify that the materialized terms were recreated
+        final recipeMaterializedTerms = await appDb.customSelect(
+          '''
+          SELECT COUNT(*) as count FROM recipe_ingredient_terms 
+          WHERE recipe_id = ?
+          ''',
+          variables: [Variable.withString(recipeId)],
+        ).getSingle();
+
+        final pantryMaterializedTerms = await appDb.customSelect(
+          '''
+          SELECT COUNT(*) as count FROM pantry_item_terms 
+          WHERE pantry_item_id = ?
+          ''',
+          variables: [Variable.withString(pantryItemId)],
+        ).getSingle();
+
+        expect(recipeMaterializedTerms.read<int>('count'), 2);
+        expect(pantryMaterializedTerms.read<int>('count'), 2);
+      });
+    });
+
+    testWidgets('Materialized terms work with household sharing', (tester) async {
+      // Create test users "owner" and "member"
+      await TestUserManager.createTestUsers(['household_owner', 'household_member']);
+
+      late String householdId;
+      late String recipeId;
+      late String pantryItemId;
+
+      // Step 1: household_owner logs in, creates a household
+      await withTestUser('household_owner', () async {
+        final householdOwnerId = Supabase.instance.client.auth.currentUser!.id;
+        final householdData = await TestHouseholdManager.createHousehold('Test Household', householdOwnerId);
+        householdId = householdData['id'] as String;
+      });
+
+      // Step 2: Add household_member to the household
+      await withTestUser('household_member', () async {
+        final householdMemberId = Supabase.instance.client.auth.currentUser!.id;
+        await TestHouseholdManager.addHouseholdMember(householdId, householdMemberId);
+      });
+
+      // Step 3: household_owner creates recipe and pantry item with terms and associates with household
+      await withTestUser('household_owner', () async {
+        final householdOwnerId = Supabase.instance.client.auth.currentUser!.id;
+
+        // Create recipe with terms and assign to household
+        recipeId = const Uuid().v4();
+        final carrotTerms = [
+          IngredientTerm(value: "carrot", source: "ai", sort: 1),
+          IngredientTerm(value: "orange vegetable", source: "ai", sort: 2),
+        ];
+
+        final ingredients = [
+          Ingredient(
+            id: "ing_1",
+            type: "ingredient",
+            name: "Diced Carrots",
+            note: "Fresh",
+            primaryAmount1Value: "3",
+            primaryAmount1Unit: "whole",
+            primaryAmount1Type: "count",
+            terms: carrotTerms,
+          ),
+        ];
+
+        await container.read(recipeNotifierProvider.notifier).addRecipe(
+          id: recipeId,
+          title: "Household Shared Recipe",
+          language: "en",
+          description: "Recipe shared with household",
+          userId: householdOwnerId,
+          householdId: householdId,
+          createdAt: DateTime.now().millisecondsSinceEpoch,
+          updatedAt: DateTime.now().millisecondsSinceEpoch,
+          ingredients: ingredients,
+        );
+
+        await waitForProviderValue<List<RecipeWithFolders>>(
+          container,
+          recipeNotifierProvider,
+          (recipes) => recipes.any((r) => r.recipe.title == "Household Shared Recipe"),
+        );
+
+        // Create pantry item with terms and assign to household
+        final potatoTerms = [
+          PantryItemTerm(value: "potato", source: "user", sort: 1),
+          PantryItemTerm(value: "russet potato", source: "user", sort: 2),
+        ];
+
+        // Add pantry item with householdId
+        pantryItemId = await container.read(pantryItemsProvider.notifier).addItem(
+          name: "Russet Potatoes",
+          inStock: true,
+          userId: householdOwnerId,
+          householdId: householdId,
+        );
+
+        await waitForProviderValue<List<PantryItemEntry>>(
+          container,
+          pantryItemsProvider,
+          (items) => items.any((item) => item.name == "Russet Potatoes"),
+        );
+
+        // Update pantry item to add terms
+        await appDb.update(appDb.pantryItems).replace(
+          PantryItemsCompanion(
+            id: Value(pantryItemId),
+            name: const Value("Russet Potatoes"),
+            inStock: const Value(true),
+            userId: Value(householdOwnerId),
+            householdId: Value(householdId),
+            terms: Value(potatoTerms),
+          ),
+        );
+
+        // Allow time for triggers to execute and sync
+        await Future.delayed(const Duration(seconds: 3));
+
+        // Verify materialized terms exist for owner
+        final recipeMaterializedTerms = await appDb.customSelect(
+          '''
+          SELECT COUNT(*) as count FROM recipe_ingredient_terms 
+          WHERE recipe_id = ?
+          ''',
+          variables: [Variable.withString(recipeId)],
+        ).getSingle();
+
+        final pantryMaterializedTerms = await appDb.customSelect(
+          '''
+          SELECT COUNT(*) as count FROM pantry_item_terms 
+          WHERE pantry_item_id = ?
+          ''',
+          variables: [Variable.withString(pantryItemId)],
+        ).getSingle();
+
+        expect(recipeMaterializedTerms.read<int>('count'), 2);
+        expect(pantryMaterializedTerms.read<int>('count'), 2);
+      });
+
+      // Step 4: household_member logs in and should see the shared items with materialized terms
+      await withTestUser('household_member', () async {
+        // Wait for sync to complete
+        await Future.delayed(const Duration(seconds: 5));
+
+        // Verify the household_member can see the items
+        await waitForProviderValue<List<RecipeWithFolders>>(
+          container,
+          recipeNotifierProvider,
+          (recipes) => recipes.any((r) => r.recipe.title == "Household Shared Recipe"),
+        );
+
+        await waitForProviderValue<List<PantryItemEntry>>(
+          container,
+          pantryItemsProvider,
+          (items) => items.any((item) => item.name == "Russet Potatoes"),
+        );
+
+        // Verify materialized terms exist for household member
+        final recipeMaterializedTerms = await appDb.customSelect(
+          '''
+          SELECT COUNT(*) as count FROM recipe_ingredient_terms 
+          WHERE recipe_id = ?
+          ''',
+          variables: [Variable.withString(recipeId)],
+        ).getSingle();
+
+        final pantryMaterializedTerms = await appDb.customSelect(
+          '''
+          SELECT COUNT(*) as count FROM pantry_item_terms 
+          WHERE pantry_item_id = ?
+          ''',
+          variables: [Variable.withString(pantryItemId)],
+        ).getSingle();
+
+        expect(recipeMaterializedTerms.read<int>('count'), 2);
+        expect(pantryMaterializedTerms.read<int>('count'), 2);
+      });
+    });
   });
 }

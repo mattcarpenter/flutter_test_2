@@ -3,7 +3,7 @@ import 'package:integration_test/integration_test.dart';
 import 'package:recipe_app/utils/mecab_wrapper.dart';
 import 'package:path_provider_platform_interface/path_provider_platform_interface.dart';
 
-import '../../utils/test_utils.dart';
+import 'utils/test_utils.dart';
 
 void main() {
   IntegrationTestWidgetsFlutterBinding.ensureInitialized();
