@@ -3110,6 +3110,34 @@ class $PantryItemsTable extends PantryItems
   late final GeneratedColumn<String> householdId = GeneratedColumn<String>(
       'household_id', aliasedName, true,
       type: DriftSqlType.string, requiredDuringInsert: false);
+  static const VerificationMeta _unitMeta = const VerificationMeta('unit');
+  @override
+  late final GeneratedColumn<String> unit = GeneratedColumn<String>(
+      'unit', aliasedName, true,
+      type: DriftSqlType.string, requiredDuringInsert: false);
+  static const VerificationMeta _quantityMeta =
+      const VerificationMeta('quantity');
+  @override
+  late final GeneratedColumn<double> quantity = GeneratedColumn<double>(
+      'quantity', aliasedName, true,
+      type: DriftSqlType.double, requiredDuringInsert: false);
+  static const VerificationMeta _baseUnitMeta =
+      const VerificationMeta('baseUnit');
+  @override
+  late final GeneratedColumn<String> baseUnit = GeneratedColumn<String>(
+      'base_unit', aliasedName, true,
+      type: DriftSqlType.string, requiredDuringInsert: false);
+  static const VerificationMeta _baseQuantityMeta =
+      const VerificationMeta('baseQuantity');
+  @override
+  late final GeneratedColumn<double> baseQuantity = GeneratedColumn<double>(
+      'base_quantity', aliasedName, true,
+      type: DriftSqlType.double, requiredDuringInsert: false);
+  static const VerificationMeta _priceMeta = const VerificationMeta('price');
+  @override
+  late final GeneratedColumn<double> price = GeneratedColumn<double>(
+      'price', aliasedName, true,
+      type: DriftSqlType.double, requiredDuringInsert: false);
   static const VerificationMeta _createdAtMeta =
       const VerificationMeta('createdAt');
   @override
@@ -3142,6 +3170,11 @@ class $PantryItemsTable extends PantryItems
         inStock,
         userId,
         householdId,
+        unit,
+        quantity,
+        baseUnit,
+        baseQuantity,
+        price,
         createdAt,
         updatedAt,
         deletedAt,
@@ -3180,6 +3213,28 @@ class $PantryItemsTable extends PantryItems
           householdId.isAcceptableOrUnknown(
               data['household_id']!, _householdIdMeta));
     }
+    if (data.containsKey('unit')) {
+      context.handle(
+          _unitMeta, unit.isAcceptableOrUnknown(data['unit']!, _unitMeta));
+    }
+    if (data.containsKey('quantity')) {
+      context.handle(_quantityMeta,
+          quantity.isAcceptableOrUnknown(data['quantity']!, _quantityMeta));
+    }
+    if (data.containsKey('base_unit')) {
+      context.handle(_baseUnitMeta,
+          baseUnit.isAcceptableOrUnknown(data['base_unit']!, _baseUnitMeta));
+    }
+    if (data.containsKey('base_quantity')) {
+      context.handle(
+          _baseQuantityMeta,
+          baseQuantity.isAcceptableOrUnknown(
+              data['base_quantity']!, _baseQuantityMeta));
+    }
+    if (data.containsKey('price')) {
+      context.handle(
+          _priceMeta, price.isAcceptableOrUnknown(data['price']!, _priceMeta));
+    }
     if (data.containsKey('created_at')) {
       context.handle(_createdAtMeta,
           createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta));
@@ -3212,6 +3267,16 @@ class $PantryItemsTable extends PantryItems
           .read(DriftSqlType.string, data['${effectivePrefix}user_id']),
       householdId: attachedDatabase.typeMapping
           .read(DriftSqlType.string, data['${effectivePrefix}household_id']),
+      unit: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}unit']),
+      quantity: attachedDatabase.typeMapping
+          .read(DriftSqlType.double, data['${effectivePrefix}quantity']),
+      baseUnit: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}base_unit']),
+      baseQuantity: attachedDatabase.typeMapping
+          .read(DriftSqlType.double, data['${effectivePrefix}base_quantity']),
+      price: attachedDatabase.typeMapping
+          .read(DriftSqlType.double, data['${effectivePrefix}price']),
       createdAt: attachedDatabase.typeMapping
           .read(DriftSqlType.int, data['${effectivePrefix}created_at']),
       updatedAt: attachedDatabase.typeMapping
@@ -3241,6 +3306,11 @@ class PantryItemEntry extends DataClass implements Insertable<PantryItemEntry> {
   final bool inStock;
   final String? userId;
   final String? householdId;
+  final String? unit;
+  final double? quantity;
+  final String? baseUnit;
+  final double? baseQuantity;
+  final double? price;
   final int? createdAt;
   final int? updatedAt;
   final int? deletedAt;
@@ -3251,6 +3321,11 @@ class PantryItemEntry extends DataClass implements Insertable<PantryItemEntry> {
       required this.inStock,
       this.userId,
       this.householdId,
+      this.unit,
+      this.quantity,
+      this.baseUnit,
+      this.baseQuantity,
+      this.price,
       this.createdAt,
       this.updatedAt,
       this.deletedAt,
@@ -3266,6 +3341,21 @@ class PantryItemEntry extends DataClass implements Insertable<PantryItemEntry> {
     }
     if (!nullToAbsent || householdId != null) {
       map['household_id'] = Variable<String>(householdId);
+    }
+    if (!nullToAbsent || unit != null) {
+      map['unit'] = Variable<String>(unit);
+    }
+    if (!nullToAbsent || quantity != null) {
+      map['quantity'] = Variable<double>(quantity);
+    }
+    if (!nullToAbsent || baseUnit != null) {
+      map['base_unit'] = Variable<String>(baseUnit);
+    }
+    if (!nullToAbsent || baseQuantity != null) {
+      map['base_quantity'] = Variable<double>(baseQuantity);
+    }
+    if (!nullToAbsent || price != null) {
+      map['price'] = Variable<double>(price);
     }
     if (!nullToAbsent || createdAt != null) {
       map['created_at'] = Variable<int>(createdAt);
@@ -3293,6 +3383,18 @@ class PantryItemEntry extends DataClass implements Insertable<PantryItemEntry> {
       householdId: householdId == null && nullToAbsent
           ? const Value.absent()
           : Value(householdId),
+      unit: unit == null && nullToAbsent ? const Value.absent() : Value(unit),
+      quantity: quantity == null && nullToAbsent
+          ? const Value.absent()
+          : Value(quantity),
+      baseUnit: baseUnit == null && nullToAbsent
+          ? const Value.absent()
+          : Value(baseUnit),
+      baseQuantity: baseQuantity == null && nullToAbsent
+          ? const Value.absent()
+          : Value(baseQuantity),
+      price:
+          price == null && nullToAbsent ? const Value.absent() : Value(price),
       createdAt: createdAt == null && nullToAbsent
           ? const Value.absent()
           : Value(createdAt),
@@ -3316,6 +3418,11 @@ class PantryItemEntry extends DataClass implements Insertable<PantryItemEntry> {
       inStock: serializer.fromJson<bool>(json['inStock']),
       userId: serializer.fromJson<String?>(json['userId']),
       householdId: serializer.fromJson<String?>(json['householdId']),
+      unit: serializer.fromJson<String?>(json['unit']),
+      quantity: serializer.fromJson<double?>(json['quantity']),
+      baseUnit: serializer.fromJson<String?>(json['baseUnit']),
+      baseQuantity: serializer.fromJson<double?>(json['baseQuantity']),
+      price: serializer.fromJson<double?>(json['price']),
       createdAt: serializer.fromJson<int?>(json['createdAt']),
       updatedAt: serializer.fromJson<int?>(json['updatedAt']),
       deletedAt: serializer.fromJson<int?>(json['deletedAt']),
@@ -3331,6 +3438,11 @@ class PantryItemEntry extends DataClass implements Insertable<PantryItemEntry> {
       'inStock': serializer.toJson<bool>(inStock),
       'userId': serializer.toJson<String?>(userId),
       'householdId': serializer.toJson<String?>(householdId),
+      'unit': serializer.toJson<String?>(unit),
+      'quantity': serializer.toJson<double?>(quantity),
+      'baseUnit': serializer.toJson<String?>(baseUnit),
+      'baseQuantity': serializer.toJson<double?>(baseQuantity),
+      'price': serializer.toJson<double?>(price),
       'createdAt': serializer.toJson<int?>(createdAt),
       'updatedAt': serializer.toJson<int?>(updatedAt),
       'deletedAt': serializer.toJson<int?>(deletedAt),
@@ -3344,6 +3456,11 @@ class PantryItemEntry extends DataClass implements Insertable<PantryItemEntry> {
           bool? inStock,
           Value<String?> userId = const Value.absent(),
           Value<String?> householdId = const Value.absent(),
+          Value<String?> unit = const Value.absent(),
+          Value<double?> quantity = const Value.absent(),
+          Value<String?> baseUnit = const Value.absent(),
+          Value<double?> baseQuantity = const Value.absent(),
+          Value<double?> price = const Value.absent(),
           Value<int?> createdAt = const Value.absent(),
           Value<int?> updatedAt = const Value.absent(),
           Value<int?> deletedAt = const Value.absent(),
@@ -3354,6 +3471,12 @@ class PantryItemEntry extends DataClass implements Insertable<PantryItemEntry> {
         inStock: inStock ?? this.inStock,
         userId: userId.present ? userId.value : this.userId,
         householdId: householdId.present ? householdId.value : this.householdId,
+        unit: unit.present ? unit.value : this.unit,
+        quantity: quantity.present ? quantity.value : this.quantity,
+        baseUnit: baseUnit.present ? baseUnit.value : this.baseUnit,
+        baseQuantity:
+            baseQuantity.present ? baseQuantity.value : this.baseQuantity,
+        price: price.present ? price.value : this.price,
         createdAt: createdAt.present ? createdAt.value : this.createdAt,
         updatedAt: updatedAt.present ? updatedAt.value : this.updatedAt,
         deletedAt: deletedAt.present ? deletedAt.value : this.deletedAt,
@@ -3367,6 +3490,13 @@ class PantryItemEntry extends DataClass implements Insertable<PantryItemEntry> {
       userId: data.userId.present ? data.userId.value : this.userId,
       householdId:
           data.householdId.present ? data.householdId.value : this.householdId,
+      unit: data.unit.present ? data.unit.value : this.unit,
+      quantity: data.quantity.present ? data.quantity.value : this.quantity,
+      baseUnit: data.baseUnit.present ? data.baseUnit.value : this.baseUnit,
+      baseQuantity: data.baseQuantity.present
+          ? data.baseQuantity.value
+          : this.baseQuantity,
+      price: data.price.present ? data.price.value : this.price,
       createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
       updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
       deletedAt: data.deletedAt.present ? data.deletedAt.value : this.deletedAt,
@@ -3382,6 +3512,11 @@ class PantryItemEntry extends DataClass implements Insertable<PantryItemEntry> {
           ..write('inStock: $inStock, ')
           ..write('userId: $userId, ')
           ..write('householdId: $householdId, ')
+          ..write('unit: $unit, ')
+          ..write('quantity: $quantity, ')
+          ..write('baseUnit: $baseUnit, ')
+          ..write('baseQuantity: $baseQuantity, ')
+          ..write('price: $price, ')
           ..write('createdAt: $createdAt, ')
           ..write('updatedAt: $updatedAt, ')
           ..write('deletedAt: $deletedAt, ')
@@ -3391,8 +3526,21 @@ class PantryItemEntry extends DataClass implements Insertable<PantryItemEntry> {
   }
 
   @override
-  int get hashCode => Object.hash(id, name, inStock, userId, householdId,
-      createdAt, updatedAt, deletedAt, terms);
+  int get hashCode => Object.hash(
+      id,
+      name,
+      inStock,
+      userId,
+      householdId,
+      unit,
+      quantity,
+      baseUnit,
+      baseQuantity,
+      price,
+      createdAt,
+      updatedAt,
+      deletedAt,
+      terms);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -3402,6 +3550,11 @@ class PantryItemEntry extends DataClass implements Insertable<PantryItemEntry> {
           other.inStock == this.inStock &&
           other.userId == this.userId &&
           other.householdId == this.householdId &&
+          other.unit == this.unit &&
+          other.quantity == this.quantity &&
+          other.baseUnit == this.baseUnit &&
+          other.baseQuantity == this.baseQuantity &&
+          other.price == this.price &&
           other.createdAt == this.createdAt &&
           other.updatedAt == this.updatedAt &&
           other.deletedAt == this.deletedAt &&
@@ -3414,6 +3567,11 @@ class PantryItemsCompanion extends UpdateCompanion<PantryItemEntry> {
   final Value<bool> inStock;
   final Value<String?> userId;
   final Value<String?> householdId;
+  final Value<String?> unit;
+  final Value<double?> quantity;
+  final Value<String?> baseUnit;
+  final Value<double?> baseQuantity;
+  final Value<double?> price;
   final Value<int?> createdAt;
   final Value<int?> updatedAt;
   final Value<int?> deletedAt;
@@ -3425,6 +3583,11 @@ class PantryItemsCompanion extends UpdateCompanion<PantryItemEntry> {
     this.inStock = const Value.absent(),
     this.userId = const Value.absent(),
     this.householdId = const Value.absent(),
+    this.unit = const Value.absent(),
+    this.quantity = const Value.absent(),
+    this.baseUnit = const Value.absent(),
+    this.baseQuantity = const Value.absent(),
+    this.price = const Value.absent(),
     this.createdAt = const Value.absent(),
     this.updatedAt = const Value.absent(),
     this.deletedAt = const Value.absent(),
@@ -3437,6 +3600,11 @@ class PantryItemsCompanion extends UpdateCompanion<PantryItemEntry> {
     this.inStock = const Value.absent(),
     this.userId = const Value.absent(),
     this.householdId = const Value.absent(),
+    this.unit = const Value.absent(),
+    this.quantity = const Value.absent(),
+    this.baseUnit = const Value.absent(),
+    this.baseQuantity = const Value.absent(),
+    this.price = const Value.absent(),
     this.createdAt = const Value.absent(),
     this.updatedAt = const Value.absent(),
     this.deletedAt = const Value.absent(),
@@ -3449,6 +3617,11 @@ class PantryItemsCompanion extends UpdateCompanion<PantryItemEntry> {
     Expression<bool>? inStock,
     Expression<String>? userId,
     Expression<String>? householdId,
+    Expression<String>? unit,
+    Expression<double>? quantity,
+    Expression<String>? baseUnit,
+    Expression<double>? baseQuantity,
+    Expression<double>? price,
     Expression<int>? createdAt,
     Expression<int>? updatedAt,
     Expression<int>? deletedAt,
@@ -3461,6 +3634,11 @@ class PantryItemsCompanion extends UpdateCompanion<PantryItemEntry> {
       if (inStock != null) 'in_stock': inStock,
       if (userId != null) 'user_id': userId,
       if (householdId != null) 'household_id': householdId,
+      if (unit != null) 'unit': unit,
+      if (quantity != null) 'quantity': quantity,
+      if (baseUnit != null) 'base_unit': baseUnit,
+      if (baseQuantity != null) 'base_quantity': baseQuantity,
+      if (price != null) 'price': price,
       if (createdAt != null) 'created_at': createdAt,
       if (updatedAt != null) 'updated_at': updatedAt,
       if (deletedAt != null) 'deleted_at': deletedAt,
@@ -3475,6 +3653,11 @@ class PantryItemsCompanion extends UpdateCompanion<PantryItemEntry> {
       Value<bool>? inStock,
       Value<String?>? userId,
       Value<String?>? householdId,
+      Value<String?>? unit,
+      Value<double?>? quantity,
+      Value<String?>? baseUnit,
+      Value<double?>? baseQuantity,
+      Value<double?>? price,
       Value<int?>? createdAt,
       Value<int?>? updatedAt,
       Value<int?>? deletedAt,
@@ -3486,6 +3669,11 @@ class PantryItemsCompanion extends UpdateCompanion<PantryItemEntry> {
       inStock: inStock ?? this.inStock,
       userId: userId ?? this.userId,
       householdId: householdId ?? this.householdId,
+      unit: unit ?? this.unit,
+      quantity: quantity ?? this.quantity,
+      baseUnit: baseUnit ?? this.baseUnit,
+      baseQuantity: baseQuantity ?? this.baseQuantity,
+      price: price ?? this.price,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
       deletedAt: deletedAt ?? this.deletedAt,
@@ -3511,6 +3699,21 @@ class PantryItemsCompanion extends UpdateCompanion<PantryItemEntry> {
     }
     if (householdId.present) {
       map['household_id'] = Variable<String>(householdId.value);
+    }
+    if (unit.present) {
+      map['unit'] = Variable<String>(unit.value);
+    }
+    if (quantity.present) {
+      map['quantity'] = Variable<double>(quantity.value);
+    }
+    if (baseUnit.present) {
+      map['base_unit'] = Variable<String>(baseUnit.value);
+    }
+    if (baseQuantity.present) {
+      map['base_quantity'] = Variable<double>(baseQuantity.value);
+    }
+    if (price.present) {
+      map['price'] = Variable<double>(price.value);
     }
     if (createdAt.present) {
       map['created_at'] = Variable<int>(createdAt.value);
@@ -3539,6 +3742,11 @@ class PantryItemsCompanion extends UpdateCompanion<PantryItemEntry> {
           ..write('inStock: $inStock, ')
           ..write('userId: $userId, ')
           ..write('householdId: $householdId, ')
+          ..write('unit: $unit, ')
+          ..write('quantity: $quantity, ')
+          ..write('baseUnit: $baseUnit, ')
+          ..write('baseQuantity: $baseQuantity, ')
+          ..write('price: $price, ')
           ..write('createdAt: $createdAt, ')
           ..write('updatedAt: $updatedAt, ')
           ..write('deletedAt: $deletedAt, ')
@@ -4996,6 +5204,613 @@ class ShoppingListsCompanion extends UpdateCompanion<ShoppingListEntry> {
   }
 }
 
+class $ConvertersTable extends Converters
+    with TableInfo<$ConvertersTable, ConverterEntry> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $ConvertersTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<String> id = GeneratedColumn<String>(
+      'id', aliasedName, false,
+      type: DriftSqlType.string,
+      requiredDuringInsert: false,
+      clientDefault: () => const Uuid().v4());
+  static const VerificationMeta _termMeta = const VerificationMeta('term');
+  @override
+  late final GeneratedColumn<String> term = GeneratedColumn<String>(
+      'term', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _fromUnitMeta =
+      const VerificationMeta('fromUnit');
+  @override
+  late final GeneratedColumn<String> fromUnit = GeneratedColumn<String>(
+      'from_unit', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _toBaseUnitMeta =
+      const VerificationMeta('toBaseUnit');
+  @override
+  late final GeneratedColumn<String> toBaseUnit = GeneratedColumn<String>(
+      'to_base_unit', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _conversionFactorMeta =
+      const VerificationMeta('conversionFactor');
+  @override
+  late final GeneratedColumn<double> conversionFactor = GeneratedColumn<double>(
+      'conversion_factor', aliasedName, false,
+      type: DriftSqlType.double, requiredDuringInsert: true);
+  static const VerificationMeta _isApproximateMeta =
+      const VerificationMeta('isApproximate');
+  @override
+  late final GeneratedColumn<bool> isApproximate = GeneratedColumn<bool>(
+      'is_approximate', aliasedName, false,
+      type: DriftSqlType.bool,
+      requiredDuringInsert: false,
+      defaultConstraints: GeneratedColumn.constraintIsAlways(
+          'CHECK ("is_approximate" IN (0, 1))'),
+      defaultValue: const Constant(false));
+  static const VerificationMeta _notesMeta = const VerificationMeta('notes');
+  @override
+  late final GeneratedColumn<String> notes = GeneratedColumn<String>(
+      'notes', aliasedName, true,
+      type: DriftSqlType.string, requiredDuringInsert: false);
+  static const VerificationMeta _userIdMeta = const VerificationMeta('userId');
+  @override
+  late final GeneratedColumn<String> userId = GeneratedColumn<String>(
+      'user_id', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _householdIdMeta =
+      const VerificationMeta('householdId');
+  @override
+  late final GeneratedColumn<String> householdId = GeneratedColumn<String>(
+      'household_id', aliasedName, true,
+      type: DriftSqlType.string, requiredDuringInsert: false);
+  static const VerificationMeta _createdAtMeta =
+      const VerificationMeta('createdAt');
+  @override
+  late final GeneratedColumn<int> createdAt = GeneratedColumn<int>(
+      'created_at', aliasedName, true,
+      type: DriftSqlType.int, requiredDuringInsert: false);
+  static const VerificationMeta _updatedAtMeta =
+      const VerificationMeta('updatedAt');
+  @override
+  late final GeneratedColumn<int> updatedAt = GeneratedColumn<int>(
+      'updated_at', aliasedName, true,
+      type: DriftSqlType.int, requiredDuringInsert: false);
+  static const VerificationMeta _deletedAtMeta =
+      const VerificationMeta('deletedAt');
+  @override
+  late final GeneratedColumn<int> deletedAt = GeneratedColumn<int>(
+      'deleted_at', aliasedName, true,
+      type: DriftSqlType.int, requiredDuringInsert: false);
+  @override
+  List<GeneratedColumn> get $columns => [
+        id,
+        term,
+        fromUnit,
+        toBaseUnit,
+        conversionFactor,
+        isApproximate,
+        notes,
+        userId,
+        householdId,
+        createdAt,
+        updatedAt,
+        deletedAt
+      ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'converters';
+  @override
+  VerificationContext validateIntegrity(Insertable<ConverterEntry> instance,
+      {bool isInserting = false}) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    }
+    if (data.containsKey('term')) {
+      context.handle(
+          _termMeta, term.isAcceptableOrUnknown(data['term']!, _termMeta));
+    } else if (isInserting) {
+      context.missing(_termMeta);
+    }
+    if (data.containsKey('from_unit')) {
+      context.handle(_fromUnitMeta,
+          fromUnit.isAcceptableOrUnknown(data['from_unit']!, _fromUnitMeta));
+    } else if (isInserting) {
+      context.missing(_fromUnitMeta);
+    }
+    if (data.containsKey('to_base_unit')) {
+      context.handle(
+          _toBaseUnitMeta,
+          toBaseUnit.isAcceptableOrUnknown(
+              data['to_base_unit']!, _toBaseUnitMeta));
+    } else if (isInserting) {
+      context.missing(_toBaseUnitMeta);
+    }
+    if (data.containsKey('conversion_factor')) {
+      context.handle(
+          _conversionFactorMeta,
+          conversionFactor.isAcceptableOrUnknown(
+              data['conversion_factor']!, _conversionFactorMeta));
+    } else if (isInserting) {
+      context.missing(_conversionFactorMeta);
+    }
+    if (data.containsKey('is_approximate')) {
+      context.handle(
+          _isApproximateMeta,
+          isApproximate.isAcceptableOrUnknown(
+              data['is_approximate']!, _isApproximateMeta));
+    }
+    if (data.containsKey('notes')) {
+      context.handle(
+          _notesMeta, notes.isAcceptableOrUnknown(data['notes']!, _notesMeta));
+    }
+    if (data.containsKey('user_id')) {
+      context.handle(_userIdMeta,
+          userId.isAcceptableOrUnknown(data['user_id']!, _userIdMeta));
+    } else if (isInserting) {
+      context.missing(_userIdMeta);
+    }
+    if (data.containsKey('household_id')) {
+      context.handle(
+          _householdIdMeta,
+          householdId.isAcceptableOrUnknown(
+              data['household_id']!, _householdIdMeta));
+    }
+    if (data.containsKey('created_at')) {
+      context.handle(_createdAtMeta,
+          createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta));
+    }
+    if (data.containsKey('updated_at')) {
+      context.handle(_updatedAtMeta,
+          updatedAt.isAcceptableOrUnknown(data['updated_at']!, _updatedAtMeta));
+    }
+    if (data.containsKey('deleted_at')) {
+      context.handle(_deletedAtMeta,
+          deletedAt.isAcceptableOrUnknown(data['deleted_at']!, _deletedAtMeta));
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  ConverterEntry map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return ConverterEntry(
+      id: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}id'])!,
+      term: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}term'])!,
+      fromUnit: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}from_unit'])!,
+      toBaseUnit: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}to_base_unit'])!,
+      conversionFactor: attachedDatabase.typeMapping.read(
+          DriftSqlType.double, data['${effectivePrefix}conversion_factor'])!,
+      isApproximate: attachedDatabase.typeMapping
+          .read(DriftSqlType.bool, data['${effectivePrefix}is_approximate'])!,
+      notes: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}notes']),
+      userId: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}user_id'])!,
+      householdId: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}household_id']),
+      createdAt: attachedDatabase.typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}created_at']),
+      updatedAt: attachedDatabase.typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}updated_at']),
+      deletedAt: attachedDatabase.typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}deleted_at']),
+    );
+  }
+
+  @override
+  $ConvertersTable createAlias(String alias) {
+    return $ConvertersTable(attachedDatabase, alias);
+  }
+}
+
+class ConverterEntry extends DataClass implements Insertable<ConverterEntry> {
+  final String id;
+  final String term;
+  final String fromUnit;
+  final String toBaseUnit;
+  final double conversionFactor;
+  final bool isApproximate;
+  final String? notes;
+  final String userId;
+  final String? householdId;
+  final int? createdAt;
+  final int? updatedAt;
+  final int? deletedAt;
+  const ConverterEntry(
+      {required this.id,
+      required this.term,
+      required this.fromUnit,
+      required this.toBaseUnit,
+      required this.conversionFactor,
+      required this.isApproximate,
+      this.notes,
+      required this.userId,
+      this.householdId,
+      this.createdAt,
+      this.updatedAt,
+      this.deletedAt});
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<String>(id);
+    map['term'] = Variable<String>(term);
+    map['from_unit'] = Variable<String>(fromUnit);
+    map['to_base_unit'] = Variable<String>(toBaseUnit);
+    map['conversion_factor'] = Variable<double>(conversionFactor);
+    map['is_approximate'] = Variable<bool>(isApproximate);
+    if (!nullToAbsent || notes != null) {
+      map['notes'] = Variable<String>(notes);
+    }
+    map['user_id'] = Variable<String>(userId);
+    if (!nullToAbsent || householdId != null) {
+      map['household_id'] = Variable<String>(householdId);
+    }
+    if (!nullToAbsent || createdAt != null) {
+      map['created_at'] = Variable<int>(createdAt);
+    }
+    if (!nullToAbsent || updatedAt != null) {
+      map['updated_at'] = Variable<int>(updatedAt);
+    }
+    if (!nullToAbsent || deletedAt != null) {
+      map['deleted_at'] = Variable<int>(deletedAt);
+    }
+    return map;
+  }
+
+  ConvertersCompanion toCompanion(bool nullToAbsent) {
+    return ConvertersCompanion(
+      id: Value(id),
+      term: Value(term),
+      fromUnit: Value(fromUnit),
+      toBaseUnit: Value(toBaseUnit),
+      conversionFactor: Value(conversionFactor),
+      isApproximate: Value(isApproximate),
+      notes:
+          notes == null && nullToAbsent ? const Value.absent() : Value(notes),
+      userId: Value(userId),
+      householdId: householdId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(householdId),
+      createdAt: createdAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(createdAt),
+      updatedAt: updatedAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(updatedAt),
+      deletedAt: deletedAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(deletedAt),
+    );
+  }
+
+  factory ConverterEntry.fromJson(Map<String, dynamic> json,
+      {ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return ConverterEntry(
+      id: serializer.fromJson<String>(json['id']),
+      term: serializer.fromJson<String>(json['term']),
+      fromUnit: serializer.fromJson<String>(json['fromUnit']),
+      toBaseUnit: serializer.fromJson<String>(json['toBaseUnit']),
+      conversionFactor: serializer.fromJson<double>(json['conversionFactor']),
+      isApproximate: serializer.fromJson<bool>(json['isApproximate']),
+      notes: serializer.fromJson<String?>(json['notes']),
+      userId: serializer.fromJson<String>(json['userId']),
+      householdId: serializer.fromJson<String?>(json['householdId']),
+      createdAt: serializer.fromJson<int?>(json['createdAt']),
+      updatedAt: serializer.fromJson<int?>(json['updatedAt']),
+      deletedAt: serializer.fromJson<int?>(json['deletedAt']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<String>(id),
+      'term': serializer.toJson<String>(term),
+      'fromUnit': serializer.toJson<String>(fromUnit),
+      'toBaseUnit': serializer.toJson<String>(toBaseUnit),
+      'conversionFactor': serializer.toJson<double>(conversionFactor),
+      'isApproximate': serializer.toJson<bool>(isApproximate),
+      'notes': serializer.toJson<String?>(notes),
+      'userId': serializer.toJson<String>(userId),
+      'householdId': serializer.toJson<String?>(householdId),
+      'createdAt': serializer.toJson<int?>(createdAt),
+      'updatedAt': serializer.toJson<int?>(updatedAt),
+      'deletedAt': serializer.toJson<int?>(deletedAt),
+    };
+  }
+
+  ConverterEntry copyWith(
+          {String? id,
+          String? term,
+          String? fromUnit,
+          String? toBaseUnit,
+          double? conversionFactor,
+          bool? isApproximate,
+          Value<String?> notes = const Value.absent(),
+          String? userId,
+          Value<String?> householdId = const Value.absent(),
+          Value<int?> createdAt = const Value.absent(),
+          Value<int?> updatedAt = const Value.absent(),
+          Value<int?> deletedAt = const Value.absent()}) =>
+      ConverterEntry(
+        id: id ?? this.id,
+        term: term ?? this.term,
+        fromUnit: fromUnit ?? this.fromUnit,
+        toBaseUnit: toBaseUnit ?? this.toBaseUnit,
+        conversionFactor: conversionFactor ?? this.conversionFactor,
+        isApproximate: isApproximate ?? this.isApproximate,
+        notes: notes.present ? notes.value : this.notes,
+        userId: userId ?? this.userId,
+        householdId: householdId.present ? householdId.value : this.householdId,
+        createdAt: createdAt.present ? createdAt.value : this.createdAt,
+        updatedAt: updatedAt.present ? updatedAt.value : this.updatedAt,
+        deletedAt: deletedAt.present ? deletedAt.value : this.deletedAt,
+      );
+  ConverterEntry copyWithCompanion(ConvertersCompanion data) {
+    return ConverterEntry(
+      id: data.id.present ? data.id.value : this.id,
+      term: data.term.present ? data.term.value : this.term,
+      fromUnit: data.fromUnit.present ? data.fromUnit.value : this.fromUnit,
+      toBaseUnit:
+          data.toBaseUnit.present ? data.toBaseUnit.value : this.toBaseUnit,
+      conversionFactor: data.conversionFactor.present
+          ? data.conversionFactor.value
+          : this.conversionFactor,
+      isApproximate: data.isApproximate.present
+          ? data.isApproximate.value
+          : this.isApproximate,
+      notes: data.notes.present ? data.notes.value : this.notes,
+      userId: data.userId.present ? data.userId.value : this.userId,
+      householdId:
+          data.householdId.present ? data.householdId.value : this.householdId,
+      createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
+      updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
+      deletedAt: data.deletedAt.present ? data.deletedAt.value : this.deletedAt,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('ConverterEntry(')
+          ..write('id: $id, ')
+          ..write('term: $term, ')
+          ..write('fromUnit: $fromUnit, ')
+          ..write('toBaseUnit: $toBaseUnit, ')
+          ..write('conversionFactor: $conversionFactor, ')
+          ..write('isApproximate: $isApproximate, ')
+          ..write('notes: $notes, ')
+          ..write('userId: $userId, ')
+          ..write('householdId: $householdId, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('deletedAt: $deletedAt')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(
+      id,
+      term,
+      fromUnit,
+      toBaseUnit,
+      conversionFactor,
+      isApproximate,
+      notes,
+      userId,
+      householdId,
+      createdAt,
+      updatedAt,
+      deletedAt);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is ConverterEntry &&
+          other.id == this.id &&
+          other.term == this.term &&
+          other.fromUnit == this.fromUnit &&
+          other.toBaseUnit == this.toBaseUnit &&
+          other.conversionFactor == this.conversionFactor &&
+          other.isApproximate == this.isApproximate &&
+          other.notes == this.notes &&
+          other.userId == this.userId &&
+          other.householdId == this.householdId &&
+          other.createdAt == this.createdAt &&
+          other.updatedAt == this.updatedAt &&
+          other.deletedAt == this.deletedAt);
+}
+
+class ConvertersCompanion extends UpdateCompanion<ConverterEntry> {
+  final Value<String> id;
+  final Value<String> term;
+  final Value<String> fromUnit;
+  final Value<String> toBaseUnit;
+  final Value<double> conversionFactor;
+  final Value<bool> isApproximate;
+  final Value<String?> notes;
+  final Value<String> userId;
+  final Value<String?> householdId;
+  final Value<int?> createdAt;
+  final Value<int?> updatedAt;
+  final Value<int?> deletedAt;
+  final Value<int> rowid;
+  const ConvertersCompanion({
+    this.id = const Value.absent(),
+    this.term = const Value.absent(),
+    this.fromUnit = const Value.absent(),
+    this.toBaseUnit = const Value.absent(),
+    this.conversionFactor = const Value.absent(),
+    this.isApproximate = const Value.absent(),
+    this.notes = const Value.absent(),
+    this.userId = const Value.absent(),
+    this.householdId = const Value.absent(),
+    this.createdAt = const Value.absent(),
+    this.updatedAt = const Value.absent(),
+    this.deletedAt = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  ConvertersCompanion.insert({
+    this.id = const Value.absent(),
+    required String term,
+    required String fromUnit,
+    required String toBaseUnit,
+    required double conversionFactor,
+    this.isApproximate = const Value.absent(),
+    this.notes = const Value.absent(),
+    required String userId,
+    this.householdId = const Value.absent(),
+    this.createdAt = const Value.absent(),
+    this.updatedAt = const Value.absent(),
+    this.deletedAt = const Value.absent(),
+    this.rowid = const Value.absent(),
+  })  : term = Value(term),
+        fromUnit = Value(fromUnit),
+        toBaseUnit = Value(toBaseUnit),
+        conversionFactor = Value(conversionFactor),
+        userId = Value(userId);
+  static Insertable<ConverterEntry> custom({
+    Expression<String>? id,
+    Expression<String>? term,
+    Expression<String>? fromUnit,
+    Expression<String>? toBaseUnit,
+    Expression<double>? conversionFactor,
+    Expression<bool>? isApproximate,
+    Expression<String>? notes,
+    Expression<String>? userId,
+    Expression<String>? householdId,
+    Expression<int>? createdAt,
+    Expression<int>? updatedAt,
+    Expression<int>? deletedAt,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (term != null) 'term': term,
+      if (fromUnit != null) 'from_unit': fromUnit,
+      if (toBaseUnit != null) 'to_base_unit': toBaseUnit,
+      if (conversionFactor != null) 'conversion_factor': conversionFactor,
+      if (isApproximate != null) 'is_approximate': isApproximate,
+      if (notes != null) 'notes': notes,
+      if (userId != null) 'user_id': userId,
+      if (householdId != null) 'household_id': householdId,
+      if (createdAt != null) 'created_at': createdAt,
+      if (updatedAt != null) 'updated_at': updatedAt,
+      if (deletedAt != null) 'deleted_at': deletedAt,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  ConvertersCompanion copyWith(
+      {Value<String>? id,
+      Value<String>? term,
+      Value<String>? fromUnit,
+      Value<String>? toBaseUnit,
+      Value<double>? conversionFactor,
+      Value<bool>? isApproximate,
+      Value<String?>? notes,
+      Value<String>? userId,
+      Value<String?>? householdId,
+      Value<int?>? createdAt,
+      Value<int?>? updatedAt,
+      Value<int?>? deletedAt,
+      Value<int>? rowid}) {
+    return ConvertersCompanion(
+      id: id ?? this.id,
+      term: term ?? this.term,
+      fromUnit: fromUnit ?? this.fromUnit,
+      toBaseUnit: toBaseUnit ?? this.toBaseUnit,
+      conversionFactor: conversionFactor ?? this.conversionFactor,
+      isApproximate: isApproximate ?? this.isApproximate,
+      notes: notes ?? this.notes,
+      userId: userId ?? this.userId,
+      householdId: householdId ?? this.householdId,
+      createdAt: createdAt ?? this.createdAt,
+      updatedAt: updatedAt ?? this.updatedAt,
+      deletedAt: deletedAt ?? this.deletedAt,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<String>(id.value);
+    }
+    if (term.present) {
+      map['term'] = Variable<String>(term.value);
+    }
+    if (fromUnit.present) {
+      map['from_unit'] = Variable<String>(fromUnit.value);
+    }
+    if (toBaseUnit.present) {
+      map['to_base_unit'] = Variable<String>(toBaseUnit.value);
+    }
+    if (conversionFactor.present) {
+      map['conversion_factor'] = Variable<double>(conversionFactor.value);
+    }
+    if (isApproximate.present) {
+      map['is_approximate'] = Variable<bool>(isApproximate.value);
+    }
+    if (notes.present) {
+      map['notes'] = Variable<String>(notes.value);
+    }
+    if (userId.present) {
+      map['user_id'] = Variable<String>(userId.value);
+    }
+    if (householdId.present) {
+      map['household_id'] = Variable<String>(householdId.value);
+    }
+    if (createdAt.present) {
+      map['created_at'] = Variable<int>(createdAt.value);
+    }
+    if (updatedAt.present) {
+      map['updated_at'] = Variable<int>(updatedAt.value);
+    }
+    if (deletedAt.present) {
+      map['deleted_at'] = Variable<int>(deletedAt.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('ConvertersCompanion(')
+          ..write('id: $id, ')
+          ..write('term: $term, ')
+          ..write('fromUnit: $fromUnit, ')
+          ..write('toBaseUnit: $toBaseUnit, ')
+          ..write('conversionFactor: $conversionFactor, ')
+          ..write('isApproximate: $isApproximate, ')
+          ..write('notes: $notes, ')
+          ..write('userId: $userId, ')
+          ..write('householdId: $householdId, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('deletedAt: $deletedAt, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
 abstract class _$AppDatabase extends GeneratedDatabase {
   _$AppDatabase(QueryExecutor e) : super(e);
   $AppDatabaseManager get managers => $AppDatabaseManager(this);
@@ -5013,6 +5828,7 @@ abstract class _$AppDatabase extends GeneratedDatabase {
   late final $ShoppingListItemsTable shoppingListItems =
       $ShoppingListItemsTable(this);
   late final $ShoppingListsTable shoppingLists = $ShoppingListsTable(this);
+  late final $ConvertersTable converters = $ConvertersTable(this);
   @override
   Iterable<TableInfo<Table, Object?>> get allTables =>
       allSchemaEntities.whereType<TableInfo<Table, Object?>>();
@@ -5028,7 +5844,8 @@ abstract class _$AppDatabase extends GeneratedDatabase {
         pantryItems,
         ingredientTermOverrides,
         shoppingListItems,
-        shoppingLists
+        shoppingLists,
+        converters
       ];
 }
 
@@ -6565,6 +7382,11 @@ typedef $$PantryItemsTableCreateCompanionBuilder = PantryItemsCompanion
   Value<bool> inStock,
   Value<String?> userId,
   Value<String?> householdId,
+  Value<String?> unit,
+  Value<double?> quantity,
+  Value<String?> baseUnit,
+  Value<double?> baseQuantity,
+  Value<double?> price,
   Value<int?> createdAt,
   Value<int?> updatedAt,
   Value<int?> deletedAt,
@@ -6578,6 +7400,11 @@ typedef $$PantryItemsTableUpdateCompanionBuilder = PantryItemsCompanion
   Value<bool> inStock,
   Value<String?> userId,
   Value<String?> householdId,
+  Value<String?> unit,
+  Value<double?> quantity,
+  Value<String?> baseUnit,
+  Value<double?> baseQuantity,
+  Value<double?> price,
   Value<int?> createdAt,
   Value<int?> updatedAt,
   Value<int?> deletedAt,
@@ -6608,6 +7435,21 @@ class $$PantryItemsTableFilterComposer
 
   ColumnFilters<String> get householdId => $composableBuilder(
       column: $table.householdId, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get unit => $composableBuilder(
+      column: $table.unit, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<double> get quantity => $composableBuilder(
+      column: $table.quantity, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get baseUnit => $composableBuilder(
+      column: $table.baseUnit, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<double> get baseQuantity => $composableBuilder(
+      column: $table.baseQuantity, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<double> get price => $composableBuilder(
+      column: $table.price, builder: (column) => ColumnFilters(column));
 
   ColumnFilters<int> get createdAt => $composableBuilder(
       column: $table.createdAt, builder: (column) => ColumnFilters(column));
@@ -6649,6 +7491,22 @@ class $$PantryItemsTableOrderingComposer
   ColumnOrderings<String> get householdId => $composableBuilder(
       column: $table.householdId, builder: (column) => ColumnOrderings(column));
 
+  ColumnOrderings<String> get unit => $composableBuilder(
+      column: $table.unit, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<double> get quantity => $composableBuilder(
+      column: $table.quantity, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get baseUnit => $composableBuilder(
+      column: $table.baseUnit, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<double> get baseQuantity => $composableBuilder(
+      column: $table.baseQuantity,
+      builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<double> get price => $composableBuilder(
+      column: $table.price, builder: (column) => ColumnOrderings(column));
+
   ColumnOrderings<int> get createdAt => $composableBuilder(
       column: $table.createdAt, builder: (column) => ColumnOrderings(column));
 
@@ -6685,6 +7543,21 @@ class $$PantryItemsTableAnnotationComposer
 
   GeneratedColumn<String> get householdId => $composableBuilder(
       column: $table.householdId, builder: (column) => column);
+
+  GeneratedColumn<String> get unit =>
+      $composableBuilder(column: $table.unit, builder: (column) => column);
+
+  GeneratedColumn<double> get quantity =>
+      $composableBuilder(column: $table.quantity, builder: (column) => column);
+
+  GeneratedColumn<String> get baseUnit =>
+      $composableBuilder(column: $table.baseUnit, builder: (column) => column);
+
+  GeneratedColumn<double> get baseQuantity => $composableBuilder(
+      column: $table.baseQuantity, builder: (column) => column);
+
+  GeneratedColumn<double> get price =>
+      $composableBuilder(column: $table.price, builder: (column) => column);
 
   GeneratedColumn<int> get createdAt =>
       $composableBuilder(column: $table.createdAt, builder: (column) => column);
@@ -6730,6 +7603,11 @@ class $$PantryItemsTableTableManager extends RootTableManager<
             Value<bool> inStock = const Value.absent(),
             Value<String?> userId = const Value.absent(),
             Value<String?> householdId = const Value.absent(),
+            Value<String?> unit = const Value.absent(),
+            Value<double?> quantity = const Value.absent(),
+            Value<String?> baseUnit = const Value.absent(),
+            Value<double?> baseQuantity = const Value.absent(),
+            Value<double?> price = const Value.absent(),
             Value<int?> createdAt = const Value.absent(),
             Value<int?> updatedAt = const Value.absent(),
             Value<int?> deletedAt = const Value.absent(),
@@ -6742,6 +7620,11 @@ class $$PantryItemsTableTableManager extends RootTableManager<
             inStock: inStock,
             userId: userId,
             householdId: householdId,
+            unit: unit,
+            quantity: quantity,
+            baseUnit: baseUnit,
+            baseQuantity: baseQuantity,
+            price: price,
             createdAt: createdAt,
             updatedAt: updatedAt,
             deletedAt: deletedAt,
@@ -6754,6 +7637,11 @@ class $$PantryItemsTableTableManager extends RootTableManager<
             Value<bool> inStock = const Value.absent(),
             Value<String?> userId = const Value.absent(),
             Value<String?> householdId = const Value.absent(),
+            Value<String?> unit = const Value.absent(),
+            Value<double?> quantity = const Value.absent(),
+            Value<String?> baseUnit = const Value.absent(),
+            Value<double?> baseQuantity = const Value.absent(),
+            Value<double?> price = const Value.absent(),
             Value<int?> createdAt = const Value.absent(),
             Value<int?> updatedAt = const Value.absent(),
             Value<int?> deletedAt = const Value.absent(),
@@ -6766,6 +7654,11 @@ class $$PantryItemsTableTableManager extends RootTableManager<
             inStock: inStock,
             userId: userId,
             householdId: householdId,
+            unit: unit,
+            quantity: quantity,
+            baseUnit: baseUnit,
+            baseQuantity: baseQuantity,
+            price: price,
             createdAt: createdAt,
             updatedAt: updatedAt,
             deletedAt: deletedAt,
@@ -7512,6 +8405,285 @@ typedef $$ShoppingListsTableProcessedTableManager = ProcessedTableManager<
     ),
     ShoppingListEntry,
     PrefetchHooks Function()>;
+typedef $$ConvertersTableCreateCompanionBuilder = ConvertersCompanion Function({
+  Value<String> id,
+  required String term,
+  required String fromUnit,
+  required String toBaseUnit,
+  required double conversionFactor,
+  Value<bool> isApproximate,
+  Value<String?> notes,
+  required String userId,
+  Value<String?> householdId,
+  Value<int?> createdAt,
+  Value<int?> updatedAt,
+  Value<int?> deletedAt,
+  Value<int> rowid,
+});
+typedef $$ConvertersTableUpdateCompanionBuilder = ConvertersCompanion Function({
+  Value<String> id,
+  Value<String> term,
+  Value<String> fromUnit,
+  Value<String> toBaseUnit,
+  Value<double> conversionFactor,
+  Value<bool> isApproximate,
+  Value<String?> notes,
+  Value<String> userId,
+  Value<String?> householdId,
+  Value<int?> createdAt,
+  Value<int?> updatedAt,
+  Value<int?> deletedAt,
+  Value<int> rowid,
+});
+
+class $$ConvertersTableFilterComposer
+    extends Composer<_$AppDatabase, $ConvertersTable> {
+  $$ConvertersTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get id => $composableBuilder(
+      column: $table.id, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get term => $composableBuilder(
+      column: $table.term, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get fromUnit => $composableBuilder(
+      column: $table.fromUnit, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get toBaseUnit => $composableBuilder(
+      column: $table.toBaseUnit, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<double> get conversionFactor => $composableBuilder(
+      column: $table.conversionFactor,
+      builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<bool> get isApproximate => $composableBuilder(
+      column: $table.isApproximate, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get notes => $composableBuilder(
+      column: $table.notes, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get userId => $composableBuilder(
+      column: $table.userId, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get householdId => $composableBuilder(
+      column: $table.householdId, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<int> get createdAt => $composableBuilder(
+      column: $table.createdAt, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<int> get updatedAt => $composableBuilder(
+      column: $table.updatedAt, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<int> get deletedAt => $composableBuilder(
+      column: $table.deletedAt, builder: (column) => ColumnFilters(column));
+}
+
+class $$ConvertersTableOrderingComposer
+    extends Composer<_$AppDatabase, $ConvertersTable> {
+  $$ConvertersTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get id => $composableBuilder(
+      column: $table.id, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get term => $composableBuilder(
+      column: $table.term, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get fromUnit => $composableBuilder(
+      column: $table.fromUnit, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get toBaseUnit => $composableBuilder(
+      column: $table.toBaseUnit, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<double> get conversionFactor => $composableBuilder(
+      column: $table.conversionFactor,
+      builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<bool> get isApproximate => $composableBuilder(
+      column: $table.isApproximate,
+      builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get notes => $composableBuilder(
+      column: $table.notes, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get userId => $composableBuilder(
+      column: $table.userId, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get householdId => $composableBuilder(
+      column: $table.householdId, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<int> get createdAt => $composableBuilder(
+      column: $table.createdAt, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<int> get updatedAt => $composableBuilder(
+      column: $table.updatedAt, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<int> get deletedAt => $composableBuilder(
+      column: $table.deletedAt, builder: (column) => ColumnOrderings(column));
+}
+
+class $$ConvertersTableAnnotationComposer
+    extends Composer<_$AppDatabase, $ConvertersTable> {
+  $$ConvertersTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get term =>
+      $composableBuilder(column: $table.term, builder: (column) => column);
+
+  GeneratedColumn<String> get fromUnit =>
+      $composableBuilder(column: $table.fromUnit, builder: (column) => column);
+
+  GeneratedColumn<String> get toBaseUnit => $composableBuilder(
+      column: $table.toBaseUnit, builder: (column) => column);
+
+  GeneratedColumn<double> get conversionFactor => $composableBuilder(
+      column: $table.conversionFactor, builder: (column) => column);
+
+  GeneratedColumn<bool> get isApproximate => $composableBuilder(
+      column: $table.isApproximate, builder: (column) => column);
+
+  GeneratedColumn<String> get notes =>
+      $composableBuilder(column: $table.notes, builder: (column) => column);
+
+  GeneratedColumn<String> get userId =>
+      $composableBuilder(column: $table.userId, builder: (column) => column);
+
+  GeneratedColumn<String> get householdId => $composableBuilder(
+      column: $table.householdId, builder: (column) => column);
+
+  GeneratedColumn<int> get createdAt =>
+      $composableBuilder(column: $table.createdAt, builder: (column) => column);
+
+  GeneratedColumn<int> get updatedAt =>
+      $composableBuilder(column: $table.updatedAt, builder: (column) => column);
+
+  GeneratedColumn<int> get deletedAt =>
+      $composableBuilder(column: $table.deletedAt, builder: (column) => column);
+}
+
+class $$ConvertersTableTableManager extends RootTableManager<
+    _$AppDatabase,
+    $ConvertersTable,
+    ConverterEntry,
+    $$ConvertersTableFilterComposer,
+    $$ConvertersTableOrderingComposer,
+    $$ConvertersTableAnnotationComposer,
+    $$ConvertersTableCreateCompanionBuilder,
+    $$ConvertersTableUpdateCompanionBuilder,
+    (
+      ConverterEntry,
+      BaseReferences<_$AppDatabase, $ConvertersTable, ConverterEntry>
+    ),
+    ConverterEntry,
+    PrefetchHooks Function()> {
+  $$ConvertersTableTableManager(_$AppDatabase db, $ConvertersTable table)
+      : super(TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$ConvertersTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$ConvertersTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$ConvertersTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback: ({
+            Value<String> id = const Value.absent(),
+            Value<String> term = const Value.absent(),
+            Value<String> fromUnit = const Value.absent(),
+            Value<String> toBaseUnit = const Value.absent(),
+            Value<double> conversionFactor = const Value.absent(),
+            Value<bool> isApproximate = const Value.absent(),
+            Value<String?> notes = const Value.absent(),
+            Value<String> userId = const Value.absent(),
+            Value<String?> householdId = const Value.absent(),
+            Value<int?> createdAt = const Value.absent(),
+            Value<int?> updatedAt = const Value.absent(),
+            Value<int?> deletedAt = const Value.absent(),
+            Value<int> rowid = const Value.absent(),
+          }) =>
+              ConvertersCompanion(
+            id: id,
+            term: term,
+            fromUnit: fromUnit,
+            toBaseUnit: toBaseUnit,
+            conversionFactor: conversionFactor,
+            isApproximate: isApproximate,
+            notes: notes,
+            userId: userId,
+            householdId: householdId,
+            createdAt: createdAt,
+            updatedAt: updatedAt,
+            deletedAt: deletedAt,
+            rowid: rowid,
+          ),
+          createCompanionCallback: ({
+            Value<String> id = const Value.absent(),
+            required String term,
+            required String fromUnit,
+            required String toBaseUnit,
+            required double conversionFactor,
+            Value<bool> isApproximate = const Value.absent(),
+            Value<String?> notes = const Value.absent(),
+            required String userId,
+            Value<String?> householdId = const Value.absent(),
+            Value<int?> createdAt = const Value.absent(),
+            Value<int?> updatedAt = const Value.absent(),
+            Value<int?> deletedAt = const Value.absent(),
+            Value<int> rowid = const Value.absent(),
+          }) =>
+              ConvertersCompanion.insert(
+            id: id,
+            term: term,
+            fromUnit: fromUnit,
+            toBaseUnit: toBaseUnit,
+            conversionFactor: conversionFactor,
+            isApproximate: isApproximate,
+            notes: notes,
+            userId: userId,
+            householdId: householdId,
+            createdAt: createdAt,
+            updatedAt: updatedAt,
+            deletedAt: deletedAt,
+            rowid: rowid,
+          ),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .toList(),
+          prefetchHooksCallback: null,
+        ));
+}
+
+typedef $$ConvertersTableProcessedTableManager = ProcessedTableManager<
+    _$AppDatabase,
+    $ConvertersTable,
+    ConverterEntry,
+    $$ConvertersTableFilterComposer,
+    $$ConvertersTableOrderingComposer,
+    $$ConvertersTableAnnotationComposer,
+    $$ConvertersTableCreateCompanionBuilder,
+    $$ConvertersTableUpdateCompanionBuilder,
+    (
+      ConverterEntry,
+      BaseReferences<_$AppDatabase, $ConvertersTable, ConverterEntry>
+    ),
+    ConverterEntry,
+    PrefetchHooks Function()>;
 
 class $AppDatabaseManager {
   final _$AppDatabase _db;
@@ -7539,4 +8711,6 @@ class $AppDatabaseManager {
       $$ShoppingListItemsTableTableManager(_db, _db.shoppingListItems);
   $$ShoppingListsTableTableManager get shoppingLists =>
       $$ShoppingListsTableTableManager(_db, _db.shoppingLists);
+  $$ConvertersTableTableManager get converters =>
+      $$ConvertersTableTableManager(_db, _db.converters);
 }

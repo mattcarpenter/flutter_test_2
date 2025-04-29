@@ -13,6 +13,7 @@ const cooksTable = 'cooks';
 const pantryItemsTable = 'pantry_items';
 const ingredientTermOverridesTable = 'ingredient_term_overrides';
 const shoppingListsTable = 'shopping_lists';
+const convertersTable = 'converters';
 const shoppingListItemsTable = 'shopping_list_items';
 
 Schema schema = const Schema(([
@@ -93,6 +94,11 @@ Schema schema = const Schema(([
     Column.integer('in_stock'),
     Column.text('user_id'),
     Column.text('household_id'),
+    Column.text('unit'),
+    Column.real('quantity'),
+    Column.text('base_unit'),
+    Column.real('base_quantity'),
+    Column.real('price'),
     Column.integer('created_at'),
     Column.integer('updated_at'),
     Column.integer('deleted_at'),
@@ -127,5 +133,18 @@ Schema schema = const Schema(([
     Column.integer('deleted_at'),
     Column.text('user_id'),
     Column.text('household_id'),
+  ]),
+  Table(convertersTable, [
+    Column.text('term'),
+    Column.text('from_unit'),
+    Column.text('to_base_unit'),
+    Column.real('conversion_factor'),
+    Column.integer('is_approximate'),
+    Column.text('notes'),
+    Column.text('user_id'),
+    Column.text('household_id'),
+    Column.integer('created_at'),
+    Column.integer('updated_at'),
+    Column.integer('deleted_at'),
   ]),
 ]));

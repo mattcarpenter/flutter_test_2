@@ -28,20 +28,44 @@ class PantryNotifier
     bool inStock = true,
     String? userId,
     String? householdId,
+    String? unit,
+    double? quantity,
+    String? baseUnit,
+    double? baseQuantity,
+    double? price,
   }) =>
       _repo.addItem(
         name: name,
         inStock: inStock,
         userId: userId,
         householdId: householdId,
+        unit: unit,
+        quantity: quantity,
+        baseUnit: baseUnit,
+        baseQuantity: baseQuantity,
+        price: price,
       );
 
   Future<void> updateItem({
     required String id,
     String? name,
     bool? inStock,
+    String? unit,
+    double? quantity,
+    String? baseUnit,
+    double? baseQuantity,
+    double? price,
   }) =>
-      _repo.updateItem(id: id, name: name, inStock: inStock);
+      _repo.updateItem(
+        id: id, 
+        name: name, 
+        inStock: inStock,
+        unit: unit,
+        quantity: quantity,
+        baseUnit: baseUnit,
+        baseQuantity: baseQuantity,
+        price: price,
+      );
 
   Future<void> deleteItem(String id) =>
       _repo.deleteItem(id);
