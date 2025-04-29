@@ -250,19 +250,20 @@ SqliteMigration createMigrationForIngredientTermOverrideTriggers() {
       CREATE TRIGGER IF NOT EXISTS update_ingredient_term_overrides
       AFTER UPDATE ON $overridesInternalName
       BEGIN
+        -- Always delete the existing entry
         DELETE FROM ingredient_term_overrides_flattened
         WHERE id = NEW.id;
 
-        INSERT INTO ingredient_term_overrides_flattened (id, input_term, mapped_term, user_id, household_id, created_at, deleted_at)
-        VALUES (
+        -- Only insert if not deleted (deleted_at is null)
+        INSERT INTO ingredient_term_overrides_flattened (id, input_term, mapped_term, user_id, household_id, created_at)
+        SELECT
           NEW.id,
           json_extract(NEW.data, '\$.input_term'),
           json_extract(NEW.data, '\$.mapped_term'),
           json_extract(NEW.data, '\$.user_id'),
           json_extract(NEW.data, '\$.household_id'),
-          strftime('%s','now') * 1000,
-          json_extract(NEW.data, '\$.deleted_at')
-        );
+          strftime('%s','now') * 1000
+        WHERE json_extract(NEW.data, '\$.deleted_at') IS NULL;
       END;
     ''');
   });
