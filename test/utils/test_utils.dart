@@ -35,6 +35,20 @@ resetDatabase () async {
   }
 }
 
+/// Clear the materialized tables that are not managed by Drift
+Future<void> clearMaterializedTables() async {
+  try {
+    // Delete data from all materialized tables
+    await appDb.customStatement('DELETE FROM recipe_ingredient_terms');
+    await appDb.customStatement('DELETE FROM pantry_item_terms');
+    await appDb.customStatement('DELETE FROM ingredient_term_overrides_flattened');
+    await appDb.customStatement('DELETE FROM fts_recipes');
+    print('Cleared all materialized tables');
+  } catch (e) {
+    print('Error clearing materialized tables: $e');
+  }
+}
+
 initializeTestEnvironment() async {
   IntegrationTestWidgetsFlutterBinding.ensureInitialized();
   SharedPreferences.setMockInitialValues({});

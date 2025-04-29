@@ -1,6 +1,7 @@
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import 'supabase_admin.dart';
+import 'test_utils.dart';
 
 class TestUserManager {
 
@@ -36,6 +37,7 @@ class TestUserManager {
     await Supabase.instance.client.auth.signOut();
     await truncateAllTables();
     await deleteAllUsers();
+    await clearMaterializedTables();
   }
 
 }

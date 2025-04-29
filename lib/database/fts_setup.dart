@@ -253,14 +253,15 @@ SqliteMigration createMigrationForIngredientTermOverrideTriggers() {
         DELETE FROM ingredient_term_overrides_flattened
         WHERE id = NEW.id;
 
-        INSERT INTO ingredient_term_overrides_flattened (id, input_term, mapped_term, user_id, household_id, created_at)
+        INSERT INTO ingredient_term_overrides_flattened (id, input_term, mapped_term, user_id, household_id, created_at, deleted_at)
         VALUES (
           NEW.id,
           json_extract(NEW.data, '\$.input_term'),
           json_extract(NEW.data, '\$.mapped_term'),
           json_extract(NEW.data, '\$.user_id'),
           json_extract(NEW.data, '\$.household_id'),
-          strftime('%s','now') * 1000
+          strftime('%s','now') * 1000,
+          json_extract(NEW.data, '\$.deleted_at')
         );
       END;
     ''');
