@@ -10,8 +10,8 @@ import 'package:recipe_app/src/features/recipes/views/recipes_folder_page.dart';
 import 'package:recipe_app/src/mobile/utils/adaptive_sheet_page.dart';
 
 import '../color_theme.dart';
-import '../features/discover/views/discover_root.dart';
-import '../features/discover/views/discover_sub_page.dart';
+import '../features/pantry/views/pantry_root.dart';
+import '../features/pantry/views/pantry_sub_page.dart';
 import '../features/labs/views/auth_sub_page.dart';
 import '../features/labs/views/labs_root.dart';
 import '../features/labs/views/labs_sub_page.dart';
@@ -90,7 +90,7 @@ class _AdaptiveApp2State extends State<AdaptiveApp2> {
     final _recipesNavKey   = GlobalKey<NavigatorState>(debugLabel: 'recipesNavKey');
     final _shoppingNavKey  = GlobalKey<NavigatorState>(debugLabel: 'shoppingNavKey');
     final _mealPlansNavKey = GlobalKey<NavigatorState>(debugLabel: 'mealPlansNavKey');
-    final _discoverNavKey  = GlobalKey<NavigatorState>(debugLabel: 'discoverNavKey');
+    final _pantryNavKey  = GlobalKey<NavigatorState>(debugLabel: 'pantryNavKey');
     final _mainPageShellKey = GlobalKey<MainPageShellState>(debugLabel: 'mainPageShellKey');
 
     final nonTabRoutes = [
@@ -316,10 +316,10 @@ class _AdaptiveApp2State extends State<AdaptiveApp2> {
             ),
 
             // ─────────────────────────────────────────────────────────
-            // TAB 4 SHELL: Discover
+            // TAB 4 SHELL: Pantry
             // ─────────────────────────────────────────────────────────
             ShellRoute(
-              navigatorKey: _discoverNavKey,
+              navigatorKey: _pantryNavKey,
               pageBuilder: (BuildContext context, GoRouterState state, Widget child) {
                 return CustomTransitionPage<void>(
                   key: state.pageKey,
@@ -332,19 +332,19 @@ class _AdaptiveApp2State extends State<AdaptiveApp2> {
               },
               routes: [
                 GoRoute(
-                  path: '/discover',
+                  path: '/pantry',
                   routes: [
                     GoRoute(
                       path: 'sub',
                       pageBuilder: (context, state) => _platformPage(
                         state: state,
-                        child: const DiscoverSubPage(),
+                        child: const PantrySubPage(),
                       ),
                     ),
                   ],
                   pageBuilder: (context, state) => _platformPage(
                     state: state,
-                    child: DiscoverTab(),
+                    child: PantryTab(),
                   ),
                 ),
               ],
