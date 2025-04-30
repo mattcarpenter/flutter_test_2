@@ -66,8 +66,8 @@ class Menu extends StatelessWidget {
         ),
         MenuItem(
           index: 4,
-          title: 'Discover',
-          icon: CupertinoIcons.compass,
+          title: 'Pantry',
+          icon: CupertinoIcons.cart_fill,
           isActive: selectedIndex == 4,
           color: primaryColor,
           textColor: textColor,

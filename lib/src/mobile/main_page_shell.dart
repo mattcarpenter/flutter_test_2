@@ -180,8 +180,8 @@ class MainPageShellState extends State<MainPageShell> with TickerProviderStateMi
             label: 'Meal Plan',
           ),
           BottomNavigationBarItem(
-            icon: Icon(CupertinoIcons.home),
-            label: 'Discover',
+            icon: Icon(CupertinoIcons.cart_fill),
+            label: 'Pantry',
           ),
         ],
       );
@@ -214,8 +214,8 @@ class MainPageShellState extends State<MainPageShell> with TickerProviderStateMi
             label: 'Meal Plan',
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.home),
-            label: 'Discover',
+            icon: Icon(Icons.shopping_cart),
+            label: 'Pantry',
           ),
         ],
       );
@@ -317,11 +317,11 @@ class MainPageShellState extends State<MainPageShell> with TickerProviderStateMi
   // --------------------------------------------------------------------------
   int _selectedIndexFromLocation() {
     final location = GoRouterState.of(context).uri.path; // Map location => index
-    // e.g. /recipes => 1, /shopping => 2, /meal_plan => 3, /discover => 4
+    // e.g. /recipes => 1, /shopping => 2, /meal_plan => 3, /pantry => 4
     if (location.startsWith('/recipes')) return 1;
     if (location.startsWith('/shopping')) return 2;
     if (location.startsWith('/meal_plan')) return 3;
-    if (location.startsWith('/discover')) return 4;
+    if (location.startsWith('/pantry')) return 4;
     if (location.startsWith('/labs')) return 5;
     return 1; // Default to recipes if unknown
   }
@@ -343,7 +343,7 @@ class MainPageShellState extends State<MainPageShell> with TickerProviderStateMi
         context.go('/meal_plans');
         break;
       case 4:
-        context.go('/discover');
+        context.go('/pantry');
         break;
     }
   }
