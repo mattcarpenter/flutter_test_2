@@ -26,6 +26,8 @@ class PantryItemFormState extends ConsumerState<PantryItemForm> {
   late final TextEditingController _priceController;
   
   bool _inStock = true;
+  bool _isQuantitySectionExpanded = false;
+  bool _isCostSectionExpanded = false;
 
   @override
   void initState() {
@@ -47,6 +49,10 @@ class PantryItemFormState extends ConsumerState<PantryItemForm> {
     );
     
     _inStock = item?.inStock ?? true;
+    
+    // Auto-expand sections if they have data
+    _isQuantitySectionExpanded = _quantityController.text.isNotEmpty || _unitController.text.isNotEmpty;
+    _isCostSectionExpanded = _priceController.text.isNotEmpty || _baseQuantityController.text.isNotEmpty || _baseUnitController.text.isNotEmpty;
   }
 
   @override
@@ -122,10 +128,10 @@ class PantryItemFormState extends ConsumerState<PantryItemForm> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           _buildBasicInfoSection(),
-          const SizedBox(height: 24),
-          _buildQuantitySection(),
-          const SizedBox(height: 24),
-          _buildPricingSection(),
+          const SizedBox(height: 16),
+          _buildExpandableQuantitySection(),
+          const SizedBox(height: 16),
+          _buildExpandableCostSection(),
         ],
       ),
     );
@@ -135,18 +141,9 @@ class PantryItemFormState extends ConsumerState<PantryItemForm> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          'Basic Information',
-          style: TextStyle(
-            fontSize: 18,
-            fontWeight: FontWeight.bold,
-            color: CupertinoTheme.of(context).primaryColor,
-          ),
-        ),
-        const SizedBox(height: 16),
         CupertinoTextField(
           controller: _nameController,
-          placeholder: 'Item Name',
+          placeholder: 'Ingredient Name',
           padding: const EdgeInsets.all(12),
           decoration: BoxDecoration(
             border: Border.all(color: Colors.grey.shade400),
@@ -159,7 +156,7 @@ class PantryItemFormState extends ConsumerState<PantryItemForm> {
         // In stock toggle
         Row(
           children: [
-            const Text('In Stock'),
+            const Text('I have this'),
             const Spacer(),
             CupertinoSwitch(
               value: _inStock,
@@ -175,113 +172,162 @@ class PantryItemFormState extends ConsumerState<PantryItemForm> {
     );
   }
 
-  Widget _buildQuantitySection() {
+  Widget _buildExpandableQuantitySection() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          'Quantity Information',
-          style: TextStyle(
-            fontSize: 18,
-            fontWeight: FontWeight.bold,
-            color: CupertinoTheme.of(context).primaryColor,
+        // Clickable header to expand/collapse
+        GestureDetector(
+          onTap: () {
+            setState(() {
+              _isQuantitySectionExpanded = !_isQuantitySectionExpanded;
+            });
+          },
+          child: Row(
+            children: [
+              Text(
+                '+ Track quantity (optional)',
+                style: TextStyle(
+                  fontSize: 16,
+                  color: CupertinoTheme.of(context).primaryColor,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+              const SizedBox(width: 8),
+              Icon(
+                _isQuantitySectionExpanded 
+                    ? CupertinoIcons.chevron_up 
+                    : CupertinoIcons.chevron_down,
+                size: 16,
+                color: CupertinoTheme.of(context).primaryColor,
+              ),
+            ],
           ),
         ),
-        const SizedBox(height: 16),
-        Row(
-          children: [
-            Expanded(
-              flex: 2,
-              child: CupertinoTextField(
-                controller: _quantityController,
-                placeholder: 'Quantity',
-                padding: const EdgeInsets.all(12),
-                decoration: BoxDecoration(
-                  border: Border.all(color: Colors.grey.shade400),
-                  borderRadius: BorderRadius.circular(8),
+        // Expandable content
+        if (_isQuantitySectionExpanded) ...[
+          const SizedBox(height: 16),
+          // Quantity and Unit
+          Row(
+            children: [
+              Expanded(
+                flex: 2,
+                child: CupertinoTextField(
+                  controller: _quantityController,
+                  placeholder: 'Quantity',
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    border: Border.all(color: Colors.grey.shade400),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  keyboardType: const TextInputType.numberWithOptions(decimal: true),
                 ),
-                keyboardType: const TextInputType.numberWithOptions(decimal: true),
               ),
-            ),
-            const SizedBox(width: 16),
-            Expanded(
-              flex: 3,
-              child: CupertinoTextField(
-                controller: _unitController,
-                placeholder: 'Unit (e.g., pack, can)',
-                padding: const EdgeInsets.all(12),
-                decoration: BoxDecoration(
-                  border: Border.all(color: Colors.grey.shade400),
-                  borderRadius: BorderRadius.circular(8),
+              const SizedBox(width: 16),
+              Expanded(
+                flex: 3,
+                child: CupertinoTextField(
+                  controller: _unitController,
+                  placeholder: 'Unit (e.g., onion, g, ml)',
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    border: Border.all(color: Colors.grey.shade400),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  keyboardType: TextInputType.text,
                 ),
-                keyboardType: TextInputType.text,
               ),
-            ),
-          ],
-        ),
-        const SizedBox(height: 16),
-        Row(
-          children: [
-            Expanded(
-              flex: 2,
-              child: CupertinoTextField(
-                controller: _baseQuantityController,
-                placeholder: 'Base Quantity',
-                padding: const EdgeInsets.all(12),
-                decoration: BoxDecoration(
-                  border: Border.all(color: Colors.grey.shade400),
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                keyboardType: const TextInputType.numberWithOptions(decimal: true),
-              ),
-            ),
-            const SizedBox(width: 16),
-            Expanded(
-              flex: 3,
-              child: CupertinoTextField(
-                controller: _baseUnitController,
-                placeholder: 'Base Unit (e.g., g, ml)',
-                padding: const EdgeInsets.all(12),
-                decoration: BoxDecoration(
-                  border: Border.all(color: Colors.grey.shade400),
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                keyboardType: TextInputType.text,
-              ),
-            ),
-          ],
-        ),
+            ],
+          ),
+        ],
       ],
     );
   }
 
-  Widget _buildPricingSection() {
+  Widget _buildExpandableCostSection() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          'Pricing',
-          style: TextStyle(
-            fontSize: 18,
-            fontWeight: FontWeight.bold,
-            color: CupertinoTheme.of(context).primaryColor,
+        // Clickable header to expand/collapse
+        GestureDetector(
+          onTap: () {
+            setState(() {
+              _isCostSectionExpanded = !_isCostSectionExpanded;
+            });
+          },
+          child: Row(
+            children: [
+              Text(
+                '+ Track cost (optional)',
+                style: TextStyle(
+                  fontSize: 16,
+                  color: CupertinoTheme.of(context).primaryColor,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+              const SizedBox(width: 8),
+              Icon(
+                _isCostSectionExpanded 
+                    ? CupertinoIcons.chevron_up 
+                    : CupertinoIcons.chevron_down,
+                size: 16,
+                color: CupertinoTheme.of(context).primaryColor,
+              ),
+            ],
           ),
         ),
-        const SizedBox(height: 16),
-        CupertinoTextField(
-          controller: _priceController,
-          placeholder: 'Price',
-          padding: const EdgeInsets.all(12),
-          decoration: BoxDecoration(
-            border: Border.all(color: Colors.grey.shade400),
-            borderRadius: BorderRadius.circular(8),
+        // Expandable content
+        if (_isCostSectionExpanded) ...[
+          const SizedBox(height: 16),
+          // Price field
+          CupertinoTextField(
+            controller: _priceController,
+            placeholder: 'Price',
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              border: Border.all(color: Colors.grey.shade400),
+              borderRadius: BorderRadius.circular(8),
+            ),
+            keyboardType: const TextInputType.numberWithOptions(decimal: true),
+            prefix: const Padding(
+              padding: EdgeInsets.only(left: 12.0),
+              child: Text('\$'),
+            ),
           ),
-          keyboardType: const TextInputType.numberWithOptions(decimal: true),
-          prefix: const Padding(
-            padding: EdgeInsets.only(left: 12.0),
-            child: Text('\$'),
+          const SizedBox(height: 16),
+          // Per quantity and per unit
+          Row(
+            children: [
+              Expanded(
+                flex: 2,
+                child: CupertinoTextField(
+                  controller: _baseQuantityController,
+                  placeholder: 'Per Quantity',
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    border: Border.all(color: Colors.grey.shade400),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                ),
+              ),
+              const SizedBox(width: 16),
+              Expanded(
+                flex: 3,
+                child: CupertinoTextField(
+                  controller: _baseUnitController,
+                  placeholder: 'Per Unit (e.g., lb, g, pack)',
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    border: Border.all(color: Colors.grey.shade400),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  keyboardType: TextInputType.text,
+                ),
+              ),
+            ],
           ),
-        ),
+        ],
       ],
     );
   }
