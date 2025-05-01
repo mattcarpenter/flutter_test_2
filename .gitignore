@@ -221,3 +221,4 @@ lib/database/*.db-shm
 lib/database/*.db-wal
 
 **/.claude/settings.local.json
+.idea/misc.xml
