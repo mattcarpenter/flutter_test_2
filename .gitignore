@@ -219,3 +219,5 @@ docker/volumes/db/data
 lib/database/*.db
 lib/database/*.db-shm
 lib/database/*.db-wal
+
+**/.claude/settings.local.json

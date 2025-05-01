@@ -71,6 +71,7 @@ dependencies:
     path: /Users/matt/repos/mecab_dart
   archive: ^4.0.5
   super_cupertino_navigation_bar: ^2.1.2
+  disclosure: ^2.2.0
 
 dev_dependencies:
   flutter_test:
