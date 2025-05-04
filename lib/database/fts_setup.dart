@@ -52,7 +52,7 @@ SqliteMigration createMigrationForRecipeIngredientTerms() {
         term TEXT NOT NULL,
         sort INTEGER NOT NULL,
         created_at INTEGER,
-        PRIMARY KEY (recipe_id, ingredient_id, term)
+        PRIMARY KEY (recipe_id, ingredient_id, term, sort)
       );
     ''');
   });
@@ -67,7 +67,7 @@ SqliteMigration createMigrationForPantryItemTerms() {
         sort INTEGER NOT NULL,
         source TEXT DEFAULT 'user',
         created_at INTEGER,
-        PRIMARY KEY (pantry_item_id, term)
+        PRIMARY KEY (pantry_item_id, term, sort)
       );
     ''');
   });

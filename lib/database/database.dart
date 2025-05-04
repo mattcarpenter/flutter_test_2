@@ -15,6 +15,7 @@ import 'models/recipe_shares.dart';
 import 'models/shopping_list_items.dart';
 import 'models/shopping_lists.dart';
 import 'models/upload_queues.dart';
+import 'models/ingredient_term_queues.dart';
 
 import 'models/ingredients.dart';
 import 'models/steps.dart';
@@ -25,7 +26,7 @@ import 'converters.dart';
 
 part 'database.g.dart';
 
-@DriftDatabase(tables: [RecipeFolders, Recipes, RecipeShares, HouseholdMembers, Households, UploadQueues, Cooks, PantryItems, IngredientTermOverrides, ShoppingListItems, ShoppingLists, Converters])
+@DriftDatabase(tables: [RecipeFolders, Recipes, RecipeShares, HouseholdMembers, Households, UploadQueues, IngredientTermQueues, Cooks, PantryItems, IngredientTermOverrides, ShoppingListItems, ShoppingLists, Converters])
 class AppDatabase extends _$AppDatabase {
   AppDatabase(PowerSyncDatabase db) : super(SqliteAsyncDriftConnection(db));
 

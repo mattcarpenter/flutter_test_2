@@ -10,6 +10,7 @@ class AppConfig {
   static const String _prodSupabaseAnonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVrb2RoZm5ydmRvdmVqaWJsbndlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzgyMjQ1ODcsImV4cCI6MjA1MzgwMDU4N30.ZlLSvOd4fgmGCmUqxwsFwA7ceSH80slwtf17Zq2fas0';
   static const String _prodPowersyncUrl = 'https://67b91959ee50386f3169557f.powersync.journeyapps.com';
   static const String _prodSupabaseStorageBucket = '';
+  static const String _prodIngredientApiUrl = 'http://localhost:3000';
 
   static bool _isInitialized = false;
   static bool _isTestMode = false;
@@ -52,6 +53,11 @@ class AppConfig {
   static String get supabaseStorageBucket {
     _ensureInitialized();
     return _getEnvValue('SUPABASE_STORAGE_BUCKET', _prodSupabaseStorageBucket) ?? '';
+  }
+  
+  static String get ingredientApiUrl {
+    _ensureInitialized();
+    return _getEnvValue('INGREDIENT_API_URL', _prodIngredientApiUrl) ?? '';
   }
 
   // Helper to ensure initialization
