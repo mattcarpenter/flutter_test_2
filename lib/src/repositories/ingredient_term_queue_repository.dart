@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'package:drift/drift.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:uuid/uuid.dart';
 import '../../database/database.dart';
 import '../../database/models/ingredient_term_queues.dart';
 import '../../database/models/ingredients.dart';
@@ -45,7 +46,11 @@ class IngredientTermQueueRepository {
       'unit': _extractUnit(ingredient),
     };
     
+    // Generate a UUID for the entry
+    final id = const Uuid().v4();
+    
     final entry = IngredientTermQueuesCompanion.insert(
+      id: Value(id),  // Explicitly provide the id as a Value
       recipeId: recipeId,
       ingredientId: ingredientId,
       requestTimestamp: now,
@@ -53,7 +58,7 @@ class IngredientTermQueueRepository {
     );
     
     await _db.into(_db.ingredientTermQueues).insert(entry);
-    return entry.id.value;
+    return id;
   }
 
   /// Update an existing queue entry
