@@ -37,7 +37,7 @@ class IngredientTermQueueRepository {
     required Ingredient ingredient,
   }) async {
     final now = DateTime.now().millisecondsSinceEpoch;
-    
+
     // Prepare ingredient data for the API request
     // Extract only what's needed for the canonicalization API
     final Map<String, dynamic> apiIngredientData = {
@@ -45,18 +45,19 @@ class IngredientTermQueueRepository {
       'quantity': _extractQuantity(ingredient),
       'unit': _extractUnit(ingredient),
     };
-    
+
     // Generate a UUID for the entry
     final id = const Uuid().v4();
-    
+
     final entry = IngredientTermQueuesCompanion.insert(
       id: Value(id),  // Explicitly provide the id as a Value
       recipeId: recipeId,
       ingredientId: ingredientId,
       requestTimestamp: now,
       ingredientData: json.encode(apiIngredientData),
+      status: const Value('pending'),
     );
-    
+
     await _db.into(_db.ingredientTermQueues).insert(entry);
     return id;
   }
