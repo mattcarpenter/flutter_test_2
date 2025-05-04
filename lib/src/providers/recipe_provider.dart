@@ -1,7 +1,9 @@
 // lib/notifiers/recipe_notifier.dart
 
 import 'dart:async';
+import 'dart:convert';
 import 'package:drift/drift.dart';
+import 'package:flutter/services.dart' show rootBundle;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:uuid/uuid.dart';
 import '../../database/database.dart';
@@ -167,6 +169,106 @@ class RecipeNotifier extends StateNotifier<AsyncValue<List<RecipeWithFolders>>> 
       await _repository.deleteRecipe(recipeId);
     } catch (e, stack) {
       state = AsyncValue.error(e, stack);
+    }
+  }
+  
+  /// Loads recipes from assets/recipes.json and adds them to the database
+  /// 
+  /// [limit] controls how many recipes to import (null means import all)
+  Future<int> importSeedRecipes({int? limit}) async {
+    try {
+      // Load and parse the JSON file
+      final data = await rootBundle.loadString('assets/recipes.json');
+      final List<dynamic> jsonRecipes = json.decode(data);
+      
+      // Apply limit if specified
+      final recipesToImport = limit != null 
+          ? jsonRecipes.take(limit).toList() 
+          : jsonRecipes;
+      
+      int importedCount = 0;
+      
+      // Process each recipe
+      for (final jsonRecipe in recipesToImport) {
+        final id = const Uuid().v4();
+        final now = DateTime.now().millisecondsSinceEpoch;
+        
+        // Convert ingredients to our app format
+        List<Ingredient> ingredients = [];
+        if (jsonRecipe['ingredients'] != null) {
+          int index = 0;
+          ingredients = (jsonRecipe['ingredients'] as List).map((item) {
+            final ingredientId = const Uuid().v4();
+            // Handle quantity safely - could be number, string, or null
+            String? quantityString;
+            if (item['quantity'] != null) {
+              quantityString = item['quantity'].toString();
+            }
+            
+            return Ingredient(
+              id: ingredientId,
+              name: item['ingredient'] ?? '',
+              type: 'ingredient',  // Default to ingredient type
+              primaryAmount1Value: quantityString,
+              primaryAmount1Unit: item['unit']?.toString(),  // Convert possible null to string safely
+              // All other fields are optional and can be left as their defaults/null
+            );
+          }).toList();
+        }
+        
+        // Convert directions to steps
+        List<Step> steps = [];
+        if (jsonRecipe['directions'] != null) {
+          int index = 0;
+          steps = (jsonRecipe['directions'] as List).map((instruction) {
+            final stepId = const Uuid().v4();
+            return Step(
+              id: stepId,
+              type: 'step',  // Default to regular step, not section or timer
+              text: instruction,  // The instruction text
+              // No note or timer duration for imported steps
+            );
+          }).toList();
+        }
+        
+        // Create the recipe object
+        final recipeCompanion = RecipesCompanion.insert(
+          id: Value(id),
+          title: jsonRecipe['recipe_name'] ?? 'Untitled Recipe',
+          description: Value(jsonRecipe['cuisine_path'] ?? ''),
+          rating: Value(jsonRecipe['rating'] != null ? int.tryParse(jsonRecipe['rating'].toString()) : null),
+          language: Value('en'),
+          servings: Value(jsonRecipe['servings'] != null ? int.tryParse(jsonRecipe['servings'].toString()) : null),
+          prepTime: Value(jsonRecipe['prep_time'] != null && jsonRecipe['prep_time'].toString().isNotEmpty 
+              ? int.tryParse(jsonRecipe['prep_time'].toString()) 
+              : null),
+          cookTime: Value(jsonRecipe['cook_time'] != null && jsonRecipe['cook_time'].toString().isNotEmpty 
+              ? int.tryParse(jsonRecipe['cook_time'].toString()) 
+              : null),
+          totalTime: Value(jsonRecipe['total_time'] != null && jsonRecipe['total_time'].toString().isNotEmpty 
+              ? int.tryParse(jsonRecipe['total_time'].toString()) 
+              : null),
+          source: Value(jsonRecipe['url'] ?? ''),
+          nutrition: Value(jsonRecipe['nutrition'] ?? ''),
+          generalNotes: Value('Imported from seed data'),
+          userId: Value('seed_import'),
+          householdId: Value(null),
+          createdAt: Value(now),
+          updatedAt: Value(now),
+          ingredients: Value(ingredients),
+          steps: Value(steps),
+          folderIds: const Value([]),
+          images: const Value([]),
+        );
+        
+        await _repository.addRecipe(recipeCompanion);
+        importedCount++;
+      }
+      
+      return importedCount;
+    } catch (e) {
+      state = AsyncValue.error(e, StackTrace.current);
+      return 0;
     }
   }
 }
