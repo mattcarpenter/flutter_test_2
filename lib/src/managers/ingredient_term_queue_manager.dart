@@ -86,6 +86,12 @@ class IngredientTermQueueManager {
       return;
     }
 
+    // Skip if ingredient has no name or empty name
+    if (ingredient.name == null || ingredient.name!.trim().isEmpty) {
+      debugPrint('Skipping ingredient with empty name in recipe $recipeId');
+      return;
+    }
+
     // Check if there's an existing entry for this ingredient
     final existingEntry = await repository.getEntryByIds(recipeId, ingredient.id);
     if (existingEntry != null) {
@@ -119,8 +125,15 @@ class IngredientTermQueueManager {
     // This helps when a recipe is updated
     await repository.deleteEntriesByRecipeId(recipeId);
 
-    // Add queue entries for each ingredient
-    for (final ingredient in ingredients) {
+    // Filter out invalid ingredients
+    final validIngredients = ingredients.where((ingredient) => 
+      ingredient.type == 'ingredient' && 
+      ingredient.name != null && 
+      ingredient.name!.trim().isNotEmpty
+    ).toList();
+
+    // Add queue entries for each valid ingredient
+    for (final ingredient in validIngredients) {
       await queueIngredient(
         recipeId: recipeId,
         ingredient: ingredient,
@@ -198,6 +211,14 @@ class IngredientTermQueueManager {
         // Parse ingredient data
         final Map<String, dynamic> ingredientData =
             json.decode(entry.ingredientData) as Map<String, dynamic>;
+
+        // Skip ingredients with missing or empty names
+        final name = ingredientData['name'];
+        if (name == null || (name is String && name.trim().isEmpty)) {
+          debugPrint('Skipping ingredient with empty name in queue entry ${entry.id}');
+          await repository.deleteEntry(entry.id);
+          continue;
+        }
 
         // Group by recipe ID for batch processing
         if (!recipeIngredients.containsKey(entry.recipeId)) {

@@ -42,19 +42,34 @@ class IngredientCanonicalizer {
           
           if (item.containsKey('terms') && item['terms'] is List) {
             final List<dynamic> termList = item['terms'];
-            final List<IngredientTerm> terms = termList.asMap().entries.map((entry) {
+            // Create a map to deduplicate terms while preserving the first occurrence's sort order
+            final Map<String, IngredientTerm> uniqueTerms = {};
+            
+            termList.asMap().entries.forEach((entry) {
               final index = entry.key;
-              final value = entry.value.toString();
+              final value = entry.value.toString().trim();
               
-              return IngredientTerm(
-                value: value,
-                source: 'ai',
-                sort: index,
-              );
-            }).toList();
+              // Skip empty terms
+              if (value.isEmpty) return;
+              
+              // Only add if we haven't seen this term yet
+              if (!uniqueTerms.containsKey(value)) {
+                uniqueTerms[value] = IngredientTerm(
+                  value: value,
+                  source: 'ai',
+                  sort: index,
+                );
+              }
+            });
+            
+            // Convert the map back to a list, sorted by the original sort order
+            final List<IngredientTerm> terms = uniqueTerms.values.toList()
+              ..sort((a, b) => a.sort.compareTo(b.sort));
             
             // Use the original name as key
-            result[original] = terms;
+            if (terms.isNotEmpty) {
+              result[original] = terms;
+            }
           }
         }
       }
