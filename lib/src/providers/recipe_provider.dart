@@ -37,8 +37,8 @@ class RecipeNotifier extends StateNotifier<AsyncValue<List<RecipeWithFolders>>> 
   Future<void> addRecipe({
     required String id,
     required String title,
-    required String language,
-    required String userId,
+    String? language,
+    String? userId,
     int? rating,
     String? description,
     int? servings,
@@ -62,7 +62,7 @@ class RecipeNotifier extends StateNotifier<AsyncValue<List<RecipeWithFolders>>> 
         title: title,
         description: Value(description),
         rating: Value(rating),
-        language: language,
+        language: Value(language),
         servings: Value(servings),
         prepTime: Value(prepTime),
         cookTime: Value(cookTime),
@@ -70,7 +70,7 @@ class RecipeNotifier extends StateNotifier<AsyncValue<List<RecipeWithFolders>>> 
         source: Value(source),
         nutrition: Value(nutrition),
         generalNotes: Value(generalNotes),
-        userId: userId,
+        userId: Value(userId),
         householdId: Value(householdId),
         createdAt: Value(createdAt),
         updatedAt: Value(updatedAt),
@@ -257,7 +257,7 @@ class RecipeSearchState {
 final recipeSearchNotifierProvider =
 NotifierProvider<RecipeSearchNotifier, RecipeSearchState>(
     RecipeSearchNotifier.new);
-    
+
 // Dedicated search provider for the cook modal
 final cookModalRecipeSearchProvider =
 NotifierProvider<RecipeSearchNotifier, RecipeSearchState>(

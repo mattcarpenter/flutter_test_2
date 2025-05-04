@@ -349,8 +349,8 @@ class $RecipesTable extends Recipes with TableInfo<$RecipesTable, RecipeEntry> {
       const VerificationMeta('language');
   @override
   late final GeneratedColumn<String> language = GeneratedColumn<String>(
-      'language', aliasedName, false,
-      type: DriftSqlType.string, requiredDuringInsert: true);
+      'language', aliasedName, true,
+      type: DriftSqlType.string, requiredDuringInsert: false);
   static const VerificationMeta _servingsMeta =
       const VerificationMeta('servings');
   @override
@@ -395,8 +395,8 @@ class $RecipesTable extends Recipes with TableInfo<$RecipesTable, RecipeEntry> {
   static const VerificationMeta _userIdMeta = const VerificationMeta('userId');
   @override
   late final GeneratedColumn<String> userId = GeneratedColumn<String>(
-      'user_id', aliasedName, false,
-      type: DriftSqlType.string, requiredDuringInsert: true);
+      'user_id', aliasedName, true,
+      type: DriftSqlType.string, requiredDuringInsert: false);
   static const VerificationMeta _householdIdMeta =
       const VerificationMeta('householdId');
   @override
@@ -504,8 +504,6 @@ class $RecipesTable extends Recipes with TableInfo<$RecipesTable, RecipeEntry> {
     if (data.containsKey('language')) {
       context.handle(_languageMeta,
           language.isAcceptableOrUnknown(data['language']!, _languageMeta));
-    } else if (isInserting) {
-      context.missing(_languageMeta);
     }
     if (data.containsKey('servings')) {
       context.handle(_servingsMeta,
@@ -540,8 +538,6 @@ class $RecipesTable extends Recipes with TableInfo<$RecipesTable, RecipeEntry> {
     if (data.containsKey('user_id')) {
       context.handle(_userIdMeta,
           userId.isAcceptableOrUnknown(data['user_id']!, _userIdMeta));
-    } else if (isInserting) {
-      context.missing(_userIdMeta);
     }
     if (data.containsKey('household_id')) {
       context.handle(
@@ -583,7 +579,7 @@ class $RecipesTable extends Recipes with TableInfo<$RecipesTable, RecipeEntry> {
       rating: attachedDatabase.typeMapping
           .read(DriftSqlType.int, data['${effectivePrefix}rating']),
       language: attachedDatabase.typeMapping
-          .read(DriftSqlType.string, data['${effectivePrefix}language'])!,
+          .read(DriftSqlType.string, data['${effectivePrefix}language']),
       servings: attachedDatabase.typeMapping
           .read(DriftSqlType.int, data['${effectivePrefix}servings']),
       prepTime: attachedDatabase.typeMapping
@@ -599,7 +595,7 @@ class $RecipesTable extends Recipes with TableInfo<$RecipesTable, RecipeEntry> {
       generalNotes: attachedDatabase.typeMapping
           .read(DriftSqlType.string, data['${effectivePrefix}general_notes']),
       userId: attachedDatabase.typeMapping
-          .read(DriftSqlType.string, data['${effectivePrefix}user_id'])!,
+          .read(DriftSqlType.string, data['${effectivePrefix}user_id']),
       householdId: attachedDatabase.typeMapping
           .read(DriftSqlType.string, data['${effectivePrefix}household_id']),
       createdAt: attachedDatabase.typeMapping
@@ -650,7 +646,7 @@ class RecipeEntry extends DataClass implements Insertable<RecipeEntry> {
   final String title;
   final String? description;
   final int? rating;
-  final String language;
+  final String? language;
   final int? servings;
   final int? prepTime;
   final int? cookTime;
@@ -658,7 +654,7 @@ class RecipeEntry extends DataClass implements Insertable<RecipeEntry> {
   final String? source;
   final String? nutrition;
   final String? generalNotes;
-  final String userId;
+  final String? userId;
   final String? householdId;
   final int? createdAt;
   final int? updatedAt;
@@ -672,7 +668,7 @@ class RecipeEntry extends DataClass implements Insertable<RecipeEntry> {
       required this.title,
       this.description,
       this.rating,
-      required this.language,
+      this.language,
       this.servings,
       this.prepTime,
       this.cookTime,
@@ -680,7 +676,7 @@ class RecipeEntry extends DataClass implements Insertable<RecipeEntry> {
       this.source,
       this.nutrition,
       this.generalNotes,
-      required this.userId,
+      this.userId,
       this.householdId,
       this.createdAt,
       this.updatedAt,
@@ -700,7 +696,9 @@ class RecipeEntry extends DataClass implements Insertable<RecipeEntry> {
     if (!nullToAbsent || rating != null) {
       map['rating'] = Variable<int>(rating);
     }
-    map['language'] = Variable<String>(language);
+    if (!nullToAbsent || language != null) {
+      map['language'] = Variable<String>(language);
+    }
     if (!nullToAbsent || servings != null) {
       map['servings'] = Variable<int>(servings);
     }
@@ -722,7 +720,9 @@ class RecipeEntry extends DataClass implements Insertable<RecipeEntry> {
     if (!nullToAbsent || generalNotes != null) {
       map['general_notes'] = Variable<String>(generalNotes);
     }
-    map['user_id'] = Variable<String>(userId);
+    if (!nullToAbsent || userId != null) {
+      map['user_id'] = Variable<String>(userId);
+    }
     if (!nullToAbsent || householdId != null) {
       map['household_id'] = Variable<String>(householdId);
     }
@@ -763,7 +763,9 @@ class RecipeEntry extends DataClass implements Insertable<RecipeEntry> {
           : Value(description),
       rating:
           rating == null && nullToAbsent ? const Value.absent() : Value(rating),
-      language: Value(language),
+      language: language == null && nullToAbsent
+          ? const Value.absent()
+          : Value(language),
       servings: servings == null && nullToAbsent
           ? const Value.absent()
           : Value(servings),
@@ -784,7 +786,8 @@ class RecipeEntry extends DataClass implements Insertable<RecipeEntry> {
       generalNotes: generalNotes == null && nullToAbsent
           ? const Value.absent()
           : Value(generalNotes),
-      userId: Value(userId),
+      userId:
+          userId == null && nullToAbsent ? const Value.absent() : Value(userId),
       householdId: householdId == null && nullToAbsent
           ? const Value.absent()
           : Value(householdId),
@@ -818,7 +821,7 @@ class RecipeEntry extends DataClass implements Insertable<RecipeEntry> {
       title: serializer.fromJson<String>(json['title']),
       description: serializer.fromJson<String?>(json['description']),
       rating: serializer.fromJson<int?>(json['rating']),
-      language: serializer.fromJson<String>(json['language']),
+      language: serializer.fromJson<String?>(json['language']),
       servings: serializer.fromJson<int?>(json['servings']),
       prepTime: serializer.fromJson<int?>(json['prepTime']),
       cookTime: serializer.fromJson<int?>(json['cookTime']),
@@ -826,7 +829,7 @@ class RecipeEntry extends DataClass implements Insertable<RecipeEntry> {
       source: serializer.fromJson<String?>(json['source']),
       nutrition: serializer.fromJson<String?>(json['nutrition']),
       generalNotes: serializer.fromJson<String?>(json['generalNotes']),
-      userId: serializer.fromJson<String>(json['userId']),
+      userId: serializer.fromJson<String?>(json['userId']),
       householdId: serializer.fromJson<String?>(json['householdId']),
       createdAt: serializer.fromJson<int?>(json['createdAt']),
       updatedAt: serializer.fromJson<int?>(json['updatedAt']),
@@ -845,7 +848,7 @@ class RecipeEntry extends DataClass implements Insertable<RecipeEntry> {
       'title': serializer.toJson<String>(title),
       'description': serializer.toJson<String?>(description),
       'rating': serializer.toJson<int?>(rating),
-      'language': serializer.toJson<String>(language),
+      'language': serializer.toJson<String?>(language),
       'servings': serializer.toJson<int?>(servings),
       'prepTime': serializer.toJson<int?>(prepTime),
       'cookTime': serializer.toJson<int?>(cookTime),
@@ -853,7 +856,7 @@ class RecipeEntry extends DataClass implements Insertable<RecipeEntry> {
       'source': serializer.toJson<String?>(source),
       'nutrition': serializer.toJson<String?>(nutrition),
       'generalNotes': serializer.toJson<String?>(generalNotes),
-      'userId': serializer.toJson<String>(userId),
+      'userId': serializer.toJson<String?>(userId),
       'householdId': serializer.toJson<String?>(householdId),
       'createdAt': serializer.toJson<int?>(createdAt),
       'updatedAt': serializer.toJson<int?>(updatedAt),
@@ -870,7 +873,7 @@ class RecipeEntry extends DataClass implements Insertable<RecipeEntry> {
           String? title,
           Value<String?> description = const Value.absent(),
           Value<int?> rating = const Value.absent(),
-          String? language,
+          Value<String?> language = const Value.absent(),
           Value<int?> servings = const Value.absent(),
           Value<int?> prepTime = const Value.absent(),
           Value<int?> cookTime = const Value.absent(),
@@ -878,7 +881,7 @@ class RecipeEntry extends DataClass implements Insertable<RecipeEntry> {
           Value<String?> source = const Value.absent(),
           Value<String?> nutrition = const Value.absent(),
           Value<String?> generalNotes = const Value.absent(),
-          String? userId,
+          Value<String?> userId = const Value.absent(),
           Value<String?> householdId = const Value.absent(),
           Value<int?> createdAt = const Value.absent(),
           Value<int?> updatedAt = const Value.absent(),
@@ -892,7 +895,7 @@ class RecipeEntry extends DataClass implements Insertable<RecipeEntry> {
         title: title ?? this.title,
         description: description.present ? description.value : this.description,
         rating: rating.present ? rating.value : this.rating,
-        language: language ?? this.language,
+        language: language.present ? language.value : this.language,
         servings: servings.present ? servings.value : this.servings,
         prepTime: prepTime.present ? prepTime.value : this.prepTime,
         cookTime: cookTime.present ? cookTime.value : this.cookTime,
@@ -901,7 +904,7 @@ class RecipeEntry extends DataClass implements Insertable<RecipeEntry> {
         nutrition: nutrition.present ? nutrition.value : this.nutrition,
         generalNotes:
             generalNotes.present ? generalNotes.value : this.generalNotes,
-        userId: userId ?? this.userId,
+        userId: userId.present ? userId.value : this.userId,
         householdId: householdId.present ? householdId.value : this.householdId,
         createdAt: createdAt.present ? createdAt.value : this.createdAt,
         updatedAt: updatedAt.present ? updatedAt.value : this.updatedAt,
@@ -1026,7 +1029,7 @@ class RecipesCompanion extends UpdateCompanion<RecipeEntry> {
   final Value<String> title;
   final Value<String?> description;
   final Value<int?> rating;
-  final Value<String> language;
+  final Value<String?> language;
   final Value<int?> servings;
   final Value<int?> prepTime;
   final Value<int?> cookTime;
@@ -1034,7 +1037,7 @@ class RecipesCompanion extends UpdateCompanion<RecipeEntry> {
   final Value<String?> source;
   final Value<String?> nutrition;
   final Value<String?> generalNotes;
-  final Value<String> userId;
+  final Value<String?> userId;
   final Value<String?> householdId;
   final Value<int?> createdAt;
   final Value<int?> updatedAt;
@@ -1073,7 +1076,7 @@ class RecipesCompanion extends UpdateCompanion<RecipeEntry> {
     required String title,
     this.description = const Value.absent(),
     this.rating = const Value.absent(),
-    required String language,
+    this.language = const Value.absent(),
     this.servings = const Value.absent(),
     this.prepTime = const Value.absent(),
     this.cookTime = const Value.absent(),
@@ -1081,7 +1084,7 @@ class RecipesCompanion extends UpdateCompanion<RecipeEntry> {
     this.source = const Value.absent(),
     this.nutrition = const Value.absent(),
     this.generalNotes = const Value.absent(),
-    required String userId,
+    this.userId = const Value.absent(),
     this.householdId = const Value.absent(),
     this.createdAt = const Value.absent(),
     this.updatedAt = const Value.absent(),
@@ -1091,9 +1094,7 @@ class RecipesCompanion extends UpdateCompanion<RecipeEntry> {
     this.folderIds = const Value.absent(),
     this.images = const Value.absent(),
     this.rowid = const Value.absent(),
-  })  : title = Value(title),
-        language = Value(language),
-        userId = Value(userId);
+  }) : title = Value(title);
   static Insertable<RecipeEntry> custom({
     Expression<String>? id,
     Expression<String>? title,
@@ -1149,7 +1150,7 @@ class RecipesCompanion extends UpdateCompanion<RecipeEntry> {
       Value<String>? title,
       Value<String?>? description,
       Value<int?>? rating,
-      Value<String>? language,
+      Value<String?>? language,
       Value<int?>? servings,
       Value<int?>? prepTime,
       Value<int?>? cookTime,
@@ -1157,7 +1158,7 @@ class RecipesCompanion extends UpdateCompanion<RecipeEntry> {
       Value<String?>? source,
       Value<String?>? nutrition,
       Value<String?>? generalNotes,
-      Value<String>? userId,
+      Value<String?>? userId,
       Value<String?>? householdId,
       Value<int?>? createdAt,
       Value<int?>? updatedAt,
@@ -2458,6 +2459,503 @@ class UploadQueuesCompanion extends UpdateCompanion<UploadQueueEntry> {
           ..write('retryCount: $retryCount, ')
           ..write('lastTryTimestamp: $lastTryTimestamp, ')
           ..write('recipeId: $recipeId, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
+class $IngredientTermQueuesTable extends IngredientTermQueues
+    with TableInfo<$IngredientTermQueuesTable, IngredientTermQueueEntry> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $IngredientTermQueuesTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<String> id = GeneratedColumn<String>(
+      'id', aliasedName, false,
+      type: DriftSqlType.string,
+      requiredDuringInsert: false,
+      defaultConstraints: GeneratedColumn.constraintIsAlways('UNIQUE'),
+      clientDefault: () => const Uuid().v4());
+  static const VerificationMeta _recipeIdMeta =
+      const VerificationMeta('recipeId');
+  @override
+  late final GeneratedColumn<String> recipeId = GeneratedColumn<String>(
+      'recipe_id', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _ingredientIdMeta =
+      const VerificationMeta('ingredientId');
+  @override
+  late final GeneratedColumn<String> ingredientId = GeneratedColumn<String>(
+      'ingredient_id', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _requestTimestampMeta =
+      const VerificationMeta('requestTimestamp');
+  @override
+  late final GeneratedColumn<int> requestTimestamp = GeneratedColumn<int>(
+      'request_timestamp', aliasedName, false,
+      type: DriftSqlType.int, requiredDuringInsert: true);
+  static const VerificationMeta _statusMeta = const VerificationMeta('status');
+  @override
+  late final GeneratedColumn<String> status = GeneratedColumn<String>(
+      'status', aliasedName, false,
+      type: DriftSqlType.string,
+      requiredDuringInsert: false,
+      defaultValue: Constant('pending'));
+  static const VerificationMeta _retryCountMeta =
+      const VerificationMeta('retryCount');
+  @override
+  late final GeneratedColumn<int> retryCount = GeneratedColumn<int>(
+      'retry_count', aliasedName, false,
+      type: DriftSqlType.int,
+      requiredDuringInsert: false,
+      defaultValue: Constant(0));
+  static const VerificationMeta _lastTryTimestampMeta =
+      const VerificationMeta('lastTryTimestamp');
+  @override
+  late final GeneratedColumn<int> lastTryTimestamp = GeneratedColumn<int>(
+      'last_try_timestamp', aliasedName, true,
+      type: DriftSqlType.int, requiredDuringInsert: false);
+  static const VerificationMeta _ingredientDataMeta =
+      const VerificationMeta('ingredientData');
+  @override
+  late final GeneratedColumn<String> ingredientData = GeneratedColumn<String>(
+      'ingredient_data', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _responseDataMeta =
+      const VerificationMeta('responseData');
+  @override
+  late final GeneratedColumn<String> responseData = GeneratedColumn<String>(
+      'response_data', aliasedName, true,
+      type: DriftSqlType.string, requiredDuringInsert: false);
+  @override
+  List<GeneratedColumn> get $columns => [
+        id,
+        recipeId,
+        ingredientId,
+        requestTimestamp,
+        status,
+        retryCount,
+        lastTryTimestamp,
+        ingredientData,
+        responseData
+      ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'ingredient_term_queues';
+  @override
+  VerificationContext validateIntegrity(
+      Insertable<IngredientTermQueueEntry> instance,
+      {bool isInserting = false}) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    }
+    if (data.containsKey('recipe_id')) {
+      context.handle(_recipeIdMeta,
+          recipeId.isAcceptableOrUnknown(data['recipe_id']!, _recipeIdMeta));
+    } else if (isInserting) {
+      context.missing(_recipeIdMeta);
+    }
+    if (data.containsKey('ingredient_id')) {
+      context.handle(
+          _ingredientIdMeta,
+          ingredientId.isAcceptableOrUnknown(
+              data['ingredient_id']!, _ingredientIdMeta));
+    } else if (isInserting) {
+      context.missing(_ingredientIdMeta);
+    }
+    if (data.containsKey('request_timestamp')) {
+      context.handle(
+          _requestTimestampMeta,
+          requestTimestamp.isAcceptableOrUnknown(
+              data['request_timestamp']!, _requestTimestampMeta));
+    } else if (isInserting) {
+      context.missing(_requestTimestampMeta);
+    }
+    if (data.containsKey('status')) {
+      context.handle(_statusMeta,
+          status.isAcceptableOrUnknown(data['status']!, _statusMeta));
+    }
+    if (data.containsKey('retry_count')) {
+      context.handle(
+          _retryCountMeta,
+          retryCount.isAcceptableOrUnknown(
+              data['retry_count']!, _retryCountMeta));
+    }
+    if (data.containsKey('last_try_timestamp')) {
+      context.handle(
+          _lastTryTimestampMeta,
+          lastTryTimestamp.isAcceptableOrUnknown(
+              data['last_try_timestamp']!, _lastTryTimestampMeta));
+    }
+    if (data.containsKey('ingredient_data')) {
+      context.handle(
+          _ingredientDataMeta,
+          ingredientData.isAcceptableOrUnknown(
+              data['ingredient_data']!, _ingredientDataMeta));
+    } else if (isInserting) {
+      context.missing(_ingredientDataMeta);
+    }
+    if (data.containsKey('response_data')) {
+      context.handle(
+          _responseDataMeta,
+          responseData.isAcceptableOrUnknown(
+              data['response_data']!, _responseDataMeta));
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  IngredientTermQueueEntry map(Map<String, dynamic> data,
+      {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return IngredientTermQueueEntry(
+      id: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}id'])!,
+      recipeId: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}recipe_id'])!,
+      ingredientId: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}ingredient_id'])!,
+      requestTimestamp: attachedDatabase.typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}request_timestamp'])!,
+      status: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}status'])!,
+      retryCount: attachedDatabase.typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}retry_count'])!,
+      lastTryTimestamp: attachedDatabase.typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}last_try_timestamp']),
+      ingredientData: attachedDatabase.typeMapping.read(
+          DriftSqlType.string, data['${effectivePrefix}ingredient_data'])!,
+      responseData: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}response_data']),
+    );
+  }
+
+  @override
+  $IngredientTermQueuesTable createAlias(String alias) {
+    return $IngredientTermQueuesTable(attachedDatabase, alias);
+  }
+}
+
+class IngredientTermQueueEntry extends DataClass
+    implements Insertable<IngredientTermQueueEntry> {
+  final String id;
+  final String recipeId;
+  final String ingredientId;
+  final int requestTimestamp;
+  final String status;
+  final int retryCount;
+  final int? lastTryTimestamp;
+  final String ingredientData;
+  final String? responseData;
+  const IngredientTermQueueEntry(
+      {required this.id,
+      required this.recipeId,
+      required this.ingredientId,
+      required this.requestTimestamp,
+      required this.status,
+      required this.retryCount,
+      this.lastTryTimestamp,
+      required this.ingredientData,
+      this.responseData});
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<String>(id);
+    map['recipe_id'] = Variable<String>(recipeId);
+    map['ingredient_id'] = Variable<String>(ingredientId);
+    map['request_timestamp'] = Variable<int>(requestTimestamp);
+    map['status'] = Variable<String>(status);
+    map['retry_count'] = Variable<int>(retryCount);
+    if (!nullToAbsent || lastTryTimestamp != null) {
+      map['last_try_timestamp'] = Variable<int>(lastTryTimestamp);
+    }
+    map['ingredient_data'] = Variable<String>(ingredientData);
+    if (!nullToAbsent || responseData != null) {
+      map['response_data'] = Variable<String>(responseData);
+    }
+    return map;
+  }
+
+  IngredientTermQueuesCompanion toCompanion(bool nullToAbsent) {
+    return IngredientTermQueuesCompanion(
+      id: Value(id),
+      recipeId: Value(recipeId),
+      ingredientId: Value(ingredientId),
+      requestTimestamp: Value(requestTimestamp),
+      status: Value(status),
+      retryCount: Value(retryCount),
+      lastTryTimestamp: lastTryTimestamp == null && nullToAbsent
+          ? const Value.absent()
+          : Value(lastTryTimestamp),
+      ingredientData: Value(ingredientData),
+      responseData: responseData == null && nullToAbsent
+          ? const Value.absent()
+          : Value(responseData),
+    );
+  }
+
+  factory IngredientTermQueueEntry.fromJson(Map<String, dynamic> json,
+      {ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return IngredientTermQueueEntry(
+      id: serializer.fromJson<String>(json['id']),
+      recipeId: serializer.fromJson<String>(json['recipeId']),
+      ingredientId: serializer.fromJson<String>(json['ingredientId']),
+      requestTimestamp: serializer.fromJson<int>(json['requestTimestamp']),
+      status: serializer.fromJson<String>(json['status']),
+      retryCount: serializer.fromJson<int>(json['retryCount']),
+      lastTryTimestamp: serializer.fromJson<int?>(json['lastTryTimestamp']),
+      ingredientData: serializer.fromJson<String>(json['ingredientData']),
+      responseData: serializer.fromJson<String?>(json['responseData']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<String>(id),
+      'recipeId': serializer.toJson<String>(recipeId),
+      'ingredientId': serializer.toJson<String>(ingredientId),
+      'requestTimestamp': serializer.toJson<int>(requestTimestamp),
+      'status': serializer.toJson<String>(status),
+      'retryCount': serializer.toJson<int>(retryCount),
+      'lastTryTimestamp': serializer.toJson<int?>(lastTryTimestamp),
+      'ingredientData': serializer.toJson<String>(ingredientData),
+      'responseData': serializer.toJson<String?>(responseData),
+    };
+  }
+
+  IngredientTermQueueEntry copyWith(
+          {String? id,
+          String? recipeId,
+          String? ingredientId,
+          int? requestTimestamp,
+          String? status,
+          int? retryCount,
+          Value<int?> lastTryTimestamp = const Value.absent(),
+          String? ingredientData,
+          Value<String?> responseData = const Value.absent()}) =>
+      IngredientTermQueueEntry(
+        id: id ?? this.id,
+        recipeId: recipeId ?? this.recipeId,
+        ingredientId: ingredientId ?? this.ingredientId,
+        requestTimestamp: requestTimestamp ?? this.requestTimestamp,
+        status: status ?? this.status,
+        retryCount: retryCount ?? this.retryCount,
+        lastTryTimestamp: lastTryTimestamp.present
+            ? lastTryTimestamp.value
+            : this.lastTryTimestamp,
+        ingredientData: ingredientData ?? this.ingredientData,
+        responseData:
+            responseData.present ? responseData.value : this.responseData,
+      );
+  IngredientTermQueueEntry copyWithCompanion(
+      IngredientTermQueuesCompanion data) {
+    return IngredientTermQueueEntry(
+      id: data.id.present ? data.id.value : this.id,
+      recipeId: data.recipeId.present ? data.recipeId.value : this.recipeId,
+      ingredientId: data.ingredientId.present
+          ? data.ingredientId.value
+          : this.ingredientId,
+      requestTimestamp: data.requestTimestamp.present
+          ? data.requestTimestamp.value
+          : this.requestTimestamp,
+      status: data.status.present ? data.status.value : this.status,
+      retryCount:
+          data.retryCount.present ? data.retryCount.value : this.retryCount,
+      lastTryTimestamp: data.lastTryTimestamp.present
+          ? data.lastTryTimestamp.value
+          : this.lastTryTimestamp,
+      ingredientData: data.ingredientData.present
+          ? data.ingredientData.value
+          : this.ingredientData,
+      responseData: data.responseData.present
+          ? data.responseData.value
+          : this.responseData,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('IngredientTermQueueEntry(')
+          ..write('id: $id, ')
+          ..write('recipeId: $recipeId, ')
+          ..write('ingredientId: $ingredientId, ')
+          ..write('requestTimestamp: $requestTimestamp, ')
+          ..write('status: $status, ')
+          ..write('retryCount: $retryCount, ')
+          ..write('lastTryTimestamp: $lastTryTimestamp, ')
+          ..write('ingredientData: $ingredientData, ')
+          ..write('responseData: $responseData')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(id, recipeId, ingredientId, requestTimestamp,
+      status, retryCount, lastTryTimestamp, ingredientData, responseData);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is IngredientTermQueueEntry &&
+          other.id == this.id &&
+          other.recipeId == this.recipeId &&
+          other.ingredientId == this.ingredientId &&
+          other.requestTimestamp == this.requestTimestamp &&
+          other.status == this.status &&
+          other.retryCount == this.retryCount &&
+          other.lastTryTimestamp == this.lastTryTimestamp &&
+          other.ingredientData == this.ingredientData &&
+          other.responseData == this.responseData);
+}
+
+class IngredientTermQueuesCompanion
+    extends UpdateCompanion<IngredientTermQueueEntry> {
+  final Value<String> id;
+  final Value<String> recipeId;
+  final Value<String> ingredientId;
+  final Value<int> requestTimestamp;
+  final Value<String> status;
+  final Value<int> retryCount;
+  final Value<int?> lastTryTimestamp;
+  final Value<String> ingredientData;
+  final Value<String?> responseData;
+  final Value<int> rowid;
+  const IngredientTermQueuesCompanion({
+    this.id = const Value.absent(),
+    this.recipeId = const Value.absent(),
+    this.ingredientId = const Value.absent(),
+    this.requestTimestamp = const Value.absent(),
+    this.status = const Value.absent(),
+    this.retryCount = const Value.absent(),
+    this.lastTryTimestamp = const Value.absent(),
+    this.ingredientData = const Value.absent(),
+    this.responseData = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  IngredientTermQueuesCompanion.insert({
+    this.id = const Value.absent(),
+    required String recipeId,
+    required String ingredientId,
+    required int requestTimestamp,
+    this.status = const Value.absent(),
+    this.retryCount = const Value.absent(),
+    this.lastTryTimestamp = const Value.absent(),
+    required String ingredientData,
+    this.responseData = const Value.absent(),
+    this.rowid = const Value.absent(),
+  })  : recipeId = Value(recipeId),
+        ingredientId = Value(ingredientId),
+        requestTimestamp = Value(requestTimestamp),
+        ingredientData = Value(ingredientData);
+  static Insertable<IngredientTermQueueEntry> custom({
+    Expression<String>? id,
+    Expression<String>? recipeId,
+    Expression<String>? ingredientId,
+    Expression<int>? requestTimestamp,
+    Expression<String>? status,
+    Expression<int>? retryCount,
+    Expression<int>? lastTryTimestamp,
+    Expression<String>? ingredientData,
+    Expression<String>? responseData,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (recipeId != null) 'recipe_id': recipeId,
+      if (ingredientId != null) 'ingredient_id': ingredientId,
+      if (requestTimestamp != null) 'request_timestamp': requestTimestamp,
+      if (status != null) 'status': status,
+      if (retryCount != null) 'retry_count': retryCount,
+      if (lastTryTimestamp != null) 'last_try_timestamp': lastTryTimestamp,
+      if (ingredientData != null) 'ingredient_data': ingredientData,
+      if (responseData != null) 'response_data': responseData,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  IngredientTermQueuesCompanion copyWith(
+      {Value<String>? id,
+      Value<String>? recipeId,
+      Value<String>? ingredientId,
+      Value<int>? requestTimestamp,
+      Value<String>? status,
+      Value<int>? retryCount,
+      Value<int?>? lastTryTimestamp,
+      Value<String>? ingredientData,
+      Value<String?>? responseData,
+      Value<int>? rowid}) {
+    return IngredientTermQueuesCompanion(
+      id: id ?? this.id,
+      recipeId: recipeId ?? this.recipeId,
+      ingredientId: ingredientId ?? this.ingredientId,
+      requestTimestamp: requestTimestamp ?? this.requestTimestamp,
+      status: status ?? this.status,
+      retryCount: retryCount ?? this.retryCount,
+      lastTryTimestamp: lastTryTimestamp ?? this.lastTryTimestamp,
+      ingredientData: ingredientData ?? this.ingredientData,
+      responseData: responseData ?? this.responseData,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<String>(id.value);
+    }
+    if (recipeId.present) {
+      map['recipe_id'] = Variable<String>(recipeId.value);
+    }
+    if (ingredientId.present) {
+      map['ingredient_id'] = Variable<String>(ingredientId.value);
+    }
+    if (requestTimestamp.present) {
+      map['request_timestamp'] = Variable<int>(requestTimestamp.value);
+    }
+    if (status.present) {
+      map['status'] = Variable<String>(status.value);
+    }
+    if (retryCount.present) {
+      map['retry_count'] = Variable<int>(retryCount.value);
+    }
+    if (lastTryTimestamp.present) {
+      map['last_try_timestamp'] = Variable<int>(lastTryTimestamp.value);
+    }
+    if (ingredientData.present) {
+      map['ingredient_data'] = Variable<String>(ingredientData.value);
+    }
+    if (responseData.present) {
+      map['response_data'] = Variable<String>(responseData.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('IngredientTermQueuesCompanion(')
+          ..write('id: $id, ')
+          ..write('recipeId: $recipeId, ')
+          ..write('ingredientId: $ingredientId, ')
+          ..write('requestTimestamp: $requestTimestamp, ')
+          ..write('status: $status, ')
+          ..write('retryCount: $retryCount, ')
+          ..write('lastTryTimestamp: $lastTryTimestamp, ')
+          ..write('ingredientData: $ingredientData, ')
+          ..write('responseData: $responseData, ')
           ..write('rowid: $rowid')
           ..write(')'))
         .toString();
@@ -5821,6 +6319,8 @@ abstract class _$AppDatabase extends GeneratedDatabase {
       $HouseholdMembersTable(this);
   late final $HouseholdsTable households = $HouseholdsTable(this);
   late final $UploadQueuesTable uploadQueues = $UploadQueuesTable(this);
+  late final $IngredientTermQueuesTable ingredientTermQueues =
+      $IngredientTermQueuesTable(this);
   late final $CooksTable cooks = $CooksTable(this);
   late final $PantryItemsTable pantryItems = $PantryItemsTable(this);
   late final $IngredientTermOverridesTable ingredientTermOverrides =
@@ -5840,6 +6340,7 @@ abstract class _$AppDatabase extends GeneratedDatabase {
         householdMembers,
         households,
         uploadQueues,
+        ingredientTermQueues,
         cooks,
         pantryItems,
         ingredientTermOverrides,
@@ -6027,7 +6528,7 @@ typedef $$RecipesTableCreateCompanionBuilder = RecipesCompanion Function({
   required String title,
   Value<String?> description,
   Value<int?> rating,
-  required String language,
+  Value<String?> language,
   Value<int?> servings,
   Value<int?> prepTime,
   Value<int?> cookTime,
@@ -6035,7 +6536,7 @@ typedef $$RecipesTableCreateCompanionBuilder = RecipesCompanion Function({
   Value<String?> source,
   Value<String?> nutrition,
   Value<String?> generalNotes,
-  required String userId,
+  Value<String?> userId,
   Value<String?> householdId,
   Value<int?> createdAt,
   Value<int?> updatedAt,
@@ -6051,7 +6552,7 @@ typedef $$RecipesTableUpdateCompanionBuilder = RecipesCompanion Function({
   Value<String> title,
   Value<String?> description,
   Value<int?> rating,
-  Value<String> language,
+  Value<String?> language,
   Value<int?> servings,
   Value<int?> prepTime,
   Value<int?> cookTime,
@@ -6059,7 +6560,7 @@ typedef $$RecipesTableUpdateCompanionBuilder = RecipesCompanion Function({
   Value<String?> source,
   Value<String?> nutrition,
   Value<String?> generalNotes,
-  Value<String> userId,
+  Value<String?> userId,
   Value<String?> householdId,
   Value<int?> createdAt,
   Value<int?> updatedAt,
@@ -6327,7 +6828,7 @@ class $$RecipesTableTableManager extends RootTableManager<
             Value<String> title = const Value.absent(),
             Value<String?> description = const Value.absent(),
             Value<int?> rating = const Value.absent(),
-            Value<String> language = const Value.absent(),
+            Value<String?> language = const Value.absent(),
             Value<int?> servings = const Value.absent(),
             Value<int?> prepTime = const Value.absent(),
             Value<int?> cookTime = const Value.absent(),
@@ -6335,7 +6836,7 @@ class $$RecipesTableTableManager extends RootTableManager<
             Value<String?> source = const Value.absent(),
             Value<String?> nutrition = const Value.absent(),
             Value<String?> generalNotes = const Value.absent(),
-            Value<String> userId = const Value.absent(),
+            Value<String?> userId = const Value.absent(),
             Value<String?> householdId = const Value.absent(),
             Value<int?> createdAt = const Value.absent(),
             Value<int?> updatedAt = const Value.absent(),
@@ -6375,7 +6876,7 @@ class $$RecipesTableTableManager extends RootTableManager<
             required String title,
             Value<String?> description = const Value.absent(),
             Value<int?> rating = const Value.absent(),
-            required String language,
+            Value<String?> language = const Value.absent(),
             Value<int?> servings = const Value.absent(),
             Value<int?> prepTime = const Value.absent(),
             Value<int?> cookTime = const Value.absent(),
@@ -6383,7 +6884,7 @@ class $$RecipesTableTableManager extends RootTableManager<
             Value<String?> source = const Value.absent(),
             Value<String?> nutrition = const Value.absent(),
             Value<String?> generalNotes = const Value.absent(),
-            required String userId,
+            Value<String?> userId = const Value.absent(),
             Value<String?> householdId = const Value.absent(),
             Value<int?> createdAt = const Value.absent(),
             Value<int?> updatedAt = const Value.absent(),
@@ -7102,6 +7603,253 @@ typedef $$UploadQueuesTableProcessedTableManager = ProcessedTableManager<
     ),
     UploadQueueEntry,
     PrefetchHooks Function()>;
+typedef $$IngredientTermQueuesTableCreateCompanionBuilder
+    = IngredientTermQueuesCompanion Function({
+  Value<String> id,
+  required String recipeId,
+  required String ingredientId,
+  required int requestTimestamp,
+  Value<String> status,
+  Value<int> retryCount,
+  Value<int?> lastTryTimestamp,
+  required String ingredientData,
+  Value<String?> responseData,
+  Value<int> rowid,
+});
+typedef $$IngredientTermQueuesTableUpdateCompanionBuilder
+    = IngredientTermQueuesCompanion Function({
+  Value<String> id,
+  Value<String> recipeId,
+  Value<String> ingredientId,
+  Value<int> requestTimestamp,
+  Value<String> status,
+  Value<int> retryCount,
+  Value<int?> lastTryTimestamp,
+  Value<String> ingredientData,
+  Value<String?> responseData,
+  Value<int> rowid,
+});
+
+class $$IngredientTermQueuesTableFilterComposer
+    extends Composer<_$AppDatabase, $IngredientTermQueuesTable> {
+  $$IngredientTermQueuesTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get id => $composableBuilder(
+      column: $table.id, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get recipeId => $composableBuilder(
+      column: $table.recipeId, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get ingredientId => $composableBuilder(
+      column: $table.ingredientId, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<int> get requestTimestamp => $composableBuilder(
+      column: $table.requestTimestamp,
+      builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get status => $composableBuilder(
+      column: $table.status, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<int> get retryCount => $composableBuilder(
+      column: $table.retryCount, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<int> get lastTryTimestamp => $composableBuilder(
+      column: $table.lastTryTimestamp,
+      builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get ingredientData => $composableBuilder(
+      column: $table.ingredientData,
+      builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get responseData => $composableBuilder(
+      column: $table.responseData, builder: (column) => ColumnFilters(column));
+}
+
+class $$IngredientTermQueuesTableOrderingComposer
+    extends Composer<_$AppDatabase, $IngredientTermQueuesTable> {
+  $$IngredientTermQueuesTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get id => $composableBuilder(
+      column: $table.id, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get recipeId => $composableBuilder(
+      column: $table.recipeId, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get ingredientId => $composableBuilder(
+      column: $table.ingredientId,
+      builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<int> get requestTimestamp => $composableBuilder(
+      column: $table.requestTimestamp,
+      builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get status => $composableBuilder(
+      column: $table.status, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<int> get retryCount => $composableBuilder(
+      column: $table.retryCount, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<int> get lastTryTimestamp => $composableBuilder(
+      column: $table.lastTryTimestamp,
+      builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get ingredientData => $composableBuilder(
+      column: $table.ingredientData,
+      builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get responseData => $composableBuilder(
+      column: $table.responseData,
+      builder: (column) => ColumnOrderings(column));
+}
+
+class $$IngredientTermQueuesTableAnnotationComposer
+    extends Composer<_$AppDatabase, $IngredientTermQueuesTable> {
+  $$IngredientTermQueuesTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get recipeId =>
+      $composableBuilder(column: $table.recipeId, builder: (column) => column);
+
+  GeneratedColumn<String> get ingredientId => $composableBuilder(
+      column: $table.ingredientId, builder: (column) => column);
+
+  GeneratedColumn<int> get requestTimestamp => $composableBuilder(
+      column: $table.requestTimestamp, builder: (column) => column);
+
+  GeneratedColumn<String> get status =>
+      $composableBuilder(column: $table.status, builder: (column) => column);
+
+  GeneratedColumn<int> get retryCount => $composableBuilder(
+      column: $table.retryCount, builder: (column) => column);
+
+  GeneratedColumn<int> get lastTryTimestamp => $composableBuilder(
+      column: $table.lastTryTimestamp, builder: (column) => column);
+
+  GeneratedColumn<String> get ingredientData => $composableBuilder(
+      column: $table.ingredientData, builder: (column) => column);
+
+  GeneratedColumn<String> get responseData => $composableBuilder(
+      column: $table.responseData, builder: (column) => column);
+}
+
+class $$IngredientTermQueuesTableTableManager extends RootTableManager<
+    _$AppDatabase,
+    $IngredientTermQueuesTable,
+    IngredientTermQueueEntry,
+    $$IngredientTermQueuesTableFilterComposer,
+    $$IngredientTermQueuesTableOrderingComposer,
+    $$IngredientTermQueuesTableAnnotationComposer,
+    $$IngredientTermQueuesTableCreateCompanionBuilder,
+    $$IngredientTermQueuesTableUpdateCompanionBuilder,
+    (
+      IngredientTermQueueEntry,
+      BaseReferences<_$AppDatabase, $IngredientTermQueuesTable,
+          IngredientTermQueueEntry>
+    ),
+    IngredientTermQueueEntry,
+    PrefetchHooks Function()> {
+  $$IngredientTermQueuesTableTableManager(
+      _$AppDatabase db, $IngredientTermQueuesTable table)
+      : super(TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$IngredientTermQueuesTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$IngredientTermQueuesTableOrderingComposer(
+                  $db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$IngredientTermQueuesTableAnnotationComposer(
+                  $db: db, $table: table),
+          updateCompanionCallback: ({
+            Value<String> id = const Value.absent(),
+            Value<String> recipeId = const Value.absent(),
+            Value<String> ingredientId = const Value.absent(),
+            Value<int> requestTimestamp = const Value.absent(),
+            Value<String> status = const Value.absent(),
+            Value<int> retryCount = const Value.absent(),
+            Value<int?> lastTryTimestamp = const Value.absent(),
+            Value<String> ingredientData = const Value.absent(),
+            Value<String?> responseData = const Value.absent(),
+            Value<int> rowid = const Value.absent(),
+          }) =>
+              IngredientTermQueuesCompanion(
+            id: id,
+            recipeId: recipeId,
+            ingredientId: ingredientId,
+            requestTimestamp: requestTimestamp,
+            status: status,
+            retryCount: retryCount,
+            lastTryTimestamp: lastTryTimestamp,
+            ingredientData: ingredientData,
+            responseData: responseData,
+            rowid: rowid,
+          ),
+          createCompanionCallback: ({
+            Value<String> id = const Value.absent(),
+            required String recipeId,
+            required String ingredientId,
+            required int requestTimestamp,
+            Value<String> status = const Value.absent(),
+            Value<int> retryCount = const Value.absent(),
+            Value<int?> lastTryTimestamp = const Value.absent(),
+            required String ingredientData,
+            Value<String?> responseData = const Value.absent(),
+            Value<int> rowid = const Value.absent(),
+          }) =>
+              IngredientTermQueuesCompanion.insert(
+            id: id,
+            recipeId: recipeId,
+            ingredientId: ingredientId,
+            requestTimestamp: requestTimestamp,
+            status: status,
+            retryCount: retryCount,
+            lastTryTimestamp: lastTryTimestamp,
+            ingredientData: ingredientData,
+            responseData: responseData,
+            rowid: rowid,
+          ),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .toList(),
+          prefetchHooksCallback: null,
+        ));
+}
+
+typedef $$IngredientTermQueuesTableProcessedTableManager
+    = ProcessedTableManager<
+        _$AppDatabase,
+        $IngredientTermQueuesTable,
+        IngredientTermQueueEntry,
+        $$IngredientTermQueuesTableFilterComposer,
+        $$IngredientTermQueuesTableOrderingComposer,
+        $$IngredientTermQueuesTableAnnotationComposer,
+        $$IngredientTermQueuesTableCreateCompanionBuilder,
+        $$IngredientTermQueuesTableUpdateCompanionBuilder,
+        (
+          IngredientTermQueueEntry,
+          BaseReferences<_$AppDatabase, $IngredientTermQueuesTable,
+              IngredientTermQueueEntry>
+        ),
+        IngredientTermQueueEntry,
+        PrefetchHooks Function()>;
 typedef $$CooksTableCreateCompanionBuilder = CooksCompanion Function({
   Value<String> id,
   required String recipeId,
@@ -8700,6 +9448,8 @@ class $AppDatabaseManager {
       $$HouseholdsTableTableManager(_db, _db.households);
   $$UploadQueuesTableTableManager get uploadQueues =>
       $$UploadQueuesTableTableManager(_db, _db.uploadQueues);
+  $$IngredientTermQueuesTableTableManager get ingredientTermQueues =>
+      $$IngredientTermQueuesTableTableManager(_db, _db.ingredientTermQueues);
   $$CooksTableTableManager get cooks =>
       $$CooksTableTableManager(_db, _db.cooks);
   $$PantryItemsTableTableManager get pantryItems =>

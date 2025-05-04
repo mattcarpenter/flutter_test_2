@@ -13,11 +13,17 @@ import '../../database/powersync.dart';
 import '../../utils/language.dart';
 import '../../utils/mecab_wrapper.dart';
 import '../models/recipe_with_folders.dart';
+import '../managers/ingredient_term_queue_manager.dart';
 
 class RecipeRepository {
   final AppDatabase _db;
+  IngredientTermQueueManager? _ingredientTermQueueManager;
 
   RecipeRepository(this._db);
+  
+  set ingredientTermQueueManager(IngredientTermQueueManager manager) {
+    _ingredientTermQueueManager = manager;
+  }
 
   // Watch all recipes.
   Stream<List<RecipeEntry>> watchAllRecipes() {
@@ -25,13 +31,43 @@ class RecipeRepository {
   }
 
   // Insert a new recipe.
-  Future<int> addRecipe(RecipesCompanion recipe) {
-    return _db.into(_db.recipes).insert(recipe);
+  Future<int> addRecipe(RecipesCompanion recipe) async {
+    final result = await _db.into(_db.recipes).insert(recipe);
+    
+    // Queue ingredients for canonicalization if they exist
+    if (recipe.ingredients.present && recipe.ingredients.value != null) {
+      final ingredients = recipe.ingredients.value!;
+      if (ingredients.isNotEmpty && _ingredientTermQueueManager != null) {
+        // We need to get the recipe ID from the database since it's auto-generated
+        final recipeEntry = await (_db.select(_db.recipes)
+          ..orderBy([(t) => OrderingTerm.desc(t.createdAt)])
+          ..limit(1))
+            .getSingle();
+            
+        await _ingredientTermQueueManager!.queueRecipeIngredients(
+          recipeEntry.id,
+          ingredients,
+        );
+      }
+    }
+    
+    return result;
   }
 
   // Update a recipe.
-  Future<bool> updateRecipe(RecipeEntry recipe) {
-    return _db.update(_db.recipes).replace(recipe);
+  Future<bool> updateRecipe(RecipeEntry recipe) async {
+    final result = await _db.update(_db.recipes).replace(recipe);
+    
+    // Queue ingredients for canonicalization if they exist
+    if (recipe.ingredients != null && recipe.ingredients!.isNotEmpty && 
+        _ingredientTermQueueManager != null) {
+      await _ingredientTermQueueManager!.queueRecipeIngredients(
+        recipe.id,
+        recipe.ingredients!,
+      );
+    }
+    
+    return result;
   }
 
   Future<RecipeEntry?> getRecipeById(String id) {
@@ -119,7 +155,12 @@ class RecipeRepository {
     final recipe = await (_db.select(_db.recipes)
       ..where((tbl) => tbl.id.equals(recipeId)))
         .getSingle();
-    final updatedRecipe = recipe.copyWith(ingredients: Value(ingredients));
+    final updatedRecipe = recipe.copyWith(
+      ingredients: Value(ingredients),
+      updatedAt: Value(DateTime.now().millisecondsSinceEpoch),
+    );
+    
+    // Here we won't call queueRecipeIngredients explicitly since it's handled in updateRecipe
     return updateRecipe(updatedRecipe);
   }
 
@@ -467,8 +508,10 @@ class RecipeRepository {
 
 }
 
+// Separate the recipe repository provider from the dependency setup
 final recipeRepositoryProvider = Provider<RecipeRepository>((ref) {
-  return RecipeRepository(appDb);
+  final repository = RecipeRepository(appDb);
+  return repository;
 });
 
 String sanitizeFtsQuery(String query) {
