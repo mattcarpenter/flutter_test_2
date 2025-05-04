@@ -42,13 +42,16 @@ void main() async {
         // Set up the circular dependency between RecipeRepository and IngredientTermQueueManager
         final recipeRepository = container.read(recipeRepositoryProvider);
         final ingredientTermManager = container.read(ingredientTermQueueManagerProvider);
-        
+
+        // Enable test mode to skip connectivity checks
+        ingredientTermManager.testMode = true;
+
         // Connect them bidirectionally
         ingredientTermManager.recipeRepository = recipeRepository;
         recipeRepository.ingredientTermQueueManager = ingredientTermManager;
-        
+
         // Import seed recipes with a limit of 10
-        final importCount = await container.read(recipeNotifierProvider.notifier).importSeedRecipes(limit: 10);
+        final importCount = await container.read(recipeNotifierProvider.notifier).importSeedRecipes();
 
         // Log the number of imported recipes
         print('Successfully imported $importCount seed recipes');
@@ -58,6 +61,7 @@ void main() async {
           container,
           recipeNotifierProvider,
           (recipes) => recipes.length >= importCount,
+          timeout: const Duration(seconds: 60),
         );
 
         // Verify recipes were imported
@@ -71,8 +75,8 @@ void main() async {
             print('===== Recipe ${i+1}: ${recipe.title} =====');
             print('Description: ${recipe.description}');
             print('Ingredients count: ${recipe.ingredients?.length ?? 0}');
-            
-            // Print first 3 ingredients 
+
+            // Print first 3 ingredients
             if (recipe.ingredients != null && recipe.ingredients!.isNotEmpty) {
               print('Sample ingredients:');
               for (int j = 0; j < Math.min(3, recipe.ingredients!.length); j++) {
@@ -80,9 +84,9 @@ void main() async {
                 print('  - ${ingredient.primaryAmount1Value ?? ""} ${ingredient.primaryAmount1Unit ?? ""} ${ingredient.name}');
               }
             }
-            
+
             print('Steps count: ${recipe.steps?.length ?? 0}');
-            
+
             // Print first step
             if (recipe.steps != null && recipe.steps!.isNotEmpty) {
               print('First step: ${recipe.steps!.first.text.substring(0, Math.min(100, recipe.steps!.first.text.length))}...');

@@ -22,6 +22,7 @@ class IngredientTermQueueManager {
   bool _isProcessing = false;
   Timer? _debounceTimer;
   StreamSubscription<List<ConnectivityResult>>? _connectivitySubscription;
+  bool _testMode = false;
 
   // Constants for backoff
   static const Duration baseDelay = Duration(seconds: 5);
@@ -32,23 +33,37 @@ class IngredientTermQueueManager {
   set recipeRepository(RecipeRepository? repository) {
     _recipeRepository = repository;
   }
+  
+  // Setter for test mode
+  set testMode(bool value) {
+    _testMode = value;
+  }
 
   IngredientTermQueueManager({
     required this.repository,
     required RecipeRepository? recipeRepository,
     required this.canonicalizer,
     required this.db,
+    bool testMode = false,
   }) {
     _recipeRepository = recipeRepository;
-    // Listen to connectivity changes
-    _connectivitySubscription =
-        Connectivity().onConnectivityChanged.listen((results) {
-          // If we have connectivity, process the queue
-          if (results.isNotEmpty && !results.contains(ConnectivityResult.none)) {
-            debugPrint('Connectivity regained, processing ingredient term queue.');
-            processQueue();
-          }
-        });
+    _testMode = testMode;
+    
+    // Only set up connectivity listener if not in test mode
+    if (!_testMode) {
+      try {
+        _connectivitySubscription =
+            Connectivity().onConnectivityChanged.listen((results) {
+              // If we have connectivity, process the queue
+              if (results.isNotEmpty && !results.contains(ConnectivityResult.none)) {
+                debugPrint('Connectivity regained, processing ingredient term queue.');
+                processQueue();
+              }
+            });
+      } catch (e) {
+        debugPrint('Warning: Could not initialize connectivity listener: $e');
+      }
+    }
   }
 
   void dispose() {
@@ -123,12 +138,20 @@ class IngredientTermQueueManager {
 
   /// Process the queue
   Future<void> processQueue() async {
-    // Check connectivity
-    final List<ConnectivityResult> connectivityResults =
-        await Connectivity().checkConnectivity();
-    if (connectivityResults.contains(ConnectivityResult.none)) {
-      debugPrint('Offline: ingredient term queue processing deferred.');
-      return;
+    // Skip connectivity checks in test mode
+    if (!_testMode) {
+      try {
+        // Check connectivity
+        final List<ConnectivityResult> connectivityResults =
+            await Connectivity().checkConnectivity();
+        if (connectivityResults.contains(ConnectivityResult.none)) {
+          debugPrint('Offline: ingredient term queue processing deferred.');
+          return;
+        }
+      } catch (e) {
+        debugPrint('Error checking connectivity. Assuming online: $e');
+        // Continue processing in case of connectivity check errors
+      }
     }
 
     if (_isProcessing) return;
@@ -345,6 +368,10 @@ final ingredientTermQueueManagerProvider = Provider<IngredientTermQueueManager>(
   // We'll get the recipe repository later via a setter to avoid circular dependency
   final recipeRepositoryUninitialized = null;
   final canonicalizer = ref.watch(ingredientCanonicalizerProvider);
+  
+  // Determine if we're in test mode by checking environment variables or other means
+  // For now we'll default to false, but you can override this with the setter
+  final bool isTestMode = false;
 
   return IngredientTermQueueManager(
     repository: repository,
@@ -352,5 +379,6 @@ final ingredientTermQueueManagerProvider = Provider<IngredientTermQueueManager>(
     recipeRepository: recipeRepositoryUninitialized,
     canonicalizer: canonicalizer,
     db: appDb,
+    testMode: isTestMode,
   );
 });

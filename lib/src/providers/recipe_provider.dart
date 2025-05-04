@@ -5,6 +5,7 @@ import 'dart:convert';
 import 'package:drift/drift.dart';
 import 'package:flutter/services.dart' show rootBundle;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:uuid/uuid.dart';
 import '../../database/database.dart';
 import '../../database/models/ingredients.dart';
@@ -171,28 +172,28 @@ class RecipeNotifier extends StateNotifier<AsyncValue<List<RecipeWithFolders>>> 
       state = AsyncValue.error(e, stack);
     }
   }
-  
+
   /// Loads recipes from assets/recipes.json and adds them to the database
-  /// 
+  ///
   /// [limit] controls how many recipes to import (null means import all)
   Future<int> importSeedRecipes({int? limit}) async {
     try {
       // Load and parse the JSON file
       final data = await rootBundle.loadString('assets/recipes.json');
       final List<dynamic> jsonRecipes = json.decode(data);
-      
+
       // Apply limit if specified
-      final recipesToImport = limit != null 
-          ? jsonRecipes.take(limit).toList() 
+      final recipesToImport = limit != null
+          ? jsonRecipes.take(limit).toList()
           : jsonRecipes;
-      
+
       int importedCount = 0;
-      
+
       // Process each recipe
       for (final jsonRecipe in recipesToImport) {
         final id = const Uuid().v4();
         final now = DateTime.now().millisecondsSinceEpoch;
-        
+
         // Convert ingredients to our app format
         List<Ingredient> ingredients = [];
         if (jsonRecipe['ingredients'] != null) {
@@ -204,7 +205,7 @@ class RecipeNotifier extends StateNotifier<AsyncValue<List<RecipeWithFolders>>> 
             if (item['quantity'] != null) {
               quantityString = item['quantity'].toString();
             }
-            
+
             return Ingredient(
               id: ingredientId,
               name: item['ingredient'] ?? '',
@@ -215,7 +216,7 @@ class RecipeNotifier extends StateNotifier<AsyncValue<List<RecipeWithFolders>>> 
             );
           }).toList();
         }
-        
+
         // Convert directions to steps
         List<Step> steps = [];
         if (jsonRecipe['directions'] != null) {
@@ -230,7 +231,7 @@ class RecipeNotifier extends StateNotifier<AsyncValue<List<RecipeWithFolders>>> 
             );
           }).toList();
         }
-        
+
         // Create the recipe object
         final recipeCompanion = RecipesCompanion.insert(
           id: Value(id),
@@ -239,19 +240,19 @@ class RecipeNotifier extends StateNotifier<AsyncValue<List<RecipeWithFolders>>> 
           rating: Value(jsonRecipe['rating'] != null ? int.tryParse(jsonRecipe['rating'].toString()) : null),
           language: Value('en'),
           servings: Value(jsonRecipe['servings'] != null ? int.tryParse(jsonRecipe['servings'].toString()) : null),
-          prepTime: Value(jsonRecipe['prep_time'] != null && jsonRecipe['prep_time'].toString().isNotEmpty 
-              ? int.tryParse(jsonRecipe['prep_time'].toString()) 
+          prepTime: Value(jsonRecipe['prep_time'] != null && jsonRecipe['prep_time'].toString().isNotEmpty
+              ? int.tryParse(jsonRecipe['prep_time'].toString())
               : null),
-          cookTime: Value(jsonRecipe['cook_time'] != null && jsonRecipe['cook_time'].toString().isNotEmpty 
-              ? int.tryParse(jsonRecipe['cook_time'].toString()) 
+          cookTime: Value(jsonRecipe['cook_time'] != null && jsonRecipe['cook_time'].toString().isNotEmpty
+              ? int.tryParse(jsonRecipe['cook_time'].toString())
               : null),
-          totalTime: Value(jsonRecipe['total_time'] != null && jsonRecipe['total_time'].toString().isNotEmpty 
-              ? int.tryParse(jsonRecipe['total_time'].toString()) 
+          totalTime: Value(jsonRecipe['total_time'] != null && jsonRecipe['total_time'].toString().isNotEmpty
+              ? int.tryParse(jsonRecipe['total_time'].toString())
               : null),
           source: Value(jsonRecipe['url'] ?? ''),
           nutrition: Value(jsonRecipe['nutrition'] ?? ''),
           generalNotes: Value('Imported from seed data'),
-          userId: Value('seed_import'),
+          userId: Supabase.instance.client.auth.currentUser?.id != null ? Value(Supabase.instance.client.auth.currentUser!.id) : const Value(null),
           householdId: Value(null),
           createdAt: Value(now),
           updatedAt: Value(now),
@@ -260,11 +261,11 @@ class RecipeNotifier extends StateNotifier<AsyncValue<List<RecipeWithFolders>>> 
           folderIds: const Value([]),
           images: const Value([]),
         );
-        
+
         await _repository.addRecipe(recipeCompanion);
         importedCount++;
       }
-      
+
       return importedCount;
     } catch (e) {
       state = AsyncValue.error(e, StackTrace.current);

@@ -3,6 +3,7 @@
 import 'dart:async';
 import 'dart:convert';
 import 'package:drift/drift.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../database/converters.dart';
 import '../../database/database.dart';
@@ -38,16 +39,34 @@ class RecipeRepository {
     if (recipe.ingredients.present && recipe.ingredients.value != null) {
       final ingredients = recipe.ingredients.value!;
       if (ingredients.isNotEmpty && _ingredientTermQueueManager != null) {
-        // We need to get the recipe ID from the database since it's auto-generated
-        final recipeEntry = await (_db.select(_db.recipes)
-          ..orderBy([(t) => OrderingTerm.desc(t.createdAt)])
-          ..limit(1))
-            .getSingle();
-            
-        await _ingredientTermQueueManager!.queueRecipeIngredients(
-          recipeEntry.id,
-          ingredients,
-        );
+        // Use the recipe ID directly from the RecipesCompanion object
+        // since we know it's explicitly provided (not auto-generated)
+        if (recipe.id.present) {
+          final recipeId = recipe.id.value;
+          await _ingredientTermQueueManager!.queueRecipeIngredients(
+            recipeId,
+            ingredients,
+          );
+        } else {
+          // Fallback to getting the most recent recipe only if needed (legacy support)
+          try {
+            final recipeEntry = await (_db.select(_db.recipes)
+              ..orderBy([(t) => OrderingTerm.desc(t.createdAt)])
+              ..limit(1))
+                .getSingleOrNull();
+                
+            if (recipeEntry != null) {
+              await _ingredientTermQueueManager!.queueRecipeIngredients(
+                recipeEntry.id,
+                ingredients,
+              );
+            } else {
+              debugPrint('Warning: Could not find recipe to queue ingredients');
+            }
+          } catch (e) {
+            debugPrint('Error finding recipe to queue ingredients: $e');
+          }
+        }
       }
     }
     
