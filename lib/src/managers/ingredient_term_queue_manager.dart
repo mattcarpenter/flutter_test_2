@@ -147,8 +147,12 @@ class IngredientTermQueueManager {
 
       // Organize entries for batch processing and apply backoff policy
       for (final entry in pendingEntries) {
+        // Handle potentially null retryCount by defaulting to 0
+        // This handles legacy entries that might have null values
+        final retryCount = entry.retryCount ?? 0;
+        
         // Calculate exponential backoff
-        final backoffMillis = baseDelay.inMilliseconds * (1 << entry.retryCount);
+        final backoffMillis = baseDelay.inMilliseconds * (1 << retryCount);
         final lastTry = entry.lastTryTimestamp ?? 0;
 
         // Skip if backoff period hasn't elapsed
@@ -157,7 +161,7 @@ class IngredientTermQueueManager {
         }
 
         // Skip if max retries exceeded
-        if (entry.retryCount >= maxRetries) {
+        if (retryCount >= maxRetries) {
           final failedEntry = entry.copyWith(
             status: 'failed',
             lastTryTimestamp: Value(now),

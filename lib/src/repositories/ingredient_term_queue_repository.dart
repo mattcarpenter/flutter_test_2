@@ -56,6 +56,9 @@ class IngredientTermQueueRepository {
       requestTimestamp: now,
       ingredientData: json.encode(apiIngredientData),
       status: const Value('pending'),
+      retryCount: const Value(0),  // Explicitly set retryCount to 0
+      // Don't set lastTryTimestamp as it's defined as nullable in the model
+      // responseData is also nullable, so we don't need to set it
     );
 
     await _db.into(_db.ingredientTermQueues).insert(entry);
