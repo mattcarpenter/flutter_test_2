@@ -55,6 +55,9 @@ SqliteMigration createMigrationForRecipeIngredientTerms() {
         PRIMARY KEY (recipe_id, ingredient_id, term, sort)
       );
     ''');
+
+    await tx.execute('CREATE INDEX IF NOT EXISTS idx_recipe_ingredient_terms_term ON recipe_ingredient_terms(term);');
+    await tx.execute('CREATE INDEX IF NOT EXISTS idx_recipe_ingredient_terms_recipe ON recipe_ingredient_terms(recipe_id);');
   });
 }
 
@@ -70,6 +73,8 @@ SqliteMigration createMigrationForPantryItemTerms() {
         PRIMARY KEY (pantry_item_id, term, sort)
       );
     ''');
+
+    await tx.execute('CREATE INDEX IF NOT EXISTS idx_pantry_item_terms_term ON pantry_item_terms(term);');
   });
 }
 

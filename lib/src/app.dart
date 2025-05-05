@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:recipe_app/src/providers/recipe_provider.dart';
 import 'package:recipe_app/src/windows/app.dart';
 import 'macos/app.dart';
 import 'mobile/adaptive_app.dart';
@@ -20,6 +21,10 @@ class MyApp extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     // Initialize background services
     ref.watch(appServicesProvider);
+
+    // Seed data (async)
+    ref.read(recipeNotifierProvider.notifier).importSeedRecipes();
+
     // Glue the SettingsController to the MaterialApp.
     //
     // The ListenableBuilder Widget listens to the SettingsController for changes.

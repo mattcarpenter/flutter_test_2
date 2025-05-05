@@ -1,12 +1,16 @@
+import 'dart:io';
 import 'dart:math' as Math;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:recipe_app/database/models/pantry_item_terms.dart';
 import 'package:recipe_app/src/managers/ingredient_term_queue_manager.dart';
 import 'package:recipe_app/src/models/recipe_with_folders.dart';
+import 'package:recipe_app/src/providers/pantry_provider.dart';
 import 'package:recipe_app/src/providers/recipe_provider.dart';
 import 'package:recipe_app/src/repositories/ingredient_term_queue_repository.dart';
 import 'package:recipe_app/src/repositories/recipe_repository.dart';
 import 'package:recipe_app/src/services/ingredient_canonicalization_service.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../utils/test_user_manager.dart';
 import '../../utils/test_utils.dart';
 
@@ -68,36 +72,37 @@ void main() async {
         final recipes = container.read(recipeNotifierProvider).value!;
         expect(recipes.length, greaterThanOrEqualTo(importCount));
 
-        // Print recipe details for manual verification
-        if (recipes.isNotEmpty) {
-          for (int i = 0; i < Math.min(3, recipes.length); i++) {
-            final recipe = recipes[i].recipe;
-            print('===== Recipe ${i+1}: ${recipe.title} =====');
-            print('Description: ${recipe.description}');
-            print('Ingredients count: ${recipe.ingredients?.length ?? 0}');
+        // Insert a couple test pantry items
+        await container.read(pantryNotifierProvider.notifier).addItem(
+          name: 'Onions',
+          userId: Supabase.instance.client.auth.currentUser!.id,
+          terms: [
+            makeTerm('onions'),
+          ],
+        );
 
-            // Print first 3 ingredients
-            if (recipe.ingredients != null && recipe.ingredients!.isNotEmpty) {
-              print('Sample ingredients:');
-              for (int j = 0; j < Math.min(3, recipe.ingredients!.length); j++) {
-                final ingredient = recipe.ingredients![j];
-                print('  - ${ingredient.primaryAmount1Value ?? ""} ${ingredient.primaryAmount1Unit ?? ""} ${ingredient.name}');
-              }
-            }
+        await container.read(pantryNotifierProvider.notifier).addItem(
+          name: 'Bacon',
+          userId: Supabase.instance.client.auth.currentUser!.id,
+          terms: [
+            makeTerm('bacon'),
+          ],
+        );
 
-            print('Steps count: ${recipe.steps?.length ?? 0}');
-
-            // Print first step
-            if (recipe.steps != null && recipe.steps!.isNotEmpty) {
-              print('First step: ${recipe.steps!.first.text.substring(0, Math.min(100, recipe.steps!.first.text.length))}...');
-            }
-            print('================================================');
-          }
-        }
+        print('Done creating pantry items');
 
         // Wait for 10 minutes so you can manually inspect the database
         await Future.delayed(const Duration(minutes: 10));
+        exit(0);
       });
     });
   });
+}
+
+PantryItemTerm makeTerm(value, { sort = 0 }) {
+  return PantryItemTerm(
+    value: value,
+    source: 'ai',
+    sort: sort,
+  );
 }

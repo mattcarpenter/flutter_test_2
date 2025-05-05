@@ -262,8 +262,13 @@ class RecipeNotifier extends StateNotifier<AsyncValue<List<RecipeWithFolders>>> 
           images: const Value([]),
         );
 
-        await _repository.addRecipe(recipeCompanion);
-        importedCount++;
+        try {
+          await _repository.addRecipe(recipeCompanion);
+          importedCount++;
+        } catch(e) {
+          // Handle any errors that occur during the import
+          print('Error importing recipe: $e');
+        }
       }
 
       return importedCount;

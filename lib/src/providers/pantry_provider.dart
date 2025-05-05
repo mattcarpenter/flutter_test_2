@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../database/database.dart';
+import '../../database/models/pantry_item_terms.dart';
 import '../../database/powersync.dart';
 import '../repositories/pantry_repository.dart';
 
@@ -33,6 +34,7 @@ class PantryNotifier
     String? baseUnit,
     double? baseQuantity,
     double? price,
+    List<PantryItemTerm>? terms,
   }) =>
       _repo.addItem(
         name: name,
@@ -44,6 +46,7 @@ class PantryNotifier
         baseUnit: baseUnit,
         baseQuantity: baseQuantity,
         price: price,
+        terms: terms,
       );
 
   Future<void> updateItem({
@@ -55,21 +58,32 @@ class PantryNotifier
     String? baseUnit,
     double? baseQuantity,
     double? price,
+    List<PantryItemTerm>? terms,
   }) =>
       _repo.updateItem(
-        id: id, 
-        name: name, 
+        id: id,
+        name: name,
         inStock: inStock,
         unit: unit,
         quantity: quantity,
         baseUnit: baseUnit,
         baseQuantity: baseQuantity,
         price: price,
+        terms: terms,
       );
 
   Future<void> deleteItem(String id) =>
       _repo.deleteItem(id);
 }
+
+// Expose PantryNotifier
+final pantryNotifierProvider =
+StateNotifierProvider<PantryNotifier, AsyncValue<List<PantryItemEntry>>>(
+      (ref) {
+    final repo = ref.watch(pantryRepositoryProvider);
+    return PantryNotifier(repo);
+  },
+);
 
 /// Expose the [PantryRepository].
 final pantryRepositoryProvider =

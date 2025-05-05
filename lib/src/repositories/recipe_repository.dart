@@ -21,7 +21,7 @@ class RecipeRepository {
   IngredientTermQueueManager? _ingredientTermQueueManager;
 
   RecipeRepository(this._db);
-  
+
   set ingredientTermQueueManager(IngredientTermQueueManager manager) {
     _ingredientTermQueueManager = manager;
   }
@@ -34,7 +34,7 @@ class RecipeRepository {
   // Insert a new recipe.
   Future<int> addRecipe(RecipesCompanion recipe) async {
     final result = await _db.into(_db.recipes).insert(recipe);
-    
+
     // Queue ingredients for canonicalization if they exist
     if (recipe.ingredients.present && recipe.ingredients.value != null) {
       final ingredients = recipe.ingredients.value!;
@@ -54,7 +54,7 @@ class RecipeRepository {
               ..orderBy([(t) => OrderingTerm.desc(t.createdAt)])
               ..limit(1))
                 .getSingleOrNull();
-                
+
             if (recipeEntry != null) {
               await _ingredientTermQueueManager!.queueRecipeIngredients(
                 recipeEntry.id,
@@ -69,23 +69,23 @@ class RecipeRepository {
         }
       }
     }
-    
+
     return result;
   }
 
   // Update a recipe.
   Future<bool> updateRecipe(RecipeEntry recipe) async {
     final result = await _db.update(_db.recipes).replace(recipe);
-    
+
     // Queue ingredients for canonicalization if they exist
-    if (recipe.ingredients != null && recipe.ingredients!.isNotEmpty && 
+    if (recipe.ingredients != null && recipe.ingredients!.isNotEmpty &&
         _ingredientTermQueueManager != null) {
       await _ingredientTermQueueManager!.queueRecipeIngredients(
         recipe.id,
         recipe.ingredients!,
       );
     }
-    
+
     return result;
   }
 
@@ -178,7 +178,7 @@ class RecipeRepository {
       ingredients: Value(ingredients),
       updatedAt: Value(DateTime.now().millisecondsSinceEpoch),
     );
-    
+
     // Here we won't call queueRecipeIngredients explicitly since it's handled in updateRecipe
     return updateRecipe(updatedRecipe);
   }
@@ -256,7 +256,7 @@ class RecipeRepository {
             source: row.read<String?>('recipe_source'),
             nutrition: row.read<String?>('recipe_nutrition'),
             generalNotes: row.read<String?>('recipe_general_notes'),
-            userId: row.read<String>('recipe_user_id'),
+            userId: row.read<String?>('recipe_user_id'),
             householdId: row.read<String?>('recipe_household_id'),
             createdAt: row.read<int?>('recipe_created_at'),
             updatedAt: row.read<int?>('recipe_updated_at'),
@@ -363,7 +363,7 @@ class RecipeRepository {
             source: row.read<String?>('recipe_source'),
             nutrition: row.read<String?>('recipe_nutrition'),
             generalNotes: row.read<String?>('recipe_general_notes'),
-            userId: row.read<String>('recipe_user_id'),
+            userId: row.read<String?>('recipe_user_id'),
             householdId: row.read<String?>('recipe_household_id'),
             createdAt: row.read<int?>('recipe_created_at'),
             updatedAt: row.read<int?>('recipe_updated_at'),
@@ -497,7 +497,7 @@ class RecipeRepository {
       title: row.read<String>('title'),
       description: row.read<String?>('description') ?? '',
       rating: row.read<int?>('rating'),
-      language: row.read<String>('language'),
+      language: row.read<String?>('language'),
       servings: row.read<int?>('servings'),
       prepTime: row.read<int?>('prep_time'),
       cookTime: row.read<int?>('cook_time'),
@@ -505,7 +505,7 @@ class RecipeRepository {
       source: row.read<String?>('source'),
       nutrition: row.read<String?>('nutrition'),
       generalNotes: row.read<String?>('general_notes'),
-      userId: row.read<String>('user_id'),
+      userId: row.read<String?>('user_id'),
       householdId: row.read<String?>('household_id'),
       createdAt: row.read<int?>('created_at'),
       updatedAt: row.read<int?>('updated_at'),
