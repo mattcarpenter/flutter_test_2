@@ -456,7 +456,15 @@ class PantryRecipeMatchNotifier extends AsyncNotifier<PantryRecipeMatchState> {
   /// Find recipes that can be made with pantry items
   Future<void> findMatchingRecipes() async {
     try {
-      state = AsyncValue.data(state.value!.copyWith(isLoading: true));
+      // Handle potential null state.value
+      if (state.value != null) {
+        state = AsyncValue.data(state.value!.copyWith(isLoading: true));
+      } else {
+        state = AsyncValue.data(PantryRecipeMatchState(
+          matches: [],
+          isLoading: true,
+        ));
+      }
       
       final matches = await ref.read(recipeRepositoryProvider).findMatchingRecipesFromPantry();
       
@@ -465,10 +473,19 @@ class PantryRecipeMatchNotifier extends AsyncNotifier<PantryRecipeMatchState> {
         isLoading: false,
       ));
     } catch (e, stack) {
-      state = AsyncValue.data(state.value!.copyWith(
-        isLoading: false,
-        error: e,
-      ));
+      // Handle potential null state.value in the catch block too
+      if (state.value != null) {
+        state = AsyncValue.data(state.value!.copyWith(
+          isLoading: false,
+          error: e,
+        ));
+      } else {
+        state = AsyncValue.data(PantryRecipeMatchState(
+          matches: [],
+          isLoading: false,
+          error: e,
+        ));
+      }
     }
   }
 }
