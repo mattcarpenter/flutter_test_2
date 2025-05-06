@@ -26,7 +26,7 @@ class RecipePantryMatch {
   });
 
   /// Whether this recipe is a perfect match (all ingredients found in pantry)
-  bool get isPerfectMatch => matchRatio >= 1.0;
+  bool get isPerfectMatch => matchedTerms == totalTerms;
   
   /// Recipe completion percentage
   int get matchPercentage => (matchRatio * 100).round();

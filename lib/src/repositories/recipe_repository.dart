@@ -543,33 +543,47 @@ class RecipeRepository {
             ON rit.term = ito.input_term
             AND ito.deleted_at IS NULL
         ),
-        matching_terms AS (
+        /* Find matching ingredients (not just terms) */
+        matching_ingredients AS (
           SELECT
             itwm.recipe_id,
-            COUNT(DISTINCT itwm.effective_term) AS match_count,
-            GROUP_CONCAT(DISTINCT pit.pantry_item_id) AS matching_pantry_item_ids
+            itwm.ingredient_id,
+            1 AS matched
           FROM ingredient_terms_with_mapping itwm
           INNER JOIN pantry_item_terms pit
             ON itwm.effective_term = pit.term
-          GROUP BY itwm.recipe_id
+          GROUP BY itwm.recipe_id, itwm.ingredient_id
         ),
-        total_terms AS (
+        /* Count matched ingredients per recipe */
+        ingredient_matches AS (
           SELECT
             recipe_id,
-            COUNT(DISTINCT term) AS total_terms
+            COUNT(DISTINCT ingredient_id) AS matched_ingredients,
+            (SELECT GROUP_CONCAT(DISTINCT pantry_item_id) 
+             FROM ingredient_terms_with_mapping itwm
+             INNER JOIN pantry_item_terms pit ON itwm.effective_term = pit.term
+             WHERE itwm.recipe_id = mi.recipe_id) AS matching_pantry_item_ids
+          FROM matching_ingredients mi
+          GROUP BY recipe_id
+        ),
+        /* Count total ingredients per recipe */
+        total_ingredients AS (
+          SELECT
+            recipe_id,
+            COUNT(DISTINCT ingredient_id) AS total_ingredients
           FROM recipe_ingredient_terms
           GROUP BY recipe_id
         )
         SELECT
           r.*,
-          COALESCE(m.match_count, 0) AS matched_terms,
-          t.total_terms,
-          (COALESCE(m.match_count, 0) * 1.0 / NULLIF(t.total_terms, 0)) AS match_ratio,
-          m.matching_pantry_item_ids
+          COALESCE(im.matched_ingredients, 0) AS matched_terms,
+          ti.total_ingredients AS total_terms,
+          (COALESCE(im.matched_ingredients, 0) * 1.0 / NULLIF(ti.total_ingredients, 0)) AS match_ratio,
+          im.matching_pantry_item_ids
         FROM recipes r
-        LEFT JOIN matching_terms m ON r.id = m.recipe_id
-        LEFT JOIN total_terms t ON r.id = t.recipe_id
-        WHERE r.deleted_at IS NULL AND COALESCE(m.match_count, 0) > 0
+        LEFT JOIN ingredient_matches im ON r.id = im.recipe_id
+        LEFT JOIN total_ingredients ti ON r.id = ti.recipe_id
+        WHERE r.deleted_at IS NULL AND COALESCE(im.matched_ingredients, 0) > 0
         ORDER BY match_ratio DESC, matched_terms DESC
       ''',
       readsFrom: {

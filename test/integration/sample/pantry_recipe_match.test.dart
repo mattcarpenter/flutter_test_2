@@ -1,4 +1,5 @@
 import 'package:drift/drift.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:recipe_app/database/database.dart';
@@ -21,6 +22,7 @@ import '../../utils/test_utils.dart';
 void main() async {
   await initializeTestEnvironment();
   late ProviderContainer container;
+  const channel = MethodChannel('dev.fluttercommunity.plus/connectivity_status');
 
   tearDownAll(() async {
     await TestUserManager.logoutTestUser();
@@ -35,11 +37,20 @@ void main() async {
     setUp(() async {
       container = ProviderContainer();
       await TestUserManager.wipeAlLocalAndRemoteTestUserData();
+      TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+          .setMockMethodCallHandler(channel, (MethodCall methodCall) async {
+        if (methodCall.method == 'listen') {
+          return null;
+        }
+        return null;
+      });
     });
 
     tearDown(() async {
       container.dispose();
       await TestUserManager.wipeAlLocalAndRemoteTestUserData();
+      TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+          .setMockMethodCallHandler(channel, null);
     });
 
     // Helper function to create a test recipe with ingredients and terms
