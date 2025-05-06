@@ -13,6 +13,7 @@ import '../../database/models/steps.dart';
 import '../../database/powersync.dart';
 import '../../utils/language.dart';
 import '../../utils/mecab_wrapper.dart';
+import '../models/ingredient_pantry_match.dart';
 import '../models/recipe_pantry_match.dart';
 import '../models/recipe_with_folders.dart';
 import '../managers/ingredient_term_queue_manager.dart';
@@ -527,7 +528,7 @@ class RecipeRepository {
   }
 
   /// Find recipes that can be made with ingredients in the pantry
-  /// 
+  ///
   /// Returns a list of [RecipePantryMatch] objects containing recipes that match
   /// at least one ingredient term in the pantry, sorted by match ratio (highest first)
   Future<List<RecipePantryMatch>> findMatchingRecipesFromPantry() async {
@@ -589,20 +590,20 @@ class RecipeRepository {
       readsFrom: {
         _db.recipes,
       }).get();
-      
+
       return results.map((row) {
         final recipe = _rowToRecipe(row);
         final matchedTerms = row.read<int>('matched_terms');
         final totalTerms = row.read<int>('total_terms');
         final matchRatio = row.read<double>('match_ratio');
-        
+
         // Parse matching pantry item IDs
         List<String>? matchedPantryItemIds;
         final pantryItemsString = row.read<String?>('matching_pantry_item_ids');
         if (pantryItemsString != null && pantryItemsString.isNotEmpty) {
           matchedPantryItemIds = pantryItemsString.split(',');
         }
-        
+
         return RecipePantryMatch(
           recipe: recipe,
           matchedTerms: matchedTerms,
@@ -613,6 +614,125 @@ class RecipeRepository {
       }).toList();
     } catch (e) {
       debugPrint('Error finding matching recipes: $e');
+      rethrow;
+    }
+  }
+
+  /// Find pantry items that match ingredients for a specific recipe
+  ///
+  /// Returns a [RecipeIngredientMatches] object containing the matches for each ingredient
+  Future<RecipeIngredientMatches> findPantryMatchesForRecipe(String recipeId) async {
+    try {
+      // First get the recipe to access its ingredients
+      final recipe = await getRecipeById(recipeId);
+      if (recipe == null || recipe.ingredients == null || recipe.ingredients!.isEmpty) {
+        return RecipeIngredientMatches(recipeId: recipeId, matches: []);
+      }
+
+      // Prepare a map of ingredient IDs to ingredient objects
+      final ingredientMap = {
+        for (var ing in recipe.ingredients!) ing.id: ing
+      };
+
+      // Query to match ingredients with pantry items
+      final results = await _db.customSelect('''
+        WITH ingredient_terms_with_mapping AS (
+          SELECT
+            rit.recipe_id,
+            rit.ingredient_id,
+            COALESCE(ito.mapped_term, rit.term) AS effective_term
+          FROM recipe_ingredient_terms rit
+          LEFT JOIN ingredient_term_overrides_flattened ito
+            ON rit.term = ito.input_term
+            AND ito.deleted_at IS NULL
+          WHERE rit.recipe_id = ?
+        ),
+        matching_pantry_items AS (
+          SELECT
+            itwm.ingredient_id,
+            pit.pantry_item_id,
+            MIN(pit.sort) AS term_priority -- use the highest priority term match
+          FROM ingredient_terms_with_mapping itwm
+          INNER JOIN pantry_item_terms pit
+            ON itwm.effective_term = pit.term
+          GROUP BY itwm.ingredient_id, pit.pantry_item_id
+        )
+        SELECT
+          i.ingredient_id,
+          p.*
+        FROM (
+          SELECT DISTINCT ingredient_id 
+          FROM recipe_ingredient_terms 
+          WHERE recipe_id = ?
+        ) i
+        LEFT JOIN (
+          SELECT 
+            mpi.ingredient_id,
+            mpi.pantry_item_id,
+            pi.*
+          FROM matching_pantry_items mpi
+          INNER JOIN pantry_items pi ON mpi.pantry_item_id = pi.id
+          WHERE pi.deleted_at IS NULL
+          -- For each ingredient, pick the best matching pantry item
+          -- (in case multiple pantry items match the same ingredient)
+          AND (mpi.ingredient_id, mpi.term_priority) IN (
+            SELECT ingredient_id, MIN(term_priority)
+            FROM matching_pantry_items
+            GROUP BY ingredient_id
+          )
+        ) p ON i.ingredient_id = p.ingredient_id
+      ''',
+      variables: [
+        Variable(recipeId),
+        Variable(recipeId),
+      ],
+      readsFrom: {
+        _db.recipes,
+        _db.pantryItems,
+      }).get();
+
+      // Process results into ingredient matches
+      final matches = results.map((row) {
+        final ingredientId = row.read<String>('ingredient_id');
+        final ingredient = ingredientMap[ingredientId];
+
+        if (ingredient == null) {
+          // This shouldn't happen if the database is consistent
+          debugPrint('Warning: Ingredient ID $ingredientId not found in recipe $recipeId');
+          return null;
+        }
+
+        // Check if there's a matching pantry item
+        final pantryItemId = row.readNullable<String>('id');
+        PantryItemEntry? pantryItem;
+
+        if (pantryItemId != null) {
+          pantryItem = PantryItemEntry(
+            id: pantryItemId,
+            name: row.read<String>('name'),
+            quantity: row.readNullable<double>('quantity'),
+            unit: row.readNullable<String>('unit'),
+            userId: row.readNullable<String>('user_id'),
+            householdId: row.readNullable<String>('household_id'),
+            createdAt: row.readNullable<int>('created_at'),
+            updatedAt: row.readNullable<int>('updated_at'),
+            deletedAt: row.readNullable<int>('deleted_at'),
+            inStock: row.read<bool>('in_stock'),
+          );
+        }
+
+        return IngredientPantryMatch(
+          ingredient: ingredient,
+          pantryItem: pantryItem,
+        );
+      }).whereType<IngredientPantryMatch>().toList();
+
+      return RecipeIngredientMatches(
+        recipeId: recipeId,
+        matches: matches,
+      );
+    } catch (e) {
+      debugPrint('Error finding pantry matches for recipe $recipeId: $e');
       rethrow;
     }
   }

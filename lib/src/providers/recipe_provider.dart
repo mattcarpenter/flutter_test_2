@@ -12,6 +12,7 @@ import '../../database/models/ingredients.dart';
 import '../../database/models/recipe_images.dart';
 import '../../database/models/steps.dart';
 import '../constants/folder_constants.dart';
+import '../models/ingredient_pantry_match.dart';
 import '../models/recipe_pantry_match.dart';
 import '../models/recipe_with_folders.dart';
 import '../repositories/recipe_repository.dart';
@@ -493,6 +494,15 @@ class PantryRecipeMatchNotifier extends AsyncNotifier<PantryRecipeMatchState> {
 /// Provider for pantry recipe matches
 final pantryRecipeMatchProvider = AsyncNotifierProvider<PantryRecipeMatchNotifier, PantryRecipeMatchState>(
   PantryRecipeMatchNotifier.new,
+);
+
+/// Provider for finding matching pantry items for a specific recipe's ingredients
+/// Takes recipeId as a parameter and returns RecipeIngredientMatches
+final recipeIngredientMatchesProvider = FutureProvider.family<RecipeIngredientMatches, String>(
+  (ref, recipeId) async {
+    final repository = ref.read(recipeRepositoryProvider);
+    return repository.findPantryMatchesForRecipe(recipeId);
+  },
 );
 
 

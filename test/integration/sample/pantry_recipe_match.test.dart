@@ -8,6 +8,7 @@ import 'package:recipe_app/database/models/ingredients.dart';
 import 'package:recipe_app/database/models/pantry_item_terms.dart';
 import 'package:recipe_app/database/models/steps.dart';
 import 'package:recipe_app/src/managers/ingredient_term_queue_manager.dart';
+import 'package:recipe_app/src/models/ingredient_pantry_match.dart';
 import 'package:recipe_app/src/models/recipe_pantry_match.dart';
 import 'package:recipe_app/src/providers/ingredient_term_override_provider.dart';
 import 'package:recipe_app/src/providers/pantry_provider.dart';
@@ -405,6 +406,148 @@ void main() async {
         expect(matchState.matches.length, 1);
         expect(matchState.matches[0].recipe.id, recipeId);
         expect(matchState.matches[0].isPerfectMatch, true);
+      });
+    });
+    
+    testWidgets('Find pantry matches for recipe ingredients', (tester) async {
+      // Create test user
+      await TestUserManager.createTestUser('pantry_match_tester');
+
+      await withTestUser('pantry_match_tester', () async {
+        // Enable test mode for the ingredient term queue manager
+        final ingredientTermManager = container.read(ingredientTermQueueManagerProvider);
+        ingredientTermManager.testMode = true;
+        
+        // Create a recipe with ingredients - some will match, some won't
+        final recipeId = await createTestRecipe(
+          title: 'Mixed Match Recipe',
+          ingredients: [
+            {
+              'name': 'Chicken',
+              'amount': '500',
+              'unit': 'g',
+              'terms': ['chicken', 'chicken breast'],
+            },
+            {
+              'name': 'Rice',
+              'amount': '1',
+              'unit': 'cup',
+              'terms': ['rice', 'white rice'],
+            },
+            {
+              'name': 'Broccoli',
+              'amount': '1',
+              'unit': 'head',
+              'terms': ['broccoli'],
+            },
+          ],
+        );
+
+        // Create pantry items - only match 2 out of 3 ingredients
+        final chickenPantryId = await createPantryItem(
+          name: 'Chicken Breast', 
+          terms: ['chicken', 'chicken breast']
+        );
+        final ricePantryId = await createPantryItem(
+          name: 'White Rice', 
+          terms: ['rice', 'white rice']
+        );
+        
+        // Use the provider to get ingredient matches
+        final matchResult = await container.read(recipeIngredientMatchesProvider(recipeId).future);
+        
+        // Verify basic results
+        expect(matchResult.recipeId, recipeId);
+        expect(matchResult.matches.length, 3); // Should have 3 ingredients
+        expect(matchResult.matchRatio, closeTo(2/3, 0.01)); // 2 out of 3 match
+        expect(matchResult.hasAllIngredients, false); // Not all ingredients match
+        
+        // Verify each ingredient match
+        final chickenMatch = matchResult.matches.firstWhere(
+          (m) => m.ingredient.name == 'Chicken'
+        );
+        expect(chickenMatch.hasMatch, true);
+        expect(chickenMatch.pantryItem!.id, chickenPantryId);
+        expect(chickenMatch.pantryItem!.name, 'Chicken Breast');
+        
+        final riceMatch = matchResult.matches.firstWhere(
+          (m) => m.ingredient.name == 'Rice'
+        );
+        expect(riceMatch.hasMatch, true);
+        expect(riceMatch.pantryItem!.id, ricePantryId);
+        expect(riceMatch.pantryItem!.name, 'White Rice');
+        
+        final broccoliMatch = matchResult.matches.firstWhere(
+          (m) => m.ingredient.name == 'Broccoli'
+        );
+        expect(broccoliMatch.hasMatch, false);
+        expect(broccoliMatch.pantryItem, null);
+        
+        // Verify missing ingredients
+        expect(matchResult.missingIngredients.length, 1);
+        expect(matchResult.missingIngredients[0].name, 'Broccoli');
+      });
+    });
+    
+    testWidgets('Find pantry matches with term overrides', (tester) async {
+      // Create test user
+      await TestUserManager.createTestUser('pantry_match_tester');
+
+      await withTestUser('pantry_match_tester', () async {
+        // Enable test mode for the ingredient term queue manager
+        final ingredientTermManager = container.read(ingredientTermQueueManagerProvider);
+        ingredientTermManager.testMode = true;
+        
+        // Create a recipe with an ingredient that needs an override
+        final recipeId = await createTestRecipe(
+          title: 'Override Ingredient Match Recipe',
+          ingredients: [
+            {
+              'name': 'Spring Onion',
+              'terms': ['spring onion', 'scallion'],
+            },
+          ],
+        );
+
+        // Add a pantry item with a different term
+        final pantryItemId = await createPantryItem(
+          name: 'Green Onions', 
+          terms: ['green onion']
+        );
+
+        // Add an override using the proper provider
+        final userId = Supabase.instance.client.auth.currentUser!.id;
+        final notifier = container.read(ingredientTermOverrideNotifierProvider.notifier);
+
+        const inputTerm = 'spring onion';
+        const mappedTerm = 'green onion';
+
+        await notifier.addOverride(
+          inputTerm: inputTerm,
+          mappedTerm: mappedTerm,
+          userId: userId,
+        );
+
+        // Wait for the override to be created
+        await waitForProviderValue<List<IngredientTermOverrideEntry>>(
+          container,
+          ingredientTermOverrideNotifierProvider,
+          (overrides) => overrides.any((o) => o.inputTerm == inputTerm),
+        );
+        
+        // Use the provider to get ingredient matches
+        final matchResult = await container.read(recipeIngredientMatchesProvider(recipeId).future);
+        
+        // Should match due to the override
+        expect(matchResult.matches.length, 1);
+        expect(matchResult.matchRatio, 1.0);
+        expect(matchResult.hasAllIngredients, true);
+        
+        final match = matchResult.matches.first;
+        expect(match.hasMatch, true);
+        expect(match.ingredient.name, 'Spring Onion');
+        expect(match.pantryItem!.id, pantryItemId);
+        expect(match.pantryItem!.name, 'Green Onions');
       });
     });
   });
