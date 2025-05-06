@@ -2,7 +2,6 @@ import 'dart:async';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../database/database.dart';
 import '../../database/models/pantry_item_terms.dart';
-import '../../database/powersync.dart';
 import '../repositories/pantry_repository.dart';
 
 /// Manages the global list of pantry items.
@@ -85,9 +84,8 @@ StateNotifierProvider<PantryNotifier, AsyncValue<List<PantryItemEntry>>>(
   },
 );
 
-/// Expose the [PantryRepository].
-final pantryRepositoryProvider =
-Provider<PantryRepository>((ref) => PantryRepository(appDb));
+/// Use the [PantryRepository] provider from pantry_repository.dart
+/// pantryRepositoryProvider is defined in src/repositories/pantry_repository.dart
 
 /// Expose the global pantry-item list.
 final pantryItemsProvider =

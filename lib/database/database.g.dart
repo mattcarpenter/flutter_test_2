@@ -2962,6 +2962,468 @@ class IngredientTermQueuesCompanion
   }
 }
 
+class $PantryItemTermQueuesTable extends PantryItemTermQueues
+    with TableInfo<$PantryItemTermQueuesTable, PantryItemTermQueueEntry> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $PantryItemTermQueuesTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<String> id = GeneratedColumn<String>(
+      'id', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _pantryItemIdMeta =
+      const VerificationMeta('pantryItemId');
+  @override
+  late final GeneratedColumn<String> pantryItemId = GeneratedColumn<String>(
+      'pantry_item_id', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _requestTimestampMeta =
+      const VerificationMeta('requestTimestamp');
+  @override
+  late final GeneratedColumn<int> requestTimestamp = GeneratedColumn<int>(
+      'request_timestamp', aliasedName, false,
+      type: DriftSqlType.int, requiredDuringInsert: true);
+  static const VerificationMeta _pantryItemDataMeta =
+      const VerificationMeta('pantryItemData');
+  @override
+  late final GeneratedColumn<String> pantryItemData = GeneratedColumn<String>(
+      'pantry_item_data', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _statusMeta = const VerificationMeta('status');
+  @override
+  late final GeneratedColumn<String> status = GeneratedColumn<String>(
+      'status', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _retryCountMeta =
+      const VerificationMeta('retryCount');
+  @override
+  late final GeneratedColumn<int> retryCount = GeneratedColumn<int>(
+      'retry_count', aliasedName, true,
+      type: DriftSqlType.int, requiredDuringInsert: false);
+  static const VerificationMeta _lastTryTimestampMeta =
+      const VerificationMeta('lastTryTimestamp');
+  @override
+  late final GeneratedColumn<int> lastTryTimestamp = GeneratedColumn<int>(
+      'last_try_timestamp', aliasedName, true,
+      type: DriftSqlType.int, requiredDuringInsert: false);
+  static const VerificationMeta _responseDataMeta =
+      const VerificationMeta('responseData');
+  @override
+  late final GeneratedColumn<String> responseData = GeneratedColumn<String>(
+      'response_data', aliasedName, true,
+      type: DriftSqlType.string, requiredDuringInsert: false);
+  @override
+  List<GeneratedColumn> get $columns => [
+        id,
+        pantryItemId,
+        requestTimestamp,
+        pantryItemData,
+        status,
+        retryCount,
+        lastTryTimestamp,
+        responseData
+      ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'pantry_item_term_queues';
+  @override
+  VerificationContext validateIntegrity(
+      Insertable<PantryItemTermQueueEntry> instance,
+      {bool isInserting = false}) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    } else if (isInserting) {
+      context.missing(_idMeta);
+    }
+    if (data.containsKey('pantry_item_id')) {
+      context.handle(
+          _pantryItemIdMeta,
+          pantryItemId.isAcceptableOrUnknown(
+              data['pantry_item_id']!, _pantryItemIdMeta));
+    } else if (isInserting) {
+      context.missing(_pantryItemIdMeta);
+    }
+    if (data.containsKey('request_timestamp')) {
+      context.handle(
+          _requestTimestampMeta,
+          requestTimestamp.isAcceptableOrUnknown(
+              data['request_timestamp']!, _requestTimestampMeta));
+    } else if (isInserting) {
+      context.missing(_requestTimestampMeta);
+    }
+    if (data.containsKey('pantry_item_data')) {
+      context.handle(
+          _pantryItemDataMeta,
+          pantryItemData.isAcceptableOrUnknown(
+              data['pantry_item_data']!, _pantryItemDataMeta));
+    } else if (isInserting) {
+      context.missing(_pantryItemDataMeta);
+    }
+    if (data.containsKey('status')) {
+      context.handle(_statusMeta,
+          status.isAcceptableOrUnknown(data['status']!, _statusMeta));
+    } else if (isInserting) {
+      context.missing(_statusMeta);
+    }
+    if (data.containsKey('retry_count')) {
+      context.handle(
+          _retryCountMeta,
+          retryCount.isAcceptableOrUnknown(
+              data['retry_count']!, _retryCountMeta));
+    }
+    if (data.containsKey('last_try_timestamp')) {
+      context.handle(
+          _lastTryTimestampMeta,
+          lastTryTimestamp.isAcceptableOrUnknown(
+              data['last_try_timestamp']!, _lastTryTimestampMeta));
+    }
+    if (data.containsKey('response_data')) {
+      context.handle(
+          _responseDataMeta,
+          responseData.isAcceptableOrUnknown(
+              data['response_data']!, _responseDataMeta));
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  PantryItemTermQueueEntry map(Map<String, dynamic> data,
+      {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return PantryItemTermQueueEntry(
+      id: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}id'])!,
+      pantryItemId: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}pantry_item_id'])!,
+      requestTimestamp: attachedDatabase.typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}request_timestamp'])!,
+      pantryItemData: attachedDatabase.typeMapping.read(
+          DriftSqlType.string, data['${effectivePrefix}pantry_item_data'])!,
+      status: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}status'])!,
+      retryCount: attachedDatabase.typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}retry_count']),
+      lastTryTimestamp: attachedDatabase.typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}last_try_timestamp']),
+      responseData: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}response_data']),
+    );
+  }
+
+  @override
+  $PantryItemTermQueuesTable createAlias(String alias) {
+    return $PantryItemTermQueuesTable(attachedDatabase, alias);
+  }
+}
+
+class PantryItemTermQueueEntry extends DataClass
+    implements Insertable<PantryItemTermQueueEntry> {
+  final String id;
+  final String pantryItemId;
+  final int requestTimestamp;
+  final String pantryItemData;
+  final String status;
+  final int? retryCount;
+  final int? lastTryTimestamp;
+  final String? responseData;
+  const PantryItemTermQueueEntry(
+      {required this.id,
+      required this.pantryItemId,
+      required this.requestTimestamp,
+      required this.pantryItemData,
+      required this.status,
+      this.retryCount,
+      this.lastTryTimestamp,
+      this.responseData});
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<String>(id);
+    map['pantry_item_id'] = Variable<String>(pantryItemId);
+    map['request_timestamp'] = Variable<int>(requestTimestamp);
+    map['pantry_item_data'] = Variable<String>(pantryItemData);
+    map['status'] = Variable<String>(status);
+    if (!nullToAbsent || retryCount != null) {
+      map['retry_count'] = Variable<int>(retryCount);
+    }
+    if (!nullToAbsent || lastTryTimestamp != null) {
+      map['last_try_timestamp'] = Variable<int>(lastTryTimestamp);
+    }
+    if (!nullToAbsent || responseData != null) {
+      map['response_data'] = Variable<String>(responseData);
+    }
+    return map;
+  }
+
+  PantryItemTermQueuesCompanion toCompanion(bool nullToAbsent) {
+    return PantryItemTermQueuesCompanion(
+      id: Value(id),
+      pantryItemId: Value(pantryItemId),
+      requestTimestamp: Value(requestTimestamp),
+      pantryItemData: Value(pantryItemData),
+      status: Value(status),
+      retryCount: retryCount == null && nullToAbsent
+          ? const Value.absent()
+          : Value(retryCount),
+      lastTryTimestamp: lastTryTimestamp == null && nullToAbsent
+          ? const Value.absent()
+          : Value(lastTryTimestamp),
+      responseData: responseData == null && nullToAbsent
+          ? const Value.absent()
+          : Value(responseData),
+    );
+  }
+
+  factory PantryItemTermQueueEntry.fromJson(Map<String, dynamic> json,
+      {ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return PantryItemTermQueueEntry(
+      id: serializer.fromJson<String>(json['id']),
+      pantryItemId: serializer.fromJson<String>(json['pantryItemId']),
+      requestTimestamp: serializer.fromJson<int>(json['requestTimestamp']),
+      pantryItemData: serializer.fromJson<String>(json['pantryItemData']),
+      status: serializer.fromJson<String>(json['status']),
+      retryCount: serializer.fromJson<int?>(json['retryCount']),
+      lastTryTimestamp: serializer.fromJson<int?>(json['lastTryTimestamp']),
+      responseData: serializer.fromJson<String?>(json['responseData']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<String>(id),
+      'pantryItemId': serializer.toJson<String>(pantryItemId),
+      'requestTimestamp': serializer.toJson<int>(requestTimestamp),
+      'pantryItemData': serializer.toJson<String>(pantryItemData),
+      'status': serializer.toJson<String>(status),
+      'retryCount': serializer.toJson<int?>(retryCount),
+      'lastTryTimestamp': serializer.toJson<int?>(lastTryTimestamp),
+      'responseData': serializer.toJson<String?>(responseData),
+    };
+  }
+
+  PantryItemTermQueueEntry copyWith(
+          {String? id,
+          String? pantryItemId,
+          int? requestTimestamp,
+          String? pantryItemData,
+          String? status,
+          Value<int?> retryCount = const Value.absent(),
+          Value<int?> lastTryTimestamp = const Value.absent(),
+          Value<String?> responseData = const Value.absent()}) =>
+      PantryItemTermQueueEntry(
+        id: id ?? this.id,
+        pantryItemId: pantryItemId ?? this.pantryItemId,
+        requestTimestamp: requestTimestamp ?? this.requestTimestamp,
+        pantryItemData: pantryItemData ?? this.pantryItemData,
+        status: status ?? this.status,
+        retryCount: retryCount.present ? retryCount.value : this.retryCount,
+        lastTryTimestamp: lastTryTimestamp.present
+            ? lastTryTimestamp.value
+            : this.lastTryTimestamp,
+        responseData:
+            responseData.present ? responseData.value : this.responseData,
+      );
+  PantryItemTermQueueEntry copyWithCompanion(
+      PantryItemTermQueuesCompanion data) {
+    return PantryItemTermQueueEntry(
+      id: data.id.present ? data.id.value : this.id,
+      pantryItemId: data.pantryItemId.present
+          ? data.pantryItemId.value
+          : this.pantryItemId,
+      requestTimestamp: data.requestTimestamp.present
+          ? data.requestTimestamp.value
+          : this.requestTimestamp,
+      pantryItemData: data.pantryItemData.present
+          ? data.pantryItemData.value
+          : this.pantryItemData,
+      status: data.status.present ? data.status.value : this.status,
+      retryCount:
+          data.retryCount.present ? data.retryCount.value : this.retryCount,
+      lastTryTimestamp: data.lastTryTimestamp.present
+          ? data.lastTryTimestamp.value
+          : this.lastTryTimestamp,
+      responseData: data.responseData.present
+          ? data.responseData.value
+          : this.responseData,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('PantryItemTermQueueEntry(')
+          ..write('id: $id, ')
+          ..write('pantryItemId: $pantryItemId, ')
+          ..write('requestTimestamp: $requestTimestamp, ')
+          ..write('pantryItemData: $pantryItemData, ')
+          ..write('status: $status, ')
+          ..write('retryCount: $retryCount, ')
+          ..write('lastTryTimestamp: $lastTryTimestamp, ')
+          ..write('responseData: $responseData')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(id, pantryItemId, requestTimestamp,
+      pantryItemData, status, retryCount, lastTryTimestamp, responseData);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is PantryItemTermQueueEntry &&
+          other.id == this.id &&
+          other.pantryItemId == this.pantryItemId &&
+          other.requestTimestamp == this.requestTimestamp &&
+          other.pantryItemData == this.pantryItemData &&
+          other.status == this.status &&
+          other.retryCount == this.retryCount &&
+          other.lastTryTimestamp == this.lastTryTimestamp &&
+          other.responseData == this.responseData);
+}
+
+class PantryItemTermQueuesCompanion
+    extends UpdateCompanion<PantryItemTermQueueEntry> {
+  final Value<String> id;
+  final Value<String> pantryItemId;
+  final Value<int> requestTimestamp;
+  final Value<String> pantryItemData;
+  final Value<String> status;
+  final Value<int?> retryCount;
+  final Value<int?> lastTryTimestamp;
+  final Value<String?> responseData;
+  final Value<int> rowid;
+  const PantryItemTermQueuesCompanion({
+    this.id = const Value.absent(),
+    this.pantryItemId = const Value.absent(),
+    this.requestTimestamp = const Value.absent(),
+    this.pantryItemData = const Value.absent(),
+    this.status = const Value.absent(),
+    this.retryCount = const Value.absent(),
+    this.lastTryTimestamp = const Value.absent(),
+    this.responseData = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  PantryItemTermQueuesCompanion.insert({
+    required String id,
+    required String pantryItemId,
+    required int requestTimestamp,
+    required String pantryItemData,
+    required String status,
+    this.retryCount = const Value.absent(),
+    this.lastTryTimestamp = const Value.absent(),
+    this.responseData = const Value.absent(),
+    this.rowid = const Value.absent(),
+  })  : id = Value(id),
+        pantryItemId = Value(pantryItemId),
+        requestTimestamp = Value(requestTimestamp),
+        pantryItemData = Value(pantryItemData),
+        status = Value(status);
+  static Insertable<PantryItemTermQueueEntry> custom({
+    Expression<String>? id,
+    Expression<String>? pantryItemId,
+    Expression<int>? requestTimestamp,
+    Expression<String>? pantryItemData,
+    Expression<String>? status,
+    Expression<int>? retryCount,
+    Expression<int>? lastTryTimestamp,
+    Expression<String>? responseData,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (pantryItemId != null) 'pantry_item_id': pantryItemId,
+      if (requestTimestamp != null) 'request_timestamp': requestTimestamp,
+      if (pantryItemData != null) 'pantry_item_data': pantryItemData,
+      if (status != null) 'status': status,
+      if (retryCount != null) 'retry_count': retryCount,
+      if (lastTryTimestamp != null) 'last_try_timestamp': lastTryTimestamp,
+      if (responseData != null) 'response_data': responseData,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  PantryItemTermQueuesCompanion copyWith(
+      {Value<String>? id,
+      Value<String>? pantryItemId,
+      Value<int>? requestTimestamp,
+      Value<String>? pantryItemData,
+      Value<String>? status,
+      Value<int?>? retryCount,
+      Value<int?>? lastTryTimestamp,
+      Value<String?>? responseData,
+      Value<int>? rowid}) {
+    return PantryItemTermQueuesCompanion(
+      id: id ?? this.id,
+      pantryItemId: pantryItemId ?? this.pantryItemId,
+      requestTimestamp: requestTimestamp ?? this.requestTimestamp,
+      pantryItemData: pantryItemData ?? this.pantryItemData,
+      status: status ?? this.status,
+      retryCount: retryCount ?? this.retryCount,
+      lastTryTimestamp: lastTryTimestamp ?? this.lastTryTimestamp,
+      responseData: responseData ?? this.responseData,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<String>(id.value);
+    }
+    if (pantryItemId.present) {
+      map['pantry_item_id'] = Variable<String>(pantryItemId.value);
+    }
+    if (requestTimestamp.present) {
+      map['request_timestamp'] = Variable<int>(requestTimestamp.value);
+    }
+    if (pantryItemData.present) {
+      map['pantry_item_data'] = Variable<String>(pantryItemData.value);
+    }
+    if (status.present) {
+      map['status'] = Variable<String>(status.value);
+    }
+    if (retryCount.present) {
+      map['retry_count'] = Variable<int>(retryCount.value);
+    }
+    if (lastTryTimestamp.present) {
+      map['last_try_timestamp'] = Variable<int>(lastTryTimestamp.value);
+    }
+    if (responseData.present) {
+      map['response_data'] = Variable<String>(responseData.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('PantryItemTermQueuesCompanion(')
+          ..write('id: $id, ')
+          ..write('pantryItemId: $pantryItemId, ')
+          ..write('requestTimestamp: $requestTimestamp, ')
+          ..write('pantryItemData: $pantryItemData, ')
+          ..write('status: $status, ')
+          ..write('retryCount: $retryCount, ')
+          ..write('lastTryTimestamp: $lastTryTimestamp, ')
+          ..write('responseData: $responseData, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
 class $CooksTable extends Cooks with TableInfo<$CooksTable, CookEntry> {
   @override
   final GeneratedDatabase attachedDatabase;
@@ -6321,6 +6783,8 @@ abstract class _$AppDatabase extends GeneratedDatabase {
   late final $UploadQueuesTable uploadQueues = $UploadQueuesTable(this);
   late final $IngredientTermQueuesTable ingredientTermQueues =
       $IngredientTermQueuesTable(this);
+  late final $PantryItemTermQueuesTable pantryItemTermQueues =
+      $PantryItemTermQueuesTable(this);
   late final $CooksTable cooks = $CooksTable(this);
   late final $PantryItemsTable pantryItems = $PantryItemsTable(this);
   late final $IngredientTermOverridesTable ingredientTermOverrides =
@@ -6341,6 +6805,7 @@ abstract class _$AppDatabase extends GeneratedDatabase {
         households,
         uploadQueues,
         ingredientTermQueues,
+        pantryItemTermQueues,
         cooks,
         pantryItems,
         ingredientTermOverrides,
@@ -7849,6 +8314,238 @@ typedef $$IngredientTermQueuesTableProcessedTableManager
               IngredientTermQueueEntry>
         ),
         IngredientTermQueueEntry,
+        PrefetchHooks Function()>;
+typedef $$PantryItemTermQueuesTableCreateCompanionBuilder
+    = PantryItemTermQueuesCompanion Function({
+  required String id,
+  required String pantryItemId,
+  required int requestTimestamp,
+  required String pantryItemData,
+  required String status,
+  Value<int?> retryCount,
+  Value<int?> lastTryTimestamp,
+  Value<String?> responseData,
+  Value<int> rowid,
+});
+typedef $$PantryItemTermQueuesTableUpdateCompanionBuilder
+    = PantryItemTermQueuesCompanion Function({
+  Value<String> id,
+  Value<String> pantryItemId,
+  Value<int> requestTimestamp,
+  Value<String> pantryItemData,
+  Value<String> status,
+  Value<int?> retryCount,
+  Value<int?> lastTryTimestamp,
+  Value<String?> responseData,
+  Value<int> rowid,
+});
+
+class $$PantryItemTermQueuesTableFilterComposer
+    extends Composer<_$AppDatabase, $PantryItemTermQueuesTable> {
+  $$PantryItemTermQueuesTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get id => $composableBuilder(
+      column: $table.id, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get pantryItemId => $composableBuilder(
+      column: $table.pantryItemId, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<int> get requestTimestamp => $composableBuilder(
+      column: $table.requestTimestamp,
+      builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get pantryItemData => $composableBuilder(
+      column: $table.pantryItemData,
+      builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get status => $composableBuilder(
+      column: $table.status, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<int> get retryCount => $composableBuilder(
+      column: $table.retryCount, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<int> get lastTryTimestamp => $composableBuilder(
+      column: $table.lastTryTimestamp,
+      builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get responseData => $composableBuilder(
+      column: $table.responseData, builder: (column) => ColumnFilters(column));
+}
+
+class $$PantryItemTermQueuesTableOrderingComposer
+    extends Composer<_$AppDatabase, $PantryItemTermQueuesTable> {
+  $$PantryItemTermQueuesTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get id => $composableBuilder(
+      column: $table.id, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get pantryItemId => $composableBuilder(
+      column: $table.pantryItemId,
+      builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<int> get requestTimestamp => $composableBuilder(
+      column: $table.requestTimestamp,
+      builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get pantryItemData => $composableBuilder(
+      column: $table.pantryItemData,
+      builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get status => $composableBuilder(
+      column: $table.status, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<int> get retryCount => $composableBuilder(
+      column: $table.retryCount, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<int> get lastTryTimestamp => $composableBuilder(
+      column: $table.lastTryTimestamp,
+      builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get responseData => $composableBuilder(
+      column: $table.responseData,
+      builder: (column) => ColumnOrderings(column));
+}
+
+class $$PantryItemTermQueuesTableAnnotationComposer
+    extends Composer<_$AppDatabase, $PantryItemTermQueuesTable> {
+  $$PantryItemTermQueuesTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get pantryItemId => $composableBuilder(
+      column: $table.pantryItemId, builder: (column) => column);
+
+  GeneratedColumn<int> get requestTimestamp => $composableBuilder(
+      column: $table.requestTimestamp, builder: (column) => column);
+
+  GeneratedColumn<String> get pantryItemData => $composableBuilder(
+      column: $table.pantryItemData, builder: (column) => column);
+
+  GeneratedColumn<String> get status =>
+      $composableBuilder(column: $table.status, builder: (column) => column);
+
+  GeneratedColumn<int> get retryCount => $composableBuilder(
+      column: $table.retryCount, builder: (column) => column);
+
+  GeneratedColumn<int> get lastTryTimestamp => $composableBuilder(
+      column: $table.lastTryTimestamp, builder: (column) => column);
+
+  GeneratedColumn<String> get responseData => $composableBuilder(
+      column: $table.responseData, builder: (column) => column);
+}
+
+class $$PantryItemTermQueuesTableTableManager extends RootTableManager<
+    _$AppDatabase,
+    $PantryItemTermQueuesTable,
+    PantryItemTermQueueEntry,
+    $$PantryItemTermQueuesTableFilterComposer,
+    $$PantryItemTermQueuesTableOrderingComposer,
+    $$PantryItemTermQueuesTableAnnotationComposer,
+    $$PantryItemTermQueuesTableCreateCompanionBuilder,
+    $$PantryItemTermQueuesTableUpdateCompanionBuilder,
+    (
+      PantryItemTermQueueEntry,
+      BaseReferences<_$AppDatabase, $PantryItemTermQueuesTable,
+          PantryItemTermQueueEntry>
+    ),
+    PantryItemTermQueueEntry,
+    PrefetchHooks Function()> {
+  $$PantryItemTermQueuesTableTableManager(
+      _$AppDatabase db, $PantryItemTermQueuesTable table)
+      : super(TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$PantryItemTermQueuesTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$PantryItemTermQueuesTableOrderingComposer(
+                  $db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$PantryItemTermQueuesTableAnnotationComposer(
+                  $db: db, $table: table),
+          updateCompanionCallback: ({
+            Value<String> id = const Value.absent(),
+            Value<String> pantryItemId = const Value.absent(),
+            Value<int> requestTimestamp = const Value.absent(),
+            Value<String> pantryItemData = const Value.absent(),
+            Value<String> status = const Value.absent(),
+            Value<int?> retryCount = const Value.absent(),
+            Value<int?> lastTryTimestamp = const Value.absent(),
+            Value<String?> responseData = const Value.absent(),
+            Value<int> rowid = const Value.absent(),
+          }) =>
+              PantryItemTermQueuesCompanion(
+            id: id,
+            pantryItemId: pantryItemId,
+            requestTimestamp: requestTimestamp,
+            pantryItemData: pantryItemData,
+            status: status,
+            retryCount: retryCount,
+            lastTryTimestamp: lastTryTimestamp,
+            responseData: responseData,
+            rowid: rowid,
+          ),
+          createCompanionCallback: ({
+            required String id,
+            required String pantryItemId,
+            required int requestTimestamp,
+            required String pantryItemData,
+            required String status,
+            Value<int?> retryCount = const Value.absent(),
+            Value<int?> lastTryTimestamp = const Value.absent(),
+            Value<String?> responseData = const Value.absent(),
+            Value<int> rowid = const Value.absent(),
+          }) =>
+              PantryItemTermQueuesCompanion.insert(
+            id: id,
+            pantryItemId: pantryItemId,
+            requestTimestamp: requestTimestamp,
+            pantryItemData: pantryItemData,
+            status: status,
+            retryCount: retryCount,
+            lastTryTimestamp: lastTryTimestamp,
+            responseData: responseData,
+            rowid: rowid,
+          ),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .toList(),
+          prefetchHooksCallback: null,
+        ));
+}
+
+typedef $$PantryItemTermQueuesTableProcessedTableManager
+    = ProcessedTableManager<
+        _$AppDatabase,
+        $PantryItemTermQueuesTable,
+        PantryItemTermQueueEntry,
+        $$PantryItemTermQueuesTableFilterComposer,
+        $$PantryItemTermQueuesTableOrderingComposer,
+        $$PantryItemTermQueuesTableAnnotationComposer,
+        $$PantryItemTermQueuesTableCreateCompanionBuilder,
+        $$PantryItemTermQueuesTableUpdateCompanionBuilder,
+        (
+          PantryItemTermQueueEntry,
+          BaseReferences<_$AppDatabase, $PantryItemTermQueuesTable,
+              PantryItemTermQueueEntry>
+        ),
+        PantryItemTermQueueEntry,
         PrefetchHooks Function()>;
 typedef $$CooksTableCreateCompanionBuilder = CooksCompanion Function({
   Value<String> id,
@@ -9450,6 +10147,8 @@ class $AppDatabaseManager {
       $$UploadQueuesTableTableManager(_db, _db.uploadQueues);
   $$IngredientTermQueuesTableTableManager get ingredientTermQueues =>
       $$IngredientTermQueuesTableTableManager(_db, _db.ingredientTermQueues);
+  $$PantryItemTermQueuesTableTableManager get pantryItemTermQueues =>
+      $$PantryItemTermQueuesTableTableManager(_db, _db.pantryItemTermQueues);
   $$CooksTableTableManager get cooks =>
       $$CooksTableTableManager(_db, _db.cooks);
   $$PantryItemsTableTableManager get pantryItems =>

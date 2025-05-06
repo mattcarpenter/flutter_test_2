@@ -10,6 +10,7 @@ const recipeFolderSharesTable = 'recipe_folder_shares';
 const recipeFolderAssignmentsTable = 'recipe_folder_assignments';
 const uploadQueuesTable = 'upload_queues';
 const ingredientTermQueuesTable = 'ingredient_term_queues';
+const pantryItemTermQueuesTable = 'pantry_item_term_queues';
 const cooksTable = 'cooks';
 const pantryItemsTable = 'pantry_items';
 const ingredientTermOverridesTable = 'ingredient_term_overrides';
@@ -33,6 +34,15 @@ Schema schema = const Schema(([
     Column.integer('retry_count'),
     Column.integer('last_try_timestamp'),
     Column.text('ingredient_data'),
+    Column.text('response_data'),
+  ]),
+  Table.localOnly(pantryItemTermQueuesTable, [
+    Column.text('pantry_item_id'),
+    Column.integer('request_timestamp'),
+    Column.text('status'),
+    Column.integer('retry_count'),
+    Column.integer('last_try_timestamp'),
+    Column.text('pantry_item_data'),
     Column.text('response_data'),
   ]),
   Table(recipeFoldersTable, [

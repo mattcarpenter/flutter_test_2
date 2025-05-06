@@ -1,12 +1,20 @@
 import 'package:drift/drift.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:uuid/uuid.dart';
-import '../../database/converters.dart';
 import '../../database/database.dart';
 import '../../database/models/pantry_item_terms.dart';
+import '../../database/powersync.dart';
+import '../managers/pantry_item_term_queue_manager.dart';
 
 class PantryRepository {
   final AppDatabase _db;
+  PantryItemTermQueueManager? _pantryItemTermQueueManager;
+
   PantryRepository(this._db);
+
+  set pantryItemTermQueueManager(PantryItemTermQueueManager manager) {
+    _pantryItemTermQueueManager = manager;
+  }
 
   /// Watch all pantry items that are not deleted.
   Stream<List<PantryItemEntry>> watchItems() {
@@ -31,7 +39,7 @@ class PantryRepository {
     final newId = const Uuid().v4();
     final now = DateTime.now().millisecondsSinceEpoch;
 
-    const converter = const PantryItemTermListConverter();
+    // No need for converter - it's handled internally by Drift
     final companion = PantryItemsCompanion.insert(
       id: Value(newId),
       name: name,
@@ -49,6 +57,16 @@ class PantryRepository {
     );
 
     await _db.into(_db.pantryItems).insert(companion);
+
+    // Queue for term canonicalization if no terms are provided
+    if ((terms == null || terms.isEmpty) && _pantryItemTermQueueManager != null) {
+      await _pantryItemTermQueueManager!.queuePantryItem(
+        pantryItemId: newId,
+        name: name,
+        existingTerms: terms,
+      );
+    }
+
     return newId;
   }
 
@@ -63,8 +81,13 @@ class PantryRepository {
     String? baseUnit,
     double? baseQuantity,
     double? price,
-  }) {
+  }) async {
     final now = DateTime.now().millisecondsSinceEpoch;
+
+    // Get the current pantry item to check if name changed and terms need updating
+    final currentItem = await (_db.select(_db.pantryItems)
+      ..where((t) => t.id.equals(id)))
+        .getSingleOrNull();
 
     final companion = PantryItemsCompanion(
       name: name != null ? Value(name) : const Value.absent(),
@@ -78,14 +101,59 @@ class PantryRepository {
       terms: terms != null ? Value(terms) : const Value.absent(),
     );
 
-    return (_db.update(_db.pantryItems)..where((t) => t.id.equals(id)))
+    await (_db.update(_db.pantryItems)..where((t) => t.id.equals(id)))
         .write(companion);
+
+    // Check if we need to queue for term canonicalization
+    if (_pantryItemTermQueueManager != null) {
+      // Queue for term canonicalization if either:
+      // 1. Terms were explicitly set to empty or
+      // 2. The name changed and no new terms were provided
+      final nameChanged = name != null && currentItem != null && name != currentItem.name;
+      final emptyTermsProvided = terms != null && terms.isEmpty;
+      final hasCurrentTerms = currentItem?.terms != null && currentItem!.terms!.isNotEmpty;
+
+      if (emptyTermsProvided || (nameChanged && terms == null && !hasCurrentTerms)) {
+        final itemName = name ?? currentItem?.name ?? "";
+        if (itemName.isNotEmpty) {
+          // First, remove any existing queue entries
+          await _pantryItemTermQueueManager!.repository.deleteEntriesByPantryItemId(id);
+
+          // Queue the item for canonicalization
+          await _pantryItemTermQueueManager!.queuePantryItem(
+            pantryItemId: id,
+            name: itemName,
+            existingTerms: terms ?? currentItem?.terms,
+          );
+        }
+      }
+    }
   }
 
   /// Soft-delete a pantry item.
-  Future<void> deleteItem(String id) {
+  Future<void> deleteItem(String id) async {
     final now = DateTime.now().millisecondsSinceEpoch;
-    return (_db.update(_db.pantryItems)..where((t) => t.id.equals(id)))
+
+    // Also remove any pending queue entries
+    if (_pantryItemTermQueueManager != null) {
+      await _pantryItemTermQueueManager!.repository.deleteEntriesByPantryItemId(id);
+    }
+
+    await (_db.update(_db.pantryItems)..where((t) => t.id.equals(id)))
         .write(PantryItemsCompanion(deletedAt: Value(now)));
   }
 }
+
+// Provider for the pantry repository
+final pantryRepositoryProvider = Provider<PantryRepository>((ref) {
+  final repository = PantryRepository(appDb);
+
+  // Connect the pantry repository with the queue manager
+  final queueManager = ref.watch(pantryItemTermQueueManagerProvider);
+  repository.pantryItemTermQueueManager = queueManager;
+
+  // Complete the circular dependency by setting pantry repository in the queue manager
+  queueManager.pantryRepository = repository;
+
+  return repository;
+});
