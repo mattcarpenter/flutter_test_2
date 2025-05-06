@@ -658,8 +658,18 @@ class RecipeRepository {
           GROUP BY itwm.ingredient_id, pit.pantry_item_id
         )
         SELECT
-          i.ingredient_id,
-          p.*
+          i.ingredient_id AS recipe_ingredient_id,
+          p.pantry_item_id,
+          p.id AS pantry_id,
+          p.name,
+          p.quantity,
+          p.unit,
+          p.user_id,
+          p.household_id,
+          p.created_at,
+          p.updated_at,
+          p.deleted_at,
+          p.in_stock
         FROM (
           SELECT DISTINCT ingredient_id 
           FROM recipe_ingredient_terms 
@@ -693,7 +703,7 @@ class RecipeRepository {
 
       // Process results into ingredient matches
       final matches = results.map((row) {
-        final ingredientId = row.read<String>('ingredient_id');
+        final ingredientId = row.read<String>('recipe_ingredient_id');
         final ingredient = ingredientMap[ingredientId];
 
         if (ingredient == null) {
@@ -703,7 +713,7 @@ class RecipeRepository {
         }
 
         // Check if there's a matching pantry item
-        final pantryItemId = row.readNullable<String>('id');
+        final pantryItemId = row.readNullable<String>('pantry_id');
         PantryItemEntry? pantryItem;
 
         if (pantryItemId != null) {
