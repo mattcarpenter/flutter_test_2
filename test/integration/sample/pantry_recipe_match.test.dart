@@ -314,9 +314,11 @@ void main() async {
         expect(matchState.matches[0].recipe.id, highMatchRecipeId);
         expect(matchState.matches[0].matchRatio, 1.0);
 
-        // Second should be medium match recipe (40-60%)
+        // Second should be medium match recipe (60%)
         expect(matchState.matches[1].recipe.id, mediumMatchRecipeId);
-        expect(matchState.matches[1].matchRatio, closeTo(0.4, 0.01));
+        expect(matchState.matches[1].matchRatio, closeTo(0.6, 0.01));
+        expect(matchState.matches[1].matchedTerms, 3); // Ground Beef, Tomato, Garlic
+        expect(matchState.matches[1].totalTerms, 5);   // out of 5 ingredients
 
         // Third should be low match recipe (20%)
         expect(matchState.matches[2].recipe.id, lowMatchRecipeId);
