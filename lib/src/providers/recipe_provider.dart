@@ -12,6 +12,7 @@ import '../../database/models/ingredients.dart';
 import '../../database/models/recipe_images.dart';
 import '../../database/models/steps.dart';
 import '../constants/folder_constants.dart';
+import '../models/recipe_pantry_match.dart';
 import '../models/recipe_with_folders.dart';
 import '../repositories/recipe_repository.dart';
 
@@ -416,5 +417,65 @@ class RecipeSearchNotifier extends Notifier<RecipeSearchState> {
     }
   }
 }
+
+/// State class for pantry recipe matches
+class PantryRecipeMatchState {
+  final List<RecipePantryMatch> matches;
+  final bool isLoading;
+  final Object? error;
+
+  PantryRecipeMatchState({
+    required this.matches,
+    this.isLoading = false,
+    this.error,
+  });
+
+  PantryRecipeMatchState copyWith({
+    List<RecipePantryMatch>? matches,
+    bool? isLoading,
+    Object? error,
+  }) {
+    return PantryRecipeMatchState(
+      matches: matches ?? this.matches,
+      isLoading: isLoading ?? this.isLoading,
+      error: error,
+    );
+  }
+}
+
+/// Notifier for handling pantry recipe matches
+class PantryRecipeMatchNotifier extends AsyncNotifier<PantryRecipeMatchState> {
+  @override
+  Future<PantryRecipeMatchState> build() async {
+    return PantryRecipeMatchState(
+      matches: [],
+      isLoading: false,
+    );
+  }
+
+  /// Find recipes that can be made with pantry items
+  Future<void> findMatchingRecipes() async {
+    try {
+      state = AsyncValue.data(state.value!.copyWith(isLoading: true));
+      
+      final matches = await ref.read(recipeRepositoryProvider).findMatchingRecipesFromPantry();
+      
+      state = AsyncValue.data(PantryRecipeMatchState(
+        matches: matches,
+        isLoading: false,
+      ));
+    } catch (e, stack) {
+      state = AsyncValue.data(state.value!.copyWith(
+        isLoading: false,
+        error: e,
+      ));
+    }
+  }
+}
+
+/// Provider for pantry recipe matches
+final pantryRecipeMatchProvider = AsyncNotifierProvider<PantryRecipeMatchNotifier, PantryRecipeMatchState>(
+  PantryRecipeMatchNotifier.new,
+);
 
 
