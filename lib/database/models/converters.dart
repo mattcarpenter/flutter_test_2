@@ -10,11 +10,11 @@ class Converters extends Table {
   TextColumn get fromUnit => text()();             // Recipe-side source unit (e.g., cup)
   TextColumn get toBaseUnit => text()();           // Base unit (g, ml, count)
   RealColumn get conversionFactor => real()();     // Factor to convert from recipe unit to base unit
-  BoolColumn get isApproximate => 
+  BoolColumn get isApproximate =>
       boolean().withDefault(const Constant(false))();  // Flag if conversion is approximate
   TextColumn get notes => text().nullable()();     // Optional notes about the conversion
 
-  TextColumn get userId => text()();
+  TextColumn get userId => text().nullable()();
   TextColumn get householdId => text().nullable()();
 
   IntColumn get createdAt => integer().nullable()();

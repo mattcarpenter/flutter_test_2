@@ -42,7 +42,7 @@ class ConverterRepository {
       conversionFactor: conversionFactor,
       isApproximate: Value(isApproximate),
       notes: Value(notes),
-      userId: userId,
+      userId: Value(userId),
       householdId: Value(householdId),
       createdAt: Value(now),
       updatedAt: Value(now),
@@ -121,5 +121,23 @@ class ConverterRepository {
     // Sort by term length (descending) to get the most specific match
     matchingConverters.sort((a, b) => b.term.length.compareTo(a.term.length));
     return matchingConverters.first;
+  }
+  
+  /// Check if a converter already exists for the given term, fromUnit, and toBaseUnit
+  Future<bool> converterExists({
+    required String term,
+    required String fromUnit,
+    required String toBaseUnit,
+  }) async {
+    final count = await (_db.select(_db.converters)
+      ..where((c) => 
+          c.deletedAt.isNull() &
+          c.term.equals(term) &
+          c.fromUnit.equals(fromUnit) &
+          c.toBaseUnit.equals(toBaseUnit)))
+        .get()
+        .then((result) => result.length);
+    
+    return count > 0;
   }
 }

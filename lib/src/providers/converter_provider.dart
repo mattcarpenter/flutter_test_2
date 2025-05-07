@@ -71,6 +71,18 @@ class ConverterNotifier
     required String unit,
   }) =>
       _repo.findBestConverter(term: term, unit: unit);
+      
+  /// Check if a converter already exists for the given term, fromUnit, and toBaseUnit
+  Future<bool> converterExists({
+    required String term,
+    required String fromUnit,
+    required String toBaseUnit,
+  }) =>
+      _repo.converterExists(
+        term: term,
+        fromUnit: fromUnit,
+        toBaseUnit: toBaseUnit,
+      );
 }
 
 /// Expose the [ConverterRepository].

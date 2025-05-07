@@ -1,4 +1,5 @@
 import 'package:drift/drift.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:recipe_app/database/models/ingredient_terms.dart';
@@ -7,6 +8,7 @@ import 'package:recipe_app/database/models/pantry_item_terms.dart';
 import 'package:recipe_app/database/models/steps.dart';
 import 'package:recipe_app/database/database.dart';
 import 'package:recipe_app/database/powersync.dart';
+import 'package:recipe_app/src/managers/pantry_item_term_queue_manager.dart';
 import 'package:recipe_app/src/models/recipe_with_folders.dart';
 import 'package:recipe_app/src/providers/ingredient_term_override_provider.dart';
 import 'package:recipe_app/src/providers/pantry_provider.dart';
@@ -20,6 +22,7 @@ import '../../utils/test_user_manager.dart';
 void main() async {
   await initializeTestEnvironment();
   late ProviderContainer container;
+  const channel = MethodChannel('dev.fluttercommunity.plus/connectivity_status');
 
   tearDownAll(() async {
     await TestUserManager.logoutTestUser();
@@ -34,11 +37,20 @@ void main() async {
     setUp(() async {
       container = ProviderContainer();
       await TestUserManager.wipeAlLocalAndRemoteTestUserData();
+      TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+          .setMockMethodCallHandler(channel, (MethodCall methodCall) async {
+        if (methodCall.method == 'listen') {
+          return null;
+        }
+        return null;
+      });
     });
 
     tearDown(() async {
       container.dispose();
       await TestUserManager.wipeAlLocalAndRemoteTestUserData();
+      TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+          .setMockMethodCallHandler(channel, null);
     });
 
     testWidgets('Recipe ingredients with terms are correctly materialized in recipe_ingredient_terms table', (tester) async {
@@ -506,6 +518,7 @@ void main() async {
         final householdOwnerId = Supabase.instance.client.auth.currentUser!.id;
         final householdData = await TestHouseholdManager.createHousehold('Test Household', householdOwnerId);
         householdId = householdData['id'] as String;
+        await TestHouseholdManager.addHouseholdMember(householdId, householdOwnerId);
       });
 
       // Step 2: Add household_member to the household

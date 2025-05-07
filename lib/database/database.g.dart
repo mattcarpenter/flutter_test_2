@@ -6218,8 +6218,8 @@ class $ConvertersTable extends Converters
   static const VerificationMeta _userIdMeta = const VerificationMeta('userId');
   @override
   late final GeneratedColumn<String> userId = GeneratedColumn<String>(
-      'user_id', aliasedName, false,
-      type: DriftSqlType.string, requiredDuringInsert: true);
+      'user_id', aliasedName, true,
+      type: DriftSqlType.string, requiredDuringInsert: false);
   static const VerificationMeta _householdIdMeta =
       const VerificationMeta('householdId');
   @override
@@ -6313,8 +6313,6 @@ class $ConvertersTable extends Converters
     if (data.containsKey('user_id')) {
       context.handle(_userIdMeta,
           userId.isAcceptableOrUnknown(data['user_id']!, _userIdMeta));
-    } else if (isInserting) {
-      context.missing(_userIdMeta);
     }
     if (data.containsKey('household_id')) {
       context.handle(
@@ -6358,7 +6356,7 @@ class $ConvertersTable extends Converters
       notes: attachedDatabase.typeMapping
           .read(DriftSqlType.string, data['${effectivePrefix}notes']),
       userId: attachedDatabase.typeMapping
-          .read(DriftSqlType.string, data['${effectivePrefix}user_id'])!,
+          .read(DriftSqlType.string, data['${effectivePrefix}user_id']),
       householdId: attachedDatabase.typeMapping
           .read(DriftSqlType.string, data['${effectivePrefix}household_id']),
       createdAt: attachedDatabase.typeMapping
@@ -6384,7 +6382,7 @@ class ConverterEntry extends DataClass implements Insertable<ConverterEntry> {
   final double conversionFactor;
   final bool isApproximate;
   final String? notes;
-  final String userId;
+  final String? userId;
   final String? householdId;
   final int? createdAt;
   final int? updatedAt;
@@ -6397,7 +6395,7 @@ class ConverterEntry extends DataClass implements Insertable<ConverterEntry> {
       required this.conversionFactor,
       required this.isApproximate,
       this.notes,
-      required this.userId,
+      this.userId,
       this.householdId,
       this.createdAt,
       this.updatedAt,
@@ -6414,7 +6412,9 @@ class ConverterEntry extends DataClass implements Insertable<ConverterEntry> {
     if (!nullToAbsent || notes != null) {
       map['notes'] = Variable<String>(notes);
     }
-    map['user_id'] = Variable<String>(userId);
+    if (!nullToAbsent || userId != null) {
+      map['user_id'] = Variable<String>(userId);
+    }
     if (!nullToAbsent || householdId != null) {
       map['household_id'] = Variable<String>(householdId);
     }
@@ -6440,7 +6440,8 @@ class ConverterEntry extends DataClass implements Insertable<ConverterEntry> {
       isApproximate: Value(isApproximate),
       notes:
           notes == null && nullToAbsent ? const Value.absent() : Value(notes),
-      userId: Value(userId),
+      userId:
+          userId == null && nullToAbsent ? const Value.absent() : Value(userId),
       householdId: householdId == null && nullToAbsent
           ? const Value.absent()
           : Value(householdId),
@@ -6467,7 +6468,7 @@ class ConverterEntry extends DataClass implements Insertable<ConverterEntry> {
       conversionFactor: serializer.fromJson<double>(json['conversionFactor']),
       isApproximate: serializer.fromJson<bool>(json['isApproximate']),
       notes: serializer.fromJson<String?>(json['notes']),
-      userId: serializer.fromJson<String>(json['userId']),
+      userId: serializer.fromJson<String?>(json['userId']),
       householdId: serializer.fromJson<String?>(json['householdId']),
       createdAt: serializer.fromJson<int?>(json['createdAt']),
       updatedAt: serializer.fromJson<int?>(json['updatedAt']),
@@ -6485,7 +6486,7 @@ class ConverterEntry extends DataClass implements Insertable<ConverterEntry> {
       'conversionFactor': serializer.toJson<double>(conversionFactor),
       'isApproximate': serializer.toJson<bool>(isApproximate),
       'notes': serializer.toJson<String?>(notes),
-      'userId': serializer.toJson<String>(userId),
+      'userId': serializer.toJson<String?>(userId),
       'householdId': serializer.toJson<String?>(householdId),
       'createdAt': serializer.toJson<int?>(createdAt),
       'updatedAt': serializer.toJson<int?>(updatedAt),
@@ -6501,7 +6502,7 @@ class ConverterEntry extends DataClass implements Insertable<ConverterEntry> {
           double? conversionFactor,
           bool? isApproximate,
           Value<String?> notes = const Value.absent(),
-          String? userId,
+          Value<String?> userId = const Value.absent(),
           Value<String?> householdId = const Value.absent(),
           Value<int?> createdAt = const Value.absent(),
           Value<int?> updatedAt = const Value.absent(),
@@ -6514,7 +6515,7 @@ class ConverterEntry extends DataClass implements Insertable<ConverterEntry> {
         conversionFactor: conversionFactor ?? this.conversionFactor,
         isApproximate: isApproximate ?? this.isApproximate,
         notes: notes.present ? notes.value : this.notes,
-        userId: userId ?? this.userId,
+        userId: userId.present ? userId.value : this.userId,
         householdId: householdId.present ? householdId.value : this.householdId,
         createdAt: createdAt.present ? createdAt.value : this.createdAt,
         updatedAt: updatedAt.present ? updatedAt.value : this.updatedAt,
@@ -6602,7 +6603,7 @@ class ConvertersCompanion extends UpdateCompanion<ConverterEntry> {
   final Value<double> conversionFactor;
   final Value<bool> isApproximate;
   final Value<String?> notes;
-  final Value<String> userId;
+  final Value<String?> userId;
   final Value<String?> householdId;
   final Value<int?> createdAt;
   final Value<int?> updatedAt;
@@ -6631,7 +6632,7 @@ class ConvertersCompanion extends UpdateCompanion<ConverterEntry> {
     required double conversionFactor,
     this.isApproximate = const Value.absent(),
     this.notes = const Value.absent(),
-    required String userId,
+    this.userId = const Value.absent(),
     this.householdId = const Value.absent(),
     this.createdAt = const Value.absent(),
     this.updatedAt = const Value.absent(),
@@ -6640,8 +6641,7 @@ class ConvertersCompanion extends UpdateCompanion<ConverterEntry> {
   })  : term = Value(term),
         fromUnit = Value(fromUnit),
         toBaseUnit = Value(toBaseUnit),
-        conversionFactor = Value(conversionFactor),
-        userId = Value(userId);
+        conversionFactor = Value(conversionFactor);
   static Insertable<ConverterEntry> custom({
     Expression<String>? id,
     Expression<String>? term,
@@ -6682,7 +6682,7 @@ class ConvertersCompanion extends UpdateCompanion<ConverterEntry> {
       Value<double>? conversionFactor,
       Value<bool>? isApproximate,
       Value<String?>? notes,
-      Value<String>? userId,
+      Value<String?>? userId,
       Value<String?>? householdId,
       Value<int?>? createdAt,
       Value<int?>? updatedAt,
@@ -9858,7 +9858,7 @@ typedef $$ConvertersTableCreateCompanionBuilder = ConvertersCompanion Function({
   required double conversionFactor,
   Value<bool> isApproximate,
   Value<String?> notes,
-  required String userId,
+  Value<String?> userId,
   Value<String?> householdId,
   Value<int?> createdAt,
   Value<int?> updatedAt,
@@ -9873,7 +9873,7 @@ typedef $$ConvertersTableUpdateCompanionBuilder = ConvertersCompanion Function({
   Value<double> conversionFactor,
   Value<bool> isApproximate,
   Value<String?> notes,
-  Value<String> userId,
+  Value<String?> userId,
   Value<String?> householdId,
   Value<int?> createdAt,
   Value<int?> updatedAt,
@@ -10055,7 +10055,7 @@ class $$ConvertersTableTableManager extends RootTableManager<
             Value<double> conversionFactor = const Value.absent(),
             Value<bool> isApproximate = const Value.absent(),
             Value<String?> notes = const Value.absent(),
-            Value<String> userId = const Value.absent(),
+            Value<String?> userId = const Value.absent(),
             Value<String?> householdId = const Value.absent(),
             Value<int?> createdAt = const Value.absent(),
             Value<int?> updatedAt = const Value.absent(),
@@ -10085,7 +10085,7 @@ class $$ConvertersTableTableManager extends RootTableManager<
             required double conversionFactor,
             Value<bool> isApproximate = const Value.absent(),
             Value<String?> notes = const Value.absent(),
-            required String userId,
+            Value<String?> userId = const Value.absent(),
             Value<String?> householdId = const Value.absent(),
             Value<int?> createdAt = const Value.absent(),
             Value<int?> updatedAt = const Value.absent(),

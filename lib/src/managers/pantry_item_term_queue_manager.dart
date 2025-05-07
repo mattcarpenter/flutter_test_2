@@ -220,8 +220,8 @@ class PantryItemTermQueueManager {
 
           // Check if we got results for this pantry item
           final name = pantryItemData['name'] as String;
-          if (results.containsKey(name)) {
-            final ingredientTerms = results[name]!;
+          if (results.terms.containsKey(name)) {
+            final ingredientTerms = results.terms[name]!;
             
             // Convert IngredientTerm to PantryItemTerm
             final terms = ingredientTerms.map((term) => PantryItemTerm(

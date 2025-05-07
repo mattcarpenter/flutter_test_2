@@ -9,6 +9,8 @@ import '../../database/database.dart';
 // The IngredientTerm type is already included via import of ingredient_canonicalization_service.dart
 import '../../database/models/ingredients.dart';
 import '../../database/powersync.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
+import '../providers/converter_provider.dart';
 import '../repositories/ingredient_term_queue_repository.dart';
 import '../repositories/recipe_repository.dart';
 import '../services/ingredient_canonicalization_service.dart';
@@ -18,7 +20,8 @@ class IngredientTermQueueManager {
   RecipeRepository? _recipeRepository;
   final IngredientCanonicalizer canonicalizer;
   final AppDatabase db;
-
+  final ConverterNotifier converterNotifier;
+  
   bool _isProcessing = false;
   Timer? _debounceTimer;
   StreamSubscription<List<ConnectivityResult>>? _connectivitySubscription;
@@ -44,6 +47,7 @@ class IngredientTermQueueManager {
     required RecipeRepository? recipeRepository,
     required this.canonicalizer,
     required this.db,
+    required this.converterNotifier,
     bool testMode = false,
   }) {
     _recipeRepository = recipeRepository;
@@ -69,6 +73,48 @@ class IngredientTermQueueManager {
   void dispose() {
     _debounceTimer?.cancel();
     _connectivitySubscription?.cancel();
+  }
+
+  /// Process converters from the API response
+  Future<void> _processConverters(Map<String, ConverterData> converters, String householdId) async {
+    if (converters.isEmpty) return;
+    
+    debugPrint('Processing ${converters.length} converters from API response');
+    
+    // Get the current user ID from Supabase
+    final userId = Supabase.instance.client.auth.currentSession?.user.id;
+    if (userId == null) {
+      debugPrint('No user ID available, skipping converter processing');
+      return;
+    }
+    
+    for (final entry in converters.entries) {
+      final converter = entry.value;
+      
+      // Check if this converter already exists
+      final exists = await converterNotifier.converterExists(
+        term: converter.term,
+        fromUnit: converter.fromUnit,
+        toBaseUnit: converter.toBaseUnit,
+      );
+      
+      // Only add if it doesn't exist
+      if (!exists) {
+        debugPrint('Adding new converter for ${converter.term} (${converter.fromUnit} to ${converter.toBaseUnit})');
+        await converterNotifier.addConverter(
+          term: converter.term,
+          fromUnit: converter.fromUnit,
+          toBaseUnit: converter.toBaseUnit,
+          conversionFactor: converter.conversionFactor,
+          isApproximate: converter.isApproximate,
+          notes: converter.notes,
+          userId: userId,
+          householdId: householdId,
+        );
+      } else {
+        debugPrint('Converter already exists for ${converter.term} (${converter.fromUnit} to ${converter.toBaseUnit})');
+      }
+    }
   }
 
   /// Queue an ingredient for canonicalization
@@ -249,6 +295,16 @@ class IngredientTermQueueManager {
           // Call the canonicalization API
           final results = await canonicalizer.canonicalizeIngredients(ingredients);
 
+          // Process any converters returned from the API
+          if (results.converters.isNotEmpty) {
+            // Get the recipe to determine household
+            final recipe = await _recipeRepository?.getRecipeById(recipeId);
+            final householdId = recipe?.householdId;
+            
+            // Process the converters
+            await _processConverters(results.converters, householdId ?? '');
+          }
+
           // Find the entries for this recipe and update them
           final recipeEntries = entryMap.values
               .where((e) => e['recipeId'] == recipeId)
@@ -289,8 +345,8 @@ class IngredientTermQueueManager {
               final originalName = originalData['name'] as String;
 
               // Find terms in the API response
-              if (results.containsKey(originalName)) {
-                final terms = results[originalName]!;
+              if (results.terms.containsKey(originalName)) {
+                final terms = results.terms[originalName]!;
 
                 // Update the ingredient with new terms
                 currentIngredients[ingredientIndex] =
@@ -302,6 +358,9 @@ class IngredientTermQueueManager {
                   status: 'completed',
                   responseData: Value(json.encode({
                     'terms': terms.map((t) => t.toJson()).toList(),
+                    'converters': results.converters.containsKey(originalName) 
+                        ? _convertToJson(results.converters[originalName]!)
+                        : null,
                   })),
                 );
                 await repository.updateEntry(completedEntry);
@@ -380,6 +439,18 @@ class IngredientTermQueueManager {
       _isProcessing = false;
     }
   }
+  
+  /// Convert ConverterData to a JSON map
+  Map<String, dynamic> _convertToJson(ConverterData converter) {
+    return {
+      'term': converter.term,
+      'fromUnit': converter.fromUnit,
+      'toBaseUnit': converter.toBaseUnit,
+      'conversionFactor': converter.conversionFactor,
+      'isApproximate': converter.isApproximate,
+      'notes': converter.notes,
+    };
+  }
 }
 
 // Create a provider that doesn't directly depend on recipeRepositoryProvider
@@ -389,6 +460,7 @@ final ingredientTermQueueManagerProvider = Provider<IngredientTermQueueManager>(
   // We'll get the recipe repository later via a setter to avoid circular dependency
   final recipeRepositoryUninitialized = null;
   final canonicalizer = ref.watch(ingredientCanonicalizerProvider);
+  final converterNotifier = ref.watch(convertersProvider.notifier);
   
   // Determine if we're in test mode by checking environment variables or other means
   // For now we'll default to false, but you can override this with the setter
@@ -400,6 +472,7 @@ final ingredientTermQueueManagerProvider = Provider<IngredientTermQueueManager>(
     recipeRepository: recipeRepositoryUninitialized,
     canonicalizer: canonicalizer,
     db: appDb,
+    converterNotifier: converterNotifier,
     testMode: isTestMode,
   );
 });
