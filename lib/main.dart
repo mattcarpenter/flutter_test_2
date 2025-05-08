@@ -9,6 +9,7 @@ import 'app_config.dart';
 import 'database/database.dart';
 import 'database/powersync.dart';
 import 'src/app.dart';
+import 'src/providers/recipe_filter_sort_provider.dart';
 import 'src/settings/settings_controller.dart';
 import 'src/settings/settings_service.dart';
 import 'src/repositories/base_repository.dart';
@@ -51,14 +52,15 @@ void main() async {
   }
 
   SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
+  
+  // Initialize SharedPreferences overrides
+  final overrides = await createSharedPreferencesOverrides();
 
   // Run the app and pass in the SettingsController. The app listens to the
   // SettingsController for changes, then passes it further down to the
   // SettingsView.
   runApp(ProviderScope(
-      //overrides: [
-      //  databaseProvider.overrideWith((ref) => db),
-      //],
+      overrides: overrides,
       child: MyApp(settingsController: settingsController))
   );
 }

@@ -23,7 +23,7 @@ class MyApp extends ConsumerWidget {
     ref.watch(appServicesProvider);
 
     // Seed data (async)
-    ref.read(recipeNotifierProvider.notifier).importSeedRecipes();
+    ref.read(recipeNotifierProvider.notifier).importSeedRecipes(limit: 10);
 
     // Glue the SettingsController to the MaterialApp.
     //
