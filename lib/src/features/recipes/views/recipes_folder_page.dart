@@ -32,16 +32,16 @@ class RecipesFolderPage extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     // Watch all recipes
     final recipesAsyncValue = ref.watch(recipeNotifierProvider);
-    
+
     // Watch pantry recipe matches if needed for filtering
     final pantryMatchesAsyncValue = ref.watch(pantryRecipeMatchProvider);
-    
+
     // Listen to filter changes for debugging and to load necessary data
     ref.listen(recipeFolderFilterSortProvider, (previous, current) {
       print('Filter state changed:');
       print('Previous: ${previous?.activeFilters}');
       print('Current: ${current.activeFilters}');
-      
+
       // Initiate pantry match loading if needed
       RecipeFilterUtils.loadPantryMatchesIfNeeded(
         filterState: current,
@@ -49,10 +49,10 @@ class RecipesFolderPage extends ConsumerWidget {
         ref: ref,
       );
     });
-    
+
     // Watch filter/sort state
     final filterSortState = ref.watch(recipeFolderFilterSortProvider);
-    
+
     // Update folder ID in filter/sort state if needed
     if (filterSortState.folderId != folderId) {
       // Use addPostFrameCallback to avoid triggering a rebuild during build
@@ -60,7 +60,7 @@ class RecipesFolderPage extends ConsumerWidget {
         ref.read(recipeFolderFilterSortProvider.notifier).updateFolderId(folderId);
       });
     }
-    
+
     return AdaptiveSliverPage(
       title: title,
       searchEnabled: true,
@@ -71,7 +71,7 @@ class RecipesFolderPage extends ConsumerWidget {
           WidgetsBinding.instance.addPostFrameCallback((_) {
             if (state.activeFilters.isNotEmpty) {
               ref.read(recipeSearchFilterSortProvider.notifier).updateFilter(
-                state.activeFilters.keys.first, 
+                state.activeFilters.keys.first,
                 state.activeFilters.values.first
               );
             } else {
@@ -88,10 +88,10 @@ class RecipesFolderPage extends ConsumerWidget {
         });
       },
       slivers: [
-        // Sort dropdown in a SliverPersistentHeader
+        // Sort dropdown in a SliverPersistentHeader - make sure it's pinned
         SliverPersistentHeader(
-          pinned: true, // Keep it visible when scrolling
-          floating: true, // Allow it to float on scroll up
+          pinned: false, // Essential to keep it visible when scrolling
+          floating: true, // Setting to false to ensure pinned behavior takes precedence
           delegate: _SortHeaderDelegate(
             sortOption: filterSortState.activeSortOption,
             sortDirection: filterSortState.sortDirection,
@@ -106,7 +106,7 @@ class RecipesFolderPage extends ConsumerWidget {
             showPantryMatchOption: false,
           ),
         ),
-        
+
         // Recipe list with filtering and sorting applied
         recipesAsyncValue.when(
           loading: () => const SliverFillRemaining(
@@ -121,36 +121,36 @@ class RecipesFolderPage extends ConsumerWidget {
                 filterState: filterSortState,
                 pantryMatchesAsyncValue: pantryMatchesAsyncValue)) {
               return const SliverFillRemaining(
-                child: Center(child: CircularProgressIndicator()), 
+                child: Center(child: CircularProgressIndicator()),
               );
             }
-            
+
             // Extract recipes from wrapper objects
             final recipes = recipesWithFolders.map((r) => r.recipe).toList();
 
             // Apply filters and sorting
             List<RecipeEntry> filteredRecipes;
-            
+
             // Apply folder filtering
             filteredRecipes = RecipeFilterUtils.applyFolderFilter(
-              recipes, 
-              folderId, 
+              recipes,
+              folderId,
               kUncategorizedFolderId,
             );
-            
+
             // Apply all other filters
             if (filterSortState.hasFilters) {
               print('Applying filters to ${filteredRecipes.length} recipes: ${filterSortState.activeFilters}');
-              
+
               filteredRecipes = RecipeFilterUtils.applyFilters(
                 recipes: filteredRecipes,
                 filterState: filterSortState,
                 pantryMatchesAsyncValue: pantryMatchesAsyncValue,
               );
-              
+
               print('After filtering: ${filteredRecipes.length} recipes remaining');
             }
-            
+
             // Apply sorting
             filteredRecipes = RecipeFilterUtils.applySorting(
               recipes: filteredRecipes,
@@ -209,7 +209,7 @@ class _SortHeaderDelegate extends SliverPersistentHeaderDelegate {
   final Function(SortDirection) onSortDirectionChanged;
   final bool showPantryMatchOption;
   final RecipeFilterSortState filterState; // Store the filter state
-  
+
   _SortHeaderDelegate({
     required this.sortOption,
     required this.sortDirection,
@@ -218,20 +218,22 @@ class _SortHeaderDelegate extends SliverPersistentHeaderDelegate {
     required this.filterState, // Add to constructor
     this.showPantryMatchOption = false,
   });
-  
+
   @override
   Widget build(BuildContext context, double shrinkOffset, bool overlapsContent) {
     // Use the filter state passed through the constructor
-    
-    return Container(
-      // Transparent background
-      color: Colors.transparent,
-      height: minExtent,
-      padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        crossAxisAlignment: CrossAxisAlignment.center, // Ensure vertical alignment
-        children: [
+
+    // Use Material widget to get elevation/shadow
+    return Material(
+      elevation: overlapsContent ? 1.0 : 0.0, // Apply elevation only when content scrolls under
+      color: Colors.white.withOpacity(0.95),
+      child: Container(
+        height: minExtent,
+        padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          crossAxisAlignment: CrossAxisAlignment.center, // Ensure vertical alignment
+          children: [
           // Filter button with counter badge
           Material(
             // Use Material for proper ink effects
@@ -241,20 +243,20 @@ class _SortHeaderDelegate extends SliverPersistentHeaderDelegate {
               onTap: () {
                 // Use the current filter state
                 print('Current filter state: ${filterState.activeFilters}');
-                    
+
                 showRecipeFilterSheet(
                   context,
                   initialState: filterState,
                   onFilterChanged: (newState) {
                     // Use a more direct approach to update filters
                     print('Filter sheet returned state: ${newState.activeFilters}');
-                    
+
                     final container = ProviderScope.containerOf(context);
                     final notifier = container.read(recipeFolderFilterSortProvider.notifier);
-                    
+
                     // Clear all existing filters first
                     notifier.clearFilters();
-                    
+
                     // Add all filters from new state
                     for (final entry in newState.activeFilters.entries) {
                       print('Adding filter: ${entry.key} = ${entry.value}');
@@ -292,7 +294,7 @@ class _SortHeaderDelegate extends SliverPersistentHeaderDelegate {
               ),
             ),
           ),
-          
+
           // Sort dropdown
           RecipeSortDropdown(
             sortOption: sortOption,
@@ -303,15 +305,16 @@ class _SortHeaderDelegate extends SliverPersistentHeaderDelegate {
           ),
         ],
       ),
+      ),
     );
   }
-  
+
   @override
   double get maxExtent => 48.0; // Slightly taller for better touch targets
-  
+
   @override
   double get minExtent => 48.0;
-  
+
   @override
   bool shouldRebuild(covariant _SortHeaderDelegate oldDelegate) {
     return oldDelegate.sortOption != sortOption ||
@@ -320,7 +323,7 @@ class _SortHeaderDelegate extends SliverPersistentHeaderDelegate {
            oldDelegate.filterState.filterCount != filterState.filterCount ||
            oldDelegate.filterState.hasFilters != filterState.hasFilters;
   }
-  
+
   @override
   TickerProvider? get vsync => null; // No animation needed
 }
