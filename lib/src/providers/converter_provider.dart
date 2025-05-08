@@ -30,7 +30,7 @@ class ConverterNotifier
     required double conversionFactor,
     bool isApproximate = false,
     String? notes,
-    required String userId,
+    String? userId,
     String? householdId,
   }) =>
       _repo.addConverter(
@@ -71,7 +71,7 @@ class ConverterNotifier
     required String unit,
   }) =>
       _repo.findBestConverter(term: term, unit: unit);
-      
+
   /// Check if a converter already exists for the given term, fromUnit, and toBaseUnit
   Future<bool> converterExists({
     required String term,
@@ -99,7 +99,7 @@ StateNotifierProvider<ConverterNotifier, AsyncValue<List<ConverterEntry>>>(
 );
 
 /// Provider that watches converters for a specific term
-final convertersForTermProvider = 
+final convertersForTermProvider =
     StreamProvider.family<List<ConverterEntry>, String>((ref, term) {
   final repo = ref.watch(converterRepositoryProvider);
   return repo.watchConvertersForTerm(term);

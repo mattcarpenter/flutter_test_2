@@ -83,10 +83,6 @@ class IngredientTermQueueManager {
 
     // Get the current user ID from Supabase
     final userId = Supabase.instance.client.auth.currentSession?.user.id;
-    if (userId == null) {
-      debugPrint('No user ID available, skipping converter processing');
-      return;
-    }
 
     for (final entry in converters.entries) {
       final converter = entry.value;

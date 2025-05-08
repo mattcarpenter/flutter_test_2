@@ -28,7 +28,7 @@ class ConverterRepository {
     required double conversionFactor,
     bool isApproximate = false,
     String? notes,
-    required String userId,
+    String? userId,
     String? householdId,
   }) async {
     final newId = const Uuid().v4();
@@ -93,7 +93,7 @@ class ConverterRepository {
   }) async {
     // First try to find an exact match
     final exactMatch = await (_db.select(_db.converters)
-      ..where((c) => 
+      ..where((c) =>
           c.deletedAt.isNull() &
           c.term.equals(term) &
           c.fromUnit.equals(unit)))
@@ -105,13 +105,13 @@ class ConverterRepository {
 
     // If no exact match, get all converters for the unit
     final converters = await (_db.select(_db.converters)
-      ..where((c) => 
+      ..where((c) =>
           c.deletedAt.isNull() &
           c.fromUnit.equals(unit)))
         .get();
 
     // Find converters with terms that match parts of our term
-    final matchingConverters = converters.where((c) => 
+    final matchingConverters = converters.where((c) =>
         term.toLowerCase().contains(c.term.toLowerCase())).toList();
 
     if (matchingConverters.isEmpty) {
@@ -122,7 +122,7 @@ class ConverterRepository {
     matchingConverters.sort((a, b) => b.term.length.compareTo(a.term.length));
     return matchingConverters.first;
   }
-  
+
   /// Check if a converter already exists for the given term, fromUnit, and toBaseUnit
   Future<bool> converterExists({
     required String term,
@@ -130,14 +130,14 @@ class ConverterRepository {
     required String toBaseUnit,
   }) async {
     final count = await (_db.select(_db.converters)
-      ..where((c) => 
+      ..where((c) =>
           c.deletedAt.isNull() &
           c.term.equals(term) &
           c.fromUnit.equals(fromUnit) &
           c.toBaseUnit.equals(toBaseUnit)))
         .get()
         .then((result) => result.length);
-    
+
     return count > 0;
   }
 }
