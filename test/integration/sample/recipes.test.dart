@@ -524,5 +524,67 @@ void main() async {
       });
     });
 
+    testWidgets('Household member can see recipes owned by the household owner', (tester) async {
+      // Create test users "owner" and "member"
+      await TestUserManager.createTestUsers(['owner', 'member']);
+
+      late String householdId;
+      late String ownerId;
+      late String memberId;
+      late String recipeId;
+      const String recipeTitle = "Household Shared Recipe";
+
+      // Step 1: As owner, create a household and capture the household ID
+      await withTestUser('owner', () async {
+        ownerId = Supabase.instance.client.auth.currentUser!.id;
+        final householdData = await TestHouseholdManager.createHousehold('Test Household', ownerId);
+        householdId = householdData['id'] as String;
+      });
+
+      // Step 2: As member, join the household
+      await withTestUser('member', () async {
+        memberId = Supabase.instance.client.auth.currentUser!.id;
+        await TestHouseholdManager.addHouseholdMember(householdId, memberId);
+      });
+
+      // Step 3: As owner, create a recipe with the household ID
+      await withTestUser('owner', () async {
+        recipeId = const Uuid().v4();
+        await container.read(recipeNotifierProvider.notifier).addRecipe(
+          id: recipeId,
+          title: recipeTitle,
+          language: "en",
+          description: "A recipe shared within the household",
+          userId: ownerId,
+          householdId: householdId, // Set the household ID for sharing
+          createdAt: DateTime.now().millisecondsSinceEpoch,
+          updatedAt: DateTime.now().millisecondsSinceEpoch,
+        );
+
+        // Verify the owner can see the recipe
+        await waitForProviderValue<List<RecipeWithFolders>>(
+          container,
+          recipeNotifierProvider,
+          (recipes) => recipes.any((r) => r.recipe.title == recipeTitle),
+        );
+
+        // Small delay to ensure recipe sync
+        await Future.delayed(const Duration(seconds: 2));
+      });
+
+      // Step 4: As member, check if the household recipe is visible
+      await withTestUser('member', () async {
+        // Allow time for sync
+        await Future.delayed(const Duration(seconds: 1));
+
+        // Check if the member can see the recipe created by the owner
+        await waitForProviderValue<List<RecipeWithFolders>>(
+          container,
+          recipeNotifierProvider,
+          (recipes) => recipes.any((r) => r.recipe.title == recipeTitle),
+        );
+      });
+    });
+
   });
 }

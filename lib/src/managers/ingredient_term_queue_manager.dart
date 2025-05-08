@@ -21,7 +21,7 @@ class IngredientTermQueueManager {
   final IngredientCanonicalizer canonicalizer;
   final AppDatabase db;
   final ConverterNotifier converterNotifier;
-  
+
   bool _isProcessing = false;
   Timer? _debounceTimer;
   StreamSubscription<List<ConnectivityResult>>? _connectivitySubscription;
@@ -36,7 +36,7 @@ class IngredientTermQueueManager {
   set recipeRepository(RecipeRepository? repository) {
     _recipeRepository = repository;
   }
-  
+
   // Setter for test mode
   set testMode(bool value) {
     _testMode = value;
@@ -52,7 +52,7 @@ class IngredientTermQueueManager {
   }) {
     _recipeRepository = recipeRepository;
     _testMode = testMode;
-    
+
     // Only set up connectivity listener if not in test mode
     if (!_testMode) {
       try {
@@ -76,28 +76,28 @@ class IngredientTermQueueManager {
   }
 
   /// Process converters from the API response
-  Future<void> _processConverters(Map<String, ConverterData> converters, String householdId) async {
+  Future<void> _processConverters(Map<String, ConverterData> converters, String? householdId) async {
     if (converters.isEmpty) return;
-    
+
     debugPrint('Processing ${converters.length} converters from API response');
-    
+
     // Get the current user ID from Supabase
     final userId = Supabase.instance.client.auth.currentSession?.user.id;
     if (userId == null) {
       debugPrint('No user ID available, skipping converter processing');
       return;
     }
-    
+
     for (final entry in converters.entries) {
       final converter = entry.value;
-      
+
       // Check if this converter already exists
       final exists = await converterNotifier.converterExists(
         term: converter.term,
         fromUnit: converter.fromUnit,
         toBaseUnit: converter.toBaseUnit,
       );
-      
+
       // Only add if it doesn't exist
       if (!exists) {
         debugPrint('Adding new converter for ${converter.term} (${converter.fromUnit} to ${converter.toBaseUnit})');
@@ -172,9 +172,9 @@ class IngredientTermQueueManager {
     await repository.deleteEntriesByRecipeId(recipeId);
 
     // Filter out invalid ingredients
-    final validIngredients = ingredients.where((ingredient) => 
-      ingredient.type == 'ingredient' && 
-      ingredient.name != null && 
+    final validIngredients = ingredients.where((ingredient) =>
+      ingredient.type == 'ingredient' &&
+      ingredient.name != null &&
       ingredient.name!.trim().isNotEmpty
     ).toList();
 
@@ -232,7 +232,7 @@ class IngredientTermQueueManager {
         // Handle potentially null retryCount by defaulting to 0
         // This handles legacy entries that might have null values
         final retryCount = entry.retryCount ?? 0;
-        
+
         // Calculate exponential backoff
         final backoffMillis = baseDelay.inMilliseconds * (1 << retryCount);
         final lastTry = entry.lastTryTimestamp ?? 0;
@@ -300,9 +300,9 @@ class IngredientTermQueueManager {
             // Get the recipe to determine household
             final recipe = await _recipeRepository?.getRecipeById(recipeId);
             final householdId = recipe?.householdId;
-            
+
             // Process the converters
-            await _processConverters(results.converters, householdId ?? '');
+            await _processConverters(results.converters, householdId);
           }
 
           // Find the entries for this recipe and update them
@@ -315,7 +315,7 @@ class IngredientTermQueueManager {
             debugPrint('Recipe repository not initialized, skipping recipe update');
             continue;
           }
-          
+
           final recipe = await _recipeRepository!.getRecipeById(recipeId);
           if (recipe == null) {
             // Recipe was deleted, remove the entries
@@ -358,7 +358,7 @@ class IngredientTermQueueManager {
                   status: 'completed',
                   responseData: Value(json.encode({
                     'terms': terms.map((t) => t.toJson()).toList(),
-                    'converters': results.converters.containsKey(originalName) 
+                    'converters': results.converters.containsKey(originalName)
                         ? _convertToJson(results.converters[originalName]!)
                         : null,
                   })),
@@ -439,7 +439,7 @@ class IngredientTermQueueManager {
       _isProcessing = false;
     }
   }
-  
+
   /// Convert ConverterData to a JSON map
   Map<String, dynamic> _convertToJson(ConverterData converter) {
     return {
@@ -461,7 +461,7 @@ final ingredientTermQueueManagerProvider = Provider<IngredientTermQueueManager>(
   final recipeRepositoryUninitialized = null;
   final canonicalizer = ref.watch(ingredientCanonicalizerProvider);
   final converterNotifier = ref.watch(convertersProvider.notifier);
-  
+
   // Determine if we're in test mode by checking environment variables or other means
   // For now we'll default to false, but you can override this with the setter
   final bool isTestMode = false;
