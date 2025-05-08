@@ -33,7 +33,7 @@ Both implementations will share the same filtering and sorting logic but may hav
 
 ## UI Components
 
-- **Filter Button (Left)**: Opens a bottom sheet with filtering options
+- **Filter Button (Left)**: Opens a bottom sheet with filtering options (Can see how we do bottom sheets here using the wolt library: lib/src/features/recipes/widgets/cook_modal/add_recipe_search_modal.dart)
 - **Sort By Dropdown (Right)**: Allows selection of sorting strategies
 
 ## Available Properties for Filtering/Sorting
@@ -75,8 +75,8 @@ Based on the data models examined, the following properties are available:
 
 ## Filter Specifications
 
-### 1. Time Range Filter
-- **UI Type**: Slider or range selector
+### 1. Cook Time Filter
+- **UI Type**: Radios
 - **Options**: 
   - Under 30 minutes
   - 30-60 minutes
@@ -87,14 +87,14 @@ Based on the data models examined, the following properties are available:
 - **Combination**: AND with other filters
 
 ### 2. Rating Filter
-- **UI Type**: Star icons with multi-select
+- **UI Type**: Radios
 - **Options**: 1-5 stars
 - **Logic**: Show recipes with rating >= selected value
 - **Multiple Selection**: Treated as OR (e.g., 4 OR 5 stars)
 - **Combination**: AND with other filters
 
 ### 3. Pantry Match Filter
-- **UI Type**: Slider or predefined ranges
+- **UI Type**: Radios
 - **Options**: 
   - Any match (>0%)
   - Good match (>50%)
@@ -102,41 +102,6 @@ Based on the data models examined, the following properties are available:
   - Perfect match (100%)
 - **Logic**: Filter by matchPercentage from RecipePantryMatch
 - **Multiple Selection**: Not applicable (range selection)
-- **Combination**: AND with other filters
-
-### 4. Folder Filter
-- **UI Type**: Checkbox list
-- **Options**: List of available folders from RecipeFolders
-- **Logic**: Recipe's folderIds contains selected folder ID
-- **Multiple Selection**: Treated as OR (recipe in folder1 OR folder2)
-- **Combination**: AND with other filters
-
-### 5. Servings Filter
-- **UI Type**: Number range selector or predefined ranges
-- **Options**: 
-  - 1-2 servings
-  - 3-4 servings
-  - 5-8 servings
-  - 9+ servings
-- **Logic**: Based on servings field
-- **Multiple Selection**: Treated as OR
-- **Combination**: AND with other filters
-
-### 6. Has Image Filter
-- **UI Type**: Toggle
-- **Options**: Yes/No
-- **Logic**: Recipe has at least one image
-- **Combination**: AND with other filters
-
-### 7. Last Updated Filter
-- **UI Type**: Predefined time periods
-- **Options**:
-  - Added/updated today
-  - Added/updated this week
-  - Added/updated this month
-  - Added/updated this year
-- **Logic**: Based on updatedAt or createdAt timestamps
-- **Multiple Selection**: Treated as OR
 - **Combination**: AND with other filters
 
 ## Sort Specifications
@@ -213,20 +178,13 @@ To efficiently implement filtering and sorting across multiple screens, consider
 
 2. **Derived Properties**: Some filter properties need to be calculated:
    - Total time might need to be derived from prep + cook time if not available
-   - Has image is derived from the images array
-   - Step count is derived from the steps array
 
-3. **Performance Considerations**:
-   - Filtering large collections of recipes with nested objects (ingredients, steps) may impact performance
-   - Consider preprocessing/indexing for frequently used filters
-
-4. **Persistence**:
+3. **Persistence**:
    - Filter and sort preferences should be persisted across app sessions
    - Consider separate persistence for different contexts (regular browse vs. pantry-matching)
 
-5. **Edge Cases**:
+4. **Edge Cases**:
    - Handling recipes with incomplete data
-   - Language-specific sorting (for multi-language recipe collections)
 
 ### User Experience Guidelines
 
@@ -269,6 +227,4 @@ To efficiently implement filtering and sorting across multiple screens, consider
    - Handle state reset when navigating between screens
 
 5. Optimize for performance:
-   - Ensure filtering large collections remains performant
-   - Consider pagination or virtualization for long result lists
    - Add loading indicators for filter/sort operations
