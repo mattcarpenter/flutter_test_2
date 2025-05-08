@@ -169,6 +169,7 @@ To efficiently implement filtering and sorting across multiple screens, consider
 3. **Context Awareness**:
    - Make filter/sort state aware of its context (e.g., current folder ID or search query)
    - When context changes, adjust available filters accordingly
+   - IMPORTANT: The filtering state must be localized to it's context (e.g., search results vs. folder browsing)
 
 ### Limitations and Challenges
 
