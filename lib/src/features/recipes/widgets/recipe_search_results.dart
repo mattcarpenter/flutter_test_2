@@ -5,6 +5,7 @@ import '../../../constants/folder_constants.dart';
 import '../../../providers/recipe_filter_sort_provider.dart';
 import '../../../providers/recipe_provider.dart';
 import '../models/recipe_filter_sort.dart';
+import '../utils/recipe_filter_utils.dart';
 import 'filter_sort/recipe_filter_sheet.dart';
 import 'filter_sort/recipe_sort_dropdown.dart';
 
@@ -24,6 +25,17 @@ class RecipeSearchResults extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final searchState = ref.watch(recipeSearchNotifierProvider);
     final filterSortState = ref.watch(recipeSearchFilterSortProvider);
+    final pantryMatchesAsyncValue = ref.watch(pantryRecipeMatchProvider);
+    
+    // Listen to filter changes to load necessary data
+    ref.listen(recipeSearchFilterSortProvider, (previous, current) {
+      // Initiate pantry match loading if needed
+      RecipeFilterUtils.loadPantryMatchesIfNeeded(
+        filterState: current,
+        pantryMatchesAsyncValue: pantryMatchesAsyncValue,
+        ref: ref,
+      );
+    });
     
     // Update folder ID in filter/sort state if needed
     if (filterSortState.folderId != folderId) {
@@ -36,25 +48,37 @@ class RecipeSearchResults extends ConsumerWidget {
     if (searchState.error != null) {
       return Center(child: Text('Error: ${searchState.error}'));
     }
+    
+    // Show loading if pantry match filter is active and we're still loading matches
+    if (RecipeFilterUtils.isPantryMatchLoading(
+        filterState: filterSortState,
+        pantryMatchesAsyncValue: pantryMatchesAsyncValue)) {
+      return const Center(child: CircularProgressIndicator());
+    }
 
-    // Apply initial folder filtering
+    // Get search results
     List<RecipeEntry> results = searchState.results;
 
-    if (folderId != null) {
-      if (folderId == kUncategorizedFolderId) {
-        results = results.where((r) => r.folderIds?.isEmpty ?? true).toList();
-      } else {
-        results = results.where((r) => r.folderIds?.contains(folderId) ?? false).toList();
-      }
+    // Apply folder filtering
+    results = RecipeFilterUtils.applyFolderFilter(
+      results, 
+      folderId, 
+      kUncategorizedFolderId,
+    );
+    
+    // Apply additional filters
+    if (filterSortState.hasFilters) {
+      results = RecipeFilterUtils.applyFilters(
+        recipes: results,
+        filterState: filterSortState,
+        pantryMatchesAsyncValue: pantryMatchesAsyncValue,
+      );
     }
     
-    // Apply additional filters from filter state
-    results = results.applyFilters(filterSortState.activeFilters);
-    
     // Apply sorting
-    results = results.applySorting(
-      filterSortState.activeSortOption,
-      filterSortState.sortDirection,
+    results = RecipeFilterUtils.applySorting(
+      recipes: results,
+      filterState: filterSortState,
     );
     
     if (results.isEmpty && searchState.isLoading) {

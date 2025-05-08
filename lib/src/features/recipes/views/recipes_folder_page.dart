@@ -9,6 +9,7 @@ import '../../../providers/recipe_provider.dart';
 import '../../../widgets/adaptive_pull_down/adaptive_menu_item.dart';
 import '../../../widgets/adaptive_pull_down/adaptive_pull_down.dart';
 import '../models/recipe_filter_sort.dart';
+import '../utils/recipe_filter_utils.dart';
 import '../widgets/filter_sort/recipe_filter_sheet.dart';
 import '../widgets/filter_sort/recipe_sort_dropdown.dart';
 import '../widgets/recipe_list.dart';
@@ -35,18 +36,18 @@ class RecipesFolderPage extends ConsumerWidget {
     // Watch pantry recipe matches if needed for filtering
     final pantryMatchesAsyncValue = ref.watch(pantryRecipeMatchProvider);
     
-    // Listen to filter changes for debugging
+    // Listen to filter changes for debugging and to load necessary data
     ref.listen(recipeFolderFilterSortProvider, (previous, current) {
       print('Filter state changed:');
       print('Previous: ${previous?.activeFilters}');
       print('Current: ${current.activeFilters}');
       
       // Initiate pantry match loading if needed
-      if (current.activeFilters.containsKey(FilterType.pantryMatch) && 
-          pantryMatchesAsyncValue.value?.matches.isEmpty != false) {
-        print('Pantry match filter active - loading pantry matches');
-        ref.read(pantryRecipeMatchProvider.notifier).findMatchingRecipes();
-      }
+      RecipeFilterUtils.loadPantryMatchesIfNeeded(
+        filterState: current,
+        pantryMatchesAsyncValue: pantryMatchesAsyncValue,
+        ref: ref,
+      );
     });
     
     // Watch filter/sort state
@@ -68,10 +69,15 @@ class RecipesFolderPage extends ConsumerWidget {
         onFilterSortStateChanged: (state) {
           // This only updates search-specific filtering
           WidgetsBinding.instance.addPostFrameCallback((_) {
-            ref.read(recipeSearchFilterSortProvider.notifier).updateFilter(
-              state.activeFilters.keys.first, 
-              state.activeFilters.values.first
-            );
+            if (state.activeFilters.isNotEmpty) {
+              ref.read(recipeSearchFilterSortProvider.notifier).updateFilter(
+                state.activeFilters.keys.first, 
+                state.activeFilters.values.first
+              );
+            } else {
+              // If filters are cleared, clear them in the provider too
+              ref.read(recipeSearchFilterSortProvider.notifier).clearFilters();
+            }
           });
         },
       ),
@@ -84,10 +90,12 @@ class RecipesFolderPage extends ConsumerWidget {
       slivers: [
         // Sort dropdown in a SliverPersistentHeader
         SliverPersistentHeader(
-          pinned: true,
+          pinned: true, // Keep it visible when scrolling
+          floating: true, // Allow it to float on scroll up
           delegate: _SortHeaderDelegate(
             sortOption: filterSortState.activeSortOption,
             sortDirection: filterSortState.sortDirection,
+            filterState: filterSortState, // Pass the filter state
             onSortOptionChanged: (option) {
               ref.read(recipeFolderFilterSortProvider.notifier).updateSortOption(option);
             },
@@ -109,100 +117,44 @@ class RecipesFolderPage extends ConsumerWidget {
           ),
           data: (recipesWithFolders) {
             // Show loading indicator if pantry match filter is active and we're still loading matches
-            if (filterSortState.activeFilters.containsKey(FilterType.pantryMatch) && 
-                pantryMatchesAsyncValue.isLoading) {
+            if (RecipeFilterUtils.isPantryMatchLoading(
+                filterState: filterSortState,
+                pantryMatchesAsyncValue: pantryMatchesAsyncValue)) {
               return const SliverFillRemaining(
                 child: Center(child: CircularProgressIndicator()), 
               );
             }
+            
+            // Extract recipes from wrapper objects
             final recipes = recipesWithFolders.map((r) => r.recipe).toList();
 
-            // Filter recipes based on folder ID first
+            // Apply filters and sorting
             List<RecipeEntry> filteredRecipes;
-
-            if (folderId == kUncategorizedFolderId) {
-              // Show recipes with no folder assignments
-              filteredRecipes = recipes.where((recipe) {
-                return recipe.folderIds == null || recipe.folderIds!.isEmpty;
-              }).toList();
-            } else if (folderId == null) {
-              // Show all recipes
-              filteredRecipes = recipes;
-            } else {
-              // Show recipes in the specified folder
-              filteredRecipes = recipes
-                  .where((recipe) => recipe.folderIds?.contains(folderId) ?? false)
-                  .toList();
-            }
             
-            // Apply additional filters from filter state
+            // Apply folder filtering
+            filteredRecipes = RecipeFilterUtils.applyFolderFilter(
+              recipes, 
+              folderId, 
+              kUncategorizedFolderId,
+            );
+            
+            // Apply all other filters
             if (filterSortState.hasFilters) {
               print('Applying filters to ${filteredRecipes.length} recipes: ${filterSortState.activeFilters}');
               
-              // Handle pantry match filter separately if present
-              final hasPantryMatchFilter = filterSortState.activeFilters.containsKey(FilterType.pantryMatch);
-              
-              if (hasPantryMatchFilter) {
-                final pantryFilter = filterSortState.activeFilters[FilterType.pantryMatch] as PantryMatchFilter;
-                print('Applying pantry match filter: $pantryFilter');
-                
-                // For "Any match" option, we'll treat it as no filter
-                if (pantryFilter == PantryMatchFilter.anyMatch) {
-                  print('Ignoring "Any match" filter as it should show all recipes');
-                  // No filtering needed - keep all recipes
-                }
-                // Check if we have loaded the pantry match data (even if it's empty)
-                else if (pantryMatchesAsyncValue.value != null) {
-                  // Create a map of recipe IDs to their match percentage
-                  final Map<String, int> recipeMatchPercentages = {};
-                  for (final match in pantryMatchesAsyncValue.value!.matches) {
-                    recipeMatchPercentages[match.recipe.id] = match.matchPercentage;
-                  }
-                  
-                  print('Applying pantry match filter - found ${recipeMatchPercentages.length} recipes with match data');
-                  
-                  // Filter recipes based on pantry match percentage
-                  filteredRecipes = filteredRecipes.where((recipe) {
-                    // If recipe isn't in the match data, its match percentage is 0
-                    final matchPercentage = recipeMatchPercentages[recipe.id] ?? 0;
-                    
-                    // Apply the appropriate filter
-                    switch (pantryFilter) {
-                      case PantryMatchFilter.anyMatch:
-                        // This case is handled above - should never reach here
-                        return true;
-                      case PantryMatchFilter.goodMatch:
-                        return matchPercentage > 50;
-                      case PantryMatchFilter.greatMatch:
-                        return matchPercentage > 75;
-                      case PantryMatchFilter.perfectMatch:
-                        return matchPercentage == 100;
-                    }
-                  }).toList();
-                } else {
-                  print('Pantry match data not loaded yet - showing loading indicator instead');
-                }
-                
-                // Remove pantry filter before applying other filters
-                final otherFilters = Map<FilterType, dynamic>.from(filterSortState.activeFilters);
-                otherFilters.remove(FilterType.pantryMatch);
-                
-                // Apply other filters
-                if (otherFilters.isNotEmpty) {
-                  filteredRecipes = filteredRecipes.applyFilters(otherFilters);
-                }
-              } else {
-                // No pantry filter, just apply regular filters
-                filteredRecipes = filteredRecipes.applyFilters(filterSortState.activeFilters);
-              }
+              filteredRecipes = RecipeFilterUtils.applyFilters(
+                recipes: filteredRecipes,
+                filterState: filterSortState,
+                pantryMatchesAsyncValue: pantryMatchesAsyncValue,
+              );
               
               print('After filtering: ${filteredRecipes.length} recipes remaining');
             }
             
             // Apply sorting
-            filteredRecipes = filteredRecipes.applySorting(
-              filterSortState.activeSortOption,
-              filterSortState.sortDirection,
+            filteredRecipes = RecipeFilterUtils.applySorting(
+              recipes: filteredRecipes,
+              filterState: filterSortState,
             );
 
             if (filteredRecipes.isEmpty) {
@@ -256,80 +208,87 @@ class _SortHeaderDelegate extends SliverPersistentHeaderDelegate {
   final Function(SortOption) onSortOptionChanged;
   final Function(SortDirection) onSortDirectionChanged;
   final bool showPantryMatchOption;
+  final RecipeFilterSortState filterState; // Store the filter state
   
   _SortHeaderDelegate({
     required this.sortOption,
     required this.sortDirection,
     required this.onSortOptionChanged,
     required this.onSortDirectionChanged,
+    required this.filterState, // Add to constructor
     this.showPantryMatchOption = false,
   });
   
   @override
   Widget build(BuildContext context, double shrinkOffset, bool overlapsContent) {
-    // Get the filter state to show the badge
-    final filterSortState = ProviderScope.containerOf(context).read(recipeFolderFilterSortProvider);
+    // Use the filter state passed through the constructor
     
     return Container(
-      color: Theme.of(context).scaffoldBackgroundColor,
+      // Transparent background
+      color: Colors.transparent,
       height: minExtent,
       padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        crossAxisAlignment: CrossAxisAlignment.center, // Ensure vertical alignment
         children: [
           // Filter button with counter badge
-          GestureDetector(
-            onTap: () {
-              // Get the latest filter state directly from the provider
-              final latestFilterState = ProviderScope.containerOf(context)
-                  .read(recipeFolderFilterSortProvider);
-              print('Latest filter state: ${latestFilterState.activeFilters}');
-                  
-              showRecipeFilterSheet(
-                context,
-                initialState: latestFilterState,
-                onFilterChanged: (newState) {
-                  // Use a more direct approach to update filters
-                  print('Filter sheet returned state: ${newState.activeFilters}');
-                  
-                  final container = ProviderScope.containerOf(context);
-                  final notifier = container.read(recipeFolderFilterSortProvider.notifier);
-                  
-                  // Clear all existing filters first
-                  notifier.clearFilters();
-                  
-                  // Add all filters from new state
-                  for (final entry in newState.activeFilters.entries) {
-                    print('Adding filter: ${entry.key} = ${entry.value}');
-                    notifier.updateFilter(entry.key, entry.value);
-                  }
-                },
-              );
-            },
-            child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 8.0),
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  const Icon(Icons.filter_list),
-                  if (filterSortState.hasFilters)
-                    Container(
-                      margin: const EdgeInsets.only(left: 4),
-                      padding: const EdgeInsets.all(4),
-                      decoration: BoxDecoration(
-                        color: Theme.of(context).colorScheme.primary,
-                        shape: BoxShape.circle,
-                      ),
-                      child: Text(
-                        filterSortState.filterCount.toString(),
-                        style: TextStyle(
-                          color: Theme.of(context).colorScheme.onPrimary,
-                          fontSize: 12,
-                          fontWeight: FontWeight.bold,
+          Material(
+            // Use Material for proper ink effects
+            color: Colors.transparent,
+            child: InkWell(
+              borderRadius: BorderRadius.circular(8),
+              onTap: () {
+                // Use the current filter state
+                print('Current filter state: ${filterState.activeFilters}');
+                    
+                showRecipeFilterSheet(
+                  context,
+                  initialState: filterState,
+                  onFilterChanged: (newState) {
+                    // Use a more direct approach to update filters
+                    print('Filter sheet returned state: ${newState.activeFilters}');
+                    
+                    final container = ProviderScope.containerOf(context);
+                    final notifier = container.read(recipeFolderFilterSortProvider.notifier);
+                    
+                    // Clear all existing filters first
+                    notifier.clearFilters();
+                    
+                    // Add all filters from new state
+                    for (final entry in newState.activeFilters.entries) {
+                      print('Adding filter: ${entry.key} = ${entry.value}');
+                      notifier.updateFilter(entry.key, entry.value);
+                    }
+                  },
+                );
+              },
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 4.0),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.center, // Ensure vertical alignment
+                  children: [
+                    const Icon(Icons.filter_list),
+                    if (filterState.hasFilters)
+                      Container(
+                        margin: const EdgeInsets.only(left: 4),
+                        padding: const EdgeInsets.all(4),
+                        decoration: BoxDecoration(
+                          color: Theme.of(context).colorScheme.primary,
+                          shape: BoxShape.circle,
+                        ),
+                        child: Text(
+                          filterState.filterCount.toString(),
+                          style: TextStyle(
+                            color: Theme.of(context).colorScheme.onPrimary,
+                            fontSize: 12,
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
                       ),
-                    ),
-                ],
+                  ],
+                ),
               ),
             ),
           ),
@@ -348,15 +307,20 @@ class _SortHeaderDelegate extends SliverPersistentHeaderDelegate {
   }
   
   @override
-  double get maxExtent => 44.0;
+  double get maxExtent => 48.0; // Slightly taller for better touch targets
   
   @override
-  double get minExtent => 44.0;
+  double get minExtent => 48.0;
   
   @override
   bool shouldRebuild(covariant _SortHeaderDelegate oldDelegate) {
     return oldDelegate.sortOption != sortOption ||
            oldDelegate.sortDirection != sortDirection ||
-           oldDelegate.showPantryMatchOption != showPantryMatchOption;
+           oldDelegate.showPantryMatchOption != showPantryMatchOption ||
+           oldDelegate.filterState.filterCount != filterState.filterCount ||
+           oldDelegate.filterState.hasFilters != filterState.hasFilters;
   }
+  
+  @override
+  TickerProvider? get vsync => null; // No animation needed
 }
