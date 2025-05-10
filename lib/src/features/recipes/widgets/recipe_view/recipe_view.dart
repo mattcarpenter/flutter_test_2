@@ -126,8 +126,11 @@ class RecipeView extends ConsumerWidget {
 
             const SizedBox(height: 16),
 
-            // Ingredients
-            RecipeIngredientsView(ingredients: recipe.ingredients ?? []),
+            // Ingredients with pantry match indicators
+            RecipeIngredientsView(
+              ingredients: recipe.ingredients ?? [],
+              recipeId: recipe.id,
+            ),
 
             const SizedBox(height: 8),
 

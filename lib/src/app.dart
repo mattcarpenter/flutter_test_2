@@ -22,8 +22,8 @@ class MyApp extends ConsumerWidget {
     // Initialize background services
     ref.watch(appServicesProvider);
 
-    // Seed data (async)
-    ref.read(recipeNotifierProvider.notifier).importSeedRecipes(limit: 10);
+    // Seed data (async) import seed recipes
+    //ref.read(recipeNotifierProvider.notifier).importSeedRecipes(limit: 10);
 
     // Glue the SettingsController to the MaterialApp.
     //
