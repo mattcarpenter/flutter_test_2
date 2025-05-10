@@ -506,7 +506,19 @@ final recipeIngredientMatchesProvider = FutureProvider.autoDispose.family<Recipe
     // This ensures the match circles update when you add/remove items from pantry
     ref.watch(pantryItemsProvider);
 
+    // Add a cache invalidation mechanism to force refresh
+    final cacheKey = DateTime.now().millisecondsSinceEpoch;
+    
+    // Create a cache invalidation listener
+    ref.keepAlive();
+    ref.onDispose(() {
+      print("Disposing recipeIngredientMatchesProvider for $recipeId");
+      // Force refresh next time
+      ref.invalidateSelf();
+    });
+    
     final repository = ref.read(recipeRepositoryProvider);
+    print("Fetching ingredient matches for $recipeId at timestamp: $cacheKey");
     return repository.findPantryMatchesForRecipe(recipeId);
   },
 );

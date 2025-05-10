@@ -130,6 +130,8 @@ class RecipeView extends ConsumerWidget {
             RecipeIngredientsView(
               ingredients: recipe.ingredients ?? [],
               recipeId: recipe.id,
+              // Add a unique key to force rebuild
+              key: ValueKey('IngredientsView-${recipe.id}-${DateTime.now().millisecondsSinceEpoch}'),
             ),
 
             const SizedBox(height: 8),

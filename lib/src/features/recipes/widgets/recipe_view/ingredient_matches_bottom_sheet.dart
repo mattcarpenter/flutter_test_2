@@ -5,7 +5,7 @@ import 'package:disclosure/disclosure.dart';
 import 'package:recipe_app/src/models/ingredient_pantry_match.dart';
 import 'package:recipe_app/database/models/ingredients.dart';
 import 'package:recipe_app/database/models/ingredient_terms.dart';
-import 'package:recipe_app/src/providers/recipe_provider.dart';
+import 'package:recipe_app/src/providers/recipe_provider.dart' show recipeIngredientMatchesProvider, recipeRepositoryProvider;
 import 'package:recipe_app/src/repositories/recipe_repository.dart';
 import 'package:uuid/uuid.dart';
 import 'ingredient_match_circle.dart';
@@ -16,6 +16,9 @@ void showIngredientMatchesBottomSheet(
   BuildContext context, {
   required RecipeIngredientMatches matches,
 }) {
+  // Create a global key to access the state directly
+  final contentKey = GlobalKey<_IngredientMatchesBottomSheetContentState>();
+  
   WoltModalSheet.show(
     useRootNavigator: true,
     context: context,
@@ -35,18 +38,34 @@ void showIngredientMatchesBottomSheet(
           trailingNavBarWidget: Consumer(
             builder: (context, ref, child) {
               return TextButton(
-                onPressed: () {
-                  // The key will be accessed from the state to save changes
-                  final state = modalContext.findAncestorStateOfType<_IngredientMatchesBottomSheetContentState>();
-                  state?.saveChanges(ref).then((_) {
-                    Navigator.of(modalContext).pop();
-                  });
+                onPressed: () async {
+                  // Access the state directly using the global key
+                  final state = contentKey.currentState;
+                  if (state != null) {
+                    print("Found state, saving changes");
+                    await state.saveChanges(ref);
+                    
+                    // Force a refresh of the matches provider to get fresh data next time
+                    // by invalidating the cache
+                    ref.invalidate(recipeIngredientMatchesProvider(matches.recipeId));
+                    print("Invalidated recipe ingredient matches for ${matches.recipeId}");
+                    
+                    // Force immediate closure to trigger refresh when reopened
+                    if (modalContext.mounted) {
+                      Navigator.of(modalContext).pop(true); // Pass true to indicate successful save
+                    }
+                  } else {
+                    print("ERROR: Could not find bottom sheet state to save changes");
+                  }
                 },
                 child: const Text('Save'),
               );
             },
           ),
-          child: IngredientMatchesBottomSheetContent(matches: matches),
+          child: IngredientMatchesBottomSheetContent(
+            key: contentKey, // Use the global key here
+            matches: matches,
+          ),
         ),
       ];
     },
@@ -72,6 +91,11 @@ class _IngredientMatchesBottomSheetContentState extends State<IngredientMatchesB
   // Track the modified ingredients to save on completion
   final Map<String, Ingredient> _modifiedIngredients = {};
 
+  // Track expanded state for each ingredient
+  final Set<String> _expandedIngredientIds = {};
+  // Map to store working copies of ingredient terms
+  final Map<String, List<IngredientTerm>> _ingredientTermsMap = {};
+
   @override
   Widget build(BuildContext context) {
     return SizedBox(
@@ -86,9 +110,9 @@ class _IngredientMatchesBottomSheetContentState extends State<IngredientMatchesB
               'Pantry matches: ${widget.matches.matches.where((m) => m.hasMatch).length} of ${widget.matches.matches.length} ingredients',
               style: Theme.of(context).textTheme.titleMedium,
             ),
-            
+
             const SizedBox(height: 16),
-            
+
             // Match details list with accordion sections
             Expanded(
               child: ListView.builder(
@@ -104,17 +128,38 @@ class _IngredientMatchesBottomSheetContentState extends State<IngredientMatchesB
       ),
     );
   }
-  
+
+  @override
+  void initState() {
+    super.initState();
+    // Initialize working copies of terms for each ingredient
+    for (final match in widget.matches.matches) {
+      final ingredient = match.ingredient;
+      _ingredientTermsMap[ingredient.id] = List<IngredientTerm>.from(ingredient.terms ?? []);
+    }
+  }
+
   Widget _buildIngredientAccordion(BuildContext context, IngredientPantryMatch match) {
     final ingredient = match.ingredient;
-    
-    // Get the terms (or empty list if null)
-    final terms = List<IngredientTerm>.from(ingredient.terms ?? []);
-    
+    final isExpanded = _expandedIngredientIds.contains(ingredient.id);
+
+    // Get the working copy of terms for this ingredient
+    final terms = _ingredientTermsMap[ingredient.id] ?? [];
+
     return Padding(
       padding: const EdgeInsets.only(bottom: 8.0),
       child: Disclosure(
-        closed: true, // Initially closed
+        closed: !isExpanded,
+        onOpen: () {
+          setState(() {
+            _expandedIngredientIds.add(ingredient.id);
+          });
+        },
+        onClose: () {
+          setState(() {
+            _expandedIngredientIds.remove(ingredient.id);
+          });
+        },
         header: DisclosureButton(
           child: Card(
             elevation: 1,
@@ -124,9 +169,9 @@ class _IngredientMatchesBottomSheetContentState extends State<IngredientMatchesB
                 children: [
                   // Status indicator with icon
                   _buildStatusIcon(match),
-                  
+
                   const SizedBox(width: 16),
-                  
+
                   // Ingredient information
                   Expanded(
                     child: Column(
@@ -139,7 +184,7 @@ class _IngredientMatchesBottomSheetContentState extends State<IngredientMatchesB
                             fontSize: 16,
                           ),
                         ),
-                        
+
                         if (match.hasMatch)
                           Padding(
                             padding: const EdgeInsets.only(top: 4.0),
@@ -148,16 +193,16 @@ class _IngredientMatchesBottomSheetContentState extends State<IngredientMatchesB
                               style: TextStyle(
                                 fontSize: 14,
                                 color: match.pantryItem!.inStock ? Colors.green : Colors.red,
-                                fontStyle: match.pantryItem!.inStock 
-                                  ? FontStyle.normal 
+                                fontStyle: match.pantryItem!.inStock
+                                  ? FontStyle.normal
                                   : FontStyle.italic,
                               ),
                             ),
                           ),
-                      ],
+                        ],
+                      ),
                     ),
-                  ),
-                  
+
                   // Disclosure arrow
                   const DisclosureIcon(),
                 ],
@@ -172,11 +217,11 @@ class _IngredientMatchesBottomSheetContentState extends State<IngredientMatchesB
       ),
     );
   }
-  
+
   Widget _buildStatusIcon(IngredientPantryMatch match) {
     final color = match.hasMatch ? Colors.green : Colors.grey;
     final icon = match.hasMatch ? Icons.check : Icons.help_outline;
-    
+
     return Container(
       width: 32,
       height: 32,
@@ -191,7 +236,7 @@ class _IngredientMatchesBottomSheetContentState extends State<IngredientMatchesB
       ),
     );
   }
-  
+
   Widget _buildTermsEditor(BuildContext context, Ingredient ingredient, List<IngredientTerm> terms) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -207,18 +252,18 @@ class _IngredientMatchesBottomSheetContentState extends State<IngredientMatchesB
               ),
             ),
             const Spacer(),
-            
+
             // Add term button
             IconButton(
               icon: const Icon(Icons.add_circle_outline),
-              onPressed: () => _addNewTerm(ingredient),
+              onPressed: () => _addNewTerm(ingredient.id),
               tooltip: 'Add New Term',
             ),
           ],
         ),
-        
+
         const SizedBox(height: 8),
-        
+
         // No terms placeholder
         if (terms.isEmpty)
           const Padding(
@@ -228,7 +273,7 @@ class _IngredientMatchesBottomSheetContentState extends State<IngredientMatchesB
               style: TextStyle(fontStyle: FontStyle.italic, color: Colors.grey),
             ),
           ),
-          
+
         // Terms list with reordering
         if (terms.isNotEmpty)
           ReorderableListView.builder(
@@ -239,36 +284,43 @@ class _IngredientMatchesBottomSheetContentState extends State<IngredientMatchesB
                 if (oldIndex < newIndex) {
                   newIndex -= 1;
                 }
-                final item = terms.removeAt(oldIndex);
-                terms.insert(newIndex, item);
-                
+
+                final List<IngredientTerm> updatedTerms = List.from(terms);
+                final item = updatedTerms.removeAt(oldIndex);
+                updatedTerms.insert(newIndex, item);
+
                 // Update sort values
-                for (int i = 0; i < terms.length; i++) {
-                  terms[i] = IngredientTerm(
-                    value: terms[i].value,
-                    source: terms[i].source,
+                for (int i = 0; i < updatedTerms.length; i++) {
+                  updatedTerms[i] = IngredientTerm(
+                    value: updatedTerms[i].value,
+                    source: updatedTerms[i].source,
                     sort: i,
                   );
                 }
-                
+
+                // Update terms list in our map
+                _ingredientTermsMap[ingredient.id] = updatedTerms;
+
                 // Mark as modified
-                _modifiedIngredients[ingredient.id] = ingredient.copyWith(terms: terms);
+                _modifiedIngredients[ingredient.id] = ingredient.copyWith(terms: updatedTerms);
+                
+                // Ensure this ingredient's accordion stays expanded
+                _expandedIngredientIds.add(ingredient.id);
               });
             },
             itemCount: terms.length,
             itemBuilder: (context, index) {
               final term = terms[index];
               return _buildTermItem(
-                key: ValueKey('${ingredient.id}_term_${term.value}'),
-                ingredient: ingredient,
+                key: ValueKey('${ingredient.id}_term_${term.value}_$index'),
+                ingredientId: ingredient.id,
                 term: term,
-                terms: terms,
               );
             },
           ),
-          
+
         const SizedBox(height: 16),
-        
+
         // Help text
         const Text(
           'Tip: Add terms that match pantry item names to improve matching.',
@@ -277,12 +329,11 @@ class _IngredientMatchesBottomSheetContentState extends State<IngredientMatchesB
       ],
     );
   }
-  
+
   Widget _buildTermItem({
     required Key key,
-    required Ingredient ingredient,
+    required String ingredientId,
     required IngredientTerm term,
-    required List<IngredientTerm> terms,
   }) {
     return Card(
       key: key,
@@ -296,15 +347,32 @@ class _IngredientMatchesBottomSheetContentState extends State<IngredientMatchesB
           children: [
             // Reorder handle
             const Icon(Icons.drag_handle),
-            
+
             // Menu for additional actions
             PopupMenuButton<String>(
               icon: const Icon(Icons.more_vert),
               onSelected: (value) {
                 if (value == 'delete') {
                   setState(() {
-                    terms.removeWhere((t) => t.value == term.value);
-                    _modifiedIngredients[ingredient.id] = ingredient.copyWith(terms: terms);
+                    // Get the current terms
+                    final terms = List<IngredientTerm>.from(_ingredientTermsMap[ingredientId] ?? []);
+
+                    // Remove the term
+                    terms.removeWhere((t) => t.value == term.value && t.source == term.source);
+
+                    // Update the maps
+                    _ingredientTermsMap[ingredientId] = terms;
+
+                    // Find the original ingredient to update
+                    final ingredient = widget.matches.matches
+                        .firstWhere((match) => match.ingredient.id == ingredientId)
+                        .ingredient;
+
+                    // Mark as modified
+                    _modifiedIngredients[ingredientId] = ingredient.copyWith(terms: terms);
+                    
+                    // Ensure the accordion stays expanded
+                    _expandedIngredientIds.add(ingredientId);
                   });
                 }
               },
@@ -320,11 +388,16 @@ class _IngredientMatchesBottomSheetContentState extends State<IngredientMatchesB
       ),
     );
   }
-  
-  void _addNewTerm(Ingredient ingredient) {
+
+  void _addNewTerm(String ingredientId) {
     // Creating a controller for the dialog
     final controller = TextEditingController();
-    
+
+    // Find the original ingredient
+    final ingredient = widget.matches.matches
+        .firstWhere((match) => match.ingredient.id == ingredientId)
+        .ingredient;
+
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
@@ -348,21 +421,29 @@ class _IngredientMatchesBottomSheetContentState extends State<IngredientMatchesB
               final value = controller.text.trim();
               if (value.isNotEmpty) {
                 setState(() {
-                  // Get existing terms or create new list
-                  final terms = List<IngredientTerm>.from(ingredient.terms ?? []);
-                  
+                  // Get existing terms from our working copy
+                  final terms = List<IngredientTerm>.from(_ingredientTermsMap[ingredientId] ?? []);
+
                   // Add new term with the next sort value
                   terms.add(IngredientTerm(
                     value: value,
                     source: 'user', // Marked as user-added
                     sort: terms.length, // Next position
                   ));
-                  
-                  // Update the ingredient and mark as modified
-                  _modifiedIngredients[ingredient.id] = ingredient.copyWith(terms: terms);
+
+                  // Update the maps
+                  _ingredientTermsMap[ingredientId] = terms;
+
+                  // Mark as modified
+                  _modifiedIngredients[ingredientId] = ingredient.copyWith(terms: terms);
                 });
               }
               Navigator.of(context).pop();
+              
+              // Ensure the accordion stays expanded
+              setState(() {
+                _expandedIngredientIds.add(ingredientId);
+              });
             },
             child: const Text('Add'),
           ),
@@ -370,30 +451,80 @@ class _IngredientMatchesBottomSheetContentState extends State<IngredientMatchesB
       ),
     );
   }
-  
+
   // Save all changes
   Future<void> saveChanges(WidgetRef ref) async {
-    if (_modifiedIngredients.isEmpty) return;
+    if (_modifiedIngredients.isEmpty) {
+      print("No modifications to save");
+      return;
+    }
     
+    print("Saving changes for ${_modifiedIngredients.length} ingredients");
+
     final repository = ref.read(recipeRepositoryProvider);
-    
+
     // Get the original recipe to modify
     final recipeId = widget.matches.recipeId;
+    print("Recipe ID: $recipeId");
+    
     final recipeAsync = await repository.getRecipeById(recipeId);
-    
-    if (recipeAsync == null) return;
-    
-    // Update the ingredients list with our modified ingredients
+
+    if (recipeAsync == null) {
+      print("Error: Recipe not found");
+      return;
+    }
+
+    // Important: Create a deep copy of the ingredients list to avoid modifying the original
     final ingredients = List<Ingredient>.from(recipeAsync.ingredients ?? []);
-    
+    print("Original ingredient count: ${ingredients.length}");
+
+    // Debug: Print original ingredients and terms
+    for (int i = 0; i < ingredients.length; i++) {
+      final ing = ingredients[i];
+      print("Ingredient $i: ${ing.id} - ${ing.name} - Terms: ${ing.terms?.map((t) => t.value).join(', ') ?? 'none'}");
+    }
+
+    // Replace ingredients with modified versions
+    int updatedCount = 0;
     for (final entry in _modifiedIngredients.entries) {
-      final index = ingredients.indexWhere((ing) => ing.id == entry.key);
+      final ingredientId = entry.key;
+      final updatedIngredient = entry.value;
+      
+      // Debug: Print terms for the updated ingredient
+      print("Modified ingredient ${updatedIngredient.name}: Terms: ${updatedIngredient.terms?.map((t) => t.value).join(', ') ?? 'none'}");
+      
+      // Find the matching ingredient by ID
+      final index = ingredients.indexWhere((ing) => ing.id == ingredientId);
       if (index >= 0) {
-        ingredients[index] = entry.value;
+        print("Found matching ingredient at index $index");
+        
+        // Replace the ingredient in the list with our modified version
+        ingredients[index] = updatedIngredient;
+        updatedCount++;
+      } else {
+        print("Warning: Ingredient with ID $ingredientId not found in recipe");
       }
     }
     
-    // Save the updated recipe
-    await repository.updateIngredients(recipeId, ingredients);
+    print("Updated $updatedCount ingredients");
+
+    // Debug: Print final ingredients list after modifications
+    for (int i = 0; i < ingredients.length; i++) {
+      final ing = ingredients[i];
+      print("Final ingredient $i: ${ing.id} - ${ing.name} - Terms: ${ing.terms?.map((t) => t.value).join(', ') ?? 'none'}");
+    }
+
+    // Save the updated recipe ingredients
+    try {
+      final result = await repository.updateIngredients(recipeId, ingredients);
+      print("Save result: $result");
+      if (result) {
+        print("Successfully saved ingredient updates");
+      } else {
+        print("Failed to save ingredient updates: updateIngredients returned false");
+      }
+    } catch (e) {
+      print("Error saving ingredients: $e");
+    }
   }
 }

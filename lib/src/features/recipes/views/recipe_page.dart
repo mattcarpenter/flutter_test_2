@@ -20,7 +20,11 @@ class RecipePage extends StatelessWidget {
         SliverToBoxAdapter(
           child: Padding(
             padding: EdgeInsets.symmetric(horizontal: 16),
-            child: RecipeView(recipeId: recipeId),
+            child: RecipeView(
+              recipeId: recipeId, 
+              // Force rebuild by using a unique key that includes timestamp
+              key: ValueKey('RecipeView-$recipeId-${DateTime.now().millisecondsSinceEpoch}'),
+            ),
           ),
         ),
       ],
