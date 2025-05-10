@@ -5,6 +5,7 @@ import 'dart:convert';
 import 'package:drift/drift.dart';
 import 'package:flutter/services.dart' show rootBundle;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:recipe_app/src/providers/pantry_provider.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:uuid/uuid.dart';
 import '../../database/database.dart';
@@ -466,9 +467,9 @@ class PantryRecipeMatchNotifier extends AsyncNotifier<PantryRecipeMatchState> {
           isLoading: true,
         ));
       }
-      
+
       final matches = await ref.read(recipeRepositoryProvider).findMatchingRecipesFromPantry();
-      
+
       state = AsyncValue.data(PantryRecipeMatchState(
         matches: matches,
         isLoading: false,
@@ -498,8 +499,13 @@ final pantryRecipeMatchProvider = AsyncNotifierProvider<PantryRecipeMatchNotifie
 
 /// Provider for finding matching pantry items for a specific recipe's ingredients
 /// Takes recipeId as a parameter and returns RecipeIngredientMatches
-final recipeIngredientMatchesProvider = FutureProvider.family<RecipeIngredientMatches, String>(
+/// Uses autoDispose to ensure it re-fetches data when needed instead of caching indefinitely
+final recipeIngredientMatchesProvider = FutureProvider.autoDispose.family<RecipeIngredientMatches, String>(
   (ref, recipeId) async {
+    // Watch the pantry provider to automatically refresh this provider when pantry data changes
+    // This ensures the match circles update when you add/remove items from pantry
+    ref.watch(pantryItemsProvider);
+
     final repository = ref.read(recipeRepositoryProvider);
     return repository.findPantryMatchesForRecipe(recipeId);
   },
