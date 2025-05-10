@@ -55,8 +55,19 @@ class RecipeFilterUtils {
       else if (pantryMatchesAsyncValue.value != null) {
         // Create a map of recipe IDs to their match percentage
         final Map<String, int> recipeMatchPercentages = {};
+        
+        print("APPLYING PANTRY FILTER: ${pantryFilter.name}");
+        print("MATCHES IN ASYNC VALUE: ${pantryMatchesAsyncValue.value!.matches.length}");
+        
         for (final match in pantryMatchesAsyncValue.value!.matches) {
           recipeMatchPercentages[match.recipe.id] = match.matchPercentage;
+          print("Adding recipe ${match.recipe.id} (${match.recipe.title}) with match % ${match.matchPercentage}");
+        }
+        
+        print("FILTERED RECIPES BEFORE: ${filteredRecipes.length}");
+        // Debug - print all recipes before filtering
+        for (final recipe in filteredRecipes) {
+          print("Pre-filter: ${recipe.id} - ${recipe.title} - Match %: ${recipeMatchPercentages[recipe.id] ?? 'not in matches'}");
         }
         
         // Filter recipes based on pantry match percentage
@@ -64,19 +75,29 @@ class RecipeFilterUtils {
           // If recipe isn't in the match data, its match percentage is 0
           final matchPercentage = recipeMatchPercentages[recipe.id] ?? 0;
           
+          print("Checking recipe ${recipe.id} (${recipe.title}) - Match %: $matchPercentage");
+          
           // Apply the appropriate filter
           switch (pantryFilter) {
             case PantryMatchFilter.anyMatch:
               // This case is handled above - should never reach here
               return true;
             case PantryMatchFilter.goodMatch:
-              return matchPercentage > 50;
+              final included = matchPercentage >= 50;
+              print("  goodMatch (>=50): $included");
+              return included;
             case PantryMatchFilter.greatMatch:
-              return matchPercentage > 75;
+              final included = matchPercentage >= 75;
+              print("  greatMatch (>=75): $included");
+              return included;
             case PantryMatchFilter.perfectMatch:
-              return matchPercentage == 100;
+              final included = matchPercentage == 100;
+              print("  perfectMatch (==100): $included");
+              return included;
           }
         }).toList();
+        
+        print("FILTERED RECIPES AFTER: ${filteredRecipes.length}");
       }
       
       // Remove pantry filter before applying other filters
@@ -121,8 +142,13 @@ class RecipeFilterUtils {
     required AsyncValue<PantryRecipeMatchState> pantryMatchesAsyncValue,
     required WidgetRef ref,
   }) {
-    if (filterState.activeFilters.containsKey(FilterType.pantryMatch) && 
-        !pantryMatchesAsyncValue.hasValue) {
+    print("Loading matches if needed");
+    print("  Has pantry filter: ${filterState.activeFilters.containsKey(FilterType.pantryMatch)}");
+    print("  Has pantry match value: ${pantryMatchesAsyncValue.hasValue}");
+    
+    if (filterState.activeFilters.containsKey(FilterType.pantryMatch)) {
+      print("  Calling findMatchingRecipes() to load pantry match data");
+      // Always reload data when filter is active to ensure we have latest matches
       ref.read(pantryRecipeMatchProvider.notifier).findMatchingRecipes();
     }
   }
