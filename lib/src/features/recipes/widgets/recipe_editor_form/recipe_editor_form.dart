@@ -151,31 +151,7 @@ class RecipeEditorFormState extends ConsumerState<RecipeEditorForm> {
       } else {
         // Merge with current DB state before saving, so that any publicUrls are preserved.
         final mergedRecipe = await mergeRecipeImagesWithDb(updatedRecipe);
-
-        final updatedIngredients = (mergedRecipe.ingredients ?? []).map((ingredient) {
-          final name = ingredient.name;
-          return ingredient.copyWith(
-            terms: [
-              IngredientTerm(
-                value: name,
-                sort: 0,
-                source: 'test',
-              ),
-              IngredientTerm(
-                value: '$name foo',
-                sort: 1,
-                source: 'test',
-              ),
-            ],
-          );
-        }).toList();
-
-        // Now update the recipe with the new ingredients
-        final finalMergedRecipe = mergedRecipe.copyWith(
-          ingredients: Value(updatedIngredients),
-        );
-
-        await notifier.updateRecipe(finalMergedRecipe); // was mergedRecipe
+        await notifier.updateRecipe(mergedRecipe); // was mergedRecipe
       }
 
       // Add any pending images to the upload queue.
