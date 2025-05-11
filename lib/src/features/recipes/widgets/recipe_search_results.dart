@@ -29,9 +29,6 @@ class RecipeSearchResults extends ConsumerWidget {
     
     // Listen to filter changes to load necessary data
     ref.listen(recipeSearchFilterSortProvider, (previous, current) {
-      print("Filter state changed in RecipeSearchResults");
-      print("Contains pantry filter: ${current.activeFilters.containsKey(FilterType.pantryMatch)}");
-      
       // Initiate pantry match loading if needed
       RecipeFilterUtils.loadPantryMatchesIfNeeded(
         filterState: current,

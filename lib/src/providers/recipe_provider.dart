@@ -469,21 +469,12 @@ class PantryRecipeMatchNotifier extends AsyncNotifier<PantryRecipeMatchState> {
       }
 
       final matches = await ref.read(recipeRepositoryProvider).findMatchingRecipesFromPantry();
-      
-      print("PANTRY MATCHES FOUND: ${matches.length}");
-      for (final match in matches) {
-        print("Recipe: ${match.recipe.title}, Match %: ${match.matchPercentage}, Ratio: ${match.matchRatio}");
-        print("Ingredients: ${match.recipe.ingredients?.map((i) => i.name).join(', ')}");
-      }
 
       state = AsyncValue.data(PantryRecipeMatchState(
         matches: matches,
         isLoading: false,
       ));
-      
-      print("PANTRY MATCHES STATE: ${state.value?.matches.length ?? 0}");
     } catch (e, stack) {
-      print("ERROR FINDING PANTRY MATCHES: $e");
       // Handle potential null state.value in the catch block too
       if (state.value != null) {
         state = AsyncValue.data(state.value!.copyWith(
