@@ -5,18 +5,18 @@ import '../../../constants/folder_constants.dart';
 import '../../../providers/recipe_filter_sort_provider.dart';
 import '../../../providers/recipe_provider.dart';
 import '../models/recipe_filter_sort.dart';
-import '../utils/recipe_filter_utils.dart';
+import '../utils/filter_utils.dart';
 import 'filter_sort/recipe_filter_sheet.dart';
 import 'filter_sort/recipe_sort_dropdown.dart';
 
 class RecipeSearchResults extends ConsumerWidget {
   final String? folderId;
   final void Function(RecipeEntry)? onResultSelected;
-  final void Function(RecipeFilterSortState)? onFilterSortStateChanged;
+  final void Function(UnifiedFilterSortState)? onFilterSortStateChanged;
 
   const RecipeSearchResults({
-    super.key, 
-    this.folderId, 
+    super.key,
+    this.folderId,
     this.onResultSelected,
     this.onFilterSortStateChanged,
   });
@@ -24,19 +24,18 @@ class RecipeSearchResults extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final searchState = ref.watch(recipeSearchNotifierProvider);
-    final filterSortState = ref.watch(recipeSearchFilterSortProvider);
+    final filterSortState = ref.watch(recipeSearchFilterSort);
     final pantryMatchesAsyncValue = ref.watch(pantryRecipeMatchProvider);
-    
+
     // Listen to filter changes to load necessary data
-    ref.listen(recipeSearchFilterSortProvider, (previous, current) {
+    ref.listen(recipeSearchFilterSort, (previous, current) {
       // Initiate pantry match loading if needed
-      RecipeFilterUtils.loadPantryMatchesIfNeeded(
+      FilterUtils.loadPantryMatchesIfNeeded(
         filterState: current,
-        pantryMatchesAsyncValue: pantryMatchesAsyncValue,
         ref: ref,
       );
     });
-    
+
     // Update folder ID in filter/sort state if needed
     if (filterSortState.folderId != folderId) {
       // Use addPostFrameCallback to avoid triggering a rebuild during build
@@ -48,9 +47,9 @@ class RecipeSearchResults extends ConsumerWidget {
     if (searchState.error != null) {
       return Center(child: Text('Error: ${searchState.error}'));
     }
-    
+
     // Show loading if pantry match filter is active and we're still loading matches
-    if (RecipeFilterUtils.isPantryMatchLoading(
+    if (FilterUtils.isPantryMatchLoading(
         filterState: filterSortState,
         pantryMatchesAsyncValue: pantryMatchesAsyncValue)) {
       return const Center(child: CircularProgressIndicator());
@@ -60,27 +59,35 @@ class RecipeSearchResults extends ConsumerWidget {
     List<RecipeEntry> results = searchState.results;
 
     // Apply folder filtering
-    results = RecipeFilterUtils.applyFolderFilter(
-      results, 
-      folderId, 
+    results = FilterUtils.applyFolderFilter(
+      results,
+      folderId,
       kUncategorizedFolderId,
     );
-    
+
     // Apply additional filters
     if (filterSortState.hasFilters) {
-      results = RecipeFilterUtils.applyFilters(
+      results = FilterUtils.applyFilters(
         recipes: results,
         filterState: filterSortState,
         pantryMatchesAsyncValue: pantryMatchesAsyncValue,
       );
     }
-    
+
     // Apply sorting
-    results = RecipeFilterUtils.applySorting(
-      recipes: results,
-      filterState: filterSortState,
-    );
-    
+    if (filterSortState.activeSortOption == SortOption.pantryMatch) {
+      results = FilterUtils.applyPantryMatchSorting(
+        recipes: results,
+        pantryMatchesAsyncValue: pantryMatchesAsyncValue,
+        sortDirection: filterSortState.sortDirection,
+      );
+    } else {
+      results = FilterUtils.applySorting(
+        recipes: results,
+        filterState: filterSortState,
+      );
+    }
+
     if (results.isEmpty && searchState.isLoading) {
       return const Center(child: CircularProgressIndicator());
     }
@@ -96,7 +103,9 @@ class RecipeSearchResults extends ConsumerWidget {
                 onPressed: () {
                   ref.read(recipeSearchFilterSortProvider.notifier).clearFilters();
                   if (onFilterSortStateChanged != null) {
-                    onFilterSortStateChanged!(RecipeFilterSortState());
+                    onFilterSortStateChanged!(UnifiedFilterSortState(
+                      context: FilterContext.recipeSearch
+                    ));
                   }
                 },
                 child: const Text('Clear Filters'),
@@ -128,14 +137,23 @@ class RecipeSearchResults extends ConsumerWidget {
                             .updateFilter(entry.key, null);
                         }
                       }
-                      
+
                       for (final entry in newState.activeFilters.entries) {
                         ref.read(recipeSearchFilterSortProvider.notifier)
                           .updateFilter(entry.key, entry.value);
                       }
-                      
+
                       if (onFilterSortStateChanged != null) {
-                        onFilterSortStateChanged!(newState);
+                        // Convert RecipeFilterSortState to UnifiedFilterSortState
+                        final unifiedState = UnifiedFilterSortState(
+                          activeFilters: newState.activeFilters,
+                          activeSortOption: newState.activeSortOption,
+                          sortDirection: newState.sortDirection,
+                          folderId: newState.folderId,
+                          searchQuery: newState.searchQuery,
+                          context: FilterContext.recipeSearch,
+                        );
+                        onFilterSortStateChanged!(unifiedState);
                       }
                     },
                   );
@@ -167,7 +185,7 @@ class RecipeSearchResults extends ConsumerWidget {
                   ),
                 ),
               ),
-              
+
               // Sort dropdown
               RecipeSortDropdown(
                 sortOption: filterSortState.activeSortOption,
@@ -183,7 +201,7 @@ class RecipeSearchResults extends ConsumerWidget {
             ],
           ),
         ),
-        
+
         // Results count
         Padding(
           padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
@@ -195,7 +213,7 @@ class RecipeSearchResults extends ConsumerWidget {
             ),
           ),
         ),
-        
+
         // Results list
         Expanded(
           child: ListView.builder(

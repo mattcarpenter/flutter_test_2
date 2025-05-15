@@ -4,12 +4,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:macos_ui/macos_ui.dart';
+import 'package:recipe_app/src/providers/recipe_filter_sort_provider.dart';
 import 'package:recipe_app/utils/mecab_wrapper.dart';
 import 'app_config.dart';
 import 'database/database.dart';
 import 'database/powersync.dart';
 import 'src/app.dart';
-import 'src/providers/recipe_filter_sort_provider.dart';
 import 'src/settings/settings_controller.dart';
 import 'src/settings/settings_service.dart';
 import 'src/repositories/base_repository.dart';
@@ -52,7 +52,7 @@ void main() async {
   }
 
   SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
-  
+
   // Initialize SharedPreferences overrides
   final overrides = await createSharedPreferencesOverrides();
 

@@ -6,7 +6,7 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:go_router/go_router.dart';
 import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
 import 'package:recipe_app/src/features/recipes/views/recipe_page.dart';
-import 'package:recipe_app/src/features/recipes/views/simplified_recipes_folder_page.dart';
+import 'package:recipe_app/src/features/recipes/views/recipes_folder_page.dart';
 import 'package:recipe_app/src/mobile/utils/adaptive_sheet_page.dart';
 
 import '../color_theme.dart';
@@ -228,7 +228,7 @@ class _AdaptiveApp2State extends State<AdaptiveApp2> {
 
                         return _platformPage(
                           state: state,
-                          child: SimplifiedRecipesFolderPage(
+                          child: RecipesFolderPage(
                             folderId: folderId,
                             title: folderTitle,
                             previousPageTitle: previousPageTitle,

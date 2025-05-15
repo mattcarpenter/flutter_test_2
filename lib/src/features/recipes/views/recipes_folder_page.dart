@@ -9,7 +9,7 @@ import '../../../providers/recipe_provider.dart';
 import '../../../widgets/adaptive_pull_down/adaptive_menu_item.dart';
 import '../../../widgets/adaptive_pull_down/adaptive_pull_down.dart';
 import '../models/recipe_filter_sort.dart';
-import '../utils/recipe_filter_utils.dart';
+import '../utils/filter_utils.dart';
 import '../widgets/filter_sort/recipe_filter_sheet.dart';
 import '../widgets/filter_sort/recipe_sort_dropdown.dart';
 import '../widgets/recipe_list.dart';
@@ -43,15 +43,14 @@ class RecipesFolderPage extends ConsumerWidget {
       print('Current: ${current.activeFilters}');
 
       // Initiate pantry match loading if needed
-      RecipeFilterUtils.loadPantryMatchesIfNeeded(
+      FilterUtils.loadPantryMatchesIfNeeded(
         filterState: current,
-        pantryMatchesAsyncValue: pantryMatchesAsyncValue,
         ref: ref,
       );
     });
 
     // Watch filter/sort state
-    final filterSortState = ref.watch(recipeFolderFilterSortProvider);
+    final filterSortState = ref.watch(recipeFolderFilterSort);
 
     // Update folder ID in filter/sort state if needed
     if (filterSortState.folderId != folderId) {
@@ -117,7 +116,7 @@ class RecipesFolderPage extends ConsumerWidget {
           ),
           data: (recipesWithFolders) {
             // Show loading indicator if pantry match filter is active and we're still loading matches
-            if (RecipeFilterUtils.isPantryMatchLoading(
+            if (FilterUtils.isPantryMatchLoading(
                 filterState: filterSortState,
                 pantryMatchesAsyncValue: pantryMatchesAsyncValue)) {
               return const SliverFillRemaining(
@@ -132,7 +131,7 @@ class RecipesFolderPage extends ConsumerWidget {
             List<RecipeEntry> filteredRecipes;
 
             // Apply folder filtering
-            filteredRecipes = RecipeFilterUtils.applyFolderFilter(
+            filteredRecipes = FilterUtils.applyFolderFilter(
               recipes,
               folderId,
               kUncategorizedFolderId,
@@ -142,7 +141,7 @@ class RecipesFolderPage extends ConsumerWidget {
             if (filterSortState.hasFilters) {
               print('Applying filters to ${filteredRecipes.length} recipes: ${filterSortState.activeFilters}');
 
-              filteredRecipes = RecipeFilterUtils.applyFilters(
+              filteredRecipes = FilterUtils.applyFilters(
                 recipes: filteredRecipes,
                 filterState: filterSortState,
                 pantryMatchesAsyncValue: pantryMatchesAsyncValue,
@@ -152,10 +151,18 @@ class RecipesFolderPage extends ConsumerWidget {
             }
 
             // Apply sorting
-            filteredRecipes = RecipeFilterUtils.applySorting(
-              recipes: filteredRecipes,
-              filterState: filterSortState,
-            );
+            if (filterSortState.activeSortOption == SortOption.pantryMatch) {
+              filteredRecipes = FilterUtils.applyPantryMatchSorting(
+                recipes: filteredRecipes,
+                pantryMatchesAsyncValue: pantryMatchesAsyncValue,
+                sortDirection: filterSortState.sortDirection,
+              );
+            } else {
+              filteredRecipes = FilterUtils.applySorting(
+                recipes: filteredRecipes,
+                filterState: filterSortState,
+              );
+            }
 
             if (filteredRecipes.isEmpty) {
               return SliverFillRemaining(
