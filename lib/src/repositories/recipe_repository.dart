@@ -534,62 +534,65 @@ class RecipeRepository {
   Future<List<RecipePantryMatch>> findMatchingRecipesFromPantry() async {
     try {
       final results = await _db.customSelect('''
-        WITH ingredient_terms_with_mapping AS (
-          SELECT
-            rit.recipe_id,
-            rit.ingredient_id,
-            COALESCE(ito.mapped_term, rit.term) AS effective_term
-          FROM recipe_ingredient_terms rit
-          LEFT JOIN ingredient_term_overrides_flattened ito
-            ON rit.term = ito.input_term
-            AND ito.deleted_at IS NULL
-        ),
-        /* Find matching ingredients (not just terms) */
-        matching_ingredients AS (
-          SELECT
-            itwm.recipe_id,
-            itwm.ingredient_id,
-            1 AS matched
-          FROM ingredient_terms_with_mapping itwm
-          INNER JOIN pantry_item_terms pit
-            ON itwm.effective_term = pit.term
-          GROUP BY itwm.recipe_id, itwm.ingredient_id
-        ),
-        /* Count matched ingredients per recipe */
-        ingredient_matches AS (
-          SELECT
-            recipe_id,
-            COUNT(DISTINCT ingredient_id) AS matched_ingredients,
-            (SELECT GROUP_CONCAT(DISTINCT pantry_item_id) 
-             FROM ingredient_terms_with_mapping itwm
-             INNER JOIN pantry_item_terms pit ON itwm.effective_term = pit.term
-             WHERE itwm.recipe_id = mi.recipe_id) AS matching_pantry_item_ids
-          FROM matching_ingredients mi
-          GROUP BY recipe_id
-        ),
-        /* Count total ingredients per recipe */
-        total_ingredients AS (
-          SELECT
-            recipe_id,
-            COUNT(DISTINCT ingredient_id) AS total_ingredients
-          FROM recipe_ingredient_terms
-          GROUP BY recipe_id
-        )
-        SELECT
-          r.*,
-          COALESCE(im.matched_ingredients, 0) AS matched_terms,
-          ti.total_ingredients AS total_terms,
-          (COALESCE(im.matched_ingredients, 0) * 1.0 / NULLIF(ti.total_ingredients, 0)) AS match_ratio,
-          im.matching_pantry_item_ids
-        FROM recipes r
-        LEFT JOIN ingredient_matches im ON r.id = im.recipe_id
-        LEFT JOIN total_ingredients ti ON r.id = ti.recipe_id
-        WHERE r.deleted_at IS NULL AND COALESCE(im.matched_ingredients, 0) > 0
-        ORDER BY match_ratio DESC, matched_terms DESC
-      ''',
-      readsFrom: {
-        _db.recipes,
-      }).get();
+  WITH ingredient_terms_with_mapping AS (
+    SELECT
+      rit.recipe_id,
+      rit.ingredient_id,
+      COALESCE(ito.mapped_term, rit.term) AS effective_term
+    FROM recipe_ingredient_terms rit
+    LEFT JOIN ingredient_term_overrides_flattened ito
+      ON rit.term = ito.input_term
+      AND ito.deleted_at IS NULL
+  ),
+  /* Find matching ingredients (not just terms) */
+  matching_ingredients AS (
+    SELECT
+      itwm.recipe_id,
+      itwm.ingredient_id,
+      1 AS matched
+    FROM ingredient_terms_with_mapping itwm
+    INNER JOIN pantry_item_terms pit
+      ON LOWER(itwm.effective_term) = LOWER(pit.term)
+    GROUP BY itwm.recipe_id, itwm.ingredient_id
+  ),
+  /* Count matched ingredients per recipe */
+  ingredient_matches AS (
+    SELECT
+      recipe_id,
+      COUNT(DISTINCT ingredient_id) AS matched_ingredients,
+      (
+        SELECT GROUP_CONCAT(DISTINCT pantry_item_id)
+        FROM ingredient_terms_with_mapping itwm
+        INNER JOIN pantry_item_terms pit
+          ON LOWER(itwm.effective_term) = LOWER(pit.term)
+        WHERE itwm.recipe_id = mi.recipe_id
+      ) AS matching_pantry_item_ids
+    FROM matching_ingredients mi
+    GROUP BY recipe_id
+  ),
+  /* Count total ingredients per recipe */
+  total_ingredients AS (
+    SELECT
+      recipe_id,
+      COUNT(DISTINCT ingredient_id) AS total_ingredients
+    FROM recipe_ingredient_terms
+    GROUP BY recipe_id
+  )
+  SELECT
+    r.*,
+    COALESCE(im.matched_ingredients, 0) AS matched_terms,
+    ti.total_ingredients AS total_terms,
+    (COALESCE(im.matched_ingredients, 0) * 1.0 / NULLIF(ti.total_ingredients, 0)) AS match_ratio,
+    im.matching_pantry_item_ids
+  FROM recipes r
+  LEFT JOIN ingredient_matches im ON r.id = im.recipe_id
+  LEFT JOIN total_ingredients ti ON r.id = ti.recipe_id
+  WHERE r.deleted_at IS NULL AND COALESCE(im.matched_ingredients, 0) > 0
+  ORDER BY match_ratio DESC, matched_terms DESC
+''',
+          readsFrom: {
+            _db.recipes,
+          }).get();
 
       return results.map((row) {
         final recipe = _rowToRecipe(row);
@@ -636,70 +639,68 @@ class RecipeRepository {
 
       // Query to match ingredients with pantry items
       final results = await _db.customSelect('''
-        WITH ingredient_terms_with_mapping AS (
-          SELECT
-            rit.recipe_id,
-            rit.ingredient_id,
-            COALESCE(ito.mapped_term, rit.term) AS effective_term
-          FROM recipe_ingredient_terms rit
-          LEFT JOIN ingredient_term_overrides_flattened ito
-            ON rit.term = ito.input_term
-            AND ito.deleted_at IS NULL
-          WHERE rit.recipe_id = ?
-        ),
-        matching_pantry_items AS (
-          SELECT
-            itwm.ingredient_id,
-            pit.pantry_item_id,
-            MIN(pit.sort) AS term_priority -- use the highest priority term match
-          FROM ingredient_terms_with_mapping itwm
-          INNER JOIN pantry_item_terms pit
-            ON itwm.effective_term = pit.term
-          GROUP BY itwm.ingredient_id, pit.pantry_item_id
-        )
-        SELECT
-          i.ingredient_id AS recipe_ingredient_id,
-          p.pantry_item_id,
-          p.id AS pantry_id,
-          p.name,
-          p.quantity,
-          p.unit,
-          p.user_id,
-          p.household_id,
-          p.created_at,
-          p.updated_at,
-          p.deleted_at,
-          p.in_stock
-        FROM (
-          SELECT DISTINCT ingredient_id 
-          FROM recipe_ingredient_terms 
-          WHERE recipe_id = ?
-        ) i
-        LEFT JOIN (
-          SELECT 
-            mpi.ingredient_id,
-            mpi.pantry_item_id,
-            pi.*
-          FROM matching_pantry_items mpi
-          INNER JOIN pantry_items pi ON mpi.pantry_item_id = pi.id
-          WHERE pi.deleted_at IS NULL
-          -- For each ingredient, pick the best matching pantry item
-          -- (in case multiple pantry items match the same ingredient)
-          AND (mpi.ingredient_id, mpi.term_priority) IN (
-            SELECT ingredient_id, MIN(term_priority)
-            FROM matching_pantry_items
-            GROUP BY ingredient_id
-          )
-        ) p ON i.ingredient_id = p.ingredient_id
-      ''',
-      variables: [
-        Variable(recipeId),
-        Variable(recipeId),
-      ],
-      readsFrom: {
-        _db.recipes,
-        _db.pantryItems,
-      }).get();
+  WITH ingredient_terms_with_mapping AS (
+    SELECT
+      rit.recipe_id,
+      rit.ingredient_id,
+      COALESCE(ito.mapped_term, rit.term) AS effective_term
+    FROM recipe_ingredient_terms rit
+    LEFT JOIN ingredient_term_overrides_flattened ito
+      ON rit.term = ito.input_term
+      AND ito.deleted_at IS NULL
+    WHERE rit.recipe_id = ?
+  ),
+  matching_pantry_items AS (
+    SELECT
+      itwm.ingredient_id,
+      pit.pantry_item_id,
+      MIN(pit.sort) AS term_priority
+    FROM ingredient_terms_with_mapping itwm
+    INNER JOIN pantry_item_terms pit
+      ON LOWER(itwm.effective_term) = LOWER(pit.term)
+    GROUP BY itwm.ingredient_id, pit.pantry_item_id
+  )
+  SELECT
+    i.ingredient_id AS recipe_ingredient_id,
+    p.pantry_item_id,
+    p.id AS pantry_id,
+    p.name,
+    p.quantity,
+    p.unit,
+    p.user_id,
+    p.household_id,
+    p.created_at,
+    p.updated_at,
+    p.deleted_at,
+    p.in_stock
+  FROM (
+    SELECT DISTINCT ingredient_id 
+    FROM recipe_ingredient_terms 
+    WHERE recipe_id = ?
+  ) i
+  LEFT JOIN (
+    SELECT 
+      mpi.ingredient_id,
+      mpi.pantry_item_id,
+      pi.*
+    FROM matching_pantry_items mpi
+    INNER JOIN pantry_items pi ON mpi.pantry_item_id = pi.id
+    WHERE pi.deleted_at IS NULL
+      AND (mpi.ingredient_id, mpi.term_priority) IN (
+        SELECT ingredient_id, MIN(term_priority)
+        FROM matching_pantry_items
+        GROUP BY ingredient_id
+      )
+  ) p ON i.ingredient_id = p.ingredient_id
+''',
+          variables: [
+            Variable(recipeId),
+            Variable(recipeId),
+          ],
+          readsFrom: {
+            _db.recipes,
+            _db.pantryItems,
+          }).get();
 
       // Process results into ingredient matches
       final matches = results.map((row) {

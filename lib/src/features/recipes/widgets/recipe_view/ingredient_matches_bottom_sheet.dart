@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/cupertino.dart';
+import 'dart:io' show Platform;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:wolt_modal_sheet/wolt_modal_sheet.dart';
 import 'package:disclosure/disclosure.dart';
+import 'package:super_context_menu/super_context_menu.dart';
 import 'package:recipe_app/src/models/ingredient_pantry_match.dart';
 import 'package:recipe_app/database/models/ingredients.dart';
 import 'package:recipe_app/database/models/ingredient_terms.dart';
@@ -9,6 +12,7 @@ import 'package:recipe_app/src/providers/recipe_provider.dart' show recipeIngred
 import 'package:recipe_app/src/repositories/recipe_repository.dart';
 import 'package:uuid/uuid.dart';
 import 'ingredient_match_circle.dart';
+import 'pantry_item_selector_bottom_sheet.dart';
 
 /// Shows a bottom sheet displaying ingredient-pantry match details
 /// with ability to edit the ingredient terms for better matching
@@ -253,8 +257,9 @@ class _IngredientMatchesBottomSheetContentState extends State<IngredientMatchesB
             ),
             const Spacer(),
 
-            // Add term button
+            // Add term button with key to get its position
             IconButton(
+              key: ValueKey('add_term_button_${ingredient.id}'),
               icon: const Icon(Icons.add_circle_outline),
               onPressed: () => _addNewTerm(ingredient.id),
               tooltip: 'Add New Term',
@@ -390,66 +395,212 @@ class _IngredientMatchesBottomSheetContentState extends State<IngredientMatchesB
   }
 
   void _addNewTerm(String ingredientId) {
-    // Creating a controller for the dialog
-    final controller = TextEditingController();
-
     // Find the original ingredient
     final ingredient = widget.matches.matches
         .firstWhere((match) => match.ingredient.id == ingredientId)
         .ingredient;
 
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Add Matching Term'),
-        content: TextField(
-          controller: controller,
-          decoration: const InputDecoration(
-            labelText: 'Term',
-            hintText: 'Enter a matching term (e.g., pantry item name)',
-          ),
-          autofocus: true,
-          textCapitalization: TextCapitalization.words,
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(),
+    // Show platform-specific menu with options
+    if (Platform.isIOS || Platform.isMacOS) {
+      showCupertinoModalPopup(
+        context: context,
+        builder: (context) => CupertinoActionSheet(
+          title: const Text('Add Matching Term'),
+          message: const Text('Choose an option to add a matching term'),
+          actions: [
+            CupertinoActionSheetAction(
+              child: const Text('Enter Custom Term'),
+              onPressed: () {
+                Navigator.pop(context);
+                _showAddTermDialog(ingredientId, ingredient);
+              },
+            ),
+            CupertinoActionSheetAction(
+              child: const Text('Select from Pantry'),
+              onPressed: () {
+                Navigator.pop(context);
+                showPantryItemSelectorBottomSheet(
+                  context: context,
+                  onItemSelected: (itemName) {
+                    _addTermFromPantryItem(ingredientId, ingredient, itemName);
+                  },
+                );
+              },
+            ),
+          ],
+          cancelButton: CupertinoActionSheetAction(
+            isDestructiveAction: true,
+            onPressed: () {
+              Navigator.pop(context);
+            },
             child: const Text('Cancel'),
           ),
-          TextButton(
-            onPressed: () {
-              final value = controller.text.trim();
-              if (value.isNotEmpty) {
-                setState(() {
-                  // Get existing terms from our working copy
-                  final terms = List<IngredientTerm>.from(_ingredientTermsMap[ingredientId] ?? []);
-
-                  // Add new term with the next sort value
-                  terms.add(IngredientTerm(
-                    value: value,
-                    source: 'user', // Marked as user-added
-                    sort: terms.length, // Next position
-                  ));
-
-                  // Update the maps
-                  _ingredientTermsMap[ingredientId] = terms;
-
-                  // Mark as modified
-                  _modifiedIngredients[ingredientId] = ingredient.copyWith(terms: terms);
-                });
-              }
-              Navigator.of(context).pop();
-              
-              // Ensure the accordion stays expanded
-              setState(() {
-                _expandedIngredientIds.add(ingredientId);
+        ),
+      );
+    } else {
+      // Material Design popup menu
+      final RenderBox renderBox = context.findRenderObject() as RenderBox;
+      final position = renderBox.localToGlobal(Offset.zero);
+      
+      showMenu(
+        context: context,
+        position: RelativeRect.fromLTRB(
+          position.dx,
+          position.dy + 50, // Offset to appear below the + button
+          position.dx + 1,
+          position.dy + 1,
+        ),
+        items: [
+          PopupMenuItem(
+            child: ListTile(
+              leading: const Icon(Icons.add_circle_outline),
+              title: const Text('Enter Custom Term'),
+              subtitle: const Text('Enter a new term for matching'),
+            ),
+            onTap: () {
+              // Add delay to avoid "Looking up a deactivated widget's ancestor" errors
+              Future.delayed(Duration.zero, () {
+                _showAddTermDialog(ingredientId, ingredient);
               });
             },
-            child: const Text('Add'),
+          ),
+          PopupMenuItem(
+            child: ListTile(
+              leading: const Icon(Icons.kitchen),
+              title: const Text('Select from Pantry'),
+              subtitle: const Text('Use an existing pantry item name'),
+            ),
+            onTap: () {
+              // Add delay to avoid "Looking up a deactivated widget's ancestor" errors
+              Future.delayed(Duration.zero, () {
+                showPantryItemSelectorBottomSheet(
+                  context: context,
+                  onItemSelected: (itemName) {
+                    _addTermFromPantryItem(ingredientId, ingredient, itemName);
+                  },
+                );
+              });
+            },
           ),
         ],
-      ),
-    );
+      );
+    }
+  }
+
+  // Show the platform-specific dialog
+  void _showAddTermDialog(String ingredientId, Ingredient ingredient) {
+    final controller = TextEditingController();
+
+    // Handle saving the term
+    void saveTerm() {
+      final value = controller.text.trim();
+      if (value.isNotEmpty) {
+        setState(() {
+          // Get existing terms from our working copy
+          final terms = List<IngredientTerm>.from(_ingredientTermsMap[ingredientId] ?? []);
+
+          // Add new term with the next sort value
+          terms.add(IngredientTerm(
+            value: value,
+            source: 'user', // Marked as user-added
+            sort: terms.length, // Next position
+          ));
+
+          // Update the maps
+          _ingredientTermsMap[ingredientId] = terms;
+
+          // Mark as modified
+          _modifiedIngredients[ingredientId] = ingredient.copyWith(terms: terms);
+          
+          // Ensure the accordion stays expanded
+          _expandedIngredientIds.add(ingredientId);
+        });
+      }
+      Navigator.of(context).pop();
+    }
+
+    if (Platform.isIOS) {
+      // Show Cupertino dialog on iOS
+      showCupertinoDialog(
+        context: context,
+        builder: (context) => CupertinoAlertDialog(
+          title: const Text('Add Matching Term'),
+          content: Padding(
+            padding: const EdgeInsets.only(top: 16.0),
+            child: CupertinoTextField(
+              controller: controller,
+              placeholder: 'Enter a matching term',
+              autofocus: true,
+              textCapitalization: TextCapitalization.words,
+              onSubmitted: (_) => saveTerm(),
+            ),
+          ),
+          actions: [
+            CupertinoDialogAction(
+              onPressed: () => Navigator.of(context).pop(),
+              isDestructiveAction: true,
+              child: const Text('Cancel'),
+            ),
+            CupertinoDialogAction(
+              onPressed: saveTerm,
+              child: const Text('Add'),
+            ),
+          ],
+        ),
+      );
+    } else {
+      // Show Material dialog on Android and other platforms
+      showDialog(
+        context: context,
+        builder: (context) => AlertDialog(
+          title: const Text('Add Matching Term'),
+          content: TextField(
+            controller: controller,
+            decoration: const InputDecoration(
+              labelText: 'Term',
+              hintText: 'Enter a matching term (e.g., pantry item name)',
+            ),
+            autofocus: true,
+            textCapitalization: TextCapitalization.words,
+            onSubmitted: (_) => saveTerm(),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: const Text('Cancel'),
+            ),
+            TextButton(
+              onPressed: saveTerm,
+              child: const Text('Add'),
+            ),
+          ],
+        ),
+      );
+    }
+  }
+
+  // Add a term from a selected pantry item
+  void _addTermFromPantryItem(String ingredientId, Ingredient ingredient, String itemName) {
+    setState(() {
+      // Get existing terms from our working copy
+      final terms = List<IngredientTerm>.from(_ingredientTermsMap[ingredientId] ?? []);
+
+      // Add new term with the next sort value
+      terms.add(IngredientTerm(
+        value: itemName,
+        source: 'pantry', // Marked as coming from pantry item
+        sort: terms.length, // Next position
+      ));
+
+      // Update the maps
+      _ingredientTermsMap[ingredientId] = terms;
+
+      // Mark as modified
+      _modifiedIngredients[ingredientId] = ingredient.copyWith(terms: terms);
+      
+      // Ensure the accordion stays expanded
+      _expandedIngredientIds.add(ingredientId);
+    });
   }
 
   // Save all changes
