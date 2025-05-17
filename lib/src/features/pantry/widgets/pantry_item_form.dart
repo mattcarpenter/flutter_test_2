@@ -26,10 +26,15 @@ class PantryItemFormState extends ConsumerState<PantryItemForm> {
   late final TextEditingController _baseUnitController;
   late final TextEditingController _baseQuantityController;
   late final TextEditingController _priceController;
+  late final TextEditingController _termController;
   
   bool _inStock = true;
   bool _isQuantitySectionExpanded = false;
   bool _isCostSectionExpanded = false;
+  bool _isTermsSectionExpanded = false;
+  
+  // Store the current terms (initialize as empty)
+  List<PantryItemTerm> _terms = [];
 
   @override
   void initState() {
@@ -49,12 +54,30 @@ class PantryItemFormState extends ConsumerState<PantryItemForm> {
     _priceController = TextEditingController(
       text: item?.price != null ? item!.price.toString() : '',
     );
+    _termController = TextEditingController();
     
     _inStock = item?.inStock ?? true;
+    
+    // Initialize terms list if available
+    if (item?.terms != null && item!.terms!.isNotEmpty) {
+      _terms = List<PantryItemTerm>.from(item.terms!);
+    } else {
+      // If this is a new item, add the name as the first term
+      if (item == null && _nameController.text.isNotEmpty) {
+        _terms = [
+          PantryItemTerm(
+            value: _nameController.text,
+            source: 'user',
+            sort: 0,
+          )
+        ];
+      }
+    }
     
     // Auto-expand sections if they have data
     _isQuantitySectionExpanded = _quantityController.text.isNotEmpty || _unitController.text.isNotEmpty;
     _isCostSectionExpanded = _priceController.text.isNotEmpty || _baseQuantityController.text.isNotEmpty || _baseUnitController.text.isNotEmpty;
+    _isTermsSectionExpanded = _terms.isNotEmpty;
   }
 
   @override
@@ -65,6 +88,7 @@ class PantryItemFormState extends ConsumerState<PantryItemForm> {
     _baseUnitController.dispose();
     _baseQuantityController.dispose();
     _priceController.dispose();
+    _termController.dispose();
     super.dispose();
   }
 
@@ -90,6 +114,20 @@ class PantryItemFormState extends ConsumerState<PantryItemForm> {
         ? null 
         : double.tryParse(_priceController.text);
 
+    // Ensure the item name is in the terms list
+    bool hasNameTerm = _terms.any((term) => term.value.toLowerCase() == name.toLowerCase());
+    if (!hasNameTerm) {
+      // Add the name as a term if it doesn't exist yet
+      _terms.add(PantryItemTerm(
+        value: name,
+        source: 'user',
+        sort: _terms.length,
+      ));
+    }
+    
+    // Sort terms by their sort order
+    _terms.sort((a, b) => a.sort.compareTo(b.sort));
+
     final userId = Supabase.instance.client.auth.currentUser?.id;
     
     try {
@@ -104,6 +142,7 @@ class PantryItemFormState extends ConsumerState<PantryItemForm> {
           baseUnit: baseUnit,
           baseQuantity: baseQuantity,
           price: price,
+          terms: _terms,
         );
       } else {
         // Update existing pantry item
@@ -116,6 +155,7 @@ class PantryItemFormState extends ConsumerState<PantryItemForm> {
           baseUnit: baseUnit,
           baseQuantity: baseQuantity,
           price: price,
+          terms: _terms,
         );
       }
     } catch (e) {
@@ -134,6 +174,8 @@ class PantryItemFormState extends ConsumerState<PantryItemForm> {
           _buildExpandableQuantitySection(),
           const SizedBox(height: 16),
           _buildExpandableCostSection(),
+          const SizedBox(height: 16),
+          _buildExpandableTermsSection(),
         ],
       ),
     );
@@ -177,6 +219,8 @@ class PantryItemFormState extends ConsumerState<PantryItemForm> {
   Widget _buildExpandableQuantitySection() {
     return Disclosure(
       closed: !_isQuantitySectionExpanded,
+      onOpen: () => setState(() => _isQuantitySectionExpanded = true),
+      onClose: () => setState(() => _isQuantitySectionExpanded = false),
       header: const DisclosureButton(
         child: ListTile(
           title: Text('+ Track quantity (optional)',
@@ -224,6 +268,8 @@ class PantryItemFormState extends ConsumerState<PantryItemForm> {
   Widget _buildExpandableCostSection() {
     return Disclosure(
       closed: !_isCostSectionExpanded,
+      onOpen: () => setState(() => _isCostSectionExpanded = true),
+      onClose: () => setState(() => _isCostSectionExpanded = false),
       header: const DisclosureButton(
         child: ListTile(
           title: Text('+ Track cost (optional)',
@@ -288,5 +334,193 @@ class PantryItemFormState extends ConsumerState<PantryItemForm> {
         ),
       ),
     );
+  }
+  
+  Widget _buildExpandableTermsSection() {
+    return Disclosure(
+      closed: !_isTermsSectionExpanded,
+      onOpen: () => setState(() => _isTermsSectionExpanded = true),
+      onClose: () => setState(() => _isTermsSectionExpanded = false),
+      header: const DisclosureButton(
+        child: ListTile(
+          title: Text('+ Add matching terms (optional)',
+            style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500)),
+          trailing: DisclosureIcon(),
+        ),
+      ),
+      child: DisclosureView(
+        padding: const EdgeInsets.only(top: 16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Terms heading
+            Row(
+              children: [
+                const Text(
+                  'Matching Terms',
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 16,
+                  ),
+                ),
+                const Spacer(),
+
+                // Add term button
+                IconButton(
+                  icon: const Icon(Icons.add_circle_outline),
+                  onPressed: _showAddTermDialog,
+                  tooltip: 'Add New Term',
+                ),
+              ],
+            ),
+
+            const SizedBox(height: 8),
+
+            // No terms placeholder
+            if (_terms.isEmpty)
+              const Padding(
+                padding: EdgeInsets.all(8.0),
+                child: Text(
+                  'No additional terms for this item. Add terms to improve recipe matching.',
+                  style: TextStyle(fontStyle: FontStyle.italic, color: Colors.grey),
+                ),
+              ),
+
+            // Terms list with reordering
+            if (_terms.isNotEmpty)
+              ReorderableListView.builder(
+                shrinkWrap: true,
+                physics: const NeverScrollableScrollPhysics(),
+                onReorder: (oldIndex, newIndex) {
+                  setState(() {
+                    if (oldIndex < newIndex) {
+                      newIndex -= 1;
+                    }
+
+                    final item = _terms.removeAt(oldIndex);
+                    _terms.insert(newIndex, item);
+
+                    // Update sort values
+                    for (int i = 0; i < _terms.length; i++) {
+                      _terms[i] = PantryItemTerm(
+                        value: _terms[i].value,
+                        source: _terms[i].source,
+                        sort: i,
+                      );
+                    }
+                  });
+                },
+                itemCount: _terms.length,
+                itemBuilder: (context, index) {
+                  final term = _terms[index];
+                  return _buildTermItem(
+                    key: ValueKey('term_${term.value}_$index'),
+                    term: term,
+                    index: index,
+                  );
+                },
+              ),
+
+            const SizedBox(height: 16),
+
+            // Help text
+            const Text(
+              'Tip: Add terms that match recipe ingredients to improve matching.',
+              style: TextStyle(fontSize: 12, color: Colors.grey),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildTermItem({
+    required Key key,
+    required PantryItemTerm term,
+    required int index,
+  }) {
+    return Card(
+      key: key,
+      elevation: 1,
+      margin: const EdgeInsets.symmetric(vertical: 4),
+      child: ListTile(
+        title: Text(term.value),
+        subtitle: Text('Source: ${term.source}'),
+        trailing: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            // Reorder handle
+            const Icon(Icons.drag_handle),
+
+            // Delete button
+            IconButton(
+              icon: const Icon(Icons.delete_outline),
+              onPressed: () {
+                setState(() {
+                  _terms.removeAt(index);
+                  
+                  // Update sort values
+                  for (int i = 0; i < _terms.length; i++) {
+                    _terms[i] = PantryItemTerm(
+                      value: _terms[i].value,
+                      source: _terms[i].source,
+                      sort: i,
+                    );
+                  }
+                });
+              },
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  void _showAddTermDialog() {
+    _termController.clear();
+    
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Add Matching Term'),
+        content: TextField(
+          controller: _termController,
+          decoration: const InputDecoration(
+            labelText: 'Term',
+            hintText: 'Enter a matching term',
+          ),
+          autofocus: true,
+          textCapitalization: TextCapitalization.words,
+          onSubmitted: (_) => _addNewTerm(),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: const Text('Cancel'),
+          ),
+          TextButton(
+            onPressed: _addNewTerm,
+            child: const Text('Add'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _addNewTerm() {
+    final value = _termController.text.trim();
+    if (value.isNotEmpty) {
+      // Check if term already exists
+      if (!_terms.any((term) => term.value.toLowerCase() == value.toLowerCase())) {
+        setState(() {
+          _terms.add(PantryItemTerm(
+            value: value,
+            source: 'user',
+            sort: _terms.length,
+          ));
+        });
+      }
+      Navigator.of(context).pop();
+    }
   }
 }
