@@ -99,7 +99,7 @@ Key architectural aspects:
 ### Key Components
 
 1. **Database Models**:
-   - Models defined in `database/models/` directory
+   - Models defined in `lib/database/models/` directory
    - Uses Drift for type-safe SQLite access
    - Recipes, folders, ingredients, steps as core models
    - Sharing models for collaborative features
@@ -181,7 +181,7 @@ Key architectural aspects:
 2. **Term System**:
    - Terms are the foundation for ingredient-pantry matching
    - Generated through canonicalization process
-   - Denormalized into dedicated tables for query efficiency
+   - Denormalized into dedicated tables (not managed by Drift, so exist in real text columns instead of embedded within the data column as JSONB) for query efficiency
    - Enables smart recipe filtering based on pantry contents
 
 3. **Wolt Bottom Sheets**:
