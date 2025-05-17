@@ -48,11 +48,11 @@ class PantryNotifier
       price: price,
       terms: terms,
     );
-    
+
     // We don't need to manually refresh - Drift and our StreamSubscription will handle it
     // The database events will trigger the watchItems() stream, which our subscription
     // is already listening to in the constructor
-    
+
     return itemId;
   }
 
@@ -73,18 +73,18 @@ class PantryNotifier
       inStock: inStock,
       unit: unit,
       quantity: quantity,
-      baseUnit: baseUnit,
+    baseUnit: baseUnit,
       baseQuantity: baseQuantity,
       price: price,
       terms: terms,
     );
-    
+
     // Database change events will automatically trigger the stream
   }
 
   Future<void> deleteItem(String id) async {
     await _repo.deleteItem(id);
-    
+
     // Database change events will automatically trigger the stream
   }
 }

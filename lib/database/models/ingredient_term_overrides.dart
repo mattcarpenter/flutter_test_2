@@ -11,4 +11,3 @@ class IngredientTermOverrides extends Table {
   IntColumn get createdAt => integer().nullable()();
   IntColumn get deletedAt => integer().nullable()(); // Soft delete
 }
-
