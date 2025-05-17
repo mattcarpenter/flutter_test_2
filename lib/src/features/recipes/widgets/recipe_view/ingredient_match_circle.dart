@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart';
 import 'package:recipe_app/src/models/ingredient_pantry_match.dart';
 
 /// A widget that displays a colored circle indicating the pantry match status
@@ -19,6 +20,16 @@ class IngredientMatchCircle extends StatelessWidget {
     required this.onTap,
     this.size = 8.0,
   }) : super(key: key);
+  
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(DiagnosticsProperty<IngredientPantryMatch>('match', match));
+    properties.add(DiagnosticsProperty<bool>('hasMatch', match.hasMatch));
+    if (match.hasMatch) {
+      properties.add(DiagnosticsProperty<bool>('inStock', match.pantryItem!.inStock));
+    }
+  }
 
   @override
   Widget build(BuildContext context) {

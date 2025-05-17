@@ -34,19 +34,27 @@ class PantryNotifier
     double? baseQuantity,
     double? price,
     List<PantryItemTerm>? terms,
-  }) =>
-      _repo.addItem(
-        name: name,
-        inStock: inStock,
-        userId: userId,
-        householdId: householdId,
-        unit: unit,
-        quantity: quantity,
-        baseUnit: baseUnit,
-        baseQuantity: baseQuantity,
-        price: price,
-        terms: terms,
-      );
+  }) async {
+    // Add the item to the repository
+    final itemId = await _repo.addItem(
+      name: name,
+      inStock: inStock,
+      userId: userId,
+      householdId: householdId,
+      unit: unit,
+      quantity: quantity,
+      baseUnit: baseUnit,
+      baseQuantity: baseQuantity,
+      price: price,
+      terms: terms,
+    );
+    
+    // We don't need to manually refresh - Drift and our StreamSubscription will handle it
+    // The database events will trigger the watchItems() stream, which our subscription
+    // is already listening to in the constructor
+    
+    return itemId;
+  }
 
   Future<void> updateItem({
     required String id,
@@ -58,21 +66,27 @@ class PantryNotifier
     double? baseQuantity,
     double? price,
     List<PantryItemTerm>? terms,
-  }) =>
-      _repo.updateItem(
-        id: id,
-        name: name,
-        inStock: inStock,
-        unit: unit,
-        quantity: quantity,
-        baseUnit: baseUnit,
-        baseQuantity: baseQuantity,
-        price: price,
-        terms: terms,
-      );
+  }) async {
+    await _repo.updateItem(
+      id: id,
+      name: name,
+      inStock: inStock,
+      unit: unit,
+      quantity: quantity,
+      baseUnit: baseUnit,
+      baseQuantity: baseQuantity,
+      price: price,
+      terms: terms,
+    );
+    
+    // Database change events will automatically trigger the stream
+  }
 
-  Future<void> deleteItem(String id) =>
-      _repo.deleteItem(id);
+  Future<void> deleteItem(String id) async {
+    await _repo.deleteItem(id);
+    
+    // Database change events will automatically trigger the stream
+  }
 }
 
 // Expose PantryNotifier

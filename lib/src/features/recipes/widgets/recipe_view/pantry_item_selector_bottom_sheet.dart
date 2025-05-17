@@ -3,11 +3,13 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:wolt_modal_sheet/wolt_modal_sheet.dart';
 import 'package:recipe_app/database/database.dart';
 import 'package:recipe_app/src/providers/pantry_provider.dart';
+import 'package:recipe_app/src/providers/recipe_provider.dart';
 
 /// Shows a bottom sheet with a list of pantry items that can be selected
 void showPantryItemSelectorBottomSheet({
   required BuildContext context,
   required Function(String itemName) onItemSelected,
+  String? recipeId, // Optional recipe ID to invalidate ingredient matches
 }) {
   WoltModalSheet.show(
     useRootNavigator: true,
@@ -27,7 +29,24 @@ void showPantryItemSelectorBottomSheet({
           ),
           child: PantryItemSelectorContent(
             onItemSelected: (itemName) {
+              // Do the callback
               onItemSelected(itemName);
+              
+              // If a recipe ID was provided, invalidate the ingredient matches
+              if (recipeId != null) {
+                // Use the container to access providers
+                final container = ProviderScope.containerOf(context);
+                
+                // Invalidate and refresh immediately
+                container.invalidate(recipeIngredientMatchesProvider(recipeId));
+                
+                // Also invalidate other providers that might be watching this
+                container.invalidate(pantryItemsProvider);
+                
+                // Force an immediate refresh
+                container.read(recipeIngredientMatchesProvider(recipeId).future);
+              }
+              
               Navigator.of(modalContext).pop();
             },
           ),
@@ -126,7 +145,15 @@ class _PantryItemSelectorContentState extends ConsumerState<PantryItemSelectorCo
                           color: item.inStock ? Colors.green : Colors.red,
                         ),
                         onTap: () {
+                          // Force immediate invalidation after selection
                           widget.onItemSelected(item.name);
+                          
+                          // A small delay before closing to ensure data propagates
+                          Future.delayed(const Duration(milliseconds: 100), () {
+                            if (mounted) {
+                              Navigator.of(context).pop();
+                            }
+                          });
                         },
                       );
                     },

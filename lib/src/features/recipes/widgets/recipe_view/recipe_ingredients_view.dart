@@ -3,10 +3,11 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../../database/models/ingredients.dart';
 import '../../../../models/ingredient_pantry_match.dart';
 import '../../../../providers/recipe_provider.dart';
+import '../../../../providers/pantry_provider.dart';
 import 'ingredient_match_circle.dart';
 import 'ingredient_matches_bottom_sheet.dart';
 
-class RecipeIngredientsView extends ConsumerWidget {
+class RecipeIngredientsView extends ConsumerStatefulWidget {
   final List<Ingredient> ingredients;
   final String? recipeId;
 
@@ -17,10 +18,54 @@ class RecipeIngredientsView extends ConsumerWidget {
   }) : super(key: key);
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<RecipeIngredientsView> createState() => _RecipeIngredientsViewState();
+}
+
+class _RecipeIngredientsViewState extends ConsumerState<RecipeIngredientsView> {
+  @override
+  void initState() {
+    super.initState();
+    // Pre-fetch ingredient matches when the view is first loaded
+    if (widget.recipeId != null) {
+      // Use future to defer until after initial build
+      Future.microtask(() {
+        // First make sure we have the latest pantry data
+        ref.refresh(pantryItemsProvider);
+        
+        // Then invalidate and prefetch the ingredient matches
+        ref.invalidate(recipeIngredientMatchesProvider(widget.recipeId!));
+        ref.read(recipeIngredientMatchesProvider(widget.recipeId!).future);
+        
+        print("Initialized RecipeIngredientsView for ${widget.recipeId}");
+      });
+    }
+  }
+  
+  @override
+  void didUpdateWidget(RecipeIngredientsView oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    
+    // If the recipe ID changes or the ingredients list changes, refresh the data
+    if (widget.recipeId != oldWidget.recipeId || 
+        widget.ingredients.length != oldWidget.ingredients.length) {
+      if (widget.recipeId != null) {
+        Future.microtask(() {
+          ref.invalidate(recipeIngredientMatchesProvider(widget.recipeId!));
+          ref.read(recipeIngredientMatchesProvider(widget.recipeId!).future);
+          print("RecipeIngredientsView updated for ${widget.recipeId}");
+        });
+      }
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    // Watch the pantry provider to detect changes to pantry items
+    ref.watch(pantryItemsProvider);
+    
     // Only fetch matches if recipeId is provided
-    final matchesAsync = recipeId != null 
-      ? ref.watch(recipeIngredientMatchesProvider(recipeId!))
+    final matchesAsync = widget.recipeId != null 
+      ? ref.watch(recipeIngredientMatchesProvider(widget.recipeId!))
       : null;
 
     return Column(
@@ -50,16 +95,16 @@ class RecipeIngredientsView extends ConsumerWidget {
           ],
         ),
 
-        if (ingredients.isEmpty)
+        if (widget.ingredients.isEmpty)
           const Text('No ingredients listed.'),
 
         // Ingredients list
         ListView.builder(
           shrinkWrap: true,
           physics: const NeverScrollableScrollPhysics(),
-          itemCount: ingredients.length,
+          itemCount: widget.ingredients.length,
           itemBuilder: (context, index) {
-            final ingredient = ingredients[index];
+            final ingredient = widget.ingredients[index];
 
             // Section header
             if (ingredient.type == 'section') {
@@ -179,9 +224,33 @@ class RecipeIngredientsView extends ConsumerWidget {
   
   /// Shows the bottom sheet with ingredient match details
   void _showMatchesBottomSheet(BuildContext context, WidgetRef ref, RecipeIngredientMatches matches) {
-    showIngredientMatchesBottomSheet(
-      context,
-      matches: matches,
-    );
+    print("Opening ingredient matches bottom sheet for recipe ${matches.recipeId}");
+    print("Current matches: ${matches.matches.length}");
+    print("Matched ingredients: ${matches.matches.where((m) => m.hasMatch).length}");
+    
+    // Refresh the recipe ingredient match data before showing the sheet
+    // This ensures we have the latest data including newly added ingredients
+    ref.invalidate(recipeIngredientMatchesProvider(matches.recipeId));
+    
+    // Show the bottom sheet after refreshing the data
+    Future.microtask(() {
+      // Wait for the provider to refresh its data before showing the sheet
+      ref.read(recipeIngredientMatchesProvider(matches.recipeId).future).then((refreshedMatches) {
+        print("Refreshed matches: ${refreshedMatches.matches.length}");
+        print("Refreshed matched ingredients: ${refreshedMatches.matches.where((m) => m.hasMatch).length}");
+        
+        showIngredientMatchesBottomSheet(
+          context,
+          matches: refreshedMatches,
+        );
+      }).catchError((error) {
+        print("Error refreshing matches: $error");
+        // If there's an error refreshing, still show the sheet with the original data
+        showIngredientMatchesBottomSheet(
+          context,
+          matches: matches,
+        );
+      });
+    });
   }
 }

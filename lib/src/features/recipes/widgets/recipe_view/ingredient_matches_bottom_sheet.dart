@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/foundation.dart';
 import 'dart:io' show Platform;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:wolt_modal_sheet/wolt_modal_sheet.dart';
@@ -20,6 +21,10 @@ void showIngredientMatchesBottomSheet(
   BuildContext context, {
   required RecipeIngredientMatches matches,
 }) {
+  // Ensure all ingredients have been properly initialized in the matches object
+  if (matches.matches.isEmpty && matches.recipeId.isNotEmpty) {
+    debugPrint("Warning: No matches found for recipe ${matches.recipeId}");
+  }
   // Create a global key to access the state directly
   final contentKey = GlobalKey<_IngredientMatchesBottomSheetContentState>();
   
@@ -52,7 +57,10 @@ void showIngredientMatchesBottomSheet(
                     // Force a refresh of the matches provider to get fresh data next time
                     // by invalidating the cache
                     ref.invalidate(recipeIngredientMatchesProvider(matches.recipeId));
-                    print("Invalidated recipe ingredient matches for ${matches.recipeId}");
+                    
+                    // Force an immediate refresh to ensure UI updates on return
+                    ref.read(recipeIngredientMatchesProvider(matches.recipeId).future);
+                    print("Invalidated and refreshed recipe ingredient matches for ${matches.recipeId}");
                     
                     // Force immediate closure to trigger refresh when reopened
                     if (modalContext.mounted) {
@@ -421,6 +429,7 @@ class _IngredientMatchesBottomSheetContentState extends State<IngredientMatchesB
                 Navigator.pop(context);
                 showPantryItemSelectorBottomSheet(
                   context: context,
+                  recipeId: widget.matches.recipeId,
                   onItemSelected: (itemName) {
                     _addTermFromPantryItem(ingredientId, ingredient, itemName);
                   },
@@ -475,6 +484,7 @@ class _IngredientMatchesBottomSheetContentState extends State<IngredientMatchesB
               Future.delayed(Duration.zero, () {
                 showPantryItemSelectorBottomSheet(
                   context: context,
+                  recipeId: widget.matches.recipeId,
                   onItemSelected: (itemName) {
                     _addTermFromPantryItem(ingredientId, ingredient, itemName);
                   },

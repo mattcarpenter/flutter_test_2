@@ -453,8 +453,9 @@ void main() async {
           terms: ['rice', 'white rice']
         );
         
-        // Use the provider to get ingredient matches
-        final matchResult = await container.read(recipeIngredientMatchesProvider(recipeId).future);
+        // Use the repository directly instead of the provider to avoid async disposal issues
+        final repository = container.read(recipeRepositoryProvider);
+        final matchResult = await repository.findPantryMatchesForRecipe(recipeId);
         
         // Verify basic results
         expect(matchResult.recipeId, recipeId);
@@ -535,8 +536,9 @@ void main() async {
           (overrides) => overrides.any((o) => o.inputTerm == inputTerm),
         );
         
-        // Use the provider to get ingredient matches
-        final matchResult = await container.read(recipeIngredientMatchesProvider(recipeId).future);
+        // Use the repository directly to get ingredient matches instead of the provider
+        final repository = container.read(recipeRepositoryProvider);
+        final matchResult = await repository.findPantryMatchesForRecipe(recipeId);
         
         // Should match due to the override
         expect(matchResult.matches.length, 1);

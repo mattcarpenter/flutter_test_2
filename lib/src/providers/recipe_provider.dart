@@ -499,27 +499,26 @@ final pantryRecipeMatchProvider = AsyncNotifierProvider<PantryRecipeMatchNotifie
 
 /// Provider for finding matching pantry items for a specific recipe's ingredients
 /// Takes recipeId as a parameter and returns RecipeIngredientMatches
-/// Uses autoDispose to ensure it re-fetches data when needed instead of caching indefinitely
-final recipeIngredientMatchesProvider = FutureProvider.autoDispose.family<RecipeIngredientMatches, String>(
+final recipeIngredientMatchesProvider = FutureProvider.family<RecipeIngredientMatches, String>(
   (ref, recipeId) async {
     // Watch the pantry provider to automatically refresh this provider when pantry data changes
     // This ensures the match circles update when you add/remove items from pantry
     ref.watch(pantryItemsProvider);
-
-    // Add a cache invalidation mechanism to force refresh
-    final cacheKey = DateTime.now().millisecondsSinceEpoch;
     
-    // Create a cache invalidation listener
-    ref.keepAlive();
-    ref.onDispose(() {
-      print("Disposing recipeIngredientMatchesProvider for $recipeId");
-      // Force refresh next time
-      ref.invalidateSelf();
-    });
+    // Also listen to the recipe provider to detect when ingredients change
+    ref.watch(recipeByIdStreamProvider(recipeId));
     
-    final repository = ref.read(recipeRepositoryProvider);
-    print("Fetching ingredient matches for $recipeId at timestamp: $cacheKey");
-    return repository.findPantryMatchesForRecipe(recipeId);
+    try {
+      print("Fetching ingredient matches for $recipeId");
+      final repository = ref.read(recipeRepositoryProvider);
+      final matches = await repository.findPantryMatchesForRecipe(recipeId);
+      print("Found ${matches.matches.length} ingredient matches for recipe $recipeId");
+      return matches;
+    } catch (e, stack) {
+      print("Error fetching ingredient matches for $recipeId: $e");
+      // Re-throw to let the UI handle the error state
+      rethrow;
+    }
   },
 );
 

@@ -4,6 +4,8 @@ import 'package:recipe_app/src/features/recipes/widgets/recipe_view/cook_action_
 import 'package:recipe_app/src/features/recipes/widgets/recipe_view/recipe_image_gallery.dart';
 import 'package:recipe_app/src/features/recipes/widgets/recipe_view/recipe_ingredients_view.dart';
 import 'package:recipe_app/src/features/recipes/widgets/recipe_view/recipe_steps_view.dart';
+import 'package:recipe_app/src/providers/pantry_provider.dart';
+import 'package:recipe_app/src/providers/recipe_provider.dart';
 
 import '../../../../../database/database.dart';
 import '../../../../repositories/recipe_repository.dart';
@@ -17,14 +19,50 @@ final recipeByIdStreamProvider = StreamProvider.family<RecipeEntry?, String>(
   },
 );
 
-class RecipeView extends ConsumerWidget {
+class RecipeView extends ConsumerStatefulWidget {
   final String recipeId;
 
   const RecipeView({Key? key, required this.recipeId}) : super(key: key);
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final recipeAsync = ref.watch(recipeByIdStreamProvider(recipeId));
+  ConsumerState<RecipeView> createState() => _RecipeViewState();
+}
+
+class _RecipeViewState extends ConsumerState<RecipeView> {
+  @override
+  void initState() {
+    super.initState();
+    // Pre-fetch ingredient matches when the view is loaded
+    Future.microtask(() {
+      // First make sure the pantry data is fresh
+      ref.refresh(pantryItemsProvider);
+      
+      // Then invalidate and read the ingredient matches
+      ref.invalidate(recipeIngredientMatchesProvider(widget.recipeId));
+      ref.read(recipeIngredientMatchesProvider(widget.recipeId).future);
+      
+      print("Initialized recipe view for ${widget.recipeId}, refreshed providers");
+    });
+  }
+  
+  @override
+  void didUpdateWidget(RecipeView oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    // If the recipe ID changes, refresh the data
+    if (oldWidget.recipeId != widget.recipeId) {
+      Future.microtask(() {
+        ref.invalidate(recipeIngredientMatchesProvider(widget.recipeId));
+        ref.read(recipeIngredientMatchesProvider(widget.recipeId).future);
+        print("Recipe ID changed, refreshed providers");
+      });
+    }
+  }
+  
+  @override
+  Widget build(BuildContext context) {
+    // Watch pantry items to detect changes
+    ref.watch(pantryItemsProvider);
+    final recipeAsync = ref.watch(recipeByIdStreamProvider(widget.recipeId));
 
     return recipeAsync.when(
       loading: () => const Center(child: CircularProgressIndicator()),
@@ -131,7 +169,7 @@ class RecipeView extends ConsumerWidget {
               ingredients: recipe.ingredients ?? [],
               recipeId: recipe.id,
               // Add a unique key to force rebuild
-              key: ValueKey('IngredientsView-${recipe.id}-${DateTime.now().millisecondsSinceEpoch}'),
+              key: ValueKey('IngredientsView-${recipe.id}'),
             ),
 
             const SizedBox(height: 8),
