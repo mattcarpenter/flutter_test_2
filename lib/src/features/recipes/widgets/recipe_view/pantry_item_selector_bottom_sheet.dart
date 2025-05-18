@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:wolt_modal_sheet/wolt_modal_sheet.dart';
 import 'package:recipe_app/database/database.dart';
+import 'package:recipe_app/database/models/pantry_items.dart'; // For StockStatus enum
 import 'package:recipe_app/src/providers/pantry_provider.dart';
 import 'package:recipe_app/src/providers/recipe_provider.dart';
 
@@ -74,6 +75,34 @@ class PantryItemSelectorContent extends ConsumerStatefulWidget {
 class _PantryItemSelectorContentState extends ConsumerState<PantryItemSelectorContent> {
   final TextEditingController _searchController = TextEditingController();
   String _searchQuery = '';
+  
+  // Helper method to get color based on stock status
+  Color _getStockStatusColor(StockStatus status) {
+    switch (status) {
+      case StockStatus.outOfStock:
+        return Colors.red;
+      case StockStatus.lowStock:
+        return Colors.yellow.shade700; // Darker yellow for better visibility
+      case StockStatus.inStock:
+        return Colors.green;
+      default:
+        return Colors.grey; // Fallback
+    }
+  }
+  
+  // Helper method to get text for stock status
+  String _getStockStatusText(StockStatus status) {
+    switch (status) {
+      case StockStatus.outOfStock:
+        return 'Out of stock';
+      case StockStatus.lowStock:
+        return 'Low stock';
+      case StockStatus.inStock:
+        return 'In stock';
+      default:
+        return 'Unknown';
+    }
+  }
 
   @override
   void dispose() {
@@ -139,10 +168,10 @@ class _PantryItemSelectorContentState extends ConsumerState<PantryItemSelectorCo
                       final item = filteredItems[index];
                       return ListTile(
                         title: Text(item.name),
-                        subtitle: Text(item.inStock ? 'In stock' : 'Out of stock'),
+                        subtitle: Text(_getStockStatusText(item.stockStatus)),
                         leading: Icon(
                           Icons.kitchen,
-                          color: item.inStock ? Colors.green : Colors.red,
+                          color: _getStockStatusColor(item.stockStatus),
                         ),
                         onTap: () {
                           // Force immediate invalidation after selection

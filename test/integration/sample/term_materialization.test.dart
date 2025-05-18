@@ -5,6 +5,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:recipe_app/database/models/ingredient_terms.dart';
 import 'package:recipe_app/database/models/ingredients.dart';
 import 'package:recipe_app/database/models/pantry_item_terms.dart';
+import 'package:recipe_app/database/models/pantry_items.dart'; // For StockStatus enum
 import 'package:recipe_app/database/models/steps.dart';
 import 'package:recipe_app/database/database.dart';
 import 'package:recipe_app/database/powersync.dart';
@@ -210,7 +211,7 @@ void main() async {
         // Add a pantry item with terms
         final pantryItemId = await container.read(pantryItemsProvider.notifier).addItem(
           name: "Granny Smith Apples",
-          inStock: true,
+          stockStatus: StockStatus.inStock,
           userId: userId,
         );
 
@@ -226,7 +227,7 @@ void main() async {
           PantryItemsCompanion(
             id: Value(pantryItemId),
             name: const Value("Granny Smith Apples"),
-            inStock: const Value(true),
+            stockStatus: const Value(StockStatus.inStock),
             userId: Value(userId),
             terms: Value(appleTerms),
           ),
@@ -263,7 +264,7 @@ void main() async {
           PantryItemsCompanion(
             id: Value(pantryItemId),
             name: const Value("Granny Smith Apples"),
-            inStock: const Value(true),
+            stockStatus: const Value(StockStatus.inStock),
             userId: Value(userId),
             terms: Value(updatedTerms),
           ),
@@ -417,7 +418,7 @@ void main() async {
         // Add a pantry item
         pantryItemId = await container.read(pantryItemsProvider.notifier).addItem(
           name: "Green Apples",
-          inStock: true,
+          stockStatus: StockStatus.inStock,
           userId: userId,
         );
 
@@ -433,7 +434,7 @@ void main() async {
           PantryItemsCompanion(
             id: Value(pantryItemId),
             name: const Value("Green Apples"),
-            inStock: const Value(true),
+            stockStatus: const Value(StockStatus.inStock),
             userId: Value(userId),
             terms: Value(appleTerms),
           ),
@@ -578,7 +579,7 @@ void main() async {
         // Add pantry item with householdId
         pantryItemId = await container.read(pantryItemsProvider.notifier).addItem(
           name: "Russet Potatoes",
-          inStock: true,
+          stockStatus: StockStatus.inStock,
           userId: householdOwnerId,
           householdId: householdId,
         );
@@ -594,7 +595,7 @@ void main() async {
           PantryItemsCompanion(
             id: Value(pantryItemId),
             name: const Value("Russet Potatoes"),
-            inStock: const Value(true),
+            stockStatus: const Value(StockStatus.inStock),
             userId: Value(householdOwnerId),
             householdId: Value(householdId),
             terms: Value(potatoTerms),

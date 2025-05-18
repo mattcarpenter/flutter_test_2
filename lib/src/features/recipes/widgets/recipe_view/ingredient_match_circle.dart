@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
+import 'package:recipe_app/database/models/pantry_items.dart'; // For StockStatus enum
 import 'package:recipe_app/src/models/ingredient_pantry_match.dart';
 
 /// A widget that displays a colored circle indicating the pantry match status
@@ -27,7 +28,7 @@ class IngredientMatchCircle extends StatelessWidget {
     properties.add(DiagnosticsProperty<IngredientPantryMatch>('match', match));
     properties.add(DiagnosticsProperty<bool>('hasMatch', match.hasMatch));
     if (match.hasMatch) {
-      properties.add(DiagnosticsProperty<bool>('inStock', match.pantryItem!.inStock));
+      properties.add(EnumProperty<StockStatus>('stockStatus', match.pantryItem!.stockStatus));
     }
   }
 
@@ -52,7 +53,16 @@ class IngredientMatchCircle extends StatelessWidget {
       return Colors.grey; // No match found
     }
     
-    // Match found, check stock status
-    return match.pantryItem!.inStock ? Colors.green : Colors.red;
+    // Match found, get color based on stock status
+    switch (match.pantryItem!.stockStatus) {
+      case StockStatus.outOfStock:
+        return Colors.red;
+      case StockStatus.lowStock:
+        return Colors.yellow.shade700; // Darker yellow for better visibility
+      case StockStatus.inStock:
+        return Colors.green;
+      default:
+        return Colors.grey; // Fallback
+    }
   }
 }

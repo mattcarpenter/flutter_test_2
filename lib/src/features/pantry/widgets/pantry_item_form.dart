@@ -5,6 +5,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:disclosure/disclosure.dart';
 import '../../../../database/database.dart';
 import '../../../../database/models/pantry_item_terms.dart';
+import '../../../../database/models/pantry_items.dart'; // For StockStatus enum
 import '../../../providers/pantry_provider.dart';
 
 class PantryItemForm extends ConsumerStatefulWidget {
@@ -28,7 +29,7 @@ class PantryItemFormState extends ConsumerState<PantryItemForm> {
   late final TextEditingController _priceController;
   late final TextEditingController _termController;
   
-  bool _inStock = true;
+  StockStatus _stockStatus = StockStatus.inStock;
   bool _isQuantitySectionExpanded = false;
   bool _isCostSectionExpanded = false;
   bool _isTermsSectionExpanded = false;
@@ -56,7 +57,7 @@ class PantryItemFormState extends ConsumerState<PantryItemForm> {
     );
     _termController = TextEditingController();
     
-    _inStock = item?.inStock ?? true;
+    _stockStatus = item?.stockStatus ?? StockStatus.inStock;
     
     // Initialize terms list if available for existing items
     if (item?.terms != null && item!.terms!.isNotEmpty) {
@@ -128,7 +129,7 @@ class PantryItemFormState extends ConsumerState<PantryItemForm> {
         // Create new pantry item - pass null for terms to trigger canonicalization
         await ref.read(pantryItemsProvider.notifier).addItem(
           name: name,
-          inStock: _inStock,
+          stockStatus: _stockStatus,
           userId: userId,
           unit: unit,
           quantity: quantity,
@@ -142,7 +143,7 @@ class PantryItemFormState extends ConsumerState<PantryItemForm> {
         await ref.read(pantryItemsProvider.notifier).updateItem(
           id: widget.initialPantryItem!.id,
           name: name,
-          inStock: _inStock,
+          stockStatus: _stockStatus,
           unit: unit,
           quantity: quantity,
           baseUnit: baseUnit,
@@ -190,18 +191,73 @@ class PantryItemFormState extends ConsumerState<PantryItemForm> {
           textCapitalization: TextCapitalization.words,
         ),
         const SizedBox(height: 16),
-        // In stock toggle
+        // Stock status selector
         Row(
           children: [
-            const Text('I have this'),
+            const Text('Stock Status:'),
             const Spacer(),
-            CupertinoSwitch(
-              value: _inStock,
-              onChanged: (value) {
-                setState(() {
-                  _inStock = value;
-                });
+            DropdownButton<StockStatus>(
+              value: _stockStatus,
+              onChanged: (StockStatus? newValue) {
+                if (newValue != null) {
+                  setState(() {
+                    _stockStatus = newValue;
+                  });
+                }
               },
+              items: [
+                DropdownMenuItem(
+                  value: StockStatus.inStock,
+                  child: Row(
+                    children: [
+                      Container(
+                        width: 12,
+                        height: 12,
+                        margin: const EdgeInsets.only(right: 8),
+                        decoration: const BoxDecoration(
+                          shape: BoxShape.circle,
+                          color: Colors.green,
+                        ),
+                      ),
+                      const Text('In Stock'),
+                    ],
+                  ),
+                ),
+                DropdownMenuItem(
+                  value: StockStatus.lowStock,
+                  child: Row(
+                    children: [
+                      Container(
+                        width: 12,
+                        height: 12,
+                        margin: const EdgeInsets.only(right: 8),
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          color: Colors.yellow.shade700,
+                        ),
+                      ),
+                      const Text('Low Stock'),
+                    ],
+                  ),
+                ),
+                DropdownMenuItem(
+                  value: StockStatus.outOfStock,
+                  child: Row(
+                    children: [
+                      Container(
+                        width: 12,
+                        height: 12,
+                        margin: const EdgeInsets.only(right: 8),
+                        decoration: const BoxDecoration(
+                          shape: BoxShape.circle,
+                          color: Colors.red,
+                        ),
+                      ),
+                      const Text('Out of Stock'),
+                    ],
+                  ),
+                ),
+              ],
             ),
           ],
         ),

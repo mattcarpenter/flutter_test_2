@@ -6,6 +6,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:wolt_modal_sheet/wolt_modal_sheet.dart';
 import 'package:disclosure/disclosure.dart';
 import 'package:super_context_menu/super_context_menu.dart';
+import 'package:recipe_app/database/models/pantry_items.dart'; // For StockStatus enum
 import 'package:recipe_app/src/models/ingredient_pantry_match.dart';
 import 'package:recipe_app/database/models/ingredients.dart';
 import 'package:recipe_app/database/models/ingredient_terms.dart';
@@ -107,6 +108,20 @@ class _IngredientMatchesBottomSheetContentState extends State<IngredientMatchesB
   final Set<String> _expandedIngredientIds = {};
   // Map to store working copies of ingredient terms
   final Map<String, List<IngredientTerm>> _ingredientTermsMap = {};
+  
+  // Helper method to get color based on stock status
+  Color _getStockStatusColor(StockStatus status) {
+    switch (status) {
+      case StockStatus.outOfStock:
+        return Colors.red;
+      case StockStatus.lowStock:
+        return Colors.yellow.shade700; // Darker yellow for better visibility
+      case StockStatus.inStock:
+        return Colors.green;
+      default:
+        return Colors.grey; // Fallback
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -204,10 +219,10 @@ class _IngredientMatchesBottomSheetContentState extends State<IngredientMatchesB
                               'Matched with: ${match.pantryItem!.name}',
                               style: TextStyle(
                                 fontSize: 14,
-                                color: match.pantryItem!.inStock ? Colors.green : Colors.red,
-                                fontStyle: match.pantryItem!.inStock
-                                  ? FontStyle.normal
-                                  : FontStyle.italic,
+                                color: _getStockStatusColor(match.pantryItem!.stockStatus),
+                                fontStyle: match.pantryItem!.stockStatus == StockStatus.outOfStock
+                                  ? FontStyle.italic
+                                  : FontStyle.normal,
                               ),
                             ),
                           ),

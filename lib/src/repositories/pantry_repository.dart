@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:uuid/uuid.dart';
 import '../../database/database.dart';
 import '../../database/models/pantry_item_terms.dart';
+import '../../database/models/pantry_items.dart'; // For StockStatus enum
 import '../../database/powersync.dart';
 import '../managers/pantry_item_term_queue_manager.dart';
 
@@ -26,7 +27,7 @@ class PantryRepository {
   /// Create a new pantry item. Returns the new item's ID.
   Future<String> addItem({
     required String name,
-    bool inStock = true,
+    StockStatus stockStatus = StockStatus.inStock,
     String? userId,
     String? householdId,
     List<PantryItemTerm>? terms,
@@ -43,7 +44,7 @@ class PantryRepository {
     final companion = PantryItemsCompanion.insert(
       id: Value(newId),
       name: name,
-      inStock: Value(inStock),
+      stockStatus: Value(stockStatus),
       userId: Value(userId),
       householdId: Value(householdId),
       unit: Value(unit),
@@ -74,7 +75,7 @@ class PantryRepository {
   Future<void> updateItem({
     required String id,
     String? name,
-    bool? inStock,
+    StockStatus? stockStatus,
     List<PantryItemTerm>? terms,
     String? unit,
     double? quantity,
@@ -91,7 +92,7 @@ class PantryRepository {
 
     final companion = PantryItemsCompanion(
       name: name != null ? Value(name) : const Value.absent(),
-      inStock: inStock != null ? Value(inStock) : const Value.absent(),
+      stockStatus: stockStatus != null ? Value(stockStatus) : const Value.absent(),
       unit: unit != null ? Value(unit) : const Value.absent(),
       quantity: quantity != null ? Value(quantity) : const Value.absent(),
       baseUnit: baseUnit != null ? Value(baseUnit) : const Value.absent(),

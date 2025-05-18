@@ -8,6 +8,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../database/converters.dart';
 import '../../database/database.dart';
 import '../../database/models/ingredients.dart';
+import '../../database/models/pantry_items.dart'; // For StockStatus enum
 import '../../database/models/recipe_images.dart';
 import '../../database/models/steps.dart';
 import '../../database/powersync.dart';
@@ -672,7 +673,7 @@ class RecipeRepository {
     p.created_at,
     p.updated_at,
     p.deleted_at,
-    p.in_stock
+    p.stock_status
   FROM (
     SELECT DISTINCT ingredient_id 
     FROM recipe_ingredient_terms 
@@ -718,6 +719,10 @@ class RecipeRepository {
         PantryItemEntry? pantryItem;
 
         if (pantryItemId != null) {
+          // Read stock_status directly as integer and convert to enum
+          final stockStatusInt = row.read<int>('stock_status');
+          final stockStatus = StockStatus.values[stockStatusInt];
+          
           pantryItem = PantryItemEntry(
             id: pantryItemId,
             name: row.read<String>('name'),
@@ -728,7 +733,7 @@ class RecipeRepository {
             createdAt: row.readNullable<int>('created_at'),
             updatedAt: row.readNullable<int>('updated_at'),
             deletedAt: row.readNullable<int>('deleted_at'),
-            inStock: row.read<bool>('in_stock'),
+            stockStatus: stockStatus,
           );
         }
 

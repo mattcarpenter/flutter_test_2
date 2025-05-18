@@ -165,7 +165,7 @@ CREATE INDEX IF NOT EXISTS cooks_household_idx
 CREATE TABLE public.pantry_items (
                                      id uuid NOT NULL DEFAULT extensions.uuid_generate_v4(),
                                      name text NOT NULL,
-                                     in_stock integer NOT NULL DEFAULT 1,
+                                     stock_status integer NOT NULL DEFAULT 2, -- 0=out_of_stock, 1=low_stock, 2=in_stock
                                      user_id uuid NOT NULL,
                                      household_id uuid NULL,
                                      unit text NULL,

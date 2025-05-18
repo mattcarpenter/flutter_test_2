@@ -4049,16 +4049,15 @@ class $PantryItemsTable extends PantryItems
   late final GeneratedColumn<String> name = GeneratedColumn<String>(
       'name', aliasedName, false,
       type: DriftSqlType.string, requiredDuringInsert: true);
-  static const VerificationMeta _inStockMeta =
-      const VerificationMeta('inStock');
+  static const VerificationMeta _stockStatusMeta =
+      const VerificationMeta('stockStatus');
   @override
-  late final GeneratedColumn<bool> inStock = GeneratedColumn<bool>(
-      'in_stock', aliasedName, false,
-      type: DriftSqlType.bool,
-      requiredDuringInsert: false,
-      defaultConstraints:
-          GeneratedColumn.constraintIsAlways('CHECK ("in_stock" IN (0, 1))'),
-      defaultValue: const Constant(true));
+  late final GeneratedColumnWithTypeConverter<StockStatus, int> stockStatus =
+      GeneratedColumn<int>('stock_status', aliasedName, false,
+              type: DriftSqlType.int,
+              requiredDuringInsert: false,
+              defaultValue: const Constant(2))
+          .withConverter<StockStatus>($PantryItemsTable.$converterstockStatus);
   static const VerificationMeta _userIdMeta = const VerificationMeta('userId');
   @override
   late final GeneratedColumn<String> userId = GeneratedColumn<String>(
@@ -4127,7 +4126,7 @@ class $PantryItemsTable extends PantryItems
   List<GeneratedColumn> get $columns => [
         id,
         name,
-        inStock,
+        stockStatus,
         userId,
         householdId,
         unit,
@@ -4159,10 +4158,7 @@ class $PantryItemsTable extends PantryItems
     } else if (isInserting) {
       context.missing(_nameMeta);
     }
-    if (data.containsKey('in_stock')) {
-      context.handle(_inStockMeta,
-          inStock.isAcceptableOrUnknown(data['in_stock']!, _inStockMeta));
-    }
+    context.handle(_stockStatusMeta, const VerificationResult.success());
     if (data.containsKey('user_id')) {
       context.handle(_userIdMeta,
           userId.isAcceptableOrUnknown(data['user_id']!, _userIdMeta));
@@ -4221,8 +4217,9 @@ class $PantryItemsTable extends PantryItems
           .read(DriftSqlType.string, data['${effectivePrefix}id'])!,
       name: attachedDatabase.typeMapping
           .read(DriftSqlType.string, data['${effectivePrefix}name'])!,
-      inStock: attachedDatabase.typeMapping
-          .read(DriftSqlType.bool, data['${effectivePrefix}in_stock'])!,
+      stockStatus: $PantryItemsTable.$converterstockStatus.fromSql(
+          attachedDatabase.typeMapping
+              .read(DriftSqlType.int, data['${effectivePrefix}stock_status'])!),
       userId: attachedDatabase.typeMapping
           .read(DriftSqlType.string, data['${effectivePrefix}user_id']),
       householdId: attachedDatabase.typeMapping
@@ -4254,6 +4251,8 @@ class $PantryItemsTable extends PantryItems
     return $PantryItemsTable(attachedDatabase, alias);
   }
 
+  static TypeConverter<StockStatus, int> $converterstockStatus =
+      const StockStatusConverter();
   static TypeConverter<List<PantryItemTerm>, String> $converterterms =
       const PantryItemTermListConverter();
   static TypeConverter<List<PantryItemTerm>?, String?> $convertertermsn =
@@ -4263,7 +4262,7 @@ class $PantryItemsTable extends PantryItems
 class PantryItemEntry extends DataClass implements Insertable<PantryItemEntry> {
   final String id;
   final String name;
-  final bool inStock;
+  final StockStatus stockStatus;
   final String? userId;
   final String? householdId;
   final String? unit;
@@ -4278,7 +4277,7 @@ class PantryItemEntry extends DataClass implements Insertable<PantryItemEntry> {
   const PantryItemEntry(
       {required this.id,
       required this.name,
-      required this.inStock,
+      required this.stockStatus,
       this.userId,
       this.householdId,
       this.unit,
@@ -4295,7 +4294,10 @@ class PantryItemEntry extends DataClass implements Insertable<PantryItemEntry> {
     final map = <String, Expression>{};
     map['id'] = Variable<String>(id);
     map['name'] = Variable<String>(name);
-    map['in_stock'] = Variable<bool>(inStock);
+    {
+      map['stock_status'] = Variable<int>(
+          $PantryItemsTable.$converterstockStatus.toSql(stockStatus));
+    }
     if (!nullToAbsent || userId != null) {
       map['user_id'] = Variable<String>(userId);
     }
@@ -4337,7 +4339,7 @@ class PantryItemEntry extends DataClass implements Insertable<PantryItemEntry> {
     return PantryItemsCompanion(
       id: Value(id),
       name: Value(name),
-      inStock: Value(inStock),
+      stockStatus: Value(stockStatus),
       userId:
           userId == null && nullToAbsent ? const Value.absent() : Value(userId),
       householdId: householdId == null && nullToAbsent
@@ -4375,7 +4377,7 @@ class PantryItemEntry extends DataClass implements Insertable<PantryItemEntry> {
     return PantryItemEntry(
       id: serializer.fromJson<String>(json['id']),
       name: serializer.fromJson<String>(json['name']),
-      inStock: serializer.fromJson<bool>(json['inStock']),
+      stockStatus: serializer.fromJson<StockStatus>(json['stockStatus']),
       userId: serializer.fromJson<String?>(json['userId']),
       householdId: serializer.fromJson<String?>(json['householdId']),
       unit: serializer.fromJson<String?>(json['unit']),
@@ -4395,7 +4397,7 @@ class PantryItemEntry extends DataClass implements Insertable<PantryItemEntry> {
     return <String, dynamic>{
       'id': serializer.toJson<String>(id),
       'name': serializer.toJson<String>(name),
-      'inStock': serializer.toJson<bool>(inStock),
+      'stockStatus': serializer.toJson<StockStatus>(stockStatus),
       'userId': serializer.toJson<String?>(userId),
       'householdId': serializer.toJson<String?>(householdId),
       'unit': serializer.toJson<String?>(unit),
@@ -4413,7 +4415,7 @@ class PantryItemEntry extends DataClass implements Insertable<PantryItemEntry> {
   PantryItemEntry copyWith(
           {String? id,
           String? name,
-          bool? inStock,
+          StockStatus? stockStatus,
           Value<String?> userId = const Value.absent(),
           Value<String?> householdId = const Value.absent(),
           Value<String?> unit = const Value.absent(),
@@ -4428,7 +4430,7 @@ class PantryItemEntry extends DataClass implements Insertable<PantryItemEntry> {
       PantryItemEntry(
         id: id ?? this.id,
         name: name ?? this.name,
-        inStock: inStock ?? this.inStock,
+        stockStatus: stockStatus ?? this.stockStatus,
         userId: userId.present ? userId.value : this.userId,
         householdId: householdId.present ? householdId.value : this.householdId,
         unit: unit.present ? unit.value : this.unit,
@@ -4446,7 +4448,8 @@ class PantryItemEntry extends DataClass implements Insertable<PantryItemEntry> {
     return PantryItemEntry(
       id: data.id.present ? data.id.value : this.id,
       name: data.name.present ? data.name.value : this.name,
-      inStock: data.inStock.present ? data.inStock.value : this.inStock,
+      stockStatus:
+          data.stockStatus.present ? data.stockStatus.value : this.stockStatus,
       userId: data.userId.present ? data.userId.value : this.userId,
       householdId:
           data.householdId.present ? data.householdId.value : this.householdId,
@@ -4469,7 +4472,7 @@ class PantryItemEntry extends DataClass implements Insertable<PantryItemEntry> {
     return (StringBuffer('PantryItemEntry(')
           ..write('id: $id, ')
           ..write('name: $name, ')
-          ..write('inStock: $inStock, ')
+          ..write('stockStatus: $stockStatus, ')
           ..write('userId: $userId, ')
           ..write('householdId: $householdId, ')
           ..write('unit: $unit, ')
@@ -4489,7 +4492,7 @@ class PantryItemEntry extends DataClass implements Insertable<PantryItemEntry> {
   int get hashCode => Object.hash(
       id,
       name,
-      inStock,
+      stockStatus,
       userId,
       householdId,
       unit,
@@ -4507,7 +4510,7 @@ class PantryItemEntry extends DataClass implements Insertable<PantryItemEntry> {
       (other is PantryItemEntry &&
           other.id == this.id &&
           other.name == this.name &&
-          other.inStock == this.inStock &&
+          other.stockStatus == this.stockStatus &&
           other.userId == this.userId &&
           other.householdId == this.householdId &&
           other.unit == this.unit &&
@@ -4524,7 +4527,7 @@ class PantryItemEntry extends DataClass implements Insertable<PantryItemEntry> {
 class PantryItemsCompanion extends UpdateCompanion<PantryItemEntry> {
   final Value<String> id;
   final Value<String> name;
-  final Value<bool> inStock;
+  final Value<StockStatus> stockStatus;
   final Value<String?> userId;
   final Value<String?> householdId;
   final Value<String?> unit;
@@ -4540,7 +4543,7 @@ class PantryItemsCompanion extends UpdateCompanion<PantryItemEntry> {
   const PantryItemsCompanion({
     this.id = const Value.absent(),
     this.name = const Value.absent(),
-    this.inStock = const Value.absent(),
+    this.stockStatus = const Value.absent(),
     this.userId = const Value.absent(),
     this.householdId = const Value.absent(),
     this.unit = const Value.absent(),
@@ -4557,7 +4560,7 @@ class PantryItemsCompanion extends UpdateCompanion<PantryItemEntry> {
   PantryItemsCompanion.insert({
     this.id = const Value.absent(),
     required String name,
-    this.inStock = const Value.absent(),
+    this.stockStatus = const Value.absent(),
     this.userId = const Value.absent(),
     this.householdId = const Value.absent(),
     this.unit = const Value.absent(),
@@ -4574,7 +4577,7 @@ class PantryItemsCompanion extends UpdateCompanion<PantryItemEntry> {
   static Insertable<PantryItemEntry> custom({
     Expression<String>? id,
     Expression<String>? name,
-    Expression<bool>? inStock,
+    Expression<int>? stockStatus,
     Expression<String>? userId,
     Expression<String>? householdId,
     Expression<String>? unit,
@@ -4591,7 +4594,7 @@ class PantryItemsCompanion extends UpdateCompanion<PantryItemEntry> {
     return RawValuesInsertable({
       if (id != null) 'id': id,
       if (name != null) 'name': name,
-      if (inStock != null) 'in_stock': inStock,
+      if (stockStatus != null) 'stock_status': stockStatus,
       if (userId != null) 'user_id': userId,
       if (householdId != null) 'household_id': householdId,
       if (unit != null) 'unit': unit,
@@ -4610,7 +4613,7 @@ class PantryItemsCompanion extends UpdateCompanion<PantryItemEntry> {
   PantryItemsCompanion copyWith(
       {Value<String>? id,
       Value<String>? name,
-      Value<bool>? inStock,
+      Value<StockStatus>? stockStatus,
       Value<String?>? userId,
       Value<String?>? householdId,
       Value<String?>? unit,
@@ -4626,7 +4629,7 @@ class PantryItemsCompanion extends UpdateCompanion<PantryItemEntry> {
     return PantryItemsCompanion(
       id: id ?? this.id,
       name: name ?? this.name,
-      inStock: inStock ?? this.inStock,
+      stockStatus: stockStatus ?? this.stockStatus,
       userId: userId ?? this.userId,
       householdId: householdId ?? this.householdId,
       unit: unit ?? this.unit,
@@ -4651,8 +4654,9 @@ class PantryItemsCompanion extends UpdateCompanion<PantryItemEntry> {
     if (name.present) {
       map['name'] = Variable<String>(name.value);
     }
-    if (inStock.present) {
-      map['in_stock'] = Variable<bool>(inStock.value);
+    if (stockStatus.present) {
+      map['stock_status'] = Variable<int>(
+          $PantryItemsTable.$converterstockStatus.toSql(stockStatus.value));
     }
     if (userId.present) {
       map['user_id'] = Variable<String>(userId.value);
@@ -4699,7 +4703,7 @@ class PantryItemsCompanion extends UpdateCompanion<PantryItemEntry> {
     return (StringBuffer('PantryItemsCompanion(')
           ..write('id: $id, ')
           ..write('name: $name, ')
-          ..write('inStock: $inStock, ')
+          ..write('stockStatus: $stockStatus, ')
           ..write('userId: $userId, ')
           ..write('householdId: $householdId, ')
           ..write('unit: $unit, ')
@@ -8824,7 +8828,7 @@ typedef $$PantryItemsTableCreateCompanionBuilder = PantryItemsCompanion
     Function({
   Value<String> id,
   required String name,
-  Value<bool> inStock,
+  Value<StockStatus> stockStatus,
   Value<String?> userId,
   Value<String?> householdId,
   Value<String?> unit,
@@ -8842,7 +8846,7 @@ typedef $$PantryItemsTableUpdateCompanionBuilder = PantryItemsCompanion
     Function({
   Value<String> id,
   Value<String> name,
-  Value<bool> inStock,
+  Value<StockStatus> stockStatus,
   Value<String?> userId,
   Value<String?> householdId,
   Value<String?> unit,
@@ -8872,8 +8876,10 @@ class $$PantryItemsTableFilterComposer
   ColumnFilters<String> get name => $composableBuilder(
       column: $table.name, builder: (column) => ColumnFilters(column));
 
-  ColumnFilters<bool> get inStock => $composableBuilder(
-      column: $table.inStock, builder: (column) => ColumnFilters(column));
+  ColumnWithTypeConverterFilters<StockStatus, StockStatus, int>
+      get stockStatus => $composableBuilder(
+          column: $table.stockStatus,
+          builder: (column) => ColumnWithTypeConverterFilters(column));
 
   ColumnFilters<String> get userId => $composableBuilder(
       column: $table.userId, builder: (column) => ColumnFilters(column));
@@ -8927,8 +8933,8 @@ class $$PantryItemsTableOrderingComposer
   ColumnOrderings<String> get name => $composableBuilder(
       column: $table.name, builder: (column) => ColumnOrderings(column));
 
-  ColumnOrderings<bool> get inStock => $composableBuilder(
-      column: $table.inStock, builder: (column) => ColumnOrderings(column));
+  ColumnOrderings<int> get stockStatus => $composableBuilder(
+      column: $table.stockStatus, builder: (column) => ColumnOrderings(column));
 
   ColumnOrderings<String> get userId => $composableBuilder(
       column: $table.userId, builder: (column) => ColumnOrderings(column));
@@ -8980,8 +8986,9 @@ class $$PantryItemsTableAnnotationComposer
   GeneratedColumn<String> get name =>
       $composableBuilder(column: $table.name, builder: (column) => column);
 
-  GeneratedColumn<bool> get inStock =>
-      $composableBuilder(column: $table.inStock, builder: (column) => column);
+  GeneratedColumnWithTypeConverter<StockStatus, int> get stockStatus =>
+      $composableBuilder(
+          column: $table.stockStatus, builder: (column) => column);
 
   GeneratedColumn<String> get userId =>
       $composableBuilder(column: $table.userId, builder: (column) => column);
@@ -9045,7 +9052,7 @@ class $$PantryItemsTableTableManager extends RootTableManager<
           updateCompanionCallback: ({
             Value<String> id = const Value.absent(),
             Value<String> name = const Value.absent(),
-            Value<bool> inStock = const Value.absent(),
+            Value<StockStatus> stockStatus = const Value.absent(),
             Value<String?> userId = const Value.absent(),
             Value<String?> householdId = const Value.absent(),
             Value<String?> unit = const Value.absent(),
@@ -9062,7 +9069,7 @@ class $$PantryItemsTableTableManager extends RootTableManager<
               PantryItemsCompanion(
             id: id,
             name: name,
-            inStock: inStock,
+            stockStatus: stockStatus,
             userId: userId,
             householdId: householdId,
             unit: unit,
@@ -9079,7 +9086,7 @@ class $$PantryItemsTableTableManager extends RootTableManager<
           createCompanionCallback: ({
             Value<String> id = const Value.absent(),
             required String name,
-            Value<bool> inStock = const Value.absent(),
+            Value<StockStatus> stockStatus = const Value.absent(),
             Value<String?> userId = const Value.absent(),
             Value<String?> householdId = const Value.absent(),
             Value<String?> unit = const Value.absent(),
@@ -9096,7 +9103,7 @@ class $$PantryItemsTableTableManager extends RootTableManager<
               PantryItemsCompanion.insert(
             id: id,
             name: name,
-            inStock: inStock,
+            stockStatus: stockStatus,
             userId: userId,
             householdId: householdId,
             unit: unit,

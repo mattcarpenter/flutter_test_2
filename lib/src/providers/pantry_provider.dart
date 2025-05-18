@@ -2,6 +2,7 @@ import 'dart:async';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../database/database.dart';
 import '../../database/models/pantry_item_terms.dart';
+import '../../database/models/pantry_items.dart'; // For StockStatus enum
 import '../repositories/pantry_repository.dart';
 
 /// Manages the global list of pantry items.
@@ -25,7 +26,7 @@ class PantryNotifier
 
   Future<String> addItem({
     required String name,
-    bool inStock = true,
+    StockStatus stockStatus = StockStatus.inStock,
     String? userId,
     String? householdId,
     String? unit,
@@ -38,7 +39,7 @@ class PantryNotifier
     // Add the item to the repository
     final itemId = await _repo.addItem(
       name: name,
-      inStock: inStock,
+      stockStatus: stockStatus,
       userId: userId,
       householdId: householdId,
       unit: unit,
@@ -59,7 +60,7 @@ class PantryNotifier
   Future<void> updateItem({
     required String id,
     String? name,
-    bool? inStock,
+    StockStatus? stockStatus,
     String? unit,
     double? quantity,
     String? baseUnit,
@@ -70,7 +71,7 @@ class PantryNotifier
     await _repo.updateItem(
       id: id,
       name: name,
-      inStock: inStock,
+      stockStatus: stockStatus,
       unit: unit,
       quantity: quantity,
     baseUnit: baseUnit,

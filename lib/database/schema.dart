@@ -112,7 +112,7 @@ Schema schema = const Schema(([
   ]),
   Table(pantryItemsTable, [
     Column.text('name'),
-    Column.integer('in_stock'),
+    Column.integer('stock_status'), // Changed from in_stock to stock_status
     Column.text('user_id'),
     Column.text('household_id'),
     Column.text('unit'),

@@ -3,13 +3,41 @@ import 'package:uuid/uuid.dart';
 
 import '../converters.dart';
 
+// Stock status enum for pantry items
+enum StockStatus {
+  outOfStock, // 0 - Red
+  lowStock,   // 1 - Yellow
+  inStock     // 2 - Green
+}
+
+// Custom type converter for StockStatus enum
+class StockStatusConverter extends TypeConverter<StockStatus, int> {
+  const StockStatusConverter();
+
+  @override
+  StockStatus fromSql(int fromDb) {
+    return StockStatus.values[fromDb];
+  }
+
+  @override
+  int toSql(StockStatus value) {
+    return value.index;
+  }
+}
+
 @DataClassName('PantryItemEntry')
 class PantryItems extends Table {
   TextColumn get id         => text().clientDefault(() => const Uuid().v4())();
   @override Set<Column> get primaryKey => {id};
 
   TextColumn get name       => text()();                     // "Kewpie Mayo"
-  BoolColumn  get inStock   => boolean().withDefault(const Constant(true))();
+  // Changed from boolean to enum using IntColumn with TypeConverter
+  IntColumn get stockStatus => integer()
+    .map(const StockStatusConverter())
+    .withDefault(const Constant(2))(); // Default to IN_STOCK (index 2)
+  
+  // No longer using inStock field - completely replaced by stockStatus
+  
   TextColumn  get userId    => text().nullable()();                     // or householdId if multi‑tenant
   TextColumn  get householdId => text().nullable()();
 

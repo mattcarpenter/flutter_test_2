@@ -1,6 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import '../../../../database/database.dart';
+import '../../../../database/models/pantry_items.dart'; // For StockStatus enum
 import '../views/add_pantry_item_modal.dart';
 
 class PantryItemList extends StatelessWidget {
@@ -66,13 +67,13 @@ class PantryItemList extends StatelessWidget {
           trailing: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
-              // In stock indicator
+              // Stock status indicator
               Container(
                 width: 12,
                 height: 12,
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
-                  color: item.inStock ? Colors.green : Colors.red,
+                  color: _getStockStatusColor(item.stockStatus),
                 ),
               ),
               const SizedBox(width: 8),
@@ -109,5 +110,19 @@ class PantryItemList extends StatelessWidget {
         ),
       ],
     );
+  }
+  
+  // Helper method to get the color based on stock status
+  Color _getStockStatusColor(StockStatus status) {
+    switch (status) {
+      case StockStatus.outOfStock:
+        return Colors.red;
+      case StockStatus.lowStock:
+        return Colors.yellow.shade700; // Darker yellow for better visibility
+      case StockStatus.inStock:
+        return Colors.green;
+      default:
+        return Colors.grey; // Fallback
+    }
   }
 }
