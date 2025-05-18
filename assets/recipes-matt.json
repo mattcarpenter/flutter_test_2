@@ -1,0 +1,864 @@
+[
+  {
+    "recipe_name": "Pad Gaprao",
+    "prep_time": "10 min",
+    "cook_time": "15 min",
+    "total_time": "25 min",
+    "servings": "2",
+    "yield": "",
+    "ingredients": [
+      { "quantity": 6, "unit": null, "ingredient": "thai chilis" },
+      { "quantity": 4, "unit": "cloves", "ingredient": "garlic" },
+      { "quantity": 0.25, "unit": "red bell pepper", "ingredient": "cut into strips" },
+      { "quantity": 0.25, "unit": "onion", "ingredient": "diced" },
+      { "quantity": 250, "unit": "g", "ingredient": "minced meat" },
+      { "quantity": 1, "unit": "cup", "ingredient": "thai basil" },
+      { "quantity": 200, "unit": "g", "ingredient": "jasmine rice" },
+      { "quantity": 2, "unit": null, "ingredient": "eggs" },
+      { "quantity": 1, "unit": "tbsp", "ingredient": "oyster sauce" },
+      { "quantity": 1, "unit": "tbsp", "ingredient": "thai soy sauce" },
+      { "quantity": 2, "unit": "tsp", "ingredient": "fish sauce" },
+      { "quantity": 1, "unit": "tsp", "ingredient": "dark soy sauce" },
+      { "quantity": 2, "unit": "tbsp", "ingredient": "water" },
+      { "quantity": 1, "unit": "tbsp", "ingredient": "sugar" }
+    ],
+    "directions": [
+      "Fry eggs and set aside.",
+      "Mince or pound garlic and thai chilis.",
+      "Combine sauce ingredients.",
+      "Stir fry garlic and chilis for about 30 seconds.",
+      "Add meat and cook until done.",
+      "Add onions and peppers, stir fry until slightly soft.",
+      "Add sauce and cook until reduced to desired consistency.",
+      "Plate with rice and place egg on top."
+    ],
+    "rating": "5",
+    "url": "",
+    "cuisine_path": "Thai/Main",
+    "nutrition": "",
+    "timing": "",
+    "img_src": ""
+  },
+  {
+    "recipe_name": "Taco Rice",
+    "prep_time": "10 min",
+    "cook_time": "15 min",
+    "total_time": "25 min",
+    "servings": "2",
+    "yield": "",
+    "ingredients": [
+      { "quantity": 1, "unit": "packet", "ingredient": "Taco seasoning" },
+      { "quantity": 0.5, "unit": "head", "ingredient": "iceburg lettuce, shredded" },
+      { "quantity": 1, "unit": "cup", "ingredient": "shredded cheddar" },
+      { "quantity": 2, "unit": null, "ingredient": "tomatoes, diced" },
+      { "quantity": 1, "unit": null, "ingredient": "avocado, sliced" },
+      { "quantity": 150, "unit": "g", "ingredient": "ground meat" },
+      { "quantity": 0.5, "unit": "cup", "ingredient": "taco sauce" },
+      { "quantity": 200, "unit": "g", "ingredient": "rice" }
+    ],
+    "directions": [
+      "Cook rice.",
+      "Cook meat with taco seasoning.",
+      "Plate rice; top with meat, cheese, lettuce, tomatoes, avocado."
+    ],
+    "rating": "5",
+    "url": "",
+    "cuisine_path": "Tex-Mex/Main",
+    "nutrition": "",
+    "timing": "",
+    "img_src": ""
+  },
+  {
+    "recipe_name": "Lasagna",
+    "prep_time": "20 min",
+    "cook_time": "30 min",
+    "total_time": "50 min",
+    "servings": "4",
+    "yield": "",
+    "ingredients": [
+      { "quantity": 150, "unit": "g", "ingredient": "minced meat" },
+      { "quantity": 1.5, "unit": "can", "ingredient": "crushed tomatoes" },
+      { "quantity": 3, "unit": "tbsp", "ingredient": "tomato paste" },
+      { "quantity": 1, "unit": null, "ingredient": "bay leaf" },
+      { "quantity": 0.5, "unit": null, "ingredient": "carrot" },
+      { "quantity": 0.5, "unit": "stalk", "ingredient": "celery" },
+      { "quantity": 0.5, "unit": "onion", "ingredient": "diced" },
+      { "quantity": 1.5, "unit": "cup", "ingredient": "milk" },
+      { "quantity": 1, "unit": "tbsp", "ingredient": "butter" },
+      { "quantity": 1, "unit": "tbsp", "ingredient": "flour" },
+      { "quantity": 0.25, "unit": "cup", "ingredient": "shredded parmesan cheese" },
+      { "quantity": 1, "unit": "ball", "ingredient": "fresh mozzarella" },
+      { "quantity": 8, "unit": null, "ingredient": "lasagna sheets" },
+      { "quantity": null, "unit": null, "ingredient": "Olive oil" }
+    ],
+    "directions": [
+      "Make meat sauce.",
+      "Boil pasta.",
+      "Assemble in layers.",
+      "Bake at 320°F for about 30 minutes or until bubbly.",
+      "Cool for 30 minutes before serving."
+    ],
+    "rating": "3",
+    "url": "",
+    "cuisine_path": "Italian/Main",
+    "nutrition": "",
+    "timing": "",
+    "img_src": ""
+  },
+  {
+    "recipe_name": "Chorizo",
+    "prep_time": "10 min",
+    "cook_time": "0 min",
+    "total_time": "10 min + chill",
+    "servings": "2",
+    "yield": "",
+    "ingredients": [
+      { "quantity": 200, "unit": "g", "ingredient": "ground pork" },
+      { "quantity": 4, "unit": "g", "ingredient": "salt" },
+      { "quantity": 0.5, "unit": "tsp", "ingredient": "oregano" },
+      { "quantity": 1, "unit": "tsp", "ingredient": "red wine vinegar" },
+      { "quantity": 2, "unit": "tbsp", "ingredient": "ancho chili powder" },
+      { "quantity": 1, "unit": "clove", "ingredient": "garlic, grated" }
+    ],
+    "directions": [
+      "Mix all ingredients.",
+      "Wrap and chill."
+    ],
+    "rating": "5",
+    "url": "",
+    "cuisine_path": "Mexican/Sausage",
+    "nutrition": "",
+    "timing": "",
+    "img_src": ""
+  },
+  {
+    "recipe_name": "Italian Sausage",
+    "prep_time": "10 min",
+    "cook_time": "0 min",
+    "total_time": "10 min + chill",
+    "servings": "2",
+    "yield": "",
+    "ingredients": [
+      { "quantity": 200, "unit": "g", "ingredient": "ground pork" },
+      { "quantity": 4, "unit": "g", "ingredient": "salt" },
+      { "quantity": 0.7, "unit": "g", "ingredient": "sugar" },
+      { "quantity": 0.6, "unit": "g", "ingredient": "black pepper" },
+      { "quantity": 1, "unit": "tbsp", "ingredient": "paprika" },
+      { "quantity": 15, "unit": "g", "ingredient": "water" },
+      { "quantity": 5, "unit": "g", "ingredient": "red wine vinegar" },
+      { "quantity": 1, "unit": "tsp", "ingredient": "red pepper flakes" },
+      { "quantity": 1, "unit": "tsp", "ingredient": "fennel, toasted and crushed" },
+      { "quantity": 1, "unit": "tsp", "ingredient": "garlic powder" },
+      { "quantity": 1, "unit": "tsp", "ingredient": "oregano" },
+      { "quantity": 1, "unit": "tsp", "ingredient": "onion powder" },
+      { "quantity": 1, "unit": "tsp", "ingredient": "marjoram" },
+      { "quantity": 1, "unit": "clove", "ingredient": "garlic, grated" }
+    ],
+    "directions": [
+      "Mix all ingredients.",
+      "Wrap and chill."
+    ],
+    "rating": "5",
+    "url": "",
+    "cuisine_path": "Italian/Sausage",
+    "nutrition": "",
+    "timing": "",
+    "img_src": ""
+  },
+  {
+    "recipe_name": "Kung Pao Chicken",
+    "prep_time": "10 min",
+    "cook_time": "15 min",
+    "total_time": "25 min",
+    "servings": "2",
+    "yield": "",
+    "ingredients": [
+      { "quantity": 1, "unit": "tbsp", "ingredient": "light soy sauce" },
+      { "quantity": 1.5, "unit": "tbsp", "ingredient": "dark soy sauce" },
+      { "quantity": 2, "unit": "tbsp", "ingredient": "black vinegar" },
+      { "quantity": 1, "unit": "tbsp", "ingredient": "cooking wine" },
+      { "quantity": 3, "unit": "tbsp", "ingredient": "sugar" },
+      { "quantity": 0.5, "unit": "tsp", "ingredient": "sesame oil" },
+      { "quantity": 0.33, "unit": "cup", "ingredient": "water" },
+      { "quantity": 2, "unit": "chicken thighs", "ingredient": "about 300g total" },
+      { "quantity": 0.5, "unit": "bell pepper", "ingredient": "diced" },
+      { "quantity": 0.5, "unit": "onion", "ingredient": "diced" },
+      { "quantity": 4, "unit": null, "ingredient": "green onions, cut into chunks" },
+      { "quantity": 8, "unit": null, "ingredient": "dried red chilis" },
+      { "quantity": 0.25, "unit": "cup", "ingredient": "peanuts" }
+    ],
+    "directions": [
+      "Combine sauce ingredients and set aside.",
+      "Dice and velvet chicken.",
+      "Cook chicken in wok.",
+      "Remove and set aside; cook vegetables minus green onions in wok.",
+      "Add chicken back.",
+      "Add sauce.",
+      "Cook until sauce reduced.",
+      "Add green onions."
+    ],
+    "rating": "3",
+    "url": "",
+    "cuisine_path": "Chinese/Main",
+    "nutrition": "",
+    "timing": "",
+    "img_src": ""
+  },
+
+  {
+    "recipe_name": "Bibim Gukusu",
+    "prep_time": "10 min",
+    "cook_time": "10 min",
+    "total_time": "20 min",
+    "servings": "2",
+    "yield": "",
+    "ingredients": [
+      { "quantity": 3, "unit": "tbsp", "ingredient": "kimchi brine" },
+      { "quantity": 0.25, "unit": "cup", "ingredient": "gochujang" },
+      { "quantity": 1, "unit": "tsp", "ingredient": "gochugaru" },
+      { "quantity": 3, "unit": "tbsp", "ingredient": "sugar" },
+      { "quantity": 3, "unit": "tbsp", "ingredient": "plum vinegar" },
+      { "quantity": 2, "unit": "tbsp", "ingredient": "sesame oil" },
+      { "quantity": 1, "unit": "tbsp", "ingredient": "soy sauce" },
+      { "quantity": 150, "unit": "g", "ingredient": "somen noodles" },
+      { "quantity": 2, "unit": null, "ingredient": "eggs, hard boiled" },
+      { "quantity": 2, "unit": null, "ingredient": "cucumbers, cut into strips" },
+      { "quantity": 1, "unit": "tbsp", "ingredient": "sesame seeds" }
+    ],
+    "directions": [
+      "Combine sauce ingredients.",
+      "Cook noodles and rinse under cold running water.",
+      "Add all noodles to bowl; add sauce and mix.",
+      "Plate: Noodles, sesame seeds, cucumber, hardboiled egg."
+    ],
+    "rating": "5",
+    "url": "",
+    "cuisine_path": "Korean/Noodles",
+    "nutrition": "",
+    "timing": "",
+    "img_src": ""
+  },
+
+  {
+    "recipe_name": "Aioli",
+    "prep_time": "5 min",
+    "cook_time": "0 min",
+    "total_time": "5 min",
+    "servings": "1 cup",
+    "yield": "",
+    "ingredients": [
+      { "quantity": 2, "unit": null, "ingredient": "garlic cloves" },
+      { "quantity": 2, "unit": null, "ingredient": "egg yolks" },
+      { "quantity": 2, "unit": "tsp", "ingredient": "mustard" },
+      { "quantity": 2, "unit": "tsp", "ingredient": "lemon juice" },
+      { "quantity": 0.33, "unit": "tsp", "ingredient": "salt" },
+      { "quantity": 1, "unit": "cup", "ingredient": "oil" }
+    ],
+    "directions": [
+      "Dice garlic, add to narrow cup with lemon juice, mustard, salt, egg yolks.",
+      "Blend with immersion blender.",
+      "Drizzle in oil while blending to make an emulsion."
+    ],
+    "rating": "3",
+    "url": "",
+    "cuisine_path": "Condiments/Sauces",
+    "nutrition": "",
+    "timing": "",
+    "img_src": ""
+  },
+
+  {
+    "recipe_name": "Bo Luc Lac",
+    "prep_time": "15 min",
+    "cook_time": "10 min",
+    "total_time": "25 min",
+    "servings": "2",
+    "yield": "",
+    "ingredients": [
+      { "quantity": 2, "unit": "tbsp", "ingredient": "oyster sauce" },
+      { "quantity": 1, "unit": "tbsp", "ingredient": "shoyu" },
+      { "quantity": 2, "unit": "tsp", "ingredient": "fish sauce" },
+      { "quantity": 1, "unit": "tsp", "ingredient": "honey" },
+      { "quantity": 1, "unit": "tsp", "ingredient": "sesame oil" },
+      { "quantity": 3, "unit": null, "ingredient": "cloves garlic" },
+      { "quantity": 1, "unit": "tsp", "ingredient": "cracked black pepper" },
+      { "quantity": 200, "unit": "g", "ingredient": "sirloin steak, cubed" },
+      { "quantity": 0.5, "unit": null, "ingredient": "onion" },
+      { "quantity": 0.5, "unit": "bell pepper", "ingredient": null }
+    ],
+    "directions": [
+      "Marinate meat.",
+      "Stir fry meat until browned.",
+      "Remove meat and set aside.",
+      "Stir fry vegetables until just slightly soft, looking more for char than texture change.",
+      "Add meat back and stir fry."
+    ],
+    "rating": "3",
+    "url": "",
+    "cuisine_path": "Vietnamese/Main",
+    "nutrition": "",
+    "timing": "",
+    "img_src": ""
+  },
+
+  {
+    "recipe_name": "Shoyu Poke",
+    "prep_time": "10 min",
+    "cook_time": "0 min",
+    "total_time": "10 min",
+    "servings": "2",
+    "yield": "",
+    "ingredients": [
+      { "quantity": 250, "unit": "g", "ingredient": "fish, cubed (salmon, tuna)" },
+      { "quantity": 0.75, "unit": "tbsp", "ingredient": "shoyu" },
+      { "quantity": 0.5, "unit": "tbsp", "ingredient": "sesame oil" },
+      { "quantity": 0.25, "unit": "tsp", "ingredient": "hawaiian sea salt" },
+      { "quantity": 0.125, "unit": "cup", "ingredient": "sliced onion" },
+      { "quantity": 0.25, "unit": "cup", "ingredient": "green onion, diced" },
+      { "quantity": 0.25, "unit": "tsp", "ingredient": "gochugaru" }
+    ],
+    "directions": [
+      "Combine all ingredients."
+    ],
+    "rating": "3",
+    "url": "",
+    "cuisine_path": "Hawaiian/Main",
+    "nutrition": "",
+    "timing": "",
+    "img_src": ""
+  },
+
+  {
+    "recipe_name": "Egg Pasta",
+    "prep_time": "15 min",
+    "cook_time": "0 min",
+    "total_time": "15 min + rest",
+    "servings": "2",
+    "yield": "",
+    "ingredients": [
+      { "quantity": 115, "unit": "g", "ingredient": "AP flour" },
+      { "quantity": 100, "unit": "g", "ingredient": "semolina flour" },
+      { "quantity": 2, "unit": null, "ingredient": "whole eggs" },
+      { "quantity": 1, "unit": "yolk", "ingredient": "egg yolk" },
+      { "quantity": 1.4, "unit": "g", "ingredient": "kosher salt" }
+    ],
+    "directions": [
+      "Make well on table with flour.",
+      "Add eggs and egg yolk.",
+      "Use a fork to break down eggs and combine flour.",
+      "Knead until soft.",
+      "Wrap and set aside for 30-60 minutes before cutting and rolling."
+    ],
+    "rating": "3",
+    "url": "",
+    "cuisine_path": "Italian/Pasta",
+    "nutrition": "",
+    "timing": "",
+    "img_src": ""
+  },
+
+  {
+    "recipe_name": "Neil’s Pancakes",
+    "prep_time": "10 min",
+    "cook_time": "10 min",
+    "total_time": "20 min",
+    "servings": "2",
+    "yield": "",
+    "ingredients": [
+      { "quantity": 80, "unit": "g", "ingredient": "flour" },
+      { "quantity": 0.75, "unit": "tsp", "ingredient": "baking powder" },
+      { "quantity": 2, "unit": "tbsp", "ingredient": "sugar" },
+      { "quantity": 1, "unit": null, "ingredient": "egg" },
+      { "quantity": 120, "unit": "ml", "ingredient": "milk" },
+      { "quantity": 30, "unit": "g", "ingredient": "butter, melted" },
+      { "quantity": 0.125, "unit": "tsp", "ingredient": "vanilla extract" },
+      { "quantity": 0.125, "unit": "tsp", "ingredient": "tartar" }
+    ],
+    "directions": [
+      "Sift flour, baking powder, sugar, salt.",
+      "In another bowl, whisk together egg yolks, milk, melted butter, and vanilla extract. Mix dry ingredients into the wet.",
+      "In another bowl, whip egg whites with tartar. Go for soft peaks.",
+      "Fold egg white into batter.",
+      "Griddle."
+    ],
+    "rating": "3",
+    "url": "",
+    "cuisine_path": "Breakfast/Pancakes",
+    "nutrition": "",
+    "timing": "",
+    "img_src": ""
+  },
+
+  {
+    "recipe_name": "General Tso’s Chicken",
+    "prep_time": "15 min",
+    "cook_time": "20 min",
+    "total_time": "35 min",
+    "servings": "2",
+    "yield": "",
+    "ingredients": [
+      { "quantity": 3, "unit": "tbsp", "ingredient": "shoyu" },
+      { "quantity": 1, "unit": "tbsp", "ingredient": "hoisin sauce" },
+      { "quantity": 1, "unit": "tbsp", "ingredient": "rice vinegar" },
+      { "quantity": 2, "unit": "tsp", "ingredient": "chili paste" },
+      { "quantity": 1, "unit": "tsp", "ingredient": "sesame oil" },
+      { "quantity": 3, "unit": "tbsp", "ingredient": "brown sugar" },
+      { "quantity": 0.5, "unit": "cup", "ingredient": "potato starch" },
+      { "quantity": 0.75, "unit": "cup", "ingredient": "chicken stock" },
+      { "quantity": 3, "unit": "chicken thighs", "ingredient": "about 500g" },
+      { "quantity": 1, "unit": "clove", "ingredient": "garlic, minced" },
+      { "quantity": 0.5, "unit": "inch", "ingredient": "ginger, sliced and smashed" },
+      { "quantity": 4, "unit": "cup", "ingredient": "oil for frying" }
+    ],
+    "directions": [
+      "Mix sauce ingredients minus sesame oil, garlic, ginger.",
+      "Dice chicken, add 2T of marinade mixture to chicken and mix.",
+      "Add potato starch and shake off excess.",
+      "Fry chicken in batches.",
+      "Heat a little oil in wok.",
+      "Stir fry ginger and garlic.",
+      "Add chicken back in with remainder of sauce."
+    ],
+    "rating": "5",
+    "url": "",
+    "cuisine_path": "Chinese/Main",
+    "nutrition": "",
+    "timing": "",
+    "img_src": ""
+  },
+
+  {
+    "recipe_name": "Nuoc Cham",
+    "prep_time": "5 min",
+    "cook_time": "0 min",
+    "total_time": "5 min",
+    "servings": "4",
+    "yield": "",
+    "ingredients": [
+      { "quantity": 2, "unit": "tbsp", "ingredient": "water" },
+      { "quantity": 2, "unit": "tbsp", "ingredient": "sugar" },
+      { "quantity": 1.5, "unit": "tbsp", "ingredient": "lime juice" },
+      { "quantity": 2, "unit": "tbsp", "ingredient": "fish sauce" },
+      { "quantity": 1, "unit": "clove", "ingredient": "garlic, minced" },
+      { "quantity": 1, "unit": null, "ingredient": "thai chili, minced" }
+    ],
+    "directions": [
+      "Combine all ingredients."
+    ],
+    "rating": "5",
+    "url": "",
+    "cuisine_path": "Vietnamese/Sauce",
+    "nutrition": "",
+    "timing": "",
+    "img_src": ""
+  },
+
+  {
+    "recipe_name": "Spring Roll Bowl",
+    "prep_time": "10 min",
+    "cook_time": "20 min",
+    "total_time": "30 min",
+    "servings": "2",
+    "yield": "",
+    "ingredients": [
+      { "quantity": 2, "unit": "tbsp", "ingredient": "light soy sauce" },
+      { "quantity": 1, "unit": "tbsp", "ingredient": "dark soy sauce" },
+      { "quantity": 2, "unit": "tbsp", "ingredient": "oyster sauce" },
+      { "quantity": 1, "unit": "tsp", "ingredient": "sugar" },
+      { "quantity": 1, "unit": "tbsp", "ingredient": "sesame oil" },
+      { "quantity": 0.5, "unit": "cup", "ingredient": "chicken stock" },
+      { "quantity": 80, "unit": "g", "ingredient": "mushrooms, diced" },
+      { "quantity": 1, "unit": "cup", "ingredient": "bean sprouts" },
+      { "quantity": 0.5, "unit": "carrot", "ingredient": "shredded" },
+      { "quantity": 0.25, "unit": "head", "ingredient": "cabbage, shredded" },
+      { "quantity": 200, "unit": "g", "ingredient": "minced meat" },
+      { "quantity": 0.5, "unit": "cup", "ingredient": "sliced green onion" },
+      { "quantity": 180, "unit": "g", "ingredient": "rice noodles" }
+    ],
+    "directions": [
+      "Combine sauce ingredients.",
+      "Stir fry meat.",
+      "Add in cabbage, carrot, sprouts, mushrooms, green onions and stir fry.",
+      "Add sauce.",
+      "Boil noodles.",
+      "Mix noodles with stir fry."
+    ],
+    "rating": "2",
+    "url": "",
+    "cuisine_path": "Vietnamese/Main",
+    "nutrition": "",
+    "timing": "",
+    "img_src": ""
+  },
+
+  {
+    "recipe_name": "Chicken Shawarma",
+    "prep_time": "10 min",
+    "cook_time": "15 min",
+    "total_time": "25 min",
+    "servings": "2",
+    "yield": "",
+    "ingredients": [
+      { "quantity": 1, "unit": "tsp", "ingredient": "garlic powder" },
+      { "quantity": 0.5, "unit": "tbsp", "ingredient": "cumin" },
+      { "quantity": 0.5, "unit": "tbsp", "ingredient": "tumeric" },
+      { "quantity": 0.5, "unit": "tbsp", "ingredient": "corriander" },
+      { "quantity": 0.5, "unit": "tbsp", "ingredient": "all spice" },
+      { "quantity": 0.5, "unit": "tbsp", "ingredient": "paprika" },
+      { "quantity": 0.5, "unit": "tbsp", "ingredient": "cardamom" },
+      { "quantity": 0.25, "unit": "tsp", "ingredient": "cloves" },
+      { "quantity": 1, "unit": "tsp", "ingredient": "onion powder" },
+      { "quantity": 2, "unit": "tbsp", "ingredient": "olive oil" },
+      { "quantity": null, "unit": null, "ingredient": "juice of half a lemon" },
+      { "quantity": 400, "unit": "g", "ingredient": "chicken thigh" }
+    ],
+    "directions": [
+      "Combine spice rub ingredients.",
+      "Mix with chicken, olive oil, lemon juice."
+    ],
+    "rating": "3",
+    "url": "",
+    "cuisine_path": "Middle Eastern/Main",
+    "nutrition": "",
+    "timing": "",
+    "img_src": ""
+  },
+
+  {
+    "recipe_name": "チジミ",
+    "prep_time": "5 min",
+    "cook_time": "10 min",
+    "total_time": "15 min",
+    "servings": "2",
+    "yield": "",
+    "ingredients": [
+      { "quantity": 40, "unit": "g", "ingredient": "flour" },
+      { "quantity": 40, "unit": "g", "ingredient": "potato starch" },
+      { "quantity": null, "unit": null, "ingredient": "Pinch of salt" },
+      { "quantity": 0.25, "unit": "tsp", "ingredient": "baking soda" },
+      { "quantity": 70, "unit": "g", "ingredient": "sparkling water" }
+    ],
+    "directions": [
+      "Combine and cook."
+    ],
+    "rating": "2",
+    "url": "",
+    "cuisine_path": "Korean/Pancake",
+    "nutrition": "",
+    "timing": "",
+    "img_src": ""
+  },
+
+  {
+    "recipe_name": "Banh Mi",
+    "prep_time": "30 min",
+    "cook_time": "20 min",
+    "total_time": "50 min + rise/proof",
+    "servings": "6",
+    "yield": "",
+    "ingredients": [
+      { "quantity": 250, "unit": "g", "ingredient": "bread flour" },
+      { "quantity": 170, "unit": "ml", "ingredient": "water" },
+      { "quantity": 2.5, "unit": "g", "ingredient": "bread improver" },
+      { "quantity": 3.5, "unit": "g", "ingredient": "instant dry yeast" },
+      { "quantity": 0.5, "unit": "tsp", "ingredient": "vitamin c powder" },
+      { "quantity": 4, "unit": "g", "ingredient": "salt" },
+      { "quantity": 3, "unit": "g", "ingredient": "sugar" }
+    ],
+    "directions": [
+      "Combine in stand mixer on low for 1 minute.",
+      "Knead at highest speed for 8–9 minutes.",
+      "Rest for 20 minutes.",
+      "Divide into 6 and shape.",
+      "Proof for 2 hours (shorter if warm).",
+      "Bake at 425°F for 20 minutes."
+    ],
+    "rating": "5",
+    "url": "",
+    "cuisine_path": "Vietnamese/Bread",
+    "nutrition": "",
+    "timing": "",
+    "img_src": ""
+  },
+
+  {
+    "recipe_name": "Pot Roast",
+    "prep_time": "20 min",
+    "cook_time": "3 hr",
+    "total_time": "3 hr 20 min",
+    "servings": "6",
+    "yield": "",
+    "ingredients": [
+      { "quantity": 1.5, "unit": "kg", "ingredient": "chuck" },
+      { "quantity": 225, "unit": "g", "ingredient": "shallots (about 5)" },
+      { "quantity": 225, "unit": "g", "ingredient": "carrots (2-3)" },
+      { "quantity": 225, "unit": "g", "ingredient": "celery (about 3 stalks)" },
+      { "quantity": 5, "unit": "cloves", "ingredient": "garlic" },
+      { "quantity": 50, "unit": "g", "ingredient": "butter" },
+      { "quantity": 25, "unit": "g", "ingredient": "tomato paste" },
+      { "quantity": 25, "unit": "g", "ingredient": "flour" },
+      { "quantity": 150, "unit": "g", "ingredient": "wine" },
+      { "quantity": 25, "unit": "g", "ingredient": "Worcestershire" },
+      { "quantity": 1, "unit": "tbsp", "ingredient": "better than bouillon paste" },
+      { "quantity": 750, "unit": "g", "ingredient": "beef stock" },
+      { "quantity": 2, "unit": null, "ingredient": "bay leaves" },
+      { "quantity": 4, "unit": "sprigs", "ingredient": "thyme" }
+    ],
+    "directions": [
+      "Season the chuck with salt and pepper. Sear on all sides in a heavy pot over medium-high heat until deeply browned. Remove and set aside.",
+      "In the same pot, lower the heat. Add butter, then the shallots, carrots, and celery. Cook for 5–7 minutes until softened. Add garlic and tomato paste; cook 1–2 minutes more.",
+      "Pour in wine and Worcestershire. Scrape the bottom to release any browned bits. Stir in the bouillon paste and let simmer for a minute.",
+      "Return the beef to the pot. Add beef stock, bay leaves, and thyme. Bring to a simmer.",
+      "Cover and cook on low (stovetop or oven at 150°C / 300°F) for ~3 hours, or until the beef is fork-tender.",
+      "Remove beef and bay leaves. Place flour in a small sieve and dip it just into the hot liquid, then quickly whisk to incorporate. Simmer briefly until thickened. Return beef to the pot to warm through."
+    ],
+    "rating": "3",
+    "url": "",
+    "cuisine_path": "Western/Main",
+    "nutrition": "",
+    "timing": "",
+    "img_src": ""
+  },
+
+  {
+    "recipe_name": "Flour Tortillas",
+    "prep_time": "10 min",
+    "cook_time": "20 min",
+    "total_time": "30 min",
+    "servings": "10",
+    "yield": "",
+    "ingredients": [
+      { "quantity": 300, "unit": "g", "ingredient": "flour" },
+      { "quantity": 1, "unit": "tsp", "ingredient": "baking powder" },
+      { "quantity": 0.5, "unit": "tsp", "ingredient": "salt" },
+      { "quantity": 0.25, "unit": "cup", "ingredient": "shortening" },
+      { "quantity": 300, "unit": "g", "ingredient": "water at 110°F" }
+    ],
+    "directions": [
+      "Work shortening into flour, baking powder, and salt and mix until texture of sand.",
+      "Add most of water, knead. Looking for soft/supple texture that’s not too sticky. Add more water if necessary.",
+      "Let rest so it relaxes a bit.",
+      "Ball, let rest again.",
+      "Roll out and cook on dry skillet."
+    ],
+    "rating": "3",
+    "url": "",
+    "cuisine_path": "Mexican/Bread",
+    "nutrition": "",
+    "timing": "",
+    "img_src": ""
+  },
+
+  {
+    "recipe_name": "BBQ Ribs",
+    "prep_time": "15 min",
+    "cook_time": "8 hr",
+    "total_time": "8 hr 15 min",
+    "servings": "4",
+    "yield": "",
+    "ingredients": [
+      { "quantity": 1.4, "unit": "kg", "ingredient": "rack of baby back ribs" },
+      { "quantity": 3, "unit": "tbsp", "ingredient": "pork rub" },
+      { "quantity": 1, "unit": "tbsp", "ingredient": "salt" },
+      { "quantity": 0.5, "unit": "tbsp", "ingredient": "cracked black pepper" },
+      { "quantity": 2, "unit": "tbsp", "ingredient": "mustard" },
+      { "quantity": 0.25, "unit": "cup", "ingredient": "bbq sauce" }
+    ],
+    "directions": [
+      "Remove membrane from ribs.",
+      "Spread mustard on both sides.",
+      "Salt and pepper.",
+      "Apply rub.",
+      "Load into oven on sous vide mode at 162°F for 8 hours.",
+      "Towards the end, do the bend test. Insert tongs from the end and pick up so that half the rack hangs off the front end of the tongs. If meat starts to tear and pull away from the bones, it’s good. It should sag significantly too - almost like it wants to keep dropping to 80+ degrees.",
+      "Broiler on - baste with BBQ sauce several times (at least 5)."
+    ],
+    "rating": "4",
+    "url": "",
+    "cuisine_path": "American/BBQ",
+    "nutrition": "",
+    "timing": "",
+    "img_src": ""
+  },
+
+  {
+    "recipe_name": "BLT Sandwich",
+    "prep_time": "10 min",
+    "cook_time": "10 min",
+    "total_time": "20 min",
+    "servings": "1",
+    "yield": "",
+    "ingredients": [
+      { "quantity": 2, "unit": "slices", "ingredient": "bread" },
+      { "quantity": 3, "unit": "strips", "ingredient": "bacon" },
+      { "quantity": 3, "unit": "slices", "ingredient": "tomato" },
+      { "quantity": 2, "unit": "tbsp", "ingredient": "mayonaise" },
+      { "quantity": null, "unit": null, "ingredient": "Shredded lettuce" }
+    ],
+    "directions": [
+      "Cook bacon.",
+      "Toast bread in bacon fat.",
+      "Season the tomatoes.",
+      "Assemble: bread, mayo, lettuce, bacon, tomato, mayo, bread."
+    ],
+    "rating": "3",
+    "url": "",
+    "cuisine_path": "Sandwiches/Main",
+    "nutrition": "",
+    "timing": "",
+    "img_src": ""
+  },
+
+  {
+    "recipe_name": "Samgyeopsal",
+    "prep_time": "10 min",
+    "cook_time": "15 min",
+    "total_time": "25 min",
+    "servings": "2",
+    "yield": "",
+    "ingredients": [
+      { "quantity": 300, "unit": "g", "ingredient": "pork belly" },
+      { "quantity": 1, "unit": "pack", "ingredient": "sanchu (lettuce)" },
+      { "quantity": 5, "unit": "cloves", "ingredient": "garlic" },
+      { "quantity": 0.5, "unit": null, "ingredient": "onion" },
+      { "quantity": 1, "unit": "pack", "ingredient": "エゴマ (perilla leaves)" },
+      { "quantity": 1, "unit": "tbsp", "ingredient": "gochujang" },
+      { "quantity": 1, "unit": "tsp", "ingredient": "miso" },
+      { "quantity": 1, "unit": "tsp", "ingredient": "sesame oil" },
+      { "quantity": 5, "unit": null, "ingredient": "Korean green chilis" },
+      { "quantity": 1, "unit": null, "ingredient": "長ネギ (naga negi)" },
+      { "quantity": 1, "unit": "tsp", "ingredient": "gochugaru" },
+      { "quantity": 0.5, "unit": "tsp", "ingredient": "sugar" },
+      { "quantity": 0.5, "unit": "tsp", "ingredient": "salt" }
+    ],
+    "directions": [
+      "Slice naga negi thinly.",
+      "Add gochugaru, salt, sesame oil, sugar (Pa Muchim).",
+      "Combine gochujang, miso, sesame oil, and a bit of water (Tare)."
+    ],
+    "rating": "3",
+    "url": "",
+    "cuisine_path": "Korean/Main",
+    "nutrition": "",
+    "timing": "",
+    "img_src": ""
+  },
+
+  {
+    "recipe_name": "Bagels",
+    "prep_time": "20 min",
+    "cook_time": "18 min",
+    "total_time": "Overnight + 38 min",
+    "servings": "8",
+    "yield": "",
+    "ingredients": [
+      { "quantity": 255, "unit": "g", "ingredient": "bread flour (preferment)" },
+      { "quantity": 283, "unit": "g", "ingredient": "water (preferment)" },
+      { "quantity": 1.5, "unit": "g", "ingredient": "instant dry yeast (preferment)" },
+      { "quantity": 241, "unit": "g", "ingredient": "flour (dough)" },
+      { "quantity": 0.75, "unit": "g", "ingredient": "instant dry yeast (dough)" },
+      { "quantity": 10, "unit": "g", "ingredient": "salt" },
+      { "quantity": 4.75, "unit": "g", "ingredient": "malt powder" },
+      { "quantity": 7, "unit": "g", "ingredient": "malt syrup" }
+    ],
+    "directions": [
+      "Mix bread flour, water, and yeast. Cover and let ferment at room temperature for 12–16 hours.",
+      "Add remaining flour, yeast, salt, malt powder, and syrup to the preferment. Mix until a rough dough forms, then knead until smooth and elastic.",
+      "Cover and let rise at room temperature for 30–60 minutes.",
+      "Divide, shape into balls, poke holes, and form into bagels. Place on a parchment-lined tray, cover, and refrigerate overnight.",
+      "Bring water to a boil, boil bagels 30–60 seconds per side. Add toppings if using.",
+      "Bake at 230°C / 450°F for 15–18 minutes. Cool on a rack."
+    ],
+    "rating": "3",
+    "url": "",
+    "cuisine_path": "Baking/Bread",
+    "nutrition": "",
+    "timing": "",
+    "img_src": ""
+  },
+
+  {
+    "recipe_name": "Pickled Daikon and Carrots",
+    "prep_time": "10 min",
+    "cook_time": "0 min",
+    "total_time": "10 min + pickling",
+    "servings": "6",
+    "yield": "",
+    "ingredients": [
+      { "quantity": 226, "unit": "g", "ingredient": "daikon radish" },
+      { "quantity": 226, "unit": "g", "ingredient": "carrots" },
+      { "quantity": 1, "unit": "tbsp", "ingredient": "salt" },
+      { "quantity": 0.5, "unit": "cup", "ingredient": "boiling water" },
+      { "quantity": 5, "unit": "tbsp", "ingredient": "white sugar" },
+      { "quantity": 4, "unit": "tbsp", "ingredient": "white vinegar" }
+    ],
+    "directions": [
+      "Boil water.",
+      "Add sugar, vinegar, and salt.",
+      "Pour over daikon and carrots."
+    ],
+    "rating": "3",
+    "url": "",
+    "cuisine_path": "Pickles/Condiment",
+    "nutrition": "",
+    "timing": "",
+    "img_src": ""
+  },
+
+  {
+    "recipe_name": "Yorkshire Pudding",
+    "prep_time": "10 min",
+    "cook_time": "20 min",
+    "total_time": "30 min + rest",
+    "servings": "6",
+    "yield": "",
+    "ingredients": [
+      { "quantity": 200, "unit": "g", "ingredient": "eggs (4 large)" },
+      { "quantity": 150, "unit": "g", "ingredient": "P flour" },
+      { "quantity": 175, "unit": "g", "ingredient": "milk" },
+      { "quantity": 2, "unit": "g", "ingredient": "kosher salt" },
+      { "quantity": 25, "unit": "g", "ingredient": "water" },
+      { "quantity": 100, "unit": "ml", "ingredient": "shortening, lard, or vegetable oil" }
+    ],
+    "directions": [
+      "Combine eggs, flour, milk, water, and salt in a bowl and whisk until smooth batter is formed.",
+      "Let rest for at least 30 minutes; longer is better.",
+      "Preheat oven to 450°F.",
+      "Heat up muffin tins, add about 1/2T fat to each, return to oven.",
+      "Fill batter between 1/2 and 3/4 of the way.",
+      "Bake until quadrupled in volume, deep brown, crisp, and sound hollow when tapped, about 15 minutes or longer."
+    ],
+    "rating": "3",
+    "url": "",
+    "cuisine_path": "British/Baking",
+    "nutrition": "",
+    "timing": "",
+    "img_src": ""
+  },
+
+  {
+    "recipe_name": "Pickled Red Onions",
+    "prep_time": "5 min",
+    "cook_time": "0 min",
+    "total_time": "5 min + pickling",
+    "servings": "6",
+    "yield": "",
+    "ingredients": [
+      { "quantity": 1, "unit": null, "ingredient": "large red onion, thinly sliced" },
+      { "quantity": 0.5, "unit": "cup", "ingredient": "white vinegar" },
+      { "quantity": 0.5, "unit": "cup", "ingredient": "water" },
+      { "quantity": 1, "unit": "tbsp", "ingredient": "sugar" },
+      { "quantity": 1, "unit": "tsp", "ingredient": "salt" }
+    ],
+    "directions": [
+      "Boil vinegar, water, sugar, salt.",
+      "Pour over onions."
+    ],
+    "rating": "3",
+    "url": "",
+    "cuisine_path": "Pickles/Condiment",
+    "nutrition": "",
+    "timing": "",
+    "img_src": ""
+  }
+]

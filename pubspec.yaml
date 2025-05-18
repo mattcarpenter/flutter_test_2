@@ -103,3 +103,4 @@ flutter:
     - assets/images/samples/
     - assets/ipadic.tar.xz
     - assets/recipes.json
+    - assets/recipes-matt.json

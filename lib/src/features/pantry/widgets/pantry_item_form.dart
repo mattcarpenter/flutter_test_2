@@ -58,21 +58,11 @@ class PantryItemFormState extends ConsumerState<PantryItemForm> {
     
     _inStock = item?.inStock ?? true;
     
-    // Initialize terms list if available
+    // Initialize terms list if available for existing items
     if (item?.terms != null && item!.terms!.isNotEmpty) {
       _terms = List<PantryItemTerm>.from(item.terms!);
-    } else {
-      // If this is a new item, add the name as the first term
-      if (item == null && _nameController.text.isNotEmpty) {
-        _terms = [
-          PantryItemTerm(
-            value: _nameController.text,
-            source: 'user',
-            sort: 0,
-          )
-        ];
-      }
     }
+    // For new items, leave terms list empty to allow canonicalization service to generate terms
     
     // Auto-expand sections if they have data
     _isQuantitySectionExpanded = _quantityController.text.isNotEmpty || _unitController.text.isNotEmpty;
@@ -114,25 +104,28 @@ class PantryItemFormState extends ConsumerState<PantryItemForm> {
         ? null 
         : double.tryParse(_priceController.text);
 
-    // Ensure the item name is in the terms list
-    bool hasNameTerm = _terms.any((term) => term.value.toLowerCase() == name.toLowerCase());
-    if (!hasNameTerm) {
-      // Add the name as a term if it doesn't exist yet
-      _terms.add(PantryItemTerm(
-        value: name,
-        source: 'user',
-        sort: _terms.length,
-      ));
+    // For new items, we'll leave terms empty to allow canonicalization
+    // For existing items, ensure the name is in the terms list
+    if (widget.initialPantryItem != null) {
+      bool hasNameTerm = _terms.any((term) => term.value.toLowerCase() == name.toLowerCase());
+      if (!hasNameTerm) {
+        // Add the name as a term if it doesn't exist yet
+        _terms.add(PantryItemTerm(
+          value: name,
+          source: 'user',
+          sort: _terms.length,
+        ));
+      }
+      
+      // Sort terms by their sort order
+      _terms.sort((a, b) => a.sort.compareTo(b.sort));
     }
-    
-    // Sort terms by their sort order
-    _terms.sort((a, b) => a.sort.compareTo(b.sort));
 
     final userId = Supabase.instance.client.auth.currentUser?.id;
     
     try {
       if (widget.initialPantryItem == null) {
-        // Create new pantry item
+        // Create new pantry item - pass null for terms to trigger canonicalization
         await ref.read(pantryItemsProvider.notifier).addItem(
           name: name,
           inStock: _inStock,
@@ -142,7 +135,7 @@ class PantryItemFormState extends ConsumerState<PantryItemForm> {
           baseUnit: baseUnit,
           baseQuantity: baseQuantity,
           price: price,
-          terms: _terms,
+          // Do NOT pass terms for new items to ensure canonicalization happens
         );
       } else {
         // Update existing pantry item

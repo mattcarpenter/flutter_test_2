@@ -182,7 +182,7 @@ class RecipeNotifier extends StateNotifier<AsyncValue<List<RecipeWithFolders>>> 
   Future<int> importSeedRecipes({int? limit}) async {
     try {
       // Load and parse the JSON file
-      final data = await rootBundle.loadString('assets/recipes.json');
+      final data = await rootBundle.loadString('assets/recipes-matt.json');
       final List<dynamic> jsonRecipes = json.decode(data);
 
       // Apply limit if specified
@@ -504,10 +504,10 @@ final recipeIngredientMatchesProvider = FutureProvider.family<RecipeIngredientMa
     // Watch the pantry provider to automatically refresh this provider when pantry data changes
     // This ensures the match circles update when you add/remove items from pantry
     ref.watch(pantryItemsProvider);
-    
+
     // Also listen to the recipe provider to detect when ingredients change
     ref.watch(recipeByIdStreamProvider(recipeId));
-    
+
     try {
       print("Fetching ingredient matches for $recipeId");
       final repository = ref.read(recipeRepositoryProvider);
