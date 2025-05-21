@@ -21,7 +21,7 @@ class RecipePage extends StatelessWidget {
           child: Padding(
             padding: EdgeInsets.symmetric(horizontal: 16),
             child: RecipeView(
-              recipeId: recipeId, 
+              recipeId: recipeId,
               // Force rebuild by using a unique key that includes timestamp
               key: ValueKey('RecipeView-$recipeId-${DateTime.now().millisecondsSinceEpoch}'),
             ),
@@ -40,6 +40,7 @@ class RecipePage extends StatelessWidget {
       ),
       automaticallyImplyLeading: true,
       previousPageTitle: previousPageTitle,
+      searchEnabled: false,
     );
   }
 }
