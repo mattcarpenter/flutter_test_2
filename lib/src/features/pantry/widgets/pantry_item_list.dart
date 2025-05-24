@@ -31,8 +31,8 @@ class PantryItemList extends StatelessWidget {
   Widget _buildPantryItemTile(BuildContext context, PantryItemEntry item) {
     final isDarkMode = CupertinoTheme.of(context).brightness == Brightness.dark;
     final textColor = CupertinoTheme.of(context).textTheme.textStyle.color!;
-    final dividerColor = isDarkMode 
-        ? Colors.grey.shade800 
+    final dividerColor = isDarkMode
+        ? Colors.grey.shade800
         : Colors.grey.shade300;
 
     // Format quantity and unit information if available
@@ -55,7 +55,8 @@ class PantryItemList extends StatelessWidget {
               fontWeight: FontWeight.w500,
             ),
           ),
-          subtitle: quantityText != null 
+          // MVP: No quantity
+          /*subtitle: quantityText != null
               ? Text(
                   quantityText,
                   style: TextStyle(
@@ -63,7 +64,7 @@ class PantryItemList extends StatelessWidget {
                     fontSize: 14,
                   ),
                 )
-              : null,
+              : null,*/
           trailing: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
@@ -78,7 +79,8 @@ class PantryItemList extends StatelessWidget {
               ),
               const SizedBox(width: 8),
               // Price information if available
-              if (item.price != null)
+              //MVP: No pricing info
+              /*if (item.price != null)
                 Text(
                   '\$${item.price!.toStringAsFixed(2)}',
                   style: TextStyle(
@@ -86,7 +88,7 @@ class PantryItemList extends StatelessWidget {
                     fontWeight: FontWeight.w600,
                   ),
                 ),
-              const SizedBox(width: 8),
+              const SizedBox(width: 8),*/
               Icon(
                 CupertinoIcons.chevron_right,
                 color: textColor.withOpacity(0.5),
@@ -111,7 +113,7 @@ class PantryItemList extends StatelessWidget {
       ],
     );
   }
-  
+
   // Helper method to get the color based on stock status
   Color _getStockStatusColor(StockStatus status) {
     switch (status) {

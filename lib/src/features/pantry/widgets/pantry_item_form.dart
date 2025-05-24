@@ -28,21 +28,21 @@ class PantryItemFormState extends ConsumerState<PantryItemForm> {
   late final TextEditingController _baseQuantityController;
   late final TextEditingController _priceController;
   late final TextEditingController _termController;
-  
+
   StockStatus _stockStatus = StockStatus.inStock;
   bool _isQuantitySectionExpanded = false;
   bool _isCostSectionExpanded = false;
   bool _isTermsSectionExpanded = false;
-  
+
   // Store the current terms (initialize as empty)
   List<PantryItemTerm> _terms = [];
 
   @override
   void initState() {
     super.initState();
-    
+
     final item = widget.initialPantryItem;
-    
+
     _nameController = TextEditingController(text: item?.name ?? '');
     _unitController = TextEditingController(text: item?.unit ?? '');
     _quantityController = TextEditingController(
@@ -56,15 +56,15 @@ class PantryItemFormState extends ConsumerState<PantryItemForm> {
       text: item?.price != null ? item!.price.toString() : '',
     );
     _termController = TextEditingController();
-    
+
     _stockStatus = item?.stockStatus ?? StockStatus.inStock;
-    
+
     // Initialize terms list if available for existing items
     if (item?.terms != null && item!.terms!.isNotEmpty) {
       _terms = List<PantryItemTerm>.from(item.terms!);
     }
     // For new items, leave terms list empty to allow canonicalization service to generate terms
-    
+
     // Auto-expand sections if they have data
     _isQuantitySectionExpanded = _quantityController.text.isNotEmpty || _unitController.text.isNotEmpty;
     _isCostSectionExpanded = _priceController.text.isNotEmpty || _baseQuantityController.text.isNotEmpty || _baseUnitController.text.isNotEmpty;
@@ -92,17 +92,17 @@ class PantryItemFormState extends ConsumerState<PantryItemForm> {
 
     final name = _nameController.text.trim();
     final unit = _unitController.text.isEmpty ? null : _unitController.text.trim();
-    final quantity = _quantityController.text.isEmpty 
-        ? null 
+    final quantity = _quantityController.text.isEmpty
+        ? null
         : double.tryParse(_quantityController.text);
-    final baseUnit = _baseUnitController.text.isEmpty 
-        ? null 
+    final baseUnit = _baseUnitController.text.isEmpty
+        ? null
         : _baseUnitController.text.trim();
-    final baseQuantity = _baseQuantityController.text.isEmpty 
-        ? null 
+    final baseQuantity = _baseQuantityController.text.isEmpty
+        ? null
         : double.tryParse(_baseQuantityController.text);
-    final price = _priceController.text.isEmpty 
-        ? null 
+    final price = _priceController.text.isEmpty
+        ? null
         : double.tryParse(_priceController.text);
 
     // For new items, we'll leave terms empty to allow canonicalization
@@ -117,13 +117,13 @@ class PantryItemFormState extends ConsumerState<PantryItemForm> {
           sort: _terms.length,
         ));
       }
-      
+
       // Sort terms by their sort order
       _terms.sort((a, b) => a.sort.compareTo(b.sort));
     }
 
     final userId = Supabase.instance.client.auth.currentUser?.id;
-    
+
     try {
       if (widget.initialPantryItem == null) {
         // Create new pantry item - pass null for terms to trigger canonicalization
@@ -131,11 +131,11 @@ class PantryItemFormState extends ConsumerState<PantryItemForm> {
           name: name,
           stockStatus: _stockStatus,
           userId: userId,
-          unit: unit,
-          quantity: quantity,
-          baseUnit: baseUnit,
-          baseQuantity: baseQuantity,
-          price: price,
+          //unit: unit,
+          //quantity: quantity,
+          //baseUnit: baseUnit,
+          //baseQuantity: baseQuantity,
+          //price: price,
           // Do NOT pass terms for new items to ensure canonicalization happens
         );
       } else {
@@ -144,11 +144,11 @@ class PantryItemFormState extends ConsumerState<PantryItemForm> {
           id: widget.initialPantryItem!.id,
           name: name,
           stockStatus: _stockStatus,
-          unit: unit,
-          quantity: quantity,
-          baseUnit: baseUnit,
-          baseQuantity: baseQuantity,
-          price: price,
+          //unit: unit,
+          //quantity: quantity,
+          //baseUnit: baseUnit,
+          //baseQuantity: baseQuantity,
+          //price: price,
           terms: _terms,
         );
       }
@@ -165,10 +165,10 @@ class PantryItemFormState extends ConsumerState<PantryItemForm> {
         children: [
           _buildBasicInfoSection(),
           const SizedBox(height: 16),
-          _buildExpandableQuantitySection(),
-          const SizedBox(height: 16),
-          _buildExpandableCostSection(),
-          const SizedBox(height: 16),
+          //_buildExpandableQuantitySection(),
+          //const SizedBox(height: 16),
+          //_buildExpandableCostSection(),
+          //const SizedBox(height: 16),
           _buildExpandableTermsSection(),
         ],
       ),
@@ -384,7 +384,7 @@ class PantryItemFormState extends ConsumerState<PantryItemForm> {
       ),
     );
   }
-  
+
   Widget _buildExpandableTermsSection() {
     return Disclosure(
       closed: !_isTermsSectionExpanded,
@@ -507,7 +507,7 @@ class PantryItemFormState extends ConsumerState<PantryItemForm> {
               onPressed: () {
                 setState(() {
                   _terms.removeAt(index);
-                  
+
                   // Update sort values
                   for (int i = 0; i < _terms.length; i++) {
                     _terms[i] = PantryItemTerm(
@@ -527,7 +527,7 @@ class PantryItemFormState extends ConsumerState<PantryItemForm> {
 
   void _showAddTermDialog() {
     _termController.clear();
-    
+
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
