@@ -291,15 +291,16 @@ class IngredientTermQueueManager {
           // Call the canonicalization API
           final results = await canonicalizer.canonicalizeIngredients(ingredients);
 
-          // Process any converters returned from the API
-          if (results.converters.isNotEmpty) {
-            // Get the recipe to determine household
-            final recipe = await _recipeRepository?.getRecipeById(recipeId);
-            final householdId = recipe?.householdId;
-
-            // Process the converters
-            await _processConverters(results.converters, householdId);
-          }
+          // DISABLED: Process any converters returned from the API
+          // Converters functionality temporarily disabled for MVP
+          // if (results.converters.isNotEmpty) {
+          //   // Get the recipe to determine household
+          //   final recipe = await _recipeRepository?.getRecipeById(recipeId);
+          //   final householdId = recipe?.householdId;
+          //
+          //   // Process the converters
+          //   await _processConverters(results.converters, householdId);
+          // }
 
           // Find the entries for this recipe and update them
           final recipeEntries = entryMap.values
@@ -354,9 +355,10 @@ class IngredientTermQueueManager {
                   status: 'completed',
                   responseData: Value(json.encode({
                     'terms': terms.map((t) => t.toJson()).toList(),
-                    'converters': results.converters.containsKey(originalName)
-                        ? _convertToJson(results.converters[originalName]!)
-                        : null,
+                    // DISABLED: Converter data storage temporarily disabled for MVP
+                    // 'converters': results.converters.containsKey(originalName)
+                    //     ? _convertToJson(results.converters[originalName]!)
+                    //     : null,
                   })),
                 );
                 await repository.updateEntry(completedEntry);
