@@ -40,7 +40,7 @@ class PantryItemList extends ConsumerWidget {
 
     return Column(
       children: [
-        InkWell(
+        GestureDetector(
           onTap: () {
             // Edit this pantry item
             showPantryItemEditorModal(
