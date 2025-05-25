@@ -170,7 +170,7 @@ class _StockStatusSegmentedControlState extends State<StockStatusSegmentedContro
 
     return Container(
       decoration: BoxDecoration(
-        color: isDarkMode ? const Color(0xFF2C2C2E) : const Color(0xFFF2F2F7),
+        color: isDarkMode ? const Color(0xFF2C2C2E) : const Color(0xFFF6F6F6),
         borderRadius: BorderRadius.circular(containerRadius),
       ),
       padding: const EdgeInsets.all(padding),
@@ -190,13 +190,13 @@ class _StockStatusSegmentedControlState extends State<StockStatusSegmentedContro
                     decoration: BoxDecoration(
                       color: _colorAnimation.value,
                       borderRadius: BorderRadius.circular(buttonRadius),
-                      boxShadow: [
+                      /*boxShadow: [
                         BoxShadow(
                           color: Colors.black.withValues(alpha: 0.1),
                           blurRadius: 2,
                           offset: const Offset(0, 1),
                         ),
-                      ],
+                      ],*/
                     ),
                   ),
                 );
