@@ -49,7 +49,7 @@ class _StockStatusSegmentedControlState extends State<StockStatusSegmentedContro
   void initState() {
     super.initState();
     _calculateSegmentDimensions();
-    
+
     _animationController = AnimationController(
       duration: const Duration(milliseconds: 250),
       vsync: this,
@@ -92,14 +92,14 @@ class _StockStatusSegmentedControlState extends State<StockStatusSegmentedContro
     // Calculate segment widths to match the natural layout
     // Each segment: text width + horizontal padding (6px on each side = 12px total)
     const segmentHorizontalPadding = 12.0;
-    
+
     for (final status in StockStatus.values) {
       final textPainter = TextPainter(
         text: TextSpan(text: _labels[status], style: textStyle),
         textDirection: TextDirection.ltr,
       );
       textPainter.layout();
-      
+
       // Width = text width + padding to match _SegmentButton
       _segmentWidths[status] = textPainter.width + segmentHorizontalPadding;
     }
@@ -185,7 +185,7 @@ class _StockStatusSegmentedControlState extends State<StockStatusSegmentedContro
                   left: _slideAnimation.value,
                   top: 0,
                   child: Container(
-                    width: _widthAnimation.value,
+                    width: _widthAnimation.value + 3,
                     height: (widget.height ?? 32) - (2 * padding),
                     decoration: BoxDecoration(
                       color: _colorAnimation.value,
@@ -248,7 +248,7 @@ class _SegmentButton extends StatelessWidget {
       onTap: onTap,
       child: Container(
         height: 26, // Fixed height to match container
-        padding: const EdgeInsets.symmetric(horizontal: 6.0), // Consistent padding for all segments
+        padding: const EdgeInsets.symmetric(horizontal: 6.0), // Add padding so text doesn't touch edges
         decoration: const BoxDecoration(
           color: Colors.transparent, // No background - handled by animated layer
         ),
