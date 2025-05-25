@@ -45,6 +45,10 @@ void main() async {
         }
         return null;
       });
+      
+      // Disable the pantry item term queue manager to prevent race conditions
+      final queueManager = container.read(pantryItemTermQueueManagerProvider);
+      queueManager.testMode = true;
     });
 
     tearDown(() async {
@@ -84,6 +88,7 @@ void main() async {
             primaryAmount1Unit: "whole",
             primaryAmount1Type: "count",
             terms: onionTerms,
+            isCanonicalised: true,
           ),
           Ingredient(
             id: "ing_2",
@@ -94,6 +99,7 @@ void main() async {
             primaryAmount1Unit: "whole",
             primaryAmount1Type: "count",
             terms: tomatoTerms,
+            isCanonicalised: true,
           ),
         ];
 
@@ -142,24 +148,26 @@ void main() async {
         // Debug log
         print('Materialized terms: ${materializedTerms.map((e) => e.data).toList()}');
 
-        // We should have 4 terms in total (2 for each ingredient)
-        expect(materializedTerms.length, 4);
+        // We should have 6 terms in total (3 for each ingredient: name + 2 canonical terms)
+        expect(materializedTerms.length, 6);
 
-        // Verify onion terms
+        // Verify onion terms (name + canonical terms)
         final onionMaterializedTerms = materializedTerms
             .where((row) => row.read<String>('ingredient_id') == 'ing_1')
             .toList();
-        expect(onionMaterializedTerms.length, 2);
-        expect(onionMaterializedTerms[0].read<String>('term'), 'onion');
-        expect(onionMaterializedTerms[1].read<String>('term'), 'yellow onion');
+        expect(onionMaterializedTerms.length, 3);
+        expect(onionMaterializedTerms[0].read<String>('term'), 'Diced Yellow Onion'); // Name term added first
+        expect(onionMaterializedTerms[1].read<String>('term'), 'onion');
+        expect(onionMaterializedTerms[2].read<String>('term'), 'yellow onion');
 
-        // Verify tomato terms
+        // Verify tomato terms (name + canonical terms)
         final tomatoMaterializedTerms = materializedTerms
             .where((row) => row.read<String>('ingredient_id') == 'ing_2')
             .toList();
-        expect(tomatoMaterializedTerms.length, 2);
-        expect(tomatoMaterializedTerms[0].read<String>('term'), 'tomato');
-        expect(tomatoMaterializedTerms[1].read<String>('term'), 'roma tomato');
+        expect(tomatoMaterializedTerms.length, 3);
+        expect(tomatoMaterializedTerms[0].read<String>('term'), 'Roma Tomatoes'); // Name term added first
+        expect(tomatoMaterializedTerms[1].read<String>('term'), 'tomato');
+        expect(tomatoMaterializedTerms[2].read<String>('term'), 'roma tomato');
 
         // Now update a recipe to test the update trigger
         final List<Ingredient> updatedIngredients = List.from(ingredients);
@@ -189,9 +197,9 @@ void main() async {
           variables: [Variable.withString(recipeId)],
         ).get();
 
-        // We should now have 3 terms for the first ingredient
-        expect(updatedMaterializedTerms.length, 3);
-        expect(updatedMaterializedTerms[2].read<String>('term'), 'allium');
+        // We should now have 4 terms for the first ingredient (name + 3 canonical terms)
+        expect(updatedMaterializedTerms.length, 4);
+        expect(updatedMaterializedTerms[3].read<String>('term'), 'allium');
       });
     });
 
@@ -222,14 +230,24 @@ void main() async {
           (items) => items.any((item) => item.name == "Granny Smith Apples"),
         );
 
-        // Update the pantry item to add terms
+        // Update the pantry item to add terms (ensure name is first term)
+        final allTerms = [
+          PantryItemTerm(value: "Granny Smith Apples", source: "user", sort: 0), // Name term first
+          ...appleTerms.map((term) => PantryItemTerm(
+            value: term.value,
+            source: term.source,
+            sort: term.sort + 1, // Adjust sort order
+          )),
+        ];
+
         await appDb.update(appDb.pantryItems).replace(
           PantryItemsCompanion(
             id: Value(pantryItemId),
             name: const Value("Granny Smith Apples"),
             stockStatus: const Value(StockStatus.inStock),
             userId: Value(userId),
-            terms: Value(appleTerms),
+            terms: Value(allTerms),
+            isCanonicalised: const Value(true),
           ),
         );
 
@@ -249,15 +267,25 @@ void main() async {
         // Debug log
         print('Pantry item materialized terms: ${materializedTerms.map((e) => e.data).toList()}');
 
-        // We should have 2 terms in total
-        expect(materializedTerms.length, 2);
-        expect(materializedTerms[0].read<String>('term'), 'apple');
-        expect(materializedTerms[1].read<String>('term'), 'granny smith');
+        // We should have 3 terms in total (name + 2 canonical terms)
+        expect(materializedTerms.length, 3);
+        expect(materializedTerms[0].read<String>('term'), 'Granny Smith Apples'); // Name term added first
+        expect(materializedTerms[1].read<String>('term'), 'apple');
+        expect(materializedTerms[2].read<String>('term'), 'granny smith');
 
         // Now update the pantry item to test the update trigger
-        final updatedTerms = [
+        final updatedCanonicalTerms = [
           ...appleTerms,
           PantryItemTerm(value: "fruit", source: "user", sort: 3),
+        ];
+
+        final allUpdatedTerms = [
+          PantryItemTerm(value: "Granny Smith Apples", source: "user", sort: 0), // Name term first
+          ...updatedCanonicalTerms.map((term) => PantryItemTerm(
+            value: term.value,
+            source: term.source,
+            sort: term.sort + 1, // Adjust sort order
+          )),
         ];
 
         await appDb.update(appDb.pantryItems).replace(
@@ -266,7 +294,8 @@ void main() async {
             name: const Value("Granny Smith Apples"),
             stockStatus: const Value(StockStatus.inStock),
             userId: Value(userId),
-            terms: Value(updatedTerms),
+            terms: Value(allUpdatedTerms),
+            isCanonicalised: const Value(true),
           ),
         );
 
@@ -283,9 +312,9 @@ void main() async {
           variables: [Variable.withString(pantryItemId)],
         ).get();
 
-        // We should now have 3 terms
-        expect(updatedMaterializedTerms.length, 3);
-        expect(updatedMaterializedTerms[2].read<String>('term'), 'fruit');
+        // We should now have 4 terms (name + 3 canonical terms)
+        expect(updatedMaterializedTerms.length, 4);
+        expect(updatedMaterializedTerms[3].read<String>('term'), 'fruit');
       });
     });
 
@@ -388,6 +417,7 @@ void main() async {
             primaryAmount1Unit: "whole",
             primaryAmount1Type: "count",
             terms: onionTerms,
+            isCanonicalised: true,
           ),
         ];
 
@@ -415,7 +445,7 @@ void main() async {
           PantryItemTerm(value: "green apple", source: "user", sort: 2),
         ];
 
-        // Add a pantry item
+        // Add a pantry item using the provider
         pantryItemId = await container.read(pantryItemsProvider.notifier).addItem(
           name: "Green Apples",
           stockStatus: StockStatus.inStock,
@@ -429,15 +459,21 @@ void main() async {
           (items) => items.any((item) => item.name == "Green Apples"),
         );
 
-        // Update the pantry item to add terms
-        await appDb.update(appDb.pantryItems).replace(
-          PantryItemsCompanion(
-            id: Value(pantryItemId),
-            name: const Value("Green Apples"),
-            stockStatus: const Value(StockStatus.inStock),
-            userId: Value(userId),
-            terms: Value(appleTerms),
-          ),
+        // Create all pantry item terms including name term
+        final allAppleTerms = [
+          PantryItemTerm(value: "Green Apples", source: "user", sort: 0), // Name term first
+          ...appleTerms.map((term) => PantryItemTerm(
+            value: term.value,
+            source: term.source,
+            sort: term.sort + 1, // Adjust sort order
+          )),
+        ];
+
+        // Update the pantry item to add terms and set canonicalized flag
+        await container.read(pantryItemsProvider.notifier).updateItem(
+          id: pantryItemId,
+          terms: allAppleTerms,
+          isCanonicalised: true,
         );
 
         // Allow some time for triggers to execute and data to sync to server
@@ -460,8 +496,8 @@ void main() async {
           variables: [Variable.withString(pantryItemId)],
         ).getSingle();
 
-        expect(recipeMaterializedTerms.read<int>('count'), 2);
-        expect(pantryMaterializedTerms.read<int>('count'), 2);
+        expect(recipeMaterializedTerms.read<int>('count'), 3); // name + 2 canonical terms
+        expect(pantryMaterializedTerms.read<int>('count'), 3); // name + 2 canonical terms
       });
 
       // At this point, user is logged out. Local DB is cleared.
@@ -501,8 +537,8 @@ void main() async {
           variables: [Variable.withString(pantryItemId)],
         ).getSingle();
 
-        expect(recipeMaterializedTerms.read<int>('count'), 2);
-        expect(pantryMaterializedTerms.read<int>('count'), 2);
+        expect(recipeMaterializedTerms.read<int>('count'), 3); // name + 2 canonical terms
+        expect(pantryMaterializedTerms.read<int>('count'), 3); // name + 2 canonical terms
       });
     });
 
@@ -549,6 +585,7 @@ void main() async {
             primaryAmount1Unit: "whole",
             primaryAmount1Type: "count",
             terms: carrotTerms,
+            isCanonicalised: true,
           ),
         ];
 
@@ -590,20 +627,27 @@ void main() async {
           (items) => items.any((item) => item.name == "Russet Potatoes"),
         );
 
-        // Update pantry item to add terms
-        await appDb.update(appDb.pantryItems).replace(
-          PantryItemsCompanion(
-            id: Value(pantryItemId),
-            name: const Value("Russet Potatoes"),
-            stockStatus: const Value(StockStatus.inStock),
-            userId: Value(householdOwnerId),
-            householdId: Value(householdId),
-            terms: Value(potatoTerms),
-          ),
+        // Update pantry item to add terms (ensure name is first term)
+        final allPotatoTerms = [
+          PantryItemTerm(value: "Russet Potatoes", source: "user", sort: 0), // Name term first
+          ...potatoTerms.map((term) => PantryItemTerm(
+            value: term.value,
+            source: term.source,
+            sort: term.sort + 1, // Adjust sort order
+          )),
+        ];
+
+
+        // Use provider method for proper PowerSync multi-user sync
+        await container.read(pantryItemsProvider.notifier).updateItem(
+          id: pantryItemId,
+          terms: allPotatoTerms,
+          isCanonicalised: true,
         );
 
         // Allow time for triggers to execute and sync
         await Future.delayed(const Duration(seconds: 3));
+
 
         // Verify materialized terms exist for owner
         final recipeMaterializedTerms = await appDb.customSelect(
@@ -622,8 +666,9 @@ void main() async {
           variables: [Variable.withString(pantryItemId)],
         ).getSingle();
 
-        expect(recipeMaterializedTerms.read<int>('count'), 2);
-        expect(pantryMaterializedTerms.read<int>('count'), 2);
+
+        expect(recipeMaterializedTerms.read<int>('count'), 3); // name + 2 canonical terms
+        expect(pantryMaterializedTerms.read<int>('count'), 3); // name + 2 canonical terms
       });
 
       // Step 4: household_member logs in and should see the shared items with materialized terms
@@ -661,8 +706,9 @@ void main() async {
           variables: [Variable.withString(pantryItemId)],
         ).getSingle();
 
-        expect(recipeMaterializedTerms.read<int>('count'), 2);
-        expect(pantryMaterializedTerms.read<int>('count'), 2);
+
+        expect(recipeMaterializedTerms.read<int>('count'), 3); // name + 2 canonical terms
+        expect(pantryMaterializedTerms.read<int>('count'), 3); // name + 2 canonical terms
       });
     });
   });

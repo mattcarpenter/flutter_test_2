@@ -3,17 +3,16 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:recipe_app/database/database.dart';
+import 'package:recipe_app/database/powersync.dart';
 import 'package:recipe_app/database/models/ingredient_terms.dart';
+import 'package:recipe_app/database/models/pantry_items.dart'; // For StockStatus enum
 import 'package:recipe_app/database/models/ingredients.dart';
 import 'package:recipe_app/database/models/pantry_item_terms.dart';
 import 'package:recipe_app/database/models/steps.dart';
 import 'package:recipe_app/src/managers/ingredient_term_queue_manager.dart';
-import 'package:recipe_app/src/models/ingredient_pantry_match.dart';
-import 'package:recipe_app/src/models/recipe_pantry_match.dart';
 import 'package:recipe_app/src/providers/ingredient_term_override_provider.dart';
-import 'package:recipe_app/src/providers/pantry_provider.dart';
 import 'package:recipe_app/src/providers/recipe_provider.dart';
-import 'package:recipe_app/src/repositories/ingredient_term_queue_repository.dart';
+import 'package:recipe_app/src/repositories/pantry_repository.dart';
 import 'package:recipe_app/src/repositories/recipe_repository.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:uuid/uuid.dart';
@@ -90,6 +89,7 @@ void main() async {
               sort: entry.key,
             );
           }).toList(),
+          isCanonicalised: true, // Mark as canonicalized since we're providing explicit terms
         );
       }).toList();
 
@@ -138,11 +138,23 @@ void main() async {
         );
       }).toList();
 
-      // Add pantry item
-      final itemId = await container.read(pantryNotifierProvider.notifier).addItem(
+      // Add pantry item using the repository method
+      final pantryRepository = container.read(pantryRepositoryProvider);
+      final itemId = await pantryRepository.addItem(
         name: name,
         userId: userId,
-        terms: pantryItemTerms,
+      );
+
+      // Update the item with our test terms and mark as canonicalized
+      await appDb.update(appDb.pantryItems).replace(
+        PantryItemsCompanion(
+          id: Value(itemId),
+          name: Value(name),
+          stockStatus: const Value(StockStatus.inStock),
+          userId: Value(userId),
+          terms: Value(pantryItemTerms),
+          isCanonicalised: const Value(true), // Mark as canonicalized since we're providing explicit terms
+        ),
       );
 
       return itemId;

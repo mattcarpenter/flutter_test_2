@@ -77,6 +77,11 @@ class PantryItemTermQueueManager {
     List<PantryItemTerm>? existingTerms,
     bool isCanonicalised = false,
   }) async {
+    // Skip if in test mode to avoid race conditions
+    if (_testMode) {
+      return;
+    }
+    
     // Skip if already canonicalized (this is the new logic)
     if (isCanonicalised) {
       return;
