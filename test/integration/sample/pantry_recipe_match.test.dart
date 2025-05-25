@@ -83,7 +83,7 @@ void main() async {
           name: ing['name'],
           primaryAmount1Value: ing['amount']?.toString(),
           primaryAmount1Unit: ing['unit'],
-          terms: (ing['terms'] as List<String>).asMap().entries.map((entry) {
+          terms: (ing['terms'] as List).cast<String>().asMap().entries.map((entry) {
             return IngredientTerm(
               value: entry.value,
               source: 'test',
@@ -550,6 +550,86 @@ void main() async {
         expect(match.ingredient.name, 'Spring Onion');
         expect(match.pantryItem!.id, pantryItemId);
         expect(match.pantryItem!.name, 'Green Onions');
+      });
+    });
+
+    testWidgets('All ingredients appear even when some have no terms', (tester) async {
+      // Create test user
+      await TestUserManager.createTestUser('pantry_match_tester');
+
+      await withTestUser('pantry_match_tester', () async {
+        // Enable test mode for the ingredient term queue manager
+        final ingredientTermManager = container.read(ingredientTermQueueManagerProvider);
+        ingredientTermManager.testMode = true;
+        
+        // Create a recipe with mixed ingredients - some with terms, some without
+        final recipeId = await createTestRecipe(
+          title: 'Mixed Terms Recipe',
+          ingredients: [
+            {
+              'name': 'Chicken with terms',
+              'amount': '500',
+              'unit': 'g',
+              'terms': ['chicken', 'chicken breast'], // Has terms
+            },
+            {
+              'name': 'Ingredient without terms',
+              'amount': '1',
+              'unit': 'piece',
+              'terms': [], // No terms - this should still appear
+            },
+            {
+              'name': 'Rice with terms',
+              'amount': '1',
+              'unit': 'cup',
+              'terms': ['rice', 'white rice'], // Has terms
+            },
+          ],
+        );
+
+        // Create a pantry item that matches one ingredient
+        final chickenPantryId = await createPantryItem(
+          name: 'Chicken Breast', 
+          terms: ['chicken', 'chicken breast']
+        );
+        
+        // Use the repository directly to get ingredient matches
+        final repository = container.read(recipeRepositoryProvider);
+        final matchResult = await repository.findPantryMatchesForRecipe(recipeId);
+        
+        // Verify ALL ingredients appear, including the one without terms
+        expect(matchResult.matches.length, 3, reason: 'All 3 ingredients should appear even if some have no terms');
+        expect(matchResult.recipeId, recipeId);
+        
+        // Find each ingredient in the matches
+        final chickenMatch = matchResult.matches.firstWhere(
+          (m) => m.ingredient.name == 'Chicken with terms'
+        );
+        final noTermsMatch = matchResult.matches.firstWhere(
+          (m) => m.ingredient.name == 'Ingredient without terms'
+        );
+        final riceMatch = matchResult.matches.firstWhere(
+          (m) => m.ingredient.name == 'Rice with terms'
+        );
+        
+        // Verify chicken matches (has terms and pantry item)
+        expect(chickenMatch.hasMatch, true);
+        expect(chickenMatch.pantryItem!.id, chickenPantryId);
+        
+        // Verify ingredient without terms still appears but doesn't match
+        expect(noTermsMatch.hasMatch, false);
+        expect(noTermsMatch.pantryItem, null);
+        expect(noTermsMatch.ingredient.terms, isEmpty);
+        
+        // Verify rice appears but doesn't match (no pantry item for it)
+        expect(riceMatch.hasMatch, false);
+        expect(riceMatch.pantryItem, null);
+        expect(riceMatch.ingredient.terms, isNotEmpty);
+        
+        // Overall stats should reflect partial match
+        expect(matchResult.matchRatio, closeTo(1/3, 0.01)); // 1 out of 3 match
+        expect(matchResult.hasAllIngredients, false);
+        expect(matchResult.missingIngredients.length, 2); // 2 ingredients don't match
       });
     });
   });

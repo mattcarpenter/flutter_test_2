@@ -639,6 +639,10 @@ class RecipeRepository {
       };
 
       // Query to match ingredients with pantry items
+      // Create a list of all ingredient IDs from the recipe
+      final allIngredientIds = recipe.ingredients!.map((ing) => ing.id).toList();
+      final ingredientIdParams = allIngredientIds.map((_) => '?').join(',');
+      
       final results = await _db.customSelect('''
   WITH ingredient_terms_with_mapping AS (
     SELECT
@@ -675,9 +679,8 @@ class RecipeRepository {
     p.deleted_at,
     p.stock_status
   FROM (
-    SELECT DISTINCT ingredient_id 
-    FROM recipe_ingredient_terms 
-    WHERE recipe_id = ?
+    SELECT ? AS ingredient_id
+    ${allIngredientIds.length > 1 ? 'UNION ALL ' + allIngredientIds.skip(1).map((_) => 'SELECT ?').join(' UNION ALL ') : ''}
   ) i
   LEFT JOIN (
     SELECT 
@@ -696,7 +699,7 @@ class RecipeRepository {
 ''',
           variables: [
             Variable(recipeId),
-            Variable(recipeId),
+            ...allIngredientIds.map((id) => Variable(id)),
           ],
           readsFrom: {
             _db.recipes,
