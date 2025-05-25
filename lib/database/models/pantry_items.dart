@@ -36,6 +36,8 @@ class PantryItems extends Table {
     .map(const StockStatusConverter())
     .withDefault(const Constant(2))(); // Default to IN_STOCK (index 2)
   
+  BoolColumn get isStaple => boolean().withDefault(const Constant(false))();
+  
   // No longer using inStock field - completely replaced by stockStatus
   
   TextColumn  get userId    => text().nullable()();                     // or householdId if multi‑tenant

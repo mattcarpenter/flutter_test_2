@@ -30,6 +30,7 @@ class PantryItemFormState extends ConsumerState<PantryItemForm> {
   late final TextEditingController _termController;
 
   StockStatus _stockStatus = StockStatus.inStock;
+  bool _isStaple = false;
   bool _isQuantitySectionExpanded = false;
   bool _isCostSectionExpanded = false;
   bool _isTermsSectionExpanded = false;
@@ -58,6 +59,7 @@ class PantryItemFormState extends ConsumerState<PantryItemForm> {
     _termController = TextEditingController();
 
     _stockStatus = item?.stockStatus ?? StockStatus.inStock;
+    _isStaple = item?.isStaple ?? false;
 
     // Initialize terms list if available for existing items
     if (item?.terms != null && item!.terms!.isNotEmpty) {
@@ -130,6 +132,7 @@ class PantryItemFormState extends ConsumerState<PantryItemForm> {
         await ref.read(pantryItemsProvider.notifier).addItem(
           name: name,
           stockStatus: _stockStatus,
+          isStaple: _isStaple,
           userId: userId,
           //unit: unit,
           //quantity: quantity,
@@ -144,6 +147,7 @@ class PantryItemFormState extends ConsumerState<PantryItemForm> {
           id: widget.initialPantryItem!.id,
           name: name,
           stockStatus: _stockStatus,
+          isStaple: _isStaple,
           //unit: unit,
           //quantity: quantity,
           //baseUnit: baseUnit,
@@ -189,6 +193,27 @@ class PantryItemFormState extends ConsumerState<PantryItemForm> {
           ),
           keyboardType: TextInputType.text,
           textCapitalization: TextCapitalization.words,
+        ),
+        const SizedBox(height: 16),
+        // Staple checkbox
+        Row(
+          children: [
+            const Text('Mark as staple:'),
+            const Spacer(),
+            CupertinoSwitch(
+              value: _isStaple,
+              onChanged: (bool value) {
+                setState(() {
+                  _isStaple = value;
+                });
+              },
+            ),
+          ],
+        ),
+        const SizedBox(height: 8),
+        const Text(
+          'Staples are assumed to always be in stock',
+          style: TextStyle(fontSize: 12, color: Colors.grey),
         ),
         const SizedBox(height: 16),
         // Stock status selector

@@ -166,6 +166,7 @@ CREATE TABLE public.pantry_items (
                                      id uuid NOT NULL DEFAULT extensions.uuid_generate_v4(),
                                      name text NOT NULL,
                                      stock_status integer NOT NULL DEFAULT 2, -- 0=out_of_stock, 1=low_stock, 2=in_stock
+                                     is_staple integer NOT NULL DEFAULT 0, -- 0=false, 1=true
                                      user_id uuid NOT NULL,
                                      household_id uuid NULL,
                                      unit text NULL,

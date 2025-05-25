@@ -677,7 +677,8 @@ class RecipeRepository {
     p.created_at,
     p.updated_at,
     p.deleted_at,
-    p.stock_status
+    p.stock_status,
+    p.is_staple
   FROM (
     SELECT ? AS ingredient_id
     ${allIngredientIds.length > 1 ? 'UNION ALL ' + allIngredientIds.skip(1).map((_) => 'SELECT ?').join(' UNION ALL ') : ''}
@@ -726,6 +727,10 @@ class RecipeRepository {
           final stockStatusInt = row.read<int>('stock_status');
           final stockStatus = StockStatus.values[stockStatusInt];
           
+          // Read is_staple as integer and convert to bool
+          final isStapleInt = row.read<int>('is_staple');
+          final isStaple = isStapleInt == 1;
+          
           pantryItem = PantryItemEntry(
             id: pantryItemId,
             name: row.read<String>('name'),
@@ -737,6 +742,7 @@ class RecipeRepository {
             updatedAt: row.readNullable<int>('updated_at'),
             deletedAt: row.readNullable<int>('deleted_at'),
             stockStatus: stockStatus,
+            isStaple: isStaple,
           );
         }
 

@@ -28,6 +28,7 @@ class PantryRepository {
   Future<String> addItem({
     required String name,
     StockStatus stockStatus = StockStatus.inStock,
+    bool isStaple = false,
     String? userId,
     String? householdId,
     List<PantryItemTerm>? terms,
@@ -45,6 +46,7 @@ class PantryRepository {
       id: Value(newId),
       name: name,
       stockStatus: Value(stockStatus),
+      isStaple: Value(isStaple),
       userId: Value(userId),
       householdId: Value(householdId),
       unit: Value(unit),
@@ -76,6 +78,7 @@ class PantryRepository {
     required String id,
     String? name,
     StockStatus? stockStatus,
+    bool? isStaple,
     List<PantryItemTerm>? terms,
     String? unit,
     double? quantity,
@@ -93,6 +96,7 @@ class PantryRepository {
     final companion = PantryItemsCompanion(
       name: name != null ? Value(name) : const Value.absent(),
       stockStatus: stockStatus != null ? Value(stockStatus) : const Value.absent(),
+      isStaple: isStaple != null ? Value(isStaple) : const Value.absent(),
       unit: unit != null ? Value(unit) : const Value.absent(),
       quantity: quantity != null ? Value(quantity) : const Value.absent(),
       baseUnit: baseUnit != null ? Value(baseUnit) : const Value.absent(),
