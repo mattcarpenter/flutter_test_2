@@ -22,51 +22,31 @@ class RecipeIngredientsView extends ConsumerStatefulWidget {
 }
 
 class _RecipeIngredientsViewState extends ConsumerState<RecipeIngredientsView> {
-  @override
-  void initState() {
-    super.initState();
-    // Pre-fetch ingredient matches when the view is first loaded
-    if (widget.recipeId != null) {
-      // Use future to defer until after initial build
-      Future.microtask(() {
-        // First make sure we have the latest pantry data
-        ref.refresh(pantryItemsProvider);
-        
-        // Then invalidate and prefetch the ingredient matches
-        ref.invalidate(recipeIngredientMatchesProvider(widget.recipeId!));
-        ref.read(recipeIngredientMatchesProvider(widget.recipeId!).future);
-        
-        print("Initialized RecipeIngredientsView for ${widget.recipeId}");
-      });
-    }
-  }
-  
-  @override
-  void didUpdateWidget(RecipeIngredientsView oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    
-    // If the recipe ID changes or the ingredients list changes, refresh the data
-    if (widget.recipeId != oldWidget.recipeId || 
-        widget.ingredients.length != oldWidget.ingredients.length) {
-      if (widget.recipeId != null) {
-        Future.microtask(() {
-          ref.invalidate(recipeIngredientMatchesProvider(widget.recipeId!));
-          ref.read(recipeIngredientMatchesProvider(widget.recipeId!).future);
-          print("RecipeIngredientsView updated for ${widget.recipeId}");
-        });
-      }
-    }
-  }
+  // Keep previous match data to prevent flashing
+  RecipeIngredientMatches? _previousMatches;
 
   @override
   Widget build(BuildContext context) {
-    // Watch the pantry provider to detect changes to pantry items
-    ref.watch(pantryItemsProvider);
-    
     // Only fetch matches if recipeId is provided
     final matchesAsync = widget.recipeId != null 
       ? ref.watch(recipeIngredientMatchesProvider(widget.recipeId!))
       : null;
+
+    // Get current matches, but keep previous data during loading to prevent flashing
+    RecipeIngredientMatches? currentMatches;
+    if (matchesAsync != null) {
+      matchesAsync.whenData((matches) {
+        _previousMatches = matches; // Store successful data
+        currentMatches = matches;
+      });
+      
+      // Use previous data if we're in loading state and have previous data
+      if (matchesAsync.isLoading && _previousMatches != null) {
+        currentMatches = _previousMatches;
+      } else if (!matchesAsync.isLoading) {
+        currentMatches = matchesAsync.valueOrNull;
+      }
+    }
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -80,16 +60,12 @@ class _RecipeIngredientsViewState extends ConsumerState<RecipeIngredientsView> {
               style: Theme.of(context).textTheme.titleLarge,
             ),
             
-            // Display match ratio if available
-            if (matchesAsync != null) ...[
+            // Display match ratio if available using current matches (including cached)
+            if (currentMatches != null) ...[
               const SizedBox(width: 8),
-              matchesAsync.when(
-                data: (matches) => Text(
-                  '(${matches.matches.where((m) => m.hasMatch).length}/${matches.matches.length})',
-                  style: Theme.of(context).textTheme.bodySmall,
-                ),
-                loading: () => const SizedBox.shrink(),
-                error: (_, __) => const SizedBox.shrink(),
+              Text(
+                '(${currentMatches!.matches.where((m) => m.hasMatch).length}/${currentMatches!.matches.length})',
+                style: Theme.of(context).textTheme.bodySmall,
               ),
             ],
           ],
@@ -134,36 +110,36 @@ class _RecipeIngredientsViewState extends ConsumerState<RecipeIngredientsView> {
               child: Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // Match indicator or bullet point
-                  if (matchesAsync != null) ...[
-                    matchesAsync.when(
-                      data: (matches) {
-                        // Find the matching IngredientPantryMatch for this ingredient
-                        final match = matches.matches.firstWhere(
-                          (m) => m.ingredient.id == ingredient.id,
-                          // If no match found, create a default one with no pantry match
-                          orElse: () => IngredientPantryMatch(ingredient: ingredient),
-                        );
-                        
-                        return IngredientMatchCircle(
-                          match: match, 
-                          onTap: () => _showMatchesBottomSheet(context, ref, matches),
-                          size: 10.0,
-                        );
-                      },
-                      loading: () => const Text(
-                        '•',
-                        style: TextStyle(
-                          fontSize: 20,
-                          height: 1.0,
-                        ),
+                  // Match indicator or bullet point - use cached data to prevent flashing
+                  if (currentMatches != null) ...[
+                    () {
+                      // Find the matching IngredientPantryMatch for this ingredient
+                      final match = currentMatches!.matches.firstWhere(
+                        (m) => m.ingredient.id == ingredient.id,
+                        // If no match found, create a default one with no pantry match
+                        orElse: () => IngredientPantryMatch(ingredient: ingredient),
+                      );
+                      
+                      return IngredientMatchCircle(
+                        match: match, 
+                        onTap: () => _showMatchesBottomSheet(context, ref, currentMatches!),
+                        size: 10.0,
+                      );
+                    }(),
+                  ] else if (matchesAsync != null && matchesAsync.isLoading) ...[
+                    const Text(
+                      '•',
+                      style: TextStyle(
+                        fontSize: 20,
+                        height: 1.0,
                       ),
-                      error: (_, __) => const Text(
-                        '•',
-                        style: TextStyle(
-                          fontSize: 20,
-                          height: 1.0,
-                        ),
+                    ),
+                  ] else if (matchesAsync != null && matchesAsync.hasError) ...[
+                    const Text(
+                      '•',
+                      style: TextStyle(
+                        fontSize: 20,
+                        height: 1.0,
                       ),
                     ),
                   ] else ...[

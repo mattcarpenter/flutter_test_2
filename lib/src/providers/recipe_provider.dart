@@ -514,7 +514,7 @@ final recipeIngredientMatchesProvider = FutureProvider.family<RecipeIngredientMa
       final matches = await repository.findPantryMatchesForRecipe(recipeId);
       print("Found ${matches.matches.length} ingredient matches for recipe $recipeId");
       return matches;
-    } catch (e, stack) {
+    } catch (e) {
       print("Error fetching ingredient matches for $recipeId: $e");
       // Re-throw to let the UI handle the error state
       rethrow;
