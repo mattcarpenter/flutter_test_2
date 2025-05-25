@@ -4068,6 +4068,16 @@ class $PantryItemsTable extends PantryItems
       defaultConstraints:
           GeneratedColumn.constraintIsAlways('CHECK ("is_staple" IN (0, 1))'),
       defaultValue: const Constant(false));
+  static const VerificationMeta _isCanonicalisedMeta =
+      const VerificationMeta('isCanonicalised');
+  @override
+  late final GeneratedColumn<bool> isCanonicalised = GeneratedColumn<bool>(
+      'is_canonicalised', aliasedName, false,
+      type: DriftSqlType.bool,
+      requiredDuringInsert: false,
+      defaultConstraints: GeneratedColumn.constraintIsAlways(
+          'CHECK ("is_canonicalised" IN (0, 1))'),
+      defaultValue: const Constant(false));
   static const VerificationMeta _userIdMeta = const VerificationMeta('userId');
   @override
   late final GeneratedColumn<String> userId = GeneratedColumn<String>(
@@ -4138,6 +4148,7 @@ class $PantryItemsTable extends PantryItems
         name,
         stockStatus,
         isStaple,
+        isCanonicalised,
         userId,
         householdId,
         unit,
@@ -4173,6 +4184,12 @@ class $PantryItemsTable extends PantryItems
     if (data.containsKey('is_staple')) {
       context.handle(_isStapleMeta,
           isStaple.isAcceptableOrUnknown(data['is_staple']!, _isStapleMeta));
+    }
+    if (data.containsKey('is_canonicalised')) {
+      context.handle(
+          _isCanonicalisedMeta,
+          isCanonicalised.isAcceptableOrUnknown(
+              data['is_canonicalised']!, _isCanonicalisedMeta));
     }
     if (data.containsKey('user_id')) {
       context.handle(_userIdMeta,
@@ -4237,6 +4254,8 @@ class $PantryItemsTable extends PantryItems
               .read(DriftSqlType.int, data['${effectivePrefix}stock_status'])!),
       isStaple: attachedDatabase.typeMapping
           .read(DriftSqlType.bool, data['${effectivePrefix}is_staple'])!,
+      isCanonicalised: attachedDatabase.typeMapping
+          .read(DriftSqlType.bool, data['${effectivePrefix}is_canonicalised'])!,
       userId: attachedDatabase.typeMapping
           .read(DriftSqlType.string, data['${effectivePrefix}user_id']),
       householdId: attachedDatabase.typeMapping
@@ -4281,6 +4300,7 @@ class PantryItemEntry extends DataClass implements Insertable<PantryItemEntry> {
   final String name;
   final StockStatus stockStatus;
   final bool isStaple;
+  final bool isCanonicalised;
   final String? userId;
   final String? householdId;
   final String? unit;
@@ -4297,6 +4317,7 @@ class PantryItemEntry extends DataClass implements Insertable<PantryItemEntry> {
       required this.name,
       required this.stockStatus,
       required this.isStaple,
+      required this.isCanonicalised,
       this.userId,
       this.householdId,
       this.unit,
@@ -4318,6 +4339,7 @@ class PantryItemEntry extends DataClass implements Insertable<PantryItemEntry> {
           $PantryItemsTable.$converterstockStatus.toSql(stockStatus));
     }
     map['is_staple'] = Variable<bool>(isStaple);
+    map['is_canonicalised'] = Variable<bool>(isCanonicalised);
     if (!nullToAbsent || userId != null) {
       map['user_id'] = Variable<String>(userId);
     }
@@ -4361,6 +4383,7 @@ class PantryItemEntry extends DataClass implements Insertable<PantryItemEntry> {
       name: Value(name),
       stockStatus: Value(stockStatus),
       isStaple: Value(isStaple),
+      isCanonicalised: Value(isCanonicalised),
       userId:
           userId == null && nullToAbsent ? const Value.absent() : Value(userId),
       householdId: householdId == null && nullToAbsent
@@ -4400,6 +4423,7 @@ class PantryItemEntry extends DataClass implements Insertable<PantryItemEntry> {
       name: serializer.fromJson<String>(json['name']),
       stockStatus: serializer.fromJson<StockStatus>(json['stockStatus']),
       isStaple: serializer.fromJson<bool>(json['isStaple']),
+      isCanonicalised: serializer.fromJson<bool>(json['isCanonicalised']),
       userId: serializer.fromJson<String?>(json['userId']),
       householdId: serializer.fromJson<String?>(json['householdId']),
       unit: serializer.fromJson<String?>(json['unit']),
@@ -4421,6 +4445,7 @@ class PantryItemEntry extends DataClass implements Insertable<PantryItemEntry> {
       'name': serializer.toJson<String>(name),
       'stockStatus': serializer.toJson<StockStatus>(stockStatus),
       'isStaple': serializer.toJson<bool>(isStaple),
+      'isCanonicalised': serializer.toJson<bool>(isCanonicalised),
       'userId': serializer.toJson<String?>(userId),
       'householdId': serializer.toJson<String?>(householdId),
       'unit': serializer.toJson<String?>(unit),
@@ -4440,6 +4465,7 @@ class PantryItemEntry extends DataClass implements Insertable<PantryItemEntry> {
           String? name,
           StockStatus? stockStatus,
           bool? isStaple,
+          bool? isCanonicalised,
           Value<String?> userId = const Value.absent(),
           Value<String?> householdId = const Value.absent(),
           Value<String?> unit = const Value.absent(),
@@ -4456,6 +4482,7 @@ class PantryItemEntry extends DataClass implements Insertable<PantryItemEntry> {
         name: name ?? this.name,
         stockStatus: stockStatus ?? this.stockStatus,
         isStaple: isStaple ?? this.isStaple,
+        isCanonicalised: isCanonicalised ?? this.isCanonicalised,
         userId: userId.present ? userId.value : this.userId,
         householdId: householdId.present ? householdId.value : this.householdId,
         unit: unit.present ? unit.value : this.unit,
@@ -4476,6 +4503,9 @@ class PantryItemEntry extends DataClass implements Insertable<PantryItemEntry> {
       stockStatus:
           data.stockStatus.present ? data.stockStatus.value : this.stockStatus,
       isStaple: data.isStaple.present ? data.isStaple.value : this.isStaple,
+      isCanonicalised: data.isCanonicalised.present
+          ? data.isCanonicalised.value
+          : this.isCanonicalised,
       userId: data.userId.present ? data.userId.value : this.userId,
       householdId:
           data.householdId.present ? data.householdId.value : this.householdId,
@@ -4500,6 +4530,7 @@ class PantryItemEntry extends DataClass implements Insertable<PantryItemEntry> {
           ..write('name: $name, ')
           ..write('stockStatus: $stockStatus, ')
           ..write('isStaple: $isStaple, ')
+          ..write('isCanonicalised: $isCanonicalised, ')
           ..write('userId: $userId, ')
           ..write('householdId: $householdId, ')
           ..write('unit: $unit, ')
@@ -4521,6 +4552,7 @@ class PantryItemEntry extends DataClass implements Insertable<PantryItemEntry> {
       name,
       stockStatus,
       isStaple,
+      isCanonicalised,
       userId,
       householdId,
       unit,
@@ -4540,6 +4572,7 @@ class PantryItemEntry extends DataClass implements Insertable<PantryItemEntry> {
           other.name == this.name &&
           other.stockStatus == this.stockStatus &&
           other.isStaple == this.isStaple &&
+          other.isCanonicalised == this.isCanonicalised &&
           other.userId == this.userId &&
           other.householdId == this.householdId &&
           other.unit == this.unit &&
@@ -4558,6 +4591,7 @@ class PantryItemsCompanion extends UpdateCompanion<PantryItemEntry> {
   final Value<String> name;
   final Value<StockStatus> stockStatus;
   final Value<bool> isStaple;
+  final Value<bool> isCanonicalised;
   final Value<String?> userId;
   final Value<String?> householdId;
   final Value<String?> unit;
@@ -4575,6 +4609,7 @@ class PantryItemsCompanion extends UpdateCompanion<PantryItemEntry> {
     this.name = const Value.absent(),
     this.stockStatus = const Value.absent(),
     this.isStaple = const Value.absent(),
+    this.isCanonicalised = const Value.absent(),
     this.userId = const Value.absent(),
     this.householdId = const Value.absent(),
     this.unit = const Value.absent(),
@@ -4593,6 +4628,7 @@ class PantryItemsCompanion extends UpdateCompanion<PantryItemEntry> {
     required String name,
     this.stockStatus = const Value.absent(),
     this.isStaple = const Value.absent(),
+    this.isCanonicalised = const Value.absent(),
     this.userId = const Value.absent(),
     this.householdId = const Value.absent(),
     this.unit = const Value.absent(),
@@ -4611,6 +4647,7 @@ class PantryItemsCompanion extends UpdateCompanion<PantryItemEntry> {
     Expression<String>? name,
     Expression<int>? stockStatus,
     Expression<bool>? isStaple,
+    Expression<bool>? isCanonicalised,
     Expression<String>? userId,
     Expression<String>? householdId,
     Expression<String>? unit,
@@ -4629,6 +4666,7 @@ class PantryItemsCompanion extends UpdateCompanion<PantryItemEntry> {
       if (name != null) 'name': name,
       if (stockStatus != null) 'stock_status': stockStatus,
       if (isStaple != null) 'is_staple': isStaple,
+      if (isCanonicalised != null) 'is_canonicalised': isCanonicalised,
       if (userId != null) 'user_id': userId,
       if (householdId != null) 'household_id': householdId,
       if (unit != null) 'unit': unit,
@@ -4649,6 +4687,7 @@ class PantryItemsCompanion extends UpdateCompanion<PantryItemEntry> {
       Value<String>? name,
       Value<StockStatus>? stockStatus,
       Value<bool>? isStaple,
+      Value<bool>? isCanonicalised,
       Value<String?>? userId,
       Value<String?>? householdId,
       Value<String?>? unit,
@@ -4666,6 +4705,7 @@ class PantryItemsCompanion extends UpdateCompanion<PantryItemEntry> {
       name: name ?? this.name,
       stockStatus: stockStatus ?? this.stockStatus,
       isStaple: isStaple ?? this.isStaple,
+      isCanonicalised: isCanonicalised ?? this.isCanonicalised,
       userId: userId ?? this.userId,
       householdId: householdId ?? this.householdId,
       unit: unit ?? this.unit,
@@ -4696,6 +4736,9 @@ class PantryItemsCompanion extends UpdateCompanion<PantryItemEntry> {
     }
     if (isStaple.present) {
       map['is_staple'] = Variable<bool>(isStaple.value);
+    }
+    if (isCanonicalised.present) {
+      map['is_canonicalised'] = Variable<bool>(isCanonicalised.value);
     }
     if (userId.present) {
       map['user_id'] = Variable<String>(userId.value);
@@ -4744,6 +4787,7 @@ class PantryItemsCompanion extends UpdateCompanion<PantryItemEntry> {
           ..write('name: $name, ')
           ..write('stockStatus: $stockStatus, ')
           ..write('isStaple: $isStaple, ')
+          ..write('isCanonicalised: $isCanonicalised, ')
           ..write('userId: $userId, ')
           ..write('householdId: $householdId, ')
           ..write('unit: $unit, ')
@@ -8870,6 +8914,7 @@ typedef $$PantryItemsTableCreateCompanionBuilder = PantryItemsCompanion
   required String name,
   Value<StockStatus> stockStatus,
   Value<bool> isStaple,
+  Value<bool> isCanonicalised,
   Value<String?> userId,
   Value<String?> householdId,
   Value<String?> unit,
@@ -8889,6 +8934,7 @@ typedef $$PantryItemsTableUpdateCompanionBuilder = PantryItemsCompanion
   Value<String> name,
   Value<StockStatus> stockStatus,
   Value<bool> isStaple,
+  Value<bool> isCanonicalised,
   Value<String?> userId,
   Value<String?> householdId,
   Value<String?> unit,
@@ -8925,6 +8971,10 @@ class $$PantryItemsTableFilterComposer
 
   ColumnFilters<bool> get isStaple => $composableBuilder(
       column: $table.isStaple, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<bool> get isCanonicalised => $composableBuilder(
+      column: $table.isCanonicalised,
+      builder: (column) => ColumnFilters(column));
 
   ColumnFilters<String> get userId => $composableBuilder(
       column: $table.userId, builder: (column) => ColumnFilters(column));
@@ -8984,6 +9034,10 @@ class $$PantryItemsTableOrderingComposer
   ColumnOrderings<bool> get isStaple => $composableBuilder(
       column: $table.isStaple, builder: (column) => ColumnOrderings(column));
 
+  ColumnOrderings<bool> get isCanonicalised => $composableBuilder(
+      column: $table.isCanonicalised,
+      builder: (column) => ColumnOrderings(column));
+
   ColumnOrderings<String> get userId => $composableBuilder(
       column: $table.userId, builder: (column) => ColumnOrderings(column));
 
@@ -9040,6 +9094,9 @@ class $$PantryItemsTableAnnotationComposer
 
   GeneratedColumn<bool> get isStaple =>
       $composableBuilder(column: $table.isStaple, builder: (column) => column);
+
+  GeneratedColumn<bool> get isCanonicalised => $composableBuilder(
+      column: $table.isCanonicalised, builder: (column) => column);
 
   GeneratedColumn<String> get userId =>
       $composableBuilder(column: $table.userId, builder: (column) => column);
@@ -9105,6 +9162,7 @@ class $$PantryItemsTableTableManager extends RootTableManager<
             Value<String> name = const Value.absent(),
             Value<StockStatus> stockStatus = const Value.absent(),
             Value<bool> isStaple = const Value.absent(),
+            Value<bool> isCanonicalised = const Value.absent(),
             Value<String?> userId = const Value.absent(),
             Value<String?> householdId = const Value.absent(),
             Value<String?> unit = const Value.absent(),
@@ -9123,6 +9181,7 @@ class $$PantryItemsTableTableManager extends RootTableManager<
             name: name,
             stockStatus: stockStatus,
             isStaple: isStaple,
+            isCanonicalised: isCanonicalised,
             userId: userId,
             householdId: householdId,
             unit: unit,
@@ -9141,6 +9200,7 @@ class $$PantryItemsTableTableManager extends RootTableManager<
             required String name,
             Value<StockStatus> stockStatus = const Value.absent(),
             Value<bool> isStaple = const Value.absent(),
+            Value<bool> isCanonicalised = const Value.absent(),
             Value<String?> userId = const Value.absent(),
             Value<String?> householdId = const Value.absent(),
             Value<String?> unit = const Value.absent(),
@@ -9159,6 +9219,7 @@ class $$PantryItemsTableTableManager extends RootTableManager<
             name: name,
             stockStatus: stockStatus,
             isStaple: isStaple,
+            isCanonicalised: isCanonicalised,
             userId: userId,
             householdId: householdId,
             unit: unit,

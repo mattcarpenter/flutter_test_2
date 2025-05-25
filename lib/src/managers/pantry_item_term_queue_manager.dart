@@ -75,9 +75,10 @@ class PantryItemTermQueueManager {
     required String pantryItemId,
     required String name,
     List<PantryItemTerm>? existingTerms,
+    bool isCanonicalised = false,
   }) async {
-    // Skip if we already have terms (this is a manual override or previously processed)
-    if (existingTerms != null && existingTerms.isNotEmpty) {
+    // Skip if already canonicalized (this is the new logic)
+    if (isCanonicalised) {
       return;
     }
 
@@ -221,20 +222,36 @@ class PantryItemTermQueueManager {
           // Check if we got results for this pantry item
           final name = pantryItemData['name'] as String;
           if (results.terms.containsKey(name)) {
-            final ingredientTerms = results.terms[name]!;
+            final apiTerms = results.terms[name]!;
             
-            // Convert IngredientTerm to PantryItemTerm
-            final terms = ingredientTerms.map((term) => PantryItemTerm(
-              value: term.value,
-              source: term.source,
-              sort: term.sort,
-            )).toList();
+            // Implement intelligent term merging:
+            // 1. Start with original name as first term
+            final mergedTerms = <PantryItemTerm>[
+              PantryItemTerm(value: name, source: 'user', sort: 0)
+            ];
+            
+            // 2. Add API terms (deduplicated, case-insensitive)
+            int sortIndex = 1;
+            for (final apiTerm in apiTerms) {
+              final isDuplicate = mergedTerms.any((term) => 
+                term.value.toLowerCase() == apiTerm.value.toLowerCase()
+              );
+              
+              if (!isDuplicate) {
+                mergedTerms.add(PantryItemTerm(
+                  value: apiTerm.value,
+                  source: 'api',
+                  sort: sortIndex++,
+                ));
+              }
+            }
 
-            // Update the pantry item with the new terms
+            // Update the pantry item with merged terms and mark as canonicalized
             if (_pantryRepository != null) {
               await _pantryRepository!.updateItem(
                 id: pantryItemId,
-                terms: terms,
+                terms: mergedTerms,
+                isCanonicalised: true, // Mark as canonicalized
               );
             } else {
               debugPrint('Pantry repository not initialized, skipping pantry item update');
@@ -244,7 +261,7 @@ class PantryItemTermQueueManager {
             final completedEntry = entry.copyWith(
               status: 'completed',
               responseData: Value(json.encode({
-                'terms': terms.map((t) => {
+                'terms': mergedTerms.map((t) => {
                   'value': t.value,
                   'source': t.source,
                   'sort': t.sort,
@@ -253,12 +270,32 @@ class PantryItemTermQueueManager {
             );
             await repository.updateEntry(completedEntry);
           } else {
-            // No terms found, mark as failed
-            final failedEntry = entry.copyWith(
-              status: 'failed',
-              retryCount: Value(entry.retryCount != null ? entry.retryCount! + 1 : 1),
+            // No terms found from API - still mark as canonicalized with just the name term
+            final nameOnlyTerms = <PantryItemTerm>[
+              PantryItemTerm(value: name, source: 'user', sort: 0)
+            ];
+
+            if (_pantryRepository != null) {
+              await _pantryRepository!.updateItem(
+                id: pantryItemId,
+                terms: nameOnlyTerms,
+                isCanonicalised: true, // Still mark as canonicalized
+              );
+            }
+
+            // Mark the entry as completed
+            final completedEntry = entry.copyWith(
+              status: 'completed',
+              responseData: Value(json.encode({
+                'terms': nameOnlyTerms.map((t) => {
+                  'value': t.value,
+                  'source': t.source,
+                  'sort': t.sort,
+                }).toList(),
+                'api_returned_empty': true,
+              })),
             );
-            await repository.updateEntry(failedEntry);
+            await repository.updateEntry(completedEntry);
           }
         } catch (e) {
           debugPrint('Error processing pantry item $pantryItemId: $e');

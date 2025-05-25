@@ -678,7 +678,8 @@ class RecipeRepository {
     p.updated_at,
     p.deleted_at,
     p.stock_status,
-    p.is_staple
+    p.is_staple,
+    p.is_canonicalised
   FROM (
     SELECT ? AS ingredient_id
     ${allIngredientIds.length > 1 ? 'UNION ALL ' + allIngredientIds.skip(1).map((_) => 'SELECT ?').join(' UNION ALL ') : ''}
@@ -731,6 +732,10 @@ class RecipeRepository {
           final isStapleInt = row.read<int>('is_staple');
           final isStaple = isStapleInt == 1;
           
+          // Read is_canonicalised as integer and convert to bool
+          final isCanonicalizedInt = row.read<int>('is_canonicalised');
+          final isCanonicalised = isCanonicalizedInt == 1;
+          
           pantryItem = PantryItemEntry(
             id: pantryItemId,
             name: row.read<String>('name'),
@@ -743,6 +748,7 @@ class RecipeRepository {
             deletedAt: row.readNullable<int>('deleted_at'),
             stockStatus: stockStatus,
             isStaple: isStaple,
+            isCanonicalised: isCanonicalised,
           );
         }
 

@@ -6,7 +6,7 @@ import 'package:drift/drift.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
 import '../../database/database.dart';
-// The IngredientTerm type is already included via import of ingredient_canonicalization_service.dart
+import '../../database/models/ingredient_terms.dart';
 import '../../database/models/ingredients.dart';
 import '../../database/powersync.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -123,13 +123,13 @@ class IngredientTermQueueManager {
       return;
     }
 
-    // Skip if we already have terms (this is a manual override or previously processed)
-    if (ingredient.terms != null && ingredient.terms!.isNotEmpty) {
+    // Skip if already canonicalized (this is the new logic)
+    if (ingredient.isCanonicalised) {
       return;
     }
 
     // Skip if ingredient has no name or empty name
-    if (ingredient.name == null || ingredient.name!.trim().isEmpty) {
+    if (ingredient.name.trim().isEmpty) {
       debugPrint('Skipping ingredient with empty name in recipe $recipeId');
       return;
     }
@@ -167,11 +167,11 @@ class IngredientTermQueueManager {
     // This helps when a recipe is updated
     await repository.deleteEntriesByRecipeId(recipeId);
 
-    // Filter out invalid ingredients
+    // Filter out invalid ingredients and already canonicalized ones
     final validIngredients = ingredients.where((ingredient) =>
       ingredient.type == 'ingredient' &&
-      ingredient.name != null &&
-      ingredient.name!.trim().isNotEmpty
+      ingredient.name.trim().isNotEmpty &&
+      !ingredient.isCanonicalised
     ).toList();
 
     // Add queue entries for each valid ingredient
@@ -256,7 +256,7 @@ class IngredientTermQueueManager {
 
         // Skip ingredients with missing or empty names
         final name = ingredientData['name'];
-        if (name == null || (name is String && name.trim().isEmpty)) {
+        if (name == null || name.toString().trim().isEmpty) {
           debugPrint('Skipping ingredient with empty name in queue entry ${entry.id}');
           await repository.deleteEntry(entry.id);
           continue;
@@ -343,18 +343,43 @@ class IngredientTermQueueManager {
 
               // Find terms in the API response
               if (results.terms.containsKey(originalName)) {
-                final terms = results.terms[originalName]!;
+                final apiTerms = results.terms[originalName]!;
 
-                // Update the ingredient with new terms
+                // Implement intelligent term merging:
+                // 1. Start with original name as first term
+                final mergedTerms = <IngredientTerm>[
+                  IngredientTerm(value: originalName, source: 'user', sort: 0)
+                ];
+                
+                // 2. Add API terms (deduplicated, case-insensitive)
+                int sortIndex = 1;
+                for (final apiTerm in apiTerms) {
+                  final isDuplicate = mergedTerms.any((term) => 
+                    term.value.toLowerCase() == apiTerm.value.toLowerCase()
+                  );
+                  
+                  if (!isDuplicate) {
+                    mergedTerms.add(IngredientTerm(
+                      value: apiTerm.value,
+                      source: 'api',
+                      sort: sortIndex++,
+                    ));
+                  }
+                }
+
+                // Update the ingredient with merged terms and mark as canonicalized
                 currentIngredients[ingredientIndex] =
-                    currentIngredients[ingredientIndex].copyWith(terms: terms);
+                    currentIngredients[ingredientIndex].copyWith(
+                      terms: mergedTerms,
+                      isCanonicalised: true,
+                    );
                 ingredientsChanged = true;
 
                 // Mark the entry as completed
                 final completedEntry = entry.copyWith(
                   status: 'completed',
                   responseData: Value(json.encode({
-                    'terms': terms.map((t) => t.toJson()).toList(),
+                    'terms': mergedTerms.map((t) => t.toJson()).toList(),
                     // DISABLED: Converter data storage temporarily disabled for MVP
                     // 'converters': results.converters.containsKey(originalName)
                     //     ? _convertToJson(results.converters[originalName]!)
@@ -363,12 +388,28 @@ class IngredientTermQueueManager {
                 );
                 await repository.updateEntry(completedEntry);
               } else {
-                // No terms found, mark as failed
-                final failedEntry = entry.copyWith(
-                  status: 'failed',
-                  retryCount: entry.retryCount + 1,
+                // No terms found from API - still mark as canonicalized with just the name term
+                final nameOnlyTerms = <IngredientTerm>[
+                  IngredientTerm(value: originalName, source: 'user', sort: 0)
+                ];
+
+                // Update the ingredient with name-only terms and mark as canonicalized
+                currentIngredients[ingredientIndex] =
+                    currentIngredients[ingredientIndex].copyWith(
+                      terms: nameOnlyTerms,
+                      isCanonicalised: true,
+                    );
+                ingredientsChanged = true;
+
+                // Mark the entry as completed
+                final completedEntry = entry.copyWith(
+                  status: 'completed',
+                  responseData: Value(json.encode({
+                    'terms': nameOnlyTerms.map((t) => t.toJson()).toList(),
+                    'api_returned_empty': true,
+                  })),
                 );
-                await repository.updateEntry(failedEntry);
+                await repository.updateEntry(completedEntry);
               }
             } else {
               // Ingredient was removed from the recipe

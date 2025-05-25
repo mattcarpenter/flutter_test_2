@@ -9,6 +9,7 @@ import 'package:recipe_app/src/providers/pantry_provider.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:uuid/uuid.dart';
 import '../../database/database.dart';
+import '../../database/models/ingredient_terms.dart';
 import '../../database/models/ingredients.dart';
 import '../../database/models/recipe_images.dart';
 import '../../database/models/steps.dart';
@@ -63,6 +64,41 @@ class RecipeNotifier extends StateNotifier<AsyncValue<List<RecipeWithFolders>>> 
     List<RecipeImage>? images,
   }) async {
     try {
+      // Process ingredients to ensure each has name as first term and isCanonicalised = false
+      List<Ingredient>? processedIngredients;
+      if (ingredients != null) {
+        processedIngredients = ingredients.map((ingredient) {
+          // Ensure the ingredient has its name as the first term
+          final currentTerms = ingredient.terms ?? [];
+          final hasNameTerm = currentTerms.any((term) => term.value.toLowerCase() == ingredient.name.toLowerCase());
+          
+          List<IngredientTerm> ensuredTerms;
+          if (!hasNameTerm) {
+            // Add name as first term
+            ensuredTerms = [
+              IngredientTerm(
+                value: ingredient.name,
+                source: 'user',
+                sort: 0,
+              ),
+              ...currentTerms.map((term) => IngredientTerm(
+                value: term.value,
+                source: term.source,
+                sort: term.sort + 1, // Shift existing terms down
+              )),
+            ];
+          } else {
+            ensuredTerms = currentTerms;
+          }
+          
+          // Return ingredient with ensured terms and isCanonicalised = false
+          return ingredient.copyWith(
+            terms: ensuredTerms,
+            isCanonicalised: false,
+          );
+        }).toList();
+      }
+
       final recipeCompanion = RecipesCompanion.insert(
         id: Value(id),
         title: title,
@@ -80,7 +116,7 @@ class RecipeNotifier extends StateNotifier<AsyncValue<List<RecipeWithFolders>>> 
         householdId: Value(householdId),
         createdAt: Value(createdAt),
         updatedAt: Value(updatedAt),
-        ingredients: Value(ingredients),
+        ingredients: Value(processedIngredients),
         steps: Value(steps),
         folderIds: Value(folderIds ?? []),
         images: Value(images),
@@ -114,7 +150,46 @@ class RecipeNotifier extends StateNotifier<AsyncValue<List<RecipeWithFolders>>> 
     required List<Ingredient> ingredients,
   }) async {
     try {
-      await _repository.updateIngredients(recipeId, ingredients);
+      // Process ingredients to ensure each has name as first term and reset canonicalization if needed
+      final processedIngredients = ingredients.map((ingredient) {
+        // Ensure the ingredient has its name as the first term
+        final currentTerms = ingredient.terms ?? [];
+        final hasNameTerm = currentTerms.any((term) => term.value.toLowerCase() == ingredient.name.toLowerCase());
+        
+        List<IngredientTerm> ensuredTerms;
+        bool needsRecanonicalisation = false;
+        
+        if (!hasNameTerm) {
+          // Add name as first term
+          ensuredTerms = [
+            IngredientTerm(
+              value: ingredient.name,
+              source: 'user',
+              sort: 0,
+            ),
+            ...currentTerms.map((term) => IngredientTerm(
+              value: term.value,
+              source: term.source,
+              sort: term.sort + 1, // Shift existing terms down
+            )),
+          ];
+          needsRecanonicalisation = true;
+        } else {
+          ensuredTerms = currentTerms;
+        }
+        
+        // If ingredient was canonicalized but name/terms changed, reset canonicalization
+        if (needsRecanonicalisation) {
+          return ingredient.copyWith(
+            terms: ensuredTerms,
+            isCanonicalised: false,
+          );
+        } else {
+          return ingredient.copyWith(terms: ensuredTerms);
+        }
+      }).toList();
+
+      await _repository.updateIngredients(recipeId, processedIngredients);
     } catch (e, stack) {
       state = AsyncValue.error(e, stack);
     }
@@ -141,8 +216,37 @@ class RecipeNotifier extends StateNotifier<AsyncValue<List<RecipeWithFolders>>> 
     if (currentRecipes == null) return;
     final index = currentRecipes.indexWhere((r) => r.recipe.id == recipeId);
     if (index == -1) return;
+    
+    // Ensure the new ingredient has its name as the first term
+    final currentTerms = ingredient.terms ?? [];
+    final hasNameTerm = currentTerms.any((term) => term.value.toLowerCase() == ingredient.name.toLowerCase());
+    
+    Ingredient processedIngredient;
+    if (!hasNameTerm) {
+      // Add name as first term
+      final ensuredTerms = [
+        IngredientTerm(
+          value: ingredient.name,
+          source: 'user',
+          sort: 0,
+        ),
+        ...currentTerms.map((term) => IngredientTerm(
+          value: term.value,
+          source: term.source,
+          sort: term.sort + 1, // Shift existing terms down
+        )),
+      ];
+      
+      processedIngredient = ingredient.copyWith(
+        terms: ensuredTerms,
+        isCanonicalised: false,
+      );
+    } else {
+      processedIngredient = ingredient.copyWith(isCanonicalised: false);
+    }
+    
     final currentIngredients = currentRecipes[index].recipe.ingredients ?? [];
-    final newIngredients = List<Ingredient>.from(currentIngredients)..add(ingredient);
+    final newIngredients = List<Ingredient>.from(currentIngredients)..add(processedIngredient);
     await updateIngredients(recipeId: recipeId, ingredients: newIngredients);
   }
 

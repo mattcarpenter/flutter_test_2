@@ -41,12 +41,34 @@ class PantryRepository {
     final newId = const Uuid().v4();
     final now = DateTime.now().millisecondsSinceEpoch;
 
-    // No need for converter - it's handled internally by Drift
+    // Always ensure the name is the first term for immediate matching capability
+    final ensuredTerms = terms ?? [];
+    final hasNameTerm = ensuredTerms.any((term) => term.value.toLowerCase() == name.toLowerCase());
+    
+    if (!hasNameTerm) {
+      // Add name as first term
+      ensuredTerms.insert(0, PantryItemTerm(
+        value: name,
+        source: 'user',
+        sort: 0,
+      ));
+      
+      // Reorder sort indices for existing terms
+      for (int i = 1; i < ensuredTerms.length; i++) {
+        ensuredTerms[i] = PantryItemTerm(
+          value: ensuredTerms[i].value,
+          source: ensuredTerms[i].source,
+          sort: i,
+        );
+      }
+    }
+
     final companion = PantryItemsCompanion.insert(
       id: Value(newId),
       name: name,
       stockStatus: Value(stockStatus),
       isStaple: Value(isStaple),
+      isCanonicalised: const Value(false), // Always start as not canonicalized
       userId: Value(userId),
       householdId: Value(householdId),
       unit: Value(unit),
@@ -56,17 +78,18 @@ class PantryRepository {
       price: Value(price),
       createdAt: Value(now),
       updatedAt: Value(now),
-      terms: terms != null ? Value(terms) : const Value.absent(),
+      terms: Value(ensuredTerms), // Always has at least the name term
     );
 
     await _db.into(_db.pantryItems).insert(companion);
 
-    // Queue for term canonicalization if no terms are provided
-    if ((terms == null || terms.isEmpty) && _pantryItemTermQueueManager != null) {
+    // Always queue for canonicalization (based on flag, not empty terms)
+    if (_pantryItemTermQueueManager != null) {
       await _pantryItemTermQueueManager!.queuePantryItem(
         pantryItemId: newId,
         name: name,
-        existingTerms: terms,
+        existingTerms: ensuredTerms,
+        isCanonicalised: false, // Always false for new items
       );
     }
 
@@ -79,6 +102,7 @@ class PantryRepository {
     String? name,
     StockStatus? stockStatus,
     bool? isStaple,
+    bool? isCanonicalised,
     List<PantryItemTerm>? terms,
     String? unit,
     double? quantity,
@@ -93,45 +117,93 @@ class PantryRepository {
       ..where((t) => t.id.equals(id)))
         .getSingleOrNull();
 
+    if (currentItem == null) {
+      throw Exception('Pantry item with id $id not found');
+    }
+
+    // Handle name changes and term updates
+    List<PantryItemTerm>? updatedTerms = terms;
+    bool resetCanonicalisation = false;
+    final newName = name ?? currentItem.name;
+
+    if (name != null && name != currentItem.name) {
+      // Name changed - update first term and reset canonicalization
+      final currentTerms = currentItem.terms ?? [];
+      updatedTerms = List<PantryItemTerm>.from(currentTerms);
+      
+      if (updatedTerms.isNotEmpty) {
+        // Update the first term to the new name
+        updatedTerms[0] = PantryItemTerm(
+          value: name,
+          source: 'user',
+          sort: 0,
+        );
+      } else {
+        // Add name as first term if no terms exist
+        updatedTerms.add(PantryItemTerm(
+          value: name,
+          source: 'user',
+          sort: 0,
+        ));
+      }
+      
+      resetCanonicalisation = true;
+    } else if (terms != null) {
+      // Terms were explicitly provided - ensure name is still first term
+      final ensuredTerms = List<PantryItemTerm>.from(terms);
+      final hasNameTerm = ensuredTerms.any((term) => term.value.toLowerCase() == newName.toLowerCase());
+      
+      if (!hasNameTerm) {
+        // Add name as first term
+        ensuredTerms.insert(0, PantryItemTerm(
+          value: newName,
+          source: 'user',
+          sort: 0,
+        ));
+        
+        // Reorder sort indices for existing terms
+        for (int i = 1; i < ensuredTerms.length; i++) {
+          ensuredTerms[i] = PantryItemTerm(
+            value: ensuredTerms[i].value,
+            source: ensuredTerms[i].source,
+            sort: i,
+          );
+        }
+      }
+      
+      updatedTerms = ensuredTerms;
+    }
+
     final companion = PantryItemsCompanion(
       name: name != null ? Value(name) : const Value.absent(),
       stockStatus: stockStatus != null ? Value(stockStatus) : const Value.absent(),
       isStaple: isStaple != null ? Value(isStaple) : const Value.absent(),
+      isCanonicalised: resetCanonicalisation ? const Value(false) : 
+                      isCanonicalised != null ? Value(isCanonicalised) : const Value.absent(),
       unit: unit != null ? Value(unit) : const Value.absent(),
       quantity: quantity != null ? Value(quantity) : const Value.absent(),
       baseUnit: baseUnit != null ? Value(baseUnit) : const Value.absent(),
       baseQuantity: baseQuantity != null ? Value(baseQuantity) : const Value.absent(),
       price: price != null ? Value(price) : const Value.absent(),
       updatedAt: Value(now),
-      terms: terms != null ? Value(terms) : const Value.absent(),
+      terms: updatedTerms != null ? Value(updatedTerms) : const Value.absent(),
     );
 
     await (_db.update(_db.pantryItems)..where((t) => t.id.equals(id)))
         .write(companion);
 
-    // Check if we need to queue for term canonicalization
-    if (_pantryItemTermQueueManager != null) {
-      // Queue for term canonicalization if either:
-      // 1. Terms were explicitly set to empty or
-      // 2. The name changed and no new terms were provided
-      final nameChanged = name != null && currentItem != null && name != currentItem.name;
-      final emptyTermsProvided = terms != null && terms.isEmpty;
-      final hasCurrentTerms = currentItem?.terms != null && currentItem!.terms!.isNotEmpty;
+    // Queue for re-canonicalization if name changed or canonicalization was reset
+    if (_pantryItemTermQueueManager != null && resetCanonicalisation) {
+      // First, remove any existing queue entries
+      await _pantryItemTermQueueManager!.repository.deleteEntriesByPantryItemId(id);
 
-      if (emptyTermsProvided || (nameChanged && terms == null && !hasCurrentTerms)) {
-        final itemName = name ?? currentItem?.name ?? "";
-        if (itemName.isNotEmpty) {
-          // First, remove any existing queue entries
-          await _pantryItemTermQueueManager!.repository.deleteEntriesByPantryItemId(id);
-
-          // Queue the item for canonicalization
-          await _pantryItemTermQueueManager!.queuePantryItem(
-            pantryItemId: id,
-            name: itemName,
-            existingTerms: terms ?? currentItem?.terms,
-          );
-        }
-      }
+      // Queue the item for canonicalization
+      await _pantryItemTermQueueManager!.queuePantryItem(
+        pantryItemId: id,
+        name: newName,
+        existingTerms: updatedTerms,
+        isCanonicalised: false, // Reset to false when re-queuing
+      );
     }
   }
 

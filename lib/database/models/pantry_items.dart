@@ -37,6 +37,7 @@ class PantryItems extends Table {
     .withDefault(const Constant(2))(); // Default to IN_STOCK (index 2)
   
   BoolColumn get isStaple => boolean().withDefault(const Constant(false))();
+  BoolColumn get isCanonicalised => boolean().withDefault(const Constant(false))();
   
   // No longer using inStock field - completely replaced by stockStatus
   

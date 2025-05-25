@@ -114,6 +114,7 @@ Schema schema = const Schema(([
     Column.text('name'),
     Column.integer('stock_status'), // Changed from in_stock to stock_status
     Column.integer('is_staple'),
+    Column.integer('is_canonicalised'),
     Column.text('user_id'),
     Column.text('household_id'),
     Column.text('unit'),
