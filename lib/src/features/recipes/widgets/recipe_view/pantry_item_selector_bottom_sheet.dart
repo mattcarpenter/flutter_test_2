@@ -30,25 +30,34 @@ void showPantryItemSelectorBottomSheet({
           ),
           child: PantryItemSelectorContent(
             onItemSelected: (itemName) {
-              // Do the callback
+              // Do the callback first
               onItemSelected(itemName);
               
-              // If a recipe ID was provided, invalidate the ingredient matches
-              if (recipeId != null) {
-                // Use the container to access providers
-                final container = ProviderScope.containerOf(context);
-                
-                // Invalidate and refresh immediately
-                container.invalidate(recipeIngredientMatchesProvider(recipeId));
-                
-                // Also invalidate other providers that might be watching this
-                container.invalidate(pantryItemsProvider);
-                
-                // Force an immediate refresh
-                container.read(recipeIngredientMatchesProvider(recipeId).future);
-              }
-              
+              // Close the modal
               Navigator.of(modalContext).pop();
+              
+              // If a recipe ID was provided, invalidate the ingredient matches
+              // Use a post-frame callback to ensure the modal is fully closed
+              if (recipeId != null) {
+                WidgetsBinding.instance.addPostFrameCallback((_) {
+                  try {
+                    // Use the modal context to access providers
+                    final container = ProviderScope.containerOf(modalContext);
+                    
+                    // Invalidate and refresh immediately
+                    container.invalidate(recipeIngredientMatchesProvider(recipeId));
+                    
+                    // Also invalidate other providers that might be watching this
+                    container.invalidate(pantryItemsProvider);
+                    
+                    // Force an immediate refresh
+                    container.read(recipeIngredientMatchesProvider(recipeId).future);
+                  } catch (e) {
+                    // If the context is no longer valid, just ignore
+                    debugPrint('Failed to invalidate providers after pantry selection: $e');
+                  }
+                });
+              }
             },
           ),
         ),
@@ -174,15 +183,8 @@ class _PantryItemSelectorContentState extends ConsumerState<PantryItemSelectorCo
                           color: _getStockStatusColor(item.stockStatus),
                         ),
                         onTap: () {
-                          // Force immediate invalidation after selection
+                          // Just call the callback - navigation is handled in the callback
                           widget.onItemSelected(item.name);
-                          
-                          // A small delay before closing to ensure data propagates
-                          Future.delayed(const Duration(milliseconds: 100), () {
-                            if (mounted) {
-                              Navigator.of(context).pop();
-                            }
-                          });
                         },
                       );
                     },
