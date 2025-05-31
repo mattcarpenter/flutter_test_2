@@ -4,7 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../database/database.dart';
 import '../../../../database/models/pantry_items.dart'; // For StockStatus enum
 import '../../../providers/pantry_provider.dart';
-import '../views/add_pantry_item_modal.dart';
+import '../views/update_pantry_item_modal.dart';
 import 'stock_status_segmented_control.dart';
 
 class PantryItemList extends ConsumerWidget {
@@ -43,10 +43,9 @@ class PantryItemList extends ConsumerWidget {
         GestureDetector(
           onTap: () {
             // Edit this pantry item
-            showPantryItemEditorModal(
+            showUpdatePantryItemModal(
               context,
               pantryItem: item,
-              isEditing: true,
             );
           },
           child: Padding(

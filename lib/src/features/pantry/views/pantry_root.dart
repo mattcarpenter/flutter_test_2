@@ -49,7 +49,7 @@ class PantryTab extends ConsumerWidget {
             title: 'Add Pantry Item',
             icon: const Icon(CupertinoIcons.cart_badge_plus),
             onTap: () {
-              showPantryItemEditorModal(context);
+              showAddPantryItemModal(context);
             },
           )
         ],
