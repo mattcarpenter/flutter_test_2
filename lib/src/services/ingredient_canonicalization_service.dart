@@ -63,10 +63,12 @@ class ConverterData {
 class CanonicalizeResult {
   final Map<String, List<IngredientTerm>> terms;
   final Map<String, ConverterData> converters;
+  final Map<String, String> categories;
 
   CanonicalizeResult({
     required this.terms,
     required this.converters,
+    required this.categories,
   });
 }
 
@@ -98,6 +100,7 @@ class IngredientCanonicalizer {
       final Map<String, dynamic> responseData = json.decode(response.body);
       final Map<String, List<IngredientTerm>> terms = {};
       final Map<String, ConverterData> converters = {};
+      final Map<String, String> categories = {};
 
       if (responseData.containsKey('ingredients') && responseData['ingredients'] is List) {
         final List<dynamic> analyzedIngredients = responseData['ingredients'];
@@ -146,10 +149,18 @@ class IngredientCanonicalizer {
               }
             }
           }
+
+          // Process category if available
+          if (item.containsKey('category') && item['category'] != null) {
+            final category = item['category'].toString().trim();
+            if (category.isNotEmpty) {
+              categories[original] = category;
+            }
+          }
         }
       }
 
-      return CanonicalizeResult(terms: terms, converters: converters);
+      return CanonicalizeResult(terms: terms, converters: converters, categories: categories);
     } catch (e) {
       debugPrint('Error in canonicalizeIngredients: $e');
       rethrow;

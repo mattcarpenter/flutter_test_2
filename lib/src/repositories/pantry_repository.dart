@@ -37,6 +37,7 @@ class PantryRepository {
     String? baseUnit,
     double? baseQuantity,
     double? price,
+    String? category,
   }) async {
     final newId = const Uuid().v4();
     final now = DateTime.now().millisecondsSinceEpoch;
@@ -79,6 +80,7 @@ class PantryRepository {
       createdAt: Value(now),
       updatedAt: Value(now),
       terms: Value(ensuredTerms), // Always has at least the name term
+      category: Value(category),
     );
 
     await _db.into(_db.pantryItems).insert(companion);
@@ -109,6 +111,7 @@ class PantryRepository {
     String? baseUnit,
     double? baseQuantity,
     double? price,
+    String? category,
   }) async {
     final now = DateTime.now().millisecondsSinceEpoch;
 
@@ -187,6 +190,7 @@ class PantryRepository {
       price: price != null ? Value(price) : const Value.absent(),
       updatedAt: Value(now),
       terms: updatedTerms != null ? Value(updatedTerms) : const Value.absent(),
+      category: category != null ? Value(category) : const Value.absent(),
     );
 
     await (_db.update(_db.pantryItems)..where((t) => t.id.equals(id)))

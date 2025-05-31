@@ -36,6 +36,7 @@ class PantryNotifier
     double? baseQuantity,
     double? price,
     List<PantryItemTerm>? terms,
+    String? category,
   }) async {
     // Add the item to the repository
     final itemId = await _repo.addItem(
@@ -50,6 +51,7 @@ class PantryNotifier
       baseQuantity: baseQuantity,
       price: price,
       terms: terms,
+      category: category,
     );
 
     // We don't need to manually refresh - Drift and our StreamSubscription will handle it
@@ -71,6 +73,7 @@ class PantryNotifier
     double? baseQuantity,
     double? price,
     List<PantryItemTerm>? terms,
+    String? category,
   }) async {
     await _repo.updateItem(
       id: id,
@@ -84,6 +87,7 @@ class PantryNotifier
       baseQuantity: baseQuantity,
       price: price,
       terms: terms,
+      category: category,
     );
 
     // Database change events will automatically trigger the stream

@@ -27,6 +27,7 @@ Ingredient _$IngredientFromJson(Map<String, dynamic> json) => Ingredient(
           ?.map((e) => IngredientTerm.fromJson(e as Map<String, dynamic>))
           .toList(),
       isCanonicalised: json['isCanonicalised'] as bool? ?? false,
+      category: json['category'] as String?,
     );
 
 Map<String, dynamic> _$IngredientToJson(Ingredient instance) =>
@@ -49,4 +50,5 @@ Map<String, dynamic> _$IngredientToJson(Ingredient instance) =>
       'secondaryAmount2Type': instance.secondaryAmount2Type,
       'terms': instance.terms,
       'isCanonicalised': instance.isCanonicalised,
+      'category': instance.category,
     };

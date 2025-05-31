@@ -251,12 +251,18 @@ class PantryItemTermQueueManager {
               }
             }
 
-            // Update the pantry item with merged terms and mark as canonicalized
+            // Get category from API response if available
+            final category = results.categories.containsKey(name) 
+                ? results.categories[name] 
+                : null;
+
+            // Update the pantry item with merged terms, category, and mark as canonicalized
             if (_pantryRepository != null) {
               await _pantryRepository!.updateItem(
                 id: pantryItemId,
                 terms: mergedTerms,
                 isCanonicalised: true, // Mark as canonicalized
+                category: category,
               );
             } else {
               debugPrint('Pantry repository not initialized, skipping pantry item update');
@@ -280,11 +286,17 @@ class PantryItemTermQueueManager {
               PantryItemTerm(value: name, source: 'user', sort: 0)
             ];
 
+            // Get category from API response if available (even without terms)
+            final category = results.categories.containsKey(name) 
+                ? results.categories[name] 
+                : null;
+
             if (_pantryRepository != null) {
               await _pantryRepository!.updateItem(
                 id: pantryItemId,
                 terms: nameOnlyTerms,
                 isCanonicalised: true, // Still mark as canonicalized
+                category: category,
               );
             }
 

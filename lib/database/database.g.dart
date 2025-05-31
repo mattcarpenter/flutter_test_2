@@ -4142,6 +4142,12 @@ class $PantryItemsTable extends PantryItems
               type: DriftSqlType.string, requiredDuringInsert: false)
           .withConverter<List<PantryItemTerm>?>(
               $PantryItemsTable.$convertertermsn);
+  static const VerificationMeta _categoryMeta =
+      const VerificationMeta('category');
+  @override
+  late final GeneratedColumn<String> category = GeneratedColumn<String>(
+      'category', aliasedName, true,
+      type: DriftSqlType.string, requiredDuringInsert: false);
   @override
   List<GeneratedColumn> get $columns => [
         id,
@@ -4159,7 +4165,8 @@ class $PantryItemsTable extends PantryItems
         createdAt,
         updatedAt,
         deletedAt,
-        terms
+        terms,
+        category
       ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -4236,6 +4243,10 @@ class $PantryItemsTable extends PantryItems
           deletedAt.isAcceptableOrUnknown(data['deleted_at']!, _deletedAtMeta));
     }
     context.handle(_termsMeta, const VerificationResult.success());
+    if (data.containsKey('category')) {
+      context.handle(_categoryMeta,
+          category.isAcceptableOrUnknown(data['category']!, _categoryMeta));
+    }
     return context;
   }
 
@@ -4279,6 +4290,8 @@ class $PantryItemsTable extends PantryItems
       terms: $PantryItemsTable.$convertertermsn.fromSql(attachedDatabase
           .typeMapping
           .read(DriftSqlType.string, data['${effectivePrefix}terms'])),
+      category: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}category']),
     );
   }
 
@@ -4312,6 +4325,7 @@ class PantryItemEntry extends DataClass implements Insertable<PantryItemEntry> {
   final int? updatedAt;
   final int? deletedAt;
   final List<PantryItemTerm>? terms;
+  final String? category;
   const PantryItemEntry(
       {required this.id,
       required this.name,
@@ -4328,7 +4342,8 @@ class PantryItemEntry extends DataClass implements Insertable<PantryItemEntry> {
       this.createdAt,
       this.updatedAt,
       this.deletedAt,
-      this.terms});
+      this.terms,
+      this.category});
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
@@ -4374,6 +4389,9 @@ class PantryItemEntry extends DataClass implements Insertable<PantryItemEntry> {
       map['terms'] =
           Variable<String>($PantryItemsTable.$convertertermsn.toSql(terms));
     }
+    if (!nullToAbsent || category != null) {
+      map['category'] = Variable<String>(category);
+    }
     return map;
   }
 
@@ -4412,6 +4430,9 @@ class PantryItemEntry extends DataClass implements Insertable<PantryItemEntry> {
           : Value(deletedAt),
       terms:
           terms == null && nullToAbsent ? const Value.absent() : Value(terms),
+      category: category == null && nullToAbsent
+          ? const Value.absent()
+          : Value(category),
     );
   }
 
@@ -4435,6 +4456,7 @@ class PantryItemEntry extends DataClass implements Insertable<PantryItemEntry> {
       updatedAt: serializer.fromJson<int?>(json['updatedAt']),
       deletedAt: serializer.fromJson<int?>(json['deletedAt']),
       terms: serializer.fromJson<List<PantryItemTerm>?>(json['terms']),
+      category: serializer.fromJson<String?>(json['category']),
     );
   }
   @override
@@ -4457,6 +4479,7 @@ class PantryItemEntry extends DataClass implements Insertable<PantryItemEntry> {
       'updatedAt': serializer.toJson<int?>(updatedAt),
       'deletedAt': serializer.toJson<int?>(deletedAt),
       'terms': serializer.toJson<List<PantryItemTerm>?>(terms),
+      'category': serializer.toJson<String?>(category),
     };
   }
 
@@ -4476,7 +4499,8 @@ class PantryItemEntry extends DataClass implements Insertable<PantryItemEntry> {
           Value<int?> createdAt = const Value.absent(),
           Value<int?> updatedAt = const Value.absent(),
           Value<int?> deletedAt = const Value.absent(),
-          Value<List<PantryItemTerm>?> terms = const Value.absent()}) =>
+          Value<List<PantryItemTerm>?> terms = const Value.absent(),
+          Value<String?> category = const Value.absent()}) =>
       PantryItemEntry(
         id: id ?? this.id,
         name: name ?? this.name,
@@ -4495,6 +4519,7 @@ class PantryItemEntry extends DataClass implements Insertable<PantryItemEntry> {
         updatedAt: updatedAt.present ? updatedAt.value : this.updatedAt,
         deletedAt: deletedAt.present ? deletedAt.value : this.deletedAt,
         terms: terms.present ? terms.value : this.terms,
+        category: category.present ? category.value : this.category,
       );
   PantryItemEntry copyWithCompanion(PantryItemsCompanion data) {
     return PantryItemEntry(
@@ -4520,6 +4545,7 @@ class PantryItemEntry extends DataClass implements Insertable<PantryItemEntry> {
       updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
       deletedAt: data.deletedAt.present ? data.deletedAt.value : this.deletedAt,
       terms: data.terms.present ? data.terms.value : this.terms,
+      category: data.category.present ? data.category.value : this.category,
     );
   }
 
@@ -4541,7 +4567,8 @@ class PantryItemEntry extends DataClass implements Insertable<PantryItemEntry> {
           ..write('createdAt: $createdAt, ')
           ..write('updatedAt: $updatedAt, ')
           ..write('deletedAt: $deletedAt, ')
-          ..write('terms: $terms')
+          ..write('terms: $terms, ')
+          ..write('category: $category')
           ..write(')'))
         .toString();
   }
@@ -4563,7 +4590,8 @@ class PantryItemEntry extends DataClass implements Insertable<PantryItemEntry> {
       createdAt,
       updatedAt,
       deletedAt,
-      terms);
+      terms,
+      category);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -4583,7 +4611,8 @@ class PantryItemEntry extends DataClass implements Insertable<PantryItemEntry> {
           other.createdAt == this.createdAt &&
           other.updatedAt == this.updatedAt &&
           other.deletedAt == this.deletedAt &&
-          other.terms == this.terms);
+          other.terms == this.terms &&
+          other.category == this.category);
 }
 
 class PantryItemsCompanion extends UpdateCompanion<PantryItemEntry> {
@@ -4603,6 +4632,7 @@ class PantryItemsCompanion extends UpdateCompanion<PantryItemEntry> {
   final Value<int?> updatedAt;
   final Value<int?> deletedAt;
   final Value<List<PantryItemTerm>?> terms;
+  final Value<String?> category;
   final Value<int> rowid;
   const PantryItemsCompanion({
     this.id = const Value.absent(),
@@ -4621,6 +4651,7 @@ class PantryItemsCompanion extends UpdateCompanion<PantryItemEntry> {
     this.updatedAt = const Value.absent(),
     this.deletedAt = const Value.absent(),
     this.terms = const Value.absent(),
+    this.category = const Value.absent(),
     this.rowid = const Value.absent(),
   });
   PantryItemsCompanion.insert({
@@ -4640,6 +4671,7 @@ class PantryItemsCompanion extends UpdateCompanion<PantryItemEntry> {
     this.updatedAt = const Value.absent(),
     this.deletedAt = const Value.absent(),
     this.terms = const Value.absent(),
+    this.category = const Value.absent(),
     this.rowid = const Value.absent(),
   }) : name = Value(name);
   static Insertable<PantryItemEntry> custom({
@@ -4659,6 +4691,7 @@ class PantryItemsCompanion extends UpdateCompanion<PantryItemEntry> {
     Expression<int>? updatedAt,
     Expression<int>? deletedAt,
     Expression<String>? terms,
+    Expression<String>? category,
     Expression<int>? rowid,
   }) {
     return RawValuesInsertable({
@@ -4678,6 +4711,7 @@ class PantryItemsCompanion extends UpdateCompanion<PantryItemEntry> {
       if (updatedAt != null) 'updated_at': updatedAt,
       if (deletedAt != null) 'deleted_at': deletedAt,
       if (terms != null) 'terms': terms,
+      if (category != null) 'category': category,
       if (rowid != null) 'rowid': rowid,
     });
   }
@@ -4699,6 +4733,7 @@ class PantryItemsCompanion extends UpdateCompanion<PantryItemEntry> {
       Value<int?>? updatedAt,
       Value<int?>? deletedAt,
       Value<List<PantryItemTerm>?>? terms,
+      Value<String?>? category,
       Value<int>? rowid}) {
     return PantryItemsCompanion(
       id: id ?? this.id,
@@ -4717,6 +4752,7 @@ class PantryItemsCompanion extends UpdateCompanion<PantryItemEntry> {
       updatedAt: updatedAt ?? this.updatedAt,
       deletedAt: deletedAt ?? this.deletedAt,
       terms: terms ?? this.terms,
+      category: category ?? this.category,
       rowid: rowid ?? this.rowid,
     );
   }
@@ -4774,6 +4810,9 @@ class PantryItemsCompanion extends UpdateCompanion<PantryItemEntry> {
       map['terms'] = Variable<String>(
           $PantryItemsTable.$convertertermsn.toSql(terms.value));
     }
+    if (category.present) {
+      map['category'] = Variable<String>(category.value);
+    }
     if (rowid.present) {
       map['rowid'] = Variable<int>(rowid.value);
     }
@@ -4799,6 +4838,7 @@ class PantryItemsCompanion extends UpdateCompanion<PantryItemEntry> {
           ..write('updatedAt: $updatedAt, ')
           ..write('deletedAt: $deletedAt, ')
           ..write('terms: $terms, ')
+          ..write('category: $category, ')
           ..write('rowid: $rowid')
           ..write(')'))
         .toString();
@@ -8926,6 +8966,7 @@ typedef $$PantryItemsTableCreateCompanionBuilder = PantryItemsCompanion
   Value<int?> updatedAt,
   Value<int?> deletedAt,
   Value<List<PantryItemTerm>?> terms,
+  Value<String?> category,
   Value<int> rowid,
 });
 typedef $$PantryItemsTableUpdateCompanionBuilder = PantryItemsCompanion
@@ -8946,6 +8987,7 @@ typedef $$PantryItemsTableUpdateCompanionBuilder = PantryItemsCompanion
   Value<int?> updatedAt,
   Value<int?> deletedAt,
   Value<List<PantryItemTerm>?> terms,
+  Value<String?> category,
   Value<int> rowid,
 });
 
@@ -9011,6 +9053,9 @@ class $$PantryItemsTableFilterComposer
       get terms => $composableBuilder(
           column: $table.terms,
           builder: (column) => ColumnWithTypeConverterFilters(column));
+
+  ColumnFilters<String> get category => $composableBuilder(
+      column: $table.category, builder: (column) => ColumnFilters(column));
 }
 
 class $$PantryItemsTableOrderingComposer
@@ -9071,6 +9116,9 @@ class $$PantryItemsTableOrderingComposer
 
   ColumnOrderings<String> get terms => $composableBuilder(
       column: $table.terms, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get category => $composableBuilder(
+      column: $table.category, builder: (column) => ColumnOrderings(column));
 }
 
 class $$PantryItemsTableAnnotationComposer
@@ -9130,6 +9178,9 @@ class $$PantryItemsTableAnnotationComposer
 
   GeneratedColumnWithTypeConverter<List<PantryItemTerm>?, String> get terms =>
       $composableBuilder(column: $table.terms, builder: (column) => column);
+
+  GeneratedColumn<String> get category =>
+      $composableBuilder(column: $table.category, builder: (column) => column);
 }
 
 class $$PantryItemsTableTableManager extends RootTableManager<
@@ -9174,6 +9225,7 @@ class $$PantryItemsTableTableManager extends RootTableManager<
             Value<int?> updatedAt = const Value.absent(),
             Value<int?> deletedAt = const Value.absent(),
             Value<List<PantryItemTerm>?> terms = const Value.absent(),
+            Value<String?> category = const Value.absent(),
             Value<int> rowid = const Value.absent(),
           }) =>
               PantryItemsCompanion(
@@ -9193,6 +9245,7 @@ class $$PantryItemsTableTableManager extends RootTableManager<
             updatedAt: updatedAt,
             deletedAt: deletedAt,
             terms: terms,
+            category: category,
             rowid: rowid,
           ),
           createCompanionCallback: ({
@@ -9212,6 +9265,7 @@ class $$PantryItemsTableTableManager extends RootTableManager<
             Value<int?> updatedAt = const Value.absent(),
             Value<int?> deletedAt = const Value.absent(),
             Value<List<PantryItemTerm>?> terms = const Value.absent(),
+            Value<String?> category = const Value.absent(),
             Value<int> rowid = const Value.absent(),
           }) =>
               PantryItemsCompanion.insert(
@@ -9231,6 +9285,7 @@ class $$PantryItemsTableTableManager extends RootTableManager<
             updatedAt: updatedAt,
             deletedAt: deletedAt,
             terms: terms,
+            category: category,
             rowid: rowid,
           ),
           withReferenceMapper: (p0) => p0

@@ -17,16 +17,70 @@ class PantryItemList extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final sortedItems = List.of(pantryItems)
-      ..sort((a, b) => a.name.compareTo(b.name));
+    // Group items by category
+    final Map<String, List<PantryItemEntry>> groupedItems = {};
+    
+    for (final item in pantryItems) {
+      final category = item.category ?? 'Other';
+      if (!groupedItems.containsKey(category)) {
+        groupedItems[category] = [];
+      }
+      groupedItems[category]!.add(item);
+    }
+
+    // Sort categories (put "Other" last)
+    final sortedCategories = groupedItems.keys.toList()
+      ..sort((a, b) {
+        if (a == 'Other' && b != 'Other') return 1;
+        if (b == 'Other' && a != 'Other') return -1;
+        return a.compareTo(b);
+      });
+
+    // Sort items within each category
+    for (final category in sortedCategories) {
+      groupedItems[category]!.sort((a, b) => a.name.compareTo(b.name));
+    }
+
+    // Build list with category headers
+    final List<Widget> children = [];
+    for (final category in sortedCategories) {
+      final items = groupedItems[category]!;
+      
+      // Add category header
+      children.add(_buildCategoryHeader(context, category));
+      
+      // Add items in this category
+      for (final item in items) {
+        children.add(_buildPantryItemTile(context, ref, item));
+      }
+    }
 
     return SliverList(
       delegate: SliverChildBuilderDelegate(
-        (context, index) {
-          final item = sortedItems[index];
-          return _buildPantryItemTile(context, ref, item);
-        },
-        childCount: sortedItems.length,
+        (context, index) => children[index],
+        childCount: children.length,
+      ),
+    );
+  }
+
+  Widget _buildCategoryHeader(BuildContext context, String category) {
+    final isDarkMode = CupertinoTheme.of(context).brightness == Brightness.dark;
+    final textColor = CupertinoTheme.of(context).textTheme.textStyle.color!;
+    final backgroundColor = isDarkMode
+        ? Colors.grey.shade900
+        : Colors.grey.shade100;
+
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
+      color: backgroundColor,
+      child: Text(
+        category,
+        style: TextStyle(
+          color: textColor,
+          fontSize: 16,
+          fontWeight: FontWeight.w600,
+        ),
       ),
     );
   }

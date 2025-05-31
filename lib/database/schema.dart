@@ -126,6 +126,7 @@ Schema schema = const Schema(([
     Column.integer('updated_at'),
     Column.integer('deleted_at'),
     Column.text('terms'),
+    Column.text('category'),
   ]),
   Table(ingredientTermOverridesTable, [
     Column.text('mapped_term'),

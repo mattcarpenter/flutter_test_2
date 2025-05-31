@@ -367,11 +367,17 @@ class IngredientTermQueueManager {
                   }
                 }
 
-                // Update the ingredient with merged terms and mark as canonicalized
+                // Get category from API response if available
+                final category = results.categories.containsKey(originalName) 
+                    ? results.categories[originalName] 
+                    : null;
+
+                // Update the ingredient with merged terms, category, and mark as canonicalized
                 currentIngredients[ingredientIndex] =
                     currentIngredients[ingredientIndex].copyWith(
                       terms: mergedTerms,
                       isCanonicalised: true,
+                      category: category,
                     );
                 ingredientsChanged = true;
 
@@ -393,11 +399,17 @@ class IngredientTermQueueManager {
                   IngredientTerm(value: originalName, source: 'user', sort: 0)
                 ];
 
-                // Update the ingredient with name-only terms and mark as canonicalized
+                // Get category from API response if available (even without terms)
+                final category = results.categories.containsKey(originalName) 
+                    ? results.categories[originalName] 
+                    : null;
+
+                // Update the ingredient with name-only terms, category, and mark as canonicalized
                 currentIngredients[ingredientIndex] =
                     currentIngredients[ingredientIndex].copyWith(
                       terms: nameOnlyTerms,
                       isCanonicalised: true,
+                      category: category,
                     );
                 ingredientsChanged = true;
 

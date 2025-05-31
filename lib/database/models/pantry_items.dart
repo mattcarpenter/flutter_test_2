@@ -56,4 +56,5 @@ class PantryItems extends Table {
   IntColumn   get deletedAt => integer().nullable()();
 
   TextColumn get terms => text().nullable().map(const PantryItemTermListConverter())();
+  TextColumn get category => text().nullable()();
 }
