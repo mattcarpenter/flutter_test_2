@@ -115,7 +115,7 @@ class _PantryFilterContentState extends ConsumerState<PantryFilterContent> {
                       const Divider(),
                       _buildStockStatusFilter(),
                       const Divider(),
-                      _buildHideStaplesFilter(),
+                      _buildShowStaplesFilter(),
                     ],
                   ),
                 ),
@@ -231,8 +231,8 @@ class _PantryFilterContentState extends ConsumerState<PantryFilterContent> {
     );
   }
 
-  Widget _buildHideStaplesFilter() {
-    final hideStaples = filterState.activeFilters[PantryFilterType.hideStaples] as bool? ?? false;
+  Widget _buildShowStaplesFilter() {
+    final showStaples = filterState.activeFilters[PantryFilterType.showStaples] as bool? ?? true;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -248,10 +248,10 @@ class _PantryFilterContentState extends ConsumerState<PantryFilterContent> {
           ),
         ),
         FilterChip(
-          label: const Text('Hide Staples'),
-          selected: hideStaples,
+          label: const Text('Show Staples'),
+          selected: showStaples,
           onSelected: (selected) {
-            _updateFilter(PantryFilterType.hideStaples, selected);
+            _updateFilter(PantryFilterType.showStaples, selected);
           },
         ),
       ],

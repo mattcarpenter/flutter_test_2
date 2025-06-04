@@ -60,10 +60,10 @@ class PantryFilterSortNotifier extends Notifier<PantryFilterSortState> {
       filters[PantryFilterType.stockStatus] = stockStatuses;
     }
 
-    // Load hide staples filter
-    final hideStaples = prefs.getBool('pantry_filter_hideStaples');
-    if (hideStaples == true) {
-      filters[PantryFilterType.hideStaples] = true;
+    // Load show staples filter (defaults to true)
+    final showStaples = prefs.getBool('pantry_filter_showStaples') ?? true;
+    if (showStaples != true) {
+      filters[PantryFilterType.showStaples] = showStaples;
     }
 
     return PantryFilterSortState(
@@ -77,7 +77,8 @@ class PantryFilterSortNotifier extends Notifier<PantryFilterSortState> {
   void updateFilter(PantryFilterType type, dynamic value) {
     if (value == null || 
         (value is List && value.isEmpty) ||
-        (value is bool && !value)) {
+        (type == PantryFilterType.showStaples && value is bool && value) ||
+        (type != PantryFilterType.showStaples && value is bool && !value)) {
       state = state.withoutFilter(type);
     } else {
       state = state.withFilter(type, value);
@@ -135,9 +136,9 @@ class PantryFilterSortNotifier extends Notifier<PantryFilterSortState> {
           prefs.setStringList('pantry_filter_stockStatus', stockStatusNames);
           break;
 
-        case PantryFilterType.hideStaples:
-          final hideStaples = filterValue as bool;
-          prefs.setBool('pantry_filter_hideStaples', hideStaples);
+        case PantryFilterType.showStaples:
+          final showStaples = filterValue as bool;
+          prefs.setBool('pantry_filter_showStaples', showStaples);
           break;
       }
     }
@@ -149,8 +150,8 @@ class PantryFilterSortNotifier extends Notifier<PantryFilterSortState> {
     if (!state.activeFilters.containsKey(PantryFilterType.stockStatus)) {
       prefs.remove('pantry_filter_stockStatus');
     }
-    if (!state.activeFilters.containsKey(PantryFilterType.hideStaples)) {
-      prefs.remove('pantry_filter_hideStaples');
+    if (!state.activeFilters.containsKey(PantryFilterType.showStaples)) {
+      prefs.remove('pantry_filter_showStaples');
     }
   }
 }

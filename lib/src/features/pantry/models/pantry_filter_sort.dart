@@ -5,7 +5,7 @@ import '../../../../database/models/pantry_items.dart';
 enum PantryFilterType {
   category,
   stockStatus,
-  hideStaples,
+  showStaples,
 }
 
 /// Filter options for stock status
@@ -125,9 +125,9 @@ extension PantryItemFiltering on List<PantryItemEntry> {
               }
             }
             
-          case PantryFilterType.hideStaples:
-            final hideStaples = filterValue as bool;
-            if (hideStaples && item.isStaple) {
+          case PantryFilterType.showStaples:
+            final showStaples = filterValue as bool;
+            if (!showStaples && item.isStaple) {
               return false;
             }
         }

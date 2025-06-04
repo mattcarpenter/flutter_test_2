@@ -8,7 +8,7 @@ import '../../../providers/pantry_filter_sort_provider.dart';
 import '../../../widgets/adaptive_pull_down/adaptive_menu_item.dart';
 import '../../../widgets/adaptive_pull_down/adaptive_pull_down.dart';
 import '../models/pantry_filter_sort.dart';
-import '../widgets/filter_sort/pantry_filter_sheet.dart';
+import '../widgets/filter_sort/pantry_filter_chips.dart';
 import '../widgets/filter_sort/pantry_sort_dropdown.dart';
 import '../widgets/pantry_item_list.dart';
 import 'add_pantry_item_modal.dart';
@@ -37,22 +37,8 @@ class PantryTab extends ConsumerWidget {
           floating: true,
           delegate: _FilterSortHeaderDelegate(
             filterState: filterSortState,
-            onFilterTap: () {
-              showPantryFilterSheet(
-                context,
-                initialState: filterSortState,
-                onFilterChanged: (newState) {
-                  final notifier = ref.read(pantryFilterSortProvider.notifier);
-                  
-                  // Clear all existing filters first
-                  notifier.clearFilters();
-                  
-                  // Add all filters from new state
-                  for (final entry in newState.activeFilters.entries) {
-                    notifier.updateFilter(entry.key, entry.value);
-                  }
-                },
-              );
+            onFilterChanged: (type, value) {
+              ref.read(pantryFilterSortProvider.notifier).updateFilter(type, value);
             },
             sortOption: filterSortState.activeSortOption,
             sortDirection: filterSortState.sortDirection,
@@ -134,7 +120,7 @@ class PantryTab extends ConsumerWidget {
 /// Delegate for the filter/sort header in a sliver persistent header
 class _FilterSortHeaderDelegate extends SliverPersistentHeaderDelegate {
   final PantryFilterSortState filterState;
-  final VoidCallback onFilterTap;
+  final Function(PantryFilterType, dynamic) onFilterChanged;
   final PantrySortOption sortOption;
   final SortDirection sortDirection;
   final Function(PantrySortOption) onSortOptionChanged;
@@ -142,7 +128,7 @@ class _FilterSortHeaderDelegate extends SliverPersistentHeaderDelegate {
 
   _FilterSortHeaderDelegate({
     required this.filterState,
-    required this.onFilterTap,
+    required this.onFilterChanged,
     required this.sortOption,
     required this.sortDirection,
     required this.onSortOptionChanged,
@@ -158,51 +144,23 @@ class _FilterSortHeaderDelegate extends SliverPersistentHeaderDelegate {
         height: minExtent,
         padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
         child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            // Filter button with counter badge
-            Material(
-              color: Colors.transparent,
-              child: InkWell(
-                borderRadius: BorderRadius.circular(8),
-                onTap: onFilterTap,
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 4.0),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: [
-                      const Icon(Icons.filter_list),
-                      if (filterState.hasFilters)
-                        Container(
-                          margin: const EdgeInsets.only(left: 4),
-                          padding: const EdgeInsets.all(4),
-                          decoration: BoxDecoration(
-                            color: Theme.of(context).colorScheme.primary,
-                            shape: BoxShape.circle,
-                          ),
-                          child: Text(
-                            filterState.filterCount.toString(),
-                            style: TextStyle(
-                              color: Theme.of(context).colorScheme.onPrimary,
-                              fontSize: 12,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                        ),
-                    ],
-                  ),
-                ),
-              ),
-            ),
-
-            // Sort dropdown
+            // Sort dropdown on the left
             PantrySortDropdown(
               sortOption: sortOption,
               sortDirection: sortDirection,
               onSortOptionChanged: onSortOptionChanged,
               onSortDirectionChanged: onSortDirectionChanged,
+            ),
+            
+            const SizedBox(width: 16),
+            
+            // Filter chips on the right, horizontally scrollable
+            Expanded(
+              child: PantryFilterChips(
+                filterState: filterState,
+                onFilterChanged: onFilterChanged,
+              ),
             ),
           ],
         ),
@@ -220,6 +178,7 @@ class _FilterSortHeaderDelegate extends SliverPersistentHeaderDelegate {
   bool shouldRebuild(covariant _FilterSortHeaderDelegate oldDelegate) {
     return oldDelegate.filterState.filterCount != filterState.filterCount ||
            oldDelegate.filterState.hasFilters != filterState.hasFilters ||
+           oldDelegate.filterState.activeFilters != filterState.activeFilters ||
            oldDelegate.sortOption != sortOption ||
            oldDelegate.sortDirection != sortDirection;
   }
