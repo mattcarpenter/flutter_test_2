@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../database/database.dart';
 import '../../../../database/models/pantry_items.dart'; // For StockStatus enum
 import '../../../providers/pantry_provider.dart';
+import '../views/add_pantry_item_modal.dart';
 import '../views/update_pantry_item_modal.dart';
 import 'stock_status_segmented_control.dart';
 
@@ -54,6 +55,9 @@ class PantryItemList extends ConsumerWidget {
         children.add(_buildPantryItemTile(context, ref, item));
       }
     }
+
+    // Add the "Add Item" button at the end
+    children.add(_buildAddItemButton(context));
 
     return SliverList(
       delegate: SliverChildBuilderDelegate(
@@ -150,5 +154,44 @@ class PantryItemList extends ConsumerWidget {
     );
   }
 
+  Widget _buildAddItemButton(BuildContext context) {
+    final isDarkMode = CupertinoTheme.of(context).brightness == Brightness.dark;
+    final textColor = CupertinoTheme.of(context).textTheme.textStyle.color!;
+    final borderColor = isDarkMode
+        ? Colors.grey.shade600
+        : Colors.grey.shade400;
+
+    return Padding(
+      padding: const EdgeInsets.all(16.0),
+      child: Center(
+        child: OutlinedButton.icon(
+          onPressed: () {
+            showAddPantryItemModal(context);
+          },
+          icon: Icon(
+            CupertinoIcons.add,
+            color: textColor,
+            size: 18,
+          ),
+          label: Text(
+            'Add Item',
+            style: TextStyle(
+              color: textColor,
+              fontSize: 16,
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+          style: OutlinedButton.styleFrom(
+            backgroundColor: Colors.transparent,
+            side: BorderSide(color: borderColor, width: 1),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(8),
+            ),
+            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+          ),
+        ),
+      ),
+    );
+  }
 
 }
