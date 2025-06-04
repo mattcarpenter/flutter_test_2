@@ -1,10 +1,15 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../../../database/database.dart';
 import '../../../mobile/utils/adaptive_sliver_page.dart';
 import '../../../providers/pantry_provider.dart';
+import '../../../providers/pantry_filter_sort_provider.dart';
 import '../../../widgets/adaptive_pull_down/adaptive_menu_item.dart';
 import '../../../widgets/adaptive_pull_down/adaptive_pull_down.dart';
+import '../models/pantry_filter_sort.dart';
+import '../widgets/filter_sort/pantry_filter_sheet.dart';
+import '../widgets/filter_sort/pantry_sort_dropdown.dart';
 import '../widgets/pantry_item_list.dart';
 import 'add_pantry_item_modal.dart';
 
@@ -16,6 +21,9 @@ class PantryTab extends ConsumerWidget {
     // Watch all pantry items
     final pantryItemsAsyncValue = ref.watch(pantryItemsProvider);
 
+    // Watch filter/sort state
+    final filterSortState = ref.watch(pantryFilterSort);
+
     return AdaptiveSliverPage(
       title: 'Pantry',
       searchEnabled: true,
@@ -23,6 +31,41 @@ class PantryTab extends ConsumerWidget {
         // TODO: Implement search functionality for pantry items
       },
       slivers: [
+        // Filter/Sort header in a SliverPersistentHeader
+        SliverPersistentHeader(
+          pinned: false,
+          floating: true,
+          delegate: _FilterSortHeaderDelegate(
+            filterState: filterSortState,
+            onFilterTap: () {
+              showPantryFilterSheet(
+                context,
+                initialState: filterSortState,
+                onFilterChanged: (newState) {
+                  final notifier = ref.read(pantryFilterSortProvider.notifier);
+                  
+                  // Clear all existing filters first
+                  notifier.clearFilters();
+                  
+                  // Add all filters from new state
+                  for (final entry in newState.activeFilters.entries) {
+                    notifier.updateFilter(entry.key, entry.value);
+                  }
+                },
+              );
+            },
+            sortOption: filterSortState.activeSortOption,
+            sortDirection: filterSortState.sortDirection,
+            onSortOptionChanged: (option) {
+              ref.read(pantryFilterSortProvider.notifier).updateSortOption(option);
+            },
+            onSortDirectionChanged: (direction) {
+              ref.read(pantryFilterSortProvider.notifier).updateSortDirection(direction);
+            },
+          ),
+        ),
+
+        // Pantry items list with filtering and sorting applied
         pantryItemsAsyncValue.when(
           loading: () => const SliverFillRemaining(
             child: Center(child: CircularProgressIndicator()),
@@ -31,15 +74,44 @@ class PantryTab extends ConsumerWidget {
             child: Center(child: Text('Error: $error')),
           ),
           data: (pantryItems) {
-            if (pantryItems.isEmpty) {
-              return const SliverFillRemaining(
+            // Apply filters
+            List<PantryItemEntry> filteredItems = pantryItems;
+            if (filterSortState.hasFilters) {
+              filteredItems = pantryItems.applyFilters(filterSortState.activeFilters);
+            }
+
+            // Apply sorting
+            filteredItems = filteredItems.applySorting(
+              filterSortState.activeSortOption,
+              filterSortState.sortDirection,
+            );
+
+            if (filteredItems.isEmpty) {
+              return SliverFillRemaining(
                 child: Center(
-                  child: Text('No pantry items yet. Tap the + button to add items.')
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Text(filterSortState.hasFilters 
+                          ? 'No pantry items match the current filters'
+                          : 'No pantry items yet. Tap the + button to add items.'),
+                      if (filterSortState.hasFilters)
+                        TextButton(
+                          onPressed: () {
+                            ref.read(pantryFilterSortProvider.notifier).clearFilters();
+                          },
+                          child: const Text('Clear Filters'),
+                        ),
+                    ],
+                  ),
                 ),
               );
             }
 
-            return PantryItemList(pantryItems: pantryItems);
+            return PantryItemList(
+              pantryItems: filteredItems,
+              showCategoryHeaders: filterSortState.showCategoryHeaders,
+            );
           },
         ),
       ],
@@ -57,4 +129,101 @@ class PantryTab extends ConsumerWidget {
       ),
     );
   }
+}
+
+/// Delegate for the filter/sort header in a sliver persistent header
+class _FilterSortHeaderDelegate extends SliverPersistentHeaderDelegate {
+  final PantryFilterSortState filterState;
+  final VoidCallback onFilterTap;
+  final PantrySortOption sortOption;
+  final SortDirection sortDirection;
+  final Function(PantrySortOption) onSortOptionChanged;
+  final Function(SortDirection) onSortDirectionChanged;
+
+  _FilterSortHeaderDelegate({
+    required this.filterState,
+    required this.onFilterTap,
+    required this.sortOption,
+    required this.sortDirection,
+    required this.onSortOptionChanged,
+    required this.onSortDirectionChanged,
+  });
+
+  @override
+  Widget build(BuildContext context, double shrinkOffset, bool overlapsContent) {
+    return Material(
+      elevation: overlapsContent ? 1.0 : 0.0,
+      color: Colors.white.withValues(alpha: 0.95),
+      child: Container(
+        height: minExtent,
+        padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            // Filter button with counter badge
+            Material(
+              color: Colors.transparent,
+              child: InkWell(
+                borderRadius: BorderRadius.circular(8),
+                onTap: onFilterTap,
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 4.0),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      const Icon(Icons.filter_list),
+                      if (filterState.hasFilters)
+                        Container(
+                          margin: const EdgeInsets.only(left: 4),
+                          padding: const EdgeInsets.all(4),
+                          decoration: BoxDecoration(
+                            color: Theme.of(context).colorScheme.primary,
+                            shape: BoxShape.circle,
+                          ),
+                          child: Text(
+                            filterState.filterCount.toString(),
+                            style: TextStyle(
+                              color: Theme.of(context).colorScheme.onPrimary,
+                              fontSize: 12,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+
+            // Sort dropdown
+            PantrySortDropdown(
+              sortOption: sortOption,
+              sortDirection: sortDirection,
+              onSortOptionChanged: onSortOptionChanged,
+              onSortDirectionChanged: onSortDirectionChanged,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  @override
+  double get maxExtent => 48.0;
+
+  @override
+  double get minExtent => 48.0;
+
+  @override
+  bool shouldRebuild(covariant _FilterSortHeaderDelegate oldDelegate) {
+    return oldDelegate.filterState.filterCount != filterState.filterCount ||
+           oldDelegate.filterState.hasFilters != filterState.hasFilters ||
+           oldDelegate.sortOption != sortOption ||
+           oldDelegate.sortDirection != sortDirection;
+  }
+
+  @override
+  TickerProvider? get vsync => null;
 }

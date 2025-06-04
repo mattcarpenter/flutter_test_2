@@ -10,48 +10,58 @@ import 'stock_status_segmented_control.dart';
 
 class PantryItemList extends ConsumerWidget {
   final List<PantryItemEntry> pantryItems;
+  final bool showCategoryHeaders;
 
   const PantryItemList({
     super.key,
     required this.pantryItems,
+    this.showCategoryHeaders = true,
   });
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    // Group items by category
-    final Map<String, List<PantryItemEntry>> groupedItems = {};
-    
-    for (final item in pantryItems) {
-      final category = item.category ?? 'Other';
-      if (!groupedItems.containsKey(category)) {
-        groupedItems[category] = [];
-      }
-      groupedItems[category]!.add(item);
-    }
-
-    // Sort categories (put "Other" last)
-    final sortedCategories = groupedItems.keys.toList()
-      ..sort((a, b) {
-        if (a == 'Other' && b != 'Other') return 1;
-        if (b == 'Other' && a != 'Other') return -1;
-        return a.compareTo(b);
-      });
-
-    // Sort items within each category
-    for (final category in sortedCategories) {
-      groupedItems[category]!.sort((a, b) => a.name.compareTo(b.name));
-    }
-
-    // Build list with category headers
     final List<Widget> children = [];
-    for (final category in sortedCategories) {
-      final items = groupedItems[category]!;
+
+    if (showCategoryHeaders) {
+      // Group items by category and show headers
+      final Map<String, List<PantryItemEntry>> groupedItems = {};
       
-      // Add category header
-      children.add(_buildCategoryHeader(context, category));
-      
-      // Add items in this category
-      for (final item in items) {
+      for (final item in pantryItems) {
+        final category = item.category ?? 'Other';
+        if (!groupedItems.containsKey(category)) {
+          groupedItems[category] = [];
+        }
+        groupedItems[category]!.add(item);
+      }
+
+      // Sort categories (put "Other" last)
+      final sortedCategories = groupedItems.keys.toList()
+        ..sort((a, b) {
+          if (a == 'Other' && b != 'Other') return 1;
+          if (b == 'Other' && a != 'Other') return -1;
+          return a.compareTo(b);
+        });
+
+      // Sort items within each category
+      for (final category in sortedCategories) {
+        groupedItems[category]!.sort((a, b) => a.name.compareTo(b.name));
+      }
+
+      // Build list with category headers
+      for (final category in sortedCategories) {
+        final items = groupedItems[category]!;
+        
+        // Add category header
+        children.add(_buildCategoryHeader(context, category));
+        
+        // Add items in this category
+        for (final item in items) {
+          children.add(_buildPantryItemTile(context, ref, item));
+        }
+      }
+    } else {
+      // Flat list without category headers - items are already sorted by the caller
+      for (final item in pantryItems) {
         children.add(_buildPantryItemTile(context, ref, item));
       }
     }
