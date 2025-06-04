@@ -47,7 +47,7 @@ void showPantryFilterSheet(
       ];
     },
     onModalDismissedWithBarrierTap: () {
-      Navigator.of(context).pop();
+      // The modal will auto-dismiss, no need to manually pop
     },
   );
 }
