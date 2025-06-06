@@ -32,7 +32,7 @@ class PantryItemTermQueueManager {
   set pantryRepository(PantryRepository? repository) {
     _pantryRepository = repository;
   }
-  
+
   // Setter for test mode
   set testMode(bool value) {
     _testMode = value;
@@ -47,7 +47,7 @@ class PantryItemTermQueueManager {
   }) {
     _pantryRepository = pantryRepository;
     _testMode = testMode;
-    
+
     // Only set up connectivity listener if not in test mode
     if (!_testMode) {
       try {
@@ -81,7 +81,7 @@ class PantryItemTermQueueManager {
     if (_testMode) {
       return;
     }
-    
+
     // Skip if already canonicalized (this is the new logic)
     if (isCanonicalised) {
       return;
@@ -120,7 +120,7 @@ class PantryItemTermQueueManager {
   }
 
   /// Schedule a debounced queue processing
-  void _scheduleProcessing({Duration delay = const Duration(seconds: 3)}) {
+  void _scheduleProcessing({Duration delay = const Duration(seconds: 0)}) {
     _debounceTimer?.cancel();
     _debounceTimer = Timer(delay, () {
       processQueue();
@@ -163,7 +163,7 @@ class PantryItemTermQueueManager {
         // Handle potentially null retryCount by defaulting to 0
         // This handles legacy entries that might have null values
         final retryCount = entry.retryCount ?? 0;
-        
+
         // Calculate exponential backoff
         final backoffMillis = baseDelay.inMilliseconds * (1 << retryCount);
         final lastTry = entry.lastTryTimestamp ?? 0;
@@ -218,7 +218,7 @@ class PantryItemTermQueueManager {
         final entry = entryData['entry'] as PantryItemTermQueueEntry;
         final pantryItemId = entryData['pantryItemId'] as String;
         final pantryItemData = entryData['data'] as Map<String, dynamic>;
-        
+
         try {
           // Call the canonicalization API - use the same API as ingredients
           // but without unit and quantity as per requirements
@@ -228,20 +228,20 @@ class PantryItemTermQueueManager {
           final name = pantryItemData['name'] as String;
           if (results.terms.containsKey(name)) {
             final apiTerms = results.terms[name]!;
-            
+
             // Implement intelligent term merging:
             // 1. Start with original name as first term
             final mergedTerms = <PantryItemTerm>[
               PantryItemTerm(value: name, source: 'user', sort: 0)
             ];
-            
+
             // 2. Add API terms (deduplicated, case-insensitive)
             int sortIndex = 1;
             for (final apiTerm in apiTerms) {
-              final isDuplicate = mergedTerms.any((term) => 
+              final isDuplicate = mergedTerms.any((term) =>
                 term.value.toLowerCase() == apiTerm.value.toLowerCase()
               );
-              
+
               if (!isDuplicate) {
                 mergedTerms.add(PantryItemTerm(
                   value: apiTerm.value,
@@ -252,8 +252,8 @@ class PantryItemTermQueueManager {
             }
 
             // Get category from API response if available
-            final category = results.categories.containsKey(name) 
-                ? results.categories[name] 
+            final category = results.categories.containsKey(name)
+                ? results.categories[name]
                 : null;
 
             // Update the pantry item with merged terms, category, and mark as canonicalized
@@ -287,8 +287,8 @@ class PantryItemTermQueueManager {
             ];
 
             // Get category from API response if available (even without terms)
-            final category = results.categories.containsKey(name) 
-                ? results.categories[name] 
+            final category = results.categories.containsKey(name)
+                ? results.categories[name]
                 : null;
 
             if (_pantryRepository != null) {
@@ -370,7 +370,7 @@ final pantryItemTermQueueManagerProvider = Provider<PantryItemTermQueueManager>(
   // We'll get the pantry repository later via a setter to avoid circular dependency
   const pantryRepositoryUninitialized = null;
   final canonicalizer = ref.watch(ingredientCanonicalizerProvider);
-  
+
   // Determine if we're in test mode by checking environment variables or other means
   // For now we'll default to false, but you can override this with the setter
   const bool isTestMode = false;
