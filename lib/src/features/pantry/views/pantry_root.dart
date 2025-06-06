@@ -142,7 +142,7 @@ class _FilterSortHeaderDelegate extends SliverPersistentHeaderDelegate {
       color: Colors.white.withValues(alpha: 0.95),
       child: Container(
         height: minExtent,
-        padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
+        padding: const EdgeInsets.fromLTRB(16, 8, 0, 8),
         child: Row(
           children: [
             // Sort dropdown on the left
