@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../database/database.dart';
 import '../../../../database/models/pantry_items.dart'; // For StockStatus enum
 import '../../../providers/pantry_provider.dart';
+import '../../../providers/pantry_selection_provider.dart';
 import '../views/add_pantry_item_modal.dart';
 import '../views/update_pantry_item_modal.dart';
 import 'stock_status_segmented_control.dart';
@@ -106,6 +107,8 @@ class PantryItemList extends ConsumerWidget {
         ? Colors.grey.shade800
         : Colors.grey.shade300;
 
+    final isSelected = ref.watch(pantrySelectionProvider.select((selection) => selection.contains(item.id)));
+
     return Column(
       children: [
         GestureDetector(
@@ -116,42 +119,63 @@ class PantryItemList extends ConsumerWidget {
               pantryItem: item,
             );
           },
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
-            child: Row(
-              children: [
-                // Pantry item name with truncation
-                Expanded(
-                  child: Text(
-                    item.name,
-                    style: TextStyle(
-                      color: textColor,
-                      fontWeight: FontWeight.w500,
-                      fontSize: 17,
+          child: Container(
+            color: isSelected ? Theme.of(context).colorScheme.primary.withValues(alpha: 0.1) : null,
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
+              child: Row(
+                children: [
+                  // Checkbox for selection
+                  GestureDetector(
+                    onTap: () {
+                      ref.read(pantrySelectionProvider.notifier).toggleSelection(item.id);
+                    },
+                    child: Container(
+                      padding: const EdgeInsets.only(right: 12),
+                      child: Icon(
+                        isSelected 
+                            ? CupertinoIcons.checkmark_circle_fill 
+                            : CupertinoIcons.circle,
+                        color: isSelected 
+                            ? Theme.of(context).colorScheme.primary 
+                            : textColor.withValues(alpha: 0.3),
+                        size: 22,
+                      ),
                     ),
-                    overflow: TextOverflow.ellipsis,
-                    maxLines: 1,
                   ),
-                ),
-                const SizedBox(width: 12),
-                // Stock status segmented controller
-                StockStatusSegmentedControl(
-                  value: item.stockStatus,
-                  onChanged: (StockStatus value) {
-                    ref.read(pantryNotifierProvider.notifier).updateItem(
-                      id: item.id,
-                      stockStatus: value,
-                    );
-                  },
-                ),
-                const SizedBox(width: 12),
-                // Edit icon
-                Icon(
-                  CupertinoIcons.pencil,
-                  color: textColor.withValues(alpha: 0.5),
-                  size: 20,
-                ),
-              ],
+                  // Pantry item name with truncation
+                  Expanded(
+                    child: Text(
+                      item.name,
+                      style: TextStyle(
+                        color: textColor,
+                        fontWeight: FontWeight.w500,
+                        fontSize: 17,
+                      ),
+                      overflow: TextOverflow.ellipsis,
+                      maxLines: 1,
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  // Stock status segmented controller
+                  StockStatusSegmentedControl(
+                    value: item.stockStatus,
+                    onChanged: (StockStatus value) {
+                      ref.read(pantryNotifierProvider.notifier).updateItem(
+                        id: item.id,
+                        stockStatus: value,
+                      );
+                    },
+                  ),
+                  const SizedBox(width: 12),
+                  // Edit icon
+                  Icon(
+                    CupertinoIcons.pencil,
+                    color: textColor.withValues(alpha: 0.5),
+                    size: 20,
+                  ),
+                ],
+              ),
             ),
           ),
         ),

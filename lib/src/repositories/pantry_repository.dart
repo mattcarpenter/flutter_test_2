@@ -223,6 +223,37 @@ class PantryRepository {
     await (_db.update(_db.pantryItems)..where((t) => t.id.equals(id)))
         .write(PantryItemsCompanion(deletedAt: Value(now)));
   }
+
+  /// Soft-delete multiple pantry items.
+  Future<void> deleteMultipleItems(List<String> ids) async {
+    if (ids.isEmpty) return;
+
+    final now = DateTime.now().millisecondsSinceEpoch;
+
+    // Remove any pending queue entries for all items
+    if (_pantryItemTermQueueManager != null) {
+      for (final id in ids) {
+        await _pantryItemTermQueueManager!.repository.deleteEntriesByPantryItemId(id);
+      }
+    }
+
+    // Bulk update all items to set deletedAt
+    await (_db.update(_db.pantryItems)..where((t) => t.id.isIn(ids)))
+        .write(PantryItemsCompanion(deletedAt: Value(now)));
+  }
+
+  /// Update stock status for multiple pantry items.
+  Future<void> updateMultipleStockStatus(List<String> ids, StockStatus stockStatus) async {
+    if (ids.isEmpty) return;
+
+    final now = DateTime.now().millisecondsSinceEpoch;
+
+    await (_db.update(_db.pantryItems)..where((t) => t.id.isIn(ids)))
+        .write(PantryItemsCompanion(
+          stockStatus: Value(stockStatus),
+          updatedAt: Value(now),
+        ));
+  }
 }
 
 // Provider for the pantry repository

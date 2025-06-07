@@ -98,6 +98,18 @@ class PantryNotifier
 
     // Database change events will automatically trigger the stream
   }
+
+  Future<void> deleteMultipleItems(List<String> ids) async {
+    await _repo.deleteMultipleItems(ids);
+
+    // Database change events will automatically trigger the stream
+  }
+
+  Future<void> updateMultipleStockStatus(List<String> ids, StockStatus stockStatus) async {
+    await _repo.updateMultipleStockStatus(ids, stockStatus);
+
+    // Database change events will automatically trigger the stream
+  }
 }
 
 // Expose PantryNotifier

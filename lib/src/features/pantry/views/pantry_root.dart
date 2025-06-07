@@ -11,6 +11,7 @@ import '../models/pantry_filter_sort.dart';
 import '../widgets/filter_sort/pantry_filter_chips.dart';
 import '../widgets/filter_sort/pantry_sort_dropdown.dart';
 import '../widgets/pantry_item_list.dart';
+import '../widgets/pantry_selection_fab.dart';
 import 'add_pantry_item_modal.dart';
 
 class PantryTab extends ConsumerWidget {
@@ -24,13 +25,15 @@ class PantryTab extends ConsumerWidget {
     // Watch filter/sort state
     final filterSortState = ref.watch(pantryFilterSort);
 
-    return AdaptiveSliverPage(
-      title: 'Pantry',
-      searchEnabled: true,
-      onSearchChanged: (query) {
-        // TODO: Implement search functionality for pantry items
-      },
-      slivers: [
+    return Stack(
+      children: [
+        AdaptiveSliverPage(
+          title: 'Pantry',
+          searchEnabled: true,
+          onSearchChanged: (query) {
+            // TODO: Implement search functionality for pantry items
+          },
+          slivers: [
         // Filter/Sort header in a SliverPersistentHeader
         SliverPersistentHeader(
           pinned: false,
@@ -100,19 +103,27 @@ class PantryTab extends ConsumerWidget {
             );
           },
         ),
+          ],
+          trailing: AdaptivePullDownButton(
+            items: [
+              AdaptiveMenuItem(
+                title: 'Add Pantry Item',
+                icon: const Icon(CupertinoIcons.cart_badge_plus),
+                onTap: () {
+                  showAddPantryItemModal(context);
+                },
+              )
+            ],
+            child: const Icon(CupertinoIcons.add_circled),
+          ),
+        ),
+        // Floating Action Button for selection
+        const Positioned(
+          bottom: 24,
+          right: 24,
+          child: PantrySelectionFAB(),
+        ),
       ],
-      trailing: AdaptivePullDownButton(
-        items: [
-          AdaptiveMenuItem(
-            title: 'Add Pantry Item',
-            icon: const Icon(CupertinoIcons.cart_badge_plus),
-            onTap: () {
-              showAddPantryItemModal(context);
-            },
-          )
-        ],
-        child: const Icon(CupertinoIcons.add_circled),
-      ),
     );
   }
 }
