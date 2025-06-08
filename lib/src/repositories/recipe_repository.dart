@@ -534,6 +534,7 @@ class RecipeRepository {
   /// at least one ingredient term in the pantry, sorted by match ratio (highest first)
   Future<List<RecipePantryMatch>> findMatchingRecipesFromPantry() async {
     try {
+      // Step 1: Get recipes and their unique ingredients with match information
       final results = await _db.customSelect('''
   WITH ingredient_terms_with_mapping AS (
     SELECT
@@ -546,87 +547,198 @@ class RecipeRepository {
       ON rit.term = ito.input_term
       AND ito.deleted_at IS NULL
   ),
-  /* Find matching ingredients (direct pantry matches only for now) */
-  matching_ingredients AS (
-    -- Direct pantry matches
-    SELECT
+  /* Find direct pantry matches for ingredients */
+  direct_pantry_matches AS (
+    SELECT DISTINCT
       itwm.recipe_id,
-      itwm.ingredient_id,
-      1 AS matched
+      itwm.ingredient_id
     FROM ingredient_terms_with_mapping itwm
-    INNER JOIN pantry_item_terms pit
-      ON LOWER(itwm.effective_term) = LOWER(pit.term)
-    INNER JOIN pantry_items pi ON pit.pantry_item_id = pi.id
+    INNER JOIN pantry_item_terms pit ON LOWER(itwm.effective_term) = LOWER(pit.term)
+    INNER JOIN pantry_items pi ON pit.pantry_item_id = pi.id 
       AND pi.stock_status = 2 AND pi.deleted_at IS NULL
     WHERE itwm.linked_recipe_id IS NULL
-    GROUP BY itwm.recipe_id, itwm.ingredient_id
   ),
-  /* Count matched ingredients per recipe */
-  ingredient_matches AS (
-    SELECT
-      recipe_id,
-      COUNT(DISTINCT ingredient_id) AS matched_ingredients,
-      (
-        SELECT GROUP_CONCAT(DISTINCT pantry_item_id)
-        FROM ingredient_terms_with_mapping itwm
-        INNER JOIN pantry_item_terms pit
-          ON LOWER(itwm.effective_term) = LOWER(pit.term)
-        INNER JOIN pantry_items pi ON pit.pantry_item_id = pi.id
-          AND pi.stock_status = 2 AND pi.deleted_at IS NULL
-        WHERE itwm.recipe_id = mi.recipe_id AND itwm.linked_recipe_id IS NULL
-      ) AS matching_pantry_item_ids
-    FROM matching_ingredients mi
-    GROUP BY recipe_id
-  ),
-  /* Count total ingredients per recipe */
-  total_ingredients AS (
-    SELECT
-      recipe_id,
-      COUNT(DISTINCT ingredient_id) AS total_ingredients
-    FROM recipe_ingredient_terms
-    GROUP BY recipe_id
+  /* Get unique ingredients per recipe with their match status */
+  recipe_ingredients AS (
+    SELECT DISTINCT
+      r.id as recipe_id,
+      rit.ingredient_id,
+      rit.linked_recipe_id,
+      CASE WHEN dpm.ingredient_id IS NOT NULL THEN 1 ELSE 0 END as has_direct_match
+    FROM recipes r
+    INNER JOIN recipe_ingredient_terms rit ON r.id = rit.recipe_id
+    LEFT JOIN direct_pantry_matches dpm ON r.id = dpm.recipe_id AND rit.ingredient_id = dpm.ingredient_id
+    WHERE r.deleted_at IS NULL
   )
   SELECT
     r.*,
-    COALESCE(im.matched_ingredients, 0) AS matched_terms,
-    ti.total_ingredients AS total_terms,
-    (COALESCE(im.matched_ingredients, 0) * 1.0 / NULLIF(ti.total_ingredients, 0)) AS match_ratio,
-    im.matching_pantry_item_ids
+    ri.ingredient_id,
+    ri.linked_recipe_id,
+    ri.has_direct_match,
+    (
+      SELECT GROUP_CONCAT(DISTINCT pi.id)
+      FROM ingredient_terms_with_mapping itwm
+      INNER JOIN pantry_item_terms pit ON LOWER(itwm.effective_term) = LOWER(pit.term)
+      INNER JOIN pantry_items pi ON pit.pantry_item_id = pi.id
+        AND pi.stock_status = 2 AND pi.deleted_at IS NULL
+      WHERE itwm.recipe_id = r.id AND itwm.linked_recipe_id IS NULL
+    ) AS matching_pantry_item_ids
   FROM recipes r
-  LEFT JOIN ingredient_matches im ON r.id = im.recipe_id
-  LEFT JOIN total_ingredients ti ON r.id = ti.recipe_id
-  WHERE r.deleted_at IS NULL AND COALESCE(im.matched_ingredients, 0) > 0
-  ORDER BY match_ratio DESC, matched_terms DESC
+  INNER JOIN recipe_ingredients ri ON r.id = ri.recipe_id
+  WHERE r.deleted_at IS NULL
+  ORDER BY r.id, ri.ingredient_id
 ''',
           readsFrom: {
             _db.recipes,
           }).get();
 
-      return results.map((row) {
-        final recipe = _rowToRecipe(row);
-        final matchedTerms = row.read<int>('matched_terms');
-        final totalTerms = row.read<int>('total_terms');
-        final matchRatio = row.read<double>('match_ratio');
-
-        // Parse matching pantry item IDs
-        List<String>? matchedPantryItemIds;
-        final pantryItemsString = row.read<String?>('matching_pantry_item_ids');
-        if (pantryItemsString != null && pantryItemsString.isNotEmpty) {
-          matchedPantryItemIds = pantryItemsString.split(',');
-        }
-
-        return RecipePantryMatch(
-          recipe: recipe,
-          matchedTerms: matchedTerms,
-          totalTerms: totalTerms,
-          matchRatio: matchRatio,
-          matchedPantryItemIds: matchedPantryItemIds,
-        );
-      }).toList();
+      // Step 2: Process results in Dart to handle recipe dependencies
+      return await _processRecipeMatches(results);
     } catch (e) {
       debugPrint('Error finding matching recipes: $e');
       rethrow;
     }
+  }
+
+  /// Process recipe match results with recursive recipe dependency checking
+  Future<List<RecipePantryMatch>> _processRecipeMatches(List<QueryRow> rows) async {
+    // Group results by recipe
+    final Map<String, List<QueryRow>> recipeRows = {};
+    for (final row in rows) {
+      final recipeId = row.read<String>('id');
+      recipeRows.putIfAbsent(recipeId, () => []).add(row);
+    }
+
+    final List<RecipePantryMatch> matches = [];
+    final Set<String> visitedRecipes = <String>{};
+
+    for (final entry in recipeRows.entries) {
+      final recipeId = entry.key;
+      final ingredientRows = entry.value;
+      
+      // Get the recipe data from the first row
+      final firstRow = ingredientRows.first;
+      final recipe = _rowToRecipe(firstRow);
+      
+      // Calculate match status with recursive checking
+      final matchResult = await _calculateRecipeMatchWithDependencies(
+        recipeId, 
+        ingredientRows, 
+        visitedRecipes,
+        depth: 0
+      );
+      
+      // Include recipe if it has any match (even partial)
+      if (matchResult.hasAnyMatch) {
+        // Parse matching pantry item IDs
+        List<String>? matchedPantryItemIds;
+        final pantryItemsString = firstRow.read<String?>('matching_pantry_item_ids');
+        if (pantryItemsString != null && pantryItemsString.isNotEmpty) {
+          matchedPantryItemIds = pantryItemsString.split(',');
+        }
+
+        matches.add(RecipePantryMatch(
+          recipe: recipe,
+          matchedTerms: matchResult.matchedIngredients,
+          totalTerms: matchResult.totalIngredients,
+          matchRatio: matchResult.matchRatio,
+          matchedPantryItemIds: matchedPantryItemIds,
+        ));
+      }
+    }
+
+    // Sort by match ratio descending
+    matches.sort((a, b) => b.matchRatio.compareTo(a.matchRatio));
+    return matches;
+  }
+
+  /// Calculate recipe match including recursive dependencies
+  Future<_RecipeMatchResult> _calculateRecipeMatchWithDependencies(
+    String recipeId, 
+    List<QueryRow> ingredientRows,
+    Set<String> visitedRecipes,
+    {int depth = 0}
+  ) async {
+    // Prevent infinite recursion
+    if (depth > 3 || visitedRecipes.contains(recipeId)) {
+      return _RecipeMatchResult(0, ingredientRows.length, false);
+    }
+
+    visitedRecipes.add(recipeId);
+    int matchedIngredients = 0;
+    
+    for (final row in ingredientRows) {
+      final hasDirectMatch = row.read<int>('has_direct_match') == 1;
+      final linkedRecipeId = row.readNullable<String>('linked_recipe_id');
+      
+      if (hasDirectMatch) {
+        matchedIngredients++;
+      } else if (linkedRecipeId != null) {
+        // Check if the linked recipe is makeable
+        final linkedRecipeMatch = await _isLinkedRecipeMakeable(linkedRecipeId, visitedRecipes, depth + 1);
+        if (linkedRecipeMatch) {
+          matchedIngredients++;
+        }
+      }
+    }
+    
+    visitedRecipes.remove(recipeId);
+    final hasAnyMatch = matchedIngredients > 0;
+    final matchRatio = ingredientRows.isNotEmpty ? matchedIngredients / ingredientRows.length : 0.0;
+    
+    return _RecipeMatchResult(matchedIngredients, ingredientRows.length, hasAnyMatch, matchRatio);
+  }
+
+  /// Check if a linked recipe can be made with current pantry
+  Future<bool> _isLinkedRecipeMakeable(String recipeId, Set<String> visitedRecipes, int depth) async {
+    if (depth > 3 || visitedRecipes.contains(recipeId)) {
+      return false;
+    }
+
+    // Get unique ingredient data for the linked recipe
+    final linkedIngredientRows = await _db.customSelect('''
+      WITH ingredient_terms_with_mapping AS (
+        SELECT
+          rit.recipe_id,
+          rit.ingredient_id,
+          COALESCE(ito.mapped_term, rit.term) AS effective_term,
+          rit.linked_recipe_id
+        FROM recipe_ingredient_terms rit
+        LEFT JOIN ingredient_term_overrides_flattened ito
+          ON rit.term = ito.input_term
+          AND ito.deleted_at IS NULL
+        WHERE rit.recipe_id = ?
+      ),
+      direct_pantry_matches AS (
+        SELECT DISTINCT
+          itwm.recipe_id,
+          itwm.ingredient_id
+        FROM ingredient_terms_with_mapping itwm
+        INNER JOIN pantry_item_terms pit ON LOWER(itwm.effective_term) = LOWER(pit.term)
+        INNER JOIN pantry_items pi ON pit.pantry_item_id = pi.id 
+          AND pi.stock_status = 2 AND pi.deleted_at IS NULL
+        WHERE itwm.linked_recipe_id IS NULL
+      )
+      SELECT DISTINCT
+        rit.ingredient_id,
+        rit.linked_recipe_id,
+        CASE WHEN dpm.ingredient_id IS NOT NULL THEN 1 ELSE 0 END as has_direct_match
+      FROM recipe_ingredient_terms rit
+      LEFT JOIN direct_pantry_matches dpm ON rit.recipe_id = dpm.recipe_id AND rit.ingredient_id = dpm.ingredient_id
+      WHERE rit.recipe_id = ?
+    ''',
+        variables: [Variable(recipeId), Variable(recipeId)],
+        readsFrom: {_db.recipes}).get();
+
+    final matchResult = await _calculateRecipeMatchWithDependencies(
+      recipeId, 
+      linkedIngredientRows, 
+      visitedRecipes,
+      depth: depth
+    );
+    
+    // Recipe is makeable if ALL ingredients are matched (100% match ratio)
+    return matchResult.matchRatio >= 1.0;
   }
 
   /// Find pantry items that match ingredients for a specific recipe
@@ -663,13 +775,6 @@ class RecipeRepository {
       AND ito.deleted_at IS NULL
     WHERE rit.recipe_id = ?
   ),
-  ingredient_recipe_links AS (
-    SELECT DISTINCT
-      ingredient_id,
-      linked_recipe_id
-    FROM ingredient_terms_with_mapping
-    WHERE linked_recipe_id IS NOT NULL
-  ),
   matching_pantry_items AS (
     SELECT
       itwm.ingredient_id,
@@ -678,7 +783,7 @@ class RecipeRepository {
     FROM ingredient_terms_with_mapping itwm
     INNER JOIN pantry_item_terms pit
       ON LOWER(itwm.effective_term) = LOWER(pit.term)
-    WHERE itwm.linked_recipe_id IS NULL  -- Only direct pantry matches for now
+    WHERE itwm.linked_recipe_id IS NULL  -- Only direct pantry matches
     GROUP BY itwm.ingredient_id, pit.pantry_item_id
   )
   SELECT
@@ -696,13 +801,17 @@ class RecipeRepository {
     p.stock_status,
     p.is_staple,
     p.is_canonicalised,
-    irl.linked_recipe_id,
-    CASE WHEN irl.linked_recipe_id IS NOT NULL THEN 0 ELSE NULL END as linked_recipe_makeable
+    (
+      SELECT linked_recipe_id 
+      FROM ingredient_terms_with_mapping itwm2 
+      WHERE itwm2.ingredient_id = i.ingredient_id 
+        AND itwm2.linked_recipe_id IS NOT NULL 
+      LIMIT 1
+    ) AS linked_recipe_id
   FROM (
     SELECT ? AS ingredient_id
     ${allIngredientIds.length > 1 ? 'UNION ALL ' + allIngredientIds.skip(1).map((_) => 'SELECT ?').join(' UNION ALL ') : ''}
   ) i
-  LEFT JOIN ingredient_recipe_links irl ON i.ingredient_id = irl.ingredient_id
   LEFT JOIN (
     SELECT 
       mpi.ingredient_id,
@@ -728,20 +837,20 @@ class RecipeRepository {
           }).get();
 
       // Process results into ingredient matches
-      final matches = results.map((row) {
+      final matches = <IngredientPantryMatch>[];
+      for (final row in results) {
         final ingredientId = row.read<String>('recipe_ingredient_id');
         final ingredient = ingredientMap[ingredientId];
 
         if (ingredient == null) {
           // This shouldn't happen if the database is consistent
           debugPrint('Warning: Ingredient ID $ingredientId not found in recipe $recipeId');
-          return null;
+          continue;
         }
 
         // Check if there's a matching pantry item
         final pantryItemId = row.readNullable<String>('pantry_id');
         final linkedRecipeId = row.readNullable<String>('linked_recipe_id');
-        // final linkedRecipeMakeable = row.readNullable<int>('linked_recipe_makeable'); // TODO: Re-enable for recursive matching
         PantryItemEntry? pantryItem;
         bool hasRecipeMatch = false;
 
@@ -773,17 +882,16 @@ class RecipeRepository {
             isCanonicalised: isCanonicalised,
           );
         } else if (linkedRecipeId != null) {
-          // For now, treat linked recipes as not available since we simplified the query
-          // TODO: Add recursive makeability calculation back later
-          hasRecipeMatch = false;
+          // Check if the linked recipe is makeable (this will be done recursively)
+          hasRecipeMatch = await _isLinkedRecipeMakeable(linkedRecipeId, <String>{}, 0);
         }
 
-        return IngredientPantryMatch(
+        matches.add(IngredientPantryMatch(
           ingredient: ingredient,
           pantryItem: pantryItem,
           hasRecipeMatch: hasRecipeMatch,
-        );
-      }).whereType<IngredientPantryMatch>().toList();
+        ));
+      }
 
       return RecipeIngredientMatches(
         recipeId: recipeId,
@@ -805,4 +913,15 @@ final recipeRepositoryProvider = Provider<RecipeRepository>((ref) {
 String sanitizeFtsQuery(String query) {
   // Allow letters, numbers, spaces, and Japanese characters. Remove everything else.
   return query.replaceAll(RegExp(r'[^\w\s\u3040-\u30FF\u4E00-\u9FFF]'), '');
+}
+
+/// Helper class for recipe matching results
+class _RecipeMatchResult {
+  final int matchedIngredients;
+  final int totalIngredients;
+  final bool hasAnyMatch;
+  final double matchRatio;
+
+  _RecipeMatchResult(this.matchedIngredients, this.totalIngredients, this.hasAnyMatch, [double? ratio])
+      : matchRatio = ratio ?? (totalIngredients > 0 ? matchedIngredients / totalIngredients : 0.0);
 }

@@ -189,11 +189,15 @@ class _IngredientMatchesBottomSheetContentState extends ConsumerState<Ingredient
                           Padding(
                             padding: const EdgeInsets.only(top: 4.0),
                             child: Text(
-                              'Matched with: ${match.pantryItem!.name}',
+                              match.hasPantryMatch 
+                                ? 'Matched with: ${match.pantryItem!.name}'
+                                : 'Can be made via sub-recipe',
                               style: TextStyle(
                                 fontSize: 14,
-                                color: _getStockStatusColor(match.pantryItem!.stockStatus),
-                                fontStyle: match.pantryItem!.stockStatus == StockStatus.outOfStock
+                                color: match.hasPantryMatch 
+                                  ? _getStockStatusColor(match.pantryItem!.stockStatus)
+                                  : Colors.green,
+                                fontStyle: match.hasPantryMatch && match.pantryItem!.stockStatus == StockStatus.outOfStock
                                   ? FontStyle.italic
                                   : FontStyle.normal,
                               ),

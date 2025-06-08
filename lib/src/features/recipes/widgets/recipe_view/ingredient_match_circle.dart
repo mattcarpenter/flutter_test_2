@@ -27,7 +27,9 @@ class IngredientMatchCircle extends StatelessWidget {
     super.debugFillProperties(properties);
     properties.add(DiagnosticsProperty<IngredientPantryMatch>('match', match));
     properties.add(DiagnosticsProperty<bool>('hasMatch', match.hasMatch));
-    if (match.hasMatch) {
+    properties.add(DiagnosticsProperty<bool>('hasPantryMatch', match.hasPantryMatch));
+    properties.add(DiagnosticsProperty<bool>('hasRecipeMatch', match.hasRecipeMatch));
+    if (match.hasPantryMatch) {
       properties.add(EnumProperty<StockStatus>('stockStatus', match.pantryItem!.stockStatus));
     }
   }
@@ -53,16 +55,24 @@ class IngredientMatchCircle extends StatelessWidget {
       return Colors.grey; // No match found
     }
     
-    // Match found, get color based on stock status
-    switch (match.pantryItem!.stockStatus) {
-      case StockStatus.outOfStock:
-        return Colors.red;
-      case StockStatus.lowStock:
-        return Colors.yellow.shade700; // Darker yellow for better visibility
-      case StockStatus.inStock:
-        return Colors.green;
-      default:
-        return Colors.grey; // Fallback
+    // Check if this is a direct pantry match
+    if (match.hasPantryMatch) {
+      // Match found, get color based on stock status
+      switch (match.pantryItem!.stockStatus) {
+        case StockStatus.outOfStock:
+          return Colors.red;
+        case StockStatus.lowStock:
+          return Colors.yellow.shade700; // Darker yellow for better visibility
+        case StockStatus.inStock:
+          return Colors.green;
+        default:
+          return Colors.grey; // Fallback
+      }
+    } else if (match.hasRecipeMatch) {
+      // This ingredient can be made via a sub-recipe
+      return Colors.green; // Use green to indicate recipe-based match
     }
+    
+    return Colors.grey; // Fallback
   }
 }
