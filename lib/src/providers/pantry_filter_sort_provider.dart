@@ -66,6 +66,12 @@ class PantryFilterSortNotifier extends Notifier<PantryFilterSortState> {
       filters[PantryFilterType.showStaples] = showStaples;
     }
 
+    // Load search query
+    final searchQuery = prefs.getString('pantry_filter_search');
+    if (searchQuery != null && searchQuery.isNotEmpty) {
+      filters[PantryFilterType.search] = searchQuery;
+    }
+
     return PantryFilterSortState(
       activeFilters: filters,
       activeSortOption: sortOption,
@@ -101,6 +107,16 @@ class PantryFilterSortNotifier extends Notifier<PantryFilterSortState> {
   /// Update sort direction
   void updateSortDirection(SortDirection direction) {
     state = state.copyWith(sortDirection: direction);
+    _saveState();
+  }
+
+  /// Update search query
+  void updateSearchQuery(String query) {
+    if (query.isEmpty) {
+      state = state.withoutFilter(PantryFilterType.search);
+    } else {
+      state = state.withFilter(PantryFilterType.search, query);
+    }
     _saveState();
   }
 
@@ -140,6 +156,11 @@ class PantryFilterSortNotifier extends Notifier<PantryFilterSortState> {
           final showStaples = filterValue as bool;
           prefs.setBool('pantry_filter_showStaples', showStaples);
           break;
+
+        case PantryFilterType.search:
+          final searchQuery = filterValue as String;
+          prefs.setString('pantry_filter_search', searchQuery);
+          break;
       }
     }
 
@@ -152,6 +173,9 @@ class PantryFilterSortNotifier extends Notifier<PantryFilterSortState> {
     }
     if (!state.activeFilters.containsKey(PantryFilterType.showStaples)) {
       prefs.remove('pantry_filter_showStaples');
+    }
+    if (!state.activeFilters.containsKey(PantryFilterType.search)) {
+      prefs.remove('pantry_filter_search');
     }
   }
 }

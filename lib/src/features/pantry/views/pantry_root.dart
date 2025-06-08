@@ -31,7 +31,7 @@ class PantryTab extends ConsumerWidget {
           title: 'Pantry',
           searchEnabled: true,
           onSearchChanged: (query) {
-            // TODO: Implement search functionality for pantry items
+            ref.read(pantryFilterSortProvider.notifier).updateSearchQuery(query);
           },
           slivers: [
         // Filter/Sort header in a SliverPersistentHeader

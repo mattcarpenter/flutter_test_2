@@ -6,6 +6,7 @@ enum PantryFilterType {
   category,
   stockStatus,
   showStaples,
+  search,
 }
 
 /// Filter options for stock status
@@ -56,6 +57,9 @@ class PantryFilterSortState {
 
   /// Whether category headers should be shown (only when sorting by category)
   bool get showCategoryHeaders => activeSortOption == PantrySortOption.category;
+
+  /// Current search query (empty string if no search active)
+  String get searchQuery => activeFilters[PantryFilterType.search] as String? ?? '';
 
   const PantryFilterSortState({
     this.activeFilters = const {},
@@ -129,6 +133,14 @@ extension PantryItemFiltering on List<PantryItemEntry> {
             final showStaples = filterValue as bool;
             if (!showStaples && item.isStaple) {
               return false;
+            }
+            
+          case PantryFilterType.search:
+            final searchQuery = filterValue as String;
+            if (searchQuery.isNotEmpty) {
+              if (!item.name.toLowerCase().contains(searchQuery.toLowerCase())) {
+                return false;
+              }
             }
         }
       }
