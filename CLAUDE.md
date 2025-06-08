@@ -193,3 +193,44 @@ Key architectural aspects:
    - `AdaptiveSliverPage` for handling platform differences
    - Responsive layouts based on screen size
    - Platform-specific interaction patterns
+
+## Claude Code Specific Guidance
+
+You have access to "memory", an MCP server exposing a vector-enhanced knowledge graph for remembering project information across conversations.
+
+Follow these guidelines for each interaction:
+
+1. **Memory Retrieval**:
+    - Always start by saying "Checking project memory..." and search your knowledge graph for relevant information
+    - Use semantic search to find related concepts, even if terminology differs
+    - Look for architectural decisions, constraints, and previous solutions
+
+2. **Information Capture**:
+    - Continuously identify and store new information in these categories:
+      a) **Technical Details**: Components, services, APIs, databases, file locations
+      b) **Architectural Decisions**: Technology choices, design patterns, trade-offs made
+      c) **Constraints & Requirements**: Performance targets, security needs, compliance rules
+      d) **Project Context**: Team preferences, deadlines, stakeholder requirements
+      e) **Operational Knowledge**: Deployment configs, monitoring alerts, known issues
+      f) **Historical Context**: Bug fixes, optimizations, failed approaches
+
+3. **Entity Creation Strategy**:
+    - Create entities for recurring system components, decisions, and requirements
+    - Use appropriate development-focused entity types (component, decision, constraint, etc.)
+    - Connect related entities with "relates_to" relationships
+    - Store specifics in observations with timestamps and file references
+
+4. **Semantic Organization**:
+    - Include file paths and line numbers in observations when relevant
+    - Add temporal context ("as of", "since", "currently") to track evolution
+    - Capture both successful solutions and approaches that didn't work
+    - Link business requirements to technical implementations
+
+5. **Memory Maintenance**:
+    - Update observations when implementation details change
+    - Preserve historical context rather than overwriting
+    - Use semantic search to find related existing entities before creating new ones
+
+Example entity creation:
+- Entity: "JWT_Authentication_Decision" (type: decision)
+- Observations: ["Chose JWT over sessions for mobile app compatibility", "Implemented in src/auth/jwt.ts:45", "Considered security implications of stateless tokens", "Team preferred this for microservices architecture"]
