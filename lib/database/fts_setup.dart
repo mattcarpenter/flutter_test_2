@@ -52,12 +52,15 @@ SqliteMigration createMigrationForRecipeIngredientTerms() {
         term TEXT NOT NULL,
         sort INTEGER NOT NULL,
         created_at INTEGER,
+        linked_recipe_id TEXT,
         PRIMARY KEY (recipe_id, ingredient_id, term, sort)
       );
     ''');
 
     await tx.execute('CREATE INDEX IF NOT EXISTS idx_recipe_ingredient_terms_term ON recipe_ingredient_terms(term);');
     await tx.execute('CREATE INDEX IF NOT EXISTS idx_recipe_ingredient_terms_recipe ON recipe_ingredient_terms(recipe_id);');
+    await tx.execute('CREATE INDEX IF NOT EXISTS idx_recipe_ingredient_terms_linked_recipe ON recipe_ingredient_terms(linked_recipe_id);');
+    await tx.execute('CREATE INDEX IF NOT EXISTS idx_recipe_ingredient_terms_recipe_linked ON recipe_ingredient_terms(recipe_id, linked_recipe_id);');
   });
 }
 
@@ -170,12 +173,13 @@ SqliteMigration createMigrationForTermsTriggers() {
       AFTER INSERT ON $recipeInternalName
       BEGIN
         DELETE FROM recipe_ingredient_terms WHERE recipe_id = NEW.id;
-        INSERT INTO recipe_ingredient_terms (recipe_id, ingredient_id, term, sort)
+        INSERT INTO recipe_ingredient_terms (recipe_id, ingredient_id, term, sort, linked_recipe_id)
         SELECT
           NEW.id,
           json_extract(ingredient.value, '\$.id'),
           json_extract(term.value, '\$.value'),
-          json_extract(term.value, '\$.sort')
+          json_extract(term.value, '\$.sort'),
+          json_extract(ingredient.value, '\$.recipeId')
         FROM json_each(json_extract(NEW.data, '\$.ingredients')) AS ingredient,
              json_each(json_extract(ingredient.value, '\$.terms')) AS term;
       END;
@@ -186,12 +190,13 @@ SqliteMigration createMigrationForTermsTriggers() {
       AFTER UPDATE ON $recipeInternalName
       BEGIN
         DELETE FROM recipe_ingredient_terms WHERE recipe_id = NEW.id;
-        INSERT INTO recipe_ingredient_terms (recipe_id, ingredient_id, term, sort)
+        INSERT INTO recipe_ingredient_terms (recipe_id, ingredient_id, term, sort, linked_recipe_id)
         SELECT
           NEW.id,
           json_extract(ingredient.value, '\$.id'),
           json_extract(term.value, '\$.value'),
-          json_extract(term.value, '\$.sort')
+          json_extract(term.value, '\$.sort'),
+          json_extract(ingredient.value, '\$.recipeId')
         FROM json_each(json_extract(NEW.data, '\$.ingredients')) AS ingredient,
              json_each(json_extract(ingredient.value, '\$.terms')) AS term;
       END;
@@ -273,7 +278,6 @@ SqliteMigration createMigrationForIngredientTermOverrideTriggers() {
     ''');
   });
 }
-
 
 
 

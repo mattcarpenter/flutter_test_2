@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import '../../../../../database/models/ingredients.dart';
 import '../../../../models/ingredient_pantry_match.dart';
 import '../../../../providers/recipe_provider.dart';
@@ -174,6 +175,17 @@ class _RecipeIngredientsViewState extends ConsumerState<RecipeIngredientsView> {
                     ),
                   ),
 
+                  // "See Recipe" chip for linked ingredients
+                  if (ingredient.recipeId != null) ...[
+                    const SizedBox(width: 8),
+                    ActionChip(
+                      label: const Text('See Recipe'),
+                      avatar: const Icon(Icons.launch, size: 16),
+                      onPressed: () => _navigateToLinkedRecipe(context, ingredient.recipeId!),
+                      visualDensity: VisualDensity.compact,
+                    ),
+                  ],
+
                   // Note (if available)
                   if (ingredient.note != null && ingredient.note!.isNotEmpty) ...[
                     const SizedBox(width: 8),
@@ -196,6 +208,11 @@ class _RecipeIngredientsViewState extends ConsumerState<RecipeIngredientsView> {
         ),
       ],
     );
+  }
+
+  /// Navigates to the linked recipe
+  void _navigateToLinkedRecipe(BuildContext context, String recipeId) {
+    context.push('/recipes/$recipeId');
   }
   
   /// Shows the bottom sheet with ingredient match details

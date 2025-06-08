@@ -29,6 +29,7 @@ class Ingredient {
   final List<IngredientTerm>? terms; // Optional terms attached to this ingredient
   final bool isCanonicalised; // Whether this ingredient has been processed by canonicalization API
   final String? category; // Optional category from canonicalization API
+  final String? recipeId; // Optional reference to another recipe for sub-recipes
 
   Ingredient({
     required this.id,
@@ -50,6 +51,7 @@ class Ingredient {
     this.terms,
     this.isCanonicalised = false,
     this.category,
+    this.recipeId,
   });
 
   factory Ingredient.fromJson(Map<String, dynamic> json) => _$IngredientFromJson(json);
@@ -75,6 +77,7 @@ class Ingredient {
     List<IngredientTerm>? terms,
     bool? isCanonicalised,
     String? category,
+    String? recipeId,
   }) {
     return Ingredient(
       id: id ?? this.id,
@@ -96,6 +99,7 @@ class Ingredient {
       terms: terms ?? this.terms,
       isCanonicalised: isCanonicalised ?? this.isCanonicalised,
       category: category ?? this.category,
+      recipeId: recipeId ?? this.recipeId,
     );
   }
 }

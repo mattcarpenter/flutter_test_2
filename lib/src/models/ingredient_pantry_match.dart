@@ -9,12 +9,19 @@ class IngredientPantryMatch {
   /// The pantry item that matches the ingredient (null if no match)
   final PantryItemEntry? pantryItem;
   
-  /// Whether a matching pantry item was found
-  bool get hasMatch => pantryItem != null;
+  /// Whether the ingredient has a makeable recipe reference
+  final bool hasRecipeMatch;
+  
+  /// Whether a matching pantry item was found OR the ingredient can be made via sub-recipe
+  bool get hasMatch => pantryItem != null || hasRecipeMatch;
+  
+  /// Whether this match is specifically through a direct pantry item
+  bool get hasPantryMatch => pantryItem != null;
 
   IngredientPantryMatch({
     required this.ingredient,
     this.pantryItem,
+    this.hasRecipeMatch = false,
   });
 }
 

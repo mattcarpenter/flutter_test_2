@@ -1,10 +1,14 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:super_context_menu/super_context_menu.dart';
+import 'package:wolt_modal_sheet/wolt_modal_sheet.dart';
 
 import '../../../../../../database/models/ingredients.dart';
+import '../../../../../../database/database.dart';
+import '../../../../../providers/recipe_provider.dart' as recipe_provider;
 import '../utils/context_menu_utils.dart';
 
-class IngredientListItem extends StatefulWidget {
+class IngredientListItem extends ConsumerStatefulWidget {
   final int index;
   final Ingredient ingredient;
   final bool autoFocus;
@@ -25,10 +29,10 @@ class IngredientListItem extends StatefulWidget {
   }) : super(key: key);
 
   @override
-  _IngredientListItemState createState() => _IngredientListItemState();
+  ConsumerState<IngredientListItem> createState() => _IngredientListItemState();
 }
 
-class _IngredientListItemState extends State<IngredientListItem> {
+class _IngredientListItemState extends ConsumerState<IngredientListItem> {
   late TextEditingController _nameController;
   TextEditingController? _amountController;
   late FocusNode _focusNode;
@@ -82,6 +86,38 @@ class _IngredientListItemState extends State<IngredientListItem> {
 
   bool _contextMenuIsAllowed(Offset location) {
     return isLocationOutsideKey(location, _dragHandleKey);
+  }
+
+  void _showRecipeSelector(BuildContext context) {
+    WoltModalSheet.show(
+      useRootNavigator: true,
+      context: context,
+      modalTypeBuilder: (_) => WoltModalType.bottomSheet(),
+      pageListBuilder: (modalContext) {
+        return [
+          WoltModalSheetPage(
+            hasTopBarLayer: true,
+            isTopBarLayerAlwaysVisible: true,
+            topBarTitle: const Text('Link to Recipe'),
+            leadingNavBarWidget: IconButton(
+              icon: const Icon(Icons.close),
+              onPressed: () {
+                Navigator.of(modalContext).pop();
+              },
+            ),
+            child: RecipeSelectorContent(
+              onRecipeSelected: (recipe) {
+                widget.onUpdate(widget.ingredient.copyWith(recipeId: recipe.id));
+                Navigator.of(modalContext).pop();
+              },
+            ),
+          ),
+        ];
+      },
+      onModalDismissedWithBarrierTap: () {
+        Navigator.of(context).pop();
+      },
+    );
   }
 
   @override
@@ -149,6 +185,23 @@ class _IngredientListItemState extends State<IngredientListItem> {
                 ));
               },
             ),
+            MenuAction(
+              title: widget.ingredient.recipeId == null 
+                  ? 'Link to Existing Recipe' 
+                  : 'Change Linked Recipe',
+              image: MenuImage.icon(Icons.link),
+              callback: () {
+                _showRecipeSelector(context);
+              },
+            ),
+            if (widget.ingredient.recipeId != null)
+              MenuAction(
+                title: 'Remove Recipe Link',
+                image: MenuImage.icon(Icons.link_off),
+                callback: () {
+                  widget.onUpdate(widget.ingredient.copyWith(recipeId: ''));
+                },
+              ),
           ],
         );
       },
@@ -200,6 +253,14 @@ class _IngredientListItemState extends State<IngredientListItem> {
                     ),
                   ),
                 ),
+                if (widget.ingredient.recipeId != null) ...[
+                  const SizedBox(width: 4),
+                  Icon(
+                    Icons.link,
+                    size: 16,
+                    color: Theme.of(context).primaryColor,
+                  ),
+                ],
                 const SizedBox(width: 48), // Space for the drag handle
               ],
             ),
@@ -219,6 +280,101 @@ class _IngredientListItemState extends State<IngredientListItem> {
             ),
           ),
         ],
+      ),
+    );
+  }
+}
+
+class RecipeSelectorContent extends ConsumerStatefulWidget {
+  final Function(RecipeEntry) onRecipeSelected;
+
+  const RecipeSelectorContent({
+    Key? key,
+    required this.onRecipeSelected,
+  }) : super(key: key);
+
+  @override
+  ConsumerState<RecipeSelectorContent> createState() => _RecipeSelectorContentState();
+}
+
+class _RecipeSelectorContentState extends ConsumerState<RecipeSelectorContent> {
+  final TextEditingController _searchController = TextEditingController();
+  final FocusNode _searchFocusNode = FocusNode();
+
+  @override
+  void initState() {
+    super.initState();
+    // Clear any previous search results and request focus
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      // Reset the search state to empty to show all recipes
+      ref.read(recipe_provider.cookModalRecipeSearchProvider.notifier).search('');
+      // Focus the search input
+      _searchFocusNode.requestFocus();
+    });
+  }
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    _searchFocusNode.dispose();
+    super.dispose();
+  }
+
+  void _onSearchChanged(String query) {
+    ref.read(recipe_provider.cookModalRecipeSearchProvider.notifier).search(query);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final searchState = ref.watch(recipe_provider.cookModalRecipeSearchProvider);
+
+    return SizedBox(
+      height: MediaQuery.of(context).size.height * 0.7,
+      child: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Search box
+            TextField(
+              controller: _searchController,
+              focusNode: _searchFocusNode,
+              decoration: InputDecoration(
+                hintText: 'Search recipes...',
+                prefixIcon: const Icon(Icons.search),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(8.0),
+                ),
+                contentPadding: const EdgeInsets.symmetric(vertical: 12.0),
+              ),
+              onChanged: _onSearchChanged,
+            ),
+
+            const SizedBox(height: 20),
+
+            // Search results
+            Expanded(
+              child: searchState.results.isEmpty && !searchState.isLoading
+                  ? const Center(
+                      child: Text('Search for recipes to link to this ingredient'),
+                    )
+                  : ListView.builder(
+                      itemCount: searchState.results.length,
+                      itemBuilder: (context, index) {
+                        final recipe = searchState.results[index];
+                        return ListTile(
+                          title: Text(recipe.title),
+                          subtitle: recipe.description != null 
+                              ? Text(recipe.description!, maxLines: 1, overflow: TextOverflow.ellipsis)
+                              : null,
+                          onTap: () => widget.onRecipeSelected(recipe),
+                          trailing: const Icon(Icons.arrow_forward_ios),
+                        );
+                      },
+                    ),
+            ),
+          ],
+        ),
       ),
     );
   }

@@ -539,14 +539,16 @@ class RecipeRepository {
     SELECT
       rit.recipe_id,
       rit.ingredient_id,
-      COALESCE(ito.mapped_term, rit.term) AS effective_term
+      COALESCE(ito.mapped_term, rit.term) AS effective_term,
+      rit.linked_recipe_id
     FROM recipe_ingredient_terms rit
     LEFT JOIN ingredient_term_overrides_flattened ito
       ON rit.term = ito.input_term
       AND ito.deleted_at IS NULL
   ),
-  /* Find matching ingredients (not just terms) */
+  /* Find matching ingredients (direct pantry matches only for now) */
   matching_ingredients AS (
+    -- Direct pantry matches
     SELECT
       itwm.recipe_id,
       itwm.ingredient_id,
@@ -554,6 +556,9 @@ class RecipeRepository {
     FROM ingredient_terms_with_mapping itwm
     INNER JOIN pantry_item_terms pit
       ON LOWER(itwm.effective_term) = LOWER(pit.term)
+    INNER JOIN pantry_items pi ON pit.pantry_item_id = pi.id
+      AND pi.stock_status = 2 AND pi.deleted_at IS NULL
+    WHERE itwm.linked_recipe_id IS NULL
     GROUP BY itwm.recipe_id, itwm.ingredient_id
   ),
   /* Count matched ingredients per recipe */
@@ -566,7 +571,9 @@ class RecipeRepository {
         FROM ingredient_terms_with_mapping itwm
         INNER JOIN pantry_item_terms pit
           ON LOWER(itwm.effective_term) = LOWER(pit.term)
-        WHERE itwm.recipe_id = mi.recipe_id
+        INNER JOIN pantry_items pi ON pit.pantry_item_id = pi.id
+          AND pi.stock_status = 2 AND pi.deleted_at IS NULL
+        WHERE itwm.recipe_id = mi.recipe_id AND itwm.linked_recipe_id IS NULL
       ) AS matching_pantry_item_ids
     FROM matching_ingredients mi
     GROUP BY recipe_id
@@ -648,12 +655,20 @@ class RecipeRepository {
     SELECT
       rit.recipe_id,
       rit.ingredient_id,
-      COALESCE(ito.mapped_term, rit.term) AS effective_term
+      COALESCE(ito.mapped_term, rit.term) AS effective_term,
+      rit.linked_recipe_id
     FROM recipe_ingredient_terms rit
     LEFT JOIN ingredient_term_overrides_flattened ito
       ON rit.term = ito.input_term
       AND ito.deleted_at IS NULL
     WHERE rit.recipe_id = ?
+  ),
+  ingredient_recipe_links AS (
+    SELECT DISTINCT
+      ingredient_id,
+      linked_recipe_id
+    FROM ingredient_terms_with_mapping
+    WHERE linked_recipe_id IS NOT NULL
   ),
   matching_pantry_items AS (
     SELECT
@@ -663,6 +678,7 @@ class RecipeRepository {
     FROM ingredient_terms_with_mapping itwm
     INNER JOIN pantry_item_terms pit
       ON LOWER(itwm.effective_term) = LOWER(pit.term)
+    WHERE itwm.linked_recipe_id IS NULL  -- Only direct pantry matches for now
     GROUP BY itwm.ingredient_id, pit.pantry_item_id
   )
   SELECT
@@ -679,11 +695,14 @@ class RecipeRepository {
     p.deleted_at,
     p.stock_status,
     p.is_staple,
-    p.is_canonicalised
+    p.is_canonicalised,
+    irl.linked_recipe_id,
+    CASE WHEN irl.linked_recipe_id IS NOT NULL THEN 0 ELSE NULL END as linked_recipe_makeable
   FROM (
     SELECT ? AS ingredient_id
     ${allIngredientIds.length > 1 ? 'UNION ALL ' + allIngredientIds.skip(1).map((_) => 'SELECT ?').join(' UNION ALL ') : ''}
   ) i
+  LEFT JOIN ingredient_recipe_links irl ON i.ingredient_id = irl.ingredient_id
   LEFT JOIN (
     SELECT 
       mpi.ingredient_id,
@@ -721,7 +740,10 @@ class RecipeRepository {
 
         // Check if there's a matching pantry item
         final pantryItemId = row.readNullable<String>('pantry_id');
+        final linkedRecipeId = row.readNullable<String>('linked_recipe_id');
+        // final linkedRecipeMakeable = row.readNullable<int>('linked_recipe_makeable'); // TODO: Re-enable for recursive matching
         PantryItemEntry? pantryItem;
+        bool hasRecipeMatch = false;
 
         if (pantryItemId != null) {
           // Read stock_status directly as integer and convert to enum
@@ -750,11 +772,16 @@ class RecipeRepository {
             isStaple: isStaple,
             isCanonicalised: isCanonicalised,
           );
+        } else if (linkedRecipeId != null) {
+          // For now, treat linked recipes as not available since we simplified the query
+          // TODO: Add recursive makeability calculation back later
+          hasRecipeMatch = false;
         }
 
         return IngredientPantryMatch(
           ingredient: ingredient,
           pantryItem: pantryItem,
+          hasRecipeMatch: hasRecipeMatch,
         );
       }).whereType<IngredientPantryMatch>().toList();
 
