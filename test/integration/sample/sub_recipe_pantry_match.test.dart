@@ -377,18 +377,206 @@ void main() async {
         }
         print('DEBUG: hasAllIngredients=${ingredientMatches.hasAllIngredients}, matchRatio=${ingredientMatches.matchRatio}');
 
-        // TODO: This test reveals a bug in the implementation
-        // The vinaigrette ingredient should match via direct pantry item since the terms match,
-        // but the current logic appears to skip direct pantry matching when recipeId is present
-        expect(ingredientMatches.hasAllIngredients, false, reason: 'Current implementation bug: direct pantry matching not working when ingredient has recipeId');
+        // Test CORRECT behavior: Direct pantry match should take priority over sub-recipe
+        // Even though vinaigrette ingredient has recipeId, direct pantry item should be preferred
+        expect(ingredientMatches.hasAllIngredients, true);
 
-        // Verify current (buggy) behavior - should be fixed in implementation
+        // Verify vinaigrette ingredient matches via DIRECT pantry item (priority over sub-recipe)
         final vinaigretteMatch = ingredientMatches.matches.firstWhere(
           (m) => m.ingredient.name == 'Balsamic Vinaigrette'
         );
-        expect(vinaigretteMatch.hasMatch, false, reason: 'Bug: should be true - direct pantry match should work');
-        expect(vinaigretteMatch.pantryItem, null, reason: 'Bug: should find Balsamic Vinaigrette pantry item');
-        expect(vinaigretteMatch.hasRecipeMatch, false, reason: 'Correct: sub-recipe is not makeable');
+        verifyIngredientMatch(
+          match: vinaigretteMatch,
+          expectedIngredientName: 'Balsamic Vinaigrette',
+          expectedHasMatch: true,
+          expectedPantryItemName: 'Balsamic Vinaigrette',
+          expectedHasRecipeMatch: false, // Should be false because direct pantry takes priority
+        );
+      });
+    });
+
+    testWidgets('Fallback to sub-recipe when direct pantry out of stock', (tester) async {
+      await TestUserManager.createTestUser('out_of_stock_fallback_tester');
+
+      await withTestUser('out_of_stock_fallback_tester', () async {
+        final ingredientTermManager = container.read(ingredientTermQueueManagerProvider);
+        ingredientTermManager.testMode = true;
+
+        // Create chicken stock recipe (makeable)
+        final stockRecipeId = await createTestRecipe(
+          title: 'Chicken Stock',
+          ingredients: [
+            {'name': 'Chicken Bones', 'terms': ['chicken bones']},
+            {'name': 'Onions', 'terms': ['onion', 'onions']},
+            {'name': 'Carrots', 'terms': ['carrot', 'carrots']},
+          ],
+        );
+
+        // Create soup recipe that links to stock
+        final soupRecipeId = await createTestRecipe(
+          title: 'Chicken Soup',
+          ingredients: [
+            {
+              'name': 'Chicken Stock',
+              'amount': '4',
+              'unit': 'cups',
+              'terms': ['chicken stock', 'stock'],
+              'recipeId': stockRecipeId, // Link to stock recipe
+            },
+            {'name': 'Noodles', 'terms': ['noodles', 'egg noodles']},
+          ],
+        );
+
+        // Create pantry items for stock recipe (making it makeable)
+        await createPantryItem(name: 'Chicken Bones', terms: ['chicken bones']);
+        await createPantryItem(name: 'Onions', terms: ['onion']);
+        await createPantryItem(name: 'Carrots', terms: ['carrot']);
+        await createPantryItem(name: 'Noodles', terms: ['noodles']);
+        
+        // Create direct pantry item BUT mark it as OUT OF STOCK
+        await createPantryItem(
+          name: 'Chicken Stock', 
+          terms: ['chicken stock', 'stock'],
+          stockStatus: StockStatus.outOfStock, // This should trigger fallback
+        );
+
+        // Test ingredient-level matching
+        final repository = container.read(recipeRepositoryProvider);
+        final ingredientMatches = await repository.findPantryMatchesForRecipe(soupRecipeId);
+        
+        expect(ingredientMatches.hasAllIngredients, true);
+        
+        // Verify chicken stock ingredient falls back to sub-recipe (not out-of-stock direct item)
+        final stockIngredientMatch = ingredientMatches.matches.firstWhere(
+          (m) => m.ingredient.name == 'Chicken Stock'
+        );
+        verifyIngredientMatch(
+          match: stockIngredientMatch,
+          expectedIngredientName: 'Chicken Stock',
+          expectedHasMatch: true,
+          expectedHasRecipeMatch: true, // Should fall back to sub-recipe
+        );
+        
+        // The pantry item should be null because we fell back to recipe, not direct pantry
+        expect(stockIngredientMatch.pantryItem, null, reason: 'Should fall back to recipe, not use out-of-stock pantry item');
+      });
+    });
+
+    testWidgets('Fallback to sub-recipe when no direct pantry match', (tester) async {
+      await TestUserManager.createTestUser('no_direct_match_fallback_tester');
+
+      await withTestUser('no_direct_match_fallback_tester', () async {
+        final ingredientTermManager = container.read(ingredientTermQueueManagerProvider);
+        ingredientTermManager.testMode = true;
+
+        // Create tomato sauce recipe (makeable)
+        final sauceRecipeId = await createTestRecipe(
+          title: 'Tomato Sauce',
+          ingredients: [
+            {'name': 'Tomatoes', 'terms': ['tomatoes', 'fresh tomatoes']},
+            {'name': 'Garlic', 'terms': ['garlic']},
+            {'name': 'Basil', 'terms': ['basil', 'fresh basil']},
+          ],
+        );
+
+        // Create pasta recipe that links to sauce
+        final pastaRecipeId = await createTestRecipe(
+          title: 'Pasta with Tomato Sauce',
+          ingredients: [
+            {'name': 'Pasta', 'terms': ['pasta', 'spaghetti']},
+            {
+              'name': 'Tomato Sauce',
+              'terms': ['tomato sauce', 'sauce'],
+              'recipeId': sauceRecipeId, // Link to sauce recipe
+            },
+          ],
+        );
+
+        // Create pantry items for sauce recipe (making it makeable)
+        await createPantryItem(name: 'Fresh Tomatoes', terms: ['tomatoes']);
+        await createPantryItem(name: 'Garlic', terms: ['garlic']);
+        await createPantryItem(name: 'Fresh Basil', terms: ['basil']);
+        await createPantryItem(name: 'Spaghetti', terms: ['pasta']);
+        
+        // NOTE: No direct "Tomato Sauce" pantry item - should fall back to recipe
+
+        // Test ingredient-level matching
+        final repository = container.read(recipeRepositoryProvider);
+        final ingredientMatches = await repository.findPantryMatchesForRecipe(pastaRecipeId);
+        
+        expect(ingredientMatches.hasAllIngredients, true);
+        
+        // Verify tomato sauce ingredient matches via sub-recipe (no direct pantry item)
+        final sauceMatch = ingredientMatches.matches.firstWhere(
+          (m) => m.ingredient.name == 'Tomato Sauce'
+        );
+        verifyIngredientMatch(
+          match: sauceMatch,
+          expectedIngredientName: 'Tomato Sauce',
+          expectedHasMatch: true,
+          expectedHasRecipeMatch: true, // Should match via sub-recipe
+        );
+        
+        expect(sauceMatch.pantryItem, null, reason: 'Should match via recipe, not direct pantry item');
+      });
+    });
+
+    testWidgets('No match when neither direct nor sub-recipe available', (tester) async {
+      await TestUserManager.createTestUser('no_match_tester');
+
+      await withTestUser('no_match_tester', () async {
+        final ingredientTermManager = container.read(ingredientTermQueueManagerProvider);
+        ingredientTermManager.testMode = true;
+
+        // Create pesto sauce recipe (NOT makeable - missing ingredients)
+        final pestoRecipeId = await createTestRecipe(
+          title: 'Pesto Sauce',
+          ingredients: [
+            {'name': 'Basil', 'terms': ['basil', 'fresh basil']},
+            {'name': 'Pine Nuts', 'terms': ['pine nuts']}, // This will be missing
+            {'name': 'Parmesan', 'terms': ['parmesan', 'parmesan cheese']},
+          ],
+        );
+
+        // Create pasta recipe that links to pesto
+        final pastaRecipeId = await createTestRecipe(
+          title: 'Pasta with Pesto',
+          ingredients: [
+            {'name': 'Pasta', 'terms': ['pasta', 'spaghetti']},
+            {
+              'name': 'Pesto Sauce',
+              'terms': ['pesto', 'pesto sauce'],
+              'recipeId': pestoRecipeId, // Link to unmakeable pesto recipe
+            },
+          ],
+        );
+
+        // Create pantry items - pesto recipe is NOT makeable (missing pine nuts)
+        await createPantryItem(name: 'Fresh Basil', terms: ['basil']);
+        await createPantryItem(name: 'Parmesan', terms: ['parmesan']);
+        await createPantryItem(name: 'Spaghetti', terms: ['pasta']);
+        // NOTE: No pine nuts, so pesto recipe can't be made
+        // NOTE: No direct "Pesto Sauce" pantry item either
+
+        // Test ingredient-level matching
+        final repository = container.read(recipeRepositoryProvider);
+        final ingredientMatches = await repository.findPantryMatchesForRecipe(pastaRecipeId);
+        
+        expect(ingredientMatches.hasAllIngredients, false);
+        expect(ingredientMatches.matchRatio, 0.5); // Only pasta matches, pesto doesn't
+        
+        // Verify pesto sauce ingredient has NO match (neither direct pantry nor sub-recipe)
+        final pestoMatch = ingredientMatches.matches.firstWhere(
+          (m) => m.ingredient.name == 'Pesto Sauce'
+        );
+        verifyIngredientMatch(
+          match: pestoMatch,
+          expectedIngredientName: 'Pesto Sauce',
+          expectedHasMatch: false, // No match available
+          expectedHasRecipeMatch: false, // Sub-recipe not makeable
+        );
+        
+        expect(pestoMatch.pantryItem, null, reason: 'No direct pantry item available');
       });
     });
 
@@ -563,7 +751,7 @@ void main() async {
       });
     });
 
-    testWidgets('Sub-recipe vs direct pantry priority', (tester) async {
+    testWidgets('Direct pantry priority - in stock item beats makeable sub-recipe', (tester) async {
       await TestUserManager.createTestUser('priority_tester');
 
       await withTestUser('priority_tester', () async {
@@ -594,7 +782,8 @@ void main() async {
         );
 
         // Create pantry items - stock recipe CAN'T be made (no chicken bones)
-        // BUT we have store-bought chicken stock
+        // BUT we have store-bought chicken stock in pantry
+        // This tests that direct pantry item takes priority over sub-recipe checking
         await createPantryItem(name: 'Onions', terms: ['onion']);
         await createPantryItem(name: 'Carrots', terms: ['carrot']);
         await createPantryItem(name: 'Chicken Stock', terms: ['chicken stock', 'stock']); // Direct match!
