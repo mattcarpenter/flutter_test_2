@@ -11,7 +11,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:fake_async/fake_async.dart';
 
-import 'upload_queue_manager.test.mocks.dart';
+import 'upload_queue_manager_test.mocks.dart';
 
 @GenerateMocks([
   UploadQueueRepository,

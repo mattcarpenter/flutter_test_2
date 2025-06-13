@@ -34,11 +34,11 @@ flutter test
 flutter test test/path/to/test_file.dart
 
 # Run integration tests
-flutter drive --driver test/driver/integration_test.dart --target=test/integration/sample/<test_file>.test.dart
+flutter drive --driver test/driver/integration_test.dart --target=test/integration/sample/<test_file>_test.dart
 
 # Run specific integration test examples
-flutter drive --driver test/driver/integration_test.dart --target=test/integration/sample/recipes.test.dart
-flutter drive --driver test/driver/integration_test.dart --target=test/integration/sample/pantry_recipe_match.test.dart
+flutter drive --driver test/driver/integration_test.dart --target=test/integration/sample/recipes_test.dart
+flutter drive --driver test/driver/integration_test.dart --target=test/integration/sample/pantry_recipe_match_test.dart
 ```
 
 ### Code Generation
