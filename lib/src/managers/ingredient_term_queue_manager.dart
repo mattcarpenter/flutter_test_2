@@ -327,10 +327,18 @@ class IngredientTermQueueManager {
           final List<Ingredient> currentIngredients = recipe.ingredients ?? [];
           bool ingredientsChanged = false;
 
+          // DEBUG: Check ingredient IDs before processing
+          debugPrint('DEBUG: Current ingredients before processing:');
+          for (final ing in currentIngredients) {
+            debugPrint('  - ${ing.name} (ID: ${ing.id})');
+          }
+
           // Update each ingredient with its terms
           for (final entryData in recipeEntries) {
             final entry = entryData['entry'];
             final ingredientId = entryData['ingredientId'];
+
+            debugPrint('DEBUG: Processing entry for ingredient ID: $ingredientId');
 
             // Find the ingredient in the current list
             final ingredientIndex = currentIngredients
@@ -373,12 +381,18 @@ class IngredientTermQueueManager {
                     : null;
 
                 // Update the ingredient with merged terms, category, and mark as canonicalized
-                currentIngredients[ingredientIndex] =
-                    currentIngredients[ingredientIndex].copyWith(
-                      terms: mergedTerms,
-                      isCanonicalised: true,
-                      category: category,
-                    );
+                final originalIngredient = currentIngredients[ingredientIndex];
+                debugPrint('DEBUG: Original ingredient ID before copyWith: ${originalIngredient.id}');
+                
+                final updatedIngredient = originalIngredient.copyWith(
+                  terms: mergedTerms,
+                  isCanonicalised: true,
+                  category: category,
+                );
+                
+                debugPrint('DEBUG: Updated ingredient ID after copyWith: ${updatedIngredient.id}');
+                
+                currentIngredients[ingredientIndex] = updatedIngredient;
                 ingredientsChanged = true;
 
                 // Mark the entry as completed
@@ -431,6 +445,12 @@ class IngredientTermQueueManager {
 
           // Update the recipe with the modified ingredients
           if (ingredientsChanged && _recipeRepository != null) {
+            // DEBUG: Check ingredient IDs before saving
+            debugPrint('DEBUG: Final ingredients before updateRecipe:');
+            for (final ing in currentIngredients) {
+              debugPrint('  - ${ing.name} (ID: ${ing.id})');
+            }
+            
             final updatedRecipe = recipe.copyWith(
               ingredients: Value(currentIngredients),
               updatedAt: Value(DateTime.now().millisecondsSinceEpoch),

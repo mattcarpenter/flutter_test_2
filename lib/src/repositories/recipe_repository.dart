@@ -717,7 +717,6 @@ class RecipeRepository {
         INNER JOIN pantry_item_terms pit ON LOWER(itwm.effective_term) = LOWER(pit.term)
         INNER JOIN pantry_items pi ON pit.pantry_item_id = pi.id 
           AND pi.stock_status = 2 AND pi.deleted_at IS NULL
-        WHERE itwm.linked_recipe_id IS NULL
       )
       SELECT DISTINCT
         rit.ingredient_id,
@@ -783,7 +782,9 @@ class RecipeRepository {
     FROM ingredient_terms_with_mapping itwm
     INNER JOIN pantry_item_terms pit
       ON LOWER(itwm.effective_term) = LOWER(pit.term)
-    WHERE itwm.linked_recipe_id IS NULL  -- Only direct pantry matches
+    INNER JOIN pantry_items pi ON pit.pantry_item_id = pi.id
+    WHERE pi.deleted_at IS NULL
+      AND pi.stock_status = 2  -- Only in-stock items (StockStatus.inStock = 2)
     GROUP BY itwm.ingredient_id, pit.pantry_item_id
   )
   SELECT
@@ -819,8 +820,7 @@ class RecipeRepository {
       pi.*
     FROM matching_pantry_items mpi
     INNER JOIN pantry_items pi ON mpi.pantry_item_id = pi.id
-    WHERE pi.deleted_at IS NULL
-      AND (mpi.ingredient_id, mpi.term_priority) IN (
+    WHERE (mpi.ingredient_id, mpi.term_priority) IN (
         SELECT ingredient_id, MIN(term_priority)
         FROM matching_pantry_items
         GROUP BY ingredient_id

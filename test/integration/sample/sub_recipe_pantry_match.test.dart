@@ -75,7 +75,7 @@ void main() async {
 
       // Convert ingredient maps to actual ingredients with terms
       final ingredientObjects = ingredients.map((ing) {
-        final id = const Uuid().v4();
+        final id = Uuid().v4(); // Remove const to ensure unique IDs
         return Ingredient(
           id: id,
           type: 'ingredient',
@@ -985,7 +985,7 @@ void main() async {
             {'name': 'Regular Match', 'terms': ['regular-match']},
 
             // Regular ingredient without match
-            {'name': 'Regular No Match', 'terms': ['regular-no-match']},
+            {'name': 'Regular No Match', 'terms': ['unicorn-tears']}, // Unique term that won't match anything
 
             // Ingredient without terms
             {'name': 'No Terms Ingredient', 'terms': []},
@@ -1007,17 +1007,82 @@ void main() async {
         );
 
         // Create pantry items for various scenarios
-        await createPantryItem(name: 'Regular Match', terms: ['regular-match']);
-        await createPantryItem(name: 'Sub 1', terms: ['sub-1']);
-        await createPantryItem(name: 'Sub 2', terms: ['sub-2']);
-        await createPantryItem(name: 'Override Component', terms: ['override-component']);
+        // NOTE: Item names should match the primary term since addItem() uses name as first term
+        await createPantryItem(name: 'regular-match', terms: ['regular-match']);
+        await createPantryItem(name: 'sub-1', terms: ['sub-1']);
+        await createPantryItem(name: 'sub-2', terms: ['sub-2']);
+        await createPantryItem(name: 'override-component', terms: ['override-component']);
+
 
         // Test ingredient-level matching
         final repository = container.read(recipeRepositoryProvider);
         final ingredientMatches = await repository.findPantryMatchesForRecipe(mainRecipeId);
 
+        // Debug: Check what's actually stored in the JSON data
+        final recipeJsonDebug = await appDb.customSelect('''
+          SELECT id, data FROM ps_data__recipes WHERE id = ?
+        ''', variables: [Variable(mainRecipeId)]).get();
+        
+        print('DEBUG: Recipe JSON data:');
+        for (final row in recipeJsonDebug) {
+          print('  Recipe ID: ${row.read<String>('id')}');
+          print('  JSON data: ${row.read<String>('data')}');
+        }
+
+        // Debug: Check what terms are materialized in the database for main recipe
+        final ingredientTermsDebug = await appDb.customSelect('''
+          SELECT recipe_id, ingredient_id, term, sort, linked_recipe_id 
+          FROM recipe_ingredient_terms 
+          WHERE recipe_id = ?
+          ORDER BY ingredient_id, sort
+        ''', variables: [Variable(mainRecipeId)]).get();
+        
+        print('DEBUG: Main recipe materialized ingredient terms:');
+        for (final row in ingredientTermsDebug) {
+          print('  Recipe: ${row.read<String>('recipe_id')}, Ingredient: ${row.read<String>('ingredient_id')}, Term: ${row.read<String>('term')}, Sort: ${row.read<int>('sort')}, LinkedRecipe: ${row.readNullable<String>('linked_recipe_id')}');
+        }
+
+        // Debug: Check what terms are materialized for the sub-recipe
+        final subRecipeTermsDebug = await appDb.customSelect('''
+          SELECT recipe_id, ingredient_id, term, sort, linked_recipe_id 
+          FROM recipe_ingredient_terms 
+          WHERE recipe_id = ?
+          ORDER BY ingredient_id, sort
+        ''', variables: [Variable(subRecipeId)]).get();
+        
+        print('DEBUG: Sub-recipe materialized ingredient terms:');
+        for (final row in subRecipeTermsDebug) {
+          print('  Recipe: ${row.read<String>('recipe_id')}, Ingredient: ${row.read<String>('ingredient_id')}, Term: ${row.read<String>('term')}, Sort: ${row.read<int>('sort')}, LinkedRecipe: ${row.readNullable<String>('linked_recipe_id')}');
+        }
+
+        // Debug: Check what's in pantry_item_terms  
+        final pantryTermsDebug = await appDb.customSelect('''
+          SELECT pit.pantry_item_id, pit.term, pit.sort, pi.name
+          FROM pantry_item_terms pit
+          LEFT JOIN pantry_items pi ON pit.pantry_item_id = pi.id
+          WHERE pi.deleted_at IS NULL
+          ORDER BY pi.name, pit.sort
+        ''').get();
+        
+        print('DEBUG: Pantry item terms:');
+        for (final row in pantryTermsDebug) {
+          print('  Item: ${row.readNullable<String>('name')}, Term: ${row.read<String>('term')}, Sort: ${row.read<int>('sort')}');
+        }
+
+        // Debug: Show each ingredient match result
+        print('DEBUG: Individual ingredient matches:');
+        for (final match in ingredientMatches.matches) {
+          print('  - ${match.ingredient.name}: hasMatch=${match.hasMatch}, hasRecipeMatch=${match.hasRecipeMatch}, pantryItem=${match.pantryItem?.name ?? "null"}');
+          print('    Ingredient ID: ${match.ingredient.id}');
+          print('    Ingredient terms: ${match.ingredient.terms?.map((t) => t.value).join(", ") ?? "none"}');
+          if (match.ingredient.recipeId != null) {
+            print('    Linked recipe ID: ${match.ingredient.recipeId}');
+          }
+        }
+        print('DEBUG: Overall results: matches=${ingredientMatches.matches.length}, ratio=${ingredientMatches.matchRatio}, hasAll=${ingredientMatches.hasAllIngredients}');
+
         expect(ingredientMatches.matches.length, 5); // All ingredients should appear
-        expect(ingredientMatches.matchRatio, 0.8); // 4 out of 5 match
+        expect(ingredientMatches.matchRatio, 0.6); // 3 out of 5 match (Regular Match + Sub Recipe Component + Override Component)
         expect(ingredientMatches.hasAllIngredients, false);
 
         // Verify each ingredient type
@@ -1068,7 +1133,7 @@ void main() async {
           match: overrideMatch,
           expectedIngredientName: 'Override Component',
           expectedHasMatch: true,
-          expectedPantryItemName: 'Override Component',
+          expectedPantryItemName: 'override-component',
           expectedHasRecipeMatch: false, // Should match via pantry, not recipe
         );
       });
