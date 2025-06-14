@@ -18,6 +18,7 @@ const ingredientTermOverridesTable = 'ingredient_term_overrides';
 const shoppingListsTable = 'shopping_lists';
 const convertersTable = 'converters';
 const shoppingListItemsTable = 'shopping_list_items';
+const mealPlansTable = 'meal_plans';
 
 Schema schema = const Schema(([
   Table.localOnly(uploadQueuesTable, [
@@ -181,6 +182,15 @@ Schema schema = const Schema(([
     Column.text('notes'),
     Column.text('user_id'),
     Column.text('household_id'),
+    Column.integer('created_at'),
+    Column.integer('updated_at'),
+    Column.integer('deleted_at'),
+  ]),
+  Table(mealPlansTable, [
+    Column.text('date'),
+    Column.text('user_id'),
+    Column.text('household_id'),
+    Column.text('data'),
     Column.integer('created_at'),
     Column.integer('updated_at'),
     Column.integer('deleted_at'),

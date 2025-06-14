@@ -274,4 +274,23 @@ CREATE INDEX IF NOT EXISTS converters_term_idx ON public.converters (term);
 CREATE INDEX IF NOT EXISTS converters_user_idx ON public.converters (user_id);
 CREATE INDEX IF NOT EXISTS converters_household_idx ON public.converters (household_id);
 
+-- MEAL PLANS
+CREATE TABLE public.meal_plans (
+                                   id uuid NOT NULL DEFAULT extensions.uuid_generate_v4(),
+                                   date text NOT NULL,
+                                   user_id uuid NOT NULL,
+                                   household_id uuid NULL,
+                                   data text NULL,
+                                   created_at bigint NULL,
+                                   updated_at bigint NULL,
+                                   deleted_at bigint NULL,
+                                   CONSTRAINT meal_plans_pkey PRIMARY KEY (id),
+                                   CONSTRAINT meal_plans_user_id_fkey FOREIGN KEY (user_id) REFERENCES auth.users (id) ON DELETE CASCADE,
+                                   CONSTRAINT meal_plans_household_id_fkey FOREIGN KEY (household_id) REFERENCES public.households (id) ON DELETE CASCADE
+);
+
+CREATE INDEX IF NOT EXISTS meal_plans_date_idx ON public.meal_plans (date);
+CREATE INDEX IF NOT EXISTS meal_plans_user_idx ON public.meal_plans (user_id);
+CREATE INDEX IF NOT EXISTS meal_plans_household_idx ON public.meal_plans (household_id);
+
 CREATE PUBLICATION powersync FOR ALL TABLES;

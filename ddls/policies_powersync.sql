@@ -451,3 +451,41 @@ CREATE POLICY "Users can delete converters"
     auth.uid() = user_id
         OR (household_id IS NOT NULL AND is_household_member(household_id, auth.uid()))
     );
+
+-- RLS policies for meal_plans
+ALTER TABLE meal_plans ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "Users can view meal_plans"
+    ON meal_plans
+    FOR SELECT
+    USING (
+    auth.uid() = user_id
+        OR (household_id IS NOT NULL AND is_household_member(household_id, auth.uid()))
+    );
+
+CREATE POLICY "Users can insert meal_plans"
+    ON meal_plans
+    FOR INSERT
+    WITH CHECK (
+    auth.uid() = user_id
+        OR (household_id IS NOT NULL AND is_household_member(household_id, auth.uid()))
+    );
+
+CREATE POLICY "Users can update meal_plans"
+    ON meal_plans
+    FOR UPDATE
+    USING (
+    auth.uid() = user_id
+        OR (household_id IS NOT NULL AND is_household_member(household_id, auth.uid()))
+    )
+    WITH CHECK (
+    household_id IS NULL OR is_household_member(household_id, auth.uid())
+    );
+
+CREATE POLICY "Users can delete meal_plans"
+    ON meal_plans
+    FOR DELETE
+    USING (
+    auth.uid() = user_id
+        OR (household_id IS NOT NULL AND is_household_member(household_id, auth.uid()))
+    );

@@ -8,6 +8,7 @@ import 'models/ingredient_terms.dart';
 import 'models/recipe_images.dart';
 import 'models/steps.dart';
 import 'models/ingredients.dart';
+import 'models/meal_plan_items.dart';
 
 class StringListTypeConverter extends TypeConverter<List<String>, String> {
   @override
@@ -137,5 +138,24 @@ class PantryItemTermListConverter extends TypeConverter<List<PantryItemTerm>, St
   @override
   String toSql(List<PantryItemTerm> value) {
     return json.encode(value.map((term) => term.toJson()).toList());
+  }
+}
+
+class MealPlanItemListConverter extends TypeConverter<List<MealPlanItem>, String> {
+  const MealPlanItemListConverter();
+
+  @override
+  List<MealPlanItem> fromSql(String fromDb) {
+    try {
+      final List<dynamic> decoded = json.decode(fromDb);
+      return decoded.map((item) => MealPlanItem.fromJson(item as Map<String, dynamic>)).toList();
+    } catch (_) {
+      return [];
+    }
+  }
+
+  @override
+  String toSql(List<MealPlanItem> value) {
+    return json.encode(value.map((item) => item.toJson()).toList());
   }
 }

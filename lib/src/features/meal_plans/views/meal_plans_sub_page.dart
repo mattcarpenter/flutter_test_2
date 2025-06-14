@@ -1,6 +1,5 @@
 import 'package:flutter/cupertino.dart';
 import '../../../mobile/utils/adaptive_sliver_page.dart';
-import 'package:go_router/go_router.dart';
 
 class MealPlansSubPage extends StatelessWidget {
   final String title;
