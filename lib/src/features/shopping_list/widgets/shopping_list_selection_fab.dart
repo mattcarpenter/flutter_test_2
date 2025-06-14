@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../database/database.dart';
 import '../../../providers/shopping_list_provider.dart';
+import '../views/update_pantry_modal.dart';
 
 class ShoppingListSelectionFAB extends ConsumerWidget {
   const ShoppingListSelectionFAB({super.key});
@@ -31,7 +32,7 @@ class ShoppingListSelectionFAB extends ConsumerWidget {
           },
           backgroundColor: CupertinoColors.activeBlue,
           foregroundColor: CupertinoColors.white,
-          label: Text('With marked (${boughtItems.length})'),
+          label: const Text('With marked…'),
           icon: const Icon(CupertinoIcons.ellipsis),
         );
       },
@@ -51,7 +52,7 @@ class ShoppingListSelectionFAB extends ConsumerWidget {
           CupertinoActionSheetAction(
             onPressed: () {
               Navigator.pop(context);
-              // TODO: Implement Update Pantry functionality
+              showUpdatePantryModal(context, boughtItems);
             },
             child: const Text('Update Pantry'),
           ),

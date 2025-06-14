@@ -101,8 +101,6 @@ class ShoppingListItemTermQueueRepository {
 
   // Reset failed entries
   Future<void> resetFailedEntries() async {
-    final now = DateTime.now().millisecondsSinceEpoch;
-    
     await (_db.update(_db.shoppingListItemTermQueues)
           ..where((tbl) => tbl.status.equals('failed')))
         .write(

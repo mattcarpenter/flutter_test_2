@@ -1,11 +1,10 @@
 import 'package:flutter/cupertino.dart';
 import '../../../mobile/utils/adaptive_sliver_page.dart';
-import 'package:go_router/go_router.dart';
 
 class ShoppingListSubPage extends StatelessWidget {
   final String title;
 
-  const ShoppingListSubPage({Key? key, this.title = 'Sub Page'}) : super(key: key);
+  const ShoppingListSubPage({super.key, this.title = 'Sub Page'});
 
   @override
   Widget build(BuildContext context) {
