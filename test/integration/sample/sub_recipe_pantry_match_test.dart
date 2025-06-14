@@ -1207,5 +1207,133 @@ void main() async {
         );
       });
     });
+
+    testWidgets('Non-existent sub-recipe with pantry fallback', (tester) async {
+      await TestUserManager.createTestUser('nonexistent_recipe_fallback_tester');
+
+      await withTestUser('nonexistent_recipe_fallback_tester', () async {
+        final ingredientTermManager = container.read(ingredientTermQueueManagerProvider);
+        ingredientTermManager.testMode = true;
+
+        // Generate a non-existent recipe ID
+        final nonExistentRecipeId = const Uuid().v4();
+
+        // Create main recipe that references non-existent sub-recipe
+        final mainRecipeId = await createTestRecipe(
+          title: 'Recipe with Broken Sub-Recipe Reference',
+          ingredients: [
+            {'name': 'Regular Ingredient', 'terms': ['regular-ingredient']},
+            {
+              'name': 'Broken Sub-Recipe Component',
+              'terms': ['broken-component', 'missing-recipe'],
+              'recipeId': nonExistentRecipeId, // Points to non-existent recipe
+            },
+          ],
+        );
+
+        // Create pantry items - one matches the broken component directly
+        await createPantryItem(name: 'regular-ingredient', terms: ['regular-ingredient']);
+        await createPantryItem(name: 'broken-component', terms: ['broken-component']); // Direct fallback
+
+        // Test ingredient-level matching
+        final repository = container.read(recipeRepositoryProvider);
+        final ingredientMatches = await repository.findPantryMatchesForRecipe(mainRecipeId);
+
+
+        expect(ingredientMatches.hasAllIngredients, true);
+        expect(ingredientMatches.matchRatio, 1.0); // Both ingredients should match
+
+        // Verify regular ingredient matches normally
+        final regularMatch = ingredientMatches.matches.firstWhere(
+          (m) => m.ingredient.name == 'Regular Ingredient'
+        );
+        verifyIngredientMatch(
+          match: regularMatch,
+          expectedIngredientName: 'Regular Ingredient',
+          expectedHasMatch: true,
+          expectedHasRecipeMatch: false,
+        );
+
+        // Verify broken sub-recipe component falls back to direct pantry
+        final brokenMatch = ingredientMatches.matches.firstWhere(
+          (m) => m.ingredient.name == 'Broken Sub-Recipe Component'
+        );
+        verifyIngredientMatch(
+          match: brokenMatch,
+          expectedIngredientName: 'Broken Sub-Recipe Component',
+          expectedHasMatch: true,
+          expectedPantryItemName: 'broken-component',
+          expectedHasRecipeMatch: false, // Should be false since sub-recipe doesn't exist
+        );
+
+        // Verify the ingredient still has the broken recipe reference
+        expect(brokenMatch.ingredient.recipeId, nonExistentRecipeId);
+      });
+    });
+
+    testWidgets('Non-existent sub-recipe without fallback - no match', (tester) async {
+      await TestUserManager.createTestUser('nonexistent_recipe_no_fallback_tester');
+
+      await withTestUser('nonexistent_recipe_no_fallback_tester', () async {
+        final ingredientTermManager = container.read(ingredientTermQueueManagerProvider);
+        ingredientTermManager.testMode = true;
+
+        // Generate a non-existent recipe ID
+        final nonExistentRecipeId = const Uuid().v4();
+
+        // Create main recipe that references non-existent sub-recipe
+        final mainRecipeId = await createTestRecipe(
+          title: 'Recipe with Unmatchable Broken Reference',
+          ingredients: [
+            {'name': 'Available Ingredient', 'terms': ['available-ingredient']},
+            {
+              'name': 'Broken No-Match Component',
+              'terms': ['completely-unique-term', 'unavailable'],
+              'recipeId': nonExistentRecipeId, // Points to non-existent recipe
+            },
+          ],
+        );
+
+        // Create pantry items - only one matches, not the broken component
+        await createPantryItem(name: 'available-ingredient', terms: ['available-ingredient']);
+        await createPantryItem(name: 'different-item', terms: ['different-term']); // Does NOT match broken component
+
+        // Test ingredient-level matching
+        final repository = container.read(recipeRepositoryProvider);
+        final ingredientMatches = await repository.findPantryMatchesForRecipe(mainRecipeId);
+
+
+        expect(ingredientMatches.hasAllIngredients, false);
+        expect(ingredientMatches.matchRatio, 0.5); // Only 1 out of 2 ingredients match
+
+        // Verify available ingredient matches normally
+        final availableMatch = ingredientMatches.matches.firstWhere(
+          (m) => m.ingredient.name == 'Available Ingredient'
+        );
+        verifyIngredientMatch(
+          match: availableMatch,
+          expectedIngredientName: 'Available Ingredient',
+          expectedHasMatch: true,
+          expectedHasRecipeMatch: false,
+        );
+
+        // Verify broken sub-recipe component has no match at all
+        final brokenMatch = ingredientMatches.matches.firstWhere(
+          (m) => m.ingredient.name == 'Broken No-Match Component'
+        );
+        verifyIngredientMatch(
+          match: brokenMatch,
+          expectedIngredientName: 'Broken No-Match Component',
+          expectedHasMatch: false,
+          expectedHasRecipeMatch: false, // Should be false since sub-recipe doesn't exist
+        );
+
+        // Verify no pantry item is matched
+        expect(brokenMatch.pantryItem, null);
+
+        // Verify the ingredient still has the broken recipe reference
+        expect(brokenMatch.ingredient.recipeId, nonExistentRecipeId);
+      });
+    });
   });
 }
