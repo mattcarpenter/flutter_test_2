@@ -3424,6 +3424,557 @@ class PantryItemTermQueuesCompanion
   }
 }
 
+class $ShoppingListItemTermQueuesTable extends ShoppingListItemTermQueues
+    with
+        TableInfo<$ShoppingListItemTermQueuesTable,
+            ShoppingListItemTermQueueEntry> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $ShoppingListItemTermQueuesTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<String> id = GeneratedColumn<String>(
+      'id', aliasedName, false,
+      type: DriftSqlType.string,
+      requiredDuringInsert: false,
+      clientDefault: () => const Uuid().v4());
+  static const VerificationMeta _shoppingListItemIdMeta =
+      const VerificationMeta('shoppingListItemId');
+  @override
+  late final GeneratedColumn<String> shoppingListItemId =
+      GeneratedColumn<String>('shopping_list_item_id', aliasedName, false,
+          type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _nameMeta = const VerificationMeta('name');
+  @override
+  late final GeneratedColumn<String> name = GeneratedColumn<String>(
+      'name', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _userIdMeta = const VerificationMeta('userId');
+  @override
+  late final GeneratedColumn<String> userId = GeneratedColumn<String>(
+      'user_id', aliasedName, true,
+      type: DriftSqlType.string, requiredDuringInsert: false);
+  static const VerificationMeta _amountMeta = const VerificationMeta('amount');
+  @override
+  late final GeneratedColumn<double> amount = GeneratedColumn<double>(
+      'amount', aliasedName, true,
+      type: DriftSqlType.double, requiredDuringInsert: false);
+  static const VerificationMeta _unitMeta = const VerificationMeta('unit');
+  @override
+  late final GeneratedColumn<String> unit = GeneratedColumn<String>(
+      'unit', aliasedName, true,
+      type: DriftSqlType.string, requiredDuringInsert: false);
+  static const VerificationMeta _statusMeta = const VerificationMeta('status');
+  @override
+  late final GeneratedColumn<String> status = GeneratedColumn<String>(
+      'status', aliasedName, false,
+      type: DriftSqlType.string,
+      requiredDuringInsert: false,
+      defaultValue: const Constant('pending'));
+  static const VerificationMeta _retryCountMeta =
+      const VerificationMeta('retryCount');
+  @override
+  late final GeneratedColumn<int> retryCount = GeneratedColumn<int>(
+      'retry_count', aliasedName, false,
+      type: DriftSqlType.int,
+      requiredDuringInsert: false,
+      defaultValue: const Constant(0));
+  static const VerificationMeta _errorMeta = const VerificationMeta('error');
+  @override
+  late final GeneratedColumn<String> error = GeneratedColumn<String>(
+      'error', aliasedName, true,
+      type: DriftSqlType.string, requiredDuringInsert: false);
+  static const VerificationMeta _createdAtMeta =
+      const VerificationMeta('createdAt');
+  @override
+  late final GeneratedColumn<int> createdAt = GeneratedColumn<int>(
+      'created_at', aliasedName, true,
+      type: DriftSqlType.int, requiredDuringInsert: false);
+  static const VerificationMeta _updatedAtMeta =
+      const VerificationMeta('updatedAt');
+  @override
+  late final GeneratedColumn<int> updatedAt = GeneratedColumn<int>(
+      'updated_at', aliasedName, true,
+      type: DriftSqlType.int, requiredDuringInsert: false);
+  @override
+  List<GeneratedColumn> get $columns => [
+        id,
+        shoppingListItemId,
+        name,
+        userId,
+        amount,
+        unit,
+        status,
+        retryCount,
+        error,
+        createdAt,
+        updatedAt
+      ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'shopping_list_item_term_queues';
+  @override
+  VerificationContext validateIntegrity(
+      Insertable<ShoppingListItemTermQueueEntry> instance,
+      {bool isInserting = false}) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    }
+    if (data.containsKey('shopping_list_item_id')) {
+      context.handle(
+          _shoppingListItemIdMeta,
+          shoppingListItemId.isAcceptableOrUnknown(
+              data['shopping_list_item_id']!, _shoppingListItemIdMeta));
+    } else if (isInserting) {
+      context.missing(_shoppingListItemIdMeta);
+    }
+    if (data.containsKey('name')) {
+      context.handle(
+          _nameMeta, name.isAcceptableOrUnknown(data['name']!, _nameMeta));
+    } else if (isInserting) {
+      context.missing(_nameMeta);
+    }
+    if (data.containsKey('user_id')) {
+      context.handle(_userIdMeta,
+          userId.isAcceptableOrUnknown(data['user_id']!, _userIdMeta));
+    }
+    if (data.containsKey('amount')) {
+      context.handle(_amountMeta,
+          amount.isAcceptableOrUnknown(data['amount']!, _amountMeta));
+    }
+    if (data.containsKey('unit')) {
+      context.handle(
+          _unitMeta, unit.isAcceptableOrUnknown(data['unit']!, _unitMeta));
+    }
+    if (data.containsKey('status')) {
+      context.handle(_statusMeta,
+          status.isAcceptableOrUnknown(data['status']!, _statusMeta));
+    }
+    if (data.containsKey('retry_count')) {
+      context.handle(
+          _retryCountMeta,
+          retryCount.isAcceptableOrUnknown(
+              data['retry_count']!, _retryCountMeta));
+    }
+    if (data.containsKey('error')) {
+      context.handle(
+          _errorMeta, error.isAcceptableOrUnknown(data['error']!, _errorMeta));
+    }
+    if (data.containsKey('created_at')) {
+      context.handle(_createdAtMeta,
+          createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta));
+    }
+    if (data.containsKey('updated_at')) {
+      context.handle(_updatedAtMeta,
+          updatedAt.isAcceptableOrUnknown(data['updated_at']!, _updatedAtMeta));
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  ShoppingListItemTermQueueEntry map(Map<String, dynamic> data,
+      {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return ShoppingListItemTermQueueEntry(
+      id: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}id'])!,
+      shoppingListItemId: attachedDatabase.typeMapping.read(DriftSqlType.string,
+          data['${effectivePrefix}shopping_list_item_id'])!,
+      name: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}name'])!,
+      userId: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}user_id']),
+      amount: attachedDatabase.typeMapping
+          .read(DriftSqlType.double, data['${effectivePrefix}amount']),
+      unit: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}unit']),
+      status: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}status'])!,
+      retryCount: attachedDatabase.typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}retry_count'])!,
+      error: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}error']),
+      createdAt: attachedDatabase.typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}created_at']),
+      updatedAt: attachedDatabase.typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}updated_at']),
+    );
+  }
+
+  @override
+  $ShoppingListItemTermQueuesTable createAlias(String alias) {
+    return $ShoppingListItemTermQueuesTable(attachedDatabase, alias);
+  }
+}
+
+class ShoppingListItemTermQueueEntry extends DataClass
+    implements Insertable<ShoppingListItemTermQueueEntry> {
+  final String id;
+  final String shoppingListItemId;
+  final String name;
+  final String? userId;
+  final double? amount;
+  final String? unit;
+  final String status;
+  final int retryCount;
+  final String? error;
+  final int? createdAt;
+  final int? updatedAt;
+  const ShoppingListItemTermQueueEntry(
+      {required this.id,
+      required this.shoppingListItemId,
+      required this.name,
+      this.userId,
+      this.amount,
+      this.unit,
+      required this.status,
+      required this.retryCount,
+      this.error,
+      this.createdAt,
+      this.updatedAt});
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<String>(id);
+    map['shopping_list_item_id'] = Variable<String>(shoppingListItemId);
+    map['name'] = Variable<String>(name);
+    if (!nullToAbsent || userId != null) {
+      map['user_id'] = Variable<String>(userId);
+    }
+    if (!nullToAbsent || amount != null) {
+      map['amount'] = Variable<double>(amount);
+    }
+    if (!nullToAbsent || unit != null) {
+      map['unit'] = Variable<String>(unit);
+    }
+    map['status'] = Variable<String>(status);
+    map['retry_count'] = Variable<int>(retryCount);
+    if (!nullToAbsent || error != null) {
+      map['error'] = Variable<String>(error);
+    }
+    if (!nullToAbsent || createdAt != null) {
+      map['created_at'] = Variable<int>(createdAt);
+    }
+    if (!nullToAbsent || updatedAt != null) {
+      map['updated_at'] = Variable<int>(updatedAt);
+    }
+    return map;
+  }
+
+  ShoppingListItemTermQueuesCompanion toCompanion(bool nullToAbsent) {
+    return ShoppingListItemTermQueuesCompanion(
+      id: Value(id),
+      shoppingListItemId: Value(shoppingListItemId),
+      name: Value(name),
+      userId:
+          userId == null && nullToAbsent ? const Value.absent() : Value(userId),
+      amount:
+          amount == null && nullToAbsent ? const Value.absent() : Value(amount),
+      unit: unit == null && nullToAbsent ? const Value.absent() : Value(unit),
+      status: Value(status),
+      retryCount: Value(retryCount),
+      error:
+          error == null && nullToAbsent ? const Value.absent() : Value(error),
+      createdAt: createdAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(createdAt),
+      updatedAt: updatedAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(updatedAt),
+    );
+  }
+
+  factory ShoppingListItemTermQueueEntry.fromJson(Map<String, dynamic> json,
+      {ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return ShoppingListItemTermQueueEntry(
+      id: serializer.fromJson<String>(json['id']),
+      shoppingListItemId:
+          serializer.fromJson<String>(json['shoppingListItemId']),
+      name: serializer.fromJson<String>(json['name']),
+      userId: serializer.fromJson<String?>(json['userId']),
+      amount: serializer.fromJson<double?>(json['amount']),
+      unit: serializer.fromJson<String?>(json['unit']),
+      status: serializer.fromJson<String>(json['status']),
+      retryCount: serializer.fromJson<int>(json['retryCount']),
+      error: serializer.fromJson<String?>(json['error']),
+      createdAt: serializer.fromJson<int?>(json['createdAt']),
+      updatedAt: serializer.fromJson<int?>(json['updatedAt']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<String>(id),
+      'shoppingListItemId': serializer.toJson<String>(shoppingListItemId),
+      'name': serializer.toJson<String>(name),
+      'userId': serializer.toJson<String?>(userId),
+      'amount': serializer.toJson<double?>(amount),
+      'unit': serializer.toJson<String?>(unit),
+      'status': serializer.toJson<String>(status),
+      'retryCount': serializer.toJson<int>(retryCount),
+      'error': serializer.toJson<String?>(error),
+      'createdAt': serializer.toJson<int?>(createdAt),
+      'updatedAt': serializer.toJson<int?>(updatedAt),
+    };
+  }
+
+  ShoppingListItemTermQueueEntry copyWith(
+          {String? id,
+          String? shoppingListItemId,
+          String? name,
+          Value<String?> userId = const Value.absent(),
+          Value<double?> amount = const Value.absent(),
+          Value<String?> unit = const Value.absent(),
+          String? status,
+          int? retryCount,
+          Value<String?> error = const Value.absent(),
+          Value<int?> createdAt = const Value.absent(),
+          Value<int?> updatedAt = const Value.absent()}) =>
+      ShoppingListItemTermQueueEntry(
+        id: id ?? this.id,
+        shoppingListItemId: shoppingListItemId ?? this.shoppingListItemId,
+        name: name ?? this.name,
+        userId: userId.present ? userId.value : this.userId,
+        amount: amount.present ? amount.value : this.amount,
+        unit: unit.present ? unit.value : this.unit,
+        status: status ?? this.status,
+        retryCount: retryCount ?? this.retryCount,
+        error: error.present ? error.value : this.error,
+        createdAt: createdAt.present ? createdAt.value : this.createdAt,
+        updatedAt: updatedAt.present ? updatedAt.value : this.updatedAt,
+      );
+  ShoppingListItemTermQueueEntry copyWithCompanion(
+      ShoppingListItemTermQueuesCompanion data) {
+    return ShoppingListItemTermQueueEntry(
+      id: data.id.present ? data.id.value : this.id,
+      shoppingListItemId: data.shoppingListItemId.present
+          ? data.shoppingListItemId.value
+          : this.shoppingListItemId,
+      name: data.name.present ? data.name.value : this.name,
+      userId: data.userId.present ? data.userId.value : this.userId,
+      amount: data.amount.present ? data.amount.value : this.amount,
+      unit: data.unit.present ? data.unit.value : this.unit,
+      status: data.status.present ? data.status.value : this.status,
+      retryCount:
+          data.retryCount.present ? data.retryCount.value : this.retryCount,
+      error: data.error.present ? data.error.value : this.error,
+      createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
+      updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('ShoppingListItemTermQueueEntry(')
+          ..write('id: $id, ')
+          ..write('shoppingListItemId: $shoppingListItemId, ')
+          ..write('name: $name, ')
+          ..write('userId: $userId, ')
+          ..write('amount: $amount, ')
+          ..write('unit: $unit, ')
+          ..write('status: $status, ')
+          ..write('retryCount: $retryCount, ')
+          ..write('error: $error, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('updatedAt: $updatedAt')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(id, shoppingListItemId, name, userId, amount,
+      unit, status, retryCount, error, createdAt, updatedAt);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is ShoppingListItemTermQueueEntry &&
+          other.id == this.id &&
+          other.shoppingListItemId == this.shoppingListItemId &&
+          other.name == this.name &&
+          other.userId == this.userId &&
+          other.amount == this.amount &&
+          other.unit == this.unit &&
+          other.status == this.status &&
+          other.retryCount == this.retryCount &&
+          other.error == this.error &&
+          other.createdAt == this.createdAt &&
+          other.updatedAt == this.updatedAt);
+}
+
+class ShoppingListItemTermQueuesCompanion
+    extends UpdateCompanion<ShoppingListItemTermQueueEntry> {
+  final Value<String> id;
+  final Value<String> shoppingListItemId;
+  final Value<String> name;
+  final Value<String?> userId;
+  final Value<double?> amount;
+  final Value<String?> unit;
+  final Value<String> status;
+  final Value<int> retryCount;
+  final Value<String?> error;
+  final Value<int?> createdAt;
+  final Value<int?> updatedAt;
+  final Value<int> rowid;
+  const ShoppingListItemTermQueuesCompanion({
+    this.id = const Value.absent(),
+    this.shoppingListItemId = const Value.absent(),
+    this.name = const Value.absent(),
+    this.userId = const Value.absent(),
+    this.amount = const Value.absent(),
+    this.unit = const Value.absent(),
+    this.status = const Value.absent(),
+    this.retryCount = const Value.absent(),
+    this.error = const Value.absent(),
+    this.createdAt = const Value.absent(),
+    this.updatedAt = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  ShoppingListItemTermQueuesCompanion.insert({
+    this.id = const Value.absent(),
+    required String shoppingListItemId,
+    required String name,
+    this.userId = const Value.absent(),
+    this.amount = const Value.absent(),
+    this.unit = const Value.absent(),
+    this.status = const Value.absent(),
+    this.retryCount = const Value.absent(),
+    this.error = const Value.absent(),
+    this.createdAt = const Value.absent(),
+    this.updatedAt = const Value.absent(),
+    this.rowid = const Value.absent(),
+  })  : shoppingListItemId = Value(shoppingListItemId),
+        name = Value(name);
+  static Insertable<ShoppingListItemTermQueueEntry> custom({
+    Expression<String>? id,
+    Expression<String>? shoppingListItemId,
+    Expression<String>? name,
+    Expression<String>? userId,
+    Expression<double>? amount,
+    Expression<String>? unit,
+    Expression<String>? status,
+    Expression<int>? retryCount,
+    Expression<String>? error,
+    Expression<int>? createdAt,
+    Expression<int>? updatedAt,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (shoppingListItemId != null)
+        'shopping_list_item_id': shoppingListItemId,
+      if (name != null) 'name': name,
+      if (userId != null) 'user_id': userId,
+      if (amount != null) 'amount': amount,
+      if (unit != null) 'unit': unit,
+      if (status != null) 'status': status,
+      if (retryCount != null) 'retry_count': retryCount,
+      if (error != null) 'error': error,
+      if (createdAt != null) 'created_at': createdAt,
+      if (updatedAt != null) 'updated_at': updatedAt,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  ShoppingListItemTermQueuesCompanion copyWith(
+      {Value<String>? id,
+      Value<String>? shoppingListItemId,
+      Value<String>? name,
+      Value<String?>? userId,
+      Value<double?>? amount,
+      Value<String?>? unit,
+      Value<String>? status,
+      Value<int>? retryCount,
+      Value<String?>? error,
+      Value<int?>? createdAt,
+      Value<int?>? updatedAt,
+      Value<int>? rowid}) {
+    return ShoppingListItemTermQueuesCompanion(
+      id: id ?? this.id,
+      shoppingListItemId: shoppingListItemId ?? this.shoppingListItemId,
+      name: name ?? this.name,
+      userId: userId ?? this.userId,
+      amount: amount ?? this.amount,
+      unit: unit ?? this.unit,
+      status: status ?? this.status,
+      retryCount: retryCount ?? this.retryCount,
+      error: error ?? this.error,
+      createdAt: createdAt ?? this.createdAt,
+      updatedAt: updatedAt ?? this.updatedAt,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<String>(id.value);
+    }
+    if (shoppingListItemId.present) {
+      map['shopping_list_item_id'] = Variable<String>(shoppingListItemId.value);
+    }
+    if (name.present) {
+      map['name'] = Variable<String>(name.value);
+    }
+    if (userId.present) {
+      map['user_id'] = Variable<String>(userId.value);
+    }
+    if (amount.present) {
+      map['amount'] = Variable<double>(amount.value);
+    }
+    if (unit.present) {
+      map['unit'] = Variable<String>(unit.value);
+    }
+    if (status.present) {
+      map['status'] = Variable<String>(status.value);
+    }
+    if (retryCount.present) {
+      map['retry_count'] = Variable<int>(retryCount.value);
+    }
+    if (error.present) {
+      map['error'] = Variable<String>(error.value);
+    }
+    if (createdAt.present) {
+      map['created_at'] = Variable<int>(createdAt.value);
+    }
+    if (updatedAt.present) {
+      map['updated_at'] = Variable<int>(updatedAt.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('ShoppingListItemTermQueuesCompanion(')
+          ..write('id: $id, ')
+          ..write('shoppingListItemId: $shoppingListItemId, ')
+          ..write('name: $name, ')
+          ..write('userId: $userId, ')
+          ..write('amount: $amount, ')
+          ..write('unit: $unit, ')
+          ..write('status: $status, ')
+          ..write('retryCount: $retryCount, ')
+          ..write('error: $error, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
 class $CooksTable extends Cooks with TableInfo<$CooksTable, CookEntry> {
   @override
   final GeneratedDatabase attachedDatabase;
@@ -5259,22 +5810,26 @@ class $ShoppingListItemsTable extends ShoppingListItems
       const VerificationMeta('shoppingListId');
   @override
   late final GeneratedColumn<String> shoppingListId = GeneratedColumn<String>(
-      'shopping_list_id', aliasedName, false,
-      type: DriftSqlType.string, requiredDuringInsert: true);
+      'shopping_list_id', aliasedName, true,
+      type: DriftSqlType.string, requiredDuringInsert: false);
   static const VerificationMeta _nameMeta = const VerificationMeta('name');
   @override
   late final GeneratedColumn<String> name = GeneratedColumn<String>(
       'name', aliasedName, false,
       type: DriftSqlType.string, requiredDuringInsert: true);
-  static const VerificationMeta _normalizedTermsMeta =
-      const VerificationMeta('normalizedTerms');
+  static const VerificationMeta _termsMeta = const VerificationMeta('terms');
   @override
-  late final GeneratedColumnWithTypeConverter<List<String>?, String>
-      normalizedTerms = GeneratedColumn<String>(
-              'normalized_terms', aliasedName, true,
+  late final GeneratedColumnWithTypeConverter<List<String>?, String> terms =
+      GeneratedColumn<String>('terms', aliasedName, true,
               type: DriftSqlType.string, requiredDuringInsert: false)
           .withConverter<List<String>?>(
-              $ShoppingListItemsTable.$converternormalizedTermsn);
+              $ShoppingListItemsTable.$convertertermsn);
+  static const VerificationMeta _categoryMeta =
+      const VerificationMeta('category');
+  @override
+  late final GeneratedColumn<String> category = GeneratedColumn<String>(
+      'category', aliasedName, true,
+      type: DriftSqlType.string, requiredDuringInsert: false);
   static const VerificationMeta _sourceRecipeIdMeta =
       const VerificationMeta('sourceRecipeId');
   @override
@@ -5334,7 +5889,8 @@ class $ShoppingListItemsTable extends ShoppingListItems
         id,
         shoppingListId,
         name,
-        normalizedTerms,
+        terms,
+        category,
         sourceRecipeId,
         amount,
         unit,
@@ -5364,8 +5920,6 @@ class $ShoppingListItemsTable extends ShoppingListItems
           _shoppingListIdMeta,
           shoppingListId.isAcceptableOrUnknown(
               data['shopping_list_id']!, _shoppingListIdMeta));
-    } else if (isInserting) {
-      context.missing(_shoppingListIdMeta);
     }
     if (data.containsKey('name')) {
       context.handle(
@@ -5373,7 +5927,11 @@ class $ShoppingListItemsTable extends ShoppingListItems
     } else if (isInserting) {
       context.missing(_nameMeta);
     }
-    context.handle(_normalizedTermsMeta, const VerificationResult.success());
+    context.handle(_termsMeta, const VerificationResult.success());
+    if (data.containsKey('category')) {
+      context.handle(_categoryMeta,
+          category.isAcceptableOrUnknown(data['category']!, _categoryMeta));
+    }
     if (data.containsKey('source_recipe_id')) {
       context.handle(
           _sourceRecipeIdMeta,
@@ -5426,12 +5984,14 @@ class $ShoppingListItemsTable extends ShoppingListItems
       id: attachedDatabase.typeMapping
           .read(DriftSqlType.string, data['${effectivePrefix}id'])!,
       shoppingListId: attachedDatabase.typeMapping.read(
-          DriftSqlType.string, data['${effectivePrefix}shopping_list_id'])!,
+          DriftSqlType.string, data['${effectivePrefix}shopping_list_id']),
       name: attachedDatabase.typeMapping
           .read(DriftSqlType.string, data['${effectivePrefix}name'])!,
-      normalizedTerms: $ShoppingListItemsTable.$converternormalizedTermsn
-          .fromSql(attachedDatabase.typeMapping.read(
-              DriftSqlType.string, data['${effectivePrefix}normalized_terms'])),
+      terms: $ShoppingListItemsTable.$convertertermsn.fromSql(attachedDatabase
+          .typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}terms'])),
+      category: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}category']),
       sourceRecipeId: attachedDatabase.typeMapping.read(
           DriftSqlType.string, data['${effectivePrefix}source_recipe_id']),
       amount: attachedDatabase.typeMapping
@@ -5458,18 +6018,19 @@ class $ShoppingListItemsTable extends ShoppingListItems
     return $ShoppingListItemsTable(attachedDatabase, alias);
   }
 
-  static TypeConverter<List<String>, String> $converternormalizedTerms =
+  static TypeConverter<List<String>, String> $converterterms =
       StringListTypeConverter();
-  static TypeConverter<List<String>?, String?> $converternormalizedTermsn =
-      NullAwareTypeConverter.wrap($converternormalizedTerms);
+  static TypeConverter<List<String>?, String?> $convertertermsn =
+      NullAwareTypeConverter.wrap($converterterms);
 }
 
 class ShoppingListItemEntry extends DataClass
     implements Insertable<ShoppingListItemEntry> {
   final String id;
-  final String shoppingListId;
+  final String? shoppingListId;
   final String name;
-  final List<String>? normalizedTerms;
+  final List<String>? terms;
+  final String? category;
   final String? sourceRecipeId;
   final double? amount;
   final String? unit;
@@ -5481,9 +6042,10 @@ class ShoppingListItemEntry extends DataClass
   final int? deletedAt;
   const ShoppingListItemEntry(
       {required this.id,
-      required this.shoppingListId,
+      this.shoppingListId,
       required this.name,
-      this.normalizedTerms,
+      this.terms,
+      this.category,
       this.sourceRecipeId,
       this.amount,
       this.unit,
@@ -5497,12 +6059,16 @@ class ShoppingListItemEntry extends DataClass
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
     map['id'] = Variable<String>(id);
-    map['shopping_list_id'] = Variable<String>(shoppingListId);
+    if (!nullToAbsent || shoppingListId != null) {
+      map['shopping_list_id'] = Variable<String>(shoppingListId);
+    }
     map['name'] = Variable<String>(name);
-    if (!nullToAbsent || normalizedTerms != null) {
-      map['normalized_terms'] = Variable<String>($ShoppingListItemsTable
-          .$converternormalizedTermsn
-          .toSql(normalizedTerms));
+    if (!nullToAbsent || terms != null) {
+      map['terms'] = Variable<String>(
+          $ShoppingListItemsTable.$convertertermsn.toSql(terms));
+    }
+    if (!nullToAbsent || category != null) {
+      map['category'] = Variable<String>(category);
     }
     if (!nullToAbsent || sourceRecipeId != null) {
       map['source_recipe_id'] = Variable<String>(sourceRecipeId);
@@ -5535,11 +6101,15 @@ class ShoppingListItemEntry extends DataClass
   ShoppingListItemsCompanion toCompanion(bool nullToAbsent) {
     return ShoppingListItemsCompanion(
       id: Value(id),
-      shoppingListId: Value(shoppingListId),
-      name: Value(name),
-      normalizedTerms: normalizedTerms == null && nullToAbsent
+      shoppingListId: shoppingListId == null && nullToAbsent
           ? const Value.absent()
-          : Value(normalizedTerms),
+          : Value(shoppingListId),
+      name: Value(name),
+      terms:
+          terms == null && nullToAbsent ? const Value.absent() : Value(terms),
+      category: category == null && nullToAbsent
+          ? const Value.absent()
+          : Value(category),
       sourceRecipeId: sourceRecipeId == null && nullToAbsent
           ? const Value.absent()
           : Value(sourceRecipeId),
@@ -5569,10 +6139,10 @@ class ShoppingListItemEntry extends DataClass
     serializer ??= driftRuntimeOptions.defaultSerializer;
     return ShoppingListItemEntry(
       id: serializer.fromJson<String>(json['id']),
-      shoppingListId: serializer.fromJson<String>(json['shoppingListId']),
+      shoppingListId: serializer.fromJson<String?>(json['shoppingListId']),
       name: serializer.fromJson<String>(json['name']),
-      normalizedTerms:
-          serializer.fromJson<List<String>?>(json['normalizedTerms']),
+      terms: serializer.fromJson<List<String>?>(json['terms']),
+      category: serializer.fromJson<String?>(json['category']),
       sourceRecipeId: serializer.fromJson<String?>(json['sourceRecipeId']),
       amount: serializer.fromJson<double?>(json['amount']),
       unit: serializer.fromJson<String?>(json['unit']),
@@ -5589,9 +6159,10 @@ class ShoppingListItemEntry extends DataClass
     serializer ??= driftRuntimeOptions.defaultSerializer;
     return <String, dynamic>{
       'id': serializer.toJson<String>(id),
-      'shoppingListId': serializer.toJson<String>(shoppingListId),
+      'shoppingListId': serializer.toJson<String?>(shoppingListId),
       'name': serializer.toJson<String>(name),
-      'normalizedTerms': serializer.toJson<List<String>?>(normalizedTerms),
+      'terms': serializer.toJson<List<String>?>(terms),
+      'category': serializer.toJson<String?>(category),
       'sourceRecipeId': serializer.toJson<String?>(sourceRecipeId),
       'amount': serializer.toJson<double?>(amount),
       'unit': serializer.toJson<String?>(unit),
@@ -5606,9 +6177,10 @@ class ShoppingListItemEntry extends DataClass
 
   ShoppingListItemEntry copyWith(
           {String? id,
-          String? shoppingListId,
+          Value<String?> shoppingListId = const Value.absent(),
           String? name,
-          Value<List<String>?> normalizedTerms = const Value.absent(),
+          Value<List<String>?> terms = const Value.absent(),
+          Value<String?> category = const Value.absent(),
           Value<String?> sourceRecipeId = const Value.absent(),
           Value<double?> amount = const Value.absent(),
           Value<String?> unit = const Value.absent(),
@@ -5620,11 +6192,11 @@ class ShoppingListItemEntry extends DataClass
           Value<int?> deletedAt = const Value.absent()}) =>
       ShoppingListItemEntry(
         id: id ?? this.id,
-        shoppingListId: shoppingListId ?? this.shoppingListId,
+        shoppingListId:
+            shoppingListId.present ? shoppingListId.value : this.shoppingListId,
         name: name ?? this.name,
-        normalizedTerms: normalizedTerms.present
-            ? normalizedTerms.value
-            : this.normalizedTerms,
+        terms: terms.present ? terms.value : this.terms,
+        category: category.present ? category.value : this.category,
         sourceRecipeId:
             sourceRecipeId.present ? sourceRecipeId.value : this.sourceRecipeId,
         amount: amount.present ? amount.value : this.amount,
@@ -5643,9 +6215,8 @@ class ShoppingListItemEntry extends DataClass
           ? data.shoppingListId.value
           : this.shoppingListId,
       name: data.name.present ? data.name.value : this.name,
-      normalizedTerms: data.normalizedTerms.present
-          ? data.normalizedTerms.value
-          : this.normalizedTerms,
+      terms: data.terms.present ? data.terms.value : this.terms,
+      category: data.category.present ? data.category.value : this.category,
       sourceRecipeId: data.sourceRecipeId.present
           ? data.sourceRecipeId.value
           : this.sourceRecipeId,
@@ -5667,7 +6238,8 @@ class ShoppingListItemEntry extends DataClass
           ..write('id: $id, ')
           ..write('shoppingListId: $shoppingListId, ')
           ..write('name: $name, ')
-          ..write('normalizedTerms: $normalizedTerms, ')
+          ..write('terms: $terms, ')
+          ..write('category: $category, ')
           ..write('sourceRecipeId: $sourceRecipeId, ')
           ..write('amount: $amount, ')
           ..write('unit: $unit, ')
@@ -5686,7 +6258,8 @@ class ShoppingListItemEntry extends DataClass
       id,
       shoppingListId,
       name,
-      normalizedTerms,
+      terms,
+      category,
       sourceRecipeId,
       amount,
       unit,
@@ -5703,7 +6276,8 @@ class ShoppingListItemEntry extends DataClass
           other.id == this.id &&
           other.shoppingListId == this.shoppingListId &&
           other.name == this.name &&
-          other.normalizedTerms == this.normalizedTerms &&
+          other.terms == this.terms &&
+          other.category == this.category &&
           other.sourceRecipeId == this.sourceRecipeId &&
           other.amount == this.amount &&
           other.unit == this.unit &&
@@ -5718,9 +6292,10 @@ class ShoppingListItemEntry extends DataClass
 class ShoppingListItemsCompanion
     extends UpdateCompanion<ShoppingListItemEntry> {
   final Value<String> id;
-  final Value<String> shoppingListId;
+  final Value<String?> shoppingListId;
   final Value<String> name;
-  final Value<List<String>?> normalizedTerms;
+  final Value<List<String>?> terms;
+  final Value<String?> category;
   final Value<String?> sourceRecipeId;
   final Value<double?> amount;
   final Value<String?> unit;
@@ -5735,7 +6310,8 @@ class ShoppingListItemsCompanion
     this.id = const Value.absent(),
     this.shoppingListId = const Value.absent(),
     this.name = const Value.absent(),
-    this.normalizedTerms = const Value.absent(),
+    this.terms = const Value.absent(),
+    this.category = const Value.absent(),
     this.sourceRecipeId = const Value.absent(),
     this.amount = const Value.absent(),
     this.unit = const Value.absent(),
@@ -5749,9 +6325,10 @@ class ShoppingListItemsCompanion
   });
   ShoppingListItemsCompanion.insert({
     this.id = const Value.absent(),
-    required String shoppingListId,
+    this.shoppingListId = const Value.absent(),
     required String name,
-    this.normalizedTerms = const Value.absent(),
+    this.terms = const Value.absent(),
+    this.category = const Value.absent(),
     this.sourceRecipeId = const Value.absent(),
     this.amount = const Value.absent(),
     this.unit = const Value.absent(),
@@ -5762,13 +6339,13 @@ class ShoppingListItemsCompanion
     this.updatedAt = const Value.absent(),
     this.deletedAt = const Value.absent(),
     this.rowid = const Value.absent(),
-  })  : shoppingListId = Value(shoppingListId),
-        name = Value(name);
+  }) : name = Value(name);
   static Insertable<ShoppingListItemEntry> custom({
     Expression<String>? id,
     Expression<String>? shoppingListId,
     Expression<String>? name,
-    Expression<String>? normalizedTerms,
+    Expression<String>? terms,
+    Expression<String>? category,
     Expression<String>? sourceRecipeId,
     Expression<double>? amount,
     Expression<String>? unit,
@@ -5784,7 +6361,8 @@ class ShoppingListItemsCompanion
       if (id != null) 'id': id,
       if (shoppingListId != null) 'shopping_list_id': shoppingListId,
       if (name != null) 'name': name,
-      if (normalizedTerms != null) 'normalized_terms': normalizedTerms,
+      if (terms != null) 'terms': terms,
+      if (category != null) 'category': category,
       if (sourceRecipeId != null) 'source_recipe_id': sourceRecipeId,
       if (amount != null) 'amount': amount,
       if (unit != null) 'unit': unit,
@@ -5800,9 +6378,10 @@ class ShoppingListItemsCompanion
 
   ShoppingListItemsCompanion copyWith(
       {Value<String>? id,
-      Value<String>? shoppingListId,
+      Value<String?>? shoppingListId,
       Value<String>? name,
-      Value<List<String>?>? normalizedTerms,
+      Value<List<String>?>? terms,
+      Value<String?>? category,
       Value<String?>? sourceRecipeId,
       Value<double?>? amount,
       Value<String?>? unit,
@@ -5817,7 +6396,8 @@ class ShoppingListItemsCompanion
       id: id ?? this.id,
       shoppingListId: shoppingListId ?? this.shoppingListId,
       name: name ?? this.name,
-      normalizedTerms: normalizedTerms ?? this.normalizedTerms,
+      terms: terms ?? this.terms,
+      category: category ?? this.category,
       sourceRecipeId: sourceRecipeId ?? this.sourceRecipeId,
       amount: amount ?? this.amount,
       unit: unit ?? this.unit,
@@ -5843,10 +6423,12 @@ class ShoppingListItemsCompanion
     if (name.present) {
       map['name'] = Variable<String>(name.value);
     }
-    if (normalizedTerms.present) {
-      map['normalized_terms'] = Variable<String>($ShoppingListItemsTable
-          .$converternormalizedTermsn
-          .toSql(normalizedTerms.value));
+    if (terms.present) {
+      map['terms'] = Variable<String>(
+          $ShoppingListItemsTable.$convertertermsn.toSql(terms.value));
+    }
+    if (category.present) {
+      map['category'] = Variable<String>(category.value);
     }
     if (sourceRecipeId.present) {
       map['source_recipe_id'] = Variable<String>(sourceRecipeId.value);
@@ -5887,7 +6469,8 @@ class ShoppingListItemsCompanion
           ..write('id: $id, ')
           ..write('shoppingListId: $shoppingListId, ')
           ..write('name: $name, ')
-          ..write('normalizedTerms: $normalizedTerms, ')
+          ..write('terms: $terms, ')
+          ..write('category: $category, ')
           ..write('sourceRecipeId: $sourceRecipeId, ')
           ..write('amount: $amount, ')
           ..write('unit: $unit, ')
@@ -6913,6 +7496,8 @@ abstract class _$AppDatabase extends GeneratedDatabase {
       $IngredientTermQueuesTable(this);
   late final $PantryItemTermQueuesTable pantryItemTermQueues =
       $PantryItemTermQueuesTable(this);
+  late final $ShoppingListItemTermQueuesTable shoppingListItemTermQueues =
+      $ShoppingListItemTermQueuesTable(this);
   late final $CooksTable cooks = $CooksTable(this);
   late final $PantryItemsTable pantryItems = $PantryItemsTable(this);
   late final $IngredientTermOverridesTable ingredientTermOverrides =
@@ -6934,6 +7519,7 @@ abstract class _$AppDatabase extends GeneratedDatabase {
         uploadQueues,
         ingredientTermQueues,
         pantryItemTermQueues,
+        shoppingListItemTermQueues,
         cooks,
         pantryItems,
         ingredientTermOverrides,
@@ -8675,6 +9261,278 @@ typedef $$PantryItemTermQueuesTableProcessedTableManager
         ),
         PantryItemTermQueueEntry,
         PrefetchHooks Function()>;
+typedef $$ShoppingListItemTermQueuesTableCreateCompanionBuilder
+    = ShoppingListItemTermQueuesCompanion Function({
+  Value<String> id,
+  required String shoppingListItemId,
+  required String name,
+  Value<String?> userId,
+  Value<double?> amount,
+  Value<String?> unit,
+  Value<String> status,
+  Value<int> retryCount,
+  Value<String?> error,
+  Value<int?> createdAt,
+  Value<int?> updatedAt,
+  Value<int> rowid,
+});
+typedef $$ShoppingListItemTermQueuesTableUpdateCompanionBuilder
+    = ShoppingListItemTermQueuesCompanion Function({
+  Value<String> id,
+  Value<String> shoppingListItemId,
+  Value<String> name,
+  Value<String?> userId,
+  Value<double?> amount,
+  Value<String?> unit,
+  Value<String> status,
+  Value<int> retryCount,
+  Value<String?> error,
+  Value<int?> createdAt,
+  Value<int?> updatedAt,
+  Value<int> rowid,
+});
+
+class $$ShoppingListItemTermQueuesTableFilterComposer
+    extends Composer<_$AppDatabase, $ShoppingListItemTermQueuesTable> {
+  $$ShoppingListItemTermQueuesTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get id => $composableBuilder(
+      column: $table.id, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get shoppingListItemId => $composableBuilder(
+      column: $table.shoppingListItemId,
+      builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get name => $composableBuilder(
+      column: $table.name, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get userId => $composableBuilder(
+      column: $table.userId, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<double> get amount => $composableBuilder(
+      column: $table.amount, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get unit => $composableBuilder(
+      column: $table.unit, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get status => $composableBuilder(
+      column: $table.status, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<int> get retryCount => $composableBuilder(
+      column: $table.retryCount, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get error => $composableBuilder(
+      column: $table.error, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<int> get createdAt => $composableBuilder(
+      column: $table.createdAt, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<int> get updatedAt => $composableBuilder(
+      column: $table.updatedAt, builder: (column) => ColumnFilters(column));
+}
+
+class $$ShoppingListItemTermQueuesTableOrderingComposer
+    extends Composer<_$AppDatabase, $ShoppingListItemTermQueuesTable> {
+  $$ShoppingListItemTermQueuesTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get id => $composableBuilder(
+      column: $table.id, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get shoppingListItemId => $composableBuilder(
+      column: $table.shoppingListItemId,
+      builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get name => $composableBuilder(
+      column: $table.name, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get userId => $composableBuilder(
+      column: $table.userId, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<double> get amount => $composableBuilder(
+      column: $table.amount, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get unit => $composableBuilder(
+      column: $table.unit, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get status => $composableBuilder(
+      column: $table.status, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<int> get retryCount => $composableBuilder(
+      column: $table.retryCount, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get error => $composableBuilder(
+      column: $table.error, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<int> get createdAt => $composableBuilder(
+      column: $table.createdAt, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<int> get updatedAt => $composableBuilder(
+      column: $table.updatedAt, builder: (column) => ColumnOrderings(column));
+}
+
+class $$ShoppingListItemTermQueuesTableAnnotationComposer
+    extends Composer<_$AppDatabase, $ShoppingListItemTermQueuesTable> {
+  $$ShoppingListItemTermQueuesTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get shoppingListItemId => $composableBuilder(
+      column: $table.shoppingListItemId, builder: (column) => column);
+
+  GeneratedColumn<String> get name =>
+      $composableBuilder(column: $table.name, builder: (column) => column);
+
+  GeneratedColumn<String> get userId =>
+      $composableBuilder(column: $table.userId, builder: (column) => column);
+
+  GeneratedColumn<double> get amount =>
+      $composableBuilder(column: $table.amount, builder: (column) => column);
+
+  GeneratedColumn<String> get unit =>
+      $composableBuilder(column: $table.unit, builder: (column) => column);
+
+  GeneratedColumn<String> get status =>
+      $composableBuilder(column: $table.status, builder: (column) => column);
+
+  GeneratedColumn<int> get retryCount => $composableBuilder(
+      column: $table.retryCount, builder: (column) => column);
+
+  GeneratedColumn<String> get error =>
+      $composableBuilder(column: $table.error, builder: (column) => column);
+
+  GeneratedColumn<int> get createdAt =>
+      $composableBuilder(column: $table.createdAt, builder: (column) => column);
+
+  GeneratedColumn<int> get updatedAt =>
+      $composableBuilder(column: $table.updatedAt, builder: (column) => column);
+}
+
+class $$ShoppingListItemTermQueuesTableTableManager extends RootTableManager<
+    _$AppDatabase,
+    $ShoppingListItemTermQueuesTable,
+    ShoppingListItemTermQueueEntry,
+    $$ShoppingListItemTermQueuesTableFilterComposer,
+    $$ShoppingListItemTermQueuesTableOrderingComposer,
+    $$ShoppingListItemTermQueuesTableAnnotationComposer,
+    $$ShoppingListItemTermQueuesTableCreateCompanionBuilder,
+    $$ShoppingListItemTermQueuesTableUpdateCompanionBuilder,
+    (
+      ShoppingListItemTermQueueEntry,
+      BaseReferences<_$AppDatabase, $ShoppingListItemTermQueuesTable,
+          ShoppingListItemTermQueueEntry>
+    ),
+    ShoppingListItemTermQueueEntry,
+    PrefetchHooks Function()> {
+  $$ShoppingListItemTermQueuesTableTableManager(
+      _$AppDatabase db, $ShoppingListItemTermQueuesTable table)
+      : super(TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$ShoppingListItemTermQueuesTableFilterComposer(
+                  $db: db, $table: table),
+          createOrderingComposer: () =>
+              $$ShoppingListItemTermQueuesTableOrderingComposer(
+                  $db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$ShoppingListItemTermQueuesTableAnnotationComposer(
+                  $db: db, $table: table),
+          updateCompanionCallback: ({
+            Value<String> id = const Value.absent(),
+            Value<String> shoppingListItemId = const Value.absent(),
+            Value<String> name = const Value.absent(),
+            Value<String?> userId = const Value.absent(),
+            Value<double?> amount = const Value.absent(),
+            Value<String?> unit = const Value.absent(),
+            Value<String> status = const Value.absent(),
+            Value<int> retryCount = const Value.absent(),
+            Value<String?> error = const Value.absent(),
+            Value<int?> createdAt = const Value.absent(),
+            Value<int?> updatedAt = const Value.absent(),
+            Value<int> rowid = const Value.absent(),
+          }) =>
+              ShoppingListItemTermQueuesCompanion(
+            id: id,
+            shoppingListItemId: shoppingListItemId,
+            name: name,
+            userId: userId,
+            amount: amount,
+            unit: unit,
+            status: status,
+            retryCount: retryCount,
+            error: error,
+            createdAt: createdAt,
+            updatedAt: updatedAt,
+            rowid: rowid,
+          ),
+          createCompanionCallback: ({
+            Value<String> id = const Value.absent(),
+            required String shoppingListItemId,
+            required String name,
+            Value<String?> userId = const Value.absent(),
+            Value<double?> amount = const Value.absent(),
+            Value<String?> unit = const Value.absent(),
+            Value<String> status = const Value.absent(),
+            Value<int> retryCount = const Value.absent(),
+            Value<String?> error = const Value.absent(),
+            Value<int?> createdAt = const Value.absent(),
+            Value<int?> updatedAt = const Value.absent(),
+            Value<int> rowid = const Value.absent(),
+          }) =>
+              ShoppingListItemTermQueuesCompanion.insert(
+            id: id,
+            shoppingListItemId: shoppingListItemId,
+            name: name,
+            userId: userId,
+            amount: amount,
+            unit: unit,
+            status: status,
+            retryCount: retryCount,
+            error: error,
+            createdAt: createdAt,
+            updatedAt: updatedAt,
+            rowid: rowid,
+          ),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .toList(),
+          prefetchHooksCallback: null,
+        ));
+}
+
+typedef $$ShoppingListItemTermQueuesTableProcessedTableManager
+    = ProcessedTableManager<
+        _$AppDatabase,
+        $ShoppingListItemTermQueuesTable,
+        ShoppingListItemTermQueueEntry,
+        $$ShoppingListItemTermQueuesTableFilterComposer,
+        $$ShoppingListItemTermQueuesTableOrderingComposer,
+        $$ShoppingListItemTermQueuesTableAnnotationComposer,
+        $$ShoppingListItemTermQueuesTableCreateCompanionBuilder,
+        $$ShoppingListItemTermQueuesTableUpdateCompanionBuilder,
+        (
+          ShoppingListItemTermQueueEntry,
+          BaseReferences<_$AppDatabase, $ShoppingListItemTermQueuesTable,
+              ShoppingListItemTermQueueEntry>
+        ),
+        ShoppingListItemTermQueueEntry,
+        PrefetchHooks Function()>;
 typedef $$CooksTableCreateCompanionBuilder = CooksCompanion Function({
   Value<String> id,
   required String recipeId,
@@ -9523,9 +10381,10 @@ typedef $$IngredientTermOverridesTableProcessedTableManager
 typedef $$ShoppingListItemsTableCreateCompanionBuilder
     = ShoppingListItemsCompanion Function({
   Value<String> id,
-  required String shoppingListId,
+  Value<String?> shoppingListId,
   required String name,
-  Value<List<String>?> normalizedTerms,
+  Value<List<String>?> terms,
+  Value<String?> category,
   Value<String?> sourceRecipeId,
   Value<double?> amount,
   Value<String?> unit,
@@ -9540,9 +10399,10 @@ typedef $$ShoppingListItemsTableCreateCompanionBuilder
 typedef $$ShoppingListItemsTableUpdateCompanionBuilder
     = ShoppingListItemsCompanion Function({
   Value<String> id,
-  Value<String> shoppingListId,
+  Value<String?> shoppingListId,
   Value<String> name,
-  Value<List<String>?> normalizedTerms,
+  Value<List<String>?> terms,
+  Value<String?> category,
   Value<String?> sourceRecipeId,
   Value<double?> amount,
   Value<String?> unit,
@@ -9575,9 +10435,12 @@ class $$ShoppingListItemsTableFilterComposer
       column: $table.name, builder: (column) => ColumnFilters(column));
 
   ColumnWithTypeConverterFilters<List<String>?, List<String>, String>
-      get normalizedTerms => $composableBuilder(
-          column: $table.normalizedTerms,
+      get terms => $composableBuilder(
+          column: $table.terms,
           builder: (column) => ColumnWithTypeConverterFilters(column));
+
+  ColumnFilters<String> get category => $composableBuilder(
+      column: $table.category, builder: (column) => ColumnFilters(column));
 
   ColumnFilters<String> get sourceRecipeId => $composableBuilder(
       column: $table.sourceRecipeId,
@@ -9627,9 +10490,11 @@ class $$ShoppingListItemsTableOrderingComposer
   ColumnOrderings<String> get name => $composableBuilder(
       column: $table.name, builder: (column) => ColumnOrderings(column));
 
-  ColumnOrderings<String> get normalizedTerms => $composableBuilder(
-      column: $table.normalizedTerms,
-      builder: (column) => ColumnOrderings(column));
+  ColumnOrderings<String> get terms => $composableBuilder(
+      column: $table.terms, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get category => $composableBuilder(
+      column: $table.category, builder: (column) => ColumnOrderings(column));
 
   ColumnOrderings<String> get sourceRecipeId => $composableBuilder(
       column: $table.sourceRecipeId,
@@ -9678,9 +10543,11 @@ class $$ShoppingListItemsTableAnnotationComposer
   GeneratedColumn<String> get name =>
       $composableBuilder(column: $table.name, builder: (column) => column);
 
-  GeneratedColumnWithTypeConverter<List<String>?, String> get normalizedTerms =>
-      $composableBuilder(
-          column: $table.normalizedTerms, builder: (column) => column);
+  GeneratedColumnWithTypeConverter<List<String>?, String> get terms =>
+      $composableBuilder(column: $table.terms, builder: (column) => column);
+
+  GeneratedColumn<String> get category =>
+      $composableBuilder(column: $table.category, builder: (column) => column);
 
   GeneratedColumn<String> get sourceRecipeId => $composableBuilder(
       column: $table.sourceRecipeId, builder: (column) => column);
@@ -9740,9 +10607,10 @@ class $$ShoppingListItemsTableTableManager extends RootTableManager<
                   $db: db, $table: table),
           updateCompanionCallback: ({
             Value<String> id = const Value.absent(),
-            Value<String> shoppingListId = const Value.absent(),
+            Value<String?> shoppingListId = const Value.absent(),
             Value<String> name = const Value.absent(),
-            Value<List<String>?> normalizedTerms = const Value.absent(),
+            Value<List<String>?> terms = const Value.absent(),
+            Value<String?> category = const Value.absent(),
             Value<String?> sourceRecipeId = const Value.absent(),
             Value<double?> amount = const Value.absent(),
             Value<String?> unit = const Value.absent(),
@@ -9758,7 +10626,8 @@ class $$ShoppingListItemsTableTableManager extends RootTableManager<
             id: id,
             shoppingListId: shoppingListId,
             name: name,
-            normalizedTerms: normalizedTerms,
+            terms: terms,
+            category: category,
             sourceRecipeId: sourceRecipeId,
             amount: amount,
             unit: unit,
@@ -9772,9 +10641,10 @@ class $$ShoppingListItemsTableTableManager extends RootTableManager<
           ),
           createCompanionCallback: ({
             Value<String> id = const Value.absent(),
-            required String shoppingListId,
+            Value<String?> shoppingListId = const Value.absent(),
             required String name,
-            Value<List<String>?> normalizedTerms = const Value.absent(),
+            Value<List<String>?> terms = const Value.absent(),
+            Value<String?> category = const Value.absent(),
             Value<String?> sourceRecipeId = const Value.absent(),
             Value<double?> amount = const Value.absent(),
             Value<String?> unit = const Value.absent(),
@@ -9790,7 +10660,8 @@ class $$ShoppingListItemsTableTableManager extends RootTableManager<
             id: id,
             shoppingListId: shoppingListId,
             name: name,
-            normalizedTerms: normalizedTerms,
+            terms: terms,
+            category: category,
             sourceRecipeId: sourceRecipeId,
             amount: amount,
             unit: unit,
@@ -10327,6 +11198,10 @@ class $AppDatabaseManager {
       $$IngredientTermQueuesTableTableManager(_db, _db.ingredientTermQueues);
   $$PantryItemTermQueuesTableTableManager get pantryItemTermQueues =>
       $$PantryItemTermQueuesTableTableManager(_db, _db.pantryItemTermQueues);
+  $$ShoppingListItemTermQueuesTableTableManager
+      get shoppingListItemTermQueues =>
+          $$ShoppingListItemTermQueuesTableTableManager(
+              _db, _db.shoppingListItemTermQueues);
   $$CooksTableTableManager get cooks =>
       $$CooksTableTableManager(_db, _db.cooks);
   $$PantryItemsTableTableManager get pantryItems =>

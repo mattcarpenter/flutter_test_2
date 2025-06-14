@@ -9,16 +9,19 @@ class ShoppingListItems extends Table {
   TextColumn get id => text().clientDefault(() => const Uuid().v4())();
   @override Set<Column> get primaryKey => {id};
 
-  // FK → list
-  TextColumn get shoppingListId => text()();
+  // FK → list (nullable to support default "My Shopping List")
+  TextColumn get shoppingListId => text().nullable()();
 
   // Visible label (what the user sees on the list)
   TextColumn get name => text()();                     // “yellow onion”
 
-  /* Optional normalized terms carried forward
+  /* Optional terms from canonicalization
      (comma‑delimited JSON string list via your StringListTypeConverter). */
-  TextColumn get normalizedTerms =>
+  TextColumn get terms =>
       text().nullable().map(StringListTypeConverter())();
+
+  // Category from canonicalization API
+  TextColumn get category => text().nullable()();
 
   // Traceability back to recipe (optional)
   TextColumn get sourceRecipeId => text().nullable()();

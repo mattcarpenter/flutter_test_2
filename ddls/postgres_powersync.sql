@@ -227,9 +227,10 @@ CREATE INDEX IF NOT EXISTS shopping_lists_household_idx ON public.shopping_lists
 
 CREATE TABLE public.shopping_list_items (
                                             id uuid NOT NULL DEFAULT extensions.uuid_generate_v4(),
-                                            shopping_list_id uuid NOT NULL,
+                                            shopping_list_id uuid NULL,
                                             name text NOT NULL,
-                                            normalized_terms text NULL,
+                                            terms text NULL,
+                                            category text NULL,
                                             source_recipe_id uuid NULL,
                                             amount double precision NULL,
                                             unit text NULL,

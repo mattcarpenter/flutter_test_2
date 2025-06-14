@@ -11,6 +11,7 @@ const recipeFolderAssignmentsTable = 'recipe_folder_assignments';
 const uploadQueuesTable = 'upload_queues';
 const ingredientTermQueuesTable = 'ingredient_term_queues';
 const pantryItemTermQueuesTable = 'pantry_item_term_queues';
+const shoppingListItemTermQueuesTable = 'shopping_list_item_term_queues';
 const cooksTable = 'cooks';
 const pantryItemsTable = 'pantry_items';
 const ingredientTermOverridesTable = 'ingredient_term_overrides';
@@ -44,6 +45,18 @@ Schema schema = const Schema(([
     Column.integer('last_try_timestamp'),
     Column.text('pantry_item_data'),
     Column.text('response_data'),
+  ]),
+  Table.localOnly(shoppingListItemTermQueuesTable, [
+    Column.text('shopping_list_item_id'),
+    Column.text('name'),
+    Column.text('user_id'),
+    Column.real('amount'),
+    Column.text('unit'),
+    Column.text('status'),
+    Column.integer('retry_count'),
+    Column.text('error'),
+    Column.integer('created_at'),
+    Column.integer('updated_at'),
   ]),
   Table(recipeFoldersTable, [
     Column.text('name'),
@@ -147,7 +160,8 @@ Schema schema = const Schema(([
   Table(shoppingListItemsTable, [
     Column.text('shopping_list_id'),
     Column.text('name'),
-    Column.text('normalized_terms'),
+    Column.text('terms'),
+    Column.text('category'),
     Column.text('source_recipe_id'),
     Column.real('amount'),
     Column.text('unit'),
