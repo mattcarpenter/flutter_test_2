@@ -4,7 +4,7 @@ import '../../../../database/models/meal_plan_items.dart';
 import '../../../providers/meal_plan_provider.dart';
 import '../models/meal_plan_drag_data.dart';
 import 'meal_plan_date_header.dart';
-import 'meal_plan_item_with_handle.dart';
+import 'meal_plan_item_lifted.dart';
 
 class MealPlanDateCard extends ConsumerStatefulWidget {
   final DateTime date;
@@ -201,7 +201,7 @@ class _MealPlanDateCardState extends ConsumerState<MealPlanDateCard>
       children: items.asMap().entries.map((entry) {
         final index = entry.key;
         final item = entry.value;
-        return MealPlanItemWithHandle(
+        return MealPlanItemLifted(
           key: ValueKey(item.id),
           item: item,
           dateString: widget.dateString,
