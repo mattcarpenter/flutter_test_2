@@ -49,6 +49,7 @@ dependencies:
   form_builder_extra_fields: ^11.1.0
   form_builder_cupertino_fields:
     path: /Users/matt/repos/form_builder_cupertino_fields
+  drag_and_drop_lists: ^0.4.1
   super_context_menu: ^0.8.24
   flutter_fast_forms: ^18.0.0
   drift_sqlite_async: ^0.2.1

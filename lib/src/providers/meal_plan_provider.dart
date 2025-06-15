@@ -148,6 +148,81 @@ class MealPlanNotifier extends Notifier<void> {
       householdId: householdId,
     );
   }
+
+  // Move item between dates (for cross-date drag and drop)
+  Future<void> moveItemBetweenDates({
+    required String sourceDate,
+    required String targetDate,
+    required MealPlanItem item,
+    required int sourceIndex,
+    required int targetIndex,
+    String? userId,
+    String? householdId,
+  }) async {
+    // Get both meal plans
+    final sourceMealPlan = await _repository.getMealPlanByDate(sourceDate, userId, householdId);
+    final targetMealPlan = await _repository.getMealPlanByDate(targetDate, userId, householdId);
+    
+    // Extract items from source
+    final sourceItems = sourceMealPlan?.data != null 
+        ? List<MealPlanItem>.from(sourceMealPlan!.data as List)
+        : <MealPlanItem>[];
+    
+    // Extract items from target
+    final targetItems = targetMealPlan?.data != null 
+        ? List<MealPlanItem>.from(targetMealPlan!.data as List)
+        : <MealPlanItem>[];
+    
+    // Remove from source if index is valid
+    if (sourceIndex < sourceItems.length) {
+      sourceItems.removeAt(sourceIndex);
+      // Update positions in source
+      for (int i = 0; i < sourceItems.length; i++) {
+        sourceItems[i] = sourceItems[i].copyWith(position: i);
+      }
+    }
+    
+    // Add to target at specified index
+    final newItem = item.copyWith(position: targetIndex);
+    if (targetIndex >= targetItems.length) {
+      targetItems.add(newItem);
+    } else {
+      targetItems.insert(targetIndex, newItem);
+    }
+    
+    // Update positions in target
+    for (int i = 0; i < targetItems.length; i++) {
+      targetItems[i] = targetItems[i].copyWith(position: i);
+    }
+    
+    // Save both meal plans
+    if (sourceItems.isEmpty) {
+      // If source is now empty, clear it
+      await _repository.clearItems(
+        date: sourceDate,
+        userId: userId,
+        householdId: householdId,
+      );
+    } else {
+      await _repository.createOrUpdateMealPlan(
+        date: sourceDate,
+        items: sourceItems,
+        userId: userId,
+        householdId: householdId,
+      );
+    }
+    
+    await _repository.createOrUpdateMealPlan(
+      date: targetDate,
+      items: targetItems,
+      userId: userId,
+      householdId: householdId,
+    );
+    
+    // Invalidate both date providers
+    ref.invalidate(mealPlanByDateStreamProvider(sourceDate));
+    ref.invalidate(mealPlanByDateStreamProvider(targetDate));
+  }
 }
 
 // Helper class for date range queries
