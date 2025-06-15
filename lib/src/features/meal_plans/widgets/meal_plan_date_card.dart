@@ -1,11 +1,14 @@
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
+import '../../../../database/models/meal_plan_items.dart';
 import '../../../providers/meal_plan_provider.dart';
 import 'meal_plan_item_tile.dart';
 import 'meal_plan_context_menu.dart';
+import '../utils/context_menu_utils.dart';
 
-class MealPlanDateCard extends ConsumerWidget {
+class MealPlanDateCard extends ConsumerStatefulWidget {
   final DateTime date;
   final String dateString;
 
@@ -16,8 +19,31 @@ class MealPlanDateCard extends ConsumerWidget {
   });
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final mealPlanAsync = ref.watch(mealPlanByDateStreamProvider(dateString));
+  ConsumerState<MealPlanDateCard> createState() => _MealPlanDateCardState();
+}
+
+class _MealPlanDateCardState extends ConsumerState<MealPlanDateCard> {
+  bool _isDragging = false;
+
+  // Method to handle drag start
+  void _onDragStart() {
+    setState(() {
+      _isDragging = true;
+      // Unfocus any text fields to prevent the leader-follower error
+      FocusScope.of(context).unfocus();
+    });
+  }
+
+  // Method to handle drag end
+  void _onDragEnd() {
+    setState(() {
+      _isDragging = false;
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final mealPlanAsync = ref.watch(mealPlanByDateStreamProvider(widget.dateString));
     
     return Container(
       decoration: BoxDecoration(
@@ -57,16 +83,16 @@ class MealPlanDateCard extends ConsumerWidget {
   }
 
   Widget _buildHeader(BuildContext context, WidgetRef ref) {
-    final isToday = _isToday(date);
-    final isTomorrow = _isTomorrow(date);
+    final isToday = _isToday(widget.date);
+    final isTomorrow = _isTomorrow(widget.date);
     
     String displayText;
     if (isToday) {
-      displayText = 'Today, ${DateFormat('MMM d').format(date)}';
+      displayText = 'Today, ${DateFormat('MMM d').format(widget.date)}';
     } else if (isTomorrow) {
-      displayText = 'Tomorrow, ${DateFormat('MMM d').format(date)}';
+      displayText = 'Tomorrow, ${DateFormat('MMM d').format(widget.date)}';
     } else {
-      displayText = DateFormat('EEEE, MMM d').format(date);
+      displayText = DateFormat('EEEE, MMM d').format(widget.date);
     }
     
     return Container(
@@ -95,7 +121,7 @@ class MealPlanDateCard extends ConsumerWidget {
                 if (isToday || isTomorrow) ...[
                   const SizedBox(height: 4),
                   Text(
-                    DateFormat('EEEE').format(date),
+                    DateFormat('EEEE').format(widget.date),
                     style: CupertinoTheme.of(context).textTheme.textStyle.copyWith(
                       fontSize: 14,
                       color: CupertinoColors.secondaryLabel.resolveFrom(context),
@@ -165,24 +191,52 @@ class MealPlanDateCard extends ConsumerWidget {
 
     return Padding(
       padding: const EdgeInsets.all(16.0),
-      child: Column(
-        children: items.map<Widget>((item) {
+      child: ReorderableListView.builder(
+        shrinkWrap: true,
+        physics: const NeverScrollableScrollPhysics(),
+        clipBehavior: Clip.none,
+        proxyDecorator: defaultProxyDecorator,
+        onReorderStart: (_) => _onDragStart(),
+        onReorderEnd: (_) => _onDragEnd(),
+        itemCount: items.length,
+        onReorder: (oldIndex, newIndex) {
+          final reorderedItems = List.from(items);
+          
+          // Handle the index adjustment for moving items down
+          if (oldIndex < newIndex) {
+            newIndex -= 1;
+          }
+          
+          // Move the item
+          final item = reorderedItems.removeAt(oldIndex);
+          reorderedItems.insert(newIndex, item);
+          
+          // Update positions
+          for (int i = 0; i < reorderedItems.length; i++) {
+            reorderedItems[i] = reorderedItems[i].copyWith(position: i);
+          }
+          
+          // Call the repository to save changes
+          ref.read(mealPlanNotifierProvider.notifier).reorderItems(
+            date: widget.dateString,
+            reorderedItems: reorderedItems.cast<MealPlanItem>(),
+            userId: null, // TODO: Pass actual user info
+            householdId: null, // TODO: Pass actual household info
+          );
+        },
+        itemBuilder: (context, index) {
+          final item = items[index];
           return Padding(
             padding: const EdgeInsets.only(bottom: 8.0),
+            key: ValueKey(item.id),
             child: MealPlanItemTile(
+              index: index,
               item: item,
-              dateString: dateString,
-              onReorder: (reorderedItems) {
-                ref.read(mealPlanNotifierProvider.notifier).reorderItems(
-                  date: dateString,
-                  reorderedItems: reorderedItems,
-                  userId: null, // TODO: Pass actual user info
-                  householdId: null, // TODO: Pass actual household info
-                );
-              },
+              dateString: widget.dateString,
+              isDragging: _isDragging,
             ),
           );
-        }).toList(),
+        },
       ),
     );
   }
@@ -190,7 +244,7 @@ class MealPlanDateCard extends ConsumerWidget {
   void _showAddMenu(BuildContext context, WidgetRef ref) {
     MealPlanContextMenu.showAddMenu(
       context: context,
-      date: dateString,
+      date: widget.dateString,
       ref: ref,
     );
   }
@@ -198,7 +252,7 @@ class MealPlanDateCard extends ConsumerWidget {
   void _showMoreMenu(BuildContext context, WidgetRef ref) {
     MealPlanContextMenu.showMoreMenu(
       context: context,
-      date: dateString,
+      date: widget.dateString,
       ref: ref,
     );
   }
