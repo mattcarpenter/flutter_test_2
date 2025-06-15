@@ -60,7 +60,7 @@ class AddToShoppingListContent extends ConsumerStatefulWidget {
 
 class _AddToShoppingListContentState extends ConsumerState<AddToShoppingListContent> {
   String? selectedListId;
-  List<AggregatedIngredient> ingredients = [];
+  Map<String, bool> checkedState = {};
   bool isLoading = false;
 
   @override
@@ -70,14 +70,14 @@ class _AddToShoppingListContentState extends ConsumerState<AddToShoppingListCont
 
     return aggregatedIngredientsAsync.when(
       data: (aggregatedIngredients) {
-        // Update local state with ingredients
-        if (ingredients.isEmpty && aggregatedIngredients.isNotEmpty) {
-          WidgetsBinding.instance.addPostFrameCallback((_) {
-            setState(() {
-              ingredients = aggregatedIngredients;
-            });
-          });
+        // Initialize checked state for new ingredients
+        for (final ingredient in aggregatedIngredients) {
+          checkedState.putIfAbsent(ingredient.id, () => ingredient.isChecked);
         }
+        
+        // Remove checked state for ingredients no longer in list
+        checkedState.removeWhere((id, _) => 
+          !aggregatedIngredients.any((i) => i.id == id));
 
         return Column(
           mainAxisSize: MainAxisSize.min,
@@ -88,19 +88,19 @@ class _AddToShoppingListContentState extends ConsumerState<AddToShoppingListCont
             const SizedBox(height: 16),
             
             // Content
-            if (ingredients.isEmpty)
+            if (aggregatedIngredients.isEmpty)
               _buildEmptyState(context)
             else
-              _buildIngredientList(context),
+              _buildIngredientList(context, aggregatedIngredients),
             
             // Action button
-            if (ingredients.isNotEmpty && ingredients.any((i) => i.isChecked))
+            if (aggregatedIngredients.isNotEmpty && checkedState.values.any((checked) => checked))
               Padding(
                 padding: const EdgeInsets.fromLTRB(16, 16, 16, 32),
                 child: SizedBox(
                   width: double.infinity,
                   child: CupertinoButton.filled(
-                    onPressed: isLoading ? null : _addToShoppingList,
+                    onPressed: isLoading ? null : () => _addToShoppingList(aggregatedIngredients),
                     child: Text(isLoading ? 'Adding...' : 'Add to Shopping List'),
                   ),
                 ),
@@ -208,7 +208,7 @@ class _AddToShoppingListContentState extends ConsumerState<AddToShoppingListCont
     );
   }
 
-  Widget _buildIngredientList(BuildContext context) {
+  Widget _buildIngredientList(BuildContext context, List<AggregatedIngredient> ingredients) {
     return Container(
       constraints: BoxConstraints(
         maxHeight: MediaQuery.of(context).size.height * 0.5,
@@ -219,11 +219,14 @@ class _AddToShoppingListContentState extends ConsumerState<AddToShoppingListCont
         itemCount: ingredients.length,
         itemBuilder: (context, index) {
           final ingredient = ingredients[index];
+          final isChecked = checkedState[ingredient.id] ?? ingredient.isChecked;
+          
           return _IngredientTile(
             ingredient: ingredient,
+            isChecked: isChecked,
             onChanged: (value) {
               setState(() {
-                ingredient.isChecked = value;
+                checkedState[ingredient.id] = value;
               });
             },
           );
@@ -294,7 +297,7 @@ class _AddToShoppingListContentState extends ConsumerState<AddToShoppingListCont
     }
   }
 
-  Future<void> _addToShoppingList() async {
+  Future<void> _addToShoppingList(List<AggregatedIngredient> ingredients) async {
     setState(() {
       isLoading = true;
     });
@@ -304,15 +307,17 @@ class _AddToShoppingListContentState extends ConsumerState<AddToShoppingListCont
       final currentListId = ref.read(currentShoppingListProvider);
       
       // Add checked ingredients to shopping list
-      for (final ingredient in ingredients.where((i) => i.isChecked)) {
-        await shoppingListRepository.addItem(
-          shoppingListId: currentListId,
-          name: ingredient.name,
-          terms: ingredient.terms,
-          category: ingredient.matchingPantryItem?.category,
-          userId: null, // TODO: Pass actual user ID
-          householdId: null, // TODO: Pass actual household ID
-        );
+      for (final ingredient in ingredients) {
+        if (checkedState[ingredient.id] ?? false) {
+          await shoppingListRepository.addItem(
+            shoppingListId: currentListId,
+            name: ingredient.name,
+            terms: ingredient.terms,
+            category: ingredient.matchingPantryItem?.category,
+            userId: null, // TODO: Pass actual user ID
+            householdId: null, // TODO: Pass actual household ID
+          );
+        }
       }
       
       // Show success and close modal
@@ -334,10 +339,12 @@ class _AddToShoppingListContentState extends ConsumerState<AddToShoppingListCont
 
 class _IngredientTile extends StatelessWidget {
   final AggregatedIngredient ingredient;
+  final bool isChecked;
   final ValueChanged<bool> onChanged;
 
   const _IngredientTile({
     required this.ingredient,
+    required this.isChecked,
     required this.onChanged,
   });
 
@@ -350,12 +357,12 @@ class _IngredientTile extends StatelessWidget {
           // Checkbox
           CupertinoButton(
             padding: EdgeInsets.zero,
-            onPressed: () => onChanged(!ingredient.isChecked),
+            onPressed: () => onChanged(!isChecked),
             child: Icon(
-              ingredient.isChecked
+              isChecked
                   ? CupertinoIcons.checkmark_circle_fill
                   : CupertinoIcons.circle,
-              color: ingredient.isChecked
+              color: isChecked
                   ? CupertinoColors.activeBlue.resolveFrom(context)
                   : CupertinoColors.tertiaryLabel.resolveFrom(context),
               size: 24,
@@ -378,8 +385,8 @@ class _IngredientTile extends StatelessWidget {
                   ingredient.name,
                   style: CupertinoTheme.of(context).textTheme.textStyle.copyWith(
                     fontSize: 16,
-                    decoration: ingredient.isChecked ? null : TextDecoration.lineThrough,
-                    color: ingredient.isChecked 
+                    decoration: isChecked ? null : TextDecoration.lineThrough,
+                    color: isChecked 
                         ? CupertinoColors.label.resolveFrom(context)
                         : CupertinoColors.secondaryLabel.resolveFrom(context),
                   ),
