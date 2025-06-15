@@ -16,9 +16,7 @@ class MealPlansRoot extends ConsumerStatefulWidget {
 class _MealPlansRootState extends ConsumerState<MealPlansRoot> {
   final ScrollController _scrollController = ScrollController();
   
-  // Local state to maintain stable drag behavior
-  Map<String, List<MealPlanItem>> _localData = {};
-  bool _isDragging = false;
+  // No local state - let drag_and_drop_lists handle everything
   
   @override
   void initState() {
@@ -49,20 +47,14 @@ class _MealPlansRootState extends ConsumerState<MealPlansRoot> {
       final dateString = dates[i];
       final date = DateTime.parse(dateString);
       
-      // Use local data during drag, otherwise use provider data
+      // Always use provider data - no local state management
+      final mealPlan = ref.watch(mealPlanByDateStreamProvider(dateString)).value;
       List<MealPlanItem> items;
-      if (_isDragging && _localData.containsKey(dateString)) {
-        items = _localData[dateString]!;
+      if (mealPlan?.data != null && (mealPlan!.data as List).isNotEmpty) {
+        items = (mealPlan.data as List).cast<MealPlanItem>();
+        items.sort((a, b) => a.position.compareTo(b.position));
       } else {
-        final mealPlan = ref.watch(mealPlanByDateStreamProvider(dateString)).value;
-        if (mealPlan?.data != null && (mealPlan!.data as List).isNotEmpty) {
-          items = (mealPlan.data as List).cast<MealPlanItem>();
-          items.sort((a, b) => a.position.compareTo(b.position));
-        } else {
-          items = [];
-        }
-        // Update local data
-        _localData[dateString] = List.from(items);
+        items = [];
       }
       
       lists.add(
@@ -92,12 +84,7 @@ class _MealPlansRootState extends ConsumerState<MealPlansRoot> {
   // Build items for a specific date
   List<DragAndDropItem> _buildItemsForDate(List<MealPlanItem> items, String dateString) {
     if (items.isEmpty) {
-      // During drag operations, show a minimal placeholder to maintain consistent height
-      if (_isDragging) {
-        return [_buildDragPlaceholder()];
-      } else {
-        return [_buildEmptyPlaceholder(dateString)];
-      }
+      return [_buildEmptyPlaceholder(dateString)];
     }
     
     return items.asMap().entries.map((entry) {
@@ -115,17 +102,29 @@ class _MealPlansRootState extends ConsumerState<MealPlansRoot> {
     }).toList();
   }
   
-  // Minimal placeholder during drag operations to maintain consistent height
-  DragAndDropItem _buildDragPlaceholder() {
+  // Empty state placeholder with height matching item tiles (padding + container + content)
+  DragAndDropItem _buildEmptyPlaceholder(String dateString) {
     return DragAndDropItem(
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 20.0),
-        child: Center(
-          child: Text(
-            'Drop here to add',
-            style: CupertinoTheme.of(context).textTheme.textStyle.copyWith(
-              fontSize: 14,
-              color: CupertinoColors.tertiaryLabel.resolveFrom(context),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 4.0), // Match item padding
+        child: Container(
+          height: 56, // Fixed height: 12 (padding) + 32 (icon height) + 12 (padding) = 56
+          padding: const EdgeInsets.all(12),
+          decoration: BoxDecoration(
+            color: CupertinoColors.secondarySystemGroupedBackground.resolveFrom(context),
+            borderRadius: BorderRadius.circular(8),
+            border: Border.all(
+              color: CupertinoColors.separator.resolveFrom(context),
+              width: 0.5,
+            ),
+          ),
+          child: Center(
+            child: Text(
+              'No meals planned - tap + to add',
+              style: CupertinoTheme.of(context).textTheme.textStyle.copyWith(
+                fontSize: 14,
+                color: CupertinoColors.tertiaryLabel.resolveFrom(context),
+              ),
             ),
           ),
         ),
@@ -133,128 +132,55 @@ class _MealPlansRootState extends ConsumerState<MealPlansRoot> {
       canDrag: false,
     );
   }
-
-  // Empty state placeholder
-  DragAndDropItem _buildEmptyPlaceholder(String dateString) {
-    return DragAndDropItem(
-      child: Padding(
-        padding: const EdgeInsets.all(32.0),
-        child: Center(
-          child: Column(
-            children: [
-              Icon(
-                CupertinoIcons.calendar_badge_plus,
-                size: 48,
-                color: CupertinoColors.secondaryLabel.resolveFrom(context),
-              ),
-              const SizedBox(height: 16),
-              Text(
-                'No meals planned',
-                style: CupertinoTheme.of(context).textTheme.textStyle.copyWith(
-                  fontSize: 16,
-                  color: CupertinoColors.secondaryLabel.resolveFrom(context),
-                ),
-              ),
-              const SizedBox(height: 8),
-              Text(
-                'Tap + to add recipes or notes',
-                style: CupertinoTheme.of(context).textTheme.textStyle.copyWith(
-                  fontSize: 14,
-                  color: CupertinoColors.tertiaryLabel.resolveFrom(context),
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-      canDrag: false,
-    );
-  }
   
-  // Handle item reorder - update local state immediately for smooth UX
-  void _onItemReorder(int oldItemIndex, int oldListIndex, int newItemIndex, int newListIndex) {
-    setState(() {
-      _isDragging = true;
-      
-      final dates = ref.read(extendedMealPlanDatesProvider);
-      final sourceDate = dates[oldListIndex];
-      final targetDate = dates[newListIndex];
-      
-      // Get items from local data
-      final sourceItems = List<MealPlanItem>.from(_localData[sourceDate] ?? []);
-      final targetItems = List<MealPlanItem>.from(_localData[targetDate] ?? []);
-      
-      if (oldItemIndex >= sourceItems.length) return;
-      
-      // Remove item from source
-      final item = sourceItems.removeAt(oldItemIndex);
-      
-      if (sourceDate == targetDate) {
-        // Within same list - adjust index if needed
-        if (oldItemIndex < newItemIndex) {
-          newItemIndex -= 1;
-        }
-        sourceItems.insert(newItemIndex, item);
-        
-        // Update positions
-        for (int i = 0; i < sourceItems.length; i++) {
-          sourceItems[i] = sourceItems[i].copyWith(position: i);
-        }
-        
-        _localData[sourceDate] = sourceItems;
-      } else {
-        // Between different lists
-        targetItems.insert(newItemIndex, item);
-        
-        // Update positions in both lists
-        for (int i = 0; i < sourceItems.length; i++) {
-          sourceItems[i] = sourceItems[i].copyWith(position: i);
-        }
-        for (int i = 0; i < targetItems.length; i++) {
-          targetItems[i] = targetItems[i].copyWith(position: i);
-        }
-        
-        _localData[sourceDate] = sourceItems;
-        _localData[targetDate] = targetItems;
-      }
-    });
+  // Handle item reorder - persist changes directly to database
+  void _onItemReorder(int oldItemIndex, int oldListIndex, int newItemIndex, int newListIndex) async {
+    final dates = ref.read(extendedMealPlanDatesProvider);
+    final sourceDate = dates[oldListIndex];
+    final targetDate = dates[newListIndex];
     
-    // Persist changes to database after a short delay
-    Future.delayed(const Duration(milliseconds: 500), () async {
-      await _persistChanges();
-      if (mounted) {
-        setState(() {
-          _isDragging = false;
-        });
+    // Get current items from providers
+    final sourceMealPlan = ref.read(mealPlanByDateStreamProvider(sourceDate)).value;
+    final targetMealPlan = ref.read(mealPlanByDateStreamProvider(targetDate)).value;
+    
+    final sourceItems = sourceMealPlan?.data != null 
+        ? List<MealPlanItem>.from(sourceMealPlan!.data as List)
+        : <MealPlanItem>[];
+    
+    if (oldItemIndex >= sourceItems.length) return;
+    
+    final item = sourceItems[oldItemIndex];
+    
+    if (sourceDate == targetDate) {
+      // Within same date - use reorderItems
+      sourceItems.removeAt(oldItemIndex);
+      if (oldItemIndex < newItemIndex) {
+        newItemIndex -= 1;
       }
-    });
-  }
-  
-  // Persist local changes to database
-  Future<void> _persistChanges() async {
-    try {
-      for (final entry in _localData.entries) {
-        final dateString = entry.key;
-        final items = entry.value;
-        
-        if (items.isEmpty) {
-          await ref.read(mealPlanNotifierProvider.notifier).clearItems(
-            date: dateString,
-            userId: null,
-            householdId: null,
-          );
-        } else {
-          await ref.read(mealPlanNotifierProvider.notifier).reorderItems(
-            date: dateString,
-            reorderedItems: items,
-            userId: null,
-            householdId: null,
-          );
-        }
+      sourceItems.insert(newItemIndex, item);
+      
+      // Update positions
+      for (int i = 0; i < sourceItems.length; i++) {
+        sourceItems[i] = sourceItems[i].copyWith(position: i);
       }
-    } catch (e) {
-      // If persistence fails, clear local data to revert to database state
-      _localData.clear();
+      
+      await ref.read(mealPlanNotifierProvider.notifier).reorderItems(
+        date: sourceDate,
+        reorderedItems: sourceItems,
+        userId: null,
+        householdId: null,
+      );
+    } else {
+      // Between different dates - use moveItemBetweenDates
+      await ref.read(mealPlanNotifierProvider.notifier).moveItemBetweenDates(
+        sourceDate: sourceDate,
+        targetDate: targetDate,
+        item: item,
+        sourceIndex: oldItemIndex,
+        targetIndex: newItemIndex,
+        userId: null,
+        householdId: null,
+      );
     }
   }
 
