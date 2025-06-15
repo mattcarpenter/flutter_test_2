@@ -24,6 +24,8 @@ class MealPlanDateCard extends ConsumerStatefulWidget {
 
 class _MealPlanDateCardState extends ConsumerState<MealPlanDateCard> {
   bool _isDragging = false;
+  List<MealPlanItem>? _optimisticItems; // Local state for optimistic updates
+  bool _isReordering = false; // Track if we're in the middle of a reorder operation
 
   // Method to handle drag start
   void _onDragStart() {
@@ -153,7 +155,19 @@ class _MealPlanDateCardState extends ConsumerState<MealPlanDateCard> {
   }
 
   Widget _buildContent(BuildContext context, WidgetRef ref, dynamic mealPlan) {
-    if (mealPlan?.data == null || (mealPlan!.data as List).isEmpty) {
+    // Always prefer optimistic items if available, regardless of reordering state
+    List<MealPlanItem>? items;
+    
+    if (_optimisticItems != null) {
+      // Use optimistic state when available
+      items = _optimisticItems!;
+    } else if (mealPlan?.data != null && (mealPlan!.data as List).isNotEmpty) {
+      // Use database data when no optimistic state
+      items = (mealPlan.data as List).cast<MealPlanItem>();
+      items.sort((a, b) => a.position.compareTo(b.position));
+    }
+    
+    if (items == null || items.isEmpty) {
       return Padding(
         padding: const EdgeInsets.all(32.0),
         child: Center(
@@ -186,9 +200,6 @@ class _MealPlanDateCardState extends ConsumerState<MealPlanDateCard> {
       );
     }
 
-    final items = (mealPlan.data as List).cast();
-    items.sort((a, b) => a.position.compareTo(b.position));
-
     return Padding(
       padding: const EdgeInsets.all(16.0),
       child: ReorderableListView.builder(
@@ -198,9 +209,10 @@ class _MealPlanDateCardState extends ConsumerState<MealPlanDateCard> {
         proxyDecorator: defaultProxyDecorator,
         onReorderStart: (_) => _onDragStart(),
         onReorderEnd: (_) => _onDragEnd(),
-        itemCount: items.length,
-        onReorder: (oldIndex, newIndex) {
-          final reorderedItems = List.from(items);
+        itemCount: items!.length,
+        onReorder: (oldIndex, newIndex) async {
+          // Immediately create optimistic state
+          final reorderedItems = List<MealPlanItem>.from(items!);
           
           // Handle the index adjustment for moving items down
           if (oldIndex < newIndex) {
@@ -216,16 +228,42 @@ class _MealPlanDateCardState extends ConsumerState<MealPlanDateCard> {
             reorderedItems[i] = reorderedItems[i].copyWith(position: i);
           }
           
-          // Call the repository to save changes
-          ref.read(mealPlanNotifierProvider.notifier).reorderItems(
-            date: widget.dateString,
-            reorderedItems: reorderedItems.cast<MealPlanItem>(),
-            userId: null, // TODO: Pass actual user info
-            householdId: null, // TODO: Pass actual household info
-          );
+          // Set optimistic state immediately
+          setState(() {
+            _isReordering = true;
+            _optimisticItems = reorderedItems;
+          });
+          
+          try {
+            // Call the repository to save changes
+            await ref.read(mealPlanNotifierProvider.notifier).reorderItems(
+              date: widget.dateString,
+              reorderedItems: reorderedItems,
+              userId: null, // TODO: Pass actual user info
+              householdId: null, // TODO: Pass actual household info
+            );
+            
+            // Give the database stream time to update before clearing optimistic state
+            await Future.delayed(const Duration(milliseconds: 100));
+            
+            if (mounted) {
+              setState(() {
+                _isReordering = false;
+                _optimisticItems = null;
+              });
+            }
+          } catch (e) {
+            // If the operation fails, clear optimistic state to revert to database data
+            if (mounted) {
+              setState(() {
+                _isReordering = false;
+                _optimisticItems = null;
+              });
+            }
+          }
         },
         itemBuilder: (context, index) {
-          final item = items[index];
+          final item = items![index];
           return Padding(
             padding: const EdgeInsets.only(bottom: 8.0),
             key: ValueKey(item.id),
