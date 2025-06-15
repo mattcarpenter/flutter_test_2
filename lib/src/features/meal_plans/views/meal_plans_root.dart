@@ -74,6 +74,8 @@ class _MealPlansRootState extends ConsumerState<MealPlansRoot> {
             ),
           ),
           canDrag: false, // We don't want to reorder dates
+          // Add minimum height and empty state styling
+          contentsWhenEmpty: _buildEmptyState(dateString),
         ),
       );
     }
@@ -83,8 +85,9 @@ class _MealPlansRootState extends ConsumerState<MealPlansRoot> {
   
   // Build items for a specific date
   List<DragAndDropItem> _buildItemsForDate(List<MealPlanItem> items, String dateString) {
+    // For empty lists, return empty array - let drag_and_drop_lists handle insertion points
     if (items.isEmpty) {
-      return [_buildEmptyPlaceholder(dateString)];
+      return [];
     }
     
     return items.asMap().entries.map((entry) {
@@ -102,34 +105,38 @@ class _MealPlansRootState extends ConsumerState<MealPlansRoot> {
     }).toList();
   }
   
-  // Empty state placeholder with height matching item tiles (padding + container + content)
-  DragAndDropItem _buildEmptyPlaceholder(String dateString) {
-    return DragAndDropItem(
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 4.0), // Match item padding
-        child: Container(
-          height: 56, // Fixed height: 12 (padding) + 32 (icon height) + 12 (padding) = 56
-          padding: const EdgeInsets.all(12),
-          decoration: BoxDecoration(
-            color: CupertinoColors.secondarySystemGroupedBackground.resolveFrom(context),
-            borderRadius: BorderRadius.circular(8),
-            border: Border.all(
-              color: CupertinoColors.separator.resolveFrom(context),
-              width: 0.5,
+  // Empty state that doesn't interfere with drag operations
+  Widget _buildEmptyState(String dateString) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 20.0),
+      child: Center(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(
+              CupertinoIcons.calendar_badge_plus,
+              size: 32,
+              color: CupertinoColors.tertiaryLabel.resolveFrom(context),
             ),
-          ),
-          child: Center(
-            child: Text(
-              'No meals planned - tap + to add',
+            const SizedBox(height: 12),
+            Text(
+              'No meals planned',
               style: CupertinoTheme.of(context).textTheme.textStyle.copyWith(
                 fontSize: 14,
                 color: CupertinoColors.tertiaryLabel.resolveFrom(context),
               ),
             ),
-          ),
+            const SizedBox(height: 4),
+            Text(
+              'Tap + to add recipes or notes',
+              style: CupertinoTheme.of(context).textTheme.textStyle.copyWith(
+                fontSize: 12,
+                color: CupertinoColors.quaternaryLabel.resolveFrom(context),
+              ),
+            ),
+          ],
         ),
       ),
-      canDrag: false,
     );
   }
   
@@ -141,7 +148,6 @@ class _MealPlansRootState extends ConsumerState<MealPlansRoot> {
     
     // Get current items from providers
     final sourceMealPlan = ref.read(mealPlanByDateStreamProvider(sourceDate)).value;
-    final targetMealPlan = ref.read(mealPlanByDateStreamProvider(targetDate)).value;
     
     final sourceItems = sourceMealPlan?.data != null 
         ? List<MealPlanItem>.from(sourceMealPlan!.data as List)
