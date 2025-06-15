@@ -26,10 +26,26 @@ class MealPlanItemLifted extends ConsumerStatefulWidget {
 
 class _MealPlanItemLiftedState extends ConsumerState<MealPlanItemLifted>
     with SingleTickerProviderStateMixin {
+  final GlobalKey _dragHandleKey = GlobalKey();
   late AnimationController _liftController;
   late Animation<double> _scaleAnimation;
   late Animation<double> _shadowAnimation;
   bool _isDragging = false;
+  
+  bool _contextMenuIsAllowed(Offset location) {
+    return _isLocationOutsideKey(location, _dragHandleKey);
+  }
+  
+  bool _isLocationOutsideKey(Offset location, GlobalKey key) {
+    final renderObject = key.currentContext?.findRenderObject();
+    if (renderObject is RenderBox) {
+      final rect = renderObject.localToGlobal(Offset.zero) & renderObject.size;
+      if (rect.contains(location)) {
+        return false;
+      }
+    }
+    return true;
+  }
 
   @override
   void initState() {
@@ -117,6 +133,7 @@ class _MealPlanItemLiftedState extends ConsumerState<MealPlanItemLifted>
   // The normal tile
   Widget _buildNormalTile(BuildContext context) {
     return ContextMenuWidget(
+      contextMenuIsAllowed: _contextMenuIsAllowed,
       menuProvider: (_) => _buildContextMenu(),
       child: GestureDetector(
         onTap: () => _handleTap(context, ref),
@@ -244,6 +261,7 @@ class _MealPlanItemLiftedState extends ConsumerState<MealPlanItemLifted>
           
           // Drag handle
           Icon(
+            key: _dragHandleKey,
             CupertinoIcons.line_horizontal_3,
             size: 16,
             color: CupertinoColors.tertiaryLabel.resolveFrom(context),
