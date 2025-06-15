@@ -206,4 +206,36 @@ class ShoppingListRepository {
       ..where((t) => t.shoppingListId.equals(listId)))
         .write(ShoppingListItemsCompanion(deletedAt: Value(now)));
   }
+
+  // Find items across all shopping lists by matching terms
+  Future<List<ShoppingListItemEntry>> findItemsByTerms(List<String> searchTerms) async {
+    if (searchTerms.isEmpty) return [];
+    
+    // Get all non-deleted shopping list items
+    final allItems = await (_db.select(_db.shoppingListItems)
+      ..where((t) => t.deletedAt.isNull()))
+      .get();
+    
+    // Normalize search terms for comparison
+    final normalizedSearchTerms = searchTerms
+        .map((term) => term.toLowerCase().trim())
+        .toSet();
+    
+    // Find items with matching terms
+    final matchingItems = <ShoppingListItemEntry>[];
+    for (final item in allItems) {
+      final itemTerms = item.terms ?? [];
+      
+      // Check if any item term matches any search term
+      for (final itemTerm in itemTerms) {
+        final normalizedItemTerm = itemTerm.toLowerCase().trim();
+        if (normalizedSearchTerms.contains(normalizedItemTerm)) {
+          matchingItems.add(item);
+          break; // Found a match, no need to check other terms
+        }
+      }
+    }
+    
+    return matchingItems;
+  }
 }

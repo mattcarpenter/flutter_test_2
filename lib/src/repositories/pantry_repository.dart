@@ -254,6 +254,38 @@ class PantryRepository {
           updatedAt: Value(now),
         ));
   }
+
+  /// Find pantry items by matching terms
+  Future<List<PantryItemEntry>> findItemsByTerms(List<String> searchTerms) async {
+    if (searchTerms.isEmpty) return [];
+    
+    // Get all non-deleted pantry items
+    final allItems = await (_db.select(_db.pantryItems)
+      ..where((t) => t.deletedAt.isNull()))
+      .get();
+    
+    // Normalize search terms for comparison
+    final normalizedSearchTerms = searchTerms
+        .map((term) => term.toLowerCase().trim())
+        .toSet();
+    
+    // Find items with matching terms
+    final matchingItems = <PantryItemEntry>[];
+    for (final item in allItems) {
+      final itemTerms = item.terms ?? [];
+      
+      // Check if any item term matches any search term
+      for (final itemTerm in itemTerms) {
+        final normalizedItemTerm = itemTerm.value.toLowerCase().trim();
+        if (normalizedSearchTerms.contains(normalizedItemTerm)) {
+          matchingItems.add(item);
+          break; // Found a match, no need to check other terms
+        }
+      }
+    }
+    
+    return matchingItems;
+  }
 }
 
 // Provider for the pantry repository

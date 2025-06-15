@@ -902,6 +902,17 @@ class RecipeRepository {
       rethrow;
     }
   }
+
+  // Batch fetch recipes by IDs
+  Future<List<RecipeEntry>> getRecipesByIds(List<String> recipeIds) async {
+    if (recipeIds.isEmpty) return [];
+    
+    final recipes = await (_db.select(_db.recipes)
+      ..where((tbl) => tbl.id.isIn(recipeIds) & tbl.deletedAt.isNull()))
+      .get();
+    
+    return recipes;
+  }
 }
 
 // Separate the recipe repository provider from the dependency setup
