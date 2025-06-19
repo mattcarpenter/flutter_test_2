@@ -976,6 +976,17 @@ class MockRecipeRepository extends _i1.Mock implements _i11.RecipeRepository {
           ),
         )),
       ) as _i6.Future<_i2.RecipeIngredientMatches>);
+
+  @override
+  _i6.Future<List<_i3.RecipeEntry>> getRecipesByIds(List<String>? recipeIds) =>
+      (super.noSuchMethod(
+        Invocation.method(
+          #getRecipesByIds,
+          [recipeIds],
+        ),
+        returnValue:
+            _i6.Future<List<_i3.RecipeEntry>>.value(<_i3.RecipeEntry>[]),
+      ) as _i6.Future<List<_i3.RecipeEntry>>);
 }
 
 /// A class which mocks [AppDatabase].

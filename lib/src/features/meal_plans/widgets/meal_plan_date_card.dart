@@ -84,8 +84,8 @@ class _MealPlanDateCardState extends ConsumerState<MealPlanDateCard>
 
     // Get current items to determine target index
     final mealPlan = ref.read(mealPlanByDateStreamProvider(widget.dateString)).value;
-    final currentItems = mealPlan?.data != null 
-        ? (mealPlan!.data as List).cast<MealPlanItem>()
+    final currentItems = mealPlan?.items != null 
+        ? (mealPlan!.items as List).cast<MealPlanItem>()
         : <MealPlanItem>[];
 
     // Move item to this date at the end of the list
@@ -188,8 +188,8 @@ class _MealPlanDateCardState extends ConsumerState<MealPlanDateCard>
   Widget _buildContent(dynamic mealPlan) {
     List<MealPlanItem> items = [];
     
-    if (mealPlan?.data != null && (mealPlan!.data as List).isNotEmpty) {
-      items = (mealPlan.data as List).cast<MealPlanItem>();
+    if (mealPlan?.items != null && (mealPlan!.items as List).isNotEmpty) {
+      items = (mealPlan.items as List).cast<MealPlanItem>();
       items.sort((a, b) => a.position.compareTo(b.position));
     }
     

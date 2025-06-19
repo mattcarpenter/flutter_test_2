@@ -164,13 +164,13 @@ class MealPlanNotifier extends Notifier<void> {
     final targetMealPlan = await _repository.getMealPlanByDate(targetDate, userId, householdId);
     
     // Extract items from source
-    final sourceItems = sourceMealPlan?.data != null 
-        ? List<MealPlanItem>.from(sourceMealPlan!.data as List)
+    final sourceItems = sourceMealPlan?.items != null 
+        ? List<MealPlanItem>.from(sourceMealPlan!.items as List)
         : <MealPlanItem>[];
     
     // Extract items from target
-    final targetItems = targetMealPlan?.data != null 
-        ? List<MealPlanItem>.from(targetMealPlan!.data as List)
+    final targetItems = targetMealPlan?.items != null 
+        ? List<MealPlanItem>.from(targetMealPlan!.items as List)
         : <MealPlanItem>[];
     
     // Remove from source if index is valid

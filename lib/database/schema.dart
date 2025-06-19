@@ -190,7 +190,7 @@ Schema schema = const Schema(([
     Column.text('date'),
     Column.text('user_id'),
     Column.text('household_id'),
-    Column.text('data'),
+    Column.text('items'),
     Column.integer('created_at'),
     Column.integer('updated_at'),
     Column.integer('deleted_at'),

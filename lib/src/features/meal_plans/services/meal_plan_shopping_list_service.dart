@@ -28,13 +28,13 @@ class MealPlanShoppingListService {
   }) async {
     // Get meal plan for the date
     final mealPlan = await mealPlanRepository.getMealPlanByDate(date, userId, householdId);
-    if (mealPlan == null || mealPlan.data == null) {
+    if (mealPlan == null || mealPlan.items == null) {
       return [];
     }
 
     // Extract recipe IDs from meal plan items
     final recipeIds = <String>[];
-    for (final item in mealPlan.data!) {
+    for (final item in mealPlan.items!) {
       if (item.isRecipe && item.recipeId != null) {
         recipeIds.add(item.recipeId!);
       }

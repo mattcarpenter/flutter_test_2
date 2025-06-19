@@ -7511,12 +7511,12 @@ class $MealPlansTable extends MealPlans
   late final GeneratedColumn<String> householdId = GeneratedColumn<String>(
       'household_id', aliasedName, true,
       type: DriftSqlType.string, requiredDuringInsert: false);
-  static const VerificationMeta _dataMeta = const VerificationMeta('data');
+  static const VerificationMeta _itemsMeta = const VerificationMeta('items');
   @override
   late final GeneratedColumnWithTypeConverter<List<MealPlanItem>?, String>
-      data = GeneratedColumn<String>('data', aliasedName, true,
+      items = GeneratedColumn<String>('items', aliasedName, true,
               type: DriftSqlType.string, requiredDuringInsert: false)
-          .withConverter<List<MealPlanItem>?>($MealPlansTable.$converterdatan);
+          .withConverter<List<MealPlanItem>?>($MealPlansTable.$converteritemsn);
   static const VerificationMeta _createdAtMeta =
       const VerificationMeta('createdAt');
   @override
@@ -7537,7 +7537,7 @@ class $MealPlansTable extends MealPlans
       type: DriftSqlType.int, requiredDuringInsert: false);
   @override
   List<GeneratedColumn> get $columns =>
-      [id, date, userId, householdId, data, createdAt, updatedAt, deletedAt];
+      [id, date, userId, householdId, items, createdAt, updatedAt, deletedAt];
   @override
   String get aliasedName => _alias ?? actualTableName;
   @override
@@ -7567,7 +7567,7 @@ class $MealPlansTable extends MealPlans
           householdId.isAcceptableOrUnknown(
               data['household_id']!, _householdIdMeta));
     }
-    context.handle(_dataMeta, const VerificationResult.success());
+    context.handle(_itemsMeta, const VerificationResult.success());
     if (data.containsKey('created_at')) {
       context.handle(_createdAtMeta,
           createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta));
@@ -7597,8 +7597,9 @@ class $MealPlansTable extends MealPlans
           .read(DriftSqlType.string, data['${effectivePrefix}user_id']),
       householdId: attachedDatabase.typeMapping
           .read(DriftSqlType.string, data['${effectivePrefix}household_id']),
-      data: $MealPlansTable.$converterdatan.fromSql(attachedDatabase.typeMapping
-          .read(DriftSqlType.string, data['${effectivePrefix}data'])),
+      items: $MealPlansTable.$converteritemsn.fromSql(attachedDatabase
+          .typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}items'])),
       createdAt: attachedDatabase.typeMapping
           .read(DriftSqlType.int, data['${effectivePrefix}created_at']),
       updatedAt: attachedDatabase.typeMapping
@@ -7613,10 +7614,10 @@ class $MealPlansTable extends MealPlans
     return $MealPlansTable(attachedDatabase, alias);
   }
 
-  static TypeConverter<List<MealPlanItem>, String> $converterdata =
+  static TypeConverter<List<MealPlanItem>, String> $converteritems =
       const MealPlanItemListConverter();
-  static TypeConverter<List<MealPlanItem>?, String?> $converterdatan =
-      NullAwareTypeConverter.wrap($converterdata);
+  static TypeConverter<List<MealPlanItem>?, String?> $converteritemsn =
+      NullAwareTypeConverter.wrap($converteritems);
 }
 
 class MealPlanEntry extends DataClass implements Insertable<MealPlanEntry> {
@@ -7624,7 +7625,7 @@ class MealPlanEntry extends DataClass implements Insertable<MealPlanEntry> {
   final String date;
   final String? userId;
   final String? householdId;
-  final List<MealPlanItem>? data;
+  final List<MealPlanItem>? items;
   final int? createdAt;
   final int? updatedAt;
   final int? deletedAt;
@@ -7633,7 +7634,7 @@ class MealPlanEntry extends DataClass implements Insertable<MealPlanEntry> {
       required this.date,
       this.userId,
       this.householdId,
-      this.data,
+      this.items,
       this.createdAt,
       this.updatedAt,
       this.deletedAt});
@@ -7648,9 +7649,9 @@ class MealPlanEntry extends DataClass implements Insertable<MealPlanEntry> {
     if (!nullToAbsent || householdId != null) {
       map['household_id'] = Variable<String>(householdId);
     }
-    if (!nullToAbsent || data != null) {
-      map['data'] =
-          Variable<String>($MealPlansTable.$converterdatan.toSql(data));
+    if (!nullToAbsent || items != null) {
+      map['items'] =
+          Variable<String>($MealPlansTable.$converteritemsn.toSql(items));
     }
     if (!nullToAbsent || createdAt != null) {
       map['created_at'] = Variable<int>(createdAt);
@@ -7673,7 +7674,8 @@ class MealPlanEntry extends DataClass implements Insertable<MealPlanEntry> {
       householdId: householdId == null && nullToAbsent
           ? const Value.absent()
           : Value(householdId),
-      data: data == null && nullToAbsent ? const Value.absent() : Value(data),
+      items:
+          items == null && nullToAbsent ? const Value.absent() : Value(items),
       createdAt: createdAt == null && nullToAbsent
           ? const Value.absent()
           : Value(createdAt),
@@ -7694,7 +7696,7 @@ class MealPlanEntry extends DataClass implements Insertable<MealPlanEntry> {
       date: serializer.fromJson<String>(json['date']),
       userId: serializer.fromJson<String?>(json['userId']),
       householdId: serializer.fromJson<String?>(json['householdId']),
-      data: serializer.fromJson<List<MealPlanItem>?>(json['data']),
+      items: serializer.fromJson<List<MealPlanItem>?>(json['items']),
       createdAt: serializer.fromJson<int?>(json['createdAt']),
       updatedAt: serializer.fromJson<int?>(json['updatedAt']),
       deletedAt: serializer.fromJson<int?>(json['deletedAt']),
@@ -7708,7 +7710,7 @@ class MealPlanEntry extends DataClass implements Insertable<MealPlanEntry> {
       'date': serializer.toJson<String>(date),
       'userId': serializer.toJson<String?>(userId),
       'householdId': serializer.toJson<String?>(householdId),
-      'data': serializer.toJson<List<MealPlanItem>?>(data),
+      'items': serializer.toJson<List<MealPlanItem>?>(items),
       'createdAt': serializer.toJson<int?>(createdAt),
       'updatedAt': serializer.toJson<int?>(updatedAt),
       'deletedAt': serializer.toJson<int?>(deletedAt),
@@ -7720,7 +7722,7 @@ class MealPlanEntry extends DataClass implements Insertable<MealPlanEntry> {
           String? date,
           Value<String?> userId = const Value.absent(),
           Value<String?> householdId = const Value.absent(),
-          Value<List<MealPlanItem>?> data = const Value.absent(),
+          Value<List<MealPlanItem>?> items = const Value.absent(),
           Value<int?> createdAt = const Value.absent(),
           Value<int?> updatedAt = const Value.absent(),
           Value<int?> deletedAt = const Value.absent()}) =>
@@ -7729,7 +7731,7 @@ class MealPlanEntry extends DataClass implements Insertable<MealPlanEntry> {
         date: date ?? this.date,
         userId: userId.present ? userId.value : this.userId,
         householdId: householdId.present ? householdId.value : this.householdId,
-        data: data.present ? data.value : this.data,
+        items: items.present ? items.value : this.items,
         createdAt: createdAt.present ? createdAt.value : this.createdAt,
         updatedAt: updatedAt.present ? updatedAt.value : this.updatedAt,
         deletedAt: deletedAt.present ? deletedAt.value : this.deletedAt,
@@ -7741,7 +7743,7 @@ class MealPlanEntry extends DataClass implements Insertable<MealPlanEntry> {
       userId: data.userId.present ? data.userId.value : this.userId,
       householdId:
           data.householdId.present ? data.householdId.value : this.householdId,
-      data: data.data.present ? data.data.value : this.data,
+      items: data.items.present ? data.items.value : this.items,
       createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
       updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
       deletedAt: data.deletedAt.present ? data.deletedAt.value : this.deletedAt,
@@ -7755,7 +7757,7 @@ class MealPlanEntry extends DataClass implements Insertable<MealPlanEntry> {
           ..write('date: $date, ')
           ..write('userId: $userId, ')
           ..write('householdId: $householdId, ')
-          ..write('data: $data, ')
+          ..write('items: $items, ')
           ..write('createdAt: $createdAt, ')
           ..write('updatedAt: $updatedAt, ')
           ..write('deletedAt: $deletedAt')
@@ -7765,7 +7767,7 @@ class MealPlanEntry extends DataClass implements Insertable<MealPlanEntry> {
 
   @override
   int get hashCode => Object.hash(
-      id, date, userId, householdId, data, createdAt, updatedAt, deletedAt);
+      id, date, userId, householdId, items, createdAt, updatedAt, deletedAt);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -7774,7 +7776,7 @@ class MealPlanEntry extends DataClass implements Insertable<MealPlanEntry> {
           other.date == this.date &&
           other.userId == this.userId &&
           other.householdId == this.householdId &&
-          other.data == this.data &&
+          other.items == this.items &&
           other.createdAt == this.createdAt &&
           other.updatedAt == this.updatedAt &&
           other.deletedAt == this.deletedAt);
@@ -7785,7 +7787,7 @@ class MealPlansCompanion extends UpdateCompanion<MealPlanEntry> {
   final Value<String> date;
   final Value<String?> userId;
   final Value<String?> householdId;
-  final Value<List<MealPlanItem>?> data;
+  final Value<List<MealPlanItem>?> items;
   final Value<int?> createdAt;
   final Value<int?> updatedAt;
   final Value<int?> deletedAt;
@@ -7795,7 +7797,7 @@ class MealPlansCompanion extends UpdateCompanion<MealPlanEntry> {
     this.date = const Value.absent(),
     this.userId = const Value.absent(),
     this.householdId = const Value.absent(),
-    this.data = const Value.absent(),
+    this.items = const Value.absent(),
     this.createdAt = const Value.absent(),
     this.updatedAt = const Value.absent(),
     this.deletedAt = const Value.absent(),
@@ -7806,7 +7808,7 @@ class MealPlansCompanion extends UpdateCompanion<MealPlanEntry> {
     required String date,
     this.userId = const Value.absent(),
     this.householdId = const Value.absent(),
-    this.data = const Value.absent(),
+    this.items = const Value.absent(),
     this.createdAt = const Value.absent(),
     this.updatedAt = const Value.absent(),
     this.deletedAt = const Value.absent(),
@@ -7817,7 +7819,7 @@ class MealPlansCompanion extends UpdateCompanion<MealPlanEntry> {
     Expression<String>? date,
     Expression<String>? userId,
     Expression<String>? householdId,
-    Expression<String>? data,
+    Expression<String>? items,
     Expression<int>? createdAt,
     Expression<int>? updatedAt,
     Expression<int>? deletedAt,
@@ -7828,7 +7830,7 @@ class MealPlansCompanion extends UpdateCompanion<MealPlanEntry> {
       if (date != null) 'date': date,
       if (userId != null) 'user_id': userId,
       if (householdId != null) 'household_id': householdId,
-      if (data != null) 'data': data,
+      if (items != null) 'items': items,
       if (createdAt != null) 'created_at': createdAt,
       if (updatedAt != null) 'updated_at': updatedAt,
       if (deletedAt != null) 'deleted_at': deletedAt,
@@ -7841,7 +7843,7 @@ class MealPlansCompanion extends UpdateCompanion<MealPlanEntry> {
       Value<String>? date,
       Value<String?>? userId,
       Value<String?>? householdId,
-      Value<List<MealPlanItem>?>? data,
+      Value<List<MealPlanItem>?>? items,
       Value<int?>? createdAt,
       Value<int?>? updatedAt,
       Value<int?>? deletedAt,
@@ -7851,7 +7853,7 @@ class MealPlansCompanion extends UpdateCompanion<MealPlanEntry> {
       date: date ?? this.date,
       userId: userId ?? this.userId,
       householdId: householdId ?? this.householdId,
-      data: data ?? this.data,
+      items: items ?? this.items,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
       deletedAt: deletedAt ?? this.deletedAt,
@@ -7874,9 +7876,9 @@ class MealPlansCompanion extends UpdateCompanion<MealPlanEntry> {
     if (householdId.present) {
       map['household_id'] = Variable<String>(householdId.value);
     }
-    if (data.present) {
-      map['data'] =
-          Variable<String>($MealPlansTable.$converterdatan.toSql(data.value));
+    if (items.present) {
+      map['items'] =
+          Variable<String>($MealPlansTable.$converteritemsn.toSql(items.value));
     }
     if (createdAt.present) {
       map['created_at'] = Variable<int>(createdAt.value);
@@ -7900,7 +7902,7 @@ class MealPlansCompanion extends UpdateCompanion<MealPlanEntry> {
           ..write('date: $date, ')
           ..write('userId: $userId, ')
           ..write('householdId: $householdId, ')
-          ..write('data: $data, ')
+          ..write('items: $items, ')
           ..write('createdAt: $createdAt, ')
           ..write('updatedAt: $updatedAt, ')
           ..write('deletedAt: $deletedAt, ')
@@ -11613,7 +11615,7 @@ typedef $$MealPlansTableCreateCompanionBuilder = MealPlansCompanion Function({
   required String date,
   Value<String?> userId,
   Value<String?> householdId,
-  Value<List<MealPlanItem>?> data,
+  Value<List<MealPlanItem>?> items,
   Value<int?> createdAt,
   Value<int?> updatedAt,
   Value<int?> deletedAt,
@@ -11624,7 +11626,7 @@ typedef $$MealPlansTableUpdateCompanionBuilder = MealPlansCompanion Function({
   Value<String> date,
   Value<String?> userId,
   Value<String?> householdId,
-  Value<List<MealPlanItem>?> data,
+  Value<List<MealPlanItem>?> items,
   Value<int?> createdAt,
   Value<int?> updatedAt,
   Value<int?> deletedAt,
@@ -11654,8 +11656,8 @@ class $$MealPlansTableFilterComposer
 
   ColumnWithTypeConverterFilters<List<MealPlanItem>?, List<MealPlanItem>,
           String>
-      get data => $composableBuilder(
-          column: $table.data,
+      get items => $composableBuilder(
+          column: $table.items,
           builder: (column) => ColumnWithTypeConverterFilters(column));
 
   ColumnFilters<int> get createdAt => $composableBuilder(
@@ -11689,8 +11691,8 @@ class $$MealPlansTableOrderingComposer
   ColumnOrderings<String> get householdId => $composableBuilder(
       column: $table.householdId, builder: (column) => ColumnOrderings(column));
 
-  ColumnOrderings<String> get data => $composableBuilder(
-      column: $table.data, builder: (column) => ColumnOrderings(column));
+  ColumnOrderings<String> get items => $composableBuilder(
+      column: $table.items, builder: (column) => ColumnOrderings(column));
 
   ColumnOrderings<int> get createdAt => $composableBuilder(
       column: $table.createdAt, builder: (column) => ColumnOrderings(column));
@@ -11723,8 +11725,8 @@ class $$MealPlansTableAnnotationComposer
   GeneratedColumn<String> get householdId => $composableBuilder(
       column: $table.householdId, builder: (column) => column);
 
-  GeneratedColumnWithTypeConverter<List<MealPlanItem>?, String> get data =>
-      $composableBuilder(column: $table.data, builder: (column) => column);
+  GeneratedColumnWithTypeConverter<List<MealPlanItem>?, String> get items =>
+      $composableBuilder(column: $table.items, builder: (column) => column);
 
   GeneratedColumn<int> get createdAt =>
       $composableBuilder(column: $table.createdAt, builder: (column) => column);
@@ -11766,7 +11768,7 @@ class $$MealPlansTableTableManager extends RootTableManager<
             Value<String> date = const Value.absent(),
             Value<String?> userId = const Value.absent(),
             Value<String?> householdId = const Value.absent(),
-            Value<List<MealPlanItem>?> data = const Value.absent(),
+            Value<List<MealPlanItem>?> items = const Value.absent(),
             Value<int?> createdAt = const Value.absent(),
             Value<int?> updatedAt = const Value.absent(),
             Value<int?> deletedAt = const Value.absent(),
@@ -11777,7 +11779,7 @@ class $$MealPlansTableTableManager extends RootTableManager<
             date: date,
             userId: userId,
             householdId: householdId,
-            data: data,
+            items: items,
             createdAt: createdAt,
             updatedAt: updatedAt,
             deletedAt: deletedAt,
@@ -11788,7 +11790,7 @@ class $$MealPlansTableTableManager extends RootTableManager<
             required String date,
             Value<String?> userId = const Value.absent(),
             Value<String?> householdId = const Value.absent(),
-            Value<List<MealPlanItem>?> data = const Value.absent(),
+            Value<List<MealPlanItem>?> items = const Value.absent(),
             Value<int?> createdAt = const Value.absent(),
             Value<int?> updatedAt = const Value.absent(),
             Value<int?> deletedAt = const Value.absent(),
@@ -11799,7 +11801,7 @@ class $$MealPlansTableTableManager extends RootTableManager<
             date: date,
             userId: userId,
             householdId: householdId,
-            data: data,
+            items: items,
             createdAt: createdAt,
             updatedAt: updatedAt,
             deletedAt: deletedAt,

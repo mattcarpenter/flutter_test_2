@@ -19,7 +19,7 @@ class MealPlans extends Table {
   TextColumn get householdId => text().nullable()();
   
   // JSON array of meal plan items (recipes and notes) with ordering
-  TextColumn get data => text().map(const MealPlanItemListConverter()).nullable()();
+  TextColumn get items => text().map(const MealPlanItemListConverter()).nullable()();
   
   // Timestamps
   IntColumn get createdAt => integer().nullable()();

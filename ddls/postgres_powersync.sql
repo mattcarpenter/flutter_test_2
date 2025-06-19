@@ -280,7 +280,7 @@ CREATE TABLE public.meal_plans (
                                    date text NOT NULL,
                                    user_id uuid NOT NULL,
                                    household_id uuid NULL,
-                                   data text NULL,
+                                   items text NULL,
                                    created_at bigint NULL,
                                    updated_at bigint NULL,
                                    deleted_at bigint NULL,

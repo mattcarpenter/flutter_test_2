@@ -41,7 +41,7 @@ class MealPlanRepository {
     if (existing != null) {
       // Update existing
       final updatedEntry = existing.copyWith(
-        data: Value(items),
+        items: Value(items),
         updatedAt: Value(now),
       );
       
@@ -53,7 +53,7 @@ class MealPlanRepository {
         date: date,
         userId: userId != null ? Value(userId) : const Value.absent(),
         householdId: householdId != null ? Value(householdId) : const Value.absent(),
-        data: Value(items),
+        items: Value(items),
         createdAt: Value(now),
         updatedAt: Value(now),
       );
@@ -74,7 +74,7 @@ class MealPlanRepository {
     String? householdId,
   }) async {
     final existing = await getMealPlanByDate(date, userId, householdId);
-    List<MealPlanItem> items = existing?.data ?? [];
+    List<MealPlanItem> items = existing?.items ?? [];
     
     // Find next position
     final nextPosition = items.isEmpty ? 0 : items.map((e) => e.position).reduce((a, b) => a > b ? a : b) + 1;
@@ -103,7 +103,7 @@ class MealPlanRepository {
     String? householdId,
   }) async {
     final existing = await getMealPlanByDate(date, userId, householdId);
-    List<MealPlanItem> items = existing?.data ?? [];
+    List<MealPlanItem> items = existing?.items ?? [];
     
     // Find next position
     final nextPosition = items.isEmpty ? 0 : items.map((e) => e.position).reduce((a, b) => a > b ? a : b) + 1;
@@ -133,7 +133,7 @@ class MealPlanRepository {
     final existing = await getMealPlanByDate(date, userId, householdId);
     if (existing == null) return;
     
-    List<MealPlanItem> items = existing.data ?? [];
+    List<MealPlanItem> items = existing.items ?? [];
     items.removeWhere((item) => item.id == itemId);
     
     // Reposition items
@@ -192,7 +192,7 @@ class MealPlanRepository {
     final existing = await getMealPlanByDate(date, userId, householdId);
     if (existing == null) return;
     
-    List<MealPlanItem> items = existing.data ?? [];
+    List<MealPlanItem> items = existing.items ?? [];
     final itemIndex = items.indexWhere((item) => item.id == itemId);
     if (itemIndex == -1) return;
     
@@ -251,13 +251,13 @@ class MealPlanRepository {
     String? householdId,
   }) async {
     final mealPlan = await getMealPlanByDate(date, userId, householdId);
-    if (mealPlan?.data == null) return [];
+    if (mealPlan?.items == null) return [];
     
-    final data = mealPlan!.data;
-    if (data == null) return [];
+    final items = mealPlan!.items;
+    if (items == null) return [];
     
     final recipeIds = <String>[];
-    for (final item in data) {
+    for (final item in items) {
       if (item.isRecipe && item.recipeId != null) {
         recipeIds.add(item.recipeId!);
       }
