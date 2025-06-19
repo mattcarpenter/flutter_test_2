@@ -5,7 +5,6 @@ import 'package:go_router/go_router.dart';
 import 'package:super_context_menu/super_context_menu.dart';
 import '../../../../database/models/meal_plan_items.dart';
 import '../../../providers/meal_plan_provider.dart';
-import '../utils/context_menu_utils.dart';
 
 class MealPlanItemTile extends ConsumerStatefulWidget {
   final int index;
@@ -26,10 +25,19 @@ class MealPlanItemTile extends ConsumerStatefulWidget {
 }
 
 class _MealPlanItemTileState extends ConsumerState<MealPlanItemTile> {
-  final GlobalKey _dragHandleKey = GlobalKey();
-
   bool _contextMenuIsAllowed(Offset location) {
-    return isLocationOutsideKey(location, _dragHandleKey);
+    // The drag handle is the rightmost 40px of the widget
+    // If we can't determine the widget size, allow context menu everywhere
+    final renderObject = context.findRenderObject();
+    if (renderObject is RenderBox) {
+      final size = renderObject.size;
+      final dragHandleWidth = 40.0;
+      // Check if the touch is in the rightmost area (drag handle)
+      if (location.dx > size.width - dragHandleWidth) {
+        return false; // Don't allow context menu in drag handle area
+      }
+    }
+    return true; // Allow context menu everywhere else
   }
 
   @override
@@ -146,7 +154,6 @@ class _MealPlanItemTileState extends ConsumerState<MealPlanItemTile> {
               child: SizedBox(
                 width: 40,
                 child: ReorderableDragStartListener(
-                  key: _dragHandleKey,
                   index: widget.index,
                   child: Icon(
                     CupertinoIcons.line_horizontal_3,

@@ -26,30 +26,30 @@ class MealPlanItemLifted extends ConsumerStatefulWidget {
 
 class _MealPlanItemLiftedState extends ConsumerState<MealPlanItemLifted>
     with SingleTickerProviderStateMixin {
-  final GlobalKey _dragHandleKey = GlobalKey();
   late AnimationController _liftController;
   late Animation<double> _scaleAnimation;
   late Animation<double> _shadowAnimation;
   bool _isDragging = false;
   
   bool _contextMenuIsAllowed(Offset location) {
-    return _isLocationOutsideKey(location, _dragHandleKey);
-  }
-  
-  bool _isLocationOutsideKey(Offset location, GlobalKey key) {
-    final renderObject = key.currentContext?.findRenderObject();
+    // The drag handle is the rightmost 48px of the widget
+    // If we can't determine the widget size, allow context menu everywhere
+    final renderObject = context.findRenderObject();
     if (renderObject is RenderBox) {
-      final rect = renderObject.localToGlobal(Offset.zero) & renderObject.size;
-      if (rect.contains(location)) {
-        return false;
+      final size = renderObject.size;
+      final dragHandleWidth = 48.0;
+      // Check if the touch is in the rightmost area (drag handle)
+      if (location.dx > size.width - dragHandleWidth) {
+        return false; // Don't allow context menu in drag handle area
       }
     }
-    return true;
+    return true; // Allow context menu everywhere else
   }
 
   @override
   void initState() {
     super.initState();
+    
     _liftController = AnimationController(
       duration: const Duration(milliseconds: 150),
       vsync: this,
@@ -261,7 +261,6 @@ class _MealPlanItemLiftedState extends ConsumerState<MealPlanItemLifted>
           
           // Drag handle
           Icon(
-            key: _dragHandleKey,
             CupertinoIcons.line_horizontal_3,
             size: 16,
             color: CupertinoColors.tertiaryLabel.resolveFrom(context),
