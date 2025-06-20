@@ -2,6 +2,7 @@
 import 'dart:ffi';
 import 'dart:io';
 
+import 'package:drift/drift.dart' show Value;
 import 'package:flutter/foundation.dart';
 import 'package:logging/logging.dart';
 import 'package:path/path.dart';
@@ -111,6 +112,16 @@ class SupabaseConnector extends PowerSyncBackendConnector {
         if (op.op == UpdateType.put) {
           var data = Map<String, dynamic>.of(op.opData!);
           data['id'] = op.id;
+          
+          // Fallback: ensure userId is set for tables that require it
+          if ((data['user_id'] == null || data['user_id'] == '') && _needsUserId(op.table)) {
+            final userId = getUserId();
+            if (userId != null) {
+              data['user_id'] = userId;
+              log.warning('Added missing userId to ${op.table} record ${op.id}');
+            }
+          }
+          
           await table.upsert(data);
         } else if (op.op == UpdateType.patch) {
           await table.update(op.opData!).eq('id', op.id);
@@ -197,6 +208,10 @@ Future<void> openDatabase({bool isTest = false}) async {
   if (isLoggedIn()) {
     // If the user is already logged in, connect immediately.
     // Otherwise, connect once logged in.
+    final userId = getUserId();
+    if (userId != null) {
+      await _claimOrphanedRecords(userId);
+    }
     currentConnector = SupabaseConnector();
     db.connect(connector: currentConnector);
   }
@@ -205,6 +220,10 @@ Future<void> openDatabase({bool isTest = false}) async {
     final AuthChangeEvent event = data.event;
     if (event == AuthChangeEvent.signedIn) {
       // Connect to PowerSync when the user is signed in
+      final userId = getUserId();
+      if (userId != null) {
+        await _claimOrphanedRecords(userId);
+      }
       currentConnector = SupabaseConnector();
       db.connect(connector: currentConnector!);
     } else if (event == AuthChangeEvent.signedOut) {
@@ -224,4 +243,112 @@ Future<void> openDatabase({bool isTest = false}) async {
   // Demo using SQLite Full-Text Search with PowerSync.
   // See https://docs.powersync.com/usage-examples/full-text-search for more details
   await configureFts(db);
+}
+
+/// Claims orphaned records (those with NULL or empty string userId) for the specified user.
+/// This should be called after sign-in but before connecting to PowerSync.
+Future<void> _claimOrphanedRecords(String userId) async {
+  try {
+    // Update recipes - handle NULL userId
+    await (appDb.update(appDb.recipes)
+      ..where((r) => r.userId.isNull()))
+      .write(RecipesCompanion(userId: Value(userId)));
+    
+    // Update recipes - handle empty string userId
+    await (appDb.update(appDb.recipes)
+      ..where((r) => r.userId.equals('')))
+      .write(RecipesCompanion(userId: Value(userId)));
+    
+    // Update meal plans - handle NULL userId
+    await (appDb.update(appDb.mealPlans)
+      ..where((m) => m.userId.isNull()))
+      .write(MealPlansCompanion(userId: Value(userId)));
+    
+    // Update meal plans - handle empty string userId
+    await (appDb.update(appDb.mealPlans)
+      ..where((m) => m.userId.equals('')))
+      .write(MealPlansCompanion(userId: Value(userId)));
+    
+    // Update shopping lists - handle NULL userId
+    await (appDb.update(appDb.shoppingLists)
+      ..where((s) => s.userId.isNull()))
+      .write(ShoppingListsCompanion(userId: Value(userId)));
+    
+    // Update shopping lists - handle empty string userId
+    await (appDb.update(appDb.shoppingLists)
+      ..where((s) => s.userId.equals('')))
+      .write(ShoppingListsCompanion(userId: Value(userId)));
+    
+    // Update shopping list items - handle NULL userId
+    await (appDb.update(appDb.shoppingListItems)
+      ..where((s) => s.userId.isNull()))
+      .write(ShoppingListItemsCompanion(userId: Value(userId)));
+    
+    // Update shopping list items - handle empty string userId
+    await (appDb.update(appDb.shoppingListItems)
+      ..where((s) => s.userId.equals('')))
+      .write(ShoppingListItemsCompanion(userId: Value(userId)));
+    
+    // Update pantry items - handle NULL userId
+    await (appDb.update(appDb.pantryItems)
+      ..where((p) => p.userId.isNull()))
+      .write(PantryItemsCompanion(userId: Value(userId)));
+    
+    // Update pantry items - handle empty string userId
+    await (appDb.update(appDb.pantryItems)
+      ..where((p) => p.userId.equals('')))
+      .write(PantryItemsCompanion(userId: Value(userId)));
+    
+    // Update recipe folders - handle NULL userId
+    await (appDb.update(appDb.recipeFolders)
+      ..where((f) => f.userId.isNull()))
+      .write(RecipeFoldersCompanion(userId: Value(userId)));
+    
+    // Update recipe folders - handle empty string userId
+    await (appDb.update(appDb.recipeFolders)
+      ..where((f) => f.userId.equals('')))
+      .write(RecipeFoldersCompanion(userId: Value(userId)));
+    
+    // Update cooks - handle NULL userId
+    await (appDb.update(appDb.cooks)
+      ..where((c) => c.userId.isNull()))
+      .write(CooksCompanion(userId: Value(userId)));
+    
+    // Update cooks - handle empty string userId
+    await (appDb.update(appDb.cooks)
+      ..where((c) => c.userId.equals('')))
+      .write(CooksCompanion(userId: Value(userId)));
+    
+    // Update ingredient term overrides - handle NULL userId
+    await (appDb.update(appDb.ingredientTermOverrides)
+      ..where((i) => i.userId.isNull()))
+      .write(IngredientTermOverridesCompanion(userId: Value(userId)));
+    
+    // Update ingredient term overrides - handle empty string userId
+    await (appDb.update(appDb.ingredientTermOverrides)
+      ..where((i) => i.userId.equals('')))
+      .write(IngredientTermOverridesCompanion(userId: Value(userId)));
+    
+    log.info('Successfully claimed orphaned records for user $userId');
+  } catch (e) {
+    log.severe('Error claiming orphaned records: $e');
+    // Don't rethrow - we don't want to block sign-in if this fails
+  }
+}
+
+/// Returns true if the given table requires a userId for RLS policies.
+bool _needsUserId(String tableName) {
+  const tablesRequiringUserId = {
+    'recipes',
+    'meal_plans',
+    'shopping_lists',
+    'shopping_list_items',
+    'pantry_items',
+    'recipe_folders',
+    'cooks',
+    'ingredient_term_overrides',
+    'converters',
+  };
+  
+  return tablesRequiringUserId.contains(tableName);
 }
