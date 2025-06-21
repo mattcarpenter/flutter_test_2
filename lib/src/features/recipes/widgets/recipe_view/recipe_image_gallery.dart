@@ -73,10 +73,22 @@ class _RecipeImageGalleryState extends State<RecipeImageGallery> {
                     ),
                     child: ClipRRect(
                       borderRadius: BorderRadius.circular(6),
-                      child: LocalOrNetworkImage(
-                        filePath: image.fileName,
-                        url: imageUrl,
-                        fit: BoxFit.cover,
+                      child: FutureBuilder<String>(
+                        future: image.getFullPath(),
+                        builder: (context, snapshot) {
+                          if (!snapshot.hasData) {
+                            return const SizedBox(
+                              width: 70,
+                              height: 70,
+                              child: Center(child: CircularProgressIndicator()),
+                            );
+                          }
+                          return LocalOrNetworkImage(
+                            filePath: snapshot.data ?? '',
+                            url: imageUrl,
+                            fit: BoxFit.cover,
+                          );
+                        },
                       ),
                     ),
                   ),
@@ -94,10 +106,20 @@ class _RecipeImageGalleryState extends State<RecipeImageGallery> {
     final imageUrl = selectedImage.getPublicUrlForSize(RecipeImageSize.large) ??
         selectedImage.publicUrl ?? '';
 
-    return LocalOrNetworkImage(
-      filePath: selectedImage.fileName,
-      url: imageUrl,
-      fit: BoxFit.cover,
+    return FutureBuilder<String>(
+      future: selectedImage.getFullPath(),
+      builder: (context, snapshot) {
+        if (!snapshot.hasData) {
+          return const SizedBox(
+            child: Center(child: CircularProgressIndicator()),
+          );
+        }
+        return LocalOrNetworkImage(
+          filePath: snapshot.data ?? '',
+          url: imageUrl,
+          fit: BoxFit.cover,
+        );
+      },
     );
   }
 }
