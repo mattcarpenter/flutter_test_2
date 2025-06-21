@@ -154,14 +154,17 @@ class RecipeEditorFormState extends ConsumerState<RecipeEditorForm> {
         await notifier.updateRecipe(mergedRecipe); // was mergedRecipe
       }
 
-      // Add any pending images to the upload queue.
-      for (final image in updatedRecipe.images ?? []) {
-        // Even if the image was updated by the processor, addToQueue should be a no-op if already uploaded.
-        if (image.publicUrl == null) {
-          ref.read(uploadQueueManagerProvider).addToQueue(
-            fileName: image.fileName,
-            recipeId: updatedRecipe.id,
-          );
+      // Add any pending images to the upload queue (only if user is authenticated).
+      final currentUser = supabase_flutter.Supabase.instance.client.auth.currentUser;
+      if (currentUser != null) {
+        for (final image in updatedRecipe.images ?? []) {
+          // Even if the image was updated by the processor, addToQueue should be a no-op if already uploaded.
+          if (image.publicUrl == null) {
+            ref.read(uploadQueueManagerProvider).addToQueue(
+              fileName: image.fileName,
+              recipeId: updatedRecipe.id,
+            );
+          }
         }
       }
 

@@ -22,6 +22,10 @@ import 'schema.dart';
 
 import 'package:path/path.dart' as p;
 
+import '../src/managers/upload_queue_manager.dart';
+import '../src/repositories/upload_queue_repository.dart';
+import '../src/repositories/recipe_repository.dart';
+
 final log = Logger('powersync-supabase');
 
 /// Postgres Response codes that we cannot recover from by retrying.
@@ -329,9 +333,57 @@ Future<void> _claimOrphanedRecords(String userId) async {
       ..where((i) => i.userId.equals('')))
       .write(IngredientTermOverridesCompanion(userId: Value(userId)));
     
+    // Populate upload queue for newly claimed recipes with images
+    await _populateUploadQueueForClaimedRecipes(userId);
+    
     log.info('Successfully claimed orphaned records for user $userId');
   } catch (e) {
     log.severe('Error claiming orphaned records: $e');
+    // Don't rethrow - we don't want to block sign-in if this fails
+  }
+}
+
+/// Populates the upload queue for recipes with images that need uploading.
+/// This should be called after claiming orphaned records to ensure images get uploaded.
+Future<void> _populateUploadQueueForClaimedRecipes(String userId) async {
+  try {
+    // Query all recipes belonging to this user that have images
+    final recipesWithImages = await (appDb.select(appDb.recipes)
+      ..where((r) => r.userId.equals(userId)))
+      .get();
+    
+    // Create upload queue manager and repositories directly
+    final uploadQueueRepository = UploadQueueRepository(appDb);
+    final recipeRepository = RecipeRepository(appDb);
+    final uploadQueueManager = UploadQueueManager(
+      repository: uploadQueueRepository,
+      db: appDb,
+      recipeRepository: recipeRepository,
+      supabaseClient: Supabase.instance.client,
+    );
+    
+    // Process each recipe's images
+    for (final recipe in recipesWithImages) {
+      final images = recipe.images;
+      if (images != null && images.isNotEmpty) {
+        for (final image in images) {
+          // Only queue images that haven't been uploaded yet
+          if (image.publicUrl == null) {
+            await uploadQueueManager.addToQueue(
+              fileName: image.fileName,
+              recipeId: recipe.id,
+            );
+          }
+        }
+      }
+    }
+    
+    // Process the upload queue immediately
+    await uploadQueueManager.processQueue();
+    
+    log.info('Upload queue populated and processed for user $userId');
+  } catch (e) {
+    log.warning('Error populating upload queue for claimed recipes: $e');
     // Don't rethrow - we don't want to block sign-in if this fails
   }
 }
