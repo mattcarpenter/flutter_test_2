@@ -66,6 +66,7 @@ Notes:
 - Invites will be created by calling an API on our express app
   - On the backend we'll take care of creating the invite in supabase
   - On the backend we'll use the 
+- All other operations related to invites will be implemented server-side as well. this includes resending, revoking, and accepting.
 
 ### UX Flow
 
@@ -100,6 +101,17 @@ Notes:
       - tapping shows confirmation bottom sheet with a dropdown to select new owner
       - tapping leave button on this bottom sheet should show a dialog with Cancel/Leave Household buttons to confirm
   - If user has been invited to a household then we show the invite instead of anything else with accept / decline options
-Notes:
+
+#### Notes:
 - Creator becomes owner, first member 
 - When a user become a member of a household (either by creating one or accepting an invite), add householdId to all existing personal data
+- Use Amazon SES for sending email invites
+- The "More" menu is located here: lib/src/widgets/menu/menu.dart
+- GoRouter routes are defined in lib/src/mobile/adaptive_app.dart. can look at the existing labs route as a reference for creating a new route for the household sharing page
+- The recipe app server directory has been added as a working directory to claude code. can make API changes here
+- Can reference the lib/src/services/ingredient_canonicalization_service.dart for how to make backend API calls
+- Since creating and modifying of invites in supabase/postgres will only be done via API calls, we can:
+  - create an RLS policy in ddls/policies_powersync.sql that permits read-only
+  - create the ddl for the new table in ddls/postgres_powersync.sql
+  - update the sync rules for powerysnc in ddls/sync-rules.yaml. note that you may have to define the bucket to use the logged in user's email in the display name col in invites. should help this work in cases where a household owner invites a non-existing user via email, meaning we wont have a userId in the invites table. if powersync doesn't work like this, we might need a userId column in invites and a trigger in supabase/pg to set the userId when someone registers with an email that matches the email on an invite
+- when building the backend please follow good layering and security practices, thinking carefully about how the app auths with the backend and how the backend auths with supabase.
