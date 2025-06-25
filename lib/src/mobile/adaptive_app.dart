@@ -20,6 +20,7 @@ import '../features/meal_plans/views/meal_plans_sub_page.dart';
 import '../features/recipes/views/recipes_root.dart';
 import '../features/shopping_list/views/shopping_list_root.dart';
 import '../features/shopping_list/views/shopping_list_sub_page.dart';
+import '../features/household/views/household_sharing_page.dart';
 import 'main_page_shell.dart';
 import 'package:sheet/route.dart';
 
@@ -92,6 +93,7 @@ class _AdaptiveApp2State extends State<AdaptiveApp2> {
     final _mealPlansNavKey = GlobalKey<NavigatorState>(debugLabel: 'mealPlansNavKey');
     final _pantryNavKey  = GlobalKey<NavigatorState>(debugLabel: 'pantryNavKey');
     final _mainPageShellKey = GlobalKey<MainPageShellState>(debugLabel: 'mainPageShellKey');
+    final _householdPageShellKey = GlobalKey<MainPageShellState>(debugLabel: 'householdPageShellKey');
 
     final nonTabRoutes = [
       ShellRoute(
@@ -138,6 +140,40 @@ class _AdaptiveApp2State extends State<AdaptiveApp2> {
               child: LabsTab(
                 onMenuPressed: () {
                   _mainPageShellKey.currentState?.toggleDrawer();
+                },
+              ),
+            ),
+          ),
+        ],
+      ),
+      ShellRoute(
+        pageBuilder: (BuildContext context, GoRouterState state, Widget child) {
+          return CustomTransitionPage<void>(
+            key: state.pageKey,
+            child: child,
+            transitionDuration: const Duration(milliseconds: 400),
+            reverseTransitionDuration: const Duration(milliseconds: 400),
+            transitionsBuilder: (context, animation, secondaryAnimation, child) =>
+                CupertinoTabPageTransition(
+                  animation: animation,
+                  child: isTablet
+                      ? child
+                      : MainPageShell(
+                    key: _householdPageShellKey,
+                    child: child,
+                    showBottomNavBar: false,
+                  ),
+                ),
+          );
+        },
+        routes: [
+          GoRoute(
+            path: '/household',
+            pageBuilder: (context, state) => _platformPage(
+              state: state,
+              child: HouseholdSharingPage(
+                onMenuPressed: () {
+                  _householdPageShellKey.currentState?.toggleDrawer();
                 },
               ),
             ),

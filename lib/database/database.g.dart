@@ -1645,8 +1645,22 @@ class $HouseholdMembersTable extends HouseholdMembers
       type: DriftSqlType.int,
       requiredDuringInsert: false,
       defaultValue: const Constant(1));
+  static const VerificationMeta _roleMeta = const VerificationMeta('role');
   @override
-  List<GeneratedColumn> get $columns => [id, householdId, userId, isActive];
+  late final GeneratedColumn<String> role = GeneratedColumn<String>(
+      'role', aliasedName, false,
+      type: DriftSqlType.string,
+      requiredDuringInsert: false,
+      defaultValue: const Constant('member'));
+  static const VerificationMeta _joinedAtMeta =
+      const VerificationMeta('joinedAt');
+  @override
+  late final GeneratedColumn<int> joinedAt = GeneratedColumn<int>(
+      'joined_at', aliasedName, false,
+      type: DriftSqlType.int, requiredDuringInsert: true);
+  @override
+  List<GeneratedColumn> get $columns =>
+      [id, householdId, userId, isActive, role, joinedAt];
   @override
   String get aliasedName => _alias ?? actualTableName;
   @override
@@ -1679,6 +1693,16 @@ class $HouseholdMembersTable extends HouseholdMembers
       context.handle(_isActiveMeta,
           isActive.isAcceptableOrUnknown(data['is_active']!, _isActiveMeta));
     }
+    if (data.containsKey('role')) {
+      context.handle(
+          _roleMeta, role.isAcceptableOrUnknown(data['role']!, _roleMeta));
+    }
+    if (data.containsKey('joined_at')) {
+      context.handle(_joinedAtMeta,
+          joinedAt.isAcceptableOrUnknown(data['joined_at']!, _joinedAtMeta));
+    } else if (isInserting) {
+      context.missing(_joinedAtMeta);
+    }
     return context;
   }
 
@@ -1696,6 +1720,10 @@ class $HouseholdMembersTable extends HouseholdMembers
           .read(DriftSqlType.string, data['${effectivePrefix}user_id'])!,
       isActive: attachedDatabase.typeMapping
           .read(DriftSqlType.int, data['${effectivePrefix}is_active'])!,
+      role: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}role'])!,
+      joinedAt: attachedDatabase.typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}joined_at'])!,
     );
   }
 
@@ -1711,11 +1739,15 @@ class HouseholdMemberEntry extends DataClass
   final String householdId;
   final String userId;
   final int isActive;
+  final String role;
+  final int joinedAt;
   const HouseholdMemberEntry(
       {required this.id,
       required this.householdId,
       required this.userId,
-      required this.isActive});
+      required this.isActive,
+      required this.role,
+      required this.joinedAt});
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
@@ -1723,6 +1755,8 @@ class HouseholdMemberEntry extends DataClass
     map['household_id'] = Variable<String>(householdId);
     map['user_id'] = Variable<String>(userId);
     map['is_active'] = Variable<int>(isActive);
+    map['role'] = Variable<String>(role);
+    map['joined_at'] = Variable<int>(joinedAt);
     return map;
   }
 
@@ -1732,6 +1766,8 @@ class HouseholdMemberEntry extends DataClass
       householdId: Value(householdId),
       userId: Value(userId),
       isActive: Value(isActive),
+      role: Value(role),
+      joinedAt: Value(joinedAt),
     );
   }
 
@@ -1743,6 +1779,8 @@ class HouseholdMemberEntry extends DataClass
       householdId: serializer.fromJson<String>(json['householdId']),
       userId: serializer.fromJson<String>(json['userId']),
       isActive: serializer.fromJson<int>(json['isActive']),
+      role: serializer.fromJson<String>(json['role']),
+      joinedAt: serializer.fromJson<int>(json['joinedAt']),
     );
   }
   @override
@@ -1753,16 +1791,25 @@ class HouseholdMemberEntry extends DataClass
       'householdId': serializer.toJson<String>(householdId),
       'userId': serializer.toJson<String>(userId),
       'isActive': serializer.toJson<int>(isActive),
+      'role': serializer.toJson<String>(role),
+      'joinedAt': serializer.toJson<int>(joinedAt),
     };
   }
 
   HouseholdMemberEntry copyWith(
-          {String? id, String? householdId, String? userId, int? isActive}) =>
+          {String? id,
+          String? householdId,
+          String? userId,
+          int? isActive,
+          String? role,
+          int? joinedAt}) =>
       HouseholdMemberEntry(
         id: id ?? this.id,
         householdId: householdId ?? this.householdId,
         userId: userId ?? this.userId,
         isActive: isActive ?? this.isActive,
+        role: role ?? this.role,
+        joinedAt: joinedAt ?? this.joinedAt,
       );
   HouseholdMemberEntry copyWithCompanion(HouseholdMembersCompanion data) {
     return HouseholdMemberEntry(
@@ -1771,6 +1818,8 @@ class HouseholdMemberEntry extends DataClass
           data.householdId.present ? data.householdId.value : this.householdId,
       userId: data.userId.present ? data.userId.value : this.userId,
       isActive: data.isActive.present ? data.isActive.value : this.isActive,
+      role: data.role.present ? data.role.value : this.role,
+      joinedAt: data.joinedAt.present ? data.joinedAt.value : this.joinedAt,
     );
   }
 
@@ -1780,13 +1829,16 @@ class HouseholdMemberEntry extends DataClass
           ..write('id: $id, ')
           ..write('householdId: $householdId, ')
           ..write('userId: $userId, ')
-          ..write('isActive: $isActive')
+          ..write('isActive: $isActive, ')
+          ..write('role: $role, ')
+          ..write('joinedAt: $joinedAt')
           ..write(')'))
         .toString();
   }
 
   @override
-  int get hashCode => Object.hash(id, householdId, userId, isActive);
+  int get hashCode =>
+      Object.hash(id, householdId, userId, isActive, role, joinedAt);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -1794,7 +1846,9 @@ class HouseholdMemberEntry extends DataClass
           other.id == this.id &&
           other.householdId == this.householdId &&
           other.userId == this.userId &&
-          other.isActive == this.isActive);
+          other.isActive == this.isActive &&
+          other.role == this.role &&
+          other.joinedAt == this.joinedAt);
 }
 
 class HouseholdMembersCompanion extends UpdateCompanion<HouseholdMemberEntry> {
@@ -1802,12 +1856,16 @@ class HouseholdMembersCompanion extends UpdateCompanion<HouseholdMemberEntry> {
   final Value<String> householdId;
   final Value<String> userId;
   final Value<int> isActive;
+  final Value<String> role;
+  final Value<int> joinedAt;
   final Value<int> rowid;
   const HouseholdMembersCompanion({
     this.id = const Value.absent(),
     this.householdId = const Value.absent(),
     this.userId = const Value.absent(),
     this.isActive = const Value.absent(),
+    this.role = const Value.absent(),
+    this.joinedAt = const Value.absent(),
     this.rowid = const Value.absent(),
   });
   HouseholdMembersCompanion.insert({
@@ -1815,14 +1873,19 @@ class HouseholdMembersCompanion extends UpdateCompanion<HouseholdMemberEntry> {
     required String householdId,
     required String userId,
     this.isActive = const Value.absent(),
+    this.role = const Value.absent(),
+    required int joinedAt,
     this.rowid = const Value.absent(),
   })  : householdId = Value(householdId),
-        userId = Value(userId);
+        userId = Value(userId),
+        joinedAt = Value(joinedAt);
   static Insertable<HouseholdMemberEntry> custom({
     Expression<String>? id,
     Expression<String>? householdId,
     Expression<String>? userId,
     Expression<int>? isActive,
+    Expression<String>? role,
+    Expression<int>? joinedAt,
     Expression<int>? rowid,
   }) {
     return RawValuesInsertable({
@@ -1830,6 +1893,8 @@ class HouseholdMembersCompanion extends UpdateCompanion<HouseholdMemberEntry> {
       if (householdId != null) 'household_id': householdId,
       if (userId != null) 'user_id': userId,
       if (isActive != null) 'is_active': isActive,
+      if (role != null) 'role': role,
+      if (joinedAt != null) 'joined_at': joinedAt,
       if (rowid != null) 'rowid': rowid,
     });
   }
@@ -1839,12 +1904,16 @@ class HouseholdMembersCompanion extends UpdateCompanion<HouseholdMemberEntry> {
       Value<String>? householdId,
       Value<String>? userId,
       Value<int>? isActive,
+      Value<String>? role,
+      Value<int>? joinedAt,
       Value<int>? rowid}) {
     return HouseholdMembersCompanion(
       id: id ?? this.id,
       householdId: householdId ?? this.householdId,
       userId: userId ?? this.userId,
       isActive: isActive ?? this.isActive,
+      role: role ?? this.role,
+      joinedAt: joinedAt ?? this.joinedAt,
       rowid: rowid ?? this.rowid,
     );
   }
@@ -1864,6 +1933,12 @@ class HouseholdMembersCompanion extends UpdateCompanion<HouseholdMemberEntry> {
     if (isActive.present) {
       map['is_active'] = Variable<int>(isActive.value);
     }
+    if (role.present) {
+      map['role'] = Variable<String>(role.value);
+    }
+    if (joinedAt.present) {
+      map['joined_at'] = Variable<int>(joinedAt.value);
+    }
     if (rowid.present) {
       map['rowid'] = Variable<int>(rowid.value);
     }
@@ -1877,6 +1952,8 @@ class HouseholdMembersCompanion extends UpdateCompanion<HouseholdMemberEntry> {
           ..write('householdId: $householdId, ')
           ..write('userId: $userId, ')
           ..write('isActive: $isActive, ')
+          ..write('role: $role, ')
+          ..write('joinedAt: $joinedAt, ')
           ..write('rowid: $rowid')
           ..write(')'))
         .toString();
@@ -2104,6 +2181,706 @@ class HouseholdsCompanion extends UpdateCompanion<HouseholdEntry> {
           ..write('id: $id, ')
           ..write('name: $name, ')
           ..write('userId: $userId, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
+class $HouseholdInvitesTable extends HouseholdInvites
+    with TableInfo<$HouseholdInvitesTable, HouseholdInviteEntry> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $HouseholdInvitesTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<String> id = GeneratedColumn<String>(
+      'id', aliasedName, false,
+      type: DriftSqlType.string,
+      requiredDuringInsert: false,
+      defaultConstraints: GeneratedColumn.constraintIsAlways('UNIQUE'),
+      clientDefault: () => const Uuid().v4());
+  static const VerificationMeta _householdIdMeta =
+      const VerificationMeta('householdId');
+  @override
+  late final GeneratedColumn<String> householdId = GeneratedColumn<String>(
+      'household_id', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _invitedByUserIdMeta =
+      const VerificationMeta('invitedByUserId');
+  @override
+  late final GeneratedColumn<String> invitedByUserId = GeneratedColumn<String>(
+      'invited_by_user_id', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _inviteCodeMeta =
+      const VerificationMeta('inviteCode');
+  @override
+  late final GeneratedColumn<String> inviteCode = GeneratedColumn<String>(
+      'invite_code', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _emailMeta = const VerificationMeta('email');
+  @override
+  late final GeneratedColumn<String> email = GeneratedColumn<String>(
+      'email', aliasedName, true,
+      type: DriftSqlType.string, requiredDuringInsert: false);
+  static const VerificationMeta _displayNameMeta =
+      const VerificationMeta('displayName');
+  @override
+  late final GeneratedColumn<String> displayName = GeneratedColumn<String>(
+      'display_name', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _inviteTypeMeta =
+      const VerificationMeta('inviteType');
+  @override
+  late final GeneratedColumn<String> inviteType = GeneratedColumn<String>(
+      'invite_type', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _statusMeta = const VerificationMeta('status');
+  @override
+  late final GeneratedColumn<String> status = GeneratedColumn<String>(
+      'status', aliasedName, false,
+      type: DriftSqlType.string,
+      requiredDuringInsert: false,
+      defaultValue: const Constant('pending'));
+  static const VerificationMeta _createdAtMeta =
+      const VerificationMeta('createdAt');
+  @override
+  late final GeneratedColumn<int> createdAt = GeneratedColumn<int>(
+      'created_at', aliasedName, false,
+      type: DriftSqlType.int, requiredDuringInsert: true);
+  static const VerificationMeta _updatedAtMeta =
+      const VerificationMeta('updatedAt');
+  @override
+  late final GeneratedColumn<int> updatedAt = GeneratedColumn<int>(
+      'updated_at', aliasedName, false,
+      type: DriftSqlType.int, requiredDuringInsert: true);
+  static const VerificationMeta _lastSentAtMeta =
+      const VerificationMeta('lastSentAt');
+  @override
+  late final GeneratedColumn<int> lastSentAt = GeneratedColumn<int>(
+      'last_sent_at', aliasedName, true,
+      type: DriftSqlType.int, requiredDuringInsert: false);
+  static const VerificationMeta _expiresAtMeta =
+      const VerificationMeta('expiresAt');
+  @override
+  late final GeneratedColumn<int> expiresAt = GeneratedColumn<int>(
+      'expires_at', aliasedName, false,
+      type: DriftSqlType.int, requiredDuringInsert: true);
+  static const VerificationMeta _acceptedAtMeta =
+      const VerificationMeta('acceptedAt');
+  @override
+  late final GeneratedColumn<int> acceptedAt = GeneratedColumn<int>(
+      'accepted_at', aliasedName, true,
+      type: DriftSqlType.int, requiredDuringInsert: false);
+  static const VerificationMeta _acceptedByUserIdMeta =
+      const VerificationMeta('acceptedByUserId');
+  @override
+  late final GeneratedColumn<String> acceptedByUserId = GeneratedColumn<String>(
+      'accepted_by_user_id', aliasedName, true,
+      type: DriftSqlType.string, requiredDuringInsert: false);
+  @override
+  List<GeneratedColumn> get $columns => [
+        id,
+        householdId,
+        invitedByUserId,
+        inviteCode,
+        email,
+        displayName,
+        inviteType,
+        status,
+        createdAt,
+        updatedAt,
+        lastSentAt,
+        expiresAt,
+        acceptedAt,
+        acceptedByUserId
+      ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'household_invites';
+  @override
+  VerificationContext validateIntegrity(
+      Insertable<HouseholdInviteEntry> instance,
+      {bool isInserting = false}) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    }
+    if (data.containsKey('household_id')) {
+      context.handle(
+          _householdIdMeta,
+          householdId.isAcceptableOrUnknown(
+              data['household_id']!, _householdIdMeta));
+    } else if (isInserting) {
+      context.missing(_householdIdMeta);
+    }
+    if (data.containsKey('invited_by_user_id')) {
+      context.handle(
+          _invitedByUserIdMeta,
+          invitedByUserId.isAcceptableOrUnknown(
+              data['invited_by_user_id']!, _invitedByUserIdMeta));
+    } else if (isInserting) {
+      context.missing(_invitedByUserIdMeta);
+    }
+    if (data.containsKey('invite_code')) {
+      context.handle(
+          _inviteCodeMeta,
+          inviteCode.isAcceptableOrUnknown(
+              data['invite_code']!, _inviteCodeMeta));
+    } else if (isInserting) {
+      context.missing(_inviteCodeMeta);
+    }
+    if (data.containsKey('email')) {
+      context.handle(
+          _emailMeta, email.isAcceptableOrUnknown(data['email']!, _emailMeta));
+    }
+    if (data.containsKey('display_name')) {
+      context.handle(
+          _displayNameMeta,
+          displayName.isAcceptableOrUnknown(
+              data['display_name']!, _displayNameMeta));
+    } else if (isInserting) {
+      context.missing(_displayNameMeta);
+    }
+    if (data.containsKey('invite_type')) {
+      context.handle(
+          _inviteTypeMeta,
+          inviteType.isAcceptableOrUnknown(
+              data['invite_type']!, _inviteTypeMeta));
+    } else if (isInserting) {
+      context.missing(_inviteTypeMeta);
+    }
+    if (data.containsKey('status')) {
+      context.handle(_statusMeta,
+          status.isAcceptableOrUnknown(data['status']!, _statusMeta));
+    }
+    if (data.containsKey('created_at')) {
+      context.handle(_createdAtMeta,
+          createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta));
+    } else if (isInserting) {
+      context.missing(_createdAtMeta);
+    }
+    if (data.containsKey('updated_at')) {
+      context.handle(_updatedAtMeta,
+          updatedAt.isAcceptableOrUnknown(data['updated_at']!, _updatedAtMeta));
+    } else if (isInserting) {
+      context.missing(_updatedAtMeta);
+    }
+    if (data.containsKey('last_sent_at')) {
+      context.handle(
+          _lastSentAtMeta,
+          lastSentAt.isAcceptableOrUnknown(
+              data['last_sent_at']!, _lastSentAtMeta));
+    }
+    if (data.containsKey('expires_at')) {
+      context.handle(_expiresAtMeta,
+          expiresAt.isAcceptableOrUnknown(data['expires_at']!, _expiresAtMeta));
+    } else if (isInserting) {
+      context.missing(_expiresAtMeta);
+    }
+    if (data.containsKey('accepted_at')) {
+      context.handle(
+          _acceptedAtMeta,
+          acceptedAt.isAcceptableOrUnknown(
+              data['accepted_at']!, _acceptedAtMeta));
+    }
+    if (data.containsKey('accepted_by_user_id')) {
+      context.handle(
+          _acceptedByUserIdMeta,
+          acceptedByUserId.isAcceptableOrUnknown(
+              data['accepted_by_user_id']!, _acceptedByUserIdMeta));
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => const {};
+  @override
+  HouseholdInviteEntry map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return HouseholdInviteEntry(
+      id: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}id'])!,
+      householdId: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}household_id'])!,
+      invitedByUserId: attachedDatabase.typeMapping.read(
+          DriftSqlType.string, data['${effectivePrefix}invited_by_user_id'])!,
+      inviteCode: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}invite_code'])!,
+      email: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}email']),
+      displayName: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}display_name'])!,
+      inviteType: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}invite_type'])!,
+      status: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}status'])!,
+      createdAt: attachedDatabase.typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}created_at'])!,
+      updatedAt: attachedDatabase.typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}updated_at'])!,
+      lastSentAt: attachedDatabase.typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}last_sent_at']),
+      expiresAt: attachedDatabase.typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}expires_at'])!,
+      acceptedAt: attachedDatabase.typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}accepted_at']),
+      acceptedByUserId: attachedDatabase.typeMapping.read(
+          DriftSqlType.string, data['${effectivePrefix}accepted_by_user_id']),
+    );
+  }
+
+  @override
+  $HouseholdInvitesTable createAlias(String alias) {
+    return $HouseholdInvitesTable(attachedDatabase, alias);
+  }
+}
+
+class HouseholdInviteEntry extends DataClass
+    implements Insertable<HouseholdInviteEntry> {
+  final String id;
+  final String householdId;
+  final String invitedByUserId;
+  final String inviteCode;
+  final String? email;
+  final String displayName;
+  final String inviteType;
+  final String status;
+  final int createdAt;
+  final int updatedAt;
+  final int? lastSentAt;
+  final int expiresAt;
+  final int? acceptedAt;
+  final String? acceptedByUserId;
+  const HouseholdInviteEntry(
+      {required this.id,
+      required this.householdId,
+      required this.invitedByUserId,
+      required this.inviteCode,
+      this.email,
+      required this.displayName,
+      required this.inviteType,
+      required this.status,
+      required this.createdAt,
+      required this.updatedAt,
+      this.lastSentAt,
+      required this.expiresAt,
+      this.acceptedAt,
+      this.acceptedByUserId});
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<String>(id);
+    map['household_id'] = Variable<String>(householdId);
+    map['invited_by_user_id'] = Variable<String>(invitedByUserId);
+    map['invite_code'] = Variable<String>(inviteCode);
+    if (!nullToAbsent || email != null) {
+      map['email'] = Variable<String>(email);
+    }
+    map['display_name'] = Variable<String>(displayName);
+    map['invite_type'] = Variable<String>(inviteType);
+    map['status'] = Variable<String>(status);
+    map['created_at'] = Variable<int>(createdAt);
+    map['updated_at'] = Variable<int>(updatedAt);
+    if (!nullToAbsent || lastSentAt != null) {
+      map['last_sent_at'] = Variable<int>(lastSentAt);
+    }
+    map['expires_at'] = Variable<int>(expiresAt);
+    if (!nullToAbsent || acceptedAt != null) {
+      map['accepted_at'] = Variable<int>(acceptedAt);
+    }
+    if (!nullToAbsent || acceptedByUserId != null) {
+      map['accepted_by_user_id'] = Variable<String>(acceptedByUserId);
+    }
+    return map;
+  }
+
+  HouseholdInvitesCompanion toCompanion(bool nullToAbsent) {
+    return HouseholdInvitesCompanion(
+      id: Value(id),
+      householdId: Value(householdId),
+      invitedByUserId: Value(invitedByUserId),
+      inviteCode: Value(inviteCode),
+      email:
+          email == null && nullToAbsent ? const Value.absent() : Value(email),
+      displayName: Value(displayName),
+      inviteType: Value(inviteType),
+      status: Value(status),
+      createdAt: Value(createdAt),
+      updatedAt: Value(updatedAt),
+      lastSentAt: lastSentAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(lastSentAt),
+      expiresAt: Value(expiresAt),
+      acceptedAt: acceptedAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(acceptedAt),
+      acceptedByUserId: acceptedByUserId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(acceptedByUserId),
+    );
+  }
+
+  factory HouseholdInviteEntry.fromJson(Map<String, dynamic> json,
+      {ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return HouseholdInviteEntry(
+      id: serializer.fromJson<String>(json['id']),
+      householdId: serializer.fromJson<String>(json['householdId']),
+      invitedByUserId: serializer.fromJson<String>(json['invitedByUserId']),
+      inviteCode: serializer.fromJson<String>(json['inviteCode']),
+      email: serializer.fromJson<String?>(json['email']),
+      displayName: serializer.fromJson<String>(json['displayName']),
+      inviteType: serializer.fromJson<String>(json['inviteType']),
+      status: serializer.fromJson<String>(json['status']),
+      createdAt: serializer.fromJson<int>(json['createdAt']),
+      updatedAt: serializer.fromJson<int>(json['updatedAt']),
+      lastSentAt: serializer.fromJson<int?>(json['lastSentAt']),
+      expiresAt: serializer.fromJson<int>(json['expiresAt']),
+      acceptedAt: serializer.fromJson<int?>(json['acceptedAt']),
+      acceptedByUserId: serializer.fromJson<String?>(json['acceptedByUserId']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<String>(id),
+      'householdId': serializer.toJson<String>(householdId),
+      'invitedByUserId': serializer.toJson<String>(invitedByUserId),
+      'inviteCode': serializer.toJson<String>(inviteCode),
+      'email': serializer.toJson<String?>(email),
+      'displayName': serializer.toJson<String>(displayName),
+      'inviteType': serializer.toJson<String>(inviteType),
+      'status': serializer.toJson<String>(status),
+      'createdAt': serializer.toJson<int>(createdAt),
+      'updatedAt': serializer.toJson<int>(updatedAt),
+      'lastSentAt': serializer.toJson<int?>(lastSentAt),
+      'expiresAt': serializer.toJson<int>(expiresAt),
+      'acceptedAt': serializer.toJson<int?>(acceptedAt),
+      'acceptedByUserId': serializer.toJson<String?>(acceptedByUserId),
+    };
+  }
+
+  HouseholdInviteEntry copyWith(
+          {String? id,
+          String? householdId,
+          String? invitedByUserId,
+          String? inviteCode,
+          Value<String?> email = const Value.absent(),
+          String? displayName,
+          String? inviteType,
+          String? status,
+          int? createdAt,
+          int? updatedAt,
+          Value<int?> lastSentAt = const Value.absent(),
+          int? expiresAt,
+          Value<int?> acceptedAt = const Value.absent(),
+          Value<String?> acceptedByUserId = const Value.absent()}) =>
+      HouseholdInviteEntry(
+        id: id ?? this.id,
+        householdId: householdId ?? this.householdId,
+        invitedByUserId: invitedByUserId ?? this.invitedByUserId,
+        inviteCode: inviteCode ?? this.inviteCode,
+        email: email.present ? email.value : this.email,
+        displayName: displayName ?? this.displayName,
+        inviteType: inviteType ?? this.inviteType,
+        status: status ?? this.status,
+        createdAt: createdAt ?? this.createdAt,
+        updatedAt: updatedAt ?? this.updatedAt,
+        lastSentAt: lastSentAt.present ? lastSentAt.value : this.lastSentAt,
+        expiresAt: expiresAt ?? this.expiresAt,
+        acceptedAt: acceptedAt.present ? acceptedAt.value : this.acceptedAt,
+        acceptedByUserId: acceptedByUserId.present
+            ? acceptedByUserId.value
+            : this.acceptedByUserId,
+      );
+  HouseholdInviteEntry copyWithCompanion(HouseholdInvitesCompanion data) {
+    return HouseholdInviteEntry(
+      id: data.id.present ? data.id.value : this.id,
+      householdId:
+          data.householdId.present ? data.householdId.value : this.householdId,
+      invitedByUserId: data.invitedByUserId.present
+          ? data.invitedByUserId.value
+          : this.invitedByUserId,
+      inviteCode:
+          data.inviteCode.present ? data.inviteCode.value : this.inviteCode,
+      email: data.email.present ? data.email.value : this.email,
+      displayName:
+          data.displayName.present ? data.displayName.value : this.displayName,
+      inviteType:
+          data.inviteType.present ? data.inviteType.value : this.inviteType,
+      status: data.status.present ? data.status.value : this.status,
+      createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
+      updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
+      lastSentAt:
+          data.lastSentAt.present ? data.lastSentAt.value : this.lastSentAt,
+      expiresAt: data.expiresAt.present ? data.expiresAt.value : this.expiresAt,
+      acceptedAt:
+          data.acceptedAt.present ? data.acceptedAt.value : this.acceptedAt,
+      acceptedByUserId: data.acceptedByUserId.present
+          ? data.acceptedByUserId.value
+          : this.acceptedByUserId,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('HouseholdInviteEntry(')
+          ..write('id: $id, ')
+          ..write('householdId: $householdId, ')
+          ..write('invitedByUserId: $invitedByUserId, ')
+          ..write('inviteCode: $inviteCode, ')
+          ..write('email: $email, ')
+          ..write('displayName: $displayName, ')
+          ..write('inviteType: $inviteType, ')
+          ..write('status: $status, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('lastSentAt: $lastSentAt, ')
+          ..write('expiresAt: $expiresAt, ')
+          ..write('acceptedAt: $acceptedAt, ')
+          ..write('acceptedByUserId: $acceptedByUserId')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(
+      id,
+      householdId,
+      invitedByUserId,
+      inviteCode,
+      email,
+      displayName,
+      inviteType,
+      status,
+      createdAt,
+      updatedAt,
+      lastSentAt,
+      expiresAt,
+      acceptedAt,
+      acceptedByUserId);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is HouseholdInviteEntry &&
+          other.id == this.id &&
+          other.householdId == this.householdId &&
+          other.invitedByUserId == this.invitedByUserId &&
+          other.inviteCode == this.inviteCode &&
+          other.email == this.email &&
+          other.displayName == this.displayName &&
+          other.inviteType == this.inviteType &&
+          other.status == this.status &&
+          other.createdAt == this.createdAt &&
+          other.updatedAt == this.updatedAt &&
+          other.lastSentAt == this.lastSentAt &&
+          other.expiresAt == this.expiresAt &&
+          other.acceptedAt == this.acceptedAt &&
+          other.acceptedByUserId == this.acceptedByUserId);
+}
+
+class HouseholdInvitesCompanion extends UpdateCompanion<HouseholdInviteEntry> {
+  final Value<String> id;
+  final Value<String> householdId;
+  final Value<String> invitedByUserId;
+  final Value<String> inviteCode;
+  final Value<String?> email;
+  final Value<String> displayName;
+  final Value<String> inviteType;
+  final Value<String> status;
+  final Value<int> createdAt;
+  final Value<int> updatedAt;
+  final Value<int?> lastSentAt;
+  final Value<int> expiresAt;
+  final Value<int?> acceptedAt;
+  final Value<String?> acceptedByUserId;
+  final Value<int> rowid;
+  const HouseholdInvitesCompanion({
+    this.id = const Value.absent(),
+    this.householdId = const Value.absent(),
+    this.invitedByUserId = const Value.absent(),
+    this.inviteCode = const Value.absent(),
+    this.email = const Value.absent(),
+    this.displayName = const Value.absent(),
+    this.inviteType = const Value.absent(),
+    this.status = const Value.absent(),
+    this.createdAt = const Value.absent(),
+    this.updatedAt = const Value.absent(),
+    this.lastSentAt = const Value.absent(),
+    this.expiresAt = const Value.absent(),
+    this.acceptedAt = const Value.absent(),
+    this.acceptedByUserId = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  HouseholdInvitesCompanion.insert({
+    this.id = const Value.absent(),
+    required String householdId,
+    required String invitedByUserId,
+    required String inviteCode,
+    this.email = const Value.absent(),
+    required String displayName,
+    required String inviteType,
+    this.status = const Value.absent(),
+    required int createdAt,
+    required int updatedAt,
+    this.lastSentAt = const Value.absent(),
+    required int expiresAt,
+    this.acceptedAt = const Value.absent(),
+    this.acceptedByUserId = const Value.absent(),
+    this.rowid = const Value.absent(),
+  })  : householdId = Value(householdId),
+        invitedByUserId = Value(invitedByUserId),
+        inviteCode = Value(inviteCode),
+        displayName = Value(displayName),
+        inviteType = Value(inviteType),
+        createdAt = Value(createdAt),
+        updatedAt = Value(updatedAt),
+        expiresAt = Value(expiresAt);
+  static Insertable<HouseholdInviteEntry> custom({
+    Expression<String>? id,
+    Expression<String>? householdId,
+    Expression<String>? invitedByUserId,
+    Expression<String>? inviteCode,
+    Expression<String>? email,
+    Expression<String>? displayName,
+    Expression<String>? inviteType,
+    Expression<String>? status,
+    Expression<int>? createdAt,
+    Expression<int>? updatedAt,
+    Expression<int>? lastSentAt,
+    Expression<int>? expiresAt,
+    Expression<int>? acceptedAt,
+    Expression<String>? acceptedByUserId,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (householdId != null) 'household_id': householdId,
+      if (invitedByUserId != null) 'invited_by_user_id': invitedByUserId,
+      if (inviteCode != null) 'invite_code': inviteCode,
+      if (email != null) 'email': email,
+      if (displayName != null) 'display_name': displayName,
+      if (inviteType != null) 'invite_type': inviteType,
+      if (status != null) 'status': status,
+      if (createdAt != null) 'created_at': createdAt,
+      if (updatedAt != null) 'updated_at': updatedAt,
+      if (lastSentAt != null) 'last_sent_at': lastSentAt,
+      if (expiresAt != null) 'expires_at': expiresAt,
+      if (acceptedAt != null) 'accepted_at': acceptedAt,
+      if (acceptedByUserId != null) 'accepted_by_user_id': acceptedByUserId,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  HouseholdInvitesCompanion copyWith(
+      {Value<String>? id,
+      Value<String>? householdId,
+      Value<String>? invitedByUserId,
+      Value<String>? inviteCode,
+      Value<String?>? email,
+      Value<String>? displayName,
+      Value<String>? inviteType,
+      Value<String>? status,
+      Value<int>? createdAt,
+      Value<int>? updatedAt,
+      Value<int?>? lastSentAt,
+      Value<int>? expiresAt,
+      Value<int?>? acceptedAt,
+      Value<String?>? acceptedByUserId,
+      Value<int>? rowid}) {
+    return HouseholdInvitesCompanion(
+      id: id ?? this.id,
+      householdId: householdId ?? this.householdId,
+      invitedByUserId: invitedByUserId ?? this.invitedByUserId,
+      inviteCode: inviteCode ?? this.inviteCode,
+      email: email ?? this.email,
+      displayName: displayName ?? this.displayName,
+      inviteType: inviteType ?? this.inviteType,
+      status: status ?? this.status,
+      createdAt: createdAt ?? this.createdAt,
+      updatedAt: updatedAt ?? this.updatedAt,
+      lastSentAt: lastSentAt ?? this.lastSentAt,
+      expiresAt: expiresAt ?? this.expiresAt,
+      acceptedAt: acceptedAt ?? this.acceptedAt,
+      acceptedByUserId: acceptedByUserId ?? this.acceptedByUserId,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<String>(id.value);
+    }
+    if (householdId.present) {
+      map['household_id'] = Variable<String>(householdId.value);
+    }
+    if (invitedByUserId.present) {
+      map['invited_by_user_id'] = Variable<String>(invitedByUserId.value);
+    }
+    if (inviteCode.present) {
+      map['invite_code'] = Variable<String>(inviteCode.value);
+    }
+    if (email.present) {
+      map['email'] = Variable<String>(email.value);
+    }
+    if (displayName.present) {
+      map['display_name'] = Variable<String>(displayName.value);
+    }
+    if (inviteType.present) {
+      map['invite_type'] = Variable<String>(inviteType.value);
+    }
+    if (status.present) {
+      map['status'] = Variable<String>(status.value);
+    }
+    if (createdAt.present) {
+      map['created_at'] = Variable<int>(createdAt.value);
+    }
+    if (updatedAt.present) {
+      map['updated_at'] = Variable<int>(updatedAt.value);
+    }
+    if (lastSentAt.present) {
+      map['last_sent_at'] = Variable<int>(lastSentAt.value);
+    }
+    if (expiresAt.present) {
+      map['expires_at'] = Variable<int>(expiresAt.value);
+    }
+    if (acceptedAt.present) {
+      map['accepted_at'] = Variable<int>(acceptedAt.value);
+    }
+    if (acceptedByUserId.present) {
+      map['accepted_by_user_id'] = Variable<String>(acceptedByUserId.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('HouseholdInvitesCompanion(')
+          ..write('id: $id, ')
+          ..write('householdId: $householdId, ')
+          ..write('invitedByUserId: $invitedByUserId, ')
+          ..write('inviteCode: $inviteCode, ')
+          ..write('email: $email, ')
+          ..write('displayName: $displayName, ')
+          ..write('inviteType: $inviteType, ')
+          ..write('status: $status, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('lastSentAt: $lastSentAt, ')
+          ..write('expiresAt: $expiresAt, ')
+          ..write('acceptedAt: $acceptedAt, ')
+          ..write('acceptedByUserId: $acceptedByUserId, ')
           ..write('rowid: $rowid')
           ..write(')'))
         .toString();
@@ -7921,6 +8698,8 @@ abstract class _$AppDatabase extends GeneratedDatabase {
   late final $HouseholdMembersTable householdMembers =
       $HouseholdMembersTable(this);
   late final $HouseholdsTable households = $HouseholdsTable(this);
+  late final $HouseholdInvitesTable householdInvites =
+      $HouseholdInvitesTable(this);
   late final $UploadQueuesTable uploadQueues = $UploadQueuesTable(this);
   late final $IngredientTermQueuesTable ingredientTermQueues =
       $IngredientTermQueuesTable(this);
@@ -7947,6 +8726,7 @@ abstract class _$AppDatabase extends GeneratedDatabase {
         recipeShares,
         householdMembers,
         households,
+        householdInvites,
         uploadQueues,
         ingredientTermQueues,
         pantryItemTermQueues,
@@ -8728,6 +9508,8 @@ typedef $$HouseholdMembersTableCreateCompanionBuilder
   required String householdId,
   required String userId,
   Value<int> isActive,
+  Value<String> role,
+  required int joinedAt,
   Value<int> rowid,
 });
 typedef $$HouseholdMembersTableUpdateCompanionBuilder
@@ -8736,6 +9518,8 @@ typedef $$HouseholdMembersTableUpdateCompanionBuilder
   Value<String> householdId,
   Value<String> userId,
   Value<int> isActive,
+  Value<String> role,
+  Value<int> joinedAt,
   Value<int> rowid,
 });
 
@@ -8759,6 +9543,12 @@ class $$HouseholdMembersTableFilterComposer
 
   ColumnFilters<int> get isActive => $composableBuilder(
       column: $table.isActive, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get role => $composableBuilder(
+      column: $table.role, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<int> get joinedAt => $composableBuilder(
+      column: $table.joinedAt, builder: (column) => ColumnFilters(column));
 }
 
 class $$HouseholdMembersTableOrderingComposer
@@ -8781,6 +9571,12 @@ class $$HouseholdMembersTableOrderingComposer
 
   ColumnOrderings<int> get isActive => $composableBuilder(
       column: $table.isActive, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get role => $composableBuilder(
+      column: $table.role, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<int> get joinedAt => $composableBuilder(
+      column: $table.joinedAt, builder: (column) => ColumnOrderings(column));
 }
 
 class $$HouseholdMembersTableAnnotationComposer
@@ -8803,6 +9599,12 @@ class $$HouseholdMembersTableAnnotationComposer
 
   GeneratedColumn<int> get isActive =>
       $composableBuilder(column: $table.isActive, builder: (column) => column);
+
+  GeneratedColumn<String> get role =>
+      $composableBuilder(column: $table.role, builder: (column) => column);
+
+  GeneratedColumn<int> get joinedAt =>
+      $composableBuilder(column: $table.joinedAt, builder: (column) => column);
 }
 
 class $$HouseholdMembersTableTableManager extends RootTableManager<
@@ -8837,6 +9639,8 @@ class $$HouseholdMembersTableTableManager extends RootTableManager<
             Value<String> householdId = const Value.absent(),
             Value<String> userId = const Value.absent(),
             Value<int> isActive = const Value.absent(),
+            Value<String> role = const Value.absent(),
+            Value<int> joinedAt = const Value.absent(),
             Value<int> rowid = const Value.absent(),
           }) =>
               HouseholdMembersCompanion(
@@ -8844,6 +9648,8 @@ class $$HouseholdMembersTableTableManager extends RootTableManager<
             householdId: householdId,
             userId: userId,
             isActive: isActive,
+            role: role,
+            joinedAt: joinedAt,
             rowid: rowid,
           ),
           createCompanionCallback: ({
@@ -8851,6 +9657,8 @@ class $$HouseholdMembersTableTableManager extends RootTableManager<
             required String householdId,
             required String userId,
             Value<int> isActive = const Value.absent(),
+            Value<String> role = const Value.absent(),
+            required int joinedAt,
             Value<int> rowid = const Value.absent(),
           }) =>
               HouseholdMembersCompanion.insert(
@@ -8858,6 +9666,8 @@ class $$HouseholdMembersTableTableManager extends RootTableManager<
             householdId: householdId,
             userId: userId,
             isActive: isActive,
+            role: role,
+            joinedAt: joinedAt,
             rowid: rowid,
           ),
           withReferenceMapper: (p0) => p0
@@ -9023,6 +9833,321 @@ typedef $$HouseholdsTableProcessedTableManager = ProcessedTableManager<
       BaseReferences<_$AppDatabase, $HouseholdsTable, HouseholdEntry>
     ),
     HouseholdEntry,
+    PrefetchHooks Function()>;
+typedef $$HouseholdInvitesTableCreateCompanionBuilder
+    = HouseholdInvitesCompanion Function({
+  Value<String> id,
+  required String householdId,
+  required String invitedByUserId,
+  required String inviteCode,
+  Value<String?> email,
+  required String displayName,
+  required String inviteType,
+  Value<String> status,
+  required int createdAt,
+  required int updatedAt,
+  Value<int?> lastSentAt,
+  required int expiresAt,
+  Value<int?> acceptedAt,
+  Value<String?> acceptedByUserId,
+  Value<int> rowid,
+});
+typedef $$HouseholdInvitesTableUpdateCompanionBuilder
+    = HouseholdInvitesCompanion Function({
+  Value<String> id,
+  Value<String> householdId,
+  Value<String> invitedByUserId,
+  Value<String> inviteCode,
+  Value<String?> email,
+  Value<String> displayName,
+  Value<String> inviteType,
+  Value<String> status,
+  Value<int> createdAt,
+  Value<int> updatedAt,
+  Value<int?> lastSentAt,
+  Value<int> expiresAt,
+  Value<int?> acceptedAt,
+  Value<String?> acceptedByUserId,
+  Value<int> rowid,
+});
+
+class $$HouseholdInvitesTableFilterComposer
+    extends Composer<_$AppDatabase, $HouseholdInvitesTable> {
+  $$HouseholdInvitesTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get id => $composableBuilder(
+      column: $table.id, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get householdId => $composableBuilder(
+      column: $table.householdId, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get invitedByUserId => $composableBuilder(
+      column: $table.invitedByUserId,
+      builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get inviteCode => $composableBuilder(
+      column: $table.inviteCode, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get email => $composableBuilder(
+      column: $table.email, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get displayName => $composableBuilder(
+      column: $table.displayName, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get inviteType => $composableBuilder(
+      column: $table.inviteType, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get status => $composableBuilder(
+      column: $table.status, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<int> get createdAt => $composableBuilder(
+      column: $table.createdAt, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<int> get updatedAt => $composableBuilder(
+      column: $table.updatedAt, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<int> get lastSentAt => $composableBuilder(
+      column: $table.lastSentAt, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<int> get expiresAt => $composableBuilder(
+      column: $table.expiresAt, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<int> get acceptedAt => $composableBuilder(
+      column: $table.acceptedAt, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get acceptedByUserId => $composableBuilder(
+      column: $table.acceptedByUserId,
+      builder: (column) => ColumnFilters(column));
+}
+
+class $$HouseholdInvitesTableOrderingComposer
+    extends Composer<_$AppDatabase, $HouseholdInvitesTable> {
+  $$HouseholdInvitesTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get id => $composableBuilder(
+      column: $table.id, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get householdId => $composableBuilder(
+      column: $table.householdId, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get invitedByUserId => $composableBuilder(
+      column: $table.invitedByUserId,
+      builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get inviteCode => $composableBuilder(
+      column: $table.inviteCode, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get email => $composableBuilder(
+      column: $table.email, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get displayName => $composableBuilder(
+      column: $table.displayName, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get inviteType => $composableBuilder(
+      column: $table.inviteType, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get status => $composableBuilder(
+      column: $table.status, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<int> get createdAt => $composableBuilder(
+      column: $table.createdAt, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<int> get updatedAt => $composableBuilder(
+      column: $table.updatedAt, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<int> get lastSentAt => $composableBuilder(
+      column: $table.lastSentAt, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<int> get expiresAt => $composableBuilder(
+      column: $table.expiresAt, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<int> get acceptedAt => $composableBuilder(
+      column: $table.acceptedAt, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get acceptedByUserId => $composableBuilder(
+      column: $table.acceptedByUserId,
+      builder: (column) => ColumnOrderings(column));
+}
+
+class $$HouseholdInvitesTableAnnotationComposer
+    extends Composer<_$AppDatabase, $HouseholdInvitesTable> {
+  $$HouseholdInvitesTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get householdId => $composableBuilder(
+      column: $table.householdId, builder: (column) => column);
+
+  GeneratedColumn<String> get invitedByUserId => $composableBuilder(
+      column: $table.invitedByUserId, builder: (column) => column);
+
+  GeneratedColumn<String> get inviteCode => $composableBuilder(
+      column: $table.inviteCode, builder: (column) => column);
+
+  GeneratedColumn<String> get email =>
+      $composableBuilder(column: $table.email, builder: (column) => column);
+
+  GeneratedColumn<String> get displayName => $composableBuilder(
+      column: $table.displayName, builder: (column) => column);
+
+  GeneratedColumn<String> get inviteType => $composableBuilder(
+      column: $table.inviteType, builder: (column) => column);
+
+  GeneratedColumn<String> get status =>
+      $composableBuilder(column: $table.status, builder: (column) => column);
+
+  GeneratedColumn<int> get createdAt =>
+      $composableBuilder(column: $table.createdAt, builder: (column) => column);
+
+  GeneratedColumn<int> get updatedAt =>
+      $composableBuilder(column: $table.updatedAt, builder: (column) => column);
+
+  GeneratedColumn<int> get lastSentAt => $composableBuilder(
+      column: $table.lastSentAt, builder: (column) => column);
+
+  GeneratedColumn<int> get expiresAt =>
+      $composableBuilder(column: $table.expiresAt, builder: (column) => column);
+
+  GeneratedColumn<int> get acceptedAt => $composableBuilder(
+      column: $table.acceptedAt, builder: (column) => column);
+
+  GeneratedColumn<String> get acceptedByUserId => $composableBuilder(
+      column: $table.acceptedByUserId, builder: (column) => column);
+}
+
+class $$HouseholdInvitesTableTableManager extends RootTableManager<
+    _$AppDatabase,
+    $HouseholdInvitesTable,
+    HouseholdInviteEntry,
+    $$HouseholdInvitesTableFilterComposer,
+    $$HouseholdInvitesTableOrderingComposer,
+    $$HouseholdInvitesTableAnnotationComposer,
+    $$HouseholdInvitesTableCreateCompanionBuilder,
+    $$HouseholdInvitesTableUpdateCompanionBuilder,
+    (
+      HouseholdInviteEntry,
+      BaseReferences<_$AppDatabase, $HouseholdInvitesTable,
+          HouseholdInviteEntry>
+    ),
+    HouseholdInviteEntry,
+    PrefetchHooks Function()> {
+  $$HouseholdInvitesTableTableManager(
+      _$AppDatabase db, $HouseholdInvitesTable table)
+      : super(TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$HouseholdInvitesTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$HouseholdInvitesTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$HouseholdInvitesTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback: ({
+            Value<String> id = const Value.absent(),
+            Value<String> householdId = const Value.absent(),
+            Value<String> invitedByUserId = const Value.absent(),
+            Value<String> inviteCode = const Value.absent(),
+            Value<String?> email = const Value.absent(),
+            Value<String> displayName = const Value.absent(),
+            Value<String> inviteType = const Value.absent(),
+            Value<String> status = const Value.absent(),
+            Value<int> createdAt = const Value.absent(),
+            Value<int> updatedAt = const Value.absent(),
+            Value<int?> lastSentAt = const Value.absent(),
+            Value<int> expiresAt = const Value.absent(),
+            Value<int?> acceptedAt = const Value.absent(),
+            Value<String?> acceptedByUserId = const Value.absent(),
+            Value<int> rowid = const Value.absent(),
+          }) =>
+              HouseholdInvitesCompanion(
+            id: id,
+            householdId: householdId,
+            invitedByUserId: invitedByUserId,
+            inviteCode: inviteCode,
+            email: email,
+            displayName: displayName,
+            inviteType: inviteType,
+            status: status,
+            createdAt: createdAt,
+            updatedAt: updatedAt,
+            lastSentAt: lastSentAt,
+            expiresAt: expiresAt,
+            acceptedAt: acceptedAt,
+            acceptedByUserId: acceptedByUserId,
+            rowid: rowid,
+          ),
+          createCompanionCallback: ({
+            Value<String> id = const Value.absent(),
+            required String householdId,
+            required String invitedByUserId,
+            required String inviteCode,
+            Value<String?> email = const Value.absent(),
+            required String displayName,
+            required String inviteType,
+            Value<String> status = const Value.absent(),
+            required int createdAt,
+            required int updatedAt,
+            Value<int?> lastSentAt = const Value.absent(),
+            required int expiresAt,
+            Value<int?> acceptedAt = const Value.absent(),
+            Value<String?> acceptedByUserId = const Value.absent(),
+            Value<int> rowid = const Value.absent(),
+          }) =>
+              HouseholdInvitesCompanion.insert(
+            id: id,
+            householdId: householdId,
+            invitedByUserId: invitedByUserId,
+            inviteCode: inviteCode,
+            email: email,
+            displayName: displayName,
+            inviteType: inviteType,
+            status: status,
+            createdAt: createdAt,
+            updatedAt: updatedAt,
+            lastSentAt: lastSentAt,
+            expiresAt: expiresAt,
+            acceptedAt: acceptedAt,
+            acceptedByUserId: acceptedByUserId,
+            rowid: rowid,
+          ),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .toList(),
+          prefetchHooksCallback: null,
+        ));
+}
+
+typedef $$HouseholdInvitesTableProcessedTableManager = ProcessedTableManager<
+    _$AppDatabase,
+    $HouseholdInvitesTable,
+    HouseholdInviteEntry,
+    $$HouseholdInvitesTableFilterComposer,
+    $$HouseholdInvitesTableOrderingComposer,
+    $$HouseholdInvitesTableAnnotationComposer,
+    $$HouseholdInvitesTableCreateCompanionBuilder,
+    $$HouseholdInvitesTableUpdateCompanionBuilder,
+    (
+      HouseholdInviteEntry,
+      BaseReferences<_$AppDatabase, $HouseholdInvitesTable,
+          HouseholdInviteEntry>
+    ),
+    HouseholdInviteEntry,
     PrefetchHooks Function()>;
 typedef $$UploadQueuesTableCreateCompanionBuilder = UploadQueuesCompanion
     Function({
@@ -11843,6 +12968,8 @@ class $AppDatabaseManager {
       $$HouseholdMembersTableTableManager(_db, _db.householdMembers);
   $$HouseholdsTableTableManager get households =>
       $$HouseholdsTableTableManager(_db, _db.households);
+  $$HouseholdInvitesTableTableManager get householdInvites =>
+      $$HouseholdInvitesTableTableManager(_db, _db.householdInvites);
   $$UploadQueuesTableTableManager get uploadQueues =>
       $$UploadQueuesTableTableManager(_db, _db.uploadQueues);
   $$IngredientTermQueuesTableTableManager get ingredientTermQueues =>

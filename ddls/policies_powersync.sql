@@ -111,21 +111,17 @@ CREATE POLICY "Users can update households they own"
 
 -- HOUSEHOLD MEMBERS -------------------------------
 
-CREATE POLICY "Users can view active membership rows or their own membership row"
+CREATE POLICY "Users can view their own membership or members of their households"
     ON public.household_members
     FOR SELECT
     USING (
-    (auth.uid() = user_id)
+    auth.uid() = user_id  -- Users can see their own membership records
         OR (
-        is_active = 1
-            AND EXISTS (
-            SELECT 1
-            FROM public.households h
-            WHERE h.id = household_members.household_id
-              AND h.user_id = auth.uid()
-        )
+        is_active = 1     -- Active members only
+            AND is_household_member(household_id, auth.uid())  -- User is a member of this household
         )
     );
+
 
 CREATE POLICY "Users can insert their own membership row"
     ON public.household_members
@@ -137,6 +133,81 @@ CREATE POLICY "Users can update their own membership row"
     FOR UPDATE
     USING (auth.uid() = user_id)
     WITH CHECK (auth.uid() = user_id);
+
+-- HOUSEHOLD INVITES -------------------------------
+
+CREATE POLICY "Users can view invites they created or received"
+    ON public.household_invites
+    FOR SELECT
+    USING (
+        auth.uid() = invited_by_user_id
+        OR auth.uid() = accepted_by_user_id
+        OR (
+            email = (SELECT email FROM auth.users WHERE id = auth.uid())
+            AND status = 'pending'
+        )
+        OR EXISTS (
+            SELECT 1 
+            FROM public.household_members hm
+            WHERE hm.household_id = household_invites.household_id
+              AND hm.user_id = auth.uid()
+              AND hm.role IN ('owner', 'admin')
+              AND hm.is_active = 1
+        )
+    );
+
+CREATE POLICY "Household owners and admins can create invites"
+    ON public.household_invites
+    FOR INSERT
+    WITH CHECK (
+        auth.uid() = invited_by_user_id
+        AND EXISTS (
+            SELECT 1
+            FROM public.household_members hm
+            WHERE hm.household_id = household_invites.household_id
+              AND hm.user_id = auth.uid()
+              AND hm.role IN ('owner', 'admin')
+              AND hm.is_active = 1
+        )
+    );
+
+CREATE POLICY "Household owners and admins can update invites"
+    ON public.household_invites
+    FOR UPDATE
+    USING (
+        EXISTS (
+            SELECT 1
+            FROM public.household_members hm
+            WHERE hm.household_id = household_invites.household_id
+              AND hm.user_id = auth.uid()
+              AND hm.role IN ('owner', 'admin')
+              AND hm.is_active = 1
+        )
+    )
+    WITH CHECK (
+        EXISTS (
+            SELECT 1
+            FROM public.household_members hm
+            WHERE hm.household_id = household_invites.household_id
+              AND hm.user_id = auth.uid()
+              AND hm.role IN ('owner', 'admin')
+              AND hm.is_active = 1
+        )
+    );
+
+CREATE POLICY "Household owners and admins can delete invites"
+    ON public.household_invites
+    FOR DELETE
+    USING (
+        EXISTS (
+            SELECT 1
+            FROM public.household_members hm
+            WHERE hm.household_id = household_invites.household_id
+              AND hm.user_id = auth.uid()
+              AND hm.role IN ('owner', 'admin')
+              AND hm.is_active = 1
+        )
+    );
 
 
 -- RECIPE SHARES -------------------------------

@@ -13,9 +13,12 @@ CREATE TABLE public.household_members (
                                           household_id uuid NOT NULL,
                                           user_id uuid NOT NULL,
                                           is_active integer NOT NULL DEFAULT 1,
+                                          role text NOT NULL DEFAULT 'member',
+                                          joined_at bigint NOT NULL,
                                           CONSTRAINT household_members_pkey PRIMARY KEY (household_id, user_id),
                                           CONSTRAINT household_members_household_id_fkey FOREIGN KEY (household_id) REFERENCES public.households (id) ON DELETE CASCADE,
-                                          CONSTRAINT household_members_user_id_fkey FOREIGN KEY (user_id) REFERENCES auth.users (id) ON DELETE CASCADE
+                                          CONSTRAINT household_members_user_id_fkey FOREIGN KEY (user_id) REFERENCES auth.users (id) ON DELETE CASCADE,
+                                          CONSTRAINT household_members_role_check CHECK (role IN ('owner', 'admin', 'member'))
 ) TABLESPACE pg_default;
 
 CREATE INDEX IF NOT EXISTS household_members_household_idx
@@ -23,7 +26,40 @@ CREATE INDEX IF NOT EXISTS household_members_household_idx
 CREATE INDEX IF NOT EXISTS household_members_user_idx
     ON public.household_members USING btree (user_id) TABLESPACE pg_default;
 
--- 3. RECIPE FOLDERS (Depends on households and auth.users)
+-- 3. HOUSEHOLD INVITES (Depends on households and auth.users)
+CREATE TABLE public.household_invites (
+    id uuid NOT NULL DEFAULT extensions.uuid_generate_v4(),
+    household_id uuid NOT NULL,
+    invited_by_user_id uuid NOT NULL,
+    invite_code uuid NOT NULL DEFAULT extensions.uuid_generate_v4(),
+    email text NULL,
+    display_name text NOT NULL,
+    invite_type text NOT NULL,
+    status text NOT NULL DEFAULT 'pending',
+    created_at bigint NOT NULL,
+    updated_at bigint NOT NULL,
+    last_sent_at bigint NULL,
+    expires_at bigint NOT NULL,
+    accepted_at bigint NULL,
+    accepted_by_user_id uuid NULL,
+    CONSTRAINT household_invites_pkey PRIMARY KEY (id),
+    CONSTRAINT household_invites_household_id_fkey FOREIGN KEY (household_id) REFERENCES public.households (id) ON DELETE CASCADE,
+    CONSTRAINT household_invites_invited_by_user_id_fkey FOREIGN KEY (invited_by_user_id) REFERENCES auth.users (id) ON DELETE CASCADE,
+    CONSTRAINT household_invites_accepted_by_user_id_fkey FOREIGN KEY (accepted_by_user_id) REFERENCES auth.users (id) ON DELETE CASCADE,
+    CONSTRAINT household_invites_invite_type_check CHECK (invite_type IN ('email', 'code')),
+    CONSTRAINT household_invites_status_check CHECK (status IN ('pending', 'accepted', 'declined', 'revoked'))
+) TABLESPACE pg_default;
+
+CREATE INDEX IF NOT EXISTS household_invites_household_id_idx
+    ON public.household_invites USING btree (household_id) TABLESPACE pg_default;
+CREATE INDEX IF NOT EXISTS household_invites_email_idx
+    ON public.household_invites USING btree (email) TABLESPACE pg_default;
+CREATE INDEX IF NOT EXISTS household_invites_code_idx
+    ON public.household_invites USING btree (invite_code) TABLESPACE pg_default;
+CREATE INDEX IF NOT EXISTS household_invites_status_idx
+    ON public.household_invites USING btree (status) TABLESPACE pg_default;
+
+-- 4. RECIPE FOLDERS (Depends on households and auth.users)
 CREATE TABLE public.recipe_folders (
                                        id uuid NOT NULL DEFAULT extensions.uuid_generate_v4(),
                                        name text NOT NULL,

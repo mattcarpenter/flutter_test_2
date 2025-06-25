@@ -114,6 +114,19 @@ class Menu extends StatelessWidget {
             onRouteGo('/labs/auth');
           },
         ),
+        MenuItem(
+          index: 7,
+          title: 'Household',
+          icon: CupertinoIcons.home,
+          isActive: selectedIndex == 8,
+          color: primaryColor,
+          textColor: textColor,
+          activeTextColor: activeTextColor,
+          backgroundColor: backgroundColor,
+          onTap: (_) {
+            onRouteGo('/household');
+          },
+        ),
       ],
     );
   }

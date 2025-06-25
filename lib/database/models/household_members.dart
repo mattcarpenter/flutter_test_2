@@ -10,6 +10,10 @@ class HouseholdMembers extends Table {
   TextColumn get userId => text()();
   // Active flag: 1 means active, 0 means inactive.
   IntColumn get isActive => integer().withDefault(const Constant(1))();
+  // Role in household: owner, admin, member
+  TextColumn get role => text().withDefault(const Constant('member'))();
+  // When the user joined the household
+  IntColumn get joinedAt => integer()();
 
   @override
   Set<Column> get primaryKey => {householdId, userId};

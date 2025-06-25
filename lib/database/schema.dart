@@ -5,6 +5,7 @@ const recipeFoldersTable = 'recipe_folders';
 const recipesTable = 'recipes';
 const householdsTable = 'households';
 const householdMembersTable = 'household_members';
+const householdInvitesTable = 'household_invites';
 const recipeSharesTable = 'recipe_shares';
 const recipeFolderSharesTable = 'recipe_folder_shares';
 const recipeFolderAssignmentsTable = 'recipe_folder_assignments';
@@ -96,6 +97,23 @@ Schema schema = const Schema(([
     Column.text('household_id'),
     Column.text('user_id'),
     Column.integer('is_active'),
+    Column.text('role'),
+    Column.integer('joined_at'),
+  ]),
+  Table(householdInvitesTable, [
+    Column.text('household_id'),
+    Column.text('invited_by_user_id'),
+    Column.text('invite_code'),
+    Column.text('email'),
+    Column.text('display_name'),
+    Column.text('invite_type'),
+    Column.text('status'),
+    Column.integer('created_at'),
+    Column.integer('updated_at'),
+    Column.integer('last_sent_at'),
+    Column.integer('expires_at'),
+    Column.integer('accepted_at'),
+    Column.text('accepted_by_user_id'),
   ]),
   Table(recipeSharesTable, [
     Column.text('recipe_id'),
