@@ -1,8 +1,9 @@
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/services.dart';
 
 class CreateInviteModal extends StatefulWidget {
-  final Function(String email) onCreateEmailInvite;
-  final Function(String displayName) onCreateCodeInvite;
+  final Future<String?> Function(String email) onCreateEmailInvite;
+  final Future<String?> Function(String displayName) onCreateCodeInvite;
 
   const CreateInviteModal({
     super.key,
@@ -45,12 +46,19 @@ class _CreateInviteModalState extends State<CreateInviteModal> {
       });
 
       try {
-        await widget.onCreateEmailInvite(_emailController.text.trim());
+        print('INVITE MODAL: Creating email invite for: ${_emailController.text.trim()}');
+        final result = await widget.onCreateEmailInvite(_emailController.text.trim());
         if (mounted) {
           Navigator.of(context).pop();
+          if (result != null) {
+            _showSuccessDialog('Email invite sent successfully!');
+          }
         }
       } catch (e) {
-        // Error handling is done in the provider
+        print('INVITE MODAL: Error creating email invite: $e');
+        if (mounted) {
+          _showErrorDialog('Failed to create email invite: $e');
+        }
       } finally {
         if (mounted) {
           setState(() {
@@ -67,12 +75,21 @@ class _CreateInviteModalState extends State<CreateInviteModal> {
       });
 
       try {
-        await widget.onCreateCodeInvite(_nameController.text.trim());
+        print('INVITE MODAL: Creating code invite for: ${_nameController.text.trim()}');
+        final inviteUrl = await widget.onCreateCodeInvite(_nameController.text.trim());
         if (mounted) {
           Navigator.of(context).pop();
+          if (inviteUrl != null) {
+            _showInviteCodeDialog(inviteUrl);
+          } else {
+            _showErrorDialog('Failed to create invite code - no URL returned');
+          }
         }
       } catch (e) {
-        // Error handling is done in the provider
+        print('INVITE MODAL: Error creating code invite: $e');
+        if (mounted) {
+          _showErrorDialog('Failed to create invite code: $e');
+        }
       } finally {
         if (mounted) {
           setState(() {
@@ -81,6 +98,82 @@ class _CreateInviteModalState extends State<CreateInviteModal> {
         }
       }
     }
+  }
+
+  void _showSuccessDialog(String message) {
+    showCupertinoDialog(
+      context: context,
+      builder: (context) => CupertinoAlertDialog(
+        title: const Text('Success'),
+        content: Text(message),
+        actions: [
+          CupertinoDialogAction(
+            onPressed: () => Navigator.of(context).pop(),
+            child: const Text('OK'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showErrorDialog(String error) {
+    showCupertinoDialog(
+      context: context,
+      builder: (context) => CupertinoAlertDialog(
+        title: const Text('Error'),
+        content: Text(error),
+        actions: [
+          CupertinoDialogAction(
+            onPressed: () => Navigator.of(context).pop(),
+            child: const Text('OK'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showInviteCodeDialog(String inviteUrl) {
+    showCupertinoDialog(
+      context: context,
+      builder: (context) => CupertinoAlertDialog(
+        title: const Text('Invite Code Created'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Text('Share this URL with the person you want to invite:'),
+            const SizedBox(height: 16),
+            Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: CupertinoColors.systemGrey6,
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Text(
+                inviteUrl,
+                style: const TextStyle(
+                  fontFamily: 'monospace',
+                  fontSize: 12,
+                ),
+              ),
+            ),
+          ],
+        ),
+        actions: [
+          CupertinoDialogAction(
+            onPressed: () {
+              Clipboard.setData(ClipboardData(text: inviteUrl));
+              Navigator.of(context).pop();
+              _showSuccessDialog('Invite URL copied to clipboard!');
+            },
+            child: const Text('Copy & Close'),
+          ),
+          CupertinoDialogAction(
+            onPressed: () => Navigator.of(context).pop(),
+            child: const Text('Close'),
+          ),
+        ],
+      ),
+    );
   }
 
   @override

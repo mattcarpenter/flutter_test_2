@@ -6,8 +6,8 @@ import 'create_invite_modal.dart';
 class HouseholdInvitesSection extends StatelessWidget {
   final List<HouseholdInvite> invites;
   final bool isCreatingInvite;
-  final Function(String email) onCreateEmailInvite;
-  final Function(String displayName) onCreateCodeInvite;
+  final Future<String?> Function(String email) onCreateEmailInvite;
+  final Future<String?> Function(String displayName) onCreateCodeInvite;
   final Function(String inviteId) onResendInvite;
   final Function(String inviteId) onRevokeInvite;
 

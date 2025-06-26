@@ -152,14 +152,17 @@ class HouseholdNotifier extends StateNotifier<HouseholdState> {
     state = state.copyWith(isCreatingInvite: true, error: null);
     
     try {
+      print('HOUSEHOLD PROVIDER: Creating code invite for: $displayName');
       final response = await _service.createCodeInvite(
         state.currentHousehold!.id,
         displayName,
       );
+      print('HOUSEHOLD PROVIDER: Successfully created invite, URL: ${response.inviteUrl}');
       return response.inviteUrl; // Return the shareable URL
     } catch (e) {
+      print('HOUSEHOLD PROVIDER: Error creating invite: $e');
       state = state.copyWith(error: e.toString());
-      return null;
+      rethrow; // Re-throw so UI can show error dialog
     } finally {
       state = state.copyWith(isCreatingInvite: false);
     }
