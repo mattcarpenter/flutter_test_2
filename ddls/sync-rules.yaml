@@ -30,11 +30,11 @@ bucket_definitions:
       - SELECT * FROM public.households WHERE user_id = bucket.user_id
 
   # Household invites for the user
-  #household_invites_for_user:
-  #  parameters: SELECT request.user_id() as user_id
-  #  data:
-  #    - SELECT * FROM public.household_invites WHERE invited_by_user_id = bucket.user_id OR accepted_by_user_id = bucket.user_id OR email IN (SELECT email FROM auth.users WHERE id = bucket.user_id)
-
+  household_invites_for_user:
+    parameters: SELECT request.user_id() as user_id
+    data:
+      - SELECT * FROM public.household_invites WHERE invited_by_user_id = bucket.user_id OR accepted_by_user_id = bucket.user_id
+  # TODO: Show email invites for invitee based on email
 
   # Shared folders: Direct share where the folder is explicitly shared with the current user.
   shared_folder_direct:
