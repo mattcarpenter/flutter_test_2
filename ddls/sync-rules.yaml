@@ -34,7 +34,13 @@ bucket_definitions:
     parameters: SELECT request.user_id() as user_id
     data:
       - SELECT * FROM public.household_invites WHERE invited_by_user_id = bucket.user_id OR accepted_by_user_id = bucket.user_id
-  # TODO: Show email invites for invitee based on email
+
+  household_invites_by_email:
+    parameters: SELECT email FROM auth.users WHERE id = request.user_id()
+    data:
+      - SELECT * FROM public.household_invites
+        WHERE email = bucket.email
+        AND status = 'pending'
 
   # Shared folders: Direct share where the folder is explicitly shared with the current user.
   shared_folder_direct:

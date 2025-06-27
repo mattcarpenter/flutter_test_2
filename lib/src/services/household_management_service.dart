@@ -3,6 +3,7 @@ import 'package:http/http.dart' as http;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../database/database.dart';
+import '../../app_config.dart';
 
 // Data models for API communication
 class CreateInviteResponse {
@@ -254,7 +255,7 @@ class HouseholdManagementService {
 // Provider for the household management service
 final householdManagementServiceProvider = Provider<HouseholdManagementService>((ref) {
   return HouseholdManagementService(
-    apiBaseUrl: 'http://localhost:3000', // Local backend API
+    apiBaseUrl: AppConfig.ingredientApiUrl, // Use the configured API URL
     getAuthToken: () {
       final accessToken = Supabase.instance.client.auth.currentSession?.accessToken;
       if (accessToken == null) {

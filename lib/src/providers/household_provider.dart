@@ -250,7 +250,7 @@ final householdNotifierProvider = StateNotifierProvider<HouseholdNotifier, House
   final inviteRepo = ref.watch(householdInviteRepositoryProvider);
   final service = ref.watch(householdManagementServiceProvider);
   // Get current user ID from Supabase auth
-  final currentUserId = Supabase.instance.client.auth.currentUser?.id;
+  final currentUserId = Supabase.instance.client.auth.currentSession?.user.id;
   
   if (currentUserId == null) {
     throw StateError('User must be authenticated to access household features');
