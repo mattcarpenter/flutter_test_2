@@ -10,6 +10,7 @@ import '../widgets/household_members_section.dart';
 import '../widgets/household_invites_section.dart';
 import '../widgets/household_actions_section.dart';
 import '../widgets/pending_invites_section.dart';
+import '../widgets/household_invite_tile.dart';
 
 class HouseholdSharingPage extends ConsumerWidget {
   final VoidCallback? onMenuPressed;
@@ -44,12 +45,11 @@ class HouseholdSharingPage extends ConsumerWidget {
 
   Widget _buildContent(BuildContext context, WidgetRef ref, householdState) {
     // Progressive disclosure based on state
-    if (householdState.hasPendingInvites) {
-      return _buildPendingInvitesSection(context, ref, householdState);
-    } else if (householdState.hasHousehold) {
+    if (householdState.hasHousehold) {
       return _buildHouseholdManagementSection(context, ref, householdState);
     } else {
-      return _buildCreateJoinSection(context, ref);
+      // Show both pending invites and create/join options when no household
+      return _buildNoHouseholdSection(context, ref, householdState);
     }
   }
 
@@ -126,26 +126,55 @@ class HouseholdSharingPage extends ConsumerWidget {
     );
   }
 
-  Widget _buildCreateJoinSection(BuildContext context, WidgetRef ref) {
+  Widget _buildNoHouseholdSection(BuildContext context, WidgetRef ref, householdState) {
     return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text(
-          'Share recipes and collaborate with your household',
-          style: TextStyle(
-            fontSize: 16,
-            color: CupertinoColors.secondaryLabel,
+        // Show pending invites first if any
+        if (householdState.hasPendingInvites) ...[
+          ...householdState.incomingInvites.map((invite) => Padding(
+            padding: const EdgeInsets.only(bottom: 12),
+            child: HouseholdInviteTile(
+              invite: invite,
+              showActions: true,
+              onAccept: () => ref.read(householdNotifierProvider.notifier)
+                  .acceptInvite(invite.inviteCode),
+              onDecline: () => ref.read(householdNotifierProvider.notifier)
+                  .declineInvite(invite.inviteCode),
+            ),
+          )),
+          const SizedBox(height: 24),
+          Container(
+            height: 0.5,
+            color: CupertinoColors.separator,
           ),
-          textAlign: TextAlign.center,
-        ),
-        const SizedBox(height: 32),
-        CupertinoButton.filled(
-          child: const Text('Create Household'),
-          onPressed: () => _showCreateHouseholdModal(context, ref),
-        ),
-        const SizedBox(height: 16),
-        CupertinoButton(
-          child: const Text('Join with Code'),
-          onPressed: () => _showJoinWithCodeModal(context, ref),
+          const SizedBox(height: 24),
+        ],
+        
+        // Always show create/join options
+        Center(
+          child: Column(
+            children: [
+              const Text(
+                'Share recipes and collaborate with your household',
+                style: TextStyle(
+                  fontSize: 16,
+                  color: CupertinoColors.secondaryLabel,
+                ),
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 32),
+              CupertinoButton.filled(
+                child: const Text('Create Household'),
+                onPressed: () => _showCreateHouseholdModal(context, ref),
+              ),
+              const SizedBox(height: 16),
+              CupertinoButton(
+                child: const Text('Join with Code'),
+                onPressed: () => _showJoinWithCodeModal(context, ref),
+              ),
+            ],
+          ),
         ),
       ],
     );

@@ -17,6 +17,7 @@ class HouseholdNotifier extends StateNotifier<HouseholdState> {
   final HouseholdInviteRepository _inviteRepository;
   final HouseholdManagementService _service;
   final String _currentUserId;
+  final String? _currentUserEmail;
 
   late final StreamSubscription _householdSubscription;
   StreamSubscription? _membersSubscription;
@@ -28,10 +29,12 @@ class HouseholdNotifier extends StateNotifier<HouseholdState> {
     required HouseholdInviteRepository inviteRepository,
     required HouseholdManagementService service,
     required String currentUserId,
+    String? currentUserEmail,
   })  : _householdRepository = householdRepository,
         _inviteRepository = inviteRepository,
         _service = service,
         _currentUserId = currentUserId,
+        _currentUserEmail = currentUserEmail,
         super(const HouseholdState()) {
     _initializeStreams();
   }
@@ -53,14 +56,19 @@ class HouseholdNotifier extends StateNotifier<HouseholdState> {
       }
     });
 
-    // Watch user's incoming invites
-    _userInvitesSubscription = _inviteRepository
-        .watchUserInvites(_currentUserId)
-        .listen((invites) {
-      state = state.copyWith(
-        incomingInvites: invites.map((e) => HouseholdInvite.fromDrift(e)).toList(),
-      );
-    });
+    // Watch user's incoming invites by email
+    if (_currentUserEmail != null) {
+      _userInvitesSubscription = _inviteRepository
+          .watchUserInvites(_currentUserEmail)
+          .listen((invites) {
+        state = state.copyWith(
+          incomingInvites: invites.map((e) => HouseholdInvite.fromDrift(e)).toList(),
+        );
+      });
+    } else {
+      // Create a dummy subscription if no email
+      _userInvitesSubscription = Stream<List<HouseholdInviteEntry>>.empty().listen((_) {});
+    }
   }
 
   void _startWatchingHouseholdData(String householdId) {
@@ -249,10 +257,10 @@ final householdNotifierProvider = StateNotifierProvider<HouseholdNotifier, House
   final householdRepo = ref.watch(householdRepositoryProvider);
   final inviteRepo = ref.watch(householdInviteRepositoryProvider);
   final service = ref.watch(householdManagementServiceProvider);
-  // Get current user ID from Supabase auth
-  final currentUserId = Supabase.instance.client.auth.currentSession?.user.id;
+  // Get current user info from Supabase auth
+  final currentUser = Supabase.instance.client.auth.currentSession?.user;
   
-  if (currentUserId == null) {
+  if (currentUser == null) {
     throw StateError('User must be authenticated to access household features');
   }
   
@@ -260,7 +268,8 @@ final householdNotifierProvider = StateNotifierProvider<HouseholdNotifier, House
     householdRepository: householdRepo,
     inviteRepository: inviteRepo,
     service: service,
-    currentUserId: currentUserId,
+    currentUserId: currentUser.id,
+    currentUserEmail: currentUser.email,
   );
 });
 
