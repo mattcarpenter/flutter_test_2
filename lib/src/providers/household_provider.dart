@@ -58,14 +58,24 @@ class HouseholdNotifier extends StateNotifier<HouseholdState> {
 
     // Watch user's incoming invites by email
     if (_currentUserEmail != null) {
+      print('HOUSEHOLD DEBUG: Watching invites for email: $_currentUserEmail');
       _userInvitesSubscription = _inviteRepository
           .watchUserInvites(_currentUserEmail)
           .listen((invites) {
+        print('HOUSEHOLD DEBUG: Received ${invites.length} invites from repository:');
+        for (var invite in invites) {
+          print('  - ID: ${invite.id}');
+          print('  - Code: ${invite.inviteCode}');
+          print('  - Email: ${invite.email}');
+          print('  - Type: ${invite.inviteType}');
+          print('  - Status: ${invite.status}');
+        }
         state = state.copyWith(
           incomingInvites: invites.map((e) => HouseholdInvite.fromDrift(e)).toList(),
         );
       });
     } else {
+      print('HOUSEHOLD DEBUG: No email available, creating empty stream');
       // Create a dummy subscription if no email
       _userInvitesSubscription = Stream<List<HouseholdInviteEntry>>.empty().listen((_) {});
     }
@@ -193,13 +203,17 @@ class HouseholdNotifier extends StateNotifier<HouseholdState> {
   }
 
   Future<void> acceptInvite(String inviteCode) async {
+    print('HOUSEHOLD PROVIDER: Accepting invite with code: $inviteCode');
     state = state.copyWith(isLoading: true, error: null);
     
     try {
+      print('HOUSEHOLD PROVIDER: Calling service.acceptInvite...');
       await _service.acceptInvite(inviteCode);
+      print('HOUSEHOLD PROVIDER: Successfully accepted invite');
       // PowerSync will automatically sync household data to the user's device
       
     } catch (e) {
+      print('HOUSEHOLD PROVIDER: Error accepting invite: $e');
       state = state.copyWith(error: e.toString());
     } finally {
       state = state.copyWith(isLoading: false);

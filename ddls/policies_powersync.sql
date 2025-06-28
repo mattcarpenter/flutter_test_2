@@ -143,7 +143,7 @@ CREATE POLICY "Users can view invites they created or received"
         auth.uid() = invited_by_user_id
         OR auth.uid() = accepted_by_user_id
         OR (
-            email = (SELECT email FROM auth.users WHERE id = auth.uid())
+            LOWER(email) = LOWER((SELECT email FROM auth.users WHERE id = auth.uid()))
             AND status = 'pending'
         )
         OR EXISTS (

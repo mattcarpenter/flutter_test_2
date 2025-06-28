@@ -188,12 +188,18 @@ class HouseholdManagementService {
   }
 
   Future<AcceptInviteResponse> acceptInvite(String inviteCode) async {
+    print('HOUSEHOLD SERVICE: Accepting invite with code: $inviteCode');
+    print('HOUSEHOLD SERVICE: Calling $apiBaseUrl/v1/household/invites/$inviteCode/accept');
+    
     final response = await http.post(
       Uri.parse('$apiBaseUrl/v1/household/invites/$inviteCode/accept'),
       headers: {
         'Authorization': 'Bearer ${getAuthToken()}',
       },
     );
+
+    print('HOUSEHOLD SERVICE: Accept response status: ${response.statusCode}');
+    print('HOUSEHOLD SERVICE: Accept response body: ${response.body}');
 
     if (response.statusCode == 200) {
       return AcceptInviteResponse.fromJson(json.decode(response.body));

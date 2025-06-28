@@ -15,6 +15,7 @@ CREATE TABLE public.household_members (
                                           is_active integer NOT NULL DEFAULT 1,
                                           role text NOT NULL DEFAULT 'member',
                                           joined_at bigint NOT NULL,
+                                          updated_at bigint NULL,
                                           CONSTRAINT household_members_pkey PRIMARY KEY (household_id, user_id),
                                           CONSTRAINT household_members_household_id_fkey FOREIGN KEY (household_id) REFERENCES public.households (id) ON DELETE CASCADE,
                                           CONSTRAINT household_members_user_id_fkey FOREIGN KEY (user_id) REFERENCES auth.users (id) ON DELETE CASCADE,

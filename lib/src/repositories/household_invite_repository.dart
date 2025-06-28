@@ -20,7 +20,7 @@ class HouseholdInviteRepository {
   Stream<List<HouseholdInviteEntry>> watchUserInvites(String userEmail) {
     // Watch invites for current user's email address
     return (_db.select(_db.householdInvites)
-      ..where((tbl) => tbl.email.equals(userEmail) &
+      ..where((tbl) => tbl.email.lower().equals(userEmail.toLowerCase()) &
                        tbl.status.equals('pending') &
                        tbl.expiresAt.isBiggerThan(
                          Variable(DateTime.now().millisecondsSinceEpoch)

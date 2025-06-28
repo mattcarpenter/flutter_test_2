@@ -14,6 +14,8 @@ class HouseholdMembers extends Table {
   TextColumn get role => text().withDefault(const Constant('member'))();
   // When the user joined the household
   IntColumn get joinedAt => integer()();
+  // When the record was last updated
+  IntColumn get updatedAt => integer().nullable()();
 
   @override
   Set<Column> get primaryKey => {householdId, userId};

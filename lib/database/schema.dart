@@ -99,6 +99,7 @@ Schema schema = const Schema(([
     Column.integer('is_active'),
     Column.text('role'),
     Column.integer('joined_at'),
+    Column.integer('updated_at'),
   ]),
   Table(householdInvitesTable, [
     Column.text('household_id'),

@@ -137,10 +137,21 @@ class HouseholdSharingPage extends ConsumerWidget {
             child: HouseholdInviteTile(
               invite: invite,
               showActions: true,
-              onAccept: () => ref.read(householdNotifierProvider.notifier)
-                  .acceptInvite(invite.inviteCode),
-              onDecline: () => ref.read(householdNotifierProvider.notifier)
-                  .declineInvite(invite.inviteCode),
+              onAccept: () {
+                print('UI: Accept button tapped for invite:');
+                print('  - ID: ${invite.id}');
+                print('  - Invite Code: ${invite.inviteCode}');
+                print('  - Type: ${invite.inviteType}');
+                print('  - Status: ${invite.status}');
+                print('  - Email: ${invite.email}');
+                ref.read(householdNotifierProvider.notifier)
+                    .acceptInvite(invite.inviteCode);
+              },
+              onDecline: () {
+                print('UI: Decline button tapped for invite: ${invite.inviteCode}');
+                ref.read(householdNotifierProvider.notifier)
+                    .declineInvite(invite.inviteCode);
+              },
             ),
           )),
           const SizedBox(height: 24),
