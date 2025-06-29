@@ -11,6 +11,7 @@ import '../services/household_management_service.dart';
 import '../features/household/models/household_state.dart';
 import '../features/household/models/household_member.dart';
 import '../features/household/models/household_invite.dart';
+import 'household_services_provider.dart';
 
 class HouseholdNotifier extends StateNotifier<HouseholdState> {
   final HouseholdRepository _householdRepository;
@@ -18,6 +19,7 @@ class HouseholdNotifier extends StateNotifier<HouseholdState> {
   final HouseholdManagementService _service;
   final String _currentUserId;
   final String? _currentUserEmail;
+  final Ref _ref;
 
   late final StreamSubscription _householdSubscription;
   StreamSubscription? _membersSubscription;
@@ -30,11 +32,13 @@ class HouseholdNotifier extends StateNotifier<HouseholdState> {
     required HouseholdManagementService service,
     required String currentUserId,
     String? currentUserEmail,
+    required Ref ref,
   })  : _householdRepository = householdRepository,
         _inviteRepository = inviteRepository,
         _service = service,
         _currentUserId = currentUserId,
         _currentUserEmail = currentUserEmail,
+        _ref = ref,
         super(const HouseholdState()) {
     _initializeStreams();
   }
@@ -136,6 +140,16 @@ class HouseholdNotifier extends StateNotifier<HouseholdState> {
         joinedAt: DateTime.now().millisecondsSinceEpoch,
       );
       await _householdRepository.addMember(memberCompanion);
+      
+      // Immediately trigger data migration for the new household
+      try {
+        final monitor = _ref.read(householdMembershipMonitorProvider);
+        await monitor.triggerMigrationForHousehold(householdId, _currentUserId);
+      } catch (e) {
+        // Log error but don't fail household creation
+        print('HOUSEHOLD PROVIDER: Failed to trigger immediate migration: $e');
+        // Migration will still happen on next app restart via startup check
+      }
       
     } catch (e) {
       state = state.copyWith(error: e.toString());
@@ -255,6 +269,20 @@ class HouseholdNotifier extends StateNotifier<HouseholdState> {
       state = state.copyWith(isLeavingHousehold: false);
     }
   }
+  
+  Future<void> deleteHousehold(String householdId) async {
+    state = state.copyWith(isLeavingHousehold: true, error: null);
+    
+    try {
+      await _service.deleteHousehold(householdId);
+      // PowerSync will detect membership removal and trigger data cleanup
+      
+    } catch (e) {
+      state = state.copyWith(error: e.toString());
+    } finally {
+      state = state.copyWith(isLeavingHousehold: false);
+    }
+  }
 
   @override
   void dispose() {
@@ -284,6 +312,7 @@ final householdNotifierProvider = StateNotifierProvider<HouseholdNotifier, House
     service: service,
     currentUserId: currentUser.id,
     currentUserEmail: currentUser.email,
+    ref: ref,
   );
 });
 

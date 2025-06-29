@@ -256,6 +256,20 @@ class HouseholdManagementService {
       throw HouseholdApiException.fromResponse(response);
     }
   }
+  
+  /// Delete a household (owner only, when no other members)
+  Future<void> deleteHousehold(String householdId) async {
+    final response = await http.delete(
+      Uri.parse('$apiBaseUrl/v1/households/$householdId'),
+      headers: {
+        'Authorization': 'Bearer ${getAuthToken()}',
+      },
+    );
+
+    if (response.statusCode != 200) {
+      throw HouseholdApiException.fromResponse(response);
+    }
+  }
 }
 
 // Provider for the household management service

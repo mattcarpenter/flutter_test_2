@@ -2,6 +2,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../managers/ingredient_term_queue_manager.dart';
 import '../managers/upload_queue_manager.dart';
 import '../repositories/recipe_repository.dart';
+import 'household_services_provider.dart';
 
 /// This provider initializes and wires up the services that have circular dependencies.
 /// It handles connecting the RecipeRepository and IngredientTermQueueManager without
@@ -32,6 +33,9 @@ final appServicesProvider = Provider<void>((ref) {
   // Start processing queues
   uploadManager.processQueue();
   ingredientTermManager.processQueue();
+  
+  // Initialize household monitoring
+  ref.watch(householdMonitoringProvider);
   
   // Return void
   return;

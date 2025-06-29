@@ -78,6 +78,20 @@ class HouseholdRepository {
       ..where((tbl) => tbl.id.equals(memberId))
     ).write(HouseholdMembersCompanion(role: Value(role)));
   }
+  
+  /// Watch all memberships for a user (active and inactive)
+  Stream<List<HouseholdMemberEntry>> watchUserMemberships(String userId) {
+    return (_db.select(_db.householdMembers)
+      ..where((tbl) => tbl.userId.equals(userId))
+    ).watch();
+  }
+
+  /// Get active memberships for startup check
+  Future<List<HouseholdMemberEntry>> getActiveUserMemberships(String userId) async {
+    return await (_db.select(_db.householdMembers)
+      ..where((tbl) => tbl.userId.equals(userId) & tbl.isActive.equals(1))
+    ).get();
+  }
 }
 
 /// Provider for the HouseholdRepository. This uses the global [appDb] instance.

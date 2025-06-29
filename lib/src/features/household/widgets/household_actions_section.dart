@@ -1,8 +1,13 @@
 import 'package:flutter/cupertino.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import '../models/household_member.dart';
+import '../../../../database/database.dart';
 import 'leave_household_modal.dart';
+import '../../../providers/household_provider.dart';
 
-class HouseholdActionsSection extends StatelessWidget {
+class HouseholdActionsSection extends ConsumerWidget {
+  final HouseholdEntry household;
   final String currentUserId;
   final List<HouseholdMember> members;
   final bool isLeavingHousehold;
@@ -10,6 +15,7 @@ class HouseholdActionsSection extends StatelessWidget {
 
   const HouseholdActionsSection({
     super.key,
+    required this.household,
     required this.currentUserId,
     required this.members,
     required this.isLeavingHousehold,
@@ -17,7 +23,7 @@ class HouseholdActionsSection extends StatelessWidget {
   });
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final currentMember = members.cast<HouseholdMember?>().firstWhere(
       (m) => m?.userId == currentUserId,
       orElse: () => null,
@@ -40,7 +46,7 @@ class HouseholdActionsSection extends StatelessWidget {
           width: double.infinity,
           child: CupertinoButton(
             color: CupertinoColors.destructiveRed,
-            onPressed: isLeavingHousehold ? null : () => _showLeaveHouseholdModal(context, currentMember),
+            onPressed: isLeavingHousehold ? null : () => _showLeaveHouseholdModal(context, currentMember, ref),
             child: isLeavingHousehold
                 ? const CupertinoActivityIndicator(color: CupertinoColors.white)
                 : const Text('Leave Household'),
@@ -59,26 +65,13 @@ class HouseholdActionsSection extends StatelessWidget {
     );
   }
 
-  void _showLeaveHouseholdModal(BuildContext context, HouseholdMember currentMember) {
+  void _showLeaveHouseholdModal(BuildContext context, HouseholdMember currentMember, WidgetRef ref) {
     if (currentMember.isOwner) {
-      // Show ownership transfer modal
       final otherMembers = members.where((m) => m.userId != currentUserId).toList();
       
       if (otherMembers.isEmpty) {
-        // Can't leave if no other members
-        showCupertinoDialog(
-          context: context,
-          builder: (context) => CupertinoAlertDialog(
-            title: const Text('Cannot Leave'),
-            content: const Text('You cannot leave the household as the owner unless there are other members to transfer ownership to.'),
-            actions: [
-              CupertinoDialogAction(
-                child: const Text('OK'),
-                onPressed: () => Navigator.of(context).pop(),
-              ),
-            ],
-          ),
-        );
+        // Show delete household modal instead of blocking
+        _showDeleteHouseholdModal(context, ref);
         return;
       }
 
@@ -114,5 +107,59 @@ class HouseholdActionsSection extends StatelessWidget {
         ),
       );
     }
+  }
+  
+  void _showDeleteHouseholdModal(BuildContext context, WidgetRef ref) {
+    showCupertinoDialog(
+      context: context,
+      builder: (context) => CupertinoAlertDialog(
+        title: const Text('Delete Household'),
+        content: const Text(
+          'Since you are the only member, this will delete the household. '
+          'Your shared data will become personal data. This cannot be undone.'
+        ),
+        actions: [
+          CupertinoDialogAction(
+            child: const Text('Cancel'),
+            onPressed: () => Navigator.pop(context),
+          ),
+          CupertinoDialogAction(
+            isDestructiveAction: true,
+            child: const Text('Delete Household'),
+            onPressed: () async {
+              Navigator.pop(context);
+              
+              final notifier = ref.read(householdNotifierProvider.notifier);
+              
+              try {
+                // Call delete endpoint (which will deactivate membership)
+                await notifier.deleteHousehold(household.id);
+                
+                // Navigate back to household list
+                if (context.mounted) {
+                  context.go('/households');
+                }
+              } catch (e) {
+                if (context.mounted) {
+                  showCupertinoDialog(
+                    context: context,
+                    builder: (context) => CupertinoAlertDialog(
+                      title: const Text('Error'),
+                      content: Text('Failed to delete household: $e'),
+                      actions: [
+                        CupertinoDialogAction(
+                          child: const Text('OK'),
+                          onPressed: () => Navigator.pop(context),
+                        ),
+                      ],
+                    ),
+                  );
+                }
+              }
+            },
+          ),
+        ],
+      ),
+    );
   }
 }

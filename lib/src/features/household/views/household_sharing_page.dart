@@ -116,6 +116,7 @@ class HouseholdSharingPage extends ConsumerWidget {
         
         // Actions section
         HouseholdActionsSection(
+          household: householdState.currentHousehold!,
           currentUserId: currentUserId,
           members: householdState.members,
           isLeavingHousehold: householdState.isLeavingHousehold,
