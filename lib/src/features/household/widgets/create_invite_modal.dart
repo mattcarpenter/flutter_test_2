@@ -1,5 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/services.dart';
+import '../../../widgets/error_dialog.dart';
+import '../utils/error_messages.dart';
 
 class CreateInviteModal extends StatefulWidget {
   final Future<String?> Function(String email) onCreateEmailInvite;
@@ -116,19 +118,10 @@ class _CreateInviteModalState extends State<CreateInviteModal> {
     );
   }
 
-  void _showErrorDialog(String error) {
-    showCupertinoDialog(
-      context: context,
-      builder: (context) => CupertinoAlertDialog(
-        title: const Text('Error'),
-        content: Text(error),
-        actions: [
-          CupertinoDialogAction(
-            onPressed: () => Navigator.of(context).pop(),
-            child: const Text('OK'),
-          ),
-        ],
-      ),
+  void _showErrorDialog(String error) async {
+    await ErrorDialog.show(
+      context,
+      message: HouseholdErrorMessages.getDisplayMessage(error),
     );
   }
 

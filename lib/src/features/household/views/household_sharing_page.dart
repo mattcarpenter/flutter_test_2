@@ -3,6 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../../providers/household_provider.dart';
 import '../../../mobile/utils/adaptive_sliver_page.dart';
+import '../../../widgets/error_dialog.dart';
+import '../../../widgets/success_dialog.dart';
 import '../widgets/create_household_modal.dart';
 import '../widgets/join_with_code_modal.dart';
 import '../widgets/household_info_section.dart';
@@ -11,6 +13,7 @@ import '../widgets/household_invites_section.dart';
 import '../widgets/household_actions_section.dart';
 import '../widgets/pending_invites_section.dart';
 import '../widgets/household_invite_tile.dart';
+import '../utils/error_messages.dart';
 
 class HouseholdSharingPage extends ConsumerWidget {
   final VoidCallback? onMenuPressed;
@@ -148,8 +151,18 @@ class HouseholdSharingPage extends ConsumerWidget {
           members: householdState.members,
           currentUserId: currentUserId,
           canManageMembers: canManageMembers,
-          onRemoveMember: (memberId) => ref.read(householdNotifierProvider.notifier)
-              .removeMember(memberId),
+          onRemoveMember: (memberId) async {
+            try {
+              await ref.read(householdNotifierProvider.notifier).removeMember(memberId);
+            } catch (e) {
+              if (context.mounted) {
+                await ErrorDialog.show(
+                  context,
+                  message: HouseholdErrorMessages.getDisplayMessage(e.toString()),
+                );
+              }
+            }
+          },
         ),
         const SizedBox(height: 24),
         
@@ -162,10 +175,36 @@ class HouseholdSharingPage extends ConsumerWidget {
                 .createEmailInvite(email),
             onCreateCodeInvite: (displayName) => ref.read(householdNotifierProvider.notifier)
                 .createCodeInvite(displayName),
-            onResendInvite: (inviteId) => ref.read(householdNotifierProvider.notifier)
-                .resendInvite(inviteId),
-            onRevokeInvite: (inviteId) => ref.read(householdNotifierProvider.notifier)
-                .revokeInvite(inviteId),
+            onResendInvite: (inviteId) async {
+              try {
+                await ref.read(householdNotifierProvider.notifier).resendInvite(inviteId);
+                if (context.mounted) {
+                  await SuccessDialog.show(
+                    context,
+                    message: 'Invitation has been resent successfully.',
+                  );
+                }
+              } catch (e) {
+                if (context.mounted) {
+                  await ErrorDialog.show(
+                    context,
+                    message: HouseholdErrorMessages.getDisplayMessage(e.toString()),
+                  );
+                }
+              }
+            },
+            onRevokeInvite: (inviteId) async {
+              try {
+                await ref.read(householdNotifierProvider.notifier).revokeInvite(inviteId);
+              } catch (e) {
+                if (context.mounted) {
+                  await ErrorDialog.show(
+                    context,
+                    message: HouseholdErrorMessages.getDisplayMessage(e.toString()),
+                  );
+                }
+              }
+            },
           ),
           const SizedBox(height: 24),
         ],
@@ -194,20 +233,44 @@ class HouseholdSharingPage extends ConsumerWidget {
             child: HouseholdInviteTile(
               invite: invite,
               showActions: true,
-              onAccept: () {
+              onAccept: () async {
                 print('UI: Accept button tapped for invite:');
                 print('  - ID: ${invite.id}');
                 print('  - Invite Code: ${invite.inviteCode}');
                 print('  - Type: ${invite.inviteType}');
                 print('  - Status: ${invite.status}');
                 print('  - Email: ${invite.email}');
-                ref.read(householdNotifierProvider.notifier)
-                    .acceptInvite(invite.inviteCode);
+                try {
+                  await ref.read(householdNotifierProvider.notifier)
+                      .acceptInvite(invite.inviteCode);
+                  if (context.mounted) {
+                    await SuccessDialog.show(
+                      context,
+                      message: 'You have successfully joined the household!',
+                    );
+                  }
+                } catch (e) {
+                  if (context.mounted) {
+                    await ErrorDialog.show(
+                      context,
+                      message: HouseholdErrorMessages.getDisplayMessage(e.toString()),
+                    );
+                  }
+                }
               },
-              onDecline: () {
+              onDecline: () async {
                 print('UI: Decline button tapped for invite: ${invite.inviteCode}');
-                ref.read(householdNotifierProvider.notifier)
-                    .declineInvite(invite.inviteCode);
+                try {
+                  await ref.read(householdNotifierProvider.notifier)
+                      .declineInvite(invite.inviteCode);
+                } catch (e) {
+                  if (context.mounted) {
+                    await ErrorDialog.show(
+                      context,
+                      message: HouseholdErrorMessages.getDisplayMessage(e.toString()),
+                    );
+                  }
+                }
               },
             ),
           )),

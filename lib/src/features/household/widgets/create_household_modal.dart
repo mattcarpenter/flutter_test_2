@@ -1,4 +1,7 @@
 import 'package:flutter/cupertino.dart';
+import '../../../widgets/error_dialog.dart';
+import '../../../widgets/success_dialog.dart';
+import '../utils/error_messages.dart';
 
 class CreateHouseholdModal extends StatefulWidget {
   final Function(String name) onCreateHousehold;
@@ -33,9 +36,19 @@ class _CreateHouseholdModalState extends State<CreateHouseholdModal> {
       await widget.onCreateHousehold(_controller.text.trim());
       if (mounted) {
         Navigator.of(context).pop();
+        // Show success dialog for this major operation
+        await SuccessDialog.show(
+          context,
+          message: 'Household "${_controller.text.trim()}" has been created successfully!',
+        );
       }
     } catch (e) {
-      // Error handling is done in the provider
+      if (mounted) {
+        await ErrorDialog.show(
+          context,
+          message: HouseholdErrorMessages.getDisplayMessage(e.toString()),
+        );
+      }
     } finally {
       if (mounted) {
         setState(() {

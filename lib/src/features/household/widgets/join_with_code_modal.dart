@@ -1,4 +1,7 @@
 import 'package:flutter/cupertino.dart';
+import '../../../widgets/error_dialog.dart';
+import '../../../widgets/success_dialog.dart';
+import '../utils/error_messages.dart';
 
 class JoinWithCodeModal extends StatefulWidget {
   final Function(String inviteCode) onAcceptInvite;
@@ -33,9 +36,19 @@ class _JoinWithCodeModalState extends State<JoinWithCodeModal> {
       await widget.onAcceptInvite(_controller.text.trim());
       if (mounted) {
         Navigator.of(context).pop();
+        // Show success dialog for this major operation
+        await SuccessDialog.show(
+          context,
+          message: 'You have successfully joined the household!',
+        );
       }
     } catch (e) {
-      // Error handling is done in the provider
+      if (mounted) {
+        await ErrorDialog.show(
+          context,
+          message: HouseholdErrorMessages.getDisplayMessage(e.toString()),
+        );
+      }
     } finally {
       if (mounted) {
         setState(() {

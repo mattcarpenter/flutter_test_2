@@ -1,5 +1,8 @@
 import 'package:flutter/cupertino.dart';
 import '../models/household_member.dart';
+import '../../../widgets/error_dialog.dart';
+import '../../../widgets/success_dialog.dart';
+import '../utils/error_messages.dart';
 
 class LeaveHouseholdModal extends StatefulWidget {
   final bool isOwner;
@@ -40,9 +43,26 @@ class _LeaveHouseholdModalState extends State<LeaveHouseholdModal> {
       await widget.onLeaveHousehold(_selectedNewOwner?.userId);
       if (mounted) {
         Navigator.of(context).pop();
+        // Show success dialog for this major operation
+        if (widget.isOwner) {
+          await SuccessDialog.show(
+            context,
+            message: 'You have successfully left the household and transferred ownership.',
+          );
+        } else {
+          await SuccessDialog.show(
+            context,
+            message: 'You have successfully left the household.',
+          );
+        }
       }
     } catch (e) {
-      // Error handling is done in the provider
+      if (mounted) {
+        await ErrorDialog.show(
+          context,
+          message: HouseholdErrorMessages.getDisplayMessage(e.toString()),
+        );
+      }
     } finally {
       if (mounted) {
         setState(() {

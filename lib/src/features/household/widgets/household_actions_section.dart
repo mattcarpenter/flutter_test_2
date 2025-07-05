@@ -5,6 +5,8 @@ import '../models/household_member.dart';
 import '../../../../database/database.dart';
 import 'leave_household_modal.dart';
 import '../../../providers/household_provider.dart';
+import '../../../widgets/error_dialog.dart';
+import '../utils/error_messages.dart';
 
 class HouseholdActionsSection extends ConsumerWidget {
   final HouseholdEntry household;
@@ -97,9 +99,18 @@ class HouseholdActionsSection extends ConsumerWidget {
             ),
             CupertinoDialogAction(
               isDestructiveAction: true,
-              onPressed: () {
+              onPressed: () async {
                 Navigator.of(context).pop();
-                onLeaveHousehold(null);
+                try {
+                  await onLeaveHousehold(null);
+                } catch (e) {
+                  if (context.mounted) {
+                    await ErrorDialog.show(
+                      context,
+                      message: HouseholdErrorMessages.getDisplayMessage(e.toString()),
+                    );
+                  }
+                }
               },
               child: const Text('Leave'),
             ),
@@ -141,18 +152,9 @@ class HouseholdActionsSection extends ConsumerWidget {
                 }
               } catch (e) {
                 if (context.mounted) {
-                  showCupertinoDialog(
-                    context: context,
-                    builder: (context) => CupertinoAlertDialog(
-                      title: const Text('Error'),
-                      content: Text('Failed to delete household: $e'),
-                      actions: [
-                        CupertinoDialogAction(
-                          child: const Text('OK'),
-                          onPressed: () => Navigator.pop(context),
-                        ),
-                      ],
-                    ),
+                  await ErrorDialog.show(
+                    context,
+                    message: HouseholdErrorMessages.getDisplayMessage(e.toString()),
                   );
                 }
               }

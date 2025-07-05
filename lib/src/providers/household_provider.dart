@@ -118,7 +118,7 @@ class HouseholdNotifier extends StateNotifier<HouseholdState> {
 
   // Household operations
   Future<void> createHousehold(String name) async {
-    state = state.copyWith(isLoading: true, error: null);
+    state = state.copyWith(isLoading: true);
     
     try {
       // Generate ID explicitly so we can use it for both operations
@@ -152,7 +152,7 @@ class HouseholdNotifier extends StateNotifier<HouseholdState> {
       }
       
     } catch (e) {
-      state = state.copyWith(error: e.toString());
+      rethrow;
     } finally {
       state = state.copyWith(isLoading: false);
     }
@@ -162,7 +162,7 @@ class HouseholdNotifier extends StateNotifier<HouseholdState> {
   Future<String?> createEmailInvite(String email) async {
     if (state.currentHousehold == null) return null;
     
-    state = state.copyWith(isCreatingInvite: true, error: null);
+    state = state.copyWith(isCreatingInvite: true);
     
     try {
       final response = await _service.createEmailInvite(
@@ -171,8 +171,7 @@ class HouseholdNotifier extends StateNotifier<HouseholdState> {
       );
       return response.invite.id;
     } catch (e) {
-      state = state.copyWith(error: e.toString());
-      return null;
+      rethrow;
     } finally {
       state = state.copyWith(isCreatingInvite: false);
     }
@@ -204,7 +203,7 @@ class HouseholdNotifier extends StateNotifier<HouseholdState> {
     try {
       await _service.resendInvite(inviteId);
     } catch (e) {
-      state = state.copyWith(error: e.toString());
+      rethrow;
     }
   }
 
@@ -217,7 +216,7 @@ class HouseholdNotifier extends StateNotifier<HouseholdState> {
     if (inviteIndex != -1) {
       final updatedInvites = [...state.outgoingInvites];
       updatedInvites[inviteIndex] = updatedInvites[inviteIndex].copyWith(isRevoking: true);
-      state = state.copyWith(outgoingInvites: updatedInvites, error: null);
+      state = state.copyWith(outgoingInvites: updatedInvites);
     }
     
     try {
@@ -229,10 +228,9 @@ class HouseholdNotifier extends StateNotifier<HouseholdState> {
       if (inviteIndex != -1) {
         final revertedInvites = [...state.outgoingInvites];
         revertedInvites[inviteIndex] = revertedInvites[inviteIndex].copyWith(isRevoking: false);
-        state = state.copyWith(outgoingInvites: revertedInvites, error: e.toString());
-      } else {
-        state = state.copyWith(error: e.toString());
+        state = state.copyWith(outgoingInvites: revertedInvites);
       }
+      rethrow;
     }
   }
 
@@ -247,7 +245,7 @@ class HouseholdNotifier extends StateNotifier<HouseholdState> {
     if (inviteIndex != -1) {
       final updatedInvites = [...state.incomingInvites];
       updatedInvites[inviteIndex] = updatedInvites[inviteIndex].copyWith(isAccepting: true);
-      state = state.copyWith(incomingInvites: updatedInvites, error: null);
+      state = state.copyWith(incomingInvites: updatedInvites);
     }
     
     try {
@@ -263,10 +261,9 @@ class HouseholdNotifier extends StateNotifier<HouseholdState> {
       if (inviteIndex != -1) {
         final revertedInvites = [...state.incomingInvites];
         revertedInvites[inviteIndex] = revertedInvites[inviteIndex].copyWith(isAccepting: false);
-        state = state.copyWith(incomingInvites: revertedInvites, error: e.toString());
-      } else {
-        state = state.copyWith(error: e.toString());
+        state = state.copyWith(incomingInvites: revertedInvites);
       }
+      rethrow;
     }
   }
 
@@ -274,7 +271,7 @@ class HouseholdNotifier extends StateNotifier<HouseholdState> {
     try {
       await _service.declineInvite(inviteCode);
     } catch (e) {
-      state = state.copyWith(error: e.toString());
+      rethrow;
     }
   }
 
@@ -283,14 +280,14 @@ class HouseholdNotifier extends StateNotifier<HouseholdState> {
     try {
       await _service.removeMember(memberId);
     } catch (e) {
-      state = state.copyWith(error: e.toString());
+      rethrow;
     }
   }
 
   Future<void> leaveHousehold({String? newOwnerId}) async {
     if (state.currentHousehold == null) return;
     
-    state = state.copyWith(isLeavingHousehold: true, error: null);
+    state = state.copyWith(isLeavingHousehold: true);
     
     try {
       await _service.leaveHousehold(
@@ -300,21 +297,21 @@ class HouseholdNotifier extends StateNotifier<HouseholdState> {
       // PowerSync will automatically remove household data access
       
     } catch (e) {
-      state = state.copyWith(error: e.toString());
+      rethrow;
     } finally {
       state = state.copyWith(isLeavingHousehold: false);
     }
   }
   
   Future<void> deleteHousehold(String householdId) async {
-    state = state.copyWith(isLeavingHousehold: true, error: null);
+    state = state.copyWith(isLeavingHousehold: true);
     
     try {
       await _service.deleteHousehold(householdId);
       // PowerSync will detect membership removal and trigger data cleanup
       
     } catch (e) {
-      state = state.copyWith(error: e.toString());
+      rethrow;
     } finally {
       state = state.copyWith(isLeavingHousehold: false);
     }
