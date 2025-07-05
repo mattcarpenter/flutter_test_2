@@ -18,6 +18,7 @@ class HouseholdInvite {
   final DateTime expiresAt;
   final DateTime? acceptedAt;
   final String? acceptedByUserId;
+  final bool isAccepting;
 
   const HouseholdInvite({
     required this.id,
@@ -34,6 +35,7 @@ class HouseholdInvite {
     required this.expiresAt,
     this.acceptedAt,
     this.acceptedByUserId,
+    this.isAccepting = false,
   });
 
   factory HouseholdInvite.fromDrift(HouseholdInviteEntry entry) {
@@ -60,6 +62,43 @@ class HouseholdInvite {
         ? DateTime.fromMillisecondsSinceEpoch(entry.acceptedAt!) 
         : null,
       acceptedByUserId: entry.acceptedByUserId,
+      isAccepting: false,
+    );
+  }
+
+  HouseholdInvite copyWith({
+    String? id,
+    String? householdId,
+    String? invitedByUserId,
+    String? inviteCode,
+    String? email,
+    String? displayName,
+    HouseholdInviteType? inviteType,
+    HouseholdInviteStatus? status,
+    DateTime? createdAt,
+    DateTime? updatedAt,
+    DateTime? lastSentAt,
+    DateTime? expiresAt,
+    DateTime? acceptedAt,
+    String? acceptedByUserId,
+    bool? isAccepting,
+  }) {
+    return HouseholdInvite(
+      id: id ?? this.id,
+      householdId: householdId ?? this.householdId,
+      invitedByUserId: invitedByUserId ?? this.invitedByUserId,
+      inviteCode: inviteCode ?? this.inviteCode,
+      email: email ?? this.email,
+      displayName: displayName ?? this.displayName,
+      inviteType: inviteType ?? this.inviteType,
+      status: status ?? this.status,
+      createdAt: createdAt ?? this.createdAt,
+      updatedAt: updatedAt ?? this.updatedAt,
+      lastSentAt: lastSentAt ?? this.lastSentAt,
+      expiresAt: expiresAt ?? this.expiresAt,
+      acceptedAt: acceptedAt ?? this.acceptedAt,
+      acceptedByUserId: acceptedByUserId ?? this.acceptedByUserId,
+      isAccepting: isAccepting ?? this.isAccepting,
     );
   }
 }

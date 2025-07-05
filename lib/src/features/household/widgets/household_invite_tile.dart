@@ -22,39 +22,42 @@ class HouseholdInviteTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: CupertinoTheme.of(context).barBackgroundColor,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(
-          color: CupertinoColors.separator,
-          width: 0.5,
+    return AnimatedOpacity(
+      opacity: invite.isAccepting ? 0.7 : 1.0,
+      duration: const Duration(milliseconds: 200),
+      child: Container(
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: CupertinoTheme.of(context).barBackgroundColor,
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(
+            color: CupertinoColors.separator,
+            width: 0.5,
+          ),
         ),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Icon(
-                invite.inviteType == HouseholdInviteType.email
-                    ? CupertinoIcons.mail
-                    : CupertinoIcons.qrcode,
-                color: CupertinoTheme.of(context).primaryColor,
-                size: 20,
-              ),
-              const SizedBox(width: 8),
-              Expanded(
-                child: Text(
-                  invite.displayName,
-                  style: const TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w500,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Icon(
+                  invite.inviteType == HouseholdInviteType.email
+                      ? CupertinoIcons.mail
+                      : CupertinoIcons.qrcode,
+                  color: CupertinoTheme.of(context).primaryColor,
+                  size: 20,
+                ),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Text(
+                    invite.displayName,
+                    style: const TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w500,
+                    ),
                   ),
                 ),
-              ),
-              _buildStatusBadge(),
+                _buildStatusBadge(),
             ],
           ),
           if (invite.email != null) ...[
@@ -84,6 +87,7 @@ class HouseholdInviteTile extends StatelessWidget {
             _buildActionButtons(),
           ],
         ],
+        ),
       ),
     );
   }
@@ -92,23 +96,28 @@ class HouseholdInviteTile extends StatelessWidget {
     Color color;
     String text;
     
-    switch (invite.status) {
-      case HouseholdInviteStatus.pending:
-        color = CupertinoColors.systemBlue;
-        text = 'Pending';
-        break;
-      case HouseholdInviteStatus.accepted:
-        color = CupertinoColors.systemGreen;
-        text = 'Accepted';
-        break;
-      case HouseholdInviteStatus.declined:
-        color = CupertinoColors.systemRed;
-        text = 'Declined';
-        break;
-      case HouseholdInviteStatus.revoked:
-        color = CupertinoColors.systemGrey;
-        text = 'Revoked';
-        break;
+    if (invite.isAccepting) {
+      color = CupertinoColors.systemOrange;
+      text = 'Accepting...';
+    } else {
+      switch (invite.status) {
+        case HouseholdInviteStatus.pending:
+          color = CupertinoColors.systemBlue;
+          text = 'Pending';
+          break;
+        case HouseholdInviteStatus.accepted:
+          color = CupertinoColors.systemGreen;
+          text = 'Accepted';
+          break;
+        case HouseholdInviteStatus.declined:
+          color = CupertinoColors.systemRed;
+          text = 'Declined';
+          break;
+        case HouseholdInviteStatus.revoked:
+          color = CupertinoColors.systemGrey;
+          text = 'Revoked';
+          break;
+      }
     }
 
     return Container(
@@ -167,8 +176,10 @@ class HouseholdInviteTile extends StatelessWidget {
           Expanded(
             child: CupertinoButton.filled(
               padding: const EdgeInsets.symmetric(vertical: 8),
-              onPressed: onAccept,
-              child: const Text('Accept'),
+              onPressed: invite.isAccepting ? null : onAccept,
+              child: invite.isAccepting 
+                  ? const CupertinoActivityIndicator(color: CupertinoColors.white)
+                  : const Text('Accept'),
             ),
           ),
         if (onAccept != null && onDecline != null) const SizedBox(width: 8),
@@ -176,7 +187,7 @@ class HouseholdInviteTile extends StatelessWidget {
           Expanded(
             child: CupertinoButton(
               padding: const EdgeInsets.symmetric(vertical: 8),
-              onPressed: onDecline,
+              onPressed: invite.isAccepting ? null : onDecline,
               child: const Text('Decline'),
             ),
           ),

@@ -218,19 +218,35 @@ class HouseholdNotifier extends StateNotifier<HouseholdState> {
 
   Future<void> acceptInvite(String inviteCode) async {
     print('HOUSEHOLD PROVIDER: Accepting invite with code: $inviteCode');
-    state = state.copyWith(isLoading: true, error: null);
+    
+    // Find the invite and mark it as accepting
+    final inviteIndex = state.incomingInvites.indexWhere(
+      (invite) => invite.inviteCode == inviteCode,
+    );
+    
+    if (inviteIndex != -1) {
+      final updatedInvites = [...state.incomingInvites];
+      updatedInvites[inviteIndex] = updatedInvites[inviteIndex].copyWith(isAccepting: true);
+      state = state.copyWith(incomingInvites: updatedInvites, error: null);
+    }
     
     try {
       print('HOUSEHOLD PROVIDER: Calling service.acceptInvite...');
       await _service.acceptInvite(inviteCode);
       print('HOUSEHOLD PROVIDER: Successfully accepted invite');
       // PowerSync will automatically sync household data to the user's device
+      // The invite will be removed from incomingInvites when PowerSync updates
       
     } catch (e) {
       print('HOUSEHOLD PROVIDER: Error accepting invite: $e');
-      state = state.copyWith(error: e.toString());
-    } finally {
-      state = state.copyWith(isLoading: false);
+      // Revert the accepting state on error
+      if (inviteIndex != -1) {
+        final revertedInvites = [...state.incomingInvites];
+        revertedInvites[inviteIndex] = revertedInvites[inviteIndex].copyWith(isAccepting: false);
+        state = state.copyWith(incomingInvites: revertedInvites, error: e.toString());
+      } else {
+        state = state.copyWith(error: e.toString());
+      }
     }
   }
 
