@@ -151,7 +151,7 @@ CREATE POLICY "Users can view invites they created or received"
             FROM public.household_members hm
             WHERE hm.household_id = household_invites.household_id
               AND hm.user_id = auth.uid()
-              AND hm.role IN ('owner', 'admin')
+              AND hm.role = 'owner'
               AND hm.is_active = 1
         )
     );
@@ -166,7 +166,7 @@ CREATE POLICY "Household owners and admins can create invites"
             FROM public.household_members hm
             WHERE hm.household_id = household_invites.household_id
               AND hm.user_id = auth.uid()
-              AND hm.role IN ('owner', 'admin')
+              AND hm.role = 'owner'
               AND hm.is_active = 1
         )
     );
@@ -180,7 +180,7 @@ CREATE POLICY "Household owners and admins can update invites"
             FROM public.household_members hm
             WHERE hm.household_id = household_invites.household_id
               AND hm.user_id = auth.uid()
-              AND hm.role IN ('owner', 'admin')
+              AND hm.role = 'owner'
               AND hm.is_active = 1
         )
     )
@@ -190,7 +190,7 @@ CREATE POLICY "Household owners and admins can update invites"
             FROM public.household_members hm
             WHERE hm.household_id = household_invites.household_id
               AND hm.user_id = auth.uid()
-              AND hm.role IN ('owner', 'admin')
+              AND hm.role = 'owner'
               AND hm.is_active = 1
         )
     );
@@ -204,7 +204,7 @@ CREATE POLICY "Household owners and admins can delete invites"
             FROM public.household_members hm
             WHERE hm.household_id = household_invites.household_id
               AND hm.user_id = auth.uid()
-              AND hm.role IN ('owner', 'admin')
+              AND hm.role = 'owner'
               AND hm.is_active = 1
         )
     );

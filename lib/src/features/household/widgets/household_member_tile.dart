@@ -125,11 +125,6 @@ class HouseholdMemberTile extends StatelessWidget {
         icon = CupertinoIcons.star_circle;
         text = 'Owner';
         break;
-      case HouseholdRole.admin:
-        color = CupertinoColors.systemBlue;
-        icon = CupertinoIcons.person_badge_plus;
-        text = 'Admin';
-        break;
       case HouseholdRole.member:
         color = CupertinoColors.systemGreen;
         icon = CupertinoIcons.person;

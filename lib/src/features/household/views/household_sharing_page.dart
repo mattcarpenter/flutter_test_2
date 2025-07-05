@@ -97,7 +97,7 @@ class HouseholdSharingPage extends ConsumerWidget {
         ),
         const SizedBox(height: 24),
         
-        // Invites section (owners/admins only)
+        // Invites section (owners only)
         if (canManageMembers) ...[
           HouseholdInvitesSection(
             invites: householdState.outgoingInvites,

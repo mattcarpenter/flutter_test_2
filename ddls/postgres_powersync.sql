@@ -19,7 +19,7 @@ CREATE TABLE public.household_members (
                                           CONSTRAINT household_members_pkey PRIMARY KEY (household_id, user_id),
                                           CONSTRAINT household_members_household_id_fkey FOREIGN KEY (household_id) REFERENCES public.households (id) ON DELETE CASCADE,
                                           CONSTRAINT household_members_user_id_fkey FOREIGN KEY (user_id) REFERENCES auth.users (id) ON DELETE CASCADE,
-                                          CONSTRAINT household_members_role_check CHECK (role IN ('owner', 'admin', 'member'))
+                                          CONSTRAINT household_members_role_check CHECK (role IN ('owner', 'member'))
 ) TABLESPACE pg_default;
 
 CREATE INDEX IF NOT EXISTS household_members_household_idx

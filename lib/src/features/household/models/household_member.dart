@@ -1,6 +1,6 @@
 import '../../../../database/database.dart';
 
-enum HouseholdRole { owner, admin, member }
+enum HouseholdRole { owner, member }
 
 class HouseholdMember {
   final String id;
@@ -37,6 +37,5 @@ class HouseholdMember {
   }
 
   bool get isOwner => role == HouseholdRole.owner;
-  bool get isAdmin => role == HouseholdRole.admin;
-  bool get canManageMembers => isOwner || isAdmin;
+  bool get canManageMembers => isOwner;
 }
