@@ -73,6 +73,7 @@ class HouseholdInvitesSection extends StatelessWidget {
             padding: const EdgeInsets.only(bottom: 8),
             child: HouseholdInviteTile(
               invite: invite,
+              showActions: true,
               onResend: invite.inviteType == HouseholdInviteType.email
                   ? () => onResendInvite(invite.id)
                   : null,

@@ -209,10 +209,30 @@ class HouseholdNotifier extends StateNotifier<HouseholdState> {
   }
 
   Future<void> revokeInvite(String inviteId) async {
+    // Find the invite and mark it as revoking
+    final inviteIndex = state.outgoingInvites.indexWhere(
+      (invite) => invite.id == inviteId,
+    );
+    
+    if (inviteIndex != -1) {
+      final updatedInvites = [...state.outgoingInvites];
+      updatedInvites[inviteIndex] = updatedInvites[inviteIndex].copyWith(isRevoking: true);
+      state = state.copyWith(outgoingInvites: updatedInvites, error: null);
+    }
+    
     try {
       await _service.revokeInvite(inviteId);
+      // PowerSync will automatically update the invite status and remove it from the list
+      
     } catch (e) {
-      state = state.copyWith(error: e.toString());
+      // Revert the revoking state on error
+      if (inviteIndex != -1) {
+        final revertedInvites = [...state.outgoingInvites];
+        revertedInvites[inviteIndex] = revertedInvites[inviteIndex].copyWith(isRevoking: false);
+        state = state.copyWith(outgoingInvites: revertedInvites, error: e.toString());
+      } else {
+        state = state.copyWith(error: e.toString());
+      }
     }
   }
 

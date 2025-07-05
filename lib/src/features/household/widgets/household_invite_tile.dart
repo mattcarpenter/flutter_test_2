@@ -23,7 +23,7 @@ class HouseholdInviteTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return AnimatedOpacity(
-      opacity: invite.isAccepting ? 0.7 : 1.0,
+      opacity: invite.isAccepting || invite.isRevoking ? 0.7 : 1.0,
       duration: const Duration(milliseconds: 200),
       child: Container(
         padding: const EdgeInsets.all(16),
@@ -99,6 +99,9 @@ class HouseholdInviteTile extends StatelessWidget {
     if (invite.isAccepting) {
       color = CupertinoColors.systemOrange;
       text = 'Accepting...';
+    } else if (invite.isRevoking) {
+      color = CupertinoColors.systemRed;
+      text = 'Revoking...';
     } else {
       switch (invite.status) {
         case HouseholdInviteStatus.pending:
@@ -176,7 +179,7 @@ class HouseholdInviteTile extends StatelessWidget {
           Expanded(
             child: CupertinoButton.filled(
               padding: const EdgeInsets.symmetric(vertical: 8),
-              onPressed: invite.isAccepting ? null : onAccept,
+              onPressed: invite.isAccepting || invite.isRevoking ? null : onAccept,
               child: invite.isAccepting 
                   ? const CupertinoActivityIndicator(color: CupertinoColors.white)
                   : const Text('Accept'),
@@ -187,21 +190,23 @@ class HouseholdInviteTile extends StatelessWidget {
           Expanded(
             child: CupertinoButton(
               padding: const EdgeInsets.symmetric(vertical: 8),
-              onPressed: invite.isAccepting ? null : onDecline,
+              onPressed: invite.isAccepting || invite.isRevoking ? null : onDecline,
               child: const Text('Decline'),
             ),
           ),
         if (onResend != null)
           CupertinoButton(
             padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-            onPressed: onResend,
+            onPressed: invite.isAccepting || invite.isRevoking ? null : onResend,
             child: const Text('Resend'),
           ),
         if (onRevoke != null)
           CupertinoButton(
             padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-            onPressed: onRevoke,
-            child: const Text('Revoke', style: TextStyle(color: CupertinoColors.destructiveRed)),
+            onPressed: invite.isRevoking ? null : onRevoke,
+            child: invite.isRevoking
+                ? const CupertinoActivityIndicator(color: CupertinoColors.destructiveRed)
+                : const Text('Revoke', style: TextStyle(color: CupertinoColors.destructiveRed)),
           ),
       ],
     );

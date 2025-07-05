@@ -19,6 +19,12 @@ class HouseholdSharingPage extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    // Check authentication before accessing the provider
+    final currentUser = Supabase.instance.client.auth.currentUser;
+    if (currentUser == null) {
+      return _buildUnauthenticatedPage(context);
+    }
+    
     final householdState = ref.watch(householdNotifierProvider);
     
     final menuButton = onMenuPressed != null 
@@ -37,6 +43,56 @@ class HouseholdSharingPage extends ConsumerWidget {
           child: Padding(
             padding: const EdgeInsets.all(16.0),
             child: _buildContent(context, ref, householdState),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildUnauthenticatedPage(BuildContext context) {
+    final menuButton = onMenuPressed != null 
+        ? GestureDetector(
+            onTap: onMenuPressed,
+            child: const Icon(CupertinoIcons.bars),
+          )
+        : null;
+
+    return AdaptiveSliverPage(
+      title: 'Household Sharing',
+      leading: menuButton,
+      automaticallyImplyLeading: onMenuPressed == null,
+      slivers: [
+        SliverToBoxAdapter(
+          child: Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(
+                    CupertinoIcons.person_badge_minus,
+                    size: 64,
+                    color: CupertinoColors.systemGrey2,
+                  ),
+                  const SizedBox(height: 16),
+                  Text(
+                    'Authentication Required',
+                    style: CupertinoTheme.of(context).textTheme.navLargeTitleTextStyle?.copyWith(
+                      color: CupertinoColors.label,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    'Please sign in to access household sharing features',
+                    style: TextStyle(
+                      fontSize: 16,
+                      color: CupertinoColors.secondaryLabel,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                ],
+              ),
+            ),
           ),
         ),
       ],

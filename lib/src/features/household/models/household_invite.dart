@@ -19,6 +19,7 @@ class HouseholdInvite {
   final DateTime? acceptedAt;
   final String? acceptedByUserId;
   final bool isAccepting;
+  final bool isRevoking;
 
   const HouseholdInvite({
     required this.id,
@@ -36,6 +37,7 @@ class HouseholdInvite {
     this.acceptedAt,
     this.acceptedByUserId,
     this.isAccepting = false,
+    this.isRevoking = false,
   });
 
   factory HouseholdInvite.fromDrift(HouseholdInviteEntry entry) {
@@ -63,6 +65,7 @@ class HouseholdInvite {
         : null,
       acceptedByUserId: entry.acceptedByUserId,
       isAccepting: false,
+      isRevoking: false,
     );
   }
 
@@ -82,6 +85,7 @@ class HouseholdInvite {
     DateTime? acceptedAt,
     String? acceptedByUserId,
     bool? isAccepting,
+    bool? isRevoking,
   }) {
     return HouseholdInvite(
       id: id ?? this.id,
@@ -99,6 +103,7 @@ class HouseholdInvite {
       acceptedAt: acceptedAt ?? this.acceptedAt,
       acceptedByUserId: acceptedByUserId ?? this.acceptedByUserId,
       isAccepting: isAccepting ?? this.isAccepting,
+      isRevoking: isRevoking ?? this.isRevoking,
     );
   }
 }
