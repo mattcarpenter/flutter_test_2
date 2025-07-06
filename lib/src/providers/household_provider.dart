@@ -11,7 +11,6 @@ import '../services/household_management_service.dart';
 import '../features/household/models/household_state.dart';
 import '../features/household/models/household_member.dart';
 import '../features/household/models/household_invite.dart';
-import 'household_services_provider.dart';
 
 class HouseholdNotifier extends StateNotifier<HouseholdState> {
   final HouseholdRepository _householdRepository;
@@ -141,15 +140,8 @@ class HouseholdNotifier extends StateNotifier<HouseholdState> {
       );
       await _householdRepository.addMember(memberCompanion);
       
-      // Immediately trigger data migration for the new household
-      try {
-        final monitor = _ref.read(householdMembershipMonitorProvider);
-        await monitor.triggerMigrationForHousehold(householdId, _currentUserId);
-      } catch (e) {
-        // Log error but don't fail household creation
-        print('HOUSEHOLD PROVIDER: Failed to trigger immediate migration: $e');
-        // Migration will still happen on next app restart via startup check
-      }
+      // Data migration is now handled automatically by PostgreSQL triggers
+      // when the household_members record is inserted above
       
     } catch (e) {
       rethrow;
