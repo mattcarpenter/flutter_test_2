@@ -19,11 +19,6 @@ class AuthError with _$AuthError {
         message: 'Invalid email or password. Please try again.',
         type: AuthErrorType.invalidCredentials,
       );
-    } else if (exception.toString().contains('Email not confirmed')) {
-      return const AuthError(
-        message: 'Please verify your email address before signing in.',
-        type: AuthErrorType.emailNotVerified,
-      );
     } else if (exception.toString().contains('User already registered')) {
       return const AuthError(
         message: 'An account with this email already exists.',
@@ -57,8 +52,6 @@ class AuthError with _$AuthError {
     switch (type) {
       case AuthErrorType.invalidCredentials:
         return 'Invalid email or password. Please try again.';
-      case AuthErrorType.emailNotVerified:
-        return 'Please verify your email address before signing in.';
       case AuthErrorType.userAlreadyExists:
         return 'An account with this email already exists. Try signing in instead.';
       case AuthErrorType.weakPassword:
@@ -83,7 +76,6 @@ class AuthError with _$AuthError {
 
 enum AuthErrorType {
   invalidCredentials,
-  emailNotVerified,
   userAlreadyExists,
   weakPassword,
   invalidEmail,

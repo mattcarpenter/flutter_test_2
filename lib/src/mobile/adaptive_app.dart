@@ -196,13 +196,6 @@ class _AdaptiveApp2State extends State<AdaptiveApp2> {
                   child: const ForgotPasswordPage(),
                 ),
               ),
-              GoRoute(
-                path: 'verify-email',
-                pageBuilder: (context, state) => _platformPage(
-                  state: state,
-                  child: const EmailVerificationPage(),
-                ),
-              ),
             ],
             pageBuilder: (context, state) => _platformPage(
               state: state,

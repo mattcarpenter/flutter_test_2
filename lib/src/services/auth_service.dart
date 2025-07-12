@@ -41,8 +41,6 @@ class AuthApiException implements Exception {
 
     if (message.contains('invalid login credentials')) {
       return AuthErrorType.invalidCredentials;
-    } else if (message.contains('email not confirmed')) {
-      return AuthErrorType.emailNotVerified;
     } else if (message.contains('user already registered')) {
       return AuthErrorType.userAlreadyExists;
     } else if (message.contains('password should be at least')) {
@@ -101,7 +99,6 @@ class AuthService {
       final response = await _supabase.auth.signUp(
         email: email,
         password: password,
-        emailRedirectTo: _getRedirectUrl(),
         data: metadata,
       );
 
@@ -267,22 +264,6 @@ class AuthService {
     }
   }
 
-  /// Resend email verification
-  Future<void> resendEmailVerification(String email) async {
-    try {
-      await _supabase.auth.resend(
-        type: OtpType.signup,
-        email: email,
-        emailRedirectTo: _getRedirectUrl(),
-      );
-    } on AuthException catch (e) {
-      debugPrint('Resend verification error: ${e.message}');
-      throw AuthApiException.fromAuthException(e);
-    } catch (e) {
-      debugPrint('Resend verification error: $e');
-      throw AuthApiException.fromException(Exception(e.toString()));
-    }
-  }
 
   /// Sign out
   Future<void> signOut() async {

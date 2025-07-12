@@ -67,12 +67,7 @@ class _SignUpPageState extends ConsumerState<SignUpPage> {
       );
       
       if (mounted) {
-        final authState = ref.read(authNotifierProvider);
-        if (authState.needsEmailVerification) {
-          context.go('/auth/verify-email');
-        } else {
-          context.go('/recipes');
-        }
+        context.go('/recipes');
       }
     } catch (e) {
       if (mounted) {

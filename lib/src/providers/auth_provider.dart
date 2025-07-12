@@ -118,20 +118,11 @@ class AuthNotifier extends StateNotifier<models.AuthState> {
         metadata: metadata,
       );
 
-      // Check if email verification is needed
-      if (response.user != null && response.session == null) {
-        state = state.copyWith(
-          isSigningUp: false,
-          needsEmailVerification: true,
-          successMessage: 'Please check your email to verify your account.',
-        );
-      } else {
-        // User is signed up and signed in
-        state = state.copyWith(
-          isSigningUp: false,
-          currentUser: response.user,
-        );
-      }
+      // User is signed up and signed in (no email verification needed)
+      state = state.copyWith(
+        isSigningUp: false,
+        currentUser: response.user,
+      );
     } catch (e) {
       final errorMessage = AuthService.getErrorMessage(e as Exception);
       state = state.copyWith(
@@ -217,29 +208,6 @@ class AuthNotifier extends StateNotifier<models.AuthState> {
     }
   }
 
-  /// Resend email verification
-  Future<void> resendEmailVerification(String email) async {
-    state = state.copyWith(
-      isLoading: true,
-      error: null,
-      successMessage: null,
-    );
-
-    try {
-      await _authService.resendEmailVerification(email);
-      state = state.copyWith(
-        isLoading: false,
-        successMessage: 'Verification email sent! Check your inbox.',
-      );
-    } catch (e) {
-      final errorMessage = AuthService.getErrorMessage(e as Exception);
-      state = state.copyWith(
-        isLoading: false,
-        error: errorMessage,
-      );
-      rethrow;
-    }
-  }
 
   /// Sign out
   Future<void> signOut() async {
@@ -296,10 +264,6 @@ class AuthNotifier extends StateNotifier<models.AuthState> {
     state = state.copyWith(successMessage: null);
   }
 
-  /// Clear email verification flag
-  void clearEmailVerification() {
-    state = state.copyWith(needsEmailVerification: false);
-  }
 
   @override
   void dispose() {

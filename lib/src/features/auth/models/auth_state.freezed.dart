@@ -22,7 +22,6 @@ mixin _$AuthState {
   bool get isSigningUp => throw _privateConstructorUsedError;
   bool get isSigningOut => throw _privateConstructorUsedError;
   bool get isResettingPassword => throw _privateConstructorUsedError;
-  bool get needsEmailVerification => throw _privateConstructorUsedError;
   String? get error => throw _privateConstructorUsedError;
   String? get successMessage => throw _privateConstructorUsedError;
 
@@ -45,7 +44,6 @@ abstract class $AuthStateCopyWith<$Res> {
       bool isSigningUp,
       bool isSigningOut,
       bool isResettingPassword,
-      bool needsEmailVerification,
       String? error,
       String? successMessage});
 }
@@ -71,7 +69,6 @@ class _$AuthStateCopyWithImpl<$Res, $Val extends AuthState>
     Object? isSigningUp = null,
     Object? isSigningOut = null,
     Object? isResettingPassword = null,
-    Object? needsEmailVerification = null,
     Object? error = freezed,
     Object? successMessage = freezed,
   }) {
@@ -100,10 +97,6 @@ class _$AuthStateCopyWithImpl<$Res, $Val extends AuthState>
           ? _value.isResettingPassword
           : isResettingPassword // ignore: cast_nullable_to_non_nullable
               as bool,
-      needsEmailVerification: null == needsEmailVerification
-          ? _value.needsEmailVerification
-          : needsEmailVerification // ignore: cast_nullable_to_non_nullable
-              as bool,
       error: freezed == error
           ? _value.error
           : error // ignore: cast_nullable_to_non_nullable
@@ -131,7 +124,6 @@ abstract class _$$AuthStateImplCopyWith<$Res>
       bool isSigningUp,
       bool isSigningOut,
       bool isResettingPassword,
-      bool needsEmailVerification,
       String? error,
       String? successMessage});
 }
@@ -155,7 +147,6 @@ class __$$AuthStateImplCopyWithImpl<$Res>
     Object? isSigningUp = null,
     Object? isSigningOut = null,
     Object? isResettingPassword = null,
-    Object? needsEmailVerification = null,
     Object? error = freezed,
     Object? successMessage = freezed,
   }) {
@@ -184,10 +175,6 @@ class __$$AuthStateImplCopyWithImpl<$Res>
           ? _value.isResettingPassword
           : isResettingPassword // ignore: cast_nullable_to_non_nullable
               as bool,
-      needsEmailVerification: null == needsEmailVerification
-          ? _value.needsEmailVerification
-          : needsEmailVerification // ignore: cast_nullable_to_non_nullable
-              as bool,
       error: freezed == error
           ? _value.error
           : error // ignore: cast_nullable_to_non_nullable
@@ -210,7 +197,6 @@ class _$AuthStateImpl extends _AuthState {
       this.isSigningUp = false,
       this.isSigningOut = false,
       this.isResettingPassword = false,
-      this.needsEmailVerification = false,
       this.error,
       this.successMessage})
       : super._();
@@ -233,16 +219,13 @@ class _$AuthStateImpl extends _AuthState {
   @JsonKey()
   final bool isResettingPassword;
   @override
-  @JsonKey()
-  final bool needsEmailVerification;
-  @override
   final String? error;
   @override
   final String? successMessage;
 
   @override
   String toString() {
-    return 'AuthState(currentUser: $currentUser, isLoading: $isLoading, isSigningIn: $isSigningIn, isSigningUp: $isSigningUp, isSigningOut: $isSigningOut, isResettingPassword: $isResettingPassword, needsEmailVerification: $needsEmailVerification, error: $error, successMessage: $successMessage)';
+    return 'AuthState(currentUser: $currentUser, isLoading: $isLoading, isSigningIn: $isSigningIn, isSigningUp: $isSigningUp, isSigningOut: $isSigningOut, isResettingPassword: $isResettingPassword, error: $error, successMessage: $successMessage)';
   }
 
   @override
@@ -262,8 +245,6 @@ class _$AuthStateImpl extends _AuthState {
                 other.isSigningOut == isSigningOut) &&
             (identical(other.isResettingPassword, isResettingPassword) ||
                 other.isResettingPassword == isResettingPassword) &&
-            (identical(other.needsEmailVerification, needsEmailVerification) ||
-                other.needsEmailVerification == needsEmailVerification) &&
             (identical(other.error, error) || other.error == error) &&
             (identical(other.successMessage, successMessage) ||
                 other.successMessage == successMessage));
@@ -278,7 +259,6 @@ class _$AuthStateImpl extends _AuthState {
       isSigningUp,
       isSigningOut,
       isResettingPassword,
-      needsEmailVerification,
       error,
       successMessage);
 
@@ -299,7 +279,6 @@ abstract class _AuthState extends AuthState {
       final bool isSigningUp,
       final bool isSigningOut,
       final bool isResettingPassword,
-      final bool needsEmailVerification,
       final String? error,
       final String? successMessage}) = _$AuthStateImpl;
   const _AuthState._() : super._();
@@ -316,8 +295,6 @@ abstract class _AuthState extends AuthState {
   bool get isSigningOut;
   @override
   bool get isResettingPassword;
-  @override
-  bool get needsEmailVerification;
   @override
   String? get error;
   @override

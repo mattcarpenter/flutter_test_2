@@ -12,7 +12,6 @@ class AuthState with _$AuthState {
     @Default(false) bool isSigningUp,
     @Default(false) bool isSigningOut,
     @Default(false) bool isResettingPassword,
-    @Default(false) bool needsEmailVerification,
     String? error,
     String? successMessage,
   }) = _AuthState;
