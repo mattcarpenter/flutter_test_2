@@ -15,6 +15,11 @@ import '../features/pantry/views/pantry_sub_page.dart';
 import '../features/labs/views/auth_sub_page.dart';
 import '../features/labs/views/labs_root.dart';
 import '../features/labs/views/labs_sub_page.dart';
+import '../features/auth/views/auth_landing_page.dart';
+import '../features/auth/views/sign_in_page.dart';
+import '../features/auth/views/sign_up_page.dart';
+import '../features/auth/views/forgot_password_page.dart';
+import '../features/auth/views/email_verification_page.dart';
 import '../features/meal_plans/views/meal_plans_root.dart';
 import '../features/meal_plans/views/meal_plans_sub_page.dart';
 import '../features/recipes/views/recipes_root.dart';
@@ -138,6 +143,70 @@ class _AdaptiveApp2State extends State<AdaptiveApp2> {
             pageBuilder: (context, state) => _platformPage(
               state: state,
               child: LabsTab(
+                onMenuPressed: () {
+                  _mainPageShellKey.currentState?.toggleDrawer();
+                },
+              ),
+            ),
+          ),
+        ],
+      ),
+      ShellRoute(
+        pageBuilder: (BuildContext context, GoRouterState state, Widget child) {
+          return CustomTransitionPage<void>(
+            key: state.pageKey,
+            child: child,
+            transitionDuration: const Duration(milliseconds: 400),
+            reverseTransitionDuration: const Duration(milliseconds: 400),
+            transitionsBuilder: (context, animation, secondaryAnimation, child) =>
+                CupertinoTabPageTransition(
+                  animation: animation,
+                  child: isTablet
+                      ? child
+                      : MainPageShell(
+                    key: _mainPageShellKey,
+                    child: child,
+                    showBottomNavBar: false,
+                  ),
+                ),
+          );
+        },
+        routes: [
+          GoRoute(
+            path: '/auth',
+            routes: [
+              GoRoute(
+                path: 'signin',
+                pageBuilder: (context, state) => _platformPage(
+                  state: state,
+                  child: const SignInPage(),
+                ),
+              ),
+              GoRoute(
+                path: 'signup',
+                pageBuilder: (context, state) => _platformPage(
+                  state: state,
+                  child: const SignUpPage(),
+                ),
+              ),
+              GoRoute(
+                path: 'forgot-password',
+                pageBuilder: (context, state) => _platformPage(
+                  state: state,
+                  child: const ForgotPasswordPage(),
+                ),
+              ),
+              GoRoute(
+                path: 'verify-email',
+                pageBuilder: (context, state) => _platformPage(
+                  state: state,
+                  child: const EmailVerificationPage(),
+                ),
+              ),
+            ],
+            pageBuilder: (context, state) => _platformPage(
+              state: state,
+              child: AuthLandingPage(
                 onMenuPressed: () {
                   _mainPageShellKey.currentState?.toggleDrawer();
                 },

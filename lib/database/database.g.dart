@@ -1658,9 +1658,15 @@ class $HouseholdMembersTable extends HouseholdMembers
   late final GeneratedColumn<int> joinedAt = GeneratedColumn<int>(
       'joined_at', aliasedName, false,
       type: DriftSqlType.int, requiredDuringInsert: true);
+  static const VerificationMeta _updatedAtMeta =
+      const VerificationMeta('updatedAt');
+  @override
+  late final GeneratedColumn<int> updatedAt = GeneratedColumn<int>(
+      'updated_at', aliasedName, true,
+      type: DriftSqlType.int, requiredDuringInsert: false);
   @override
   List<GeneratedColumn> get $columns =>
-      [id, householdId, userId, isActive, role, joinedAt];
+      [id, householdId, userId, isActive, role, joinedAt, updatedAt];
   @override
   String get aliasedName => _alias ?? actualTableName;
   @override
@@ -1703,6 +1709,10 @@ class $HouseholdMembersTable extends HouseholdMembers
     } else if (isInserting) {
       context.missing(_joinedAtMeta);
     }
+    if (data.containsKey('updated_at')) {
+      context.handle(_updatedAtMeta,
+          updatedAt.isAcceptableOrUnknown(data['updated_at']!, _updatedAtMeta));
+    }
     return context;
   }
 
@@ -1724,6 +1734,8 @@ class $HouseholdMembersTable extends HouseholdMembers
           .read(DriftSqlType.string, data['${effectivePrefix}role'])!,
       joinedAt: attachedDatabase.typeMapping
           .read(DriftSqlType.int, data['${effectivePrefix}joined_at'])!,
+      updatedAt: attachedDatabase.typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}updated_at']),
     );
   }
 
@@ -1741,13 +1753,15 @@ class HouseholdMemberEntry extends DataClass
   final int isActive;
   final String role;
   final int joinedAt;
+  final int? updatedAt;
   const HouseholdMemberEntry(
       {required this.id,
       required this.householdId,
       required this.userId,
       required this.isActive,
       required this.role,
-      required this.joinedAt});
+      required this.joinedAt,
+      this.updatedAt});
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
@@ -1757,6 +1771,9 @@ class HouseholdMemberEntry extends DataClass
     map['is_active'] = Variable<int>(isActive);
     map['role'] = Variable<String>(role);
     map['joined_at'] = Variable<int>(joinedAt);
+    if (!nullToAbsent || updatedAt != null) {
+      map['updated_at'] = Variable<int>(updatedAt);
+    }
     return map;
   }
 
@@ -1768,6 +1785,9 @@ class HouseholdMemberEntry extends DataClass
       isActive: Value(isActive),
       role: Value(role),
       joinedAt: Value(joinedAt),
+      updatedAt: updatedAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(updatedAt),
     );
   }
 
@@ -1781,6 +1801,7 @@ class HouseholdMemberEntry extends DataClass
       isActive: serializer.fromJson<int>(json['isActive']),
       role: serializer.fromJson<String>(json['role']),
       joinedAt: serializer.fromJson<int>(json['joinedAt']),
+      updatedAt: serializer.fromJson<int?>(json['updatedAt']),
     );
   }
   @override
@@ -1793,6 +1814,7 @@ class HouseholdMemberEntry extends DataClass
       'isActive': serializer.toJson<int>(isActive),
       'role': serializer.toJson<String>(role),
       'joinedAt': serializer.toJson<int>(joinedAt),
+      'updatedAt': serializer.toJson<int?>(updatedAt),
     };
   }
 
@@ -1802,7 +1824,8 @@ class HouseholdMemberEntry extends DataClass
           String? userId,
           int? isActive,
           String? role,
-          int? joinedAt}) =>
+          int? joinedAt,
+          Value<int?> updatedAt = const Value.absent()}) =>
       HouseholdMemberEntry(
         id: id ?? this.id,
         householdId: householdId ?? this.householdId,
@@ -1810,6 +1833,7 @@ class HouseholdMemberEntry extends DataClass
         isActive: isActive ?? this.isActive,
         role: role ?? this.role,
         joinedAt: joinedAt ?? this.joinedAt,
+        updatedAt: updatedAt.present ? updatedAt.value : this.updatedAt,
       );
   HouseholdMemberEntry copyWithCompanion(HouseholdMembersCompanion data) {
     return HouseholdMemberEntry(
@@ -1820,6 +1844,7 @@ class HouseholdMemberEntry extends DataClass
       isActive: data.isActive.present ? data.isActive.value : this.isActive,
       role: data.role.present ? data.role.value : this.role,
       joinedAt: data.joinedAt.present ? data.joinedAt.value : this.joinedAt,
+      updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
     );
   }
 
@@ -1831,14 +1856,15 @@ class HouseholdMemberEntry extends DataClass
           ..write('userId: $userId, ')
           ..write('isActive: $isActive, ')
           ..write('role: $role, ')
-          ..write('joinedAt: $joinedAt')
+          ..write('joinedAt: $joinedAt, ')
+          ..write('updatedAt: $updatedAt')
           ..write(')'))
         .toString();
   }
 
   @override
   int get hashCode =>
-      Object.hash(id, householdId, userId, isActive, role, joinedAt);
+      Object.hash(id, householdId, userId, isActive, role, joinedAt, updatedAt);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -1848,7 +1874,8 @@ class HouseholdMemberEntry extends DataClass
           other.userId == this.userId &&
           other.isActive == this.isActive &&
           other.role == this.role &&
-          other.joinedAt == this.joinedAt);
+          other.joinedAt == this.joinedAt &&
+          other.updatedAt == this.updatedAt);
 }
 
 class HouseholdMembersCompanion extends UpdateCompanion<HouseholdMemberEntry> {
@@ -1858,6 +1885,7 @@ class HouseholdMembersCompanion extends UpdateCompanion<HouseholdMemberEntry> {
   final Value<int> isActive;
   final Value<String> role;
   final Value<int> joinedAt;
+  final Value<int?> updatedAt;
   final Value<int> rowid;
   const HouseholdMembersCompanion({
     this.id = const Value.absent(),
@@ -1866,6 +1894,7 @@ class HouseholdMembersCompanion extends UpdateCompanion<HouseholdMemberEntry> {
     this.isActive = const Value.absent(),
     this.role = const Value.absent(),
     this.joinedAt = const Value.absent(),
+    this.updatedAt = const Value.absent(),
     this.rowid = const Value.absent(),
   });
   HouseholdMembersCompanion.insert({
@@ -1875,6 +1904,7 @@ class HouseholdMembersCompanion extends UpdateCompanion<HouseholdMemberEntry> {
     this.isActive = const Value.absent(),
     this.role = const Value.absent(),
     required int joinedAt,
+    this.updatedAt = const Value.absent(),
     this.rowid = const Value.absent(),
   })  : householdId = Value(householdId),
         userId = Value(userId),
@@ -1886,6 +1916,7 @@ class HouseholdMembersCompanion extends UpdateCompanion<HouseholdMemberEntry> {
     Expression<int>? isActive,
     Expression<String>? role,
     Expression<int>? joinedAt,
+    Expression<int>? updatedAt,
     Expression<int>? rowid,
   }) {
     return RawValuesInsertable({
@@ -1895,6 +1926,7 @@ class HouseholdMembersCompanion extends UpdateCompanion<HouseholdMemberEntry> {
       if (isActive != null) 'is_active': isActive,
       if (role != null) 'role': role,
       if (joinedAt != null) 'joined_at': joinedAt,
+      if (updatedAt != null) 'updated_at': updatedAt,
       if (rowid != null) 'rowid': rowid,
     });
   }
@@ -1906,6 +1938,7 @@ class HouseholdMembersCompanion extends UpdateCompanion<HouseholdMemberEntry> {
       Value<int>? isActive,
       Value<String>? role,
       Value<int>? joinedAt,
+      Value<int?>? updatedAt,
       Value<int>? rowid}) {
     return HouseholdMembersCompanion(
       id: id ?? this.id,
@@ -1914,6 +1947,7 @@ class HouseholdMembersCompanion extends UpdateCompanion<HouseholdMemberEntry> {
       isActive: isActive ?? this.isActive,
       role: role ?? this.role,
       joinedAt: joinedAt ?? this.joinedAt,
+      updatedAt: updatedAt ?? this.updatedAt,
       rowid: rowid ?? this.rowid,
     );
   }
@@ -1939,6 +1973,9 @@ class HouseholdMembersCompanion extends UpdateCompanion<HouseholdMemberEntry> {
     if (joinedAt.present) {
       map['joined_at'] = Variable<int>(joinedAt.value);
     }
+    if (updatedAt.present) {
+      map['updated_at'] = Variable<int>(updatedAt.value);
+    }
     if (rowid.present) {
       map['rowid'] = Variable<int>(rowid.value);
     }
@@ -1954,6 +1991,7 @@ class HouseholdMembersCompanion extends UpdateCompanion<HouseholdMemberEntry> {
           ..write('isActive: $isActive, ')
           ..write('role: $role, ')
           ..write('joinedAt: $joinedAt, ')
+          ..write('updatedAt: $updatedAt, ')
           ..write('rowid: $rowid')
           ..write(')'))
         .toString();
@@ -9510,6 +9548,7 @@ typedef $$HouseholdMembersTableCreateCompanionBuilder
   Value<int> isActive,
   Value<String> role,
   required int joinedAt,
+  Value<int?> updatedAt,
   Value<int> rowid,
 });
 typedef $$HouseholdMembersTableUpdateCompanionBuilder
@@ -9520,6 +9559,7 @@ typedef $$HouseholdMembersTableUpdateCompanionBuilder
   Value<int> isActive,
   Value<String> role,
   Value<int> joinedAt,
+  Value<int?> updatedAt,
   Value<int> rowid,
 });
 
@@ -9549,6 +9589,9 @@ class $$HouseholdMembersTableFilterComposer
 
   ColumnFilters<int> get joinedAt => $composableBuilder(
       column: $table.joinedAt, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<int> get updatedAt => $composableBuilder(
+      column: $table.updatedAt, builder: (column) => ColumnFilters(column));
 }
 
 class $$HouseholdMembersTableOrderingComposer
@@ -9577,6 +9620,9 @@ class $$HouseholdMembersTableOrderingComposer
 
   ColumnOrderings<int> get joinedAt => $composableBuilder(
       column: $table.joinedAt, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<int> get updatedAt => $composableBuilder(
+      column: $table.updatedAt, builder: (column) => ColumnOrderings(column));
 }
 
 class $$HouseholdMembersTableAnnotationComposer
@@ -9605,6 +9651,9 @@ class $$HouseholdMembersTableAnnotationComposer
 
   GeneratedColumn<int> get joinedAt =>
       $composableBuilder(column: $table.joinedAt, builder: (column) => column);
+
+  GeneratedColumn<int> get updatedAt =>
+      $composableBuilder(column: $table.updatedAt, builder: (column) => column);
 }
 
 class $$HouseholdMembersTableTableManager extends RootTableManager<
@@ -9641,6 +9690,7 @@ class $$HouseholdMembersTableTableManager extends RootTableManager<
             Value<int> isActive = const Value.absent(),
             Value<String> role = const Value.absent(),
             Value<int> joinedAt = const Value.absent(),
+            Value<int?> updatedAt = const Value.absent(),
             Value<int> rowid = const Value.absent(),
           }) =>
               HouseholdMembersCompanion(
@@ -9650,6 +9700,7 @@ class $$HouseholdMembersTableTableManager extends RootTableManager<
             isActive: isActive,
             role: role,
             joinedAt: joinedAt,
+            updatedAt: updatedAt,
             rowid: rowid,
           ),
           createCompanionCallback: ({
@@ -9659,6 +9710,7 @@ class $$HouseholdMembersTableTableManager extends RootTableManager<
             Value<int> isActive = const Value.absent(),
             Value<String> role = const Value.absent(),
             required int joinedAt,
+            Value<int?> updatedAt = const Value.absent(),
             Value<int> rowid = const Value.absent(),
           }) =>
               HouseholdMembersCompanion.insert(
@@ -9668,6 +9720,7 @@ class $$HouseholdMembersTableTableManager extends RootTableManager<
             isActive: isActive,
             role: role,
             joinedAt: joinedAt,
+            updatedAt: updatedAt,
             rowid: rowid,
           ),
           withReferenceMapper: (p0) => p0
