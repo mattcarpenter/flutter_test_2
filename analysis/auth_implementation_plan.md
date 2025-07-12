@@ -3,25 +3,26 @@
 ## File Structure
 
 ```
-lib/src/features/auth/
-├── models/
-│   ├── auth_state.dart              # Auth state model (loading, error, etc.)
-│   └── auth_error.dart              # Custom auth error handling
+lib/src/
+├── features/auth/
+│   ├── models/
+│   │   ├── auth_state.dart              # Auth state model (loading, error, etc.)
+│   │   └── auth_error.dart              # Custom auth error handling
+│   ├── views/
+│   │   ├── auth_landing_page.dart       # Main auth entry point
+│   │   ├── sign_in_page.dart            # Email/password sign in
+│   │   ├── sign_up_page.dart            # Email/password sign up
+│   │   ├── forgot_password_page.dart    # Password reset flow
+│   │   └── email_verification_page.dart # Email confirmation screen
+│   └── widgets/
+│       ├── auth_form_field.dart         # Reusable form input
+│       ├── social_auth_button.dart      # Google sign-in button
+│       ├── auth_loading_overlay.dart    # Loading states
+│       └── auth_error_dialog.dart       # Error handling UI
 ├── providers/
-│   └── auth_provider.dart           # Riverpod auth state management
-├── services/
-│   └── auth_service.dart            # Supabase auth service wrapper
-├── views/
-│   ├── auth_landing_page.dart       # Main auth entry point
-│   ├── sign_in_page.dart            # Email/password sign in
-│   ├── sign_up_page.dart            # Email/password sign up
-│   ├── forgot_password_page.dart    # Password reset flow
-│   └── email_verification_page.dart # Email confirmation screen
-└── widgets/
-    ├── auth_form_field.dart         # Reusable form input
-    ├── social_auth_button.dart      # Google sign-in button
-    ├── auth_loading_overlay.dart    # Loading states
-    └── auth_error_dialog.dart       # Error handling UI
+│   └── auth_provider.dart               # Riverpod auth state management
+└── services/
+    └── auth_service.dart                # Supabase auth service wrapper
 ```
 
 ## Routing Updates
@@ -91,7 +92,7 @@ MenuItem(
 
 ## Implementation Details
 
-### 1. Auth Service (`auth_service.dart`)
+### 1. Auth Service (`/lib/src/services/auth_service.dart`)
 ```dart
 class AuthService {
   final SupabaseClient _supabase;
@@ -171,7 +172,7 @@ class AuthService {
 }
 ```
 
-### 2. Auth Provider (`auth_provider.dart`)
+### 2. Auth Provider (`/lib/src/providers/auth_provider.dart`)
 ```dart
 @riverpod
 class Auth extends _$Auth {
@@ -239,7 +240,7 @@ class Auth extends _$Auth {
 }
 ```
 
-### 3. Sign In Page (`sign_in_page.dart`)
+### 3. Sign In Page (`/lib/src/features/auth/views/sign_in_page.dart`)
 ```dart
 class SignInPage extends ConsumerStatefulWidget {
   const SignInPage({super.key});
