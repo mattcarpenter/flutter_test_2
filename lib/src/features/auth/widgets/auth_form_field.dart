@@ -3,8 +3,6 @@ import 'dart:io' show Platform;
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
-import '../../../widgets/wolt/text/app_text_form_field.dart';
-
 class AuthFormField extends StatelessWidget {
   final TextEditingController? controller;
   final String label;
@@ -39,28 +37,67 @@ class AuthFormField extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Use AppTextFormField for forms with validation (all platforms)
-    // This provides better error handling and validation UI
-    if (validator != null) {
-      return AppTextFormField(
-        controller: controller,
-        labelText: label,
-        obscureText: obscureText,
-        textInputType: keyboardType,
-        textInputAction: textInputAction,
-        onValidate: validator,
-        onChanged: onChanged,
-        onSubmitted: onSubmitted,
-        focusNode: focusNode,
-        enabled: enabled,
-        autocorrect: !obscureText,
-        autofillHints: autofillHints,
-        autoValidateMode: AutovalidateMode.onUserInteraction,
-      );
-    }
-
-    // Use platform-specific simple fields for non-validated inputs
+    // Use platform-adaptive form fields with proper validation
     if (Platform.isIOS) {
+      return _buildCupertinoFormField(context);
+    } else {
+      return _buildMaterialFormField(context);
+    }
+  }
+
+  Widget _buildCupertinoFormField(BuildContext context) {
+    if (validator != null) {
+      // For fields with validation, use FormField wrapper
+      return FormField<String>(
+        initialValue: controller?.text,
+        validator: validator,
+        autovalidateMode: AutovalidateMode.onUserInteraction,
+        builder: (FormFieldState<String> field) {
+          return Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              CupertinoTextField(
+                controller: controller,
+                placeholder: placeholder ?? label,
+                obscureText: obscureText,
+                keyboardType: keyboardType ?? TextInputType.text,
+                textInputAction: textInputAction,
+                onChanged: (value) {
+                  field.didChange(value);
+                  onChanged?.call(value);
+                },
+                onSubmitted: onSubmitted,
+                focusNode: focusNode,
+                enabled: enabled,
+                autofocus: autofocus,
+                autofillHints: autofillHints,
+                decoration: BoxDecoration(
+                  border: Border.all(
+                    color: field.hasError 
+                        ? CupertinoColors.destructiveRed
+                        : CupertinoColors.systemGrey4,
+                    width: field.hasError ? 2 : 1,
+                  ),
+                  borderRadius: BorderRadius.circular(8.0),
+                ),
+                padding: const EdgeInsets.all(12.0),
+              ),
+              if (field.hasError) ...[
+                const SizedBox(height: 6),
+                Text(
+                  field.errorText!,
+                  style: const TextStyle(
+                    color: CupertinoColors.destructiveRed,
+                    fontSize: 12,
+                  ),
+                ),
+              ],
+            ],
+          );
+        },
+      );
+    } else {
+      // Simple field without validation
       return CupertinoTextField(
         controller: controller,
         placeholder: placeholder ?? label,
@@ -72,6 +109,7 @@ class AuthFormField extends StatelessWidget {
         focusNode: focusNode,
         enabled: enabled,
         autofocus: autofocus,
+        autofillHints: autofillHints,
         decoration: BoxDecoration(
           border: Border.all(
             color: CupertinoColors.systemGrey4,
@@ -80,7 +118,34 @@ class AuthFormField extends StatelessWidget {
         ),
         padding: const EdgeInsets.all(12.0),
       );
+    }
+  }
+
+  Widget _buildMaterialFormField(BuildContext context) {
+    if (validator != null) {
+      // Use TextFormField for validation
+      return TextFormField(
+        controller: controller,
+        obscureText: obscureText,
+        keyboardType: keyboardType ?? TextInputType.text,
+        textInputAction: textInputAction,
+        onChanged: onChanged,
+        onFieldSubmitted: onSubmitted,
+        focusNode: focusNode,
+        enabled: enabled,
+        autofocus: autofocus,
+        autofillHints: autofillHints,
+        validator: validator,
+        autovalidateMode: AutovalidateMode.onUserInteraction,
+        decoration: InputDecoration(
+          labelText: label,
+          hintText: placeholder,
+          border: const OutlineInputBorder(),
+          contentPadding: const EdgeInsets.all(12.0),
+        ),
+      );
     } else {
+      // Simple field without validation
       return TextField(
         controller: controller,
         obscureText: obscureText,
@@ -91,6 +156,7 @@ class AuthFormField extends StatelessWidget {
         focusNode: focusNode,
         enabled: enabled,
         autofocus: autofocus,
+        autofillHints: autofillHints,
         decoration: InputDecoration(
           labelText: label,
           hintText: placeholder,

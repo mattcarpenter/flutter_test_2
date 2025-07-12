@@ -38,7 +38,7 @@ class AuthApiException implements Exception {
 
   static AuthErrorType _mapAuthExceptionToType(AuthException authException) {
     final message = authException.message.toLowerCase();
-    
+
     if (message.contains('invalid login credentials')) {
       return AuthErrorType.invalidCredentials;
     } else if (message.contains('email not confirmed')) {
@@ -52,7 +52,7 @@ class AuthApiException implements Exception {
     } else if (message.contains('rate limit')) {
       return AuthErrorType.rateLimited;
     }
-    
+
     return AuthErrorType.unknown;
   }
 
@@ -63,11 +63,11 @@ class AuthApiException implements Exception {
 class AuthService {
   final SupabaseClient _supabase;
   late final GoogleSignIn _googleSignIn;
-  
+
   AuthService() : _supabase = Supabase.instance.client {
     _googleSignIn = GoogleSignIn(
       // TODO: Replace with your actual web client ID from Google Cloud Console
-      serverClientId: 'YOUR_WEB_CLIENT_ID.apps.googleusercontent.com',
+    serverClientId: '954511479486-avfjhihhekild9n04jrre8dafv21q161.apps.googleusercontent.com',
       scopes: ['openid', 'email', 'profile'],
     );
   }
@@ -155,7 +155,7 @@ class AuthService {
     try {
       // Sign out from any previous session
       await _googleSignIn.signOut();
-      
+
       // Start the Google Sign-In flow
       final googleUser = await _googleSignIn.signIn();
       if (googleUser == null) {
@@ -177,7 +177,7 @@ class AuthService {
         );
       }
 
-      // Exchange tokens with Supabase
+      // Exchange tokens with Supabase (requires "Skip nonce check" enabled in Supabase Dashboard)
       final response = await _supabase.auth.signInWithIdToken(
         provider: OAuthProvider.google,
         idToken: idToken,
@@ -365,7 +365,7 @@ class AuthService {
       );
       return authError.displayMessage;
     }
-    
+
     return AuthError.fromException(exception).displayMessage;
   }
 }

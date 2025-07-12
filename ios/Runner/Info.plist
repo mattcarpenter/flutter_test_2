@@ -60,8 +60,8 @@
 			<string>google</string>
 			<key>CFBundleURLSchemes</key>
 			<array>
-				<!-- TODO: Replace with your REVERSED_CLIENT_ID from GoogleService-Info.plist -->
-				<string>com.googleusercontent.apps.YOUR_REVERSED_CLIENT_ID</string>
+				<!-- prod REVERSED_CLIENT_ID from GoogleService-Info.plist -->
+				<string>com.googleusercontent.apps.954511479486-avfjhihhekild9n04jrre8dafv21q161</string>
 			</array>
 		</dict>
 	</array>
@@ -70,5 +70,7 @@
 		<string>https</string>
 		<string>http</string>
 	</array>
+	<key>GIDClientID</key>
+	<string>954511479486-avfjhihhekild9n04jrre8dafv21q161.apps.googleusercontent.com</string>
 </dict>
 </plist>
