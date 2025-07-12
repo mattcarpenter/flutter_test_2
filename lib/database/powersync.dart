@@ -1,4 +1,5 @@
 // This file performs setup of the PowerSync database
+import 'dart:async';
 import 'dart:ffi';
 import 'dart:io';
 
@@ -43,8 +44,14 @@ final List<RegExp> fatalResponseCodes = [
 /// Use Supabase for authentication and data upload.
 class SupabaseConnector extends PowerSyncBackendConnector {
   Future<void>? _refreshFuture;
+  Timer? _proactiveRefreshTimer;
+  int _refreshRetryCount = 0;
+  static const int _maxRefreshRetries = 3;
 
-  SupabaseConnector();
+  SupabaseConnector() {
+    // Start proactive refresh timer
+    _startProactiveRefreshTimer();
+  }
 
   /// Get a Supabase token to authenticate against the PowerSync instance.
   @override
@@ -59,38 +66,109 @@ class SupabaseConnector extends PowerSyncBackendConnector {
       return null;
     }
 
+    // Check if token is about to expire (within 5 minutes)
+    final expiresAt = session.expiresAt;
+    if (expiresAt != null) {
+      final expiryTime = DateTime.fromMillisecondsSinceEpoch(expiresAt * 1000);
+      final now = DateTime.now();
+      final timeUntilExpiry = expiryTime.difference(now);
+      
+      if (timeUntilExpiry.inMinutes < 5) {
+        log.info('Token expires in ${timeUntilExpiry.inMinutes} minutes, triggering refresh');
+        // Don't await here to avoid blocking
+        _triggerTokenRefresh();
+      }
+    }
+
     // Use the access token to authenticate against PowerSync
     final token = session.accessToken;
 
     // userId and expiresAt are for debugging purposes only
     final userId = session.user.id;
-    final expiresAt = session.expiresAt == null
+    final expiresAtDateTime = expiresAt == null
         ? null
-        : DateTime.fromMillisecondsSinceEpoch(session.expiresAt! * 1000);
+        : DateTime.fromMillisecondsSinceEpoch(expiresAt * 1000);
+    
+    log.fine('Providing credentials for user $userId, expires at $expiresAtDateTime');
+    
     return PowerSyncCredentials(
         endpoint: AppConfig.powersyncUrl,
         token: token,
         userId: userId,
-        expiresAt: expiresAt);
+        expiresAt: expiresAtDateTime);
   }
 
   @override
   void invalidateCredentials() {
     // Trigger a session refresh if auth fails on PowerSync.
-    // Generally, sessions should be refreshed automatically by Supabase.
-    // However, in some cases it can be a while before the session refresh is
-    // retried. We attempt to trigger the refresh as soon as we get an auth
-    // failure on PowerSync.
-    //
-    // This could happen if the device was offline for a while and the session
-    // expired, and nothing else attempt to use the session it in the meantime.
-    //
-    // Timeout the refresh call to avoid waiting for long retries,
-    // and ignore any errors. Errors will surface as expired tokens.
-    _refreshFuture = Supabase.instance.client.auth
-        .refreshSession()
-        .timeout(const Duration(seconds: 5))
-        .then((response) => null, onError: (error) => null);
+    log.warning('PowerSync auth failed, triggering token refresh');
+    _triggerTokenRefresh();
+  }
+
+  void _triggerTokenRefresh() {
+    if (_refreshFuture != null) {
+      log.fine('Token refresh already in progress');
+      return;
+    }
+
+    _refreshFuture = _refreshWithRetry()
+        .then((response) {
+          log.info('Token refresh successful');
+          _refreshRetryCount = 0;
+          _refreshFuture = null;
+          // Trigger PowerSync to fetch new credentials
+          prefetchCredentials();
+        })
+        .catchError((error) {
+          log.severe('Token refresh failed after retries: $error');
+          _refreshFuture = null;
+        });
+  }
+
+  Future<AuthResponse> _refreshWithRetry() async {
+    for (int i = 0; i < _maxRefreshRetries; i++) {
+      try {
+        // Exponential backoff: 30s, 60s, 120s
+        final timeout = Duration(seconds: 30 * (i + 1));
+        log.info('Attempting token refresh (attempt ${i + 1}/$_maxRefreshRetries) with ${timeout.inSeconds}s timeout');
+        
+        final response = await Supabase.instance.client.auth
+            .refreshSession()
+            .timeout(timeout);
+        
+        if (response.session != null) {
+          return response;
+        }
+      } catch (e) {
+        log.warning('Token refresh attempt ${i + 1} failed: $e');
+        if (i < _maxRefreshRetries - 1) {
+          // Wait before retry with exponential backoff
+          await Future.delayed(Duration(seconds: 2 * (i + 1)));
+        }
+      }
+    }
+    throw Exception('Token refresh failed after $_maxRefreshRetries attempts');
+  }
+
+  void _startProactiveRefreshTimer() {
+    // Cancel any existing timer
+    _proactiveRefreshTimer?.cancel();
+    
+    // Set up timer to refresh token every 45 minutes
+    _proactiveRefreshTimer = Timer.periodic(
+      const Duration(minutes: 45),
+      (timer) async {
+        final session = Supabase.instance.client.auth.currentSession;
+        if (session != null) {
+          log.info('Proactive token refresh triggered');
+          _triggerTokenRefresh();
+        }
+      },
+    );
+  }
+
+  void dispose() {
+    _proactiveRefreshTimer?.cancel();
   }
 
   // Upload pending changes to Supabase.
@@ -187,9 +265,7 @@ Future<String> getDatabasePath({ bool isTest = false}) async {
 Future<void> openDatabase({bool isTest = false}) async {
 
   final databasePath = await getDatabasePath(isTest: isTest);
-  print('Opening test database at $databasePath');
-
-  PowerSyncDatabase db;
+  print('Opening database at $databasePath');
 
   if (isTest) {
     db = PowerSyncDatabase.withFactory(CustomOpenFactoryForTest(path: databasePath), schema: schema, logger: attachedLogger);
@@ -213,6 +289,12 @@ Future<void> openDatabase({bool isTest = false}) async {
     // If the user is already logged in, connect immediately.
     // Otherwise, connect once logged in.
     final userId = getUserId();
+    final session = Supabase.instance.client.auth.currentSession;
+    if (session != null && session.expiresAt != null) {
+      final expiryTime = DateTime.fromMillisecondsSinceEpoch(session.expiresAt! * 1000);
+      log.info('Initial session check - User: $userId, expires at: $expiryTime');
+    }
+    
     if (userId != null) {
       await _claimOrphanedRecords(userId);
     }
@@ -222,16 +304,29 @@ Future<void> openDatabase({bool isTest = false}) async {
 
   Supabase.instance.client.auth.onAuthStateChange.listen((data) async {
     final AuthChangeEvent event = data.event;
+    final session = data.session;
+    
+    log.info('Auth state changed: $event');
+    if (session != null && session.expiresAt != null) {
+      final expiryTime = DateTime.fromMillisecondsSinceEpoch(session.expiresAt! * 1000);
+      log.info('Session expires at: $expiryTime');
+    }
+    
     if (event == AuthChangeEvent.signedIn) {
       // Connect to PowerSync when the user is signed in
+      log.info('User signed in, connecting to PowerSync');
       final userId = getUserId();
       if (userId != null) {
         await _claimOrphanedRecords(userId);
       }
+      // Dispose old connector if exists
+      currentConnector?.dispose();
       currentConnector = SupabaseConnector();
       db.connect(connector: currentConnector!);
     } else if (event == AuthChangeEvent.signedOut) {
       // Implicit sign out - disconnect, but don't delete data
+      log.info('User signed out, disconnecting from PowerSync');
+      currentConnector?.dispose();
       currentConnector = null;
       if (isTest) {
         await db.disconnectAndClear();
@@ -240,7 +335,12 @@ Future<void> openDatabase({bool isTest = false}) async {
       }
     } else if (event == AuthChangeEvent.tokenRefreshed) {
       // Supabase token refreshed - trigger token refresh for PowerSync.
+      log.info('Token refreshed by Supabase, updating PowerSync credentials');
       currentConnector?.prefetchCredentials();
+    } else if (event == AuthChangeEvent.userUpdated) {
+      log.info('User updated event received');
+    } else if (event == AuthChangeEvent.passwordRecovery) {
+      log.info('Password recovery event received');
     }
   });
 
