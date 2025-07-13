@@ -1663,6 +1663,22 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "0.10.2"
+  purchases_flutter:
+    dependency: "direct main"
+    description:
+      name: purchases_flutter
+      sha256: "7d72ac820022f1256ad7ca596857a9c304f930627f03f2759a5f5d3e58143821"
+      url: "https://pub.dev"
+    source: hosted
+    version: "9.0.0-beta.3"
+  purchases_ui_flutter:
+    dependency: "direct main"
+    description:
+      name: purchases_ui_flutter
+      sha256: a91fdabb5c0ef90329f104a7ef5f76341a5a72fe302ab5e4cabf0cc1cd7e3f02
+      url: "https://pub.dev"
+    source: hosted
+    version: "9.0.0-beta.3"
   realtime_client:
     dependency: transitive
     description:
@@ -2400,10 +2416,10 @@ packages:
     dependency: transitive
     description:
       name: web
-      sha256: cd3543bd5798f6ad290ea73d210f423502e71900302dde696f8bff84bf89a1cb
+      sha256: "868d88a33d8a87b18ffc05f9f030ba328ffefba92d6c127917a2ba740f9cfe4a"
       url: "https://pub.dev"
     source: hosted
-    version: "1.1.0"
+    version: "1.1.1"
   web_socket:
     dependency: transitive
     description:

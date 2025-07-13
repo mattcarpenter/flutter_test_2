@@ -4,7 +4,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../database/powersync.dart';
 import '../../providers/auth_provider.dart';
+import '../../providers/subscription_provider.dart';
 import '../../repositories/upload_queue_repository.dart';
+import '../../utils/feature_flags.dart';
 import 'menu_item.dart';
 
 class Menu extends ConsumerWidget {
@@ -89,8 +91,23 @@ class Menu extends ConsumerWidget {
           textColor: textColor,
           activeTextColor: activeTextColor,
           backgroundColor: backgroundColor,
-          onTap: (_) {
-            onRouteGo('/labs');
+          trailing: PremiumBadge(feature: 'labs'),
+          onTap: (_) async {
+            final hasAccess = ref.read(hasPlusProvider);
+            if (hasAccess) {
+              onRouteGo('/labs');
+            } else {
+              // Show paywall first, only navigate if user purchases
+              try {
+                final purchased = await ref.read(subscriptionProvider.notifier).presentPaywallIfNeeded();
+                if (purchased) {
+                  onRouteGo('/labs');
+                }
+                // If user cancels paywall, stay where they were (no navigation)
+              } catch (e) {
+                // Error presenting paywall, stay where they were
+              }
+            }
           },
         ),
         MenuItem(
@@ -102,8 +119,23 @@ class Menu extends ConsumerWidget {
           textColor: textColor,
           activeTextColor: activeTextColor,
           backgroundColor: backgroundColor,
-          onTap: (_) {
-            onRouteGo('/labs/sub');
+          trailing: PremiumBadge(feature: 'labs'),
+          onTap: (_) async {
+            final hasAccess = ref.read(hasPlusProvider);
+            if (hasAccess) {
+              onRouteGo('/labs/sub');
+            } else {
+              // Show paywall first, only navigate if user purchases
+              try {
+                final purchased = await ref.read(subscriptionProvider.notifier).presentPaywallIfNeeded();
+                if (purchased) {
+                  onRouteGo('/labs/sub');
+                }
+                // If user cancels paywall, stay where they were (no navigation)
+              } catch (e) {
+                // Error presenting paywall, stay where they were
+              }
+            }
           },
         ),
         MenuItem(
@@ -115,8 +147,22 @@ class Menu extends ConsumerWidget {
           textColor: textColor,
           activeTextColor: activeTextColor,
           backgroundColor: backgroundColor,
-          onTap: (_) {
-            onRouteGo('/labs/auth');
+          onTap: (_) async {
+            final hasAccess = ref.read(hasPlusProvider);
+            if (hasAccess) {
+              onRouteGo('/labs/auth');
+            } else {
+              // Show paywall first, only navigate if user purchases
+              try {
+                final purchased = await ref.read(subscriptionProvider.notifier).presentPaywallIfNeeded();
+                if (purchased) {
+                  onRouteGo('/labs/auth');
+                }
+                // If user cancels paywall, stay where they were (no navigation)
+              } catch (e) {
+                // Error presenting paywall, stay where they were
+              }
+            }
           },
         ),
         MenuItem(

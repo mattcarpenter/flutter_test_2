@@ -19,6 +19,7 @@ import macos_window_utils
 import mecab_dart
 import path_provider_foundation
 import powersync_flutter_libs
+import purchases_flutter
 import screen_retriever_macos
 import shared_preferences_foundation
 import sign_in_with_apple
@@ -44,6 +45,7 @@ func RegisterGeneratedPlugins(registry: FlutterPluginRegistry) {
   MecabDartPlugin.register(with: registry.registrar(forPlugin: "MecabDartPlugin"))
   PathProviderPlugin.register(with: registry.registrar(forPlugin: "PathProviderPlugin"))
   PowersyncFlutterLibsPlugin.register(with: registry.registrar(forPlugin: "PowersyncFlutterLibsPlugin"))
+  PurchasesFlutterPlugin.register(with: registry.registrar(forPlugin: "PurchasesFlutterPlugin"))
   ScreenRetrieverMacosPlugin.register(with: registry.registrar(forPlugin: "ScreenRetrieverMacosPlugin"))
   SharedPreferencesPlugin.register(with: registry.registrar(forPlugin: "SharedPreferencesPlugin"))
   SignInWithApplePlugin.register(with: registry.registrar(forPlugin: "SignInWithApplePlugin"))

@@ -50,6 +50,10 @@
         <meta-data
             android:name="flutterEmbedding"
             android:value="2" />
+        <!-- RevenueCat API Key -->
+        <meta-data
+            android:name="REVENUECAT_API_KEY"
+            android:value="appl_SPuDBCvjoalGuumyxdYEfRZKEXt" />
     </application>
     <!-- Required to query activities that can process text, see:
          https://developer.android.com/training/package-visibility and

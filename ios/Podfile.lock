@@ -34,13 +34,13 @@ PODS:
     - AppCheckCore (~> 11.0)
     - GTMAppAuth (< 5.0, >= 4.1.1)
     - GTMSessionFetcher/Core (~> 3.3)
-  - GoogleUtilities/Environment (8.0.2):
+  - GoogleUtilities/Environment (8.1.0):
     - GoogleUtilities/Privacy
-  - GoogleUtilities/Logger (8.0.2):
+  - GoogleUtilities/Logger (8.1.0):
     - GoogleUtilities/Environment
     - GoogleUtilities/Privacy
-  - GoogleUtilities/Privacy (8.0.2)
-  - GoogleUtilities/UserDefaults (8.0.2):
+  - GoogleUtilities/Privacy (8.1.0)
+  - GoogleUtilities/UserDefaults (8.1.0):
     - GoogleUtilities/Logger
     - GoogleUtilities/Privacy
   - GTMAppAuth (4.1.1):
@@ -79,14 +79,28 @@ PODS:
     - FlutterMacOS
   - pointer_interceptor_ios (0.0.1):
     - Flutter
-  - powersync-sqlite-core (0.3.10)
+  - powersync-sqlite-core (0.3.14)
   - powersync_flutter_libs (0.0.1):
     - Flutter
     - powersync-sqlite-core (~> 0.3.10)
   - PromisesObjC (2.4.0)
-  - SDWebImage (5.21.0):
-    - SDWebImage/Core (= 5.21.0)
-  - SDWebImage/Core (5.21.0)
+  - purchases_flutter (9.0.0-beta.3):
+    - Flutter
+    - PurchasesHybridCommon (= 13.37.0)
+  - purchases_ui_flutter (9.0.0-beta.3):
+    - Flutter
+    - PurchasesHybridCommonUI (= 13.37.0)
+  - PurchasesHybridCommon (13.37.0):
+    - RevenueCat (= 5.29.0)
+  - PurchasesHybridCommonUI (13.37.0):
+    - PurchasesHybridCommon (= 13.37.0)
+    - RevenueCatUI (= 5.29.0)
+  - RevenueCat (5.29.0)
+  - RevenueCatUI (5.29.0):
+    - RevenueCat (= 5.29.0)
+  - SDWebImage (5.21.1):
+    - SDWebImage/Core (= 5.21.1)
+  - SDWebImage/Core (5.21.1)
   - SDWebImageWebPCoder (0.14.6):
     - libwebp (~> 1.0)
     - SDWebImage/Core (~> 5.17)
@@ -98,18 +112,18 @@ PODS:
   - sqflite_darwin (0.0.4):
     - Flutter
     - FlutterMacOS
-  - sqlite3 (3.49.1):
-    - sqlite3/common (= 3.49.1)
-  - sqlite3/common (3.49.1)
-  - sqlite3/dbstatvtab (3.49.1):
+  - sqlite3 (3.49.2):
+    - sqlite3/common (= 3.49.2)
+  - sqlite3/common (3.49.2)
+  - sqlite3/dbstatvtab (3.49.2):
     - sqlite3/common
-  - sqlite3/fts5 (3.49.1):
+  - sqlite3/fts5 (3.49.2):
     - sqlite3/common
-  - sqlite3/math (3.49.1):
+  - sqlite3/math (3.49.2):
     - sqlite3/common
-  - sqlite3/perf-threadsafe (3.49.1):
+  - sqlite3/perf-threadsafe (3.49.2):
     - sqlite3/common
-  - sqlite3/rtree (3.49.1):
+  - sqlite3/rtree (3.49.2):
     - sqlite3/common
   - sqlite3_flutter_libs (0.0.1):
     - Flutter
@@ -142,6 +156,8 @@ DEPENDENCIES:
   - path_provider_foundation (from `.symlinks/plugins/path_provider_foundation/darwin`)
   - pointer_interceptor_ios (from `.symlinks/plugins/pointer_interceptor_ios/ios`)
   - powersync_flutter_libs (from `.symlinks/plugins/powersync_flutter_libs/ios`)
+  - purchases_flutter (from `.symlinks/plugins/purchases_flutter/ios`)
+  - purchases_ui_flutter (from `.symlinks/plugins/purchases_ui_flutter/ios`)
   - shared_preferences_foundation (from `.symlinks/plugins/shared_preferences_foundation/darwin`)
   - sign_in_with_apple (from `.symlinks/plugins/sign_in_with_apple/ios`)
   - sqflite_darwin (from `.symlinks/plugins/sqflite_darwin/darwin`)
@@ -162,6 +178,10 @@ SPEC REPOS:
     - Mantle
     - powersync-sqlite-core
     - PromisesObjC
+    - PurchasesHybridCommon
+    - PurchasesHybridCommonUI
+    - RevenueCat
+    - RevenueCatUI
     - SDWebImage
     - SDWebImageWebPCoder
     - sqlite3
@@ -195,6 +215,10 @@ EXTERNAL SOURCES:
     :path: ".symlinks/plugins/pointer_interceptor_ios/ios"
   powersync_flutter_libs:
     :path: ".symlinks/plugins/powersync_flutter_libs/ios"
+  purchases_flutter:
+    :path: ".symlinks/plugins/purchases_flutter/ios"
+  purchases_ui_flutter:
+    :path: ".symlinks/plugins/purchases_ui_flutter/ios"
   shared_preferences_foundation:
     :path: ".symlinks/plugins/shared_preferences_foundation/darwin"
   sign_in_with_apple:
@@ -221,7 +245,7 @@ SPEC CHECKSUMS:
   flutter_keyboard_visibility: 0339d06371254c3eb25eeb90ba8d17dca8f9c069
   google_sign_in_ios: 7411fab6948df90490dc4620ecbcabdc3ca04017
   GoogleSignIn: ce8c89bb9b37fb624b92e7514cc67335d1e277e4
-  GoogleUtilities: 26a3abef001b6533cf678d3eb38fd3f614b7872d
+  GoogleUtilities: 00c88b9a86066ef77f0da2fab05f65d7768ed8e1
   GTMAppAuth: f69bd07d68cd3b766125f7e072c45d7340dea0de
   GTMSessionFetcher: 5aea5ba6bd522a239e236100971f10cb71b96ab6
   image_picker_ios: c560581cceedb403a6ff17f2f816d7fea1421fc1
@@ -232,20 +256,26 @@ SPEC CHECKSUMS:
   mecab_dart: 7491d01a31ed6c39b99c7c1c086d5c84a839e593
   path_provider_foundation: 2b6b4c569c0fb62ec74538f866245ac84301af46
   pointer_interceptor_ios: 508241697ff0947f853c061945a8b822463947c1
-  powersync-sqlite-core: c7045a44bb1040485ba46b42a3b0acaed424a5cd
+  powersync-sqlite-core: ef06642c8110680fcddce8a8c0dd2696daaf672d
   powersync_flutter_libs: 1704315ac8bc369b9bebf26db792a225a46b6737
   PromisesObjC: f5707f49cb48b9636751c5b2e7d227e43fba9f47
-  SDWebImage: f84b0feeb08d2d11e6a9b843cb06d75ebf5b8868
+  purchases_flutter: 0fa7cf05ec067fd0011860616bdbf7b9bf89f34c
+  purchases_ui_flutter: 843fa7ffdc728997147f087d7ceda28fbc5c7e18
+  PurchasesHybridCommon: 1583b4532763b795f8ae61913102d6ef9ed556a8
+  PurchasesHybridCommonUI: 5b81191e03bb0e50625901d1515a4723beee5d0e
+  RevenueCat: 5fa12c42c14b390dd2423897e925f407f474b8fa
+  RevenueCatUI: fd24e43324c5e3711e5b5cba18eadd0fe2f023d0
+  SDWebImage: f29024626962457f3470184232766516dee8dfea
   SDWebImageWebPCoder: e38c0a70396191361d60c092933e22c20d5b1380
   shared_preferences_foundation: fcdcbc04712aee1108ac7fda236f363274528f78
   sign_in_with_apple: f3bf75217ea4c2c8b91823f225d70230119b8440
   sqflite_darwin: 5a7236e3b501866c1c9befc6771dfd73ffb8702d
-  sqlite3: fc1400008a9b3525f5914ed715a5d1af0b8f4983
+  sqlite3: 3c950dc86011117c307eb0b28c4a7bb449dce9f1
   sqlite3_flutter_libs: 487032b9008b28de37c72a3aa66849ef3745f3e6
   super_native_extensions: 4916b3c627a9c7fffdc48a23a9eca0b1ac228fa7
   system_theme: bfc1b0913d08f38d8c6bbe94b202a58df599d9f7
   url_launcher_ios: 5334b05cef931de560670eeae103fd3e431ac3fe
 
-PODFILE CHECKSUM: 4305caec6b40dde0ae97be1573c53de1882a07e5
+PODFILE CHECKSUM: 251cb053df7158f337c0712f2ab29f4e0fa474ce
 
 COCOAPODS: 1.15.2

@@ -11,6 +11,7 @@ class MenuItem extends StatefulWidget {
   final Color activeTextColor;
   final Color backgroundColor;
   final void Function(int index) onTap;
+  final Widget? trailing;
 
   const MenuItem({
     super.key,
@@ -23,6 +24,7 @@ class MenuItem extends StatefulWidget {
     required this.backgroundColor,
     required this.textColor,
     required this.onTap,
+    this.trailing,
   });
 
   @override
@@ -103,7 +105,13 @@ class MenuItemState extends State<MenuItem> {
                 color: widget.color,
               ),
               const SizedBox(width: 10),
-              Text(widget.title, style: effectiveTextStyle),
+              Expanded(
+                child: Text(widget.title, style: effectiveTextStyle),
+              ),
+              if (widget.trailing != null) ...[
+                const SizedBox(width: 8),
+                widget.trailing!,
+              ],
             ],
           ),
         ),
