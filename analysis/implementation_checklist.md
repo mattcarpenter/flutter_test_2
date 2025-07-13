@@ -6,7 +6,9 @@ Simple PowerSync-driven subscription system with RevenueCat webhooks updating Su
 ## Server-Side Tasks
 
 ### 1. RevenueCat Webhook Handler
-- [ ] Create `/users/matt/repos/recipe_app_server/supabase/functions/revenuecat-webhook/index.ts`
+- [ ] Create `/users/matt/repos/recipe_app_server/src/controllers/webhookController.ts`
+- [ ] Create `/users/matt/repos/recipe_app_server/src/routes/webhookRoutes.ts`
+- [ ] Add webhook routes to `/users/matt/repos/recipe_app_server/src/index.ts`
 - [ ] Implement webhook signature verification
 - [ ] Process subscription events (purchase, renewal, cancellation, expiration)
 - [ ] Update Supabase auth.users metadata with subscription status
@@ -14,12 +16,11 @@ Simple PowerSync-driven subscription system with RevenueCat webhooks updating Su
 - [ ] Add error handling and logging
 
 ### 2. Optional: Subscription Events Audit Table
-- [ ] Create database migration for subscription_events table
-- [ ] Add RLS policies for subscription events
+- [ ] Run the DDL from `/Users/matt/repos/flutter_test_2/ddls/postgres_powersync.sql` (subscription_events table already added)
 - [ ] Implement event logging in webhook handler
 
 ### 3. Environment Configuration
-- [ ] Add REVENUECAT_WEBHOOK_SECRET to Supabase environment
+- [ ] Add REVENUECAT_WEBHOOK_SECRET to recipe_app_server environment
 - [ ] Configure RevenueCat webhook URL in dashboard
 - [ ] Set up webhook event types in RevenueCat
 
@@ -75,15 +76,15 @@ Simple PowerSync-driven subscription system with RevenueCat webhooks updating Su
 ## Configuration Tasks
 
 ### 11. RevenueCat Dashboard Configuration
-- [ ] Set webhook URL to Supabase function
+- [ ] Set webhook URL to recipe_app_server endpoint: `/v1/webhooks/revenuecat`
 - [ ] Configure webhook events (purchase, renewal, cancellation, etc.)
 - [ ] Set webhook authentication secret
 - [ ] Test webhook delivery
 
-### 12. Supabase Configuration
-- [ ] Deploy webhook function
-- [ ] Set environment variables
-- [ ] Test function accessibility
+### 12. Server Configuration
+- [ ] Deploy recipe_app_server with webhook endpoints
+- [ ] Set environment variables (REVENUECAT_WEBHOOK_SECRET, SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY)
+- [ ] Test webhook endpoint accessibility
 - [ ] Verify PowerSync has access to user metadata
 
 ## Verification Tasks

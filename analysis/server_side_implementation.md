@@ -39,9 +39,9 @@ Subscription data is stored in `auth.users.user_metadata` with this structure:
 
 ## 2. Recipe App Server Implementation
 
-### 2.1 RevenueCat Webhook Handler
+### 2.1 RevenueCat Webhook Controller
 
-**File**: `/users/matt/repos/recipe_app_server/src/routes/webhooks/revenuecat.ts`
+**File**: `/users/matt/repos/recipe_app_server/src/controllers/webhookController.ts`
 
 ```typescript
 import { Request, Response } from 'express'
@@ -82,24 +82,26 @@ const supabase = createClient(
   process.env.SUPABASE_SERVICE_ROLE_KEY!
 )
 
-export async function revenueCatWebhook(req: Request, res: Response) {
-  try {
-    // Verify webhook signature
-    const signature = req.headers.authorization
-    if (!signature || !await verifyWebhookSignature(req, signature)) {
-      return res.status(401).json({ error: 'Unauthorized' })
+export class WebhookController {
+  async revenueCatWebhook(req: Request, res: Response) {
+    try {
+      // Verify webhook signature
+      const signature = req.headers.authorization
+      if (!signature || !await verifyWebhookSignature(req, signature)) {
+        return res.status(401).json({ error: 'Unauthorized' })
+      }
+
+      const payload: RevenueCatWebhookEvent = req.body
+      console.log('Processing RevenueCat webhook:', payload.event.type, payload.event.app_user_id)
+
+      // Process the webhook event
+      await processSubscriptionEvent(payload)
+
+      return res.json({ success: true })
+    } catch (error) {
+      console.error('Webhook processing error:', error)
+      return res.status(500).json({ error: error.message })
     }
-
-    const payload: RevenueCatWebhookEvent = req.body
-    console.log('Processing RevenueCat webhook:', payload.event.type, payload.event.app_user_id)
-
-    // Process the webhook event
-    await processSubscriptionEvent(payload)
-
-    return res.json({ success: true })
-  } catch (error) {
-    console.error('Webhook processing error:', error)
-    return res.status(500).json({ error: error.message })
   }
 }
 
@@ -331,29 +333,30 @@ function mapPlatformString(store: string): string {
 }
 ```
 
-### 2.2 Express Route Setup
+### 2.2 Webhook Routes Setup
 
-**File**: `/users/matt/repos/recipe_app_server/src/routes/webhooks/index.ts`
+**File**: `/users/matt/repos/recipe_app_server/src/routes/webhookRoutes.ts`
 
 ```typescript
 import express from 'express'
-import { revenueCatWebhook } from './revenuecat'
+import { WebhookController } from '../controllers/webhookController'
 
 const router = express.Router()
+const webhookController = new WebhookController()
 
 // RevenueCat webhook endpoint
-router.post('/revenuecat', revenueCatWebhook)
+router.post('/revenuecat', webhookController.revenueCatWebhook.bind(webhookController))
 
 export default router
 ```
 
-**Add to main app** (in `/users/matt/repos/recipe_app_server/src/app.ts` or similar):
+**Update main app** (in `/users/matt/repos/recipe_app_server/src/index.ts`):
 
 ```typescript
-import webhookRoutes from './routes/webhooks'
+import webhookRoutes from './routes/webhookRoutes'
 
-// Add webhook routes
-app.use('/api/webhooks', webhookRoutes)
+// Add webhook routes (no auth required for webhooks)
+app.use('/v1/webhooks', webhookRoutes)
 ```
 
 ### 2.3 PowerSync Integration
@@ -382,7 +385,7 @@ SUPABASE_SERVICE_ROLE_KEY=your_service_role_key
 
 In RevenueCat dashboard:
 1. Go to Integrations → Webhooks
-2. Add webhook URL: `https://your-recipe-app-server.com/api/webhooks/revenuecat`
+2. Add webhook URL: `https://your-recipe-app-server.com/v1/webhooks/revenuecat`
 3. Set webhook secret (save in environment variables)
 4. Enable all relevant events:
    - Initial Purchase
@@ -426,7 +429,7 @@ const testWebhook = async () => {
     }
   }
 
-  const response = await fetch('http://localhost:3000/api/webhooks/revenuecat', {
+  const response = await fetch('http://localhost:3000/v1/webhooks/revenuecat', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
