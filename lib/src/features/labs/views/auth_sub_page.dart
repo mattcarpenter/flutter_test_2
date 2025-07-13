@@ -1,11 +1,10 @@
 // auth_page.dart
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../../../mobile/utils/adaptive_sliver_page.dart';
-import '../../../providers/user_provider.dart';
+import '../../../utils/feature_flags.dart';
 
 class AuthSubPage extends StatefulWidget {
   const AuthSubPage({super.key});
@@ -70,10 +69,13 @@ class _AuthSubPageState extends State<AuthSubPage> {
   Widget build(BuildContext context) {
     return AdaptiveSliverPage(
       title: 'Auth',
-      body: Center(
-        child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
+      body: FeatureGate(
+        feature: 'labs',
+        customUpgradeText: 'Upgrade to access Labs',
+        child: Center(
+          child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
                 CupertinoTextField(
                   controller: _emailController,
                   placeholder: 'Email', // ✅ Acts as the labelText
@@ -97,10 +99,11 @@ class _AuthSubPageState extends State<AuthSubPage> {
               ],
             ),
           ),
+        ),
       trailing: const Icon(CupertinoIcons.add_circled),
       previousPageTitle: 'Labs',
       automaticallyImplyLeading: true,
-        );
+    );
 
   }
 }

@@ -94,6 +94,9 @@ class Menu extends ConsumerWidget {
           trailing: PremiumBadge(feature: 'labs'),
           onTap: (_) async {
             final hasAccess = ref.read(hasPlusProvider);
+            final debugInfo = ref.read(subscriptionDebugProvider);
+            debugPrint('Labs tapped - hasAccess: $hasAccess, debugInfo: $debugInfo');
+            
             if (hasAccess) {
               onRouteGo('/labs');
             } else {

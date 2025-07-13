@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:flutter/foundation.dart';
 import 'package:drift/drift.dart';
 import 'package:recipe_app/database/models/pantry_item_terms.dart';
 
@@ -11,11 +12,42 @@ import 'models/ingredients.dart';
 import 'models/meal_plan_items.dart';
 
 class StringListTypeConverter extends TypeConverter<List<String>, String> {
+  const StringListTypeConverter();
+  
   @override
   List<String> fromSql(String fromDb) {
     try {
-      return List<String>.from(jsonDecode(fromDb));
-    } catch (_) {
+      debugPrint('StringListTypeConverter.fromSql: input="$fromDb"');
+      debugPrint('StringListTypeConverter.fromSql: input type=${fromDb.runtimeType}');
+      
+      var decoded = jsonDecode(fromDb);
+      debugPrint('StringListTypeConverter.fromSql: decoded=$decoded');
+      debugPrint('StringListTypeConverter.fromSql: decoded type=${decoded.runtimeType}');
+      
+      // Handle double-encoded JSON: if decoded is a string, try to decode it again
+      if (decoded is String) {
+        try {
+          decoded = jsonDecode(decoded);
+          debugPrint('StringListTypeConverter.fromSql: double-decoded=$decoded');
+          debugPrint('StringListTypeConverter.fromSql: double-decoded type=${decoded.runtimeType}');
+        } catch (e) {
+          debugPrint('StringListTypeConverter.fromSql: not double-encoded JSON, treating as single string');
+          final result = [decoded as String];
+          debugPrint('StringListTypeConverter.fromSql: wrapped single string=$result');
+          return result;
+        }
+      }
+      
+      if (decoded is List) {
+        final result = decoded.cast<String>();
+        debugPrint('StringListTypeConverter.fromSql: result=$result');
+        return result;
+      } else {
+        debugPrint('StringListTypeConverter.fromSql: unexpected type ${decoded.runtimeType}');
+        return [];
+      }
+    } catch (e) {
+      debugPrint('StringListTypeConverter.fromSql: error=$e, input="$fromDb"');
       return [];
     }
   }

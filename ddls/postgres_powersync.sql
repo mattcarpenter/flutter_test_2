@@ -338,6 +338,7 @@ CREATE TABLE public.subscription_events (
     -- Event details
     event_type text NOT NULL, -- 'purchase', 'renewal', 'cancellation', 'expiration', etc.
     event_source text NOT NULL DEFAULT 'revenuecat_webhook',
+    event_data jsonb NOT NULL DEFAULT '{}', -- Structured event data
     
     -- RevenueCat data
     revenuecat_event_id text NULL,
@@ -361,7 +362,8 @@ CREATE TABLE public.subscription_events (
     raw_webhook_data jsonb NULL,
     
     -- Metadata
-    processed_at timestamp with time zone NOT NULL DEFAULT now(),
+    processed_at timestamp with time zone NULL,
+    created_at timestamp with time zone NOT NULL DEFAULT now(),
     
     CONSTRAINT subscription_events_pkey PRIMARY KEY (id),
     CONSTRAINT subscription_events_user_id_fkey FOREIGN KEY (user_id) REFERENCES auth.users (id) ON DELETE CASCADE
@@ -373,18 +375,54 @@ CREATE INDEX IF NOT EXISTS subscription_events_event_type_idx ON public.subscrip
 CREATE INDEX IF NOT EXISTS subscription_events_revenuecat_event_id_idx ON public.subscription_events (revenuecat_event_id);
 CREATE INDEX IF NOT EXISTS subscription_events_processed_at_idx ON public.subscription_events (processed_at);
 
--- User metadata structure for subscriptions (stored in auth.users.user_metadata):
--- {
---   "subscription": {
---     "status": "active",           -- active, cancelled, expired, trial, none
---     "entitlements": ["plus"],     -- array of entitlement IDs
---     "expires_at": "2024-02-15T10:30:00Z",
---     "trial_ends_at": null,
---     "product_id": "stockpot_plus_monthly",
---     "store": "app_store",         -- app_store, play_store, stripe
---     "revenuecat_customer_id": "customer_123",
---     "last_updated": "2024-01-15T10:30:00Z"
---   }
--- }
+-- USER SUBSCRIPTIONS (PowerSync-driven subscription management)
+CREATE TABLE public.user_subscriptions (
+    id uuid NOT NULL DEFAULT extensions.uuid_generate_v4(),
+    user_id uuid NOT NULL,
+    household_id uuid NULL, -- For household-level subscriptions
+    
+    -- Subscription status
+    status text NOT NULL DEFAULT 'none', -- none, active, cancelled, expired
+    entitlements jsonb NOT NULL DEFAULT '[]', -- Array of entitlement IDs ["plus"]
+    
+    -- Timing (Unix timestamps in milliseconds)
+    expires_at bigint NULL,
+    trial_ends_at bigint NULL,
+    cancelled_at bigint NULL,
+    
+    -- RevenueCat integration
+    product_id text NULL,
+    store text NULL, -- app_store, play_store, stripe
+    revenuecat_customer_id text NULL,
+    
+    -- Metadata (Unix timestamps in milliseconds)
+    created_at bigint NULL,
+    updated_at bigint NULL,
+    
+    CONSTRAINT user_subscriptions_pkey PRIMARY KEY (id),
+    CONSTRAINT user_subscriptions_user_id_fkey FOREIGN KEY (user_id) REFERENCES auth.users (id) ON DELETE CASCADE,
+    CONSTRAINT user_subscriptions_household_id_fkey FOREIGN KEY (household_id) REFERENCES public.households (id) ON DELETE CASCADE,
+    CONSTRAINT user_subscriptions_status_check CHECK (status IN ('none', 'active', 'cancelled', 'expired')),
+    
+    -- Ensure one subscription record per user
+    CONSTRAINT user_subscriptions_user_id_unique UNIQUE (user_id)
+) TABLESPACE pg_default;
+
+-- Indexes for performance
+CREATE INDEX IF NOT EXISTS user_subscriptions_user_id_idx ON public.user_subscriptions (user_id);
+CREATE INDEX IF NOT EXISTS user_subscriptions_household_id_idx ON public.user_subscriptions (household_id);
+CREATE INDEX IF NOT EXISTS user_subscriptions_status_idx ON public.user_subscriptions (status);
+CREATE INDEX IF NOT EXISTS user_subscriptions_expires_at_idx ON public.user_subscriptions (expires_at);
+
+-- RLS policies
+ALTER TABLE public.user_subscriptions ENABLE ROW LEVEL SECURITY;
+
+-- Policy: Users can view their own subscription
+CREATE POLICY "Users can view own subscription" ON public.user_subscriptions
+    FOR SELECT USING (auth.uid() = user_id);
+
+-- Policy: Service role can manage all subscriptions (for webhooks)
+CREATE POLICY "Service role can manage subscriptions" ON public.user_subscriptions
+    FOR ALL USING (auth.role() = 'service_role');
 
 CREATE PUBLICATION powersync FOR ALL TABLES;

@@ -2,8 +2,10 @@ import 'dart:async';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:purchases_flutter/purchases_flutter.dart';
 
+import '../../database/database.dart';
+import '../../database/powersync.dart';
+import '../../database/models/user_subscriptions.dart';
 import '../models/subscription_state.dart';
 import '../services/subscription_service.dart';
 import 'auth_provider.dart';
@@ -14,8 +16,6 @@ class SubscriptionNotifier extends StateNotifier<SubscriptionState> {
   final Ref _ref;
   
   late final StreamSubscription _authSubscription;
-  StreamSubscription<CustomerInfo>? _customerInfoSubscription;
-  Timer? _periodicRefreshTimer;
 
   SubscriptionNotifier({
     required SubscriptionService subscriptionService,
@@ -28,208 +28,149 @@ class SubscriptionNotifier extends StateNotifier<SubscriptionState> {
 
   void _initializeSubscriptionState() {
     // Listen to auth state changes
-    _authSubscription = _ref.watch(authNotifierProvider.notifier).stream.listen((authState) {
-      debugPrint('SubscriptionNotifier: Auth state changed, authenticated: ${authState.isAuthenticated}');
-      _handleAuthChange(authState.isAuthenticated);
+    _ref.listen(authNotifierProvider, (previous, next) {
+      debugPrint('SubscriptionNotifier: Auth state changed');
+      _updateSubscriptionState();
     });
 
-    // Check initial auth state and initialize if authenticated
-    final currentAuthState = _ref.read(authNotifierProvider);
-    if (currentAuthState.isAuthenticated) {
-      _handleAuthChange(true);
-    }
+    // Check initial subscription state
+    _updateSubscriptionState();
   }
 
-  Future<void> _handleAuthChange(bool isAuthenticated) async {
-    if (isAuthenticated) {
-      await _initializeForAuthenticatedUser();
-    } else {
-      await _cleanupForUnauthenticatedUser();
-    }
-  }
-
-  Future<void> _initializeForAuthenticatedUser() async {
+  void _updateSubscriptionState() {
     try {
-      debugPrint('SubscriptionNotifier: Initializing for authenticated user');
+      // Refresh cache from database first
+      _subscriptionService.refreshSubscriptionStatus().then((_) {
+        final hasPlus = _subscriptionService.hasPlus();
+        final metadata = _subscriptionService.getSubscriptionMetadata();
+        
+        // Build entitlements map from metadata
+        final entitlements = <String, bool>{};
+        if (metadata != null) {
+          final entitlementsList = metadata['entitlements'] as List<dynamic>?;
+          if (entitlementsList != null) {
+            for (final entitlement in entitlementsList) {
+              entitlements[entitlement.toString()] = true;
+            }
+          }
+        }
+        // Always include plus entitlement
+        entitlements['plus'] = hasPlus;
+        
+        state = state.updateAccess(
+          hasPlus: hasPlus,
+          subscriptionMetadata: metadata,
+          entitlements: entitlements,
+        );
+        
+        debugPrint('SubscriptionNotifier: Updated state - hasPlus: $hasPlus, entitlements: $entitlements');
+      }).catchError((e) {
+        debugPrint('SubscriptionNotifier: Error refreshing subscription: $e');
+        state = state.setError(e.toString());
+      });
+    } catch (e) {
+      debugPrint('SubscriptionNotifier: Error updating state: $e');
+      state = state.setError(e.toString());
+    }
+  }
+
+  /// Initialize RevenueCat and sync user ID
+  Future<void> initialize() async {
+    try {
+      state = state.copyWith(isLoading: true);
       
-      // Initialize RevenueCat and sync user ID
       await _subscriptionService.initialize();
       await _subscriptionService.syncUserId();
       
-      // Set up customer info stream for real-time updates
-      _setupCustomerInfoStream();
+      _updateSubscriptionState();
       
-      // Set up periodic refresh timer
-      _setupPeriodicRefresh();
-      
-      // Check current subscription status
-      await checkSubscriptionStatus();
-      
+      state = state.copyWith(isLoading: false);
     } catch (e) {
-      debugPrint('SubscriptionNotifier: Error initializing for authenticated user: $e');
-      state = state.setError(SubscriptionService.getErrorMessage(e as Exception));
+      debugPrint('SubscriptionNotifier: Initialization failed: $e');
+      state = state.copyWith(
+        isLoading: false,
+        error: e.toString(),
+      );
     }
   }
 
-  Future<void> _cleanupForUnauthenticatedUser() async {
-    debugPrint('SubscriptionNotifier: Cleaning up for unauthenticated user');
-    
-    // Cancel subscriptions and timers
-    _customerInfoSubscription?.cancel();
-    _customerInfoSubscription = null;
-    _periodicRefreshTimer?.cancel();
-    _periodicRefreshTimer = null;
-    
-    // Reset state
-    state = const SubscriptionState();
-  }
-
-  void _setupCustomerInfoStream() {
-    _customerInfoSubscription?.cancel();
-    
-    // Use the service's customer info stream for real-time updates
-    _customerInfoSubscription = _subscriptionService.customerInfoStream.listen(
-      (customerInfo) {
-        debugPrint('SubscriptionNotifier: Customer info updated');
-        _updateStateFromCustomerInfo(customerInfo);
-      },
-      onError: (error) {
-        debugPrint('SubscriptionNotifier: Customer info stream error: $error');
-        // Don't update error state from stream errors to avoid interrupting user flow
-      },
-    );
-  }
-
-  void _setupPeriodicRefresh() {
-    _periodicRefreshTimer?.cancel();
-    
-    // Refresh subscription status every 5 minutes when app is active
-    _periodicRefreshTimer = Timer.periodic(const Duration(minutes: 5), (_) {
-      if (!state.isBusy) {
-        debugPrint('SubscriptionNotifier: Periodic refresh triggered');
-        checkSubscriptionStatus();
-      }
-    });
-  }
-
-  void _updateStateFromCustomerInfo(CustomerInfo customerInfo) {
-    final hasPlus = customerInfo.entitlements.all['plus']?.isActive ?? false;
-    
-    // Extract all entitlements for comprehensive state
-    final entitlements = <String, bool>{};
-    for (final entry in customerInfo.entitlements.all.entries) {
-      entitlements[entry.key] = entry.value.isActive;
-    }
-    
-    state = state.updateAccess(
-      hasPlus: hasPlus,
-      entitlements: entitlements,
-    );
-  }
-
-  /// Check current subscription status
-  Future<void> checkSubscriptionStatus() async {
-    if (state.isLoading) return;
-    
-    state = state.setLoading(true);
-    
-    try {
-      debugPrint('SubscriptionNotifier: Checking subscription status');
-      final hasPlus = await _subscriptionService.hasPlus();
-      
-      state = state.updateAccess(hasPlus: hasPlus);
-      debugPrint('SubscriptionNotifier: Subscription status updated - hasPlus: $hasPlus');
-    } catch (e) {
-      debugPrint('SubscriptionNotifier: Error checking subscription status: $e');
-      state = state.setError(SubscriptionService.getErrorMessage(e as Exception));
-    }
-  }
-
-  /// Present paywall to user
+  /// Present paywall
   Future<bool> presentPaywall() async {
-    if (state.isBusy) return false;
-    
-    state = state.setLoading(true);
-    
     try {
-      debugPrint('SubscriptionNotifier: Presenting paywall');
+      state = state.copyWith(isShowingPaywall: true);
+      
       final purchased = await _subscriptionService.presentPaywall();
       
       if (purchased) {
-        // Refresh subscription status after successful purchase
-        await checkSubscriptionStatus();
-        debugPrint('SubscriptionNotifier: Purchase successful, status refreshed');
-      } else {
-        state = state.setLoading(false);
-        debugPrint('SubscriptionNotifier: Purchase not completed');
+        // Wait a moment for webhook to process, then update state
+        await Future.delayed(const Duration(seconds: 2));
+        _updateSubscriptionState();
       }
       
       return purchased;
     } catch (e) {
-      debugPrint('SubscriptionNotifier: Error presenting paywall: $e');
-      state = state.setError(SubscriptionService.getErrorMessage(e as Exception));
+      debugPrint('SubscriptionNotifier: Paywall error: $e');
+      state = state.copyWith(error: e.toString());
       return false;
+    } finally {
+      state = state.copyWith(isShowingPaywall: false);
     }
   }
 
   /// Present paywall only if user doesn't have Plus subscription
   Future<bool> presentPaywallIfNeeded() async {
-    if (state.isBusy) return state.hasPlus;
-    
-    state = state.setLoading(true);
-    
-    try {
-      debugPrint('SubscriptionNotifier: Presenting paywall if needed');
-      final result = await _subscriptionService.presentPaywallIfNeeded();
-      
-      // Refresh subscription status regardless of result
-      await checkSubscriptionStatus();
-      debugPrint('SubscriptionNotifier: Paywall flow completed, status refreshed');
-      
-      return result;
-    } catch (e) {
-      debugPrint('SubscriptionNotifier: Error in paywall if needed: $e');
-      state = state.setError(SubscriptionService.getErrorMessage(e as Exception));
-      return false;
+    if (state.hasPlus) {
+      return true;
     }
+    
+    return await presentPaywall();
   }
+
+  /// Get current subscription metadata
+  Map<String, dynamic>? get subscriptionMetadata => state.subscriptionMetadata;
 
   /// Restore purchases
   Future<void> restorePurchases() async {
-    if (state.isRestoring) return;
-    
-    state = state.setRestoring(true);
-    
     try {
-      debugPrint('SubscriptionNotifier: Restoring purchases');
+      state = state.copyWith(isRestoring: true);
+      
       await _subscriptionService.restorePurchases();
       
-      // Refresh subscription status after restore
-      await checkSubscriptionStatus();
-      debugPrint('SubscriptionNotifier: Purchases restored successfully');
+      // Wait for webhook to process, then update state
+      await Future.delayed(const Duration(seconds: 2));
+      _updateSubscriptionState();
+      
     } catch (e) {
-      debugPrint('SubscriptionNotifier: Error restoring purchases: $e');
-      state = state.setError(SubscriptionService.getErrorMessage(e as Exception));
+      debugPrint('SubscriptionNotifier: Restore error: $e');
+      state = state.copyWith(error: e.toString());
+    } finally {
+      state = state.copyWith(isRestoring: false);
     }
   }
 
-  /// Refresh subscription status manually
+  /// Manual refresh
   Future<void> refresh() async {
-    debugPrint('SubscriptionNotifier: Manual refresh requested');
-    await checkSubscriptionStatus();
-  }
-
-  /// Clear error state
-  void clearError() {
-    state = state.clearError();
+    try {
+      state = state.copyWith(isLoading: true);
+      
+      await _subscriptionService.refreshSubscriptionStatus();
+      
+      // Wait for webhook and PowerSync to process
+      await Future.delayed(const Duration(seconds: 3));
+      _updateSubscriptionState();
+      
+    } catch (e) {
+      debugPrint('SubscriptionNotifier: Refresh error: $e');
+      state = state.copyWith(error: e.toString());
+    } finally {
+      state = state.copyWith(isLoading: false);
+    }
   }
 
   @override
   void dispose() {
     debugPrint('SubscriptionNotifier: Disposing');
     _authSubscription.cancel();
-    _customerInfoSubscription?.cancel();
-    _periodicRefreshTimer?.cancel();
     super.dispose();
   }
 }
@@ -237,6 +178,36 @@ class SubscriptionNotifier extends StateNotifier<SubscriptionState> {
 // Provider for SubscriptionService instance
 final subscriptionServiceProvider = Provider<SubscriptionService>((ref) {
   return SubscriptionService();
+});
+
+// Direct database watch provider for user subscription
+final userSubscriptionStreamProvider = StreamProvider<UserSubscriptionEntry?>((ref) {
+  final currentUser = ref.watch(currentUserProvider);
+  if (currentUser == null) {
+    debugPrint('userSubscriptionStreamProvider: No current user');
+    return Stream.value(null);
+  }
+  
+  debugPrint('userSubscriptionStreamProvider: Watching subscription for user ${currentUser.id}');
+  return (appDb.select(appDb.userSubscriptions)
+    ..where((tbl) => tbl.userId.equals(currentUser.id)))
+    .watchSingleOrNull();
+});
+
+// Debug provider to see what's in the database
+final subscriptionDebugProvider = Provider<String>((ref) {
+  final subscriptionAsync = ref.watch(userSubscriptionStreamProvider);
+  
+  return subscriptionAsync.when(
+    data: (subscription) {
+      if (subscription == null) {
+        return "DEBUG: No subscription found in database";
+      }
+      return "DEBUG: Status=${subscription.status.name}, Entitlements=${subscription.entitlements}, ExpiresAt=${subscription.expiresAt}";
+    },
+    loading: () => "DEBUG: Loading subscription...",
+    error: (error, _) => "DEBUG: Error loading subscription: $error",
+  );
 });
 
 // Main subscription state provider
@@ -249,10 +220,35 @@ final subscriptionProvider = StateNotifierProvider<SubscriptionNotifier, Subscri
   );
 });
 
-// Convenience provider for checking Plus access
+// Reactive provider for checking Plus access - directly watches database
 final hasPlusProvider = Provider<bool>((ref) {
-  final subscriptionState = ref.watch(subscriptionProvider);
-  return subscriptionState.hasPlus;
+  final subscriptionAsync = ref.watch(userSubscriptionStreamProvider);
+  
+  return subscriptionAsync.when(
+    data: (subscription) {
+      if (subscription == null) {
+        debugPrint('hasPlusProvider: No subscription found');
+        return false;
+      }
+      
+      // Check subscription status and entitlements
+      final isActive = subscription.status == SubscriptionStatus.active ||
+                      subscription.status == SubscriptionStatus.cancelled;
+      
+      final hasPlus = isActive && subscription.entitlements.contains('plus');
+      
+      debugPrint('hasPlusProvider: status=${subscription.status.name}, entitlements=${subscription.entitlements}, hasPlus=$hasPlus');
+      return hasPlus;
+    },
+    loading: () {
+      debugPrint('hasPlusProvider: Loading subscription data...');
+      return false; // Default to no access while loading
+    },
+    error: (error, _) {
+      debugPrint('hasPlusProvider: Error loading subscription: $error');
+      return false; // Default to no access on error
+    },
+  );
 });
 
 // Convenience provider for loading states
@@ -277,6 +273,12 @@ final subscriptionBusyProvider = Provider<bool>((ref) {
 final subscriptionRestoringProvider = Provider<bool>((ref) {
   final subscriptionState = ref.watch(subscriptionProvider);
   return subscriptionState.isRestoring;
+});
+
+// Convenience provider for checking if paywall is currently showing
+final subscriptionShowingPaywallProvider = Provider<bool>((ref) {
+  final subscriptionState = ref.watch(subscriptionProvider);
+  return subscriptionState.isShowingPaywall;
 });
 
 // Convenience provider for last checked timestamp
@@ -310,6 +312,30 @@ final subscriptionStatusProvider = Provider<String>((ref) {
   } else {
     return 'Free';
   }
+});
+
+// Convenience provider for subscription metadata
+final subscriptionMetadataProvider = Provider<Map<String, dynamic>?>((ref) {
+  final subscriptionState = ref.watch(subscriptionProvider);
+  return subscriptionState.subscriptionMetadata;
+});
+
+// Convenience provider for subscription status
+final subscriptionStatusStringProvider = Provider<String?>((ref) {
+  final subscriptionState = ref.watch(subscriptionProvider);
+  return subscriptionState.subscriptionStatus;
+});
+
+// Convenience provider for trial status
+final subscriptionTrialActiveProvider = Provider<bool>((ref) {
+  final subscriptionState = ref.watch(subscriptionProvider);
+  return subscriptionState.isTrialActive;
+});
+
+// Convenience provider for expiration date
+final subscriptionExpiresAtProvider = Provider<DateTime?>((ref) {
+  final subscriptionState = ref.watch(subscriptionProvider);
+  return subscriptionState.expiresAt;
 });
 
 // Provider for determining if paywall should be shown for feature access

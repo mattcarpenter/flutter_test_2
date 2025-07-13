@@ -5,6 +5,11 @@ import 'package:flutter/services.dart';
 import 'package:purchases_flutter/purchases_flutter.dart';
 import 'package:purchases_ui_flutter/purchases_ui_flutter.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:drift/drift.dart';
+
+import '../../database/powersync.dart';
+import '../../database/database.dart';
+import '../../database/models/user_subscriptions.dart';
 
 /// Exception thrown when subscription operations fail
 class SubscriptionApiException implements Exception {
@@ -96,6 +101,10 @@ class SubscriptionService {
   
   bool _isInitialized = false;
   Completer<void>? _initCompleter;
+  
+  // Cache for subscription state
+  UserSubscriptionEntry? _cachedSubscription;
+  String? _lastUserId;
 
   SubscriptionService() : _supabase = Supabase.instance.client;
 
@@ -143,36 +152,58 @@ class SubscriptionService {
     }
   }
 
-  /// Check if user has Plus subscription
-  Future<bool> hasPlus() async {
+  /// Check if user has Plus subscription from cached PowerSync data
+  bool hasPlus() {
     try {
-      await _ensureInitialized();
+      final user = _supabase.auth.currentUser;
+      if (user == null) return false;
       
-      debugPrint('SubscriptionService: Checking Plus entitlement');
-      final customerInfo = await Purchases.getCustomerInfo();
-      
-      final hasEntitlement = customerInfo.entitlements.all[_entitlementId]?.isActive ?? false;
-      debugPrint('SubscriptionService: Plus entitlement active: $hasEntitlement');
-      
-      return hasEntitlement;
-    } on PlatformException catch (e) {
-      debugPrint('SubscriptionService: Error checking Plus entitlement: $e');
-      
-      // Fail closed - deny access on error
-      if (e.code == 'purchases_not_configured') {
-        throw SubscriptionApiException(
-          message: 'Subscription service not properly configured',
-          code: e.code,
-          type: SubscriptionErrorType.configuration,
-        );
+      // Use cached subscription if available for same user
+      if (_lastUserId == user.id && _cachedSubscription != null) {
+        final subscription = _cachedSubscription!;
+        
+        // Check subscription status and entitlements
+        final isActive = subscription.status == SubscriptionStatus.active ||
+                        subscription.status == SubscriptionStatus.cancelled; // Cancelled but still valid until expiry
+        
+        return isActive && subscription.entitlements.contains(_entitlementId);
       }
       
-      // For other errors, fail safely by denying access
+      // No cached data available - refresh needed
       return false;
     } catch (e) {
-      debugPrint('SubscriptionService: Unexpected error checking entitlement: $e');
-      // Fail closed - deny access on unexpected errors
-      return false;
+      debugPrint('SubscriptionService: Error checking Plus access: $e');
+      return false; // Fail closed
+    }
+  }
+
+  /// Get subscription metadata from cached PowerSync data
+  Map<String, dynamic>? getSubscriptionMetadata() {
+    try {
+      final user = _supabase.auth.currentUser;
+      if (user == null) return null;
+      
+      // Use cached subscription if available for same user
+      if (_lastUserId == user.id && _cachedSubscription != null) {
+        final subscription = _cachedSubscription!;
+        
+        return {
+          'status': subscription.status.name,
+          'entitlements': subscription.entitlements,
+          'expires_at': subscription.expiresAt != null ? DateTime.fromMillisecondsSinceEpoch(subscription.expiresAt!).toIso8601String() : null,
+          'trial_ends_at': subscription.trialEndsAt != null ? DateTime.fromMillisecondsSinceEpoch(subscription.trialEndsAt!).toIso8601String() : null,
+          'cancelled_at': subscription.cancelledAt != null ? DateTime.fromMillisecondsSinceEpoch(subscription.cancelledAt!).toIso8601String() : null,
+          'product_id': subscription.productId,
+          'store': subscription.store,
+          'revenuecat_customer_id': subscription.revenuecatCustomerId,
+          'last_updated': subscription.updatedAt != null ? DateTime.fromMillisecondsSinceEpoch(subscription.updatedAt!).toIso8601String() : null,
+        };
+      }
+      
+      return null;
+    } catch (e) {
+      debugPrint('SubscriptionService: Error getting subscription metadata: $e');
+      return null;
     }
   }
 
@@ -210,7 +241,7 @@ class SubscriptionService {
       await _ensureInitialized();
       
       debugPrint('SubscriptionService: Checking if paywall needed');
-      final hasActivePlus = await hasPlus();
+      final hasActivePlus = hasPlus();
       
       if (hasActivePlus) {
         debugPrint('SubscriptionService: User already has Plus, skipping paywall');
@@ -293,6 +324,32 @@ class SubscriptionService {
     }
   }
 
+  /// Force refresh subscription status from PowerSync database
+  Future<void> refreshSubscriptionStatus() async {
+    try {
+      final user = _supabase.auth.currentUser;
+      if (user == null) return;
+      
+      debugPrint('SubscriptionService: Refreshing subscription status from database');
+      
+      // Get latest subscription from PowerSync database
+      final query = appDb.select(appDb.userSubscriptions)
+        ..where((tbl) => tbl.userId.equals(user.id));
+      
+      final subscription = await query.getSingleOrNull();
+      
+      // Update cache
+      _cachedSubscription = subscription;
+      _lastUserId = user.id;
+      
+      debugPrint('SubscriptionService: Subscription cache updated - hasPlus: ${hasPlus()}');
+      
+    } catch (e) {
+      debugPrint('SubscriptionService: Error refreshing subscription: $e');
+      rethrow;
+    }
+  }
+
   /// Stream of customer info changes
   Stream<CustomerInfo> get customerInfoStream {
     // Note: Customer info stream requires manual polling in current RevenueCat version
@@ -335,4 +392,26 @@ class SubscriptionService {
     
     return 'An unexpected error occurred. Please try again.';
   }
+
+  /// Initialize subscription cache for the current user
+  Future<void> _initializeSubscriptionCache() async {
+    try {
+      final user = _supabase.auth.currentUser;
+      if (user == null) {
+        _cachedSubscription = null;
+        _lastUserId = null;
+        return;
+      }
+      
+      // Skip if already cached for this user
+      if (_lastUserId == user.id && _cachedSubscription != null) {
+        return;
+      }
+      
+      await refreshSubscriptionStatus();
+    } catch (e) {
+      debugPrint('SubscriptionService: Error initializing subscription cache: $e');
+    }
+  }
+
 }

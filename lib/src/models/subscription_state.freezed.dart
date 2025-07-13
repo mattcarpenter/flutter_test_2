@@ -19,9 +19,12 @@ mixin _$SubscriptionState {
   bool get hasPlus => throw _privateConstructorUsedError;
   bool get isLoading => throw _privateConstructorUsedError;
   bool get isRestoring => throw _privateConstructorUsedError;
+  bool get isShowingPaywall => throw _privateConstructorUsedError;
   String? get error => throw _privateConstructorUsedError;
   DateTime? get lastChecked => throw _privateConstructorUsedError;
   Map<String, bool>? get entitlements => throw _privateConstructorUsedError;
+  Map<String, dynamic>? get subscriptionMetadata =>
+      throw _privateConstructorUsedError;
 
   /// Create a copy of SubscriptionState
   /// with the given fields replaced by the non-null parameter values.
@@ -40,9 +43,11 @@ abstract class $SubscriptionStateCopyWith<$Res> {
       {bool hasPlus,
       bool isLoading,
       bool isRestoring,
+      bool isShowingPaywall,
       String? error,
       DateTime? lastChecked,
-      Map<String, bool>? entitlements});
+      Map<String, bool>? entitlements,
+      Map<String, dynamic>? subscriptionMetadata});
 }
 
 /// @nodoc
@@ -63,9 +68,11 @@ class _$SubscriptionStateCopyWithImpl<$Res, $Val extends SubscriptionState>
     Object? hasPlus = null,
     Object? isLoading = null,
     Object? isRestoring = null,
+    Object? isShowingPaywall = null,
     Object? error = freezed,
     Object? lastChecked = freezed,
     Object? entitlements = freezed,
+    Object? subscriptionMetadata = freezed,
   }) {
     return _then(_value.copyWith(
       hasPlus: null == hasPlus
@@ -80,6 +87,10 @@ class _$SubscriptionStateCopyWithImpl<$Res, $Val extends SubscriptionState>
           ? _value.isRestoring
           : isRestoring // ignore: cast_nullable_to_non_nullable
               as bool,
+      isShowingPaywall: null == isShowingPaywall
+          ? _value.isShowingPaywall
+          : isShowingPaywall // ignore: cast_nullable_to_non_nullable
+              as bool,
       error: freezed == error
           ? _value.error
           : error // ignore: cast_nullable_to_non_nullable
@@ -92,6 +103,10 @@ class _$SubscriptionStateCopyWithImpl<$Res, $Val extends SubscriptionState>
           ? _value.entitlements
           : entitlements // ignore: cast_nullable_to_non_nullable
               as Map<String, bool>?,
+      subscriptionMetadata: freezed == subscriptionMetadata
+          ? _value.subscriptionMetadata
+          : subscriptionMetadata // ignore: cast_nullable_to_non_nullable
+              as Map<String, dynamic>?,
     ) as $Val);
   }
 }
@@ -108,9 +123,11 @@ abstract class _$$SubscriptionStateImplCopyWith<$Res>
       {bool hasPlus,
       bool isLoading,
       bool isRestoring,
+      bool isShowingPaywall,
       String? error,
       DateTime? lastChecked,
-      Map<String, bool>? entitlements});
+      Map<String, bool>? entitlements,
+      Map<String, dynamic>? subscriptionMetadata});
 }
 
 /// @nodoc
@@ -129,9 +146,11 @@ class __$$SubscriptionStateImplCopyWithImpl<$Res>
     Object? hasPlus = null,
     Object? isLoading = null,
     Object? isRestoring = null,
+    Object? isShowingPaywall = null,
     Object? error = freezed,
     Object? lastChecked = freezed,
     Object? entitlements = freezed,
+    Object? subscriptionMetadata = freezed,
   }) {
     return _then(_$SubscriptionStateImpl(
       hasPlus: null == hasPlus
@@ -146,6 +165,10 @@ class __$$SubscriptionStateImplCopyWithImpl<$Res>
           ? _value.isRestoring
           : isRestoring // ignore: cast_nullable_to_non_nullable
               as bool,
+      isShowingPaywall: null == isShowingPaywall
+          ? _value.isShowingPaywall
+          : isShowingPaywall // ignore: cast_nullable_to_non_nullable
+              as bool,
       error: freezed == error
           ? _value.error
           : error // ignore: cast_nullable_to_non_nullable
@@ -158,6 +181,10 @@ class __$$SubscriptionStateImplCopyWithImpl<$Res>
           ? _value._entitlements
           : entitlements // ignore: cast_nullable_to_non_nullable
               as Map<String, bool>?,
+      subscriptionMetadata: freezed == subscriptionMetadata
+          ? _value._subscriptionMetadata
+          : subscriptionMetadata // ignore: cast_nullable_to_non_nullable
+              as Map<String, dynamic>?,
     ));
   }
 }
@@ -169,10 +196,13 @@ class _$SubscriptionStateImpl extends _SubscriptionState {
       {this.hasPlus = false,
       this.isLoading = false,
       this.isRestoring = false,
+      this.isShowingPaywall = false,
       this.error,
       this.lastChecked,
-      final Map<String, bool>? entitlements})
+      final Map<String, bool>? entitlements,
+      final Map<String, dynamic>? subscriptionMetadata})
       : _entitlements = entitlements,
+        _subscriptionMetadata = subscriptionMetadata,
         super._();
 
   @override
@@ -184,6 +214,9 @@ class _$SubscriptionStateImpl extends _SubscriptionState {
   @override
   @JsonKey()
   final bool isRestoring;
+  @override
+  @JsonKey()
+  final bool isShowingPaywall;
   @override
   final String? error;
   @override
@@ -198,9 +231,20 @@ class _$SubscriptionStateImpl extends _SubscriptionState {
     return EqualUnmodifiableMapView(value);
   }
 
+  final Map<String, dynamic>? _subscriptionMetadata;
+  @override
+  Map<String, dynamic>? get subscriptionMetadata {
+    final value = _subscriptionMetadata;
+    if (value == null) return null;
+    if (_subscriptionMetadata is EqualUnmodifiableMapView)
+      return _subscriptionMetadata;
+    // ignore: implicit_dynamic_type
+    return EqualUnmodifiableMapView(value);
+  }
+
   @override
   String toString() {
-    return 'SubscriptionState(hasPlus: $hasPlus, isLoading: $isLoading, isRestoring: $isRestoring, error: $error, lastChecked: $lastChecked, entitlements: $entitlements)';
+    return 'SubscriptionState(hasPlus: $hasPlus, isLoading: $isLoading, isRestoring: $isRestoring, isShowingPaywall: $isShowingPaywall, error: $error, lastChecked: $lastChecked, entitlements: $entitlements, subscriptionMetadata: $subscriptionMetadata)';
   }
 
   @override
@@ -213,16 +257,28 @@ class _$SubscriptionStateImpl extends _SubscriptionState {
                 other.isLoading == isLoading) &&
             (identical(other.isRestoring, isRestoring) ||
                 other.isRestoring == isRestoring) &&
+            (identical(other.isShowingPaywall, isShowingPaywall) ||
+                other.isShowingPaywall == isShowingPaywall) &&
             (identical(other.error, error) || other.error == error) &&
             (identical(other.lastChecked, lastChecked) ||
                 other.lastChecked == lastChecked) &&
             const DeepCollectionEquality()
-                .equals(other._entitlements, _entitlements));
+                .equals(other._entitlements, _entitlements) &&
+            const DeepCollectionEquality()
+                .equals(other._subscriptionMetadata, _subscriptionMetadata));
   }
 
   @override
-  int get hashCode => Object.hash(runtimeType, hasPlus, isLoading, isRestoring,
-      error, lastChecked, const DeepCollectionEquality().hash(_entitlements));
+  int get hashCode => Object.hash(
+      runtimeType,
+      hasPlus,
+      isLoading,
+      isRestoring,
+      isShowingPaywall,
+      error,
+      lastChecked,
+      const DeepCollectionEquality().hash(_entitlements),
+      const DeepCollectionEquality().hash(_subscriptionMetadata));
 
   /// Create a copy of SubscriptionState
   /// with the given fields replaced by the non-null parameter values.
@@ -236,12 +292,15 @@ class _$SubscriptionStateImpl extends _SubscriptionState {
 
 abstract class _SubscriptionState extends SubscriptionState {
   const factory _SubscriptionState(
-      {final bool hasPlus,
-      final bool isLoading,
-      final bool isRestoring,
-      final String? error,
-      final DateTime? lastChecked,
-      final Map<String, bool>? entitlements}) = _$SubscriptionStateImpl;
+          {final bool hasPlus,
+          final bool isLoading,
+          final bool isRestoring,
+          final bool isShowingPaywall,
+          final String? error,
+          final DateTime? lastChecked,
+          final Map<String, bool>? entitlements,
+          final Map<String, dynamic>? subscriptionMetadata}) =
+      _$SubscriptionStateImpl;
   const _SubscriptionState._() : super._();
 
   @override
@@ -251,11 +310,15 @@ abstract class _SubscriptionState extends SubscriptionState {
   @override
   bool get isRestoring;
   @override
+  bool get isShowingPaywall;
+  @override
   String? get error;
   @override
   DateTime? get lastChecked;
   @override
   Map<String, bool>? get entitlements;
+  @override
+  Map<String, dynamic>? get subscriptionMetadata;
 
   /// Create a copy of SubscriptionState
   /// with the given fields replaced by the non-null parameter values.

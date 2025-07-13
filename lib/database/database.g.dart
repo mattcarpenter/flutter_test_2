@@ -8727,6 +8727,677 @@ class MealPlansCompanion extends UpdateCompanion<MealPlanEntry> {
   }
 }
 
+class $UserSubscriptionsTable extends UserSubscriptions
+    with TableInfo<$UserSubscriptionsTable, UserSubscriptionEntry> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $UserSubscriptionsTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<String> id = GeneratedColumn<String>(
+      'id', aliasedName, false,
+      type: DriftSqlType.string,
+      requiredDuringInsert: false,
+      clientDefault: () => const Uuid().v4());
+  static const VerificationMeta _userIdMeta = const VerificationMeta('userId');
+  @override
+  late final GeneratedColumn<String> userId = GeneratedColumn<String>(
+      'user_id', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _householdIdMeta =
+      const VerificationMeta('householdId');
+  @override
+  late final GeneratedColumn<String> householdId = GeneratedColumn<String>(
+      'household_id', aliasedName, true,
+      type: DriftSqlType.string, requiredDuringInsert: false);
+  static const VerificationMeta _statusMeta = const VerificationMeta('status');
+  @override
+  late final GeneratedColumnWithTypeConverter<SubscriptionStatus, String>
+      status = GeneratedColumn<String>('status', aliasedName, false,
+              type: DriftSqlType.string,
+              requiredDuringInsert: false,
+              defaultValue: const Constant('none'))
+          .withConverter<SubscriptionStatus>(
+              $UserSubscriptionsTable.$converterstatus);
+  static const VerificationMeta _entitlementsMeta =
+      const VerificationMeta('entitlements');
+  @override
+  late final GeneratedColumnWithTypeConverter<List<String>, String>
+      entitlements = GeneratedColumn<String>('entitlements', aliasedName, false,
+              type: DriftSqlType.string,
+              requiredDuringInsert: false,
+              defaultValue: const Constant('[]'))
+          .withConverter<List<String>>(
+              $UserSubscriptionsTable.$converterentitlements);
+  static const VerificationMeta _expiresAtMeta =
+      const VerificationMeta('expiresAt');
+  @override
+  late final GeneratedColumn<int> expiresAt = GeneratedColumn<int>(
+      'expires_at', aliasedName, true,
+      type: DriftSqlType.int, requiredDuringInsert: false);
+  static const VerificationMeta _trialEndsAtMeta =
+      const VerificationMeta('trialEndsAt');
+  @override
+  late final GeneratedColumn<int> trialEndsAt = GeneratedColumn<int>(
+      'trial_ends_at', aliasedName, true,
+      type: DriftSqlType.int, requiredDuringInsert: false);
+  static const VerificationMeta _cancelledAtMeta =
+      const VerificationMeta('cancelledAt');
+  @override
+  late final GeneratedColumn<int> cancelledAt = GeneratedColumn<int>(
+      'cancelled_at', aliasedName, true,
+      type: DriftSqlType.int, requiredDuringInsert: false);
+  static const VerificationMeta _productIdMeta =
+      const VerificationMeta('productId');
+  @override
+  late final GeneratedColumn<String> productId = GeneratedColumn<String>(
+      'product_id', aliasedName, true,
+      type: DriftSqlType.string, requiredDuringInsert: false);
+  static const VerificationMeta _storeMeta = const VerificationMeta('store');
+  @override
+  late final GeneratedColumn<String> store = GeneratedColumn<String>(
+      'store', aliasedName, true,
+      type: DriftSqlType.string, requiredDuringInsert: false);
+  static const VerificationMeta _revenuecatCustomerIdMeta =
+      const VerificationMeta('revenuecatCustomerId');
+  @override
+  late final GeneratedColumn<String> revenuecatCustomerId =
+      GeneratedColumn<String>('revenuecat_customer_id', aliasedName, true,
+          type: DriftSqlType.string, requiredDuringInsert: false);
+  static const VerificationMeta _createdAtMeta =
+      const VerificationMeta('createdAt');
+  @override
+  late final GeneratedColumn<int> createdAt = GeneratedColumn<int>(
+      'created_at', aliasedName, true,
+      type: DriftSqlType.int, requiredDuringInsert: false);
+  static const VerificationMeta _updatedAtMeta =
+      const VerificationMeta('updatedAt');
+  @override
+  late final GeneratedColumn<int> updatedAt = GeneratedColumn<int>(
+      'updated_at', aliasedName, true,
+      type: DriftSqlType.int, requiredDuringInsert: false);
+  @override
+  List<GeneratedColumn> get $columns => [
+        id,
+        userId,
+        householdId,
+        status,
+        entitlements,
+        expiresAt,
+        trialEndsAt,
+        cancelledAt,
+        productId,
+        store,
+        revenuecatCustomerId,
+        createdAt,
+        updatedAt
+      ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'user_subscriptions';
+  @override
+  VerificationContext validateIntegrity(
+      Insertable<UserSubscriptionEntry> instance,
+      {bool isInserting = false}) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    }
+    if (data.containsKey('user_id')) {
+      context.handle(_userIdMeta,
+          userId.isAcceptableOrUnknown(data['user_id']!, _userIdMeta));
+    } else if (isInserting) {
+      context.missing(_userIdMeta);
+    }
+    if (data.containsKey('household_id')) {
+      context.handle(
+          _householdIdMeta,
+          householdId.isAcceptableOrUnknown(
+              data['household_id']!, _householdIdMeta));
+    }
+    context.handle(_statusMeta, const VerificationResult.success());
+    context.handle(_entitlementsMeta, const VerificationResult.success());
+    if (data.containsKey('expires_at')) {
+      context.handle(_expiresAtMeta,
+          expiresAt.isAcceptableOrUnknown(data['expires_at']!, _expiresAtMeta));
+    }
+    if (data.containsKey('trial_ends_at')) {
+      context.handle(
+          _trialEndsAtMeta,
+          trialEndsAt.isAcceptableOrUnknown(
+              data['trial_ends_at']!, _trialEndsAtMeta));
+    }
+    if (data.containsKey('cancelled_at')) {
+      context.handle(
+          _cancelledAtMeta,
+          cancelledAt.isAcceptableOrUnknown(
+              data['cancelled_at']!, _cancelledAtMeta));
+    }
+    if (data.containsKey('product_id')) {
+      context.handle(_productIdMeta,
+          productId.isAcceptableOrUnknown(data['product_id']!, _productIdMeta));
+    }
+    if (data.containsKey('store')) {
+      context.handle(
+          _storeMeta, store.isAcceptableOrUnknown(data['store']!, _storeMeta));
+    }
+    if (data.containsKey('revenuecat_customer_id')) {
+      context.handle(
+          _revenuecatCustomerIdMeta,
+          revenuecatCustomerId.isAcceptableOrUnknown(
+              data['revenuecat_customer_id']!, _revenuecatCustomerIdMeta));
+    }
+    if (data.containsKey('created_at')) {
+      context.handle(_createdAtMeta,
+          createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta));
+    }
+    if (data.containsKey('updated_at')) {
+      context.handle(_updatedAtMeta,
+          updatedAt.isAcceptableOrUnknown(data['updated_at']!, _updatedAtMeta));
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  UserSubscriptionEntry map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return UserSubscriptionEntry(
+      id: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}id'])!,
+      userId: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}user_id'])!,
+      householdId: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}household_id']),
+      status: $UserSubscriptionsTable.$converterstatus.fromSql(attachedDatabase
+          .typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}status'])!),
+      entitlements: $UserSubscriptionsTable.$converterentitlements.fromSql(
+          attachedDatabase.typeMapping.read(
+              DriftSqlType.string, data['${effectivePrefix}entitlements'])!),
+      expiresAt: attachedDatabase.typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}expires_at']),
+      trialEndsAt: attachedDatabase.typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}trial_ends_at']),
+      cancelledAt: attachedDatabase.typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}cancelled_at']),
+      productId: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}product_id']),
+      store: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}store']),
+      revenuecatCustomerId: attachedDatabase.typeMapping.read(
+          DriftSqlType.string,
+          data['${effectivePrefix}revenuecat_customer_id']),
+      createdAt: attachedDatabase.typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}created_at']),
+      updatedAt: attachedDatabase.typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}updated_at']),
+    );
+  }
+
+  @override
+  $UserSubscriptionsTable createAlias(String alias) {
+    return $UserSubscriptionsTable(attachedDatabase, alias);
+  }
+
+  static TypeConverter<SubscriptionStatus, String> $converterstatus =
+      const SubscriptionStatusConverter();
+  static TypeConverter<List<String>, String> $converterentitlements =
+      const StringListTypeConverter();
+}
+
+class UserSubscriptionEntry extends DataClass
+    implements Insertable<UserSubscriptionEntry> {
+  final String id;
+  final String userId;
+  final String? householdId;
+  final SubscriptionStatus status;
+  final List<String> entitlements;
+  final int? expiresAt;
+  final int? trialEndsAt;
+  final int? cancelledAt;
+  final String? productId;
+  final String? store;
+  final String? revenuecatCustomerId;
+  final int? createdAt;
+  final int? updatedAt;
+  const UserSubscriptionEntry(
+      {required this.id,
+      required this.userId,
+      this.householdId,
+      required this.status,
+      required this.entitlements,
+      this.expiresAt,
+      this.trialEndsAt,
+      this.cancelledAt,
+      this.productId,
+      this.store,
+      this.revenuecatCustomerId,
+      this.createdAt,
+      this.updatedAt});
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<String>(id);
+    map['user_id'] = Variable<String>(userId);
+    if (!nullToAbsent || householdId != null) {
+      map['household_id'] = Variable<String>(householdId);
+    }
+    {
+      map['status'] = Variable<String>(
+          $UserSubscriptionsTable.$converterstatus.toSql(status));
+    }
+    {
+      map['entitlements'] = Variable<String>(
+          $UserSubscriptionsTable.$converterentitlements.toSql(entitlements));
+    }
+    if (!nullToAbsent || expiresAt != null) {
+      map['expires_at'] = Variable<int>(expiresAt);
+    }
+    if (!nullToAbsent || trialEndsAt != null) {
+      map['trial_ends_at'] = Variable<int>(trialEndsAt);
+    }
+    if (!nullToAbsent || cancelledAt != null) {
+      map['cancelled_at'] = Variable<int>(cancelledAt);
+    }
+    if (!nullToAbsent || productId != null) {
+      map['product_id'] = Variable<String>(productId);
+    }
+    if (!nullToAbsent || store != null) {
+      map['store'] = Variable<String>(store);
+    }
+    if (!nullToAbsent || revenuecatCustomerId != null) {
+      map['revenuecat_customer_id'] = Variable<String>(revenuecatCustomerId);
+    }
+    if (!nullToAbsent || createdAt != null) {
+      map['created_at'] = Variable<int>(createdAt);
+    }
+    if (!nullToAbsent || updatedAt != null) {
+      map['updated_at'] = Variable<int>(updatedAt);
+    }
+    return map;
+  }
+
+  UserSubscriptionsCompanion toCompanion(bool nullToAbsent) {
+    return UserSubscriptionsCompanion(
+      id: Value(id),
+      userId: Value(userId),
+      householdId: householdId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(householdId),
+      status: Value(status),
+      entitlements: Value(entitlements),
+      expiresAt: expiresAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(expiresAt),
+      trialEndsAt: trialEndsAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(trialEndsAt),
+      cancelledAt: cancelledAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(cancelledAt),
+      productId: productId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(productId),
+      store:
+          store == null && nullToAbsent ? const Value.absent() : Value(store),
+      revenuecatCustomerId: revenuecatCustomerId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(revenuecatCustomerId),
+      createdAt: createdAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(createdAt),
+      updatedAt: updatedAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(updatedAt),
+    );
+  }
+
+  factory UserSubscriptionEntry.fromJson(Map<String, dynamic> json,
+      {ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return UserSubscriptionEntry(
+      id: serializer.fromJson<String>(json['id']),
+      userId: serializer.fromJson<String>(json['userId']),
+      householdId: serializer.fromJson<String?>(json['householdId']),
+      status: serializer.fromJson<SubscriptionStatus>(json['status']),
+      entitlements: serializer.fromJson<List<String>>(json['entitlements']),
+      expiresAt: serializer.fromJson<int?>(json['expiresAt']),
+      trialEndsAt: serializer.fromJson<int?>(json['trialEndsAt']),
+      cancelledAt: serializer.fromJson<int?>(json['cancelledAt']),
+      productId: serializer.fromJson<String?>(json['productId']),
+      store: serializer.fromJson<String?>(json['store']),
+      revenuecatCustomerId:
+          serializer.fromJson<String?>(json['revenuecatCustomerId']),
+      createdAt: serializer.fromJson<int?>(json['createdAt']),
+      updatedAt: serializer.fromJson<int?>(json['updatedAt']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<String>(id),
+      'userId': serializer.toJson<String>(userId),
+      'householdId': serializer.toJson<String?>(householdId),
+      'status': serializer.toJson<SubscriptionStatus>(status),
+      'entitlements': serializer.toJson<List<String>>(entitlements),
+      'expiresAt': serializer.toJson<int?>(expiresAt),
+      'trialEndsAt': serializer.toJson<int?>(trialEndsAt),
+      'cancelledAt': serializer.toJson<int?>(cancelledAt),
+      'productId': serializer.toJson<String?>(productId),
+      'store': serializer.toJson<String?>(store),
+      'revenuecatCustomerId': serializer.toJson<String?>(revenuecatCustomerId),
+      'createdAt': serializer.toJson<int?>(createdAt),
+      'updatedAt': serializer.toJson<int?>(updatedAt),
+    };
+  }
+
+  UserSubscriptionEntry copyWith(
+          {String? id,
+          String? userId,
+          Value<String?> householdId = const Value.absent(),
+          SubscriptionStatus? status,
+          List<String>? entitlements,
+          Value<int?> expiresAt = const Value.absent(),
+          Value<int?> trialEndsAt = const Value.absent(),
+          Value<int?> cancelledAt = const Value.absent(),
+          Value<String?> productId = const Value.absent(),
+          Value<String?> store = const Value.absent(),
+          Value<String?> revenuecatCustomerId = const Value.absent(),
+          Value<int?> createdAt = const Value.absent(),
+          Value<int?> updatedAt = const Value.absent()}) =>
+      UserSubscriptionEntry(
+        id: id ?? this.id,
+        userId: userId ?? this.userId,
+        householdId: householdId.present ? householdId.value : this.householdId,
+        status: status ?? this.status,
+        entitlements: entitlements ?? this.entitlements,
+        expiresAt: expiresAt.present ? expiresAt.value : this.expiresAt,
+        trialEndsAt: trialEndsAt.present ? trialEndsAt.value : this.trialEndsAt,
+        cancelledAt: cancelledAt.present ? cancelledAt.value : this.cancelledAt,
+        productId: productId.present ? productId.value : this.productId,
+        store: store.present ? store.value : this.store,
+        revenuecatCustomerId: revenuecatCustomerId.present
+            ? revenuecatCustomerId.value
+            : this.revenuecatCustomerId,
+        createdAt: createdAt.present ? createdAt.value : this.createdAt,
+        updatedAt: updatedAt.present ? updatedAt.value : this.updatedAt,
+      );
+  UserSubscriptionEntry copyWithCompanion(UserSubscriptionsCompanion data) {
+    return UserSubscriptionEntry(
+      id: data.id.present ? data.id.value : this.id,
+      userId: data.userId.present ? data.userId.value : this.userId,
+      householdId:
+          data.householdId.present ? data.householdId.value : this.householdId,
+      status: data.status.present ? data.status.value : this.status,
+      entitlements: data.entitlements.present
+          ? data.entitlements.value
+          : this.entitlements,
+      expiresAt: data.expiresAt.present ? data.expiresAt.value : this.expiresAt,
+      trialEndsAt:
+          data.trialEndsAt.present ? data.trialEndsAt.value : this.trialEndsAt,
+      cancelledAt:
+          data.cancelledAt.present ? data.cancelledAt.value : this.cancelledAt,
+      productId: data.productId.present ? data.productId.value : this.productId,
+      store: data.store.present ? data.store.value : this.store,
+      revenuecatCustomerId: data.revenuecatCustomerId.present
+          ? data.revenuecatCustomerId.value
+          : this.revenuecatCustomerId,
+      createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
+      updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('UserSubscriptionEntry(')
+          ..write('id: $id, ')
+          ..write('userId: $userId, ')
+          ..write('householdId: $householdId, ')
+          ..write('status: $status, ')
+          ..write('entitlements: $entitlements, ')
+          ..write('expiresAt: $expiresAt, ')
+          ..write('trialEndsAt: $trialEndsAt, ')
+          ..write('cancelledAt: $cancelledAt, ')
+          ..write('productId: $productId, ')
+          ..write('store: $store, ')
+          ..write('revenuecatCustomerId: $revenuecatCustomerId, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('updatedAt: $updatedAt')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(
+      id,
+      userId,
+      householdId,
+      status,
+      entitlements,
+      expiresAt,
+      trialEndsAt,
+      cancelledAt,
+      productId,
+      store,
+      revenuecatCustomerId,
+      createdAt,
+      updatedAt);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is UserSubscriptionEntry &&
+          other.id == this.id &&
+          other.userId == this.userId &&
+          other.householdId == this.householdId &&
+          other.status == this.status &&
+          other.entitlements == this.entitlements &&
+          other.expiresAt == this.expiresAt &&
+          other.trialEndsAt == this.trialEndsAt &&
+          other.cancelledAt == this.cancelledAt &&
+          other.productId == this.productId &&
+          other.store == this.store &&
+          other.revenuecatCustomerId == this.revenuecatCustomerId &&
+          other.createdAt == this.createdAt &&
+          other.updatedAt == this.updatedAt);
+}
+
+class UserSubscriptionsCompanion
+    extends UpdateCompanion<UserSubscriptionEntry> {
+  final Value<String> id;
+  final Value<String> userId;
+  final Value<String?> householdId;
+  final Value<SubscriptionStatus> status;
+  final Value<List<String>> entitlements;
+  final Value<int?> expiresAt;
+  final Value<int?> trialEndsAt;
+  final Value<int?> cancelledAt;
+  final Value<String?> productId;
+  final Value<String?> store;
+  final Value<String?> revenuecatCustomerId;
+  final Value<int?> createdAt;
+  final Value<int?> updatedAt;
+  final Value<int> rowid;
+  const UserSubscriptionsCompanion({
+    this.id = const Value.absent(),
+    this.userId = const Value.absent(),
+    this.householdId = const Value.absent(),
+    this.status = const Value.absent(),
+    this.entitlements = const Value.absent(),
+    this.expiresAt = const Value.absent(),
+    this.trialEndsAt = const Value.absent(),
+    this.cancelledAt = const Value.absent(),
+    this.productId = const Value.absent(),
+    this.store = const Value.absent(),
+    this.revenuecatCustomerId = const Value.absent(),
+    this.createdAt = const Value.absent(),
+    this.updatedAt = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  UserSubscriptionsCompanion.insert({
+    this.id = const Value.absent(),
+    required String userId,
+    this.householdId = const Value.absent(),
+    this.status = const Value.absent(),
+    this.entitlements = const Value.absent(),
+    this.expiresAt = const Value.absent(),
+    this.trialEndsAt = const Value.absent(),
+    this.cancelledAt = const Value.absent(),
+    this.productId = const Value.absent(),
+    this.store = const Value.absent(),
+    this.revenuecatCustomerId = const Value.absent(),
+    this.createdAt = const Value.absent(),
+    this.updatedAt = const Value.absent(),
+    this.rowid = const Value.absent(),
+  }) : userId = Value(userId);
+  static Insertable<UserSubscriptionEntry> custom({
+    Expression<String>? id,
+    Expression<String>? userId,
+    Expression<String>? householdId,
+    Expression<String>? status,
+    Expression<String>? entitlements,
+    Expression<int>? expiresAt,
+    Expression<int>? trialEndsAt,
+    Expression<int>? cancelledAt,
+    Expression<String>? productId,
+    Expression<String>? store,
+    Expression<String>? revenuecatCustomerId,
+    Expression<int>? createdAt,
+    Expression<int>? updatedAt,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (userId != null) 'user_id': userId,
+      if (householdId != null) 'household_id': householdId,
+      if (status != null) 'status': status,
+      if (entitlements != null) 'entitlements': entitlements,
+      if (expiresAt != null) 'expires_at': expiresAt,
+      if (trialEndsAt != null) 'trial_ends_at': trialEndsAt,
+      if (cancelledAt != null) 'cancelled_at': cancelledAt,
+      if (productId != null) 'product_id': productId,
+      if (store != null) 'store': store,
+      if (revenuecatCustomerId != null)
+        'revenuecat_customer_id': revenuecatCustomerId,
+      if (createdAt != null) 'created_at': createdAt,
+      if (updatedAt != null) 'updated_at': updatedAt,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  UserSubscriptionsCompanion copyWith(
+      {Value<String>? id,
+      Value<String>? userId,
+      Value<String?>? householdId,
+      Value<SubscriptionStatus>? status,
+      Value<List<String>>? entitlements,
+      Value<int?>? expiresAt,
+      Value<int?>? trialEndsAt,
+      Value<int?>? cancelledAt,
+      Value<String?>? productId,
+      Value<String?>? store,
+      Value<String?>? revenuecatCustomerId,
+      Value<int?>? createdAt,
+      Value<int?>? updatedAt,
+      Value<int>? rowid}) {
+    return UserSubscriptionsCompanion(
+      id: id ?? this.id,
+      userId: userId ?? this.userId,
+      householdId: householdId ?? this.householdId,
+      status: status ?? this.status,
+      entitlements: entitlements ?? this.entitlements,
+      expiresAt: expiresAt ?? this.expiresAt,
+      trialEndsAt: trialEndsAt ?? this.trialEndsAt,
+      cancelledAt: cancelledAt ?? this.cancelledAt,
+      productId: productId ?? this.productId,
+      store: store ?? this.store,
+      revenuecatCustomerId: revenuecatCustomerId ?? this.revenuecatCustomerId,
+      createdAt: createdAt ?? this.createdAt,
+      updatedAt: updatedAt ?? this.updatedAt,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<String>(id.value);
+    }
+    if (userId.present) {
+      map['user_id'] = Variable<String>(userId.value);
+    }
+    if (householdId.present) {
+      map['household_id'] = Variable<String>(householdId.value);
+    }
+    if (status.present) {
+      map['status'] = Variable<String>(
+          $UserSubscriptionsTable.$converterstatus.toSql(status.value));
+    }
+    if (entitlements.present) {
+      map['entitlements'] = Variable<String>($UserSubscriptionsTable
+          .$converterentitlements
+          .toSql(entitlements.value));
+    }
+    if (expiresAt.present) {
+      map['expires_at'] = Variable<int>(expiresAt.value);
+    }
+    if (trialEndsAt.present) {
+      map['trial_ends_at'] = Variable<int>(trialEndsAt.value);
+    }
+    if (cancelledAt.present) {
+      map['cancelled_at'] = Variable<int>(cancelledAt.value);
+    }
+    if (productId.present) {
+      map['product_id'] = Variable<String>(productId.value);
+    }
+    if (store.present) {
+      map['store'] = Variable<String>(store.value);
+    }
+    if (revenuecatCustomerId.present) {
+      map['revenuecat_customer_id'] =
+          Variable<String>(revenuecatCustomerId.value);
+    }
+    if (createdAt.present) {
+      map['created_at'] = Variable<int>(createdAt.value);
+    }
+    if (updatedAt.present) {
+      map['updated_at'] = Variable<int>(updatedAt.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('UserSubscriptionsCompanion(')
+          ..write('id: $id, ')
+          ..write('userId: $userId, ')
+          ..write('householdId: $householdId, ')
+          ..write('status: $status, ')
+          ..write('entitlements: $entitlements, ')
+          ..write('expiresAt: $expiresAt, ')
+          ..write('trialEndsAt: $trialEndsAt, ')
+          ..write('cancelledAt: $cancelledAt, ')
+          ..write('productId: $productId, ')
+          ..write('store: $store, ')
+          ..write('revenuecatCustomerId: $revenuecatCustomerId, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
 abstract class _$AppDatabase extends GeneratedDatabase {
   _$AppDatabase(QueryExecutor e) : super(e);
   $AppDatabaseManager get managers => $AppDatabaseManager(this);
@@ -8754,6 +9425,8 @@ abstract class _$AppDatabase extends GeneratedDatabase {
   late final $ShoppingListsTable shoppingLists = $ShoppingListsTable(this);
   late final $ConvertersTable converters = $ConvertersTable(this);
   late final $MealPlansTable mealPlans = $MealPlansTable(this);
+  late final $UserSubscriptionsTable userSubscriptions =
+      $UserSubscriptionsTable(this);
   @override
   Iterable<TableInfo<Table, Object?>> get allTables =>
       allSchemaEntities.whereType<TableInfo<Table, Object?>>();
@@ -8775,7 +9448,8 @@ abstract class _$AppDatabase extends GeneratedDatabase {
         shoppingListItems,
         shoppingLists,
         converters,
-        mealPlans
+        mealPlans,
+        userSubscriptions
       ];
 }
 
@@ -13007,6 +13681,311 @@ typedef $$MealPlansTableProcessedTableManager = ProcessedTableManager<
     ),
     MealPlanEntry,
     PrefetchHooks Function()>;
+typedef $$UserSubscriptionsTableCreateCompanionBuilder
+    = UserSubscriptionsCompanion Function({
+  Value<String> id,
+  required String userId,
+  Value<String?> householdId,
+  Value<SubscriptionStatus> status,
+  Value<List<String>> entitlements,
+  Value<int?> expiresAt,
+  Value<int?> trialEndsAt,
+  Value<int?> cancelledAt,
+  Value<String?> productId,
+  Value<String?> store,
+  Value<String?> revenuecatCustomerId,
+  Value<int?> createdAt,
+  Value<int?> updatedAt,
+  Value<int> rowid,
+});
+typedef $$UserSubscriptionsTableUpdateCompanionBuilder
+    = UserSubscriptionsCompanion Function({
+  Value<String> id,
+  Value<String> userId,
+  Value<String?> householdId,
+  Value<SubscriptionStatus> status,
+  Value<List<String>> entitlements,
+  Value<int?> expiresAt,
+  Value<int?> trialEndsAt,
+  Value<int?> cancelledAt,
+  Value<String?> productId,
+  Value<String?> store,
+  Value<String?> revenuecatCustomerId,
+  Value<int?> createdAt,
+  Value<int?> updatedAt,
+  Value<int> rowid,
+});
+
+class $$UserSubscriptionsTableFilterComposer
+    extends Composer<_$AppDatabase, $UserSubscriptionsTable> {
+  $$UserSubscriptionsTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get id => $composableBuilder(
+      column: $table.id, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get userId => $composableBuilder(
+      column: $table.userId, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get householdId => $composableBuilder(
+      column: $table.householdId, builder: (column) => ColumnFilters(column));
+
+  ColumnWithTypeConverterFilters<SubscriptionStatus, SubscriptionStatus, String>
+      get status => $composableBuilder(
+          column: $table.status,
+          builder: (column) => ColumnWithTypeConverterFilters(column));
+
+  ColumnWithTypeConverterFilters<List<String>, List<String>, String>
+      get entitlements => $composableBuilder(
+          column: $table.entitlements,
+          builder: (column) => ColumnWithTypeConverterFilters(column));
+
+  ColumnFilters<int> get expiresAt => $composableBuilder(
+      column: $table.expiresAt, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<int> get trialEndsAt => $composableBuilder(
+      column: $table.trialEndsAt, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<int> get cancelledAt => $composableBuilder(
+      column: $table.cancelledAt, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get productId => $composableBuilder(
+      column: $table.productId, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get store => $composableBuilder(
+      column: $table.store, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get revenuecatCustomerId => $composableBuilder(
+      column: $table.revenuecatCustomerId,
+      builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<int> get createdAt => $composableBuilder(
+      column: $table.createdAt, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<int> get updatedAt => $composableBuilder(
+      column: $table.updatedAt, builder: (column) => ColumnFilters(column));
+}
+
+class $$UserSubscriptionsTableOrderingComposer
+    extends Composer<_$AppDatabase, $UserSubscriptionsTable> {
+  $$UserSubscriptionsTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get id => $composableBuilder(
+      column: $table.id, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get userId => $composableBuilder(
+      column: $table.userId, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get householdId => $composableBuilder(
+      column: $table.householdId, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get status => $composableBuilder(
+      column: $table.status, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get entitlements => $composableBuilder(
+      column: $table.entitlements,
+      builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<int> get expiresAt => $composableBuilder(
+      column: $table.expiresAt, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<int> get trialEndsAt => $composableBuilder(
+      column: $table.trialEndsAt, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<int> get cancelledAt => $composableBuilder(
+      column: $table.cancelledAt, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get productId => $composableBuilder(
+      column: $table.productId, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get store => $composableBuilder(
+      column: $table.store, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get revenuecatCustomerId => $composableBuilder(
+      column: $table.revenuecatCustomerId,
+      builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<int> get createdAt => $composableBuilder(
+      column: $table.createdAt, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<int> get updatedAt => $composableBuilder(
+      column: $table.updatedAt, builder: (column) => ColumnOrderings(column));
+}
+
+class $$UserSubscriptionsTableAnnotationComposer
+    extends Composer<_$AppDatabase, $UserSubscriptionsTable> {
+  $$UserSubscriptionsTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get userId =>
+      $composableBuilder(column: $table.userId, builder: (column) => column);
+
+  GeneratedColumn<String> get householdId => $composableBuilder(
+      column: $table.householdId, builder: (column) => column);
+
+  GeneratedColumnWithTypeConverter<SubscriptionStatus, String> get status =>
+      $composableBuilder(column: $table.status, builder: (column) => column);
+
+  GeneratedColumnWithTypeConverter<List<String>, String> get entitlements =>
+      $composableBuilder(
+          column: $table.entitlements, builder: (column) => column);
+
+  GeneratedColumn<int> get expiresAt =>
+      $composableBuilder(column: $table.expiresAt, builder: (column) => column);
+
+  GeneratedColumn<int> get trialEndsAt => $composableBuilder(
+      column: $table.trialEndsAt, builder: (column) => column);
+
+  GeneratedColumn<int> get cancelledAt => $composableBuilder(
+      column: $table.cancelledAt, builder: (column) => column);
+
+  GeneratedColumn<String> get productId =>
+      $composableBuilder(column: $table.productId, builder: (column) => column);
+
+  GeneratedColumn<String> get store =>
+      $composableBuilder(column: $table.store, builder: (column) => column);
+
+  GeneratedColumn<String> get revenuecatCustomerId => $composableBuilder(
+      column: $table.revenuecatCustomerId, builder: (column) => column);
+
+  GeneratedColumn<int> get createdAt =>
+      $composableBuilder(column: $table.createdAt, builder: (column) => column);
+
+  GeneratedColumn<int> get updatedAt =>
+      $composableBuilder(column: $table.updatedAt, builder: (column) => column);
+}
+
+class $$UserSubscriptionsTableTableManager extends RootTableManager<
+    _$AppDatabase,
+    $UserSubscriptionsTable,
+    UserSubscriptionEntry,
+    $$UserSubscriptionsTableFilterComposer,
+    $$UserSubscriptionsTableOrderingComposer,
+    $$UserSubscriptionsTableAnnotationComposer,
+    $$UserSubscriptionsTableCreateCompanionBuilder,
+    $$UserSubscriptionsTableUpdateCompanionBuilder,
+    (
+      UserSubscriptionEntry,
+      BaseReferences<_$AppDatabase, $UserSubscriptionsTable,
+          UserSubscriptionEntry>
+    ),
+    UserSubscriptionEntry,
+    PrefetchHooks Function()> {
+  $$UserSubscriptionsTableTableManager(
+      _$AppDatabase db, $UserSubscriptionsTable table)
+      : super(TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$UserSubscriptionsTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$UserSubscriptionsTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$UserSubscriptionsTableAnnotationComposer(
+                  $db: db, $table: table),
+          updateCompanionCallback: ({
+            Value<String> id = const Value.absent(),
+            Value<String> userId = const Value.absent(),
+            Value<String?> householdId = const Value.absent(),
+            Value<SubscriptionStatus> status = const Value.absent(),
+            Value<List<String>> entitlements = const Value.absent(),
+            Value<int?> expiresAt = const Value.absent(),
+            Value<int?> trialEndsAt = const Value.absent(),
+            Value<int?> cancelledAt = const Value.absent(),
+            Value<String?> productId = const Value.absent(),
+            Value<String?> store = const Value.absent(),
+            Value<String?> revenuecatCustomerId = const Value.absent(),
+            Value<int?> createdAt = const Value.absent(),
+            Value<int?> updatedAt = const Value.absent(),
+            Value<int> rowid = const Value.absent(),
+          }) =>
+              UserSubscriptionsCompanion(
+            id: id,
+            userId: userId,
+            householdId: householdId,
+            status: status,
+            entitlements: entitlements,
+            expiresAt: expiresAt,
+            trialEndsAt: trialEndsAt,
+            cancelledAt: cancelledAt,
+            productId: productId,
+            store: store,
+            revenuecatCustomerId: revenuecatCustomerId,
+            createdAt: createdAt,
+            updatedAt: updatedAt,
+            rowid: rowid,
+          ),
+          createCompanionCallback: ({
+            Value<String> id = const Value.absent(),
+            required String userId,
+            Value<String?> householdId = const Value.absent(),
+            Value<SubscriptionStatus> status = const Value.absent(),
+            Value<List<String>> entitlements = const Value.absent(),
+            Value<int?> expiresAt = const Value.absent(),
+            Value<int?> trialEndsAt = const Value.absent(),
+            Value<int?> cancelledAt = const Value.absent(),
+            Value<String?> productId = const Value.absent(),
+            Value<String?> store = const Value.absent(),
+            Value<String?> revenuecatCustomerId = const Value.absent(),
+            Value<int?> createdAt = const Value.absent(),
+            Value<int?> updatedAt = const Value.absent(),
+            Value<int> rowid = const Value.absent(),
+          }) =>
+              UserSubscriptionsCompanion.insert(
+            id: id,
+            userId: userId,
+            householdId: householdId,
+            status: status,
+            entitlements: entitlements,
+            expiresAt: expiresAt,
+            trialEndsAt: trialEndsAt,
+            cancelledAt: cancelledAt,
+            productId: productId,
+            store: store,
+            revenuecatCustomerId: revenuecatCustomerId,
+            createdAt: createdAt,
+            updatedAt: updatedAt,
+            rowid: rowid,
+          ),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .toList(),
+          prefetchHooksCallback: null,
+        ));
+}
+
+typedef $$UserSubscriptionsTableProcessedTableManager = ProcessedTableManager<
+    _$AppDatabase,
+    $UserSubscriptionsTable,
+    UserSubscriptionEntry,
+    $$UserSubscriptionsTableFilterComposer,
+    $$UserSubscriptionsTableOrderingComposer,
+    $$UserSubscriptionsTableAnnotationComposer,
+    $$UserSubscriptionsTableCreateCompanionBuilder,
+    $$UserSubscriptionsTableUpdateCompanionBuilder,
+    (
+      UserSubscriptionEntry,
+      BaseReferences<_$AppDatabase, $UserSubscriptionsTable,
+          UserSubscriptionEntry>
+    ),
+    UserSubscriptionEntry,
+    PrefetchHooks Function()>;
 
 class $AppDatabaseManager {
   final _$AppDatabase _db;
@@ -13048,4 +14027,6 @@ class $AppDatabaseManager {
       $$ConvertersTableTableManager(_db, _db.converters);
   $$MealPlansTableTableManager get mealPlans =>
       $$MealPlansTableTableManager(_db, _db.mealPlans);
+  $$UserSubscriptionsTableTableManager get userSubscriptions =>
+      $$UserSubscriptionsTableTableManager(_db, _db.userSubscriptions);
 }

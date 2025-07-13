@@ -8,9 +8,11 @@ class SubscriptionState with _$SubscriptionState {
     @Default(false) bool hasPlus,
     @Default(false) bool isLoading,
     @Default(false) bool isRestoring,
+    @Default(false) bool isShowingPaywall,
     String? error,
     DateTime? lastChecked,
     Map<String, bool>? entitlements,
+    Map<String, dynamic>? subscriptionMetadata,
   }) = _SubscriptionState;
   
   const SubscriptionState._();
@@ -22,7 +24,7 @@ class SubscriptionState with _$SubscriptionState {
   bool get hasError => error != null;
   
   /// Whether any operation is in progress
-  bool get isBusy => isLoading || isRestoring;
+  bool get isBusy => isLoading || isRestoring || isShowingPaywall;
   
   /// Clear error state
   SubscriptionState clearError() => copyWith(error: null);
@@ -44,14 +46,41 @@ class SubscriptionState with _$SubscriptionState {
   SubscriptionState updateAccess({
     required bool hasPlus,
     Map<String, bool>? entitlements,
+    Map<String, dynamic>? subscriptionMetadata,
   }) => copyWith(
     hasPlus: hasPlus,
     entitlements: entitlements,
+    subscriptionMetadata: subscriptionMetadata,
     lastChecked: DateTime.now(),
     isLoading: false,
     isRestoring: false,
+    isShowingPaywall: false,
     error: null,
   );
+
+  /// Get subscription status from metadata  
+  String? get subscriptionStatus => subscriptionMetadata?['status'] as String?;
+  
+  /// Get subscription expires date from metadata
+  DateTime? get expiresAt {
+    final expiresAtStr = subscriptionMetadata?['expires_at'] as String?;
+    if (expiresAtStr == null) return null;
+    return DateTime.tryParse(expiresAtStr);
+  }
+  
+  /// Get subscription product ID from metadata
+  String? get productId => subscriptionMetadata?['product_id'] as String?;
+  
+  /// Get subscription store from metadata
+  String? get store => subscriptionMetadata?['store'] as String?;
+  
+  /// Whether subscription is in trial period
+  bool get isTrialActive {
+    final trialEndsAtStr = subscriptionMetadata?['trial_ends_at'] as String?;
+    if (trialEndsAtStr == null) return false;
+    final trialEndsAt = DateTime.tryParse(trialEndsAtStr);
+    return trialEndsAt != null && DateTime.now().isBefore(trialEndsAt);
+  }
 }
 
 @freezed
