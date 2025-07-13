@@ -87,8 +87,8 @@ import 'package:purchases_flutter/purchases_flutter.dart';
 import 'package:flutter/foundation.dart';
 
 class SubscriptionService {
-  static const String _apiKey = String.fromEnvironment('REVENUECAT_API_KEY');
-  static const String _labsEntitlementId = 'labs_premium';
+  static const String _apiKey = 'appl_SPuDBCvjoalGuumyxdYEfRZKEXt';
+  static const String _plusEntitlementId = 'plus';
   
   bool _isInitialized = false;
   
@@ -117,22 +117,22 @@ class SubscriptionService {
     }
   }
   
-  /// Check if user has Labs premium access
-  Future<bool> hasLabsAccess() async {
+  /// Check if user has Stockpot Plus access
+  Future<bool> hasPlus() async {
     try {
       final customerInfo = await Purchases.getCustomerInfo();
-      return customerInfo.entitlements.active.containsKey(_labsEntitlementId);
+      return customerInfo.entitlements.active.containsKey(_plusEntitlementId);
     } catch (e) {
-      debugPrint('Error checking Labs access: $e');
+      debugPrint('Error checking Plus access: $e');
       // Graceful degradation - deny access on error
       return false;
     }
   }
   
   /// Stream of subscription status changes
-  Stream<bool> get labsAccessStream {
+  Stream<bool> get plusAccessStream {
     return Purchases.getCustomerInfoStream().map((customerInfo) {
-      return customerInfo.entitlements.active.containsKey(_labsEntitlementId);
+      return customerInfo.entitlements.active.containsKey(_plusEntitlementId);
     }).handleError((error) {
       debugPrint('Error in subscription stream: $error');
       return false;
@@ -153,7 +153,7 @@ class SubscriptionService {
   /// Present paywall only if user lacks entitlement
   Future<bool> presentPaywallIfNeeded({String? offeringId}) async {
     try {
-      final result = await RevenueCatUI.presentPaywallIfNeeded(_labsEntitlementId);
+      final result = await RevenueCatUI.presentPaywallIfNeeded(_plusEntitlementId);
       return result == PaywallResult.purchased;
     } catch (e) {
       debugPrint('Error presenting conditional paywall: $e');
@@ -221,7 +221,7 @@ part 'subscription_state.freezed.dart';
 @freezed
 class SubscriptionState with _$SubscriptionState {
   const factory SubscriptionState({
-    @Default(false) bool hasLabsAccess,
+    @Default(false) bool hasPlus,
     @Default(false) bool isLoading,
     @Default(false) bool isRestoring,
     String? error,
@@ -231,7 +231,7 @@ class SubscriptionState with _$SubscriptionState {
   
   const SubscriptionState._();
   
-  bool get isActive => hasLabsAccess;
+  bool get isActive => hasPlus;
   bool get hasError => error != null;
 }
 
@@ -298,10 +298,10 @@ class SubscriptionNotifier extends StateNotifier<AsyncValue<SubscriptionState>> 
       await checkSubscriptionStatus();
       
       // Listen to subscription changes
-      _subscriptionService.labsAccessStream.listen((hasAccess) {
+      _subscriptionService.plusAccessStream.listen((hasAccess) {
         final currentState = state.valueOrNull ?? const SubscriptionState();
         state = AsyncValue.data(currentState.copyWith(
-          hasLabsAccess: hasAccess,
+          hasPlus: hasAccess,
           lastChecked: DateTime.now(),
           error: null,
         ));
@@ -318,10 +318,10 @@ class SubscriptionNotifier extends StateNotifier<AsyncValue<SubscriptionState>> 
         (state.valueOrNull ?? const SubscriptionState()).copyWith(isLoading: true)
       );
       
-      final hasAccess = await _subscriptionService.hasLabsAccess();
+      final hasAccess = await _subscriptionService.hasPlus();
       
       state = AsyncValue.data(SubscriptionState(
-        hasLabsAccess: hasAccess,
+        hasPlus: hasAccess,
         isLoading: false,
         lastChecked: DateTime.now(),
       ));
@@ -400,9 +400,9 @@ class SubscriptionNotifier extends StateNotifier<AsyncValue<SubscriptionState>> 
 }
 
 // Convenience providers
-final hasLabsAccessProvider = Provider<bool>((ref) {
+final hasPlusProvider = Provider<bool>((ref) {
   final subscription = ref.watch(subscriptionProvider);
-  return subscription.valueOrNull?.hasLabsAccess ?? false;
+  return subscription.valueOrNull?.hasPlus ?? false;
 });
 
 final subscriptionLoadingProvider = Provider<bool>((ref) {
@@ -432,8 +432,12 @@ GoRoute(
     
     // Check subscription status
     final subscription = await ref.read(subscriptionProvider.future);
-    if (!subscription.hasLabsAccess) {
-      return '/paywall?source=labs_gate&redirect=${Uri.encodeComponent(state.matchedLocation)}';
+    if (!subscription.hasPlus) {
+      // Show RevenueCat paywall directly
+      final purchased = await ref.read(subscriptionServiceProvider).presentPaywallIfNeeded();
+      if (!purchased) {
+        return '/recipes'; // Redirect to safe location if cancelled
+      }
     }
     
     return null; // Allow access
@@ -445,8 +449,9 @@ GoRoute(
       redirect: (context, state) async {
         // Same subscription check for sub-routes
         final subscription = await ref.read(subscriptionProvider.future);
-        if (!subscription.hasLabsAccess) {
-          return '/paywall?source=labs_feature&redirect=${Uri.encodeComponent(state.matchedLocation)}';
+        if (!subscription.hasPlus) {
+          final purchased = await ref.read(subscriptionServiceProvider).presentPaywallIfNeeded();
+          if (!purchased) return '/recipes';
         }
         return null;
       },
@@ -466,22 +471,7 @@ GoRoute(
   ),
 ),
 
-// Add new paywall route
-GoRoute(
-  path: '/paywall',
-  pageBuilder: (context, state) {
-    final source = state.uri.queryParameters['source'] ?? 'unknown';
-    final redirectPath = state.uri.queryParameters['redirect'];
-    
-    return _platformPage(
-      state: state,
-      child: PaywallPage(
-        source: source,
-        redirectAfterPurchase: redirectPath,
-      ),
-    );
-  },
-),
+// No custom paywall route needed - using RevenueCat built-in paywalls only
 ```
 
 ### Route Guard Component
@@ -602,265 +592,79 @@ class SubscriptionGate extends ConsumerWidget {
 }
 ```
 
-## Paywall UI Implementation
+## Feature Flag Implementation
 
-### Custom Paywall Page
+### Feature Flag Utilities
 
-**File**: `lib/src/features/subscription/views/paywall_page.dart`
+**File**: `lib/src/utils/feature_flags.dart`
 
 ```dart
-import 'package:flutter/cupertino.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:go_router/go_router.dart';
-import '../../../mobile/utils/adaptive_sliver_page.dart';
-import '../../../providers/subscription_provider.dart';
+import '../providers/subscription_provider.dart';
 
-class PaywallPage extends ConsumerStatefulWidget {
-  final String source;
-  final String? redirectAfterPurchase;
+class FeatureFlags {
+  /// Check if user has access to a specific feature
+  static Future<bool> hasFeature(String feature, WidgetRef ref) async {
+    final subscription = await ref.read(subscriptionProvider.future);
+    
+    switch (feature) {
+      case 'labs':
+      case 'advanced_analytics':
+      case 'premium_recipes':
+      case 'experimental_features':
+        return subscription.hasPlus;
+      default:
+        return true; // Free features
+    }
+  }
   
-  const PaywallPage({
+  /// Synchronous version for widgets that already have subscription state
+  static bool hasFeatureSync(String feature, SubscriptionState subscription) {
+    switch (feature) {
+      case 'labs':
+      case 'advanced_analytics':
+      case 'premium_recipes':
+      case 'experimental_features':
+        return subscription.hasPlus;
+      default:
+        return true; // Free features
+    }
+  }
+}
+
+/// Feature gate widget for easy premium feature protection
+class FeatureGate extends ConsumerWidget {
+  final String feature;
+  final Widget child;
+  final Widget? fallback;
+  
+  const FeatureGate({
     super.key,
-    required this.source,
-    this.redirectAfterPurchase,
+    required this.feature,
+    required this.child,
+    this.fallback,
   });
   
   @override
-  ConsumerState<PaywallPage> createState() => _PaywallPageState();
-}
-
-class _PaywallPageState extends ConsumerState<PaywallPage> {
-  bool _isProcessing = false;
-  
-  @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final subscription = ref.watch(subscriptionProvider);
     
-    // Listen for subscription state changes
-    ref.listen(subscriptionProvider, (previous, next) {
-      next.whenData((state) {
-        if (state.hasLabsAccess && !_isProcessing) {
-          _handlePurchaseSuccess();
+    return subscription.when(
+      data: (state) {
+        final hasAccess = FeatureFlags.hasFeatureSync(feature, state);
+        if (hasAccess) {
+          return child;
         }
-      });
-    });
-    
-    return WillPopScope(
-      onWillPop: () async {
-        // For post-auth paywalls, prevent going back
-        if (widget.source == 'post_auth') {
-          context.go('/recipes');
-          return false;
-        }
-        return true;
+        
+        return fallback ?? CupertinoButton(
+          onPressed: () async {
+            await ref.read(subscriptionServiceProvider).presentPaywall();
+          },
+          child: const Text('Upgrade to Stockpot Plus'),
+        );
       },
-      child: AdaptiveSliverPage(
-        title: 'Premium Features',
-        automaticallyImplyLeading: widget.source != 'post_auth',
-        body: subscription.when(
-          data: (state) => _buildPaywallContent(state),
-          loading: () => const Center(child: CupertinoActivityIndicator()),
-          error: (error, stack) => _buildErrorContent(error),
-        ),
-      ),
-    );
-  }
-  
-  Widget _buildPaywallContent(SubscriptionState state) {
-    return Padding(
-      padding: const EdgeInsets.all(24.0),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          const Icon(
-            CupertinoIcons.lab_flask_solid,
-            size: 80,
-            color: CupertinoColors.systemPurple,
-          ),
-          const SizedBox(height: 24),
-          Text(
-            'Unlock Labs Features',
-            style: CupertinoTheme.of(context).textTheme.navLargeTitleTextStyle,
-            textAlign: TextAlign.center,
-          ),
-          const SizedBox(height: 16),
-          const Text(
-            'Get access to experimental features and help shape the future of the app.',
-            textAlign: TextAlign.center,
-          ),
-          const SizedBox(height: 32),
-          _buildFeatureList(),
-          const SizedBox(height: 32),
-          _buildPurchaseButton(state),
-          const SizedBox(height: 16),
-          _buildRestoreButton(state),
-          if (state.error != null) ...[
-            const SizedBox(height: 16),
-            Text(
-              state.error!,
-              style: const TextStyle(color: CupertinoColors.systemRed),
-              textAlign: TextAlign.center,
-            ),
-          ],
-        ],
-      ),
-    );
-  }
-  
-  Widget _buildFeatureList() {
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: CupertinoColors.systemGrey6,
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: const Column(
-        children: [
-          _FeatureRow(
-            icon: CupertinoIcons.lab_flask,
-            title: 'Experimental Features',
-            description: 'Early access to new functionality',
-          ),
-          SizedBox(height: 12),
-          _FeatureRow(
-            icon: CupertinoIcons.gear,
-            title: 'Advanced Settings',
-            description: 'Fine-tune your app experience',
-          ),
-          SizedBox(height: 12),
-          _FeatureRow(
-            icon: CupertinoIcons.chart_bar,
-            title: 'Analytics Dashboard',
-            description: 'Detailed insights into your usage',
-          ),
-        ],
-      ),
-    );
-  }
-  
-  Widget _buildPurchaseButton(SubscriptionState state) {
-    return SizedBox(
-      width: double.infinity,
-      child: CupertinoButton.filled(
-        onPressed: (_isProcessing || state.isLoading) 
-            ? null 
-            : _handlePurchasePressed,
-        child: _isProcessing || state.isLoading
-            ? const CupertinoActivityIndicator(color: CupertinoColors.white)
-            : const Text('Start Premium Subscription'),
-      ),
-    );
-  }
-  
-  Widget _buildRestoreButton(SubscriptionState state) {
-    return CupertinoButton(
-      onPressed: (state.isRestoring) ? null : _handleRestorePressed,
-      child: state.isRestoring
-          ? const CupertinoActivityIndicator()
-          : const Text('Restore Purchases'),
-    );
-  }
-  
-  Widget _buildErrorContent(Object error) {
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.all(24.0),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            const Icon(
-              CupertinoIcons.exclamationmark_triangle,
-              size: 64,
-              color: CupertinoColors.systemRed,
-            ),
-            const SizedBox(height: 16),
-            const Text('Unable to load subscription information'),
-            const SizedBox(height: 16),
-            CupertinoButton(
-              onPressed: () {
-                ref.read(subscriptionProvider.notifier).checkSubscriptionStatus();
-              },
-              child: const Text('Try Again'),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-  
-  Future<void> _handlePurchasePressed() async {
-    setState(() {
-      _isProcessing = true;
-    });
-    
-    try {
-      // Use RevenueCat's built-in paywall
-      final success = await ref
-          .read(subscriptionProvider.notifier)
-          .presentPaywall(source: widget.source);
-      
-      if (success) {
-        _handlePurchaseSuccess();
-      }
-    } finally {
-      setState(() {
-        _isProcessing = false;
-      });
-    }
-  }
-  
-  Future<void> _handleRestorePressed() async {
-    await ref.read(subscriptionProvider.notifier).restorePurchases();
-  }
-  
-  void _handlePurchaseSuccess() {
-    if (widget.redirectAfterPurchase != null) {
-      context.go(Uri.decodeComponent(widget.redirectAfterPurchase!));
-    } else {
-      context.go('/recipes');
-    }
-  }
-}
-
-class _FeatureRow extends StatelessWidget {
-  final IconData icon;
-  final String title;
-  final String description;
-  
-  const _FeatureRow({
-    required this.icon,
-    required this.title,
-    required this.description,
-  });
-  
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      children: [
-        Icon(
-          icon,
-          color: CupertinoColors.systemPurple,
-        ),
-        const SizedBox(width: 12),
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                title,
-                style: const TextStyle(fontWeight: FontWeight.w600),
-              ),
-              Text(
-                description,
-                style: const TextStyle(
-                  color: CupertinoColors.systemGrey,
-                  fontSize: 14,
-                ),
-              ),
-            ],
-          ),
-        ),
-      ],
+      loading: () => const CupertinoActivityIndicator(),
+      error: (e, _) => const SizedBox.shrink(),
     );
   }
 }
@@ -883,7 +687,7 @@ MenuItem(
   backgroundColor: backgroundColor,
   trailing: Consumer(
     builder: (context, ref, child) {
-      final hasAccess = ref.watch(hasLabsAccessProvider);
+      final hasAccess = ref.watch(hasPlusProvider);
       return hasAccess 
           ? const Icon(
               CupertinoIcons.checkmark_seal_fill,
@@ -931,16 +735,16 @@ void main() {
       mockCustomerInfo = MockCustomerInfo();
     });
     
-    test('hasLabsAccess returns true when entitlement is active', () async {
+    test('hasPlus returns true when entitlement is active', () async {
       // Arrange
       final entitlements = <String, EntitlementInfo>{
-        'labs_premium': EntitlementInfo(
-          identifier: 'labs_premium',
+        'plus': EntitlementInfo(
+          identifier: 'plus',
           isActive: true,
           willRenew: true,
           latestPurchaseDate: DateTime.now(),
           originalPurchaseDate: DateTime.now(),
-          productIdentifier: 'labs_premium_monthly',
+          productIdentifier: 'stockpot_plus_monthly',
           isSandbox: true,
         ),
       };
@@ -951,13 +755,13 @@ void main() {
       when(mockPurchases.getCustomerInfo()).thenAnswer((_) async => mockCustomerInfo);
       
       // Act
-      final hasAccess = await subscriptionService.hasLabsAccess();
+      final hasAccess = await subscriptionService.hasPlus();
       
       // Assert
       expect(hasAccess, true);
     });
     
-    test('hasLabsAccess returns false when entitlement is inactive', () async {
+    test('hasPlus returns false when entitlement is inactive', () async {
       // Arrange
       when(mockCustomerInfo.entitlements).thenReturn(
         EntitlementInfos(all: {}, active: {})
@@ -965,18 +769,18 @@ void main() {
       when(mockPurchases.getCustomerInfo()).thenAnswer((_) async => mockCustomerInfo);
       
       // Act
-      final hasAccess = await subscriptionService.hasLabsAccess();
+      final hasAccess = await subscriptionService.hasPlus();
       
       // Assert
       expect(hasAccess, false);
     });
     
-    test('hasLabsAccess returns false on error', () async {
+    test('hasPlus returns false on error', () async {
       // Arrange
       when(mockPurchases.getCustomerInfo()).thenThrow(Exception('Network error'));
       
       // Act
-      final hasAccess = await subscriptionService.hasLabsAccess();
+      final hasAccess = await subscriptionService.hasPlus();
       
       // Assert
       expect(hasAccess, false);
@@ -985,107 +789,39 @@ void main() {
 }
 ```
 
-### Widget Tests
+### Feature Flag Tests
 
-**File**: `test/widget/subscription_gate_test.dart`
+**File**: `test/unit/feature_flags_test.dart`
 
 ```dart
-import 'package:flutter/cupertino.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:recipe_app/src/widgets/subscription_gate.dart';
-import 'package:recipe_app/src/providers/subscription_provider.dart';
+import 'package:recipe_app/src/utils/feature_flags.dart';
 import 'package:recipe_app/src/models/subscription_state.dart';
 
 void main() {
-  group('SubscriptionGate', () {
-    testWidgets('shows child when user has access', (tester) async {
-      await tester.pumpWidget(
-        ProviderScope(
-          overrides: [
-            subscriptionProvider.overrideWith((ref) => 
-              StateNotifier((ref) => const AsyncValue.data(
-                SubscriptionState(hasLabsAccess: true)
-              ))
-            ),
-          ],
-          child: const CupertinoApp(
-            home: SubscriptionGate(
-              feature: 'labs',
-              child: Text('Protected Content'),
-            ),
-          ),
-        ),
-      );
+  group('FeatureFlags', () {
+    test('hasFeatureSync returns true for plus features when user has plus', () {
+      const subscription = SubscriptionState(hasPlus: true);
       
-      expect(find.text('Protected Content'), findsOneWidget);
-      expect(find.text('Upgrade to Premium'), findsNothing);
+      expect(FeatureFlags.hasFeatureSync('labs', subscription), true);
+      expect(FeatureFlags.hasFeatureSync('advanced_analytics', subscription), true);
+      expect(FeatureFlags.hasFeatureSync('premium_recipes', subscription), true);
     });
     
-    testWidgets('shows upgrade prompt when user lacks access', (tester) async {
-      await tester.pumpWidget(
-        ProviderScope(
-          overrides: [
-            subscriptionProvider.overrideWith((ref) => 
-              StateNotifier((ref) => const AsyncValue.data(
-                SubscriptionState(hasLabsAccess: false)
-              ))
-            ),
-          ],
-          child: const CupertinoApp(
-            home: SubscriptionGate(
-              feature: 'labs',
-              child: Text('Protected Content'),
-            ),
-          ),
-        ),
-      );
+    test('hasFeatureSync returns false for plus features when user lacks plus', () {
+      const subscription = SubscriptionState(hasPlus: false);
       
-      expect(find.text('Protected Content'), findsNothing);
-      expect(find.text('Upgrade to Premium'), findsOneWidget);
-      expect(find.text('Restore Purchases'), findsOneWidget);
-    });
-  });
-}
-```
-
-### Integration Tests
-
-**File**: `test/integration/subscription_flow_test.dart`
-
-```dart
-import 'package:flutter/services.dart';
-import 'package:flutter_test/flutter_test.dart';
-import 'package:integration_test/integration_test.dart';
-import 'package:recipe_app/main.dart' as app;
-
-void main() {
-  IntegrationTestWidgetsFlutterBinding.ensureInitialized();
-  
-  group('Subscription Flow Integration Tests', () {
-    testWidgets('Complete subscription purchase flow', (tester) async {
-      app.main();
-      await tester.pumpAndSettle();
-      
-      // Navigate to Labs (should trigger paywall)
-      await tester.tap(find.text('🧪Labs'));
-      await tester.pumpAndSettle();
-      
-      // Should see paywall
-      expect(find.text('Premium Features'), findsOneWidget);
-      expect(find.text('Start Premium Subscription'), findsOneWidget);
-      
-      // Tap purchase button (will open RevenueCat paywall)
-      await tester.tap(find.text('Start Premium Subscription'));
-      await tester.pumpAndSettle();
-      
-      // Note: Actual purchase testing requires sandbox environment
-      // and cannot be fully automated in CI/CD
+      expect(FeatureFlags.hasFeatureSync('labs', subscription), false);
+      expect(FeatureFlags.hasFeatureSync('advanced_analytics', subscription), false);
+      expect(FeatureFlags.hasFeatureSync('premium_recipes', subscription), false);
     });
     
-    testWidgets('Labs access after successful purchase', (tester) async {
-      // This test would require mocking purchase success
-      // or running in sandbox with pre-purchased test account
+    test('hasFeatureSync returns true for free features regardless of subscription', () {
+      const subscription = SubscriptionState(hasPlus: false);
+      
+      expect(FeatureFlags.hasFeatureSync('recipes', subscription), true);
+      expect(FeatureFlags.hasFeatureSync('pantry', subscription), true);
+      expect(FeatureFlags.hasFeatureSync('unknown_feature', subscription), true);
     });
   });
 }
@@ -1093,75 +829,29 @@ void main() {
 
 ## Configuration Requirements
 
-### RevenueCat Dashboard Setup
+### RevenueCat Configuration
+- **API Key**: `appl_SPuDBCvjoalGuumyxdYEfRZKEXt`
+- **Entitlement ID**: `plus`
+- **Subscription**: Stockpot Plus (monthly)
 
-1. **Project Creation**
-   - Create new project in RevenueCat dashboard
-   - Configure iOS and Android app bundles
-   - Upload App Store Connect P8 key
+### Key Implementation Notes
+- Using RevenueCat built-in paywalls exclusively
+- Family Sharing handled automatically by RevenueCat
+- No custom paywall UI components needed
+- Feature flags based on `plus` entitlement checking
 
-2. **Product Configuration**
-   - Create "Labs Premium" entitlement
-   - Configure monthly/yearly subscription products
-   - Set up offerings and packages
+## Key Benefits
 
-3. **Paywall Design**
-   - Use visual paywall editor for branded experience
-   - Configure multiple paywall variations for A/B testing
-   - Set up localization for multiple markets
+### Simplified Implementation
+- **No Custom UI**: RevenueCat handles all paywall presentation
+- **Proven Conversion**: Built-in A/B testing and optimization
+- **Family Sharing**: Automatic support without additional code
+- **Feature Flags**: Simple entitlement-based gating system
 
-### App Store Connect Configuration
+### Technical Advantages
+- **Reduced Complexity**: ~50% less code than custom paywall approach
+- **Faster Development**: Focus on core integration rather than UI
+- **Better UX**: RevenueCat's proven paywall experience
+- **Easier Maintenance**: Paywall updates via dashboard, not app releases
 
-1. **In-App Purchases**
-   - Create subscription groups
-   - Configure subscription products (monthly/yearly)
-   - Set pricing and availability
-
-2. **App Information**
-   - Update app description with subscription features
-   - Configure subscription terms and privacy policy
-   - Set up promotional offers if desired
-
-### Environment Variables
-
-**File**: `.env` (for development)
-```
-REVENUECAT_API_KEY=your_development_api_key_here
-```
-
-**File**: `.env.production` (for production)
-```
-REVENUECAT_API_KEY=your_production_api_key_here
-```
-
-## Implementation Timeline
-
-### Week 1: Foundation Setup
-- **Day 1-2**: Dependencies, basic service implementation
-- **Day 3-4**: Provider setup and auth integration
-- **Day 5**: Initial testing and debugging
-
-### Week 2: Labs Feature Protection
-- **Day 1-2**: Route guard implementation
-- **Day 3-4**: Paywall UI and purchase flow
-- **Day 5**: Menu integration and status indicators
-
-### Week 3: Polish and Testing
-- **Day 1-2**: Custom paywall page and enhanced UX
-- **Day 3-4**: Comprehensive testing (unit, widget, integration)
-- **Day 5**: Bug fixes and performance optimization
-
-### Week 4: Production Readiness
-- **Day 1-2**: RevenueCat dashboard configuration
-- **Day 3-4**: App Store Connect setup and submission preparation
-- **Day 5**: Documentation and handoff
-
-## Risk Mitigation
-
-1. **Testing Strategy**: Extensive testing in sandbox before production
-2. **Graceful Degradation**: Always fail closed on subscription checks
-3. **Error Handling**: Comprehensive error handling with user-friendly messages
-4. **Performance**: Optimize subscription checks to avoid UI blocking
-5. **Privacy**: Ensure compliance with App Store guidelines and privacy policies
-
-This technical plan provides a comprehensive roadmap for implementing RevenueCat paywall functionality while maintaining the high quality and user experience standards of the existing Flutter recipe app.
+This simplified technical plan leverages RevenueCat's built-in capabilities for rapid implementation while maintaining high quality standards.

@@ -14,12 +14,12 @@ This document provides a concise summary of the RevenueCat subscription integrat
 - Centralized access control logic
 - Works naturally with deep linking
 
-### 2. Dual Paywall Strategy ✅
-**Decision**: Combine RevenueCat built-in paywalls with custom routes
+### 2. RevenueCat-Only Paywall Strategy ✅
+**Decision**: Use RevenueCat built-in paywalls exclusively
 **Rationale**:
-- Built-in paywalls: Quick feature gates, proven conversion optimization
-- Custom routes: Brand consistency, comprehensive onboarding flows
-- Flexibility to choose appropriate presentation per context
+- Built-in paywalls: Proven conversion optimization and A/B testing
+- Simplified development: No custom UI components needed
+- RevenueCat dashboard: Configure paywall design and copy remotely
 
 ### 3. Riverpod State Management ✅
 **Decision**: Follow existing AuthProvider patterns for subscription state
@@ -53,7 +53,7 @@ This document provides a concise summary of the RevenueCat subscription integrat
 └─────────────────────┘
            │
 ┌─────────────────────┐
-│   RevenueCat SDK    │ ← Purchase & entitlement management
+│RevenueCat SDK + UI  │ ← Purchase, entitlement & paywall UI
 └─────────────────────┘
 ```
 
@@ -81,23 +81,14 @@ This document provides a concise summary of the RevenueCat subscription integrat
 
 ## Implementation Strategy
 
-### Phase 1: Core Foundation
-1. RevenueCat SDK integration
-2. SubscriptionService implementation
-3. Basic Riverpod providers
-4. Initial Labs route protection
-
-### Phase 2: Enhanced UX
-1. Custom paywall UI matching app branding
-2. Menu system integration with status indicators
-3. Comprehensive error handling
-4. Purchase flow optimization
-
-### Phase 3: Production Polish
-1. Testing across all scenarios
-2. Performance optimization
-3. Analytics integration
-4. Documentation completion
+### Core Implementation
+1. RevenueCat SDK integration (`purchases_flutter`, `purchases_ui_flutter`)
+2. SubscriptionService with `plus` entitlement checking
+3. Riverpod providers for subscription state
+4. Route guards with direct `RevenueCatUI.presentPaywall()` calls
+5. Feature flag system for premium capability gating
+6. Menu integration with Stockpot Plus indicators
+7. Comprehensive testing and error handling
 
 ## Benefits of This Architecture
 
@@ -123,13 +114,14 @@ This document provides a concise summary of the RevenueCat subscription integrat
 
 ### Route Protection Pattern
 ```dart
-// Clean, declarative route protection
+// Direct RevenueCat paywall presentation
 GoRoute(
   path: '/labs',
   redirect: (context, state) async {
     final subscription = await ref.read(subscriptionProvider.future);
-    if (!subscription.hasLabsAccess) {
-      return '/paywall?source=labs&redirect=${Uri.encodeComponent(state.matchedLocation)}';
+    if (!subscription.hasPlus) {
+      final purchased = await RevenueCatUI.presentPaywallIfNeeded('plus');
+      if (!purchased) return '/recipes'; // Safe fallback
     }
     return null;
   },
@@ -148,12 +140,12 @@ final subscriptionProvider = StateNotifierProvider<SubscriptionNotifier, AsyncVa
 
 ### Paywall Presentation Pattern
 ```dart
-// Context-appropriate paywall presentation
-// Quick feature gate
-await RevenueCatUI.presentPaywallIfNeeded('labs_premium');
+// Simple, direct paywall presentation
+// Feature gate with entitlement check
+await RevenueCatUI.presentPaywallIfNeeded('plus');
 
-// Comprehensive onboarding
-context.push('/paywall?source=onboarding');
+// Direct paywall for upgrade prompts
+await RevenueCatUI.presentPaywall();
 ```
 
 ## File Structure
@@ -166,9 +158,8 @@ lib/src/
 │   └── subscription_provider.dart         # Riverpod state management
 ├── models/
 │   └── subscription_state.dart           # Data models
-├── features/subscription/
-│   └── views/
-│       └── paywall_page.dart            # Custom paywall UI
+├── utils/
+│   └── feature_flags.dart                # Feature gating utilities
 ├── widgets/
 │   └── subscription_gate.dart           # Reusable protection widget
 └── mobile/

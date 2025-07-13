@@ -13,90 +13,48 @@ This document outlines a comprehensive plan for integrating RevenueCat subscript
 ## Strategic Approach
 
 ### 1. Integration Philosophy
-- **Leverage Built-in Solutions**: Use RevenueCat's native paywall UI for rapid implementation and proven conversion optimization
+- **Leverage Built-in Solutions**: Use RevenueCat's native paywall UI exclusively for rapid implementation and proven conversion optimization
 - **Adaptive Architecture**: Build on existing auth and state management patterns (Riverpod, Supabase)
 - **Incremental Rollout**: Start with Labs feature, expand to additional premium features progressively
 
 ### 2. Technical Strategy
 - **Route Guard Pattern**: Implement subscription checks at the routing level for seamless protection
-- **Dual Paywall Approach**: Built-in modals for quick gates, custom routes for comprehensive onboarding
-- **State Synchronization**: Bridge RevenueCat entitlements with Supabase user metadata
+- **RevenueCat-Only Paywalls**: Use `RevenueCatUI.presentPaywall()` directly without custom UI
+- **Feature Flag System**: Simple entitlement checking for premium capabilities
 
 ## High-Level Architecture
 
 ### Core Components
-1. **SubscriptionService**: Central service managing RevenueCat integration
+1. **SubscriptionService**: Central service managing RevenueCat integration with `plus` entitlement
 2. **Subscription Providers**: Riverpod providers for real-time state management  
-3. **Paywall UI System**: Adaptive paywall presentation layer
-4. **Route Protection**: GoRouter integration for feature gating
-5. **Analytics Integration**: Purchase funnel and conversion tracking
+3. **Route Protection**: GoRouter integration with direct RevenueCat paywall presentation
+4. **Feature Flag System**: Simple entitlement-based gating utilities
 
 ### Integration Points
 - **Auth Flow**: Post-authentication subscription status checking
-- **Navigation**: Route guards and paywall redirects
-- **Menu System**: Premium status indicators and upgrade prompts
-- **Feature Gates**: Subscription-aware UI components
+- **Navigation**: Route guards with direct RevenueCat paywall presentation
+- **Menu System**: Premium status indicators for Stockpot Plus
+- **Feature Gates**: Simple entitlement checking with `plus` subscription
 
-## Implementation Phases
+## Implementation Approach
 
-### Phase 1: Foundation Setup (Week 1)
-**Scope**: Core RevenueCat integration and basic subscription management
+### Core Integration
+**Scope**: Complete RevenueCat integration with Labs feature protection
 
-**Deliverables**:
+**Components**:
 - RevenueCat SDK integration (`purchases_flutter`, `purchases_ui_flutter`)
-- SubscriptionService implementation following AuthService patterns
-- Basic Riverpod providers for subscription state
-- App Store Connect and RevenueCat dashboard configuration
+- SubscriptionService with `plus` entitlement checking
+- Riverpod providers for subscription state management
+- Route guards using direct RevenueCat paywall presentation
+- Feature flag system for premium capability gating
+- Menu integration with Stockpot Plus status indicators
 
-**Success Criteria**:
-- RevenueCat properly configured and connected
-- Subscription status can be queried and cached
-- Basic entitlement checking functional
-
-### Phase 2: Labs Feature Protection (Week 2)
-**Scope**: Implement paywall gating for Labs experimental features
-
-**Deliverables**:
-- Route guard implementation for `/labs` path
-- Built-in paywall integration using `RevenueCatUI.presentPaywall()`
-- Menu updates showing premium status
-- User intent preservation for post-purchase navigation
-
-**Success Criteria**:
-- Labs features properly gated behind subscription
-- Paywall presents correctly with purchase flow
-- Successful purchases grant immediate access
-- Navigation flows work seamlessly
-
-### Phase 3: Enhanced UX & Testing (Week 3)
-**Scope**: Polish user experience and comprehensive testing
-
-**Deliverables**:
-- Custom paywall route for branding alignment
-- Comprehensive error handling and edge cases
-- Sandbox and TestFlight testing implementation
-- Analytics integration for purchase funnel tracking
-
-**Success Criteria**:
-- Professional paywall experience matching app design
-- Robust error handling for network/payment issues
-- Thorough testing across all purchase scenarios
-- Analytics providing actionable conversion insights
-
-### Phase 4: Scalability Foundation (Week 4)
-**Scope**: Prepare architecture for future premium features
-
-**Deliverables**:
-- Multiple subscription tier support
-- Feature flag system for premium capabilities
-- Documentation and patterns for future integrations
-- Performance optimization and caching strategies
-
-**Success Criteria**:
-- Clear patterns for adding new premium features
-- Scalable entitlement management system
-- Optimized performance for subscription checks
-- Comprehensive implementation documentation
+**Key Features**:
+- Labs features gated behind `plus` subscription
+- Direct `RevenueCatUI.presentPaywall()` presentation
+- Automatic Family Sharing support via RevenueCat
+- Simple entitlement checking utilities
+- Comprehensive error handling and offline scenarios
 
 ## Risk Assessment & Mitigation
 
@@ -131,29 +89,20 @@ This document outlines a comprehensive plan for integrating RevenueCat subscript
 - **Revenue Growth**: Monthly recurring revenue (MRR) growth
 - **User Retention**: Premium subscriber retention rates
 
-## Resource Requirements
+## Configuration Requirements
 
-### Development Resources
-- **Primary Developer**: 3-4 weeks full-time implementation
-- **Testing Resources**: 1 week comprehensive testing across devices/scenarios
-- **Design Resources**: 2-3 days for custom paywall design (if needed)
+### RevenueCat Setup
+- **API Key**: `appl_SPuDBCvjoalGuumyxdYEfRZKEXt`
+- **Entitlement ID**: `plus`
+- **Subscription**: Stockpot Plus (monthly)
 
-### External Dependencies
-- **App Store Connect**: P8 key generation and product configuration
-- **RevenueCat Dashboard**: Paywall design and offering configuration
-- **Testing Devices**: iOS/Android devices for sandbox testing
-- **TestFlight Beta**: Real purchase flow testing
-
-## Next Steps
-
-1. **Stakeholder Review**: Review and approve this high-level plan
-2. **Detailed Technical Planning**: Create comprehensive technical implementation plan
-3. **Timeline Alignment**: Confirm resource availability and project timeline
-4. **Configuration Setup**: Begin App Store Connect and RevenueCat setup
-5. **Development Kickoff**: Start Phase 1 implementation
+### Implementation Notes
+- **Family Sharing**: Handled automatically by RevenueCat
+- **Paywall Design**: Configured in RevenueCat dashboard
+- **Testing**: Sandbox environment for purchase flow validation
 
 ## Conclusion
 
-This plan provides a structured approach to implementing RevenueCat paywall functionality while maintaining the high quality and user experience standards of the existing app. The phased approach allows for iterative improvement and risk mitigation while establishing a foundation for future monetization opportunities.
+This simplified plan leverages RevenueCat's built-in paywall functionality for rapid implementation while maintaining the high quality and user experience standards of the existing app. By using only RevenueCat's native UI, development complexity is significantly reduced while still providing proven conversion optimization.
 
-The focus on the Labs feature as the initial implementation target provides an ideal testing ground that won't impact core app functionality while allowing comprehensive validation of the subscription system before broader rollout.
+The focus on the Labs feature as the initial implementation target provides an ideal testing ground that won't impact core app functionality while establishing a foundation for future premium features.
