@@ -330,4 +330,61 @@ CREATE INDEX IF NOT EXISTS meal_plans_date_idx ON public.meal_plans (date);
 CREATE INDEX IF NOT EXISTS meal_plans_user_idx ON public.meal_plans (user_id);
 CREATE INDEX IF NOT EXISTS meal_plans_household_idx ON public.meal_plans (household_id);
 
+-- SUBSCRIPTION EVENTS (Optional audit table for subscription events)
+CREATE TABLE public.subscription_events (
+    id uuid NOT NULL DEFAULT extensions.uuid_generate_v4(),
+    user_id uuid NULL,
+    
+    -- Event details
+    event_type text NOT NULL, -- 'purchase', 'renewal', 'cancellation', 'expiration', etc.
+    event_source text NOT NULL DEFAULT 'revenuecat_webhook',
+    
+    -- RevenueCat data
+    revenuecat_event_id text NULL,
+    product_id text NULL,
+    transaction_id text NULL,
+    original_transaction_id text NULL,
+    
+    -- Financial
+    price_in_cents integer NULL,
+    currency text NULL,
+    
+    -- Platform
+    platform text NULL, -- 'ios', 'android', 'web'
+    store text NULL,
+    
+    -- Timing
+    expires_at timestamp with time zone NULL,
+    purchased_at timestamp with time zone NULL,
+    
+    -- Raw data for debugging
+    raw_webhook_data jsonb NULL,
+    
+    -- Metadata
+    processed_at timestamp with time zone NOT NULL DEFAULT now(),
+    
+    CONSTRAINT subscription_events_pkey PRIMARY KEY (id),
+    CONSTRAINT subscription_events_user_id_fkey FOREIGN KEY (user_id) REFERENCES auth.users (id) ON DELETE CASCADE
+) TABLESPACE pg_default;
+
+-- Indexes for performance
+CREATE INDEX IF NOT EXISTS subscription_events_user_id_idx ON public.subscription_events (user_id);
+CREATE INDEX IF NOT EXISTS subscription_events_event_type_idx ON public.subscription_events (event_type);
+CREATE INDEX IF NOT EXISTS subscription_events_revenuecat_event_id_idx ON public.subscription_events (revenuecat_event_id);
+CREATE INDEX IF NOT EXISTS subscription_events_processed_at_idx ON public.subscription_events (processed_at);
+
+-- User metadata structure for subscriptions (stored in auth.users.user_metadata):
+-- {
+--   "subscription": {
+--     "status": "active",           -- active, cancelled, expired, trial, none
+--     "entitlements": ["plus"],     -- array of entitlement IDs
+--     "expires_at": "2024-02-15T10:30:00Z",
+--     "trial_ends_at": null,
+--     "product_id": "stockpot_plus_monthly",
+--     "store": "app_store",         -- app_store, play_store, stripe
+--     "revenuecat_customer_id": "customer_123",
+--     "last_updated": "2024-01-15T10:30:00Z"
+--   }
+-- }
+
 CREATE PUBLICATION powersync FOR ALL TABLES;
