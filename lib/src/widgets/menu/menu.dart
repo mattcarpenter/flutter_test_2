@@ -99,13 +99,14 @@ class Menu extends ConsumerWidget {
             } else {
               // Show paywall first, only navigate if user purchases
               try {
-                final purchased = await ref.read(subscriptionProvider.notifier).presentPaywallIfNeeded();
+                final purchased = await ref.read(subscriptionProvider.notifier).presentPaywall();
                 if (purchased) {
                   onRouteGo('/labs');
                 }
                 // If user cancels paywall, stay where they were (no navigation)
               } catch (e) {
                 // Error presenting paywall, stay where they were
+                debugPrint('Error presenting paywall: $e');
               }
             }
           },
@@ -127,7 +128,7 @@ class Menu extends ConsumerWidget {
             } else {
               // Show paywall first, only navigate if user purchases
               try {
-                final purchased = await ref.read(subscriptionProvider.notifier).presentPaywallIfNeeded();
+                final purchased = await ref.read(subscriptionProvider.notifier).presentPaywall();
                 if (purchased) {
                   onRouteGo('/labs/sub');
                 }
@@ -154,7 +155,7 @@ class Menu extends ConsumerWidget {
             } else {
               // Show paywall first, only navigate if user purchases
               try {
-                final purchased = await ref.read(subscriptionProvider.notifier).presentPaywallIfNeeded();
+                final purchased = await ref.read(subscriptionProvider.notifier).presentPaywall();
                 if (purchased) {
                   onRouteGo('/labs/auth');
                 }
