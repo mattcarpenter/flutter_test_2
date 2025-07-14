@@ -41,7 +41,7 @@ class SubscriptionNotifier extends StateNotifier<SubscriptionState> {
     try {
       // Refresh cache from database first
       _subscriptionService.refreshSubscriptionStatus().then((_) {
-        final hasPlus = _subscriptionService.hasPlus();
+        final hasPlus = _subscriptionService.hasPlusSync();
         final metadata = _subscriptionService.getSubscriptionMetadata();
         
         // Build entitlements map from metadata
@@ -102,8 +102,10 @@ class SubscriptionNotifier extends StateNotifier<SubscriptionState> {
       final purchased = await _subscriptionService.presentPaywall();
       
       if (purchased) {
-        // Wait a moment for webhook to process, then update state
-        await Future.delayed(const Duration(seconds: 2));
+        // Invalidate hybrid provider to refresh with new RevenueCat state
+        _ref.invalidate(hasPlusHybridProvider);
+        
+        // Also update local state (database may take time to sync)
         _updateSubscriptionState();
       }
       
@@ -119,7 +121,10 @@ class SubscriptionNotifier extends StateNotifier<SubscriptionState> {
 
   /// Present paywall only if user doesn't have Plus subscription
   Future<bool> presentPaywallIfNeeded() async {
-    if (state.hasPlus) {
+    // Check hybrid state to ensure we have the most current status
+    final hasPlus = await _subscriptionService.hasPlus();
+    
+    if (hasPlus) {
       return true;
     }
     
@@ -136,8 +141,10 @@ class SubscriptionNotifier extends StateNotifier<SubscriptionState> {
       
       await _subscriptionService.restorePurchases();
       
-      // Wait for webhook to process, then update state
-      await Future.delayed(const Duration(seconds: 2));
+      // Invalidate hybrid provider to refresh with new RevenueCat state
+      _ref.invalidate(hasPlusHybridProvider);
+      
+      // Update local state (database may take time to sync)
       _updateSubscriptionState();
       
     } catch (e) {
@@ -154,9 +161,11 @@ class SubscriptionNotifier extends StateNotifier<SubscriptionState> {
       state = state.copyWith(isLoading: true);
       
       await _subscriptionService.refreshSubscriptionStatus();
+      await _subscriptionService.refreshRevenueCatState();
       
-      // Wait for webhook and PowerSync to process
-      await Future.delayed(const Duration(seconds: 3));
+      // Invalidate hybrid provider to refresh with latest state
+      _ref.invalidate(hasPlusHybridProvider);
+      
       _updateSubscriptionState();
       
     } catch (e) {
@@ -231,11 +240,9 @@ final hasPlusProvider = Provider<bool>((ref) {
         return false;
       }
       
-      // Check subscription status and entitlements
-      final isActive = subscription.status == SubscriptionStatus.active ||
-                      subscription.status == SubscriptionStatus.cancelled;
-      
-      final hasPlus = isActive && subscription.entitlements.contains('plus');
+      // Simply check if the required entitlement is present
+      // RevenueCat webhook removes entitlements when subscription expires
+      final hasPlus = subscription.entitlements.contains('plus');
       
       debugPrint('hasPlusProvider: status=${subscription.status.name}, entitlements=${subscription.entitlements}, hasPlus=$hasPlus');
       return hasPlus;
@@ -249,6 +256,22 @@ final hasPlusProvider = Provider<bool>((ref) {
       return false; // Default to no access on error
     },
   );
+});
+
+// Hybrid provider that combines database and RevenueCat for immediate access
+final hasPlusHybridProvider = FutureProvider<bool>((ref) async {
+  final subscriptionService = ref.watch(subscriptionServiceProvider);
+  
+  debugPrint('hasPlusHybridProvider: Starting hybrid check');
+  
+  // First ensure we have fresh database cache
+  await subscriptionService.refreshSubscriptionStatus();
+  
+  // Use hybrid check with RevenueCat fallback
+  final result = await subscriptionService.hasPlus(allowRevenueCatFallback: true);
+  
+  debugPrint('hasPlusHybridProvider: Result = $result');
+  return result;
 });
 
 // Convenience provider for loading states

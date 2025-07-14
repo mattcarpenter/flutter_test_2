@@ -105,6 +105,11 @@ class SubscriptionService {
   // Cache for subscription state
   UserSubscriptionEntry? _cachedSubscription;
   String? _lastUserId;
+  
+  // RevenueCat CustomerInfo cache for immediate access
+  CustomerInfo? _cachedCustomerInfo;
+  String? _customerInfoUserId; // Track which user this info belongs to
+  DateTime? _customerInfoLastUpdated;
 
   SubscriptionService() : _supabase = Supabase.instance.client;
 
@@ -152,21 +157,82 @@ class SubscriptionService {
     }
   }
 
-  /// Check if user has Plus subscription from cached PowerSync data
-  bool hasPlus() {
+  /// Check if user has Plus subscription - hybrid approach
+  Future<bool> hasPlus({bool allowRevenueCatFallback = true}) async {
+    try {
+      final user = _supabase.auth.currentUser;
+      debugPrint('SubscriptionService.hasPlus: Starting check for user: ${user?.id}');
+      
+      if (user == null) {
+        debugPrint('SubscriptionService.hasPlus: No current user, returning false');
+        return false;
+      }
+      
+      // 1. First check PowerSync database (cached)
+      debugPrint('SubscriptionService.hasPlus: Checking cached subscription - lastUserId: $_lastUserId, currentUserId: ${user.id}, hasCachedSubscription: ${_cachedSubscription != null}');
+      
+      if (_lastUserId == user.id && _cachedSubscription != null) {
+        final dbHasPlus = _isSubscriptionActive(_cachedSubscription!);
+        debugPrint('SubscriptionService.hasPlus: Database check - subscription: ${_cachedSubscription!.toJson()}, hasPlus: $dbHasPlus');
+        if (dbHasPlus) {
+          debugPrint('SubscriptionService.hasPlus: Database check passed, returning true');
+          return true;
+        }
+      } else {
+        debugPrint('SubscriptionService.hasPlus: No valid cached subscription, need to refresh');
+      }
+      
+      // 2. If not in database and fallback allowed, check RevenueCat
+      if (allowRevenueCatFallback && _isInitialized) {
+        try {
+          debugPrint('SubscriptionService.hasPlus: Checking RevenueCat fallback');
+          
+          // Ensure RevenueCat has correct user
+          final currentRevenueCatUser = await Purchases.appUserID;
+          debugPrint('SubscriptionService.hasPlus: Current RevenueCat user: $currentRevenueCatUser, Expected: ${user.id}');
+          
+          if (currentRevenueCatUser != user.id) {
+            debugPrint('SubscriptionService.hasPlus: Wrong user in RevenueCat, logging in correct user');
+            await Purchases.logIn(user.id);
+          }
+          
+          // Get fresh customer info
+          final customerInfo = await Purchases.getCustomerInfo();
+          
+          // Cache it with user ID
+          _cachedCustomerInfo = customerInfo;
+          _customerInfoUserId = user.id;
+          _customerInfoLastUpdated = DateTime.now();
+          
+          // Check entitlements
+          final hasActiveEntitlement = customerInfo.entitlements.active.containsKey(_entitlementId);
+          debugPrint('SubscriptionService.hasPlus: RevenueCat check - active entitlements: ${customerInfo.entitlements.active.keys.toList()}, hasPlus: $hasActiveEntitlement');
+          
+          return hasActiveEntitlement;
+        } catch (e) {
+          debugPrint('SubscriptionService.hasPlus: RevenueCat fallback failed: $e');
+        }
+      } else {
+        debugPrint('SubscriptionService.hasPlus: RevenueCat fallback not allowed or not initialized - allowFallback: $allowRevenueCatFallback, isInitialized: $_isInitialized');
+      }
+      
+      debugPrint('SubscriptionService.hasPlus: All checks failed, returning false');
+      return false;
+    } catch (e) {
+      debugPrint('SubscriptionService.hasPlus: Error checking Plus access: $e');
+      return false; // Fail closed
+    }
+  }
+  
+  /// Check if user has Plus subscription synchronously from database only
+  bool hasPlusSync() {
     try {
       final user = _supabase.auth.currentUser;
       if (user == null) return false;
       
       // Use cached subscription if available for same user
       if (_lastUserId == user.id && _cachedSubscription != null) {
-        final subscription = _cachedSubscription!;
-        
-        // Check subscription status and entitlements
-        final isActive = subscription.status == SubscriptionStatus.active ||
-                        subscription.status == SubscriptionStatus.cancelled; // Cancelled but still valid until expiry
-        
-        return isActive && subscription.entitlements.contains(_entitlementId);
+        return _isSubscriptionActive(_cachedSubscription!);
       }
       
       // No cached data available - refresh needed
@@ -175,6 +241,13 @@ class SubscriptionService {
       debugPrint('SubscriptionService: Error checking Plus access: $e');
       return false; // Fail closed
     }
+  }
+  
+  /// Helper to check if subscription is active
+  bool _isSubscriptionActive(UserSubscriptionEntry subscription) {
+    // Simply check if the required entitlement is present
+    // RevenueCat webhook removes entitlements when subscription expires
+    return subscription.entitlements.contains(_entitlementId);
   }
 
   /// Get subscription metadata from cached PowerSync data
@@ -216,7 +289,14 @@ class SubscriptionService {
       final result = await RevenueCatUI.presentPaywall();
       
       debugPrint('SubscriptionService: Paywall result: ${result.name}');
-      return result == PaywallResult.purchased;
+      final purchased = result == PaywallResult.purchased;
+      
+      if (purchased) {
+        // Immediately refresh RevenueCat state for instant access
+        await refreshRevenueCatState();
+      }
+      
+      return purchased;
     } on PlatformException catch (e) {
       debugPrint('SubscriptionService: Error presenting paywall: $e');
       
@@ -241,7 +321,7 @@ class SubscriptionService {
       await _ensureInitialized();
       
       debugPrint('SubscriptionService: Checking if paywall needed');
-      final hasActivePlus = hasPlus();
+      final hasActivePlus = await hasPlus();
       
       if (hasActivePlus) {
         debugPrint('SubscriptionService: User already has Plus, skipping paywall');
@@ -267,7 +347,10 @@ class SubscriptionService {
       final hasActiveEntitlements = customerInfo.entitlements.active.isNotEmpty;
       debugPrint('SubscriptionService: Restored purchases, active entitlements: $hasActiveEntitlements');
       
-      if (!hasActiveEntitlements) {
+      if (hasActiveEntitlements) {
+        // Immediately refresh RevenueCat state for instant access
+        await refreshRevenueCatState();
+      } else {
         throw SubscriptionApiException(
           message: 'No active purchases found to restore',
           type: SubscriptionErrorType.missingReceipt,
@@ -342,7 +425,7 @@ class SubscriptionService {
       _cachedSubscription = subscription;
       _lastUserId = user.id;
       
-      debugPrint('SubscriptionService: Subscription cache updated - hasPlus: ${hasPlus()}');
+      debugPrint('SubscriptionService: Subscription cache updated - subscription: ${subscription?.toJson()}');
       
     } catch (e) {
       debugPrint('SubscriptionService: Error refreshing subscription: $e');
@@ -391,6 +474,42 @@ class SubscriptionService {
     }
     
     return 'An unexpected error occurred. Please try again.';
+  }
+
+  /// Force refresh RevenueCat state for immediate access
+  Future<void> refreshRevenueCatState() async {
+    try {
+      final user = _supabase.auth.currentUser;
+      if (user == null) {
+        _cachedCustomerInfo = null;
+        _customerInfoUserId = null;
+        _customerInfoLastUpdated = null;
+        return;
+      }
+      
+      await _ensureInitialized();
+      
+      debugPrint('SubscriptionService: Refreshing RevenueCat state');
+      
+      // Ensure correct user is logged in
+      final currentRevenueCatUser = await Purchases.appUserID;
+      if (currentRevenueCatUser != user.id) {
+        debugPrint('SubscriptionService: Logging in correct user to RevenueCat');
+        await Purchases.logIn(user.id);
+      }
+      
+      // Get fresh customer info
+      final customerInfo = await Purchases.getCustomerInfo();
+      
+      // Update cache
+      _cachedCustomerInfo = customerInfo;
+      _customerInfoUserId = user.id;
+      _customerInfoLastUpdated = DateTime.now();
+      
+      debugPrint('SubscriptionService: RevenueCat state refreshed - active entitlements: ${customerInfo.entitlements.active.keys.toList()}');
+    } catch (e) {
+      debugPrint('SubscriptionService: Error refreshing RevenueCat state: $e');
+    }
   }
 
   /// Initialize subscription cache for the current user

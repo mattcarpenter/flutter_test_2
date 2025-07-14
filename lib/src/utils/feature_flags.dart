@@ -6,9 +6,11 @@ import '../models/subscription_state.dart';
 /// Utility class for checking feature access based on subscription status
 class FeatureFlags {
   /// Check if user has access to a specific feature
+  /// NOTE: This method uses ref.watch and should only be used in build methods
+  /// For non-reactive checks, use hasFeatureSync directly with subscription state
   static bool hasFeature(String feature, WidgetRef ref) {
-    final subscription = ref.read(subscriptionProvider);
-    return hasFeatureSync(feature, subscription);
+    final hasPlus = ref.watch(hasPlusProvider);
+    return hasFeatureSync(feature, SubscriptionState(hasPlus: hasPlus));
   }
   
   /// Synchronous version for widgets that already have subscription state
@@ -118,28 +120,40 @@ class FeatureGate extends ConsumerWidget {
   
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final subscription = ref.watch(subscriptionProvider);
-    final isLoading = ref.watch(subscriptionLoadingProvider);
+    final hasPlusAsync = ref.watch(hasPlusHybridProvider);
     final error = ref.watch(subscriptionErrorProvider);
-    
-    // Show loading indicator if checking subscription
-    if (isLoading) {
-      return const Center(child: CupertinoActivityIndicator());
-    }
     
     // Show error widget if there's an error
     if (error != null) {
       return _buildErrorWidget(context, ref, error);
     }
     
-    // Check feature access
-    final hasAccess = FeatureFlags.hasFeatureSync(feature, subscription);
-    if (hasAccess) {
-      return child;
-    }
-    
-    // User doesn't have access, show fallback or upgrade prompt
-    return fallback ?? _buildUpgradePrompt(context, ref);
+    return hasPlusAsync.when(
+      data: (hasPlus) {
+        // Check feature access using hybrid provider result
+        final hasAccess = FeatureFlags.hasFeatureSync(feature, SubscriptionState(hasPlus: hasPlus));
+        
+        // Debug logging to trace the issue
+        debugPrint('FeatureGate($feature): hasPlusHybridProvider=$hasPlus, hasAccess=$hasAccess');
+        
+        if (hasAccess) {
+          debugPrint('FeatureGate($feature): Showing child (access granted)');
+          return child;
+        }
+        
+        // User doesn't have access, show fallback or upgrade prompt
+        debugPrint('FeatureGate($feature): Showing upgrade prompt (access denied)');
+        return fallback ?? _buildUpgradePrompt(context, ref);
+      },
+      loading: () {
+        debugPrint('FeatureGate($feature): Showing loading indicator');
+        return const Center(child: CupertinoActivityIndicator());
+      },
+      error: (e, _) {
+        debugPrint('FeatureGate($feature): Showing error widget - $e');
+        return _buildErrorWidget(context, ref, e.toString());
+      },
+    );
   }
   
   Widget _buildUpgradePrompt(BuildContext context, WidgetRef ref) {
@@ -226,38 +240,44 @@ class PremiumBadge extends ConsumerWidget {
   
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final hasPlus = ref.watch(hasPlusProvider);
+    final hasPlusAsync = ref.watch(hasPlusHybridProvider);
     
-    // If user has plus, show premium badge or custom child
-    if (hasPlus) {
-      return child ?? Container(
-        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-        decoration: BoxDecoration(
-          color: CupertinoColors.systemGreen.resolveFrom(context),
-          borderRadius: BorderRadius.circular(4),
-        ),
-        child: Text(
-          'PLUS',
-          style: TextStyle(
-            color: CupertinoColors.white,
-            fontSize: 10,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-      );
-    }
-    
-    // If feature is specified and is premium, show lock icon
-    if (feature != null && !FeatureFlags.hasFeatureSync(feature!, SubscriptionState(hasPlus: false))) {
-      return Icon(
-        CupertinoIcons.lock_fill,
-        size: 16,
-        color: CupertinoColors.systemOrange.resolveFrom(context),
-      );
-    }
-    
-    // Show when free or hide completely
-    return showWhenFree ? (child ?? const SizedBox.shrink()) : const SizedBox.shrink();
+    return hasPlusAsync.when(
+      data: (hasPlus) {
+        // If user has plus, show premium badge or custom child
+        if (hasPlus) {
+          return child ?? Container(
+            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+            decoration: BoxDecoration(
+              color: CupertinoColors.systemGreen.resolveFrom(context),
+              borderRadius: BorderRadius.circular(4),
+            ),
+            child: Text(
+              'PLUS',
+              style: TextStyle(
+                color: CupertinoColors.white,
+                fontSize: 10,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          );
+        }
+        
+        // If feature is specified and is premium, show lock icon
+        if (feature != null && !FeatureFlags.hasFeatureSync(feature!, SubscriptionState(hasPlus: false))) {
+          return Icon(
+            CupertinoIcons.lock_fill,
+            size: 16,
+            color: CupertinoColors.systemOrange.resolveFrom(context),
+          );
+        }
+        
+        // Show when free or hide completely
+        return showWhenFree ? (child ?? const SizedBox.shrink()) : const SizedBox.shrink();
+      },
+      loading: () => const SizedBox.shrink(), // Hide while loading
+      error: (e, _) => const SizedBox.shrink(), // Hide on error
+    );
   }
 }
 

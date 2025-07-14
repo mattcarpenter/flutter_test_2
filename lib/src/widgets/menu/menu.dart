@@ -25,6 +25,7 @@ class Menu extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final isDarkMode = CupertinoTheme.of(context).brightness == Brightness.dark;
     final isAuthenticated = ref.watch(isAuthenticatedProvider);
+    final hasPlus = ref.watch(hasPlusProvider); // Watch for reactive updates
 
     // Theme Colors
     final Color backgroundColor = isDarkMode ? CupertinoTheme.of(context).barBackgroundColor : CupertinoTheme.of(context).scaffoldBackgroundColor;
@@ -93,11 +94,10 @@ class Menu extends ConsumerWidget {
           backgroundColor: backgroundColor,
           trailing: PremiumBadge(feature: 'labs'),
           onTap: (_) async {
-            final hasAccess = ref.read(hasPlusProvider);
             final debugInfo = ref.read(subscriptionDebugProvider);
-            debugPrint('Labs tapped - hasAccess: $hasAccess, debugInfo: $debugInfo');
+            debugPrint('Labs tapped - hasAccess: $hasPlus, debugInfo: $debugInfo');
             
-            if (hasAccess) {
+            if (hasPlus) {
               onRouteGo('/labs');
             } else {
               // Show paywall first, only navigate if user purchases
@@ -125,8 +125,7 @@ class Menu extends ConsumerWidget {
           backgroundColor: backgroundColor,
           trailing: PremiumBadge(feature: 'labs'),
           onTap: (_) async {
-            final hasAccess = ref.read(hasPlusProvider);
-            if (hasAccess) {
+            if (hasPlus) {
               onRouteGo('/labs/sub');
             } else {
               // Show paywall first, only navigate if user purchases
@@ -152,8 +151,7 @@ class Menu extends ConsumerWidget {
           activeTextColor: activeTextColor,
           backgroundColor: backgroundColor,
           onTap: (_) async {
-            final hasAccess = ref.read(hasPlusProvider);
-            if (hasAccess) {
+            if (hasPlus) {
               onRouteGo('/labs/auth');
             } else {
               // Show paywall first, only navigate if user purchases
