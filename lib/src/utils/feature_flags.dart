@@ -240,44 +240,38 @@ class PremiumBadge extends ConsumerWidget {
   
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final hasPlusAsync = ref.watch(hasPlusHybridProvider);
+    final hasPlus = ref.watch(hasPlusProvider);
     
-    return hasPlusAsync.when(
-      data: (hasPlus) {
-        // If user has plus, show premium badge or custom child
-        if (hasPlus) {
-          return child ?? Container(
-            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-            decoration: BoxDecoration(
-              color: CupertinoColors.systemGreen.resolveFrom(context),
-              borderRadius: BorderRadius.circular(4),
-            ),
-            child: Text(
-              'PLUS',
-              style: TextStyle(
-                color: CupertinoColors.white,
-                fontSize: 10,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-          );
-        }
-        
-        // If feature is specified and is premium, show lock icon
-        if (feature != null && !FeatureFlags.hasFeatureSync(feature!, SubscriptionState(hasPlus: false))) {
-          return Icon(
-            CupertinoIcons.lock_fill,
-            size: 16,
-            color: CupertinoColors.systemOrange.resolveFrom(context),
-          );
-        }
-        
-        // Show when free or hide completely
-        return showWhenFree ? (child ?? const SizedBox.shrink()) : const SizedBox.shrink();
-      },
-      loading: () => const SizedBox.shrink(), // Hide while loading
-      error: (e, _) => const SizedBox.shrink(), // Hide on error
-    );
+    // If user has plus, show premium badge or custom child
+    if (hasPlus) {
+      return child ?? Container(
+        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+        decoration: BoxDecoration(
+          color: CupertinoColors.systemGreen.resolveFrom(context),
+          borderRadius: BorderRadius.circular(4),
+        ),
+        child: Text(
+          'PLUS',
+          style: TextStyle(
+            color: CupertinoColors.white,
+            fontSize: 10,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+      );
+    }
+    
+    // If feature is specified and is premium, show lock icon
+    if (feature != null && !FeatureFlags.hasFeatureSync(feature!, SubscriptionState(hasPlus: false))) {
+      return Icon(
+        CupertinoIcons.lock_fill,
+        size: 16,
+        color: CupertinoColors.systemOrange.resolveFrom(context),
+      );
+    }
+    
+    // Show when free or hide completely
+    return showWhenFree ? (child ?? const SizedBox.shrink()) : const SizedBox.shrink();
   }
 }
 
