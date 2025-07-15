@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:collection/collection.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:purchases_flutter/purchases_flutter.dart';
@@ -102,8 +103,8 @@ class SubscriptionService {
   bool _isInitialized = false;
   Completer<void>? _initCompleter;
   
-  // Cache for subscription state
-  UserSubscriptionEntry? _cachedSubscription;
+  // Cache for ALL subscriptions (not just user's own)
+  List<UserSubscriptionEntry> _cachedSubscriptions = [];
   String? _lastUserId;
   
   // RevenueCat CustomerInfo cache for immediate access
@@ -169,17 +170,19 @@ class SubscriptionService {
       }
       
       // 1. First check PowerSync database (cached)
-      debugPrint('SubscriptionService.hasPlus: Checking cached subscription - lastUserId: $_lastUserId, currentUserId: ${user.id}, hasCachedSubscription: ${_cachedSubscription != null}');
+      debugPrint('SubscriptionService.hasPlus: Checking cached subscriptions - lastUserId: $_lastUserId, currentUserId: ${user.id}, cachedCount: ${_cachedSubscriptions.length}');
       
-      if (_lastUserId == user.id && _cachedSubscription != null) {
-        final dbHasPlus = _isSubscriptionActive(_cachedSubscription!);
-        debugPrint('SubscriptionService.hasPlus: Database check - subscription: ${_cachedSubscription!.toJson()}, hasPlus: $dbHasPlus');
+      if (_lastUserId == user.id && _cachedSubscriptions.isNotEmpty) {
+        final dbHasPlus = _cachedSubscriptions.any((subscription) => 
+          subscription.entitlements.contains(_entitlementId) && 
+          subscription.status == SubscriptionStatus.active);
+        debugPrint('SubscriptionService.hasPlus: Database check - found ${_cachedSubscriptions.length} subscriptions, hasPlus: $dbHasPlus');
         if (dbHasPlus) {
           debugPrint('SubscriptionService.hasPlus: Database check passed, returning true');
           return true;
         }
       } else {
-        debugPrint('SubscriptionService.hasPlus: No valid cached subscription, need to refresh');
+        debugPrint('SubscriptionService.hasPlus: No valid cached subscriptions, need to refresh');
       }
       
       // 2. If not in database and fallback allowed, check RevenueCat
@@ -230,9 +233,11 @@ class SubscriptionService {
       final user = _supabase.auth.currentUser;
       if (user == null) return false;
       
-      // Use cached subscription if available for same user
-      if (_lastUserId == user.id && _cachedSubscription != null) {
-        return _isSubscriptionActive(_cachedSubscription!);
+      // Check if ANY cached subscription has plus entitlement and is active
+      if (_lastUserId == user.id && _cachedSubscriptions.isNotEmpty) {
+        return _cachedSubscriptions.any((subscription) => 
+          subscription.entitlements.contains(_entitlementId) && 
+          subscription.status == SubscriptionStatus.active);
       }
       
       // No cached data available - refresh needed
@@ -256,20 +261,26 @@ class SubscriptionService {
       final user = _supabase.auth.currentUser;
       if (user == null) return null;
       
-      // Use cached subscription if available for same user
-      if (_lastUserId == user.id && _cachedSubscription != null) {
-        final subscription = _cachedSubscription!;
+      // Find any active subscription with plus entitlement
+      if (_lastUserId == user.id && _cachedSubscriptions.isNotEmpty) {
+        final activeSubscription = _cachedSubscriptions.firstWhereOrNull((subscription) => 
+          subscription.entitlements.contains(_entitlementId) && 
+          subscription.status == SubscriptionStatus.active);
+        
+        if (activeSubscription == null) return null;
         
         return {
-          'status': subscription.status.name,
-          'entitlements': subscription.entitlements,
-          'expires_at': subscription.expiresAt != null ? DateTime.fromMillisecondsSinceEpoch(subscription.expiresAt!).toIso8601String() : null,
-          'trial_ends_at': subscription.trialEndsAt != null ? DateTime.fromMillisecondsSinceEpoch(subscription.trialEndsAt!).toIso8601String() : null,
-          'cancelled_at': subscription.cancelledAt != null ? DateTime.fromMillisecondsSinceEpoch(subscription.cancelledAt!).toIso8601String() : null,
-          'product_id': subscription.productId,
-          'store': subscription.store,
-          'revenuecat_customer_id': subscription.revenuecatCustomerId,
-          'last_updated': subscription.updatedAt != null ? DateTime.fromMillisecondsSinceEpoch(subscription.updatedAt!).toIso8601String() : null,
+          'status': activeSubscription.status.name,
+          'entitlements': activeSubscription.entitlements,
+          'expires_at': activeSubscription.expiresAt != null ? DateTime.fromMillisecondsSinceEpoch(activeSubscription.expiresAt!).toIso8601String() : null,
+          'trial_ends_at': activeSubscription.trialEndsAt != null ? DateTime.fromMillisecondsSinceEpoch(activeSubscription.trialEndsAt!).toIso8601String() : null,
+          'cancelled_at': activeSubscription.cancelledAt != null ? DateTime.fromMillisecondsSinceEpoch(activeSubscription.cancelledAt!).toIso8601String() : null,
+          'product_id': activeSubscription.productId,
+          'store': activeSubscription.store,
+          'revenuecat_customer_id': activeSubscription.revenuecatCustomerId,
+          'last_updated': activeSubscription.updatedAt != null ? DateTime.fromMillisecondsSinceEpoch(activeSubscription.updatedAt!).toIso8601String() : null,
+          'is_household_subscription': activeSubscription.userId != user.id,
+          'subscription_owner': activeSubscription.userId,
         };
       }
       
@@ -413,22 +424,20 @@ class SubscriptionService {
       final user = _supabase.auth.currentUser;
       if (user == null) return;
       
-      debugPrint('SubscriptionService: Refreshing subscription status from database');
+      debugPrint('SubscriptionService: Refreshing all subscriptions from database');
       
-      // Get latest subscription from PowerSync database
-      final query = appDb.select(appDb.userSubscriptions)
-        ..where((tbl) => tbl.userId.equals(user.id));
-      
-      final subscription = await query.getSingleOrNull();
+      // Get ALL subscriptions that PowerSync synced down
+      // PowerSync sync rules ensure user only gets subscriptions they're entitled to
+      final subscriptions = await appDb.select(appDb.userSubscriptions).get();
       
       // Update cache
-      _cachedSubscription = subscription;
+      _cachedSubscriptions = subscriptions;
       _lastUserId = user.id;
       
-      debugPrint('SubscriptionService: Subscription cache updated - subscription: ${subscription?.toJson()}');
+      debugPrint('SubscriptionService: Cached ${subscriptions.length} subscriptions');
       
     } catch (e) {
-      debugPrint('SubscriptionService: Error refreshing subscription: $e');
+      debugPrint('SubscriptionService: Error refreshing subscriptions: $e');
       rethrow;
     }
   }
@@ -517,13 +526,13 @@ class SubscriptionService {
     try {
       final user = _supabase.auth.currentUser;
       if (user == null) {
-        _cachedSubscription = null;
+        _cachedSubscriptions = [];
         _lastUserId = null;
         return;
       }
       
       // Skip if already cached for this user
-      if (_lastUserId == user.id && _cachedSubscription != null) {
+      if (_lastUserId == user.id && _cachedSubscriptions.isNotEmpty) {
         return;
       }
       

@@ -189,33 +189,34 @@ final subscriptionServiceProvider = Provider<SubscriptionService>((ref) {
   return SubscriptionService();
 });
 
-// Direct database watch provider for user subscription
-final userSubscriptionStreamProvider = StreamProvider<UserSubscriptionEntry?>((ref) {
+// All subscriptions stream provider - gets ALL subscriptions that PowerSync synced down
+final allSubscriptionsStreamProvider = StreamProvider<List<UserSubscriptionEntry>>((ref) {
   final currentUser = ref.watch(currentUserProvider);
   if (currentUser == null) {
-    debugPrint('userSubscriptionStreamProvider: No current user');
-    return Stream.value(null);
+    debugPrint('allSubscriptionsStreamProvider: No current user');
+    return Stream.value([]);
   }
   
-  debugPrint('userSubscriptionStreamProvider: Watching subscription for user ${currentUser.id}');
-  return (appDb.select(appDb.userSubscriptions)
-    ..where((tbl) => tbl.userId.equals(currentUser.id)))
-    .watchSingleOrNull();
+  debugPrint('allSubscriptionsStreamProvider: Watching all subscriptions for user ${currentUser.id}');
+  // Get ALL subscriptions that PowerSync synced down
+  // PowerSync sync rules ensure user only gets subscriptions they're entitled to
+  return appDb.select(appDb.userSubscriptions).watch();
 });
 
 // Debug provider to see what's in the database
 final subscriptionDebugProvider = Provider<String>((ref) {
-  final subscriptionAsync = ref.watch(userSubscriptionStreamProvider);
+  final subscriptionsAsync = ref.watch(allSubscriptionsStreamProvider);
   
-  return subscriptionAsync.when(
-    data: (subscription) {
-      if (subscription == null) {
-        return "DEBUG: No subscription found in database";
+  return subscriptionsAsync.when(
+    data: (subscriptions) {
+      if (subscriptions.isEmpty) {
+        return "DEBUG: No subscriptions found in database";
       }
-      return "DEBUG: Status=${subscription.status.name}, Entitlements=${subscription.entitlements}, ExpiresAt=${subscription.expiresAt}";
+      final subscription = subscriptions.first;
+      return "DEBUG: Found ${subscriptions.length} subscriptions - Status=${subscription.status.name}, Entitlements=${subscription.entitlements}, ExpiresAt=${subscription.expiresAt}";
     },
-    loading: () => "DEBUG: Loading subscription...",
-    error: (error, _) => "DEBUG: Error loading subscription: $error",
+    loading: () => "DEBUG: Loading subscriptions...",
+    error: (error, _) => "DEBUG: Error loading subscriptions: $error",
   );
 });
 
@@ -229,30 +230,30 @@ final subscriptionProvider = StateNotifierProvider<SubscriptionNotifier, Subscri
   );
 });
 
-// Reactive provider for checking Plus access - directly watches database
+// Reactive provider for checking Plus access - checks ALL subscriptions
 final hasPlusProvider = Provider<bool>((ref) {
-  final subscriptionAsync = ref.watch(userSubscriptionStreamProvider);
+  final subscriptionsAsync = ref.watch(allSubscriptionsStreamProvider);
   
-  return subscriptionAsync.when(
-    data: (subscription) {
-      if (subscription == null) {
-        debugPrint('hasPlusProvider: No subscription found');
-        return false;
+  return subscriptionsAsync.when(
+    data: (subscriptions) {
+      // Check if ANY subscription has plus entitlement and is active
+      final hasPlus = subscriptions.any((subscription) => 
+        subscription.entitlements.contains('plus') && 
+        subscription.status == SubscriptionStatus.active);
+      
+      debugPrint('hasPlusProvider: Found ${subscriptions.length} subscriptions, hasPlus=$hasPlus');
+      if (subscriptions.isNotEmpty) {
+        final firstSub = subscriptions.first;
+        debugPrint('hasPlusProvider: First subscription - status=${firstSub.status.name}, entitlements=${firstSub.entitlements}');
       }
-      
-      // Simply check if the required entitlement is present
-      // RevenueCat webhook removes entitlements when subscription expires
-      final hasPlus = subscription.entitlements.contains('plus');
-      
-      debugPrint('hasPlusProvider: status=${subscription.status.name}, entitlements=${subscription.entitlements}, hasPlus=$hasPlus');
       return hasPlus;
     },
     loading: () {
-      debugPrint('hasPlusProvider: Loading subscription data...');
+      debugPrint('hasPlusProvider: Loading subscriptions...');
       return false; // Default to no access while loading
     },
     error: (error, _) {
-      debugPrint('hasPlusProvider: Error loading subscription: $error');
+      debugPrint('hasPlusProvider: Error loading subscriptions: $error');
       return false; // Default to no access on error
     },
   );
