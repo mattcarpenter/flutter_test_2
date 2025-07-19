@@ -85,12 +85,10 @@ class HouseholdInvitesSection extends StatelessWidget {
   }
 
   void _showCreateInviteModal(BuildContext context) {
-    showCupertinoModalPopup<void>(
-      context: context,
-      builder: (context) => CreateInviteModal(
-        onCreateEmailInvite: onCreateEmailInvite,
-        onCreateCodeInvite: onCreateCodeInvite,
-      ),
+    showCreateInviteModal(
+      context,
+      onCreateEmailInvite,
+      onCreateCodeInvite,
     );
   }
 }

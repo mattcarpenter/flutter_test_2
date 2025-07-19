@@ -1,23 +1,79 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:wolt_modal_sheet/wolt_modal_sheet.dart';
 import '../../../widgets/error_dialog.dart';
+import '../../../widgets/wolt/text/modal_sheet_title.dart';
+import '../../../widgets/wolt/button/wolt_elevated_button.dart';
 import '../utils/error_messages.dart';
 
-class CreateInviteModal extends StatefulWidget {
+void showCreateInviteModal(
+  BuildContext context,
+  Future<String?> Function(String email) onCreateEmailInvite,
+  Future<String?> Function(String displayName) onCreateCodeInvite,
+) {
+  WoltModalSheet.show(
+    useRootNavigator: true,
+    context: context,
+    pageListBuilder: (bottomSheetContext) => [
+      CreateInviteModalPage.build(
+        context: bottomSheetContext,
+        onCreateEmailInvite: onCreateEmailInvite,
+        onCreateCodeInvite: onCreateCodeInvite,
+      ),
+    ],
+  );
+}
+
+class CreateInviteModalPage {
+  CreateInviteModalPage._();
+
+  static WoltModalSheetPage build({
+    required BuildContext context,
+    required Future<String?> Function(String email) onCreateEmailInvite,
+    required Future<String?> Function(String displayName) onCreateCodeInvite,
+  }) {
+    final isDarkMode = CupertinoTheme.of(context).brightness == Brightness.dark;
+    final backgroundColor = isDarkMode
+        ? CupertinoTheme.of(context).barBackgroundColor
+        : CupertinoTheme.of(context).scaffoldBackgroundColor;
+
+    return WoltModalSheetPage(
+      backgroundColor: backgroundColor,
+      leadingNavBarWidget: CupertinoButton(
+        padding: const EdgeInsets.symmetric(horizontal: 16.0),
+        onPressed: () {
+          Navigator.of(context).pop();
+        },
+        child: const Text('Cancel'),
+      ),
+      pageTitle: const ModalSheetTitle('Invite Member'),
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(16, 16, 16, 16),
+        child: CreateInviteForm(
+          onCreateEmailInvite: onCreateEmailInvite,
+          onCreateCodeInvite: onCreateCodeInvite,
+        ),
+      ),
+    );
+  }
+}
+
+class CreateInviteForm extends ConsumerStatefulWidget {
   final Future<String?> Function(String email) onCreateEmailInvite;
   final Future<String?> Function(String displayName) onCreateCodeInvite;
 
-  const CreateInviteModal({
+  const CreateInviteForm({
     super.key,
     required this.onCreateEmailInvite,
     required this.onCreateCodeInvite,
   });
 
   @override
-  State<CreateInviteModal> createState() => _CreateInviteModalState();
+  ConsumerState<CreateInviteForm> createState() => _CreateInviteFormState();
 }
 
-class _CreateInviteModalState extends State<CreateInviteModal> {
+class _CreateInviteFormState extends ConsumerState<CreateInviteForm> {
   int _selectedSegment = 0;
   final _emailController = TextEditingController();
   final _nameController = TextEditingController();
@@ -48,18 +104,17 @@ class _CreateInviteModalState extends State<CreateInviteModal> {
       });
 
       try {
-        print('INVITE MODAL: Creating email invite for: ${_emailController.text.trim()}');
-        final result = await widget.onCreateEmailInvite(_emailController.text.trim());
+        await widget.onCreateEmailInvite(_emailController.text.trim());
         if (mounted) {
           Navigator.of(context).pop();
-          if (result != null) {
-            _showSuccessDialog('Email invite sent successfully!');
-          }
+          _showSuccessDialog('Invitation email has been sent!');
         }
       } catch (e) {
-        print('INVITE MODAL: Error creating email invite: $e');
         if (mounted) {
-          _showErrorDialog('Failed to create email invite: $e');
+          await ErrorDialog.show(
+            context,
+            message: HouseholdErrorMessages.getDisplayMessage(e.toString()),
+          );
         }
       } finally {
         if (mounted) {
@@ -77,20 +132,17 @@ class _CreateInviteModalState extends State<CreateInviteModal> {
       });
 
       try {
-        print('INVITE MODAL: Creating code invite for: ${_nameController.text.trim()}');
         final inviteUrl = await widget.onCreateCodeInvite(_nameController.text.trim());
-        if (mounted) {
+        if (mounted && inviteUrl != null) {
           Navigator.of(context).pop();
-          if (inviteUrl != null) {
-            _showInviteCodeDialog(inviteUrl);
-          } else {
-            _showErrorDialog('Failed to create invite code - no URL returned');
-          }
+          _showInviteCodeDialog(inviteUrl);
         }
       } catch (e) {
-        print('INVITE MODAL: Error creating code invite: $e');
         if (mounted) {
-          _showErrorDialog('Failed to create invite code: $e');
+          await ErrorDialog.show(
+            context,
+            message: HouseholdErrorMessages.getDisplayMessage(e.toString()),
+          );
         }
       } finally {
         if (mounted) {
@@ -115,13 +167,6 @@ class _CreateInviteModalState extends State<CreateInviteModal> {
           ),
         ],
       ),
-    );
-  }
-
-  void _showErrorDialog(String error) async {
-    await ErrorDialog.show(
-      context,
-      message: HouseholdErrorMessages.getDisplayMessage(error),
     );
   }
 
@@ -171,85 +216,81 @@ class _CreateInviteModalState extends State<CreateInviteModal> {
 
   @override
   Widget build(BuildContext context) {
-    return CupertinoActionSheet(
-      title: const Text('Invite Member'),
-      message: const Text('Choose how to invite a new member'),
-      actions: [
-        Container(
-          padding: const EdgeInsets.all(16),
-          child: Column(
-            children: [
-              CupertinoSlidingSegmentedControl<int>(
-                groupValue: _selectedSegment,
-                onValueChanged: _isCreating ? (_) {} : _handleSegmentChanged,
-                children: const {
-                  0: Padding(
-                    padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                    child: Text('Email'),
-                  ),
-                  1: Padding(
-                    padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                    child: Text('Code'),
-                  ),
-                },
-              ),
-              const SizedBox(height: 16),
-              if (_selectedSegment == 0) ...[
-                CupertinoTextField(
-                  controller: _emailController,
-                  placeholder: 'Email address',
-                  keyboardType: TextInputType.emailAddress,
-                  autofocus: true,
-                  enabled: !_isCreating,
-                  onSubmitted: (_) => _createInvite(),
-                ),
-                const SizedBox(height: 8),
-                const Text(
-                  'An invitation email will be sent to this address',
-                  style: TextStyle(
-                    color: CupertinoColors.secondaryLabel,
-                    fontSize: 12,
-                  ),
-                ),
-              ] else ...[
-                CupertinoTextField(
-                  controller: _nameController,
-                  placeholder: 'Display name',
-                  autofocus: true,
-                  enabled: !_isCreating,
-                  onSubmitted: (_) => _createInvite(),
-                ),
-                const SizedBox(height: 8),
-                const Text(
-                  'A shareable invitation code will be generated',
-                  style: TextStyle(
-                    color: CupertinoColors.secondaryLabel,
-                    fontSize: 12,
-                  ),
-                ),
-              ],
-              const SizedBox(height: 16),
-              Row(
-                children: [
-                  Expanded(
-                    child: CupertinoButton(
-                      onPressed: _isCreating ? null : () => Navigator.of(context).pop(),
-                      child: const Text('Cancel'),
-                    ),
-                  ),
-                  const SizedBox(width: 8),
-                  Expanded(
-                    child: CupertinoButton.filled(
-                      onPressed: _isCreating ? null : _createInvite,
-                      child: _isCreating
-                          ? const CupertinoActivityIndicator(color: CupertinoColors.white)
-                          : Text(_selectedSegment == 0 ? 'Send Email' : 'Generate Code'),
-                    ),
-                  ),
-                ],
-              ),
-            ],
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        const Text(
+          'Choose how to invite a new member',
+          style: TextStyle(
+            color: CupertinoColors.secondaryLabel,
+            fontSize: 14,
           ),
+        ),
+        const SizedBox(height: 16),
+        CupertinoSlidingSegmentedControl<int>(
+          groupValue: _selectedSegment,
+          onValueChanged: _isCreating ? (_) {} : _handleSegmentChanged,
+          children: const {
+            0: Padding(
+              padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+              child: Text('Email'),
+            ),
+            1: Padding(
+              padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+              child: Text('Code'),
+            ),
+          },
+        ),
+        const SizedBox(height: 24),
+        if (_selectedSegment == 0) ...[
+          CupertinoTextField(
+            controller: _emailController,
+            placeholder: 'Email address',
+            keyboardType: TextInputType.emailAddress,
+            autofocus: true,
+            enabled: !_isCreating,
+            onSubmitted: (_) => _createInvite(),
+            padding: const EdgeInsets.all(12),
+          ),
+          const SizedBox(height: 8),
+          const Text(
+            'An invitation email will be sent to this address',
+            style: TextStyle(
+              color: CupertinoColors.secondaryLabel,
+              fontSize: 12,
+            ),
+          ),
+        ] else ...[
+          CupertinoTextField(
+            controller: _nameController,
+            placeholder: 'Display name',
+            autofocus: true,
+            enabled: !_isCreating,
+            onSubmitted: (_) => _createInvite(),
+            padding: const EdgeInsets.all(12),
+          ),
+          const SizedBox(height: 8),
+          const Text(
+            'A shareable invitation code will be generated',
+            style: TextStyle(
+              color: CupertinoColors.secondaryLabel,
+              fontSize: 12,
+            ),
+          ),
+        ],
+        const SizedBox(height: 24),
+        SizedBox(
+          width: double.infinity,
+          child: _isCreating
+              ? const CupertinoButton(
+                  onPressed: null,
+                  child: CupertinoActivityIndicator(color: CupertinoColors.white),
+                )
+              : WoltElevatedButton(
+                  onPressed: _createInvite,
+                  child: Text(_selectedSegment == 0 ? 'Send Email' : 'Generate Code'),
+                ),
         ),
       ],
     );

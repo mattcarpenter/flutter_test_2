@@ -1,21 +1,68 @@
 import 'package:flutter/cupertino.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:wolt_modal_sheet/wolt_modal_sheet.dart';
 import '../../../widgets/error_dialog.dart';
 import '../../../widgets/success_dialog.dart';
+import '../../../widgets/wolt/text/modal_sheet_title.dart';
+import '../../../widgets/wolt/button/wolt_elevated_button.dart';
 import '../utils/error_messages.dart';
 
-class CreateHouseholdModal extends StatefulWidget {
+void showCreateHouseholdModal(BuildContext context, Function(String name) onCreateHousehold) {
+  WoltModalSheet.show(
+    useRootNavigator: true,
+    context: context,
+    pageListBuilder: (bottomSheetContext) => [
+      CreateHouseholdModalPage.build(
+        context: bottomSheetContext,
+        onCreateHousehold: onCreateHousehold,
+      ),
+    ],
+  );
+}
+
+class CreateHouseholdModalPage {
+  CreateHouseholdModalPage._();
+
+  static WoltModalSheetPage build({
+    required BuildContext context,
+    required Function(String name) onCreateHousehold,
+  }) {
+    final isDarkMode = CupertinoTheme.of(context).brightness == Brightness.dark;
+    final backgroundColor = isDarkMode
+        ? CupertinoTheme.of(context).barBackgroundColor
+        : CupertinoTheme.of(context).scaffoldBackgroundColor;
+
+    return WoltModalSheetPage(
+      backgroundColor: backgroundColor,
+      leadingNavBarWidget: CupertinoButton(
+        padding: const EdgeInsets.symmetric(horizontal: 16.0),
+        onPressed: () {
+          Navigator.of(context).pop();
+        },
+        child: const Text('Cancel'),
+      ),
+      pageTitle: const ModalSheetTitle('Create Household'),
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(16, 16, 16, 16),
+        child: CreateHouseholdForm(onCreateHousehold: onCreateHousehold),
+      ),
+    );
+  }
+}
+
+class CreateHouseholdForm extends ConsumerStatefulWidget {
   final Function(String name) onCreateHousehold;
 
-  const CreateHouseholdModal({
+  const CreateHouseholdForm({
     super.key,
     required this.onCreateHousehold,
   });
 
   @override
-  State<CreateHouseholdModal> createState() => _CreateHouseholdModalState();
+  ConsumerState<CreateHouseholdForm> createState() => _CreateHouseholdFormState();
 }
 
-class _CreateHouseholdModalState extends State<CreateHouseholdModal> {
+class _CreateHouseholdFormState extends ConsumerState<CreateHouseholdForm> {
   final _controller = TextEditingController();
   bool _isCreating = false;
 
@@ -60,43 +107,38 @@ class _CreateHouseholdModalState extends State<CreateHouseholdModal> {
 
   @override
   Widget build(BuildContext context) {
-    return CupertinoActionSheet(
-      title: const Text('Create Household'),
-      message: const Text('Enter a name for your household'),
-      actions: [
-        Container(
-          padding: const EdgeInsets.all(16),
-          child: Column(
-            children: [
-              CupertinoTextField(
-                controller: _controller,
-                placeholder: 'Household name',
-                autofocus: true,
-                enabled: !_isCreating,
-                onSubmitted: (_) => _createHousehold(),
-              ),
-              const SizedBox(height: 16),
-              Row(
-                children: [
-                  Expanded(
-                    child: CupertinoButton(
-                      onPressed: _isCreating ? null : () => Navigator.of(context).pop(),
-                      child: const Text('Cancel'),
-                    ),
-                  ),
-                  const SizedBox(width: 8),
-                  Expanded(
-                    child: CupertinoButton.filled(
-                      onPressed: _isCreating ? null : _createHousehold,
-                      child: _isCreating
-                          ? const CupertinoActivityIndicator(color: CupertinoColors.white)
-                          : const Text('Create'),
-                    ),
-                  ),
-                ],
-              ),
-            ],
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        const Text(
+          'Enter a name for your household',
+          style: TextStyle(
+            color: CupertinoColors.secondaryLabel,
+            fontSize: 14,
           ),
+        ),
+        const SizedBox(height: 16),
+        CupertinoTextField(
+          controller: _controller,
+          placeholder: 'Household name',
+          autofocus: true,
+          enabled: !_isCreating,
+          onSubmitted: (_) => _createHousehold(),
+          padding: const EdgeInsets.all(12),
+        ),
+        const SizedBox(height: 24),
+        SizedBox(
+          width: double.infinity,
+          child: _isCreating
+              ? const CupertinoButton(
+                  onPressed: null,
+                  child: CupertinoActivityIndicator(color: CupertinoColors.white),
+                )
+              : WoltElevatedButton(
+                  onPressed: _createHousehold,
+                  child: const Text('Create Household'),
+                ),
         ),
       ],
     );

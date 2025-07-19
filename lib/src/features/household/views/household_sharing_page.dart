@@ -11,7 +11,6 @@ import '../widgets/household_info_section.dart';
 import '../widgets/household_members_section.dart';
 import '../widgets/household_invites_section.dart';
 import '../widgets/household_actions_section.dart';
-import '../widgets/pending_invites_section.dart';
 import '../widgets/household_invite_tile.dart';
 import '../utils/error_messages.dart';
 
@@ -72,7 +71,7 @@ class HouseholdSharingPage extends ConsumerWidget {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Icon(
+                  const Icon(
                     CupertinoIcons.person_badge_minus,
                     size: 64,
                     color: CupertinoColors.systemGrey2,
@@ -80,12 +79,12 @@ class HouseholdSharingPage extends ConsumerWidget {
                   const SizedBox(height: 16),
                   Text(
                     'Authentication Required',
-                    style: CupertinoTheme.of(context).textTheme.navLargeTitleTextStyle?.copyWith(
+                    style: CupertinoTheme.of(context).textTheme.navLargeTitleTextStyle.copyWith(
                       color: CupertinoColors.label,
                     ),
                   ),
                   const SizedBox(height: 8),
-                  Text(
+                  const Text(
                     'Please sign in to access household sharing features',
                     style: TextStyle(
                       fontSize: 16,
@@ -112,25 +111,6 @@ class HouseholdSharingPage extends ConsumerWidget {
     }
   }
 
-  Widget _buildPendingInvitesSection(BuildContext context, WidgetRef ref, householdState) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          'Household Invitations',
-          style: CupertinoTheme.of(context).textTheme.navLargeTitleTextStyle,
-        ),
-        const SizedBox(height: 16),
-        PendingInvitesSection(
-          invites: householdState.incomingInvites,
-          onAccept: (inviteCode) => ref.read(householdNotifierProvider.notifier)
-              .acceptInvite(inviteCode),
-          onDecline: (inviteCode) => ref.read(householdNotifierProvider.notifier)
-              .declineInvite(inviteCode),
-        ),
-      ],
-    );
-  }
 
   Widget _buildHouseholdManagementSection(BuildContext context, WidgetRef ref, householdState) {
     final currentUserId = Supabase.instance.client.auth.currentUser?.id;
@@ -234,12 +214,6 @@ class HouseholdSharingPage extends ConsumerWidget {
               invite: invite,
               showActions: true,
               onAccept: () async {
-                print('UI: Accept button tapped for invite:');
-                print('  - ID: ${invite.id}');
-                print('  - Invite Code: ${invite.inviteCode}');
-                print('  - Type: ${invite.inviteType}');
-                print('  - Status: ${invite.status}');
-                print('  - Email: ${invite.email}');
                 try {
                   await ref.read(householdNotifierProvider.notifier)
                       .acceptInvite(invite.inviteCode);
@@ -259,7 +233,6 @@ class HouseholdSharingPage extends ConsumerWidget {
                 }
               },
               onDecline: () async {
-                print('UI: Decline button tapped for invite: ${invite.inviteCode}');
                 try {
                   await ref.read(householdNotifierProvider.notifier)
                       .declineInvite(invite.inviteCode);
@@ -313,22 +286,16 @@ class HouseholdSharingPage extends ConsumerWidget {
 
   // Modal methods
   void _showCreateHouseholdModal(BuildContext context, WidgetRef ref) {
-    showCupertinoModalPopup<void>(
-      context: context,
-      builder: (context) => CreateHouseholdModal(
-        onCreateHousehold: (name) => ref.read(householdNotifierProvider.notifier)
-            .createHousehold(name),
-      ),
+    showCreateHouseholdModal(
+      context,
+      (name) => ref.read(householdNotifierProvider.notifier).createHousehold(name),
     );
   }
 
   void _showJoinWithCodeModal(BuildContext context, WidgetRef ref) {
-    showCupertinoModalPopup<void>(
-      context: context,
-      builder: (context) => JoinWithCodeModal(
-        onAcceptInvite: (inviteCode) => ref.read(householdNotifierProvider.notifier)
-            .acceptInvite(inviteCode),
-      ),
+    showJoinWithCodeModal(
+      context,
+      (inviteCode) => ref.read(householdNotifierProvider.notifier).acceptInvite(inviteCode),
     );
   }
 }
