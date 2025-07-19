@@ -159,66 +159,90 @@ class _AdaptiveSliverPageState extends State<AdaptiveSliverPage> {
             keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
             slivers: [
               widget.leading == null
-                  ? CupertinoSliverNavigationBar.search(
-                searchField: CupertinoSearchTextField(
-                  controller: _controller,
-                  placeholder: _searchIsActive ? 'Enter search text' : 'Search',
-                  autofocus: _searchIsActive,
-                  onChanged: (value) {
-                    setState(() {
-                      _searchQuery = value;
-                    });
-                    widget.onSearchChanged?.call(value);
-                  },
-                ),
-                largeTitle: Text(widget.title),
-                transitionBetweenRoutes: true,
-                previousPageTitle: widget.previousPageTitle,
-                trailing: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16),
-                  child: widget.trailing,
-                ),
-                padding: EdgeInsetsDirectional.only(start: padding),
-                automaticallyImplyLeading: widget.automaticallyImplyLeading ?? false,
-                onSearchableBottomTap: widget.searchEnabled && widget.searchResultsBuilder != null
-                    ? (value) {
-                        setState(() {
-                          _searchIsActive = value;
-                        });
-                      }
-                    : null,
-              )
-                  : CupertinoSliverNavigationBar.search(
-                searchField: CupertinoSearchTextField(
-                  controller: _controller,
-                  placeholder: _searchIsActive ? 'Enter search text' : 'Search',
-                  autofocus: _searchIsActive,
-                  onChanged: (value) {
-                    setState(() {
-                      _searchQuery = value;
-                    });
-                    widget.onSearchChanged?.call(value);
-                  },
-                ),
-                largeTitle: Text(widget.title),
-                transitionBetweenRoutes: true,
-                previousPageTitle: widget.previousPageTitle,
-                trailing: widget.trailing,
-                automaticallyImplyLeading: widget.automaticallyImplyLeading ?? false,
-                leading: Padding(
-                  padding: EdgeInsets.symmetric(horizontal: padding),
-                  child: widget.leading,
-                ),
-                onSearchableBottomTap: widget.searchEnabled && widget.searchResultsBuilder != null
-                    ? (value) {
-                        setState(() {
-                          _searchIsActive = value;
-                        });
-                      }
-                    : null,
-              ),
-              // Show search results when search is active, otherwise show normal content
-              if (_searchIsActive && widget.searchResultsBuilder != null)
+                  ? (widget.searchEnabled
+                      ? CupertinoSliverNavigationBar.search(
+                          searchField: CupertinoSearchTextField(
+                            controller: _controller,
+                            placeholder: _searchIsActive ? 'Enter search text' : 'Search',
+                            autofocus: _searchIsActive,
+                            onChanged: (value) {
+                              setState(() {
+                                _searchQuery = value;
+                              });
+                              widget.onSearchChanged?.call(value);
+                            },
+                          ),
+                          largeTitle: Text(widget.title),
+                          transitionBetweenRoutes: true,
+                          previousPageTitle: widget.previousPageTitle,
+                          trailing: Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 16),
+                            child: widget.trailing,
+                          ),
+                          padding: EdgeInsetsDirectional.only(start: padding),
+                          automaticallyImplyLeading: widget.automaticallyImplyLeading ?? false,
+                          onSearchableBottomTap: widget.searchResultsBuilder != null
+                              ? (value) {
+                                  setState(() {
+                                    _searchIsActive = value;
+                                  });
+                                }
+                              : null,
+                        )
+                      : CupertinoSliverNavigationBar(
+                          largeTitle: Text(widget.title),
+                          transitionBetweenRoutes: true,
+                          previousPageTitle: widget.previousPageTitle,
+                          trailing: Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 16),
+                            child: widget.trailing,
+                          ),
+                          padding: EdgeInsetsDirectional.only(start: padding),
+                          automaticallyImplyLeading: widget.automaticallyImplyLeading ?? false,
+                        ))
+                  : (widget.searchEnabled
+                      ? CupertinoSliverNavigationBar.search(
+                          searchField: CupertinoSearchTextField(
+                            controller: _controller,
+                            placeholder: _searchIsActive ? 'Enter search text' : 'Search',
+                            autofocus: _searchIsActive,
+                            onChanged: (value) {
+                              setState(() {
+                                _searchQuery = value;
+                              });
+                              widget.onSearchChanged?.call(value);
+                            },
+                          ),
+                          largeTitle: Text(widget.title),
+                          transitionBetweenRoutes: true,
+                          previousPageTitle: widget.previousPageTitle,
+                          trailing: widget.trailing,
+                          automaticallyImplyLeading: widget.automaticallyImplyLeading ?? false,
+                          leading: Padding(
+                            padding: EdgeInsets.symmetric(horizontal: padding),
+                            child: widget.leading,
+                          ),
+                          onSearchableBottomTap: widget.searchResultsBuilder != null
+                              ? (value) {
+                                  setState(() {
+                                    _searchIsActive = value;
+                                  });
+                                }
+                              : null,
+                        )
+                      : CupertinoSliverNavigationBar(
+                          largeTitle: Text(widget.title),
+                          transitionBetweenRoutes: true,
+                          previousPageTitle: widget.previousPageTitle,
+                          trailing: widget.trailing,
+                          automaticallyImplyLeading: widget.automaticallyImplyLeading ?? false,
+                          leading: Padding(
+                            padding: EdgeInsets.symmetric(horizontal: padding),
+                            child: widget.leading,
+                          ),
+                        )),
+              // Show search results when search is active and enabled, otherwise show normal content
+              if (widget.searchEnabled && _searchIsActive && widget.searchResultsBuilder != null)
                 _buildSearchResultsSliver()
               else
                 ..._buildContentSlivers(),
