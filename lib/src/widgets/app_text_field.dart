@@ -281,7 +281,7 @@ class _AppTextFieldState extends State<AppTextField>
                   padding: EdgeInsets.only(
                     left: widget.prefix != null ? 0 : _horizontalPadding,
                     right: widget.suffix != null ? 0 : _horizontalPadding,
-                    top: isFloating ? 20.0 : 0.0,
+                    top: isFloating ? 16.0 : 0.0,
                   ),
                   child: Row(
                     children: [
