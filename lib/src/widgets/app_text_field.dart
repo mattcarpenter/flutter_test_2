@@ -11,7 +11,7 @@ class AppTextField extends StatefulWidget {
   final bool enabled;
   final TextInputType keyboardType;
   final bool obscureText;
-  final int maxLines;
+  final bool multiline;
   final ValueChanged<String>? onChanged;
   final VoidCallback? onEditingComplete;
   final ValueChanged<String>? onSubmitted;
@@ -34,7 +34,7 @@ class AppTextField extends StatefulWidget {
     this.enabled = true,
     this.keyboardType = TextInputType.text,
     this.obscureText = false,
-    this.maxLines = 1,
+    this.multiline = false,
     this.onChanged,
     this.onEditingComplete,
     this.onSubmitted,
@@ -72,6 +72,7 @@ class _AppTextFieldState extends State<AppTextField>
   static const double _labelFontSize = 16.0;
   static const double _floatingLabelFontSize = 12.0;
   static const Duration _animationDuration = Duration(milliseconds: 250);
+  static const double _lineHeight = 24.0; // For multiline calculation
 
   // Colors
   static const Color _focusColor = Color(0xFFE91E63); // Pink/Magenta
@@ -191,6 +192,10 @@ class _AppTextFieldState extends State<AppTextField>
     return _labelColor;
   }
 
+  int get _maxLines => widget.multiline ? 5 : 1;
+  
+  bool get _isMultiline => widget.multiline;
+
   @override
   Widget build(BuildContext context) {
     final isFloating = _isFocused || _hasValue;
@@ -199,8 +204,7 @@ class _AppTextFieldState extends State<AppTextField>
       crossAxisAlignment: CrossAxisAlignment.start,
       mainAxisSize: MainAxisSize.min,
       children: [
-        SizedBox(
-          height: _fieldHeight,
+        IntrinsicHeight(
           child: Stack(
             clipBehavior: Clip.none,
             children: [
@@ -213,7 +217,9 @@ class _AppTextFieldState extends State<AppTextField>
                       : _borderColorAnimation.value ?? _defaultBorderColor;
 
                   return Container(
-                    height: _fieldHeight,
+                    constraints: BoxConstraints(
+                      minHeight: _fieldHeight,
+                    ),
                     decoration: BoxDecoration(
                       color: widget.variant == AppTextFieldVariant.filled
                           ? (widget.enabled
@@ -241,8 +247,17 @@ class _AppTextFieldState extends State<AppTextField>
                   final progress = _animation.value;
                   
                   // Linear interpolation for position
-                  // From center (28px) to top inside box (12px)
-                  final yPosition = 28.0 - (progress * 16.0);
+                  // Calculate proper baseline positions
+                  final textBaseline = 18.0; // Approximate baseline offset for 16px font
+                  
+                  // Single line: visual center of container (56px)
+                  // Multiline: align with input text position
+                  final startY = _isMultiline 
+                      ? 16.0 + textBaseline + 3.0  // Match input padding + baseline + adjustment
+                      : (_fieldHeight / 2) + (textBaseline / 2) - 2.0; // Visual center
+                  
+                  final endY = 3.0 + textBaseline; // Floating position much higher up
+                  final yPosition = startY - (progress * (startY - endY));
                   
                   // Linear scale from 1.0 to 0.75
                   final scale = 1.0 - (progress * 0.25);
@@ -257,7 +272,7 @@ class _AppTextFieldState extends State<AppTextField>
 
                   return Transform(
                     transform: Matrix4.identity()
-                      ..translate(_horizontalPadding, yPosition - 8.0)
+                      ..translate(_horizontalPadding, yPosition - textBaseline)
                       ..scale(scale),
                     alignment: Alignment.centerLeft,
                     child: Opacity(
@@ -276,13 +291,13 @@ class _AppTextFieldState extends State<AppTextField>
               ),
 
               // Input field
-              Positioned.fill(
-                child: Padding(
-                  padding: EdgeInsets.only(
-                    left: widget.prefix != null ? 0 : _horizontalPadding,
-                    right: widget.suffix != null ? 0 : _horizontalPadding,
-                    top: isFloating ? 16.0 : 0.0,
-                  ),
+              Padding(
+                padding: EdgeInsets.only(
+                  left: widget.prefix != null ? 0 : _horizontalPadding,
+                  right: widget.suffix != null ? 0 : _horizontalPadding,
+                  top: isFloating ? 24.0 : 16.0,
+                  bottom: isFloating ? 8.0 : 16.0,
+                ),
                   child: Row(
                     children: [
                       if (widget.prefix != null) ...[
@@ -297,14 +312,18 @@ class _AppTextFieldState extends State<AppTextField>
                           controller: widget.controller,
                           focusNode: _focusNode,
                           enabled: widget.enabled,
-                          keyboardType: widget.keyboardType,
+                          keyboardType: widget.multiline 
+                              ? TextInputType.multiline 
+                              : widget.keyboardType,
                           obscureText: widget.obscureText,
-                          maxLines: widget.maxLines,
+                          minLines: 1,
+                          maxLines: widget.obscureText ? 1 : _maxLines,
                           onChanged: widget.onChanged,
                           onEditingComplete: widget.onEditingComplete,
                           onSubmitted: widget.onSubmitted,
                           inputFormatters: widget.inputFormatters,
-                          textInputAction: widget.textInputAction,
+                          textInputAction: widget.textInputAction ?? 
+                              (widget.multiline ? TextInputAction.newline : TextInputAction.done),
                           autofocus: widget.autofocus,
                           textCapitalization: widget.textCapitalization,
                           textAlign: widget.textAlign,
@@ -315,6 +334,9 @@ class _AppTextFieldState extends State<AppTextField>
                             color: widget.enabled ? Colors.black : _disabledColor,
                             height: 1.5,
                           ),
+                          textAlignVertical: _isMultiline 
+                              ? TextAlignVertical.top 
+                              : TextAlignVertical.center,
                           decoration: InputDecoration(
                             isDense: true,
                             contentPadding: EdgeInsets.zero,
@@ -332,7 +354,6 @@ class _AppTextFieldState extends State<AppTextField>
                       ],
                     ],
                   ),
-                ),
               ),
             ],
           ),

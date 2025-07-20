@@ -34,15 +34,11 @@ class RecipeMetadataSection extends StatelessWidget {
         const SizedBox(height: 16),
 
         // Recipe Description
-        CupertinoTextField(
+        AppTextField(
           controller: descriptionController,
           placeholder: "Description (optional)",
-          padding: const EdgeInsets.all(12),
-          decoration: BoxDecoration(
-            border: Border.all(color: Colors.grey.shade400),
-            borderRadius: BorderRadius.circular(8),
-          ),
-          maxLines: 3,
+          variant: AppTextFieldVariant.outline,
+          multiline: true,
         ),
         const SizedBox(height: 16),
 

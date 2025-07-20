@@ -104,7 +104,7 @@ class _AppTextFieldExampleState extends State<AppTextFieldExample> {
               controller: _notesController,
               placeholder: 'Notes',
               variant: AppTextFieldVariant.filled,
-              maxLines: 3,
+              multiline: true,
             ),
             
             const SizedBox(height: 24),
