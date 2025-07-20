@@ -1,5 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import '../../../../../widgets/app_text_field.dart';
 
 class RecipeMetadataSection extends StatelessWidget {
   final TextEditingController titleController;
@@ -25,15 +26,10 @@ class RecipeMetadataSection extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         // Recipe Title
-        CupertinoTextField(
+        AppTextField(
           controller: titleController,
           placeholder: "Recipe Title",
-          padding: const EdgeInsets.all(12),
-          decoration: BoxDecoration(
-            border: Border.all(color: Colors.grey.shade400),
-            borderRadius: BorderRadius.circular(8),
-          ),
-          style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+          variant: AppTextFieldVariant.outline,
         ),
         const SizedBox(height: 16),
 
