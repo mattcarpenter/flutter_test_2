@@ -1,5 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import '../../../../../widgets/app_text_field.dart';
 import '../../../../../widgets/app_duration_picker.dart';
 
@@ -12,14 +13,14 @@ class RecipeMetadataSection extends StatelessWidget {
   final TextEditingController sourceController;
 
   const RecipeMetadataSection({
-    Key? key,
+    super.key,
     required this.titleController,
     required this.descriptionController,
     required this.servingsController,
     required this.prepTimeController,
     required this.cookTimeController,
     required this.sourceController,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -52,6 +53,7 @@ class RecipeMetadataSection extends StatelessWidget {
                 placeholder: "Servings",
                 variant: AppTextFieldVariant.outline,
                 keyboardType: TextInputType.number,
+                inputFormatters: [FilteringTextInputFormatter.digitsOnly],
               ),
             ),
             const SizedBox(width: 8),

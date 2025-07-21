@@ -24,6 +24,7 @@ class AppTextField extends StatefulWidget {
   final int? maxLength;
   final Widget? suffix;
   final Widget? prefix;
+  final String? Function(String?)? validator;
 
   const AppTextField({
     Key? key,
@@ -47,6 +48,7 @@ class AppTextField extends StatefulWidget {
     this.maxLength,
     this.suffix,
     this.prefix,
+    this.validator,
   }) : super(key: key);
 
   @override
@@ -64,6 +66,7 @@ class _AppTextFieldState extends State<AppTextField>
   late Animation<Color?> _labelColorAnimation;
   bool _hasValue = false;
   bool _isFocused = false;
+  String? _validationError;
 
   // Design tokens
   static const double _fieldHeight = 56.0;
@@ -177,19 +180,33 @@ class _AppTextFieldState extends State<AppTextField>
         _animationController.reverse();
       }
     }
+
+    // Run validation if validator is provided
+    if (widget.validator != null) {
+      final error = widget.validator!(widget.controller.text);
+      if (error != _validationError) {
+        setState(() {
+          _validationError = error;
+        });
+      }
+    }
   }
 
   Color get _borderColor {
-    if (widget.errorText != null) return _errorColor;
+    if (widget.errorText != null || _validationError != null) return _errorColor;
     if (_isFocused) return _focusColor;
     if (!widget.enabled) return _disabledColor;
     return _defaultBorderColor;
   }
 
   Color get _labelColorAnimated {
-    if (widget.errorText != null) return _errorColor;
+    if (widget.errorText != null || _validationError != null) return _errorColor;
     if (_isFocused) return _focusColor;
     return _labelColor;
+  }
+
+  String? get _effectiveErrorText {
+    return widget.errorText ?? _validationError;
   }
 
   int get _maxLines => widget.multiline ? 5 : 1;
@@ -212,7 +229,7 @@ class _AppTextFieldState extends State<AppTextField>
               AnimatedBuilder(
                 animation: _focusAnimation,
                 builder: (context, child) {
-                  final borderColor = widget.errorText != null
+                  final borderColor = _effectiveErrorText != null
                       ? _errorColor
                       : _borderColorAnimation.value ?? _defaultBorderColor;
 
@@ -266,7 +283,7 @@ class _AppTextFieldState extends State<AppTextField>
                   final opacity = 0.7 + (progress * 0.3);
                   
                   // Animated label color
-                  final labelColor = widget.errorText != null
+                  final labelColor = _effectiveErrorText != null
                       ? _errorColor
                       : _labelColorAnimation.value ?? _labelColor;
 
@@ -360,10 +377,10 @@ class _AppTextFieldState extends State<AppTextField>
         ),
 
         // Error text
-        if (widget.errorText != null)
+        if (_effectiveErrorText != null)
           AnimatedContainer(
             duration: _animationDuration,
-            height: widget.errorText != null ? null : 0,
+            height: _effectiveErrorText != null ? null : 0,
             child: Padding(
               padding: const EdgeInsets.only(
                 top: 4.0,
@@ -371,7 +388,7 @@ class _AppTextFieldState extends State<AppTextField>
                 right: _horizontalPadding,
               ),
               child: Text(
-                widget.errorText ?? '',
+                _effectiveErrorText ?? '',
                 style: TextStyle(
                   color: _errorColor,
                   fontSize: 12.0,
