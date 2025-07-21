@@ -46,40 +46,28 @@ class RecipeMetadataSection extends StatelessWidget {
         Row(
           children: [
             Expanded(
-              child: CupertinoTextField(
+              child: AppTextField(
                 controller: servingsController,
                 placeholder: "Servings",
-                padding: const EdgeInsets.all(12),
-                decoration: BoxDecoration(
-                  border: Border.all(color: Colors.grey.shade400),
-                  borderRadius: BorderRadius.circular(8),
-                ),
+                variant: AppTextFieldVariant.outline,
                 keyboardType: TextInputType.number,
               ),
             ),
             const SizedBox(width: 8),
             Expanded(
-              child: CupertinoTextField(
+              child: AppTextField(
                 controller: prepTimeController,
-                placeholder: "Prep Time (min)",
-                padding: const EdgeInsets.all(12),
-                decoration: BoxDecoration(
-                  border: Border.all(color: Colors.grey.shade400),
-                  borderRadius: BorderRadius.circular(8),
-                ),
+                placeholder: "Prep Time",
+                variant: AppTextFieldVariant.outline,
                 keyboardType: TextInputType.number,
               ),
             ),
             const SizedBox(width: 8),
             Expanded(
-              child: CupertinoTextField(
+              child: AppTextField(
                 controller: cookTimeController,
-                placeholder: "Cook Time (min)",
-                padding: const EdgeInsets.all(12),
-                decoration: BoxDecoration(
-                  border: Border.all(color: Colors.grey.shade400),
-                  borderRadius: BorderRadius.circular(8),
-                ),
+                placeholder: "Cook Time",
+                variant: AppTextFieldVariant.outline,
                 keyboardType: TextInputType.number,
               ),
             ),
@@ -88,14 +76,10 @@ class RecipeMetadataSection extends StatelessWidget {
         const SizedBox(height: 16),
 
         // Source Field
-        CupertinoTextField(
+        AppTextField(
           controller: sourceController,
           placeholder: "Source (optional)",
-          padding: const EdgeInsets.all(12),
-          decoration: BoxDecoration(
-            border: Border.all(color: Colors.grey.shade400),
-            borderRadius: BorderRadius.circular(8),
-          ),
+          variant: AppTextFieldVariant.outline,
         ),
       ],
     );
