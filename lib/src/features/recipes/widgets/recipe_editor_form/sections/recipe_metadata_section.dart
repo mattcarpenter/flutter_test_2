@@ -1,6 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import '../../../../../widgets/app_text_field.dart';
+import '../../../../../widgets/app_duration_picker.dart';
 
 class RecipeMetadataSection extends StatelessWidget {
   final TextEditingController titleController;
@@ -55,20 +56,20 @@ class RecipeMetadataSection extends StatelessWidget {
             ),
             const SizedBox(width: 8),
             Expanded(
-              child: AppTextField(
+              child: AppDurationPicker(
                 controller: prepTimeController,
                 placeholder: "Prep Time",
                 variant: AppTextFieldVariant.outline,
-                keyboardType: TextInputType.number,
+                mode: DurationPickerMode.hoursMinutes,
               ),
             ),
             const SizedBox(width: 8),
             Expanded(
-              child: AppTextField(
+              child: AppDurationPicker(
                 controller: cookTimeController,
                 placeholder: "Cook Time",
                 variant: AppTextFieldVariant.outline,
-                keyboardType: TextInputType.number,
+                mode: DurationPickerMode.hoursMinutes,
               ),
             ),
           ],
