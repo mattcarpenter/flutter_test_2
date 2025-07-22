@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'app_text_field_condensed.dart';
+import 'app_duration_picker_condensed.dart';
+import 'app_duration_picker.dart' show DurationPickerMode;
 
 class AppTextFieldCondensedExample extends StatefulWidget {
   const AppTextFieldCondensedExample({Key? key}) : super(key: key);
@@ -160,6 +163,55 @@ class _AppTextFieldCondensedExampleState extends State<AppTextFieldCondensedExam
                 variant: AppTextFieldVariant.outline,
                 multiline: true,
                 minLines: 3,
+              ),
+              
+              const SizedBox(height: 32),
+              
+              const Text(
+                'Form Hierarchy Groups',
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(height: 16),
+              
+              // Servings - standalone
+              AppTextFieldCondensed(
+                controller: TextEditingController(text: '4'),
+                placeholder: 'Servings',
+                variant: AppTextFieldVariant.outline,
+                keyboardType: TextInputType.number,
+                inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                first: true,
+                last: true,
+              ),
+              const SizedBox(height: 8),
+              
+              // Timing group
+              AppDurationPickerCondensed(
+                controller: TextEditingController(text: '15'),
+                placeholder: 'Prep Time',
+                variant: AppTextFieldVariant.outline,
+                mode: DurationPickerMode.hoursMinutes,
+                first: true,
+                last: false,
+              ),
+              AppDurationPickerCondensed(
+                controller: TextEditingController(text: '30'),
+                placeholder: 'Cook Time',
+                variant: AppTextFieldVariant.outline,
+                mode: DurationPickerMode.hoursMinutes,
+                first: false,
+                last: true,
+              ),
+              const SizedBox(height: 8),
+              
+              // Source - standalone
+              AppTextFieldCondensed(
+                controller: TextEditingController(text: 'example.com/recipe'),
+                placeholder: 'Source',
+                variant: AppTextFieldVariant.outline,
+                keyboardType: TextInputType.url,
+                first: true,
+                last: true,
               ),
               
               const SizedBox(height: 32),

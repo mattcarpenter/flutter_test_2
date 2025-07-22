@@ -49,57 +49,45 @@ class RecipeMetadataSection extends StatelessWidget {
         ),
         const SizedBox(height: 12),
 
-        // Servings - using condensed field
-        SizedBox(
-          width: double.infinity,
-          child: Row(
-            children: [
-              Expanded(
-                flex: 1,
-                child: AppTextFieldCondensed(
-                  controller: servingsController,
-                  placeholder: "Servings",
-                  variant: AppTextFieldVariant.outline,
-                  keyboardType: TextInputType.number,
-                  inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-                ),
-              ),
-              const Expanded(flex: 1, child: SizedBox()), // Empty space
-            ],
-          ),
+        // Servings - standalone
+        AppTextFieldCondensed(
+          controller: servingsController,
+          placeholder: "Servings",
+          variant: AppTextFieldVariant.outline,
+          keyboardType: TextInputType.number,
+          inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+          first: true,
+          last: true,
         ),
         const SizedBox(height: 8),
 
-        // Prep and Cook Time - using condensed duration pickers
-        Row(
-          children: [
-            Expanded(
-              child: AppDurationPickerCondensed(
-                controller: prepTimeController,
-                placeholder: "Prep Time",
-                variant: AppTextFieldVariant.outline,
-                mode: DurationPickerMode.hoursMinutes,
-              ),
-            ),
-            const SizedBox(width: 8),
-            Expanded(
-              child: AppDurationPickerCondensed(
-                controller: cookTimeController,
-                placeholder: "Cook Time",
-                variant: AppTextFieldVariant.outline,
-                mode: DurationPickerMode.hoursMinutes,
-              ),
-            ),
-          ],
+        // Timing group: Prep Time + Cook Time
+        AppDurationPickerCondensed(
+          controller: prepTimeController,
+          placeholder: "Prep Time",
+          variant: AppTextFieldVariant.outline,
+          mode: DurationPickerMode.hoursMinutes,
+          first: true,
+          last: false,
+        ),
+        AppDurationPickerCondensed(
+          controller: cookTimeController,
+          placeholder: "Cook Time",
+          variant: AppTextFieldVariant.outline,
+          mode: DurationPickerMode.hoursMinutes,
+          first: false,
+          last: true,
         ),
         const SizedBox(height: 8),
 
-        // Source - using condensed field
+        // Source - standalone
         AppTextFieldCondensed(
           controller: sourceController,
           placeholder: "Source (optional)",
           variant: AppTextFieldVariant.outline,
           keyboardType: TextInputType.url,
+          first: true,
+          last: true,
         ),
       ],
     );

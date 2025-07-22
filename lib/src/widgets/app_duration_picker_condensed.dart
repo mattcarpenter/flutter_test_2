@@ -2,7 +2,6 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:wolt_modal_sheet/wolt_modal_sheet.dart';
-import 'app_text_field_condensed.dart';
 import 'app_duration_picker.dart' show DurationPickerMode;
 import 'app_text_field.dart' show AppTextFieldVariant;
 
@@ -250,24 +249,106 @@ class _AppDurationPickerCondensedState extends State<AppDurationPickerCondensed>
     );
   }
 
+  Widget _buildChip(String text) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      decoration: BoxDecoration(
+        color: const Color(0xFFE3F2FD), // Light blue
+        borderRadius: BorderRadius.circular(2),
+      ),
+      child: Text(
+        text,
+        style: const TextStyle(
+          color: Color(0xFF1565C0), // Dark blue
+          fontSize: 12,
+          fontWeight: FontWeight.w500,
+        ),
+      ),
+    );
+  }
+
+  BorderRadius _getBorderRadius() {
+    if (widget.first && widget.last) {
+      return BorderRadius.circular(8.0);
+    } else if (widget.first && !widget.last) {
+      return BorderRadius.only(
+        topLeft: Radius.circular(8.0),
+        topRight: Radius.circular(8.0),
+      );
+    } else if (!widget.first && widget.last) {
+      return BorderRadius.only(
+        bottomLeft: Radius.circular(8.0),
+        bottomRight: Radius.circular(8.0),
+      );
+    } else {
+      return BorderRadius.zero;
+    }
+  }
+
+  Border _getBorder() {
+    const borderColor = Color(0xFFE5E7EB);
+    const borderWidth = 1.0;
+
+    if (widget.variant == AppTextFieldVariant.outline) {
+      // Match AppTextFieldCondensed logic: first items get full border, others omit top border
+      if (widget.first) {
+        return Border.all(
+          color: borderColor,
+          width: borderWidth,
+        );
+      } else {
+        return Border(
+          left: BorderSide(color: borderColor, width: borderWidth),
+          right: BorderSide(color: borderColor, width: borderWidth),
+          bottom: BorderSide(color: borderColor, width: borderWidth),
+        );
+      }
+    } else {
+      // Filled variant - no border
+      return Border.all(
+        color: Colors.transparent,
+        width: 0,
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
+    final displayText = _displayController.text.isEmpty ? '--:--' : _displayController.text;
+    
     return GestureDetector(
       onTap: _showDurationPicker,
-      child: AbsorbPointer(
-        child: AppTextFieldCondensed(
-          controller: _displayController,
-          placeholder: widget.placeholder,
-          variant: widget.variant,
-          errorText: widget.errorText,
-          enabled: widget.enabled,
-          first: widget.first,
-          last: widget.last,
-          suffix: Icon(
-            CupertinoIcons.clock,
-            size: 20,
-            color: widget.enabled ? Colors.grey[600] : Colors.grey[400],
-          ),
+      child: Container(
+        height: 48.0,
+        decoration: BoxDecoration(
+          color: widget.enabled ? Colors.white : Colors.grey[50],
+          borderRadius: _getBorderRadius(),
+          border: _getBorder(),
+        ),
+        child: Row(
+          children: [
+            const SizedBox(width: 16),
+            
+            // Fixed label on the left
+            Text(
+              widget.placeholder,
+              style: const TextStyle(
+                color: Color(0xFF6B7280),
+                fontSize: 16,
+                fontWeight: FontWeight.w400,
+              ),
+            ),
+            
+            const SizedBox(width: 16),
+            
+            // Spacer to push chip to the right
+            const Spacer(),
+            
+            // Chip on the right
+            _buildChip(displayText),
+            
+            const SizedBox(width: 16),
+          ],
         ),
       ),
     );
