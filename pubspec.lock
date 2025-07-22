@@ -2484,6 +2484,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "0.11.0"
+  wolt_responsive_layout_grid:
+    dependency: "direct main"
+    description:
+      name: wolt_responsive_layout_grid
+      sha256: bfcc215af79e7afc5e6370c1a242662a1f80e1144ac3f364bc650cdce65c6e66
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.0.3"
   xdg_directories:
     dependency: transitive
     description:

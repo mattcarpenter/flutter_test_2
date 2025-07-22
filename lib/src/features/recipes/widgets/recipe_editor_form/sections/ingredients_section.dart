@@ -52,15 +52,9 @@ class _IngredientsSectionState extends State<IngredientsSection> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text(
-          "Ingredients",
-          style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-        ),
-        const SizedBox(height: 8),
-
         if (widget.ingredients.isEmpty)
           const Padding(
-            padding: EdgeInsets.all(16.0),
+            padding: EdgeInsets.symmetric(vertical: 16.0),
             child: Text("No ingredients added yet."),
           )
         else
@@ -93,15 +87,16 @@ class _IngredientsSectionState extends State<IngredientsSection> {
           ),
 
         Padding(
-          padding: const EdgeInsets.symmetric(vertical: 8.0),
-          child: Row(
+          padding: const EdgeInsets.only(top: 8.0),
+          child: Wrap(
+            spacing: 8.0,
+            runSpacing: 8.0,
             children: [
               ElevatedButton.icon(
                 onPressed: () => widget.onAddIngredient(false),
                 icon: const Icon(Icons.add),
                 label: const Text('Add Ingredient'),
               ),
-              const SizedBox(width: 8),
               ElevatedButton.icon(
                 onPressed: () => widget.onAddIngredient(true),
                 icon: const Icon(Icons.segment),

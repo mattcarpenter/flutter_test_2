@@ -52,12 +52,6 @@ class _StepsSectionState extends State<StepsSection> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text(
-          "Instructions",
-          style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-        ),
-        const SizedBox(height: 8),
-
         if (widget.steps.isEmpty)
           const Padding(
             padding: EdgeInsets.all(16.0),
@@ -92,15 +86,16 @@ class _StepsSectionState extends State<StepsSection> {
           ),
 
         Padding(
-          padding: const EdgeInsets.symmetric(vertical: 8.0),
-          child: Row(
+          padding: const EdgeInsets.only(top: 8.0),
+          child: Wrap(
+            spacing: 8.0,
+            runSpacing: 8.0,
             children: [
               ElevatedButton.icon(
                 onPressed: () => widget.onAddStep(false),
                 icon: const Icon(Icons.add),
                 label: const Text('Add Step'),
               ),
-              const SizedBox(width: 8),
               ElevatedButton.icon(
                 onPressed: () => widget.onAddStep(true),
                 icon: const Icon(Icons.segment),
