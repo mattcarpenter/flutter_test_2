@@ -2,8 +2,9 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import '../../../../../widgets/app_text_field.dart';
+import '../../../../../widgets/app_text_field_condensed.dart';
 import '../../../../../widgets/app_duration_picker.dart';
-import '../../../../../widgets/section_header.dart';
+import '../../../../../widgets/app_duration_picker_condensed.dart';
 
 class RecipeMetadataSection extends StatelessWidget {
   final TextEditingController titleController;
@@ -29,31 +30,33 @@ class RecipeMetadataSection extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         const SizedBox(height: 16),
-        // Title - full width
-        AppTextField(
+        // Title and Description grouped together
+        AppTextFieldCondensed(
           controller: titleController,
           placeholder: "Recipe Title",
           variant: AppTextFieldVariant.outline,
+          first: true,
+          last: false,
         ),
-        const SizedBox(height: 6),
-
-        // Description - full width
-        AppTextField(
+        AppTextFieldCondensed(
           controller: descriptionController,
           placeholder: "Description (optional)",
           variant: AppTextFieldVariant.outline,
           multiline: true,
+          minLines: 2,
+          first: false,
+          last: true,
         ),
-        const SizedBox(height: 6),
+        const SizedBox(height: 12),
 
-        // Servings - half width, on its own row
+        // Servings - using condensed field
         SizedBox(
           width: double.infinity,
           child: Row(
             children: [
               Expanded(
                 flex: 1,
-                child: AppTextField(
+                child: AppTextFieldCondensed(
                   controller: servingsController,
                   placeholder: "Servings",
                   variant: AppTextFieldVariant.outline,
@@ -65,22 +68,22 @@ class RecipeMetadataSection extends StatelessWidget {
             ],
           ),
         ),
-        const SizedBox(height: 6),
+        const SizedBox(height: 8),
 
-        // Prep and Cook Time - each half width
+        // Prep and Cook Time - using condensed duration pickers
         Row(
           children: [
             Expanded(
-              child: AppDurationPicker(
+              child: AppDurationPickerCondensed(
                 controller: prepTimeController,
                 placeholder: "Prep Time",
                 variant: AppTextFieldVariant.outline,
                 mode: DurationPickerMode.hoursMinutes,
               ),
             ),
-            const SizedBox(width: 6),
+            const SizedBox(width: 8),
             Expanded(
-              child: AppDurationPicker(
+              child: AppDurationPickerCondensed(
                 controller: cookTimeController,
                 placeholder: "Cook Time",
                 variant: AppTextFieldVariant.outline,
@@ -89,13 +92,14 @@ class RecipeMetadataSection extends StatelessWidget {
             ),
           ],
         ),
-        const SizedBox(height: 6),
+        const SizedBox(height: 8),
 
-        // Source - full width
-        AppTextField(
+        // Source - using condensed field
+        AppTextFieldCondensed(
           controller: sourceController,
           placeholder: "Source (optional)",
           variant: AppTextFieldVariant.outline,
+          keyboardType: TextInputType.url,
         ),
       ],
     );
