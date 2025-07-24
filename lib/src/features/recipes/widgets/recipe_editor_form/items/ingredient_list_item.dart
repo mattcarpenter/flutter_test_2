@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:super_context_menu/super_context_menu.dart';
 import 'package:wolt_modal_sheet/wolt_modal_sheet.dart';
 
@@ -12,6 +13,7 @@ class IngredientListItem extends ConsumerStatefulWidget {
   final int index;
   final Ingredient ingredient;
   final bool autoFocus;
+  final bool isDragging;
   final VoidCallback onRemove;
   final Function(Ingredient) onUpdate;
   final VoidCallback onAddNext;
@@ -22,6 +24,7 @@ class IngredientListItem extends ConsumerStatefulWidget {
     required this.index,
     required this.ingredient,
     required this.autoFocus,
+    required this.isDragging,
     required this.onRemove,
     required this.onUpdate,
     required this.onAddNext,
@@ -166,120 +169,135 @@ class _IngredientListItemState extends ConsumerState<IngredientListItem> {
       );
     }
 
-    return ContextMenuWidget(
-      contextMenuIsAllowed: _contextMenuIsAllowed,
-      menuProvider: (_) {
-        return Menu(
-          children: [
-            MenuAction(
-              title: 'Convert to section',
-              image: MenuImage.icon(Icons.segment),
-              callback: () {
-                // Convert the ingredient to a section
-                widget.onUpdate(widget.ingredient.copyWith(
-                  type: 'section',
-                  name: widget.ingredient.name.isEmpty ? 'New Section' : widget.ingredient.name,
-                  primaryAmount1Value: null,
-                  primaryAmount1Unit: null,
-                  primaryAmount1Type: null,
-                ));
-              },
-            ),
-            MenuAction(
-              title: widget.ingredient.recipeId == null 
-                  ? 'Link to Existing Recipe' 
-                  : 'Change Linked Recipe',
-              image: MenuImage.icon(Icons.link),
-              callback: () {
-                _showRecipeSelector(context);
-              },
-            ),
-            if (widget.ingredient.recipeId != null)
-              MenuAction(
-                title: 'Remove Recipe Link',
-                image: MenuImage.icon(Icons.link_off),
-                callback: () {
-                  widget.onUpdate(widget.ingredient.copyWith(recipeId: ''));
-                },
-              ),
-          ],
-        );
-      },
-      child: Stack(
+    return Slidable(
+      enabled: !widget.isDragging,
+      endActionPane: ActionPane(
+        motion: const ScrollMotion(),
         children: [
-          Container(
-            decoration: BoxDecoration(
-              color: backgroundColor,
-              border: Border.all(color: Colors.grey.shade300),
-              borderRadius: BorderRadius.circular(8),
-            ),
-            child: Row(
-              children: [
-                IconButton(
-                  icon: const Icon(Icons.remove_circle_outline),
-                  onPressed: widget.onRemove,
-                ),
-                SizedBox(
-                  width: 70,
-                  child: TextField(
-                    controller: _amountController,
-                    decoration: const InputDecoration(
-                      hintText: 'Amt',
-                      border: InputBorder.none,
-                      contentPadding: EdgeInsets.symmetric(horizontal: 8),
-                    ),
-                    keyboardType: TextInputType.number,
-                    onChanged: (value) {
-                      widget.onUpdate(widget.ingredient.copyWith(primaryAmount1Value: value));
-                    },
-                  ),
-                ),
-                const Text('g', style: TextStyle(color: Colors.grey)),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: Focus(
-                    focusNode: _focusNode,
-                    child: TextField(
-                      controller: _nameController,
-                      decoration: const InputDecoration(
-                        hintText: 'Ingredient name',
-                        border: InputBorder.none,
-                      ),
-                      onChanged: (value) {
-                        widget.onUpdate(widget.ingredient.copyWith(name: value));
-                      },
-                      textInputAction: TextInputAction.next,
-                      onSubmitted: (_) => widget.onAddNext(),
-                    ),
-                  ),
-                ),
-                if (widget.ingredient.recipeId != null) ...[
-                  const SizedBox(width: 4),
-                  Icon(
-                    Icons.link,
-                    size: 16,
-                    color: Theme.of(context).primaryColor,
-                  ),
-                ],
-                const SizedBox(width: 48), // Space for the drag handle
-              ],
-            ),
-          ),
-          // Position the drag handle on top so it's clickable
-          Positioned(
-            right: 0,
-            top: 0,
-            bottom: 0,
-            child: SizedBox(
-              width: 40,
-              child: ReorderableDragStartListener(
-                key: _dragHandleKey,
-                index: widget.index,
-                child: const Icon(Icons.drag_handle),
-              ),
-            ),
+          SlidableAction(
+            onPressed: (_) => widget.onRemove(),
+            backgroundColor: Colors.red,
+            foregroundColor: Colors.white,
+            icon: Icons.delete,
+            label: 'Delete',
           ),
         ],
+      ),
+      child: ContextMenuWidget(
+        contextMenuIsAllowed: _contextMenuIsAllowed,
+        menuProvider: (_) {
+          return Menu(
+            children: [
+              MenuAction(
+                title: 'Convert to section',
+                image: MenuImage.icon(Icons.segment),
+                callback: () {
+                  // Convert the ingredient to a section
+                  widget.onUpdate(widget.ingredient.copyWith(
+                    type: 'section',
+                    name: widget.ingredient.name.isEmpty ? 'New Section' : widget.ingredient.name,
+                    primaryAmount1Value: null,
+                    primaryAmount1Unit: null,
+                    primaryAmount1Type: null,
+                  ));
+                },
+              ),
+              MenuAction(
+                title: widget.ingredient.recipeId == null 
+                    ? 'Link to Existing Recipe' 
+                    : 'Change Linked Recipe',
+                image: MenuImage.icon(Icons.link),
+                callback: () {
+                  _showRecipeSelector(context);
+                },
+              ),
+              if (widget.ingredient.recipeId != null)
+                MenuAction(
+                  title: 'Remove Recipe Link',
+                  image: MenuImage.icon(Icons.link_off),
+                  callback: () {
+                    widget.onUpdate(widget.ingredient.copyWith(recipeId: ''));
+                  },
+                ),
+            ],
+          );
+        },
+        child: Stack(
+          children: [
+            Container(
+              decoration: BoxDecoration(
+                color: backgroundColor,
+                border: Border.all(color: Colors.grey.shade300),
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Row(
+                children: [
+                  IconButton(
+                    icon: const Icon(Icons.remove_circle_outline),
+                    onPressed: widget.onRemove,
+                  ),
+                  SizedBox(
+                    width: 70,
+                    child: TextField(
+                      controller: _amountController,
+                      decoration: const InputDecoration(
+                        hintText: 'Amt',
+                        border: InputBorder.none,
+                        contentPadding: EdgeInsets.symmetric(horizontal: 8),
+                      ),
+                      keyboardType: TextInputType.number,
+                      onChanged: (value) {
+                        widget.onUpdate(widget.ingredient.copyWith(primaryAmount1Value: value));
+                      },
+                    ),
+                  ),
+                  const Text('g', style: TextStyle(color: Colors.grey)),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Focus(
+                      focusNode: _focusNode,
+                      child: TextField(
+                        controller: _nameController,
+                        decoration: const InputDecoration(
+                          hintText: 'Ingredient name',
+                          border: InputBorder.none,
+                        ),
+                        onChanged: (value) {
+                          widget.onUpdate(widget.ingredient.copyWith(name: value));
+                        },
+                        textInputAction: TextInputAction.next,
+                        onSubmitted: (_) => widget.onAddNext(),
+                      ),
+                    ),
+                  ),
+                  if (widget.ingredient.recipeId != null) ...[
+                    const SizedBox(width: 4),
+                    Icon(
+                      Icons.link,
+                      size: 16,
+                      color: Theme.of(context).primaryColor,
+                    ),
+                  ],
+                  const SizedBox(width: 48), // Space for the drag handle
+                ],
+              ),
+            ),
+            // Position the drag handle on top so it's clickable
+            Positioned(
+              right: 0,
+              top: 0,
+              bottom: 0,
+              child: SizedBox(
+                width: 40,
+                child: ReorderableDragStartListener(
+                  key: _dragHandleKey,
+                  index: widget.index,
+                  child: const Icon(Icons.drag_handle),
+                ),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

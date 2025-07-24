@@ -76,6 +76,7 @@ class _IngredientsSectionState extends State<IngredientsSection> {
                   index: index,
                   ingredient: ingredient,
                   autoFocus: widget.autoFocusIngredientId == ingredient.id && !_isDragging,
+                  isDragging: _isDragging,
                   onRemove: () => widget.onRemoveIngredient(ingredient.id),
                   onUpdate: (updatedIngredient) =>
                       widget.onUpdateIngredient(ingredient.id, updatedIngredient),
