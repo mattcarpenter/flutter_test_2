@@ -178,30 +178,16 @@ class _IngredientListItemState extends ConsumerState<IngredientListItem> {
         enabled: !widget.isDragging,
         endActionPane: ActionPane(
           motion: const ScrollMotion(),
-          extentRatio: 0.25,
+          extentRatio: 0.2,
           children: [
             Expanded(
               child: Center(
                 child: GestureDetector(
                   onTap: widget.onRemove,
-                  child: const Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Icon(
-                        Icons.delete,
-                        color: Colors.white,
-                        size: 20,
-                      ),
-                      SizedBox(height: 2),
-                      Text(
-                        'Delete',
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 10,
-                          fontWeight: FontWeight.w500,
-                        ),
-                      ),
-                    ],
+                  child: const Icon(
+                    Icons.delete,
+                    color: Colors.white,
+                    size: 24,
                   ),
                 ),
               ),
@@ -257,10 +243,7 @@ class _IngredientListItemState extends ConsumerState<IngredientListItem> {
               ),
               child: Row(
                 children: [
-                  IconButton(
-                    icon: const Icon(Icons.remove_circle_outline),
-                    onPressed: widget.onRemove,
-                  ),
+                  const SizedBox(width: 12), // Add some left padding
                   SizedBox(
                     width: 70,
                     child: TextField(
