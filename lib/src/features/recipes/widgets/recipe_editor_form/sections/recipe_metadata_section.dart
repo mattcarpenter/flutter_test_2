@@ -59,7 +59,7 @@ class RecipeMetadataSection extends StatelessWidget {
           first: true,
           last: true,
         ),
-        const SizedBox(height: 8),
+        const SizedBox(height: 12),
 
         // Timing group: Prep Time + Cook Time
         AppDurationPickerCondensed(
@@ -78,7 +78,7 @@ class RecipeMetadataSection extends StatelessWidget {
           first: false,
           last: true,
         ),
-        const SizedBox(height: 8),
+        const SizedBox(height: 12),
 
         // Source - standalone
         AppTextFieldCondensed(
