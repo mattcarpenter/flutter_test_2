@@ -12,7 +12,6 @@ class RecipeMetadataSection extends StatelessWidget {
   final TextEditingController servingsController;
   final TextEditingController prepTimeController;
   final TextEditingController cookTimeController;
-  final TextEditingController sourceController;
 
   const RecipeMetadataSection({
     super.key,
@@ -21,7 +20,6 @@ class RecipeMetadataSection extends StatelessWidget {
     required this.servingsController,
     required this.prepTimeController,
     required this.cookTimeController,
-    required this.sourceController,
   });
 
   @override
@@ -49,19 +47,7 @@ class RecipeMetadataSection extends StatelessWidget {
         ),
         const SizedBox(height: 12),
 
-        // Servings - standalone
-        AppTextFieldCondensed(
-          controller: servingsController,
-          placeholder: "Servings",
-          variant: AppTextFieldVariant.outline,
-          keyboardType: TextInputType.number,
-          inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-          first: true,
-          last: true,
-        ),
-        const SizedBox(height: 12),
-
-        // Timing group: Prep Time + Cook Time
+        // Timing group: Prep Time + Cook Time + Servings
         AppDurationPickerCondensed(
           controller: prepTimeController,
           placeholder: "Prep Time",
@@ -76,17 +62,15 @@ class RecipeMetadataSection extends StatelessWidget {
           variant: AppTextFieldVariant.outline,
           mode: DurationPickerMode.hoursMinutes,
           first: false,
-          last: true,
+          last: false,
         ),
-        const SizedBox(height: 12),
-
-        // Source - standalone
         AppTextFieldCondensed(
-          controller: sourceController,
-          placeholder: "Source (optional)",
+          controller: servingsController,
+          placeholder: "Servings",
           variant: AppTextFieldVariant.outline,
-          keyboardType: TextInputType.url,
-          first: true,
+          keyboardType: TextInputType.number,
+          inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+          first: false,
           last: true,
         ),
       ],

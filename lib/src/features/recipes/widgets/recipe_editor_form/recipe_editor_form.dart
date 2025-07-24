@@ -13,6 +13,7 @@ import '../../../../providers/recipe_provider.dart';
 import '../../../../repositories/recipe_repository.dart';
 import '../../../../widgets/section_header.dart';
 import '../../../../widgets/app_text_field.dart';
+import '../../../../widgets/app_text_field_condensed.dart';
 import 'sections/ingredients_section.dart';
 import 'sections/recipe_metadata_section.dart';
 import 'sections/steps_section.dart';
@@ -302,7 +303,6 @@ class RecipeEditorFormState extends ConsumerState<RecipeEditorForm> {
               servingsController: _servingsController,
               prepTimeController: _prepTimeController,
               cookTimeController: _cookTimeController,
-              sourceController: _sourceController,
             ),
 
             // Images Section Header
@@ -379,12 +379,23 @@ class RecipeEditorFormState extends ConsumerState<RecipeEditorForm> {
               topSpacing: 0,
             ),
 
-            // Notes Section
-            AppTextField(
+            // Source and Notes grouped together
+            AppTextFieldCondensed(
+              controller: _sourceController,
+              placeholder: "Source (optional)",
+              variant: AppTextFieldVariant.outline,
+              keyboardType: TextInputType.url,
+              first: true,
+              last: false,
+            ),
+            AppTextFieldCondensed(
               controller: _notesController,
               placeholder: "General notes about this recipe",
               variant: AppTextFieldVariant.outline,
               multiline: true,
+              minLines: 2,
+              first: false,
+              last: true,
             ),
           ],
         ),
