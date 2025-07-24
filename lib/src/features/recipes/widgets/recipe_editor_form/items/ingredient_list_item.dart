@@ -169,21 +169,46 @@ class _IngredientListItemState extends ConsumerState<IngredientListItem> {
       );
     }
 
-    return Slidable(
-      enabled: !widget.isDragging,
-      endActionPane: ActionPane(
-        motion: const ScrollMotion(),
-        children: [
-          SlidableAction(
-            onPressed: (_) => widget.onRemove(),
-            backgroundColor: Colors.red,
-            foregroundColor: Colors.white,
-            icon: Icons.delete,
-            label: 'Delete',
-          ),
-        ],
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.red,
+        borderRadius: BorderRadius.circular(8),
       ),
-      child: ContextMenuWidget(
+      child: Slidable(
+        enabled: !widget.isDragging,
+        endActionPane: ActionPane(
+          motion: const ScrollMotion(),
+          extentRatio: 0.25,
+          children: [
+            Expanded(
+              child: Center(
+                child: GestureDetector(
+                  onTap: widget.onRemove,
+                  child: const Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(
+                        Icons.delete,
+                        color: Colors.white,
+                        size: 20,
+                      ),
+                      SizedBox(height: 2),
+                      Text(
+                        'Delete',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 10,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
+        child: ContextMenuWidget(
         contextMenuIsAllowed: _contextMenuIsAllowed,
         menuProvider: (_) {
           return Menu(
@@ -299,6 +324,7 @@ class _IngredientListItemState extends ConsumerState<IngredientListItem> {
           ],
         ),
       ),
+    ),
     );
   }
 }
