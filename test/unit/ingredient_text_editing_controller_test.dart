@@ -138,6 +138,75 @@ void main() {
              equals((span2.children![0] as TextSpan).text));
     });
 
+    test('highlights bare numbers', () {
+      controller.text = '2 onions';
+      
+      final span = controller.buildTextSpan(
+        context: _MockContext(),
+        style: const TextStyle(),
+        withComposing: false,
+      );
+      
+      expect(span.children, isNotNull);
+      expect(span.children!.length, 2);
+      
+      // First child should be the bare number in blue
+      final quantitySpan = span.children![0] as TextSpan;
+      expect(quantitySpan.text, '2');
+      expect(quantitySpan.style?.color, Colors.blue.shade700);
+      
+      // Second child should be the ingredient name in default color
+      final nameSpan = span.children![1] as TextSpan;
+      expect(nameSpan.text, ' onions');
+      expect(nameSpan.style?.color, isNull);
+    });
+
+    test('highlights Unicode fractions', () {
+      controller.text = '½ cup flour';
+      
+      final span = controller.buildTextSpan(
+        context: _MockContext(),
+        style: const TextStyle(),
+        withComposing: false,
+      );
+      
+      expect(span.children, isNotNull);
+      expect(span.children!.length, 2);
+      
+      // First child should be the Unicode fraction quantity in blue
+      final quantitySpan = span.children![0] as TextSpan;
+      expect(quantitySpan.text, '½ cup');
+      expect(quantitySpan.style?.color, Colors.blue.shade700);
+      
+      // Second child should be the ingredient name in default color
+      final nameSpan = span.children![1] as TextSpan;
+      expect(nameSpan.text, ' flour');
+      expect(nameSpan.style?.color, isNull);
+    });
+
+    test('highlights bare Unicode fractions', () {
+      controller.text = '¼ onion';
+      
+      final span = controller.buildTextSpan(
+        context: _MockContext(),
+        style: const TextStyle(),
+        withComposing: false,
+      );
+      
+      expect(span.children, isNotNull);
+      expect(span.children!.length, 2);
+      
+      // First child should be the bare Unicode fraction in blue
+      final quantitySpan = span.children![0] as TextSpan;
+      expect(quantitySpan.text, '¼');
+      expect(quantitySpan.style?.color, Colors.blue.shade700);
+      
+      // Second child should be the ingredient name in default color
+      final nameSpan = span.children![1] as TextSpan;
+      expect(nameSpan.text, ' onion');
+      expect(nameSpan.style?.color, isNull);
+    });
+
     test('gracefully handles parsing errors', () {
       // Create a controller with a mock parser that throws
       final throwingParser = _ThrowingParser();

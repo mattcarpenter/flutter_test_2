@@ -18,7 +18,6 @@ class IngredientParserService {
     }
     
     final quantities = <QuantitySpan>[];
-    var remainingText = input;
     
     // Find all quantity matches
     final allMatches = <_QuantityMatch>[];
@@ -31,6 +30,9 @@ class IngredientParserService {
     
     // Check for approximate quantities
     allMatches.addAll(_findApproximateQuantities(input, allMatches));
+    
+    // Check for bare numbers at the start (e.g. "1 onion", "2 eggs")
+    allMatches.addAll(_findBareNumbers(input, allMatches));
     
     // Sort by start position
     allMatches.sort((a, b) => a.start.compareTo(b.start));
@@ -130,6 +132,37 @@ class IngredientParserService {
           start: match.start,
           end: match.end,
           text: match.group(0)!,
+        ));
+      }
+    }
+    
+    return matches;
+  }
+  
+  List<_QuantityMatch> _findBareNumbers(String input, List<_QuantityMatch> existingMatches) {
+    final matches = <_QuantityMatch>[];
+    
+    // Match bare numbers at the start of the string: "1 onion", "2 eggs", "1/2 avocado", "½ cup"
+    // Only match if not already covered by a unit-based quantity
+    const unicodeFractions = r'[½⅓⅔¼¾⅕⅖⅗⅘⅙⅚⅛⅜⅝⅞]';
+    final bareNumberPattern = RegExp('^(?:(?:\\d+\\s+)?(?:\\d+/\\d+|\\d+)|(?:\\d+\\s*)?$unicodeFractions)(?=\\s+[a-zA-Z])');
+    final match = bareNumberPattern.firstMatch(input);
+    
+    if (match != null) {
+      // Check if this position is already covered by existing matches
+      bool overlaps = false;
+      for (final existing in existingMatches) {
+        if (match.start >= existing.start && match.start < existing.end) {
+          overlaps = true;
+          break;
+        }
+      }
+      
+      if (!overlaps) {
+        matches.add(_QuantityMatch(
+          start: match.start,
+          end: match.end,
+          text: match.group(0)!.trim(),
         ));
       }
     }
@@ -345,12 +378,13 @@ class RegexBuilder {
         .toList()
       ..sort((a, b) => b.length.compareTo(a.length));
     
-    final unitsPattern = '(' + allVariations.join('|') + ')';
+    final unitsPattern = '(${allVariations.join('|')})';
     
-    // Fraction pattern: handles 1/2, 1 1/2, etc.
-    const fractionPart = r'(?:\d+\s+)?(?:\d+/\d+)';
+    // Fraction pattern: handles 1/2, 1 1/2, ½, 1½, etc.
+    const regularFractionPart = r'(?:\d+\s+)?(?:\d+/\d+)';
+    const unicodeFractionPart = '(?:\\d+\\s*)?[½⅓⅔¼¾⅕⅖⅗⅘⅙⅚⅛⅜⅝⅞]';
     const decimalPart = r'\d+(?:\.\d+)?';
-    const numberPattern = '(?:$fractionPart|$decimalPart)';
+    const numberPattern = '(?:$regularFractionPart|$unicodeFractionPart|$decimalPart)';
     
     // Single quantity pattern - with optional space between number and unit
     // Updated to better handle word boundaries and spaces
@@ -396,6 +430,27 @@ extension IngredientScaling on String {
     return scaled;
   }
   
+  static double _unicodeFractionToDecimal(String unicodeFraction) {
+    const fractionMap = {
+      '½': 0.5,
+      '⅓': 1/3,
+      '⅔': 2/3,
+      '¼': 0.25,
+      '¾': 0.75,
+      '⅕': 0.2,
+      '⅖': 0.4,
+      '⅗': 0.6,
+      '⅘': 0.8,
+      '⅙': 1/6,
+      '⅚': 5/6,
+      '⅛': 0.125,
+      '⅜': 0.375,
+      '⅝': 0.625,
+      '⅞': 0.875,
+    };
+    return fractionMap[unicodeFraction] ?? 0.0;
+  }
+
   String _scaleQuantityText(String quantityText, double scale) {
     // Handle ranges like "2-3 cups"
     final rangeMatch = RegExp(r'(\d+(?:\.\d+)?)\s*(?:-|–|to)\s*(\d+(?:\.\d+)?)(\s*.*)').firstMatch(quantityText);
@@ -437,6 +492,21 @@ extension IngredientScaling on String {
       return _formatNumber(scaledValue) + remainder;
     }
     
+    // Handle Unicode fractions like "½ cup" or "1½ cups"
+    final unicodeFractionMatch = RegExp(r'(\d+\s*)?([½⅓⅔¼¾⅕⅖⅗⅘⅙⅚⅛⅜⅝⅞])(\s*.*)').firstMatch(quantityText);
+    if (unicodeFractionMatch != null) {
+      final wholeStr = unicodeFractionMatch.group(1)?.trim();
+      final fractionChar = unicodeFractionMatch.group(2)!;
+      final remainder = unicodeFractionMatch.group(3)!;
+      
+      final whole = wholeStr != null && wholeStr.isNotEmpty ? double.parse(wholeStr) : 0.0;
+      final fractionValue = _unicodeFractionToDecimal(fractionChar);
+      final totalValue = whole + fractionValue;
+      final scaledValue = totalValue * scale;
+      
+      return _formatNumber(scaledValue) + remainder;
+    }
+
     // Handle decimals and whole numbers
     final numberMatch = RegExp(r'(\d+(?:\.\d+)?)(\s*.*)').firstMatch(quantityText);
     if (numberMatch != null) {

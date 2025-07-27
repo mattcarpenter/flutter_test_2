@@ -72,6 +72,58 @@ void main() {
       });
     });
 
+    group('Unicode fractions', () {
+      test('parses simple Unicode fractions', () {
+        final result = parser.parse('½ cup sugar');
+        
+        expect(result.quantities.length, 1);
+        expect(result.quantities[0].text, '½ cup');
+        expect(result.cleanName, 'sugar');
+      });
+
+      test('parses mixed Unicode fractions', () {
+        final result = parser.parse('1½ cups flour');
+        
+        expect(result.quantities.length, 1);
+        expect(result.quantities[0].text, '1½ cups');
+        expect(result.cleanName, 'flour');
+      });
+
+      test('parses various Unicode fractions', () {
+        final testCases = [
+          ('¼ cup milk', '¼ cup', 'milk'),
+          ('¾ tsp salt', '¾ tsp', 'salt'),
+          ('⅓ cup water', '⅓ cup', 'water'),
+          ('⅔ cup oats', '⅔ cup', 'oats'),
+          ('⅛ tsp pepper', '⅛ tsp', 'pepper'),
+          ('⅞ cup cream', '⅞ cup', 'cream'),
+        ];
+        
+        for (final (input, expectedQuantity, expectedName) in testCases) {
+          final result = parser.parse(input);
+          expect(result.quantities.length, 1, reason: 'Failed for: $input');
+          expect(result.quantities[0].text, expectedQuantity, reason: 'Failed for: $input');
+          expect(result.cleanName, expectedName, reason: 'Failed for: $input');
+        }
+      });
+
+      test('parses bare Unicode fractions', () {
+        final result = parser.parse('½ onion');
+        
+        expect(result.quantities.length, 1);
+        expect(result.quantities[0].text, '½');
+        expect(result.cleanName, 'onion');
+      });
+
+      test('parses mixed bare Unicode fractions', () {
+        final result = parser.parse('1½ tomatoes');
+        
+        expect(result.quantities.length, 1);
+        expect(result.quantities[0].text, '1½');
+        expect(result.cleanName, 'tomatoes');
+      });
+    });
+
     group('Ranges', () {
       test('parses ranges with hyphen', () {
         final result = parser.parse('2-3 cloves garlic');
@@ -163,6 +215,58 @@ void main() {
         
         expect(result.quantities.length, 0); // Number without unit not parsed
         expect(result.cleanName, 'eggs, 2');
+      });
+    });
+
+    group('Bare numbers', () {
+      test('parses bare number at start', () {
+        final result = parser.parse('1 onion');
+        
+        expect(result.quantities.length, 1);
+        expect(result.quantities[0].text, '1');
+        expect(result.quantities[0].start, 0);
+        expect(result.quantities[0].end, 1);
+        expect(result.cleanName, 'onion');
+      });
+
+      test('parses bare fraction at start', () {
+        final result = parser.parse('1/2 avocado');
+        
+        expect(result.quantities.length, 1);
+        expect(result.quantities[0].text, '1/2');
+        expect(result.cleanName, 'avocado');
+      });
+
+      test('parses bare mixed fraction at start', () {
+        final result = parser.parse('1 1/2 onions');
+        
+        expect(result.quantities.length, 1);
+        expect(result.quantities[0].text, '1 1/2');
+        expect(result.cleanName, 'onions');
+      });
+
+      test('does not parse bare number if unit follows', () {
+        // Should be handled by regular quantity parsing, not bare number
+        final result = parser.parse('1 cup flour');
+        
+        expect(result.quantities.length, 1);
+        expect(result.quantities[0].text, '1 cup'); // Full quantity with unit
+        expect(result.cleanName, 'flour');
+      });
+
+      test('does not parse numbers in middle of text', () {
+        final result = parser.parse('eggs 2 dozen');
+        
+        expect(result.quantities.length, 0); // No bare number parsing in middle
+        expect(result.cleanName, 'eggs 2 dozen');
+      });
+
+      test('parses multiple items with bare numbers', () {
+        final result = parser.parse('2 eggs');
+        
+        expect(result.quantities.length, 1);
+        expect(result.quantities[0].text, '2');
+        expect(result.cleanName, 'eggs');
       });
     });
 
@@ -313,6 +417,41 @@ void main() {
     test('preserves original formatting', () {
       final scaled = '1T butter'.scaleIngredient(3, parser);
       expect(scaled, '3T butter'); // Keeps the 'T' format
+    });
+
+    test('scales bare numbers', () {
+      final scaled = '2 eggs'.scaleIngredient(1.5, parser);
+      expect(scaled, '3 eggs');
+    });
+
+    test('scales bare fractions', () {
+      final scaled = '1/2 onion'.scaleIngredient(4, parser);
+      expect(scaled, '2 onion');
+    });
+
+    test('scales bare mixed fractions', () {
+      final scaled = '1 1/2 tomatoes'.scaleIngredient(2, parser);
+      expect(scaled, '3 tomatoes');
+    });
+
+    test('scales Unicode fractions', () {
+      final scaled = '½ cup flour'.scaleIngredient(2, parser);
+      expect(scaled, '1 cup flour');
+    });
+
+    test('scales mixed Unicode fractions', () {
+      final scaled = '1½ cups sugar'.scaleIngredient(2, parser);
+      expect(scaled, '3 cups sugar');
+    });
+
+    test('scales bare Unicode fractions', () {
+      final scaled = '¼ onion'.scaleIngredient(4, parser);
+      expect(scaled, '1 onion');
+    });
+
+    test('scales complex Unicode fractions', () {
+      final scaled = '⅔ cup milk'.scaleIngredient(1.5, parser);
+      expect(scaled, '1 cup milk');
     });
   });
 }
