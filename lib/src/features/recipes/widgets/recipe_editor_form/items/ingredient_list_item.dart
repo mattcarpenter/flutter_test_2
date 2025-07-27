@@ -7,6 +7,8 @@ import 'package:wolt_modal_sheet/wolt_modal_sheet.dart';
 import '../../../../../../database/models/ingredients.dart';
 import '../../../../../../database/database.dart';
 import '../../../../../providers/recipe_provider.dart' as recipe_provider;
+import '../../../../../services/ingredient_parser_service.dart';
+import '../../../../../widgets/ingredient_text_editing_controller.dart';
 import '../utils/context_menu_utils.dart';
 
 class IngredientListItem extends ConsumerStatefulWidget {
@@ -36,8 +38,7 @@ class IngredientListItem extends ConsumerStatefulWidget {
 }
 
 class _IngredientListItemState extends ConsumerState<IngredientListItem> {
-  late TextEditingController _nameController;
-  TextEditingController? _amountController;
+  late IngredientTextEditingController _ingredientController;
   late FocusNode _focusNode;
 
   bool get isSection => widget.ingredient.type == 'section';
@@ -47,10 +48,10 @@ class _IngredientListItemState extends ConsumerState<IngredientListItem> {
   @override
   void initState() {
     super.initState();
-    _nameController = TextEditingController(text: widget.ingredient.name);
-    if (!isSection) {
-      _amountController = TextEditingController(text: widget.ingredient.primaryAmount1Value ?? '');
-    }
+    _ingredientController = IngredientTextEditingController(
+      parser: IngredientParserService(),
+      text: widget.ingredient.name,
+    );
     _focusNode = FocusNode();
     _focusNode.addListener(() {
       widget.onFocus(_focusNode.hasFocus);
@@ -65,12 +66,8 @@ class _IngredientListItemState extends ConsumerState<IngredientListItem> {
   void didUpdateWidget(covariant IngredientListItem oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.ingredient.name != widget.ingredient.name &&
-        _nameController.text != widget.ingredient.name) {
-      _nameController.text = widget.ingredient.name;
-    }
-    if (!isSection &&
-        oldWidget.ingredient.primaryAmount1Value != widget.ingredient.primaryAmount1Value) {
-      _amountController?.text = widget.ingredient.primaryAmount1Value ?? '';
+        _ingredientController.text != widget.ingredient.name) {
+      _ingredientController.text = widget.ingredient.name;
     }
 
     // Handle autofocus change
@@ -81,8 +78,7 @@ class _IngredientListItemState extends ConsumerState<IngredientListItem> {
 
   @override
   void dispose() {
-    _nameController.dispose();
-    _amountController?.dispose();
+    _ingredientController.dispose();
     _focusNode.dispose();
     super.dispose();
   }
@@ -142,7 +138,7 @@ class _IngredientListItemState extends ConsumerState<IngredientListItem> {
                 hintText: 'Section name',
                 border: InputBorder.none,
               ),
-              controller: _nameController,
+              controller: _ingredientController,
               style: const TextStyle(fontWeight: FontWeight.bold),
               onChanged: (value) {
                 widget.onUpdate(widget.ingredient.copyWith(name: value));
@@ -244,30 +240,13 @@ class _IngredientListItemState extends ConsumerState<IngredientListItem> {
               child: Row(
                 children: [
                   const SizedBox(width: 12), // Add some left padding
-                  SizedBox(
-                    width: 70,
-                    child: TextField(
-                      controller: _amountController,
-                      decoration: const InputDecoration(
-                        hintText: 'Amt',
-                        border: InputBorder.none,
-                        contentPadding: EdgeInsets.symmetric(horizontal: 8),
-                      ),
-                      keyboardType: TextInputType.number,
-                      onChanged: (value) {
-                        widget.onUpdate(widget.ingredient.copyWith(primaryAmount1Value: value));
-                      },
-                    ),
-                  ),
-                  const Text('g', style: TextStyle(color: Colors.grey)),
-                  const SizedBox(width: 8),
                   Expanded(
                     child: Focus(
                       focusNode: _focusNode,
                       child: TextField(
-                        controller: _nameController,
+                        controller: _ingredientController,
                         decoration: const InputDecoration(
-                          hintText: 'Ingredient name',
+                          hintText: 'e.g. 1 cup flour',
                           border: InputBorder.none,
                         ),
                         onChanged: (value) {
