@@ -454,4 +454,225 @@ void main() {
       expect(scaled, '1 cup milk');
     });
   });
+
+  group('Japanese Language Support', () {
+    group('Language Detection', () {
+      test('detects Japanese text with Hiragana', () {
+        final language = parser.detectLanguage('小麦粉');
+        expect(language, Language.japanese);
+      });
+
+      test('detects Japanese text with Katakana', () {
+        final language = parser.detectLanguage('カップ');
+        expect(language, Language.japanese);
+      });
+
+      test('detects Japanese text with Kanji', () {
+        final language = parser.detectLanguage('大さじ');
+        expect(language, Language.japanese);
+      });
+
+      test('detects English text', () {
+        final language = parser.detectLanguage('cup flour');
+        expect(language, Language.english);
+      });
+
+      test('prefers Japanese when mixed', () {
+        final language = parser.detectLanguage('1カップ flour');
+        expect(language, Language.japanese);
+      });
+    });
+
+    group('Japanese Units', () {
+      test('parses Japanese volume units', () {
+        final testCases = [
+          ('1カップ小麦粉', '1カップ', '小麦粉'),
+          ('2大さじバター', '2大さじ', 'バター'),
+          ('1小さじ塩', '1小さじ', '塩'),
+          ('200ml牛乳', '200ml', '牛乳'),
+        ];
+
+        for (final (input, expectedQuantity, expectedName) in testCases) {
+          final result = parser.parse(input);
+          expect(result.quantities.length, 1, reason: 'Failed for: $input');
+          expect(result.quantities[0].text, expectedQuantity, reason: 'Failed for: $input');
+          expect(result.cleanName, expectedName, reason: 'Failed for: $input');
+        }
+      });
+
+      test('parses Japanese weight units', () {
+        final testCases = [
+          ('100gチーズ', '100g', 'チーズ'),
+          ('1キロ肉', '1キロ', '肉'),
+        ];
+
+        for (final (input, expectedQuantity, expectedName) in testCases) {
+          final result = parser.parse(input);
+          expect(result.quantities.length, 1, reason: 'Failed for: $input');
+          expect(result.quantities[0].text, expectedQuantity, reason: 'Failed for: $input');
+          expect(result.cleanName, expectedName, reason: 'Failed for: $input');
+        }
+      });
+
+      test('parses Japanese count units', () {
+        final testCases = [
+          ('卵2個', '2個', '卵'),
+          ('にんじん3本', '3本', 'にんじん'),
+          ('トマト1玉', '1玉', 'トマト'),
+          ('豆腐1丁', '1丁', '豆腐'),
+        ];
+
+        for (final (input, expectedQuantity, expectedName) in testCases) {
+          final result = parser.parse(input);
+          expect(result.quantities.length, 1, reason: 'Failed for: $input');
+          expect(result.quantities[0].text, expectedQuantity, reason: 'Failed for: $input');
+          expect(result.cleanName, expectedName, reason: 'Failed for: $input');
+        }
+      });
+    });
+
+    group('Japanese Numbers', () {
+      test('parses Arabic numbers with half', () {
+        final result = parser.parse('2半個卵');
+        expect(result.quantities.length, 1);
+        expect(result.quantities[0].text, '2半個');
+        expect(result.cleanName, '卵');
+      });
+
+      test('parses Kanji numbers', () {
+        final testCases = [
+          ('一個りんご', '一個', 'りんご'),
+          ('二本バナナ', '二本', 'バナナ'),
+          ('三枚チーズ', '三枚', 'チーズ'),
+        ];
+
+        for (final (input, expectedQuantity, expectedName) in testCases) {
+          final result = parser.parse(input);
+          expect(result.quantities.length, 1, reason: 'Failed for: $input');
+          expect(result.quantities[0].text, expectedQuantity, reason: 'Failed for: $input');
+          expect(result.cleanName, expectedName, reason: 'Failed for: $input');
+        }
+      });
+
+      test('parses Kanji numbers with half', () {
+        final result = parser.parse('二半カップ小麦粉');
+        expect(result.quantities.length, 1);
+        expect(result.quantities[0].text, '二半カップ');
+        expect(result.cleanName, '小麦粉');
+      });
+
+      test('parses pure half', () {
+        final result = parser.parse('半分');
+        expect(result.quantities.length, 1);
+        expect(result.quantities[0].text, '半');
+        expect(result.cleanName, '分');
+      });
+    });
+
+    group('Japanese Approximate Terms', () {
+      test('parses Japanese approximate quantities', () {
+        final testCases = [
+          ('塩適量', '適量', '塩'),
+          ('砂糖少々', '少々', '砂糖'),
+          ('胡椒ひとつまみ', 'ひとつまみ', '胡椒'),
+          ('醤油お好みで', 'お好みで', '醤油'),
+        ];
+
+        for (final (input, expectedQuantity, expectedName) in testCases) {
+          final result = parser.parse(input);
+          expect(result.quantities.length, 1, reason: 'Failed for: $input');
+          expect(result.quantities[0].text, expectedQuantity, reason: 'Failed for: $input');
+          expect(result.cleanName, expectedName, reason: 'Failed for: $input');
+        }
+      });
+    });
+
+    group('Japanese Scaling', () {
+      test('scales Japanese quantities with Arabic numbers', () {
+        final scaled = '2カップ小麦粉'.scaleIngredient(1.5, parser);
+        expect(scaled, '3カップ小麦粉');
+      });
+
+      test('scales Japanese numbers with half', () {
+        final scaled = '2半個卵'.scaleIngredient(2, parser);
+        expect(scaled, '5個卵');
+      });
+
+      test('scales Kanji numbers', () {
+        final scaled = '二個りんご'.scaleIngredient(2, parser);
+        expect(scaled, '4個りんご');
+      });
+
+      test('scales pure half', () {
+        final scaled = '半カップ牛乳'.scaleIngredient(2, parser);
+        expect(scaled, '1カップ牛乳');
+      });
+
+      test('preserves Japanese approximate terms', () {
+        final scaled = '塩適量'.scaleIngredient(2, parser);
+        expect(scaled, '塩適量');
+      });
+    });
+
+    group('Mixed Language Support', () {
+      test('handles mixed English-Japanese input', () {
+        final result = parser.parse('1 cup 小麦粉');
+        expect(result.quantities.length, 1);
+        expect(result.quantities[0].text, '1 cup');
+        expect(result.cleanName, '小麦粉');
+      });
+
+      test('handles Japanese units with English ingredient names', () {
+        final result = parser.parse('2カップ flour');
+        expect(result.quantities.length, 1);
+        expect(result.quantities[0].text, '2カップ');
+        expect(result.cleanName, 'flour');
+      });
+
+      test('falls back to English when Japanese parsing fails', () {
+        final result = parser.parse('1 cup flour (with some カタカナ)');
+        expect(result.quantities.length, 1);
+        expect(result.quantities[0].text, '1 cup');
+        expect(result.cleanName, 'flour (with some カタカナ)');
+      });
+    });
+
+    group('Complex Japanese Patterns', () {
+      test('handles traditional measurements', () {
+        final testCases = [
+          ('米1合', '1合', '米'),
+          ('酒2升', '2升', '酒'),
+        ];
+
+        for (final (input, expectedQuantity, expectedName) in testCases) {
+          final result = parser.parse(input);
+          expect(result.quantities.length, 1, reason: 'Failed for: $input');
+          expect(result.quantities[0].text, expectedQuantity, reason: 'Failed for: $input');
+          expect(result.cleanName, expectedName, reason: 'Failed for: $input');
+        }
+      });
+
+      test('handles portions and containers', () {
+        final testCases = [
+          ('4人分', '4人分', ''),
+          ('牛乳1パック', '1パック', '牛乳'),
+          ('ヨーグルト1杯', '1杯', 'ヨーグルト'),
+        ];
+
+        for (final (input, expectedQuantity, expectedName) in testCases) {
+          final result = parser.parse(input);
+          expect(result.quantities.length, 1, reason: 'Failed for: $input');
+          expect(result.quantities[0].text, expectedQuantity, reason: 'Failed for: $input');
+          expect(result.cleanName, expectedName, reason: 'Failed for: $input');
+        }
+      });
+
+      test('handles ingredients with preparation notes', () {
+        final result = parser.parse('2カップ小麦粉、ふるったもの');
+        expect(result.quantities.length, 1);
+        expect(result.quantities[0].text, '2カップ');
+        expect(result.cleanName, '小麦粉、ふるったもの');
+      });
+    });
+  });
 }

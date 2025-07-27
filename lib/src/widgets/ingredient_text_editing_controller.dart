@@ -6,8 +6,9 @@ import '../services/ingredient_parser_service.dart';
 class IngredientTextEditingController extends TextEditingController {
   final IngredientParserService _parser;
   
-  // Simple caching to avoid re-parsing on every buildTextSpan call
+  // Enhanced caching with language awareness
   String? _lastText;
+  Language? _lastLanguage;
   List<QuantitySpan>? _lastQuantities;
   
   IngredientTextEditingController({
@@ -28,14 +29,18 @@ class IngredientTextEditingController extends TextEditingController {
     }
     
     try {
-      // Use cached result if text hasn't changed
+      // Detect language for current text
+      final currentLanguage = _parser.detectLanguage(text);
+      
+      // Use cached result if text and language haven't changed
       List<QuantitySpan> quantities;
-      if (text == _lastText && _lastQuantities != null) {
+      if (text == _lastText && currentLanguage == _lastLanguage && _lastQuantities != null) {
         quantities = _lastQuantities!;
       } else {
         final parseResult = _parser.parse(text);
         quantities = parseResult.quantities;
         _lastText = text;
+        _lastLanguage = currentLanguage;
         _lastQuantities = quantities;
       }
       
@@ -84,6 +89,7 @@ class IngredientTextEditingController extends TextEditingController {
   @override
   void dispose() {
     _lastText = null;
+    _lastLanguage = null;
     _lastQuantities = null;
     super.dispose();
   }
