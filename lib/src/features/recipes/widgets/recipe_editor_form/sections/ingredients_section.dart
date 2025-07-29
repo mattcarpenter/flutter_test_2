@@ -69,8 +69,38 @@ class _IngredientsSectionState extends State<IngredientsSection> {
             onReorder: widget.onReorderIngredients,
             itemBuilder: (context, index) {
               final ingredient = widget.ingredients[index];
+              
+              // Calculate padding based on grouping
+              final isSection = ingredient.type == 'section';
+              final prevIngredient = index > 0 ? widget.ingredients[index - 1] : null;
+              final nextIngredient = index < widget.ingredients.length - 1 ? widget.ingredients[index + 1] : null;
+              
+              // Determine if this ingredient is part of a group
+              final isGrouped = !isSection;
+              final isFirstInGroup = isGrouped && (index == 0 || prevIngredient?.type == 'section');
+              final isLastInGroup = isGrouped && (index == widget.ingredients.length - 1 || nextIngredient?.type == 'section');
+              
+              // Apply different padding based on grouping
+              EdgeInsets padding;
+              if (isSection) {
+                // Sections get normal padding
+                padding = const EdgeInsets.symmetric(vertical: 4.0);
+              } else if (isFirstInGroup && isLastInGroup) {
+                // Single ingredient (not grouped) gets normal padding
+                padding = const EdgeInsets.symmetric(vertical: 4.0);
+              } else if (isFirstInGroup) {
+                // First in group: normal top, no bottom
+                padding = const EdgeInsets.only(top: 4.0);
+              } else if (isLastInGroup) {
+                // Last in group: no top, normal bottom
+                padding = const EdgeInsets.only(bottom: 4.0);
+              } else {
+                // Middle of group: no vertical padding
+                padding = EdgeInsets.zero;
+              }
+              
               return Padding(
-                padding: const EdgeInsets.symmetric(vertical: 4.0),
+                padding: padding,
                 key: ValueKey(ingredient.id),
                 child: IngredientListItem(
                   index: index,
@@ -82,6 +112,8 @@ class _IngredientsSectionState extends State<IngredientsSection> {
                       widget.onUpdateIngredient(ingredient.id, updatedIngredient),
                   onAddNext: () => widget.onAddIngredient(false),
                   onFocus: (hasFocus) => widget.onFocusChanged(ingredient.id, hasFocus),
+                  allIngredients: widget.ingredients,
+                  enableGrouping: true,
                 ),
               );
             },

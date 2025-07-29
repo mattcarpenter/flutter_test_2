@@ -20,6 +20,8 @@ class IngredientListItem extends ConsumerStatefulWidget {
   final Function(Ingredient) onUpdate;
   final VoidCallback onAddNext;
   final Function(bool) onFocus;
+  final List<Ingredient> allIngredients;
+  final bool enableGrouping;
 
   const IngredientListItem({
     Key? key,
@@ -31,6 +33,8 @@ class IngredientListItem extends ConsumerStatefulWidget {
     required this.onUpdate,
     required this.onAddNext,
     required this.onFocus,
+    required this.allIngredients,
+    this.enableGrouping = false,
   }) : super(key: key);
 
   @override
@@ -44,6 +48,109 @@ class _IngredientListItemState extends ConsumerState<IngredientListItem> {
   bool get isSection => widget.ingredient.type == 'section';
 
   final GlobalKey _dragHandleKey = GlobalKey();
+
+  // Grouping detection methods
+  bool get _isGrouped => widget.enableGrouping && !isSection;
+  
+  Ingredient? get _prevIngredient {
+    if (widget.index <= 0) return null;
+    return widget.allIngredients[widget.index - 1];
+  }
+  
+  Ingredient? get _nextIngredient {
+    if (widget.index >= widget.allIngredients.length - 1) return null;
+    return widget.allIngredients[widget.index + 1];
+  }
+  
+  bool get _isFirstInGroup {
+    if (!_isGrouped) return false;
+    return widget.index == 0 || (_prevIngredient?.type == 'section');
+  }
+  
+  bool get _isLastInGroup {
+    if (!_isGrouped) return false;
+    return widget.index == widget.allIngredients.length - 1 || (_nextIngredient?.type == 'section');
+  }
+  
+  // Border radius calculation for grouping
+  BorderRadius _getBorderRadius() {
+    if (!_isGrouped) {
+      return BorderRadius.circular(8.0);
+    }
+    
+    if (_isFirstInGroup && _isLastInGroup) {
+      // Single item in group (shouldn't happen, but handle gracefully)
+      return BorderRadius.circular(8.0);
+    } else if (_isFirstInGroup) {
+      return const BorderRadius.only(
+        topLeft: Radius.circular(8.0),
+        topRight: Radius.circular(8.0),
+      );
+    } else if (_isLastInGroup) {
+      return const BorderRadius.only(
+        bottomLeft: Radius.circular(8.0),
+        bottomRight: Radius.circular(8.0),
+      );
+    } else {
+      // Middle item - no rounded corners
+      return BorderRadius.zero;
+    }
+  }
+  
+  // Border calculation for grouping
+  Border _getBorder() {
+    const borderColor = Colors.grey;
+    const borderWidth = 1.0;
+    
+    if (!_isGrouped) {
+      return Border.all(color: borderColor.shade300, width: borderWidth);
+    }
+    
+    if (_isFirstInGroup) {
+      // First item gets full border
+      return Border.all(color: borderColor.shade300, width: borderWidth);
+    } else {
+      // Non-first items omit top border to prevent double borders
+      return Border(
+        left: BorderSide(color: borderColor.shade300, width: borderWidth),
+        right: BorderSide(color: borderColor.shade300, width: borderWidth),
+        bottom: BorderSide(color: borderColor.shade300, width: borderWidth),
+      );
+    }
+  }
+  
+  // Build inset divider widget for grouped ingredients
+  Widget? _buildInsetDivider() {
+    if (!_isGrouped || _isLastInGroup) {
+      return null;
+    }
+    
+    return Positioned(
+      bottom: -0.5,
+      left: 0,
+      right: 0,
+      child: Row(
+        children: [
+          Container(
+            width: 16,
+            height: 1,
+            color: Colors.white,
+          ),
+          Expanded(
+            child: Container(
+              height: 1,
+              color: Colors.grey.shade300,
+            ),
+          ),
+          Container(
+            width: 16,
+            height: 1,
+            color: Colors.white,
+          ),
+        ],
+      ),
+    );
+  }
 
   @override
   void initState() {
@@ -234,8 +341,8 @@ class _IngredientListItemState extends ConsumerState<IngredientListItem> {
             Container(
               decoration: BoxDecoration(
                 color: backgroundColor,
-                border: Border.all(color: Colors.grey.shade300),
-                borderRadius: BorderRadius.circular(8),
+                border: _getBorder(),
+                borderRadius: _getBorderRadius(),
               ),
               child: Row(
                 children: [
@@ -283,6 +390,8 @@ class _IngredientListItemState extends ConsumerState<IngredientListItem> {
                 ),
               ),
             ),
+            // Add inset divider for grouped ingredients
+            if (_buildInsetDivider() != null) _buildInsetDivider()!,
           ],
         ),
       ),
