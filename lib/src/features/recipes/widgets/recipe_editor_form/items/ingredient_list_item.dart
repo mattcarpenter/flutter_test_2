@@ -22,6 +22,8 @@ class IngredientListItem extends ConsumerStatefulWidget {
   final Function(bool) onFocus;
   final List<Ingredient> allIngredients;
   final bool enableGrouping;
+  final int? visualIndex;  // Visual position during drag operations
+  final int? draggedIndex; // Index of the item being dragged
 
   const IngredientListItem({
     Key? key,
@@ -35,6 +37,8 @@ class IngredientListItem extends ConsumerStatefulWidget {
     required this.onFocus,
     required this.allIngredients,
     this.enableGrouping = false,
+    this.visualIndex,
+    this.draggedIndex,
   }) : super(key: key);
 
   @override
@@ -52,24 +56,37 @@ class _IngredientListItemState extends ConsumerState<IngredientListItem> {
   // Grouping detection methods
   bool get _isGrouped => widget.enableGrouping && !isSection;
   
-  Ingredient? get _prevIngredient {
-    if (widget.index <= 0) return null;
-    return widget.allIngredients[widget.index - 1];
-  }
-  
-  Ingredient? get _nextIngredient {
-    if (widget.index >= widget.allIngredients.length - 1) return null;
-    return widget.allIngredients[widget.index + 1];
-  }
-  
   bool get _isFirstInGroup {
     if (!_isGrouped) return false;
-    return widget.index == 0 || (_prevIngredient?.type == 'section');
+    
+    // Use visual index during drag operations if available
+    final effectiveIndex = widget.visualIndex ?? widget.index;
+    final prevIndex = effectiveIndex - 1;
+    
+    if (effectiveIndex == 0) return true;
+    if (prevIndex < 0 || prevIndex >= widget.allIngredients.length) return true;
+    
+    return widget.allIngredients[prevIndex].type == 'section';
   }
   
   bool get _isLastInGroup {
     if (!_isGrouped) return false;
-    return widget.index == widget.allIngredients.length - 1 || (_nextIngredient?.type == 'section');
+    
+    // Use visual index during drag operations if available
+    final effectiveIndex = widget.visualIndex ?? widget.index;
+    
+    // During drag operations, visual array length is reduced by 1 (dragged item)
+    if (widget.visualIndex != null) {
+      final visualArrayLength = widget.allIngredients.length - 1;
+      return effectiveIndex == visualArrayLength - 1;
+    }
+    
+    // Normal (non-drag) logic
+    final nextIndex = effectiveIndex + 1;
+    if (effectiveIndex == widget.allIngredients.length - 1) return true;
+    if (nextIndex >= widget.allIngredients.length) return true;
+    
+    return widget.allIngredients[nextIndex].type == 'section';
   }
   
   // Border radius calculation for grouping

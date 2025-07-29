@@ -46,9 +46,34 @@ class _IngredientsSectionState extends State<IngredientsSection> {
   void _onDragEnd(int index) {
     setState(() {
       _isDragging = false;
-      _draggedIndex = null;
+    });
+    
+    // Delay clearing draggedIndex to match ReorderableListView's animation timing
+    Future.delayed(const Duration(milliseconds: 250), () {
+      if (mounted) {
+        setState(() {
+          _draggedIndex = null;
+        });
+      }
     });
   }
+
+  // Calculate visual index during drag operations
+  int? _getVisualIndex(int index) {
+    if (!_isDragging || _draggedIndex == null) return null;
+    
+    // The dragged item doesn't have a visual position (it's floating)
+    if (index == _draggedIndex) return null;
+    
+    // Items before the dragged item stay in the same visual position
+    if (index < _draggedIndex!) {
+      return index;
+    }
+    
+    // Items after the dragged item shift up by one visual position
+    return index - 1;
+  }
+
 
   @override
   Widget build(BuildContext context) {
@@ -89,6 +114,8 @@ class _IngredientsSectionState extends State<IngredientsSection> {
                   onFocus: (hasFocus) => widget.onFocusChanged(ingredient.id, hasFocus),
                   allIngredients: widget.ingredients,
                   enableGrouping: true,
+                  visualIndex: _getVisualIndex(index),
+                  draggedIndex: _draggedIndex,
                 ),
               );
             },
