@@ -14,6 +14,7 @@ class AppDurationPickerCondensed extends StatefulWidget {
   final DurationPickerMode mode;
   final bool first;
   final bool last;
+  final bool grouped;
 
   const AppDurationPickerCondensed({
     Key? key,
@@ -25,6 +26,7 @@ class AppDurationPickerCondensed extends StatefulWidget {
     this.mode = DurationPickerMode.hoursMinutes,
     this.first = true,
     this.last = true,
+    this.grouped = false,
   }) : super(key: key);
 
   @override
@@ -316,41 +318,129 @@ class _AppDurationPickerCondensedState extends State<AppDurationPickerCondensed>
   Widget build(BuildContext context) {
     final displayText = _displayController.text.isEmpty ? '--:--' : _displayController.text;
     
-    return GestureDetector(
-      onTap: _showDurationPicker,
-      child: Container(
-        height: 48.0,
-        decoration: BoxDecoration(
-          color: widget.enabled ? Colors.white : Colors.grey[50],
-          borderRadius: _getBorderRadius(),
-          border: _getBorder(),
+    // When grouped, render without container decoration
+    if (widget.grouped) {
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          GestureDetector(
+            onTap: _showDurationPicker,
+            child: SizedBox(
+              height: 48.0,
+              child: Row(
+                children: [
+                  const SizedBox(width: 16),
+                  
+                  // Fixed label on the left
+                  Text(
+                    widget.placeholder,
+                    style: TextStyle(
+                      color: widget.errorText != null 
+                          ? const Color(0xFFDC2626) 
+                          : const Color(0xFF6B7280),
+                      fontSize: 16,
+                      fontWeight: FontWeight.w400,
+                    ),
+                  ),
+                  
+                  const SizedBox(width: 16),
+                  
+                  // Spacer to push chip to the right
+                  const Spacer(),
+                  
+                  // Chip on the right
+                  _buildChip(displayText),
+                  
+                  const SizedBox(width: 16),
+                ],
+              ),
+            ),
+          ),
+
+          // Error text for grouped fields
+          if (widget.errorText != null)
+            Padding(
+              padding: const EdgeInsets.only(
+                top: 4.0,
+                left: 16.0,
+                right: 16.0,
+              ),
+              child: Text(
+                widget.errorText!,
+                style: const TextStyle(
+                  color: Color(0xFFDC2626),
+                  fontSize: 12,
+                  fontWeight: FontWeight.w400,
+                ),
+              ),
+            ),
+        ],
+      );
+    }
+
+    // Non-grouped field with container decoration
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        GestureDetector(
+          onTap: _showDurationPicker,
+          child: Container(
+            height: 48.0,
+            decoration: BoxDecoration(
+              color: widget.enabled ? Colors.white : Colors.grey[50],
+              borderRadius: _getBorderRadius(),
+              border: _getBorder(),
+            ),
+            child: Row(
+              children: [
+                const SizedBox(width: 16),
+                
+                // Fixed label on the left
+                Text(
+                  widget.placeholder,
+                  style: TextStyle(
+                    color: widget.errorText != null 
+                        ? const Color(0xFFDC2626) 
+                        : const Color(0xFF6B7280),
+                    fontSize: 16,
+                    fontWeight: FontWeight.w400,
+                  ),
+                ),
+                
+                const SizedBox(width: 16),
+                
+                // Spacer to push chip to the right
+                const Spacer(),
+                
+                // Chip on the right
+                _buildChip(displayText),
+                
+                const SizedBox(width: 16),
+              ],
+            ),
+          ),
         ),
-        child: Row(
-          children: [
-            const SizedBox(width: 16),
-            
-            // Fixed label on the left
-            Text(
-              widget.placeholder,
+
+        // Error text for non-grouped fields
+        if (widget.errorText != null)
+          Padding(
+            padding: const EdgeInsets.only(
+              top: 4.0,
+              left: 16.0,
+              right: 16.0,
+            ),
+            child: Text(
+              widget.errorText!,
               style: const TextStyle(
-                color: Color(0xFF6B7280),
-                fontSize: 16,
+                color: Color(0xFFDC2626),
+                fontSize: 12,
                 fontWeight: FontWeight.w400,
               ),
             ),
-            
-            const SizedBox(width: 16),
-            
-            // Spacer to push chip to the right
-            const Spacer(),
-            
-            // Chip on the right
-            _buildChip(displayText),
-            
-            const SizedBox(width: 16),
-          ],
-        ),
-      ),
+          ),
+      ],
     );
   }
 }

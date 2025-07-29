@@ -28,6 +28,7 @@ class AppTextFieldCondensed extends StatefulWidget {
   final String? Function(String?)? validator;
   final bool first;
   final bool last;
+  final bool grouped;
 
   const AppTextFieldCondensed({
     Key? key,
@@ -55,6 +56,7 @@ class AppTextFieldCondensed extends StatefulWidget {
     this.validator,
     this.first = true,
     this.last = true,
+    this.grouped = false,
   }) : super(key: key);
 
   @override
@@ -243,6 +245,107 @@ class _AppTextFieldCondensedState extends State<AppTextFieldCondensed>
   }
 
   Widget _buildSingleLineField() {
+    // When grouped, render without container decoration
+    if (widget.grouped) {
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          SizedBox(
+            height: _condensedHeight,
+            child: Row(
+              children: [
+                if (widget.prefix != null) ...[
+                  Padding(
+                    padding: const EdgeInsets.only(left: 12.0),
+                    child: widget.prefix!,
+                  ),
+                  const SizedBox(width: 4),
+                ] else ...[
+                  const SizedBox(width: _horizontalPadding),
+                ],
+                
+                // Fixed label on the left
+                Text(
+                  widget.placeholder,
+                  style: AppTypography.fieldLabel.copyWith(
+                    color: _effectiveErrorText != null
+                        ? _errorColor
+                        : widget.enabled
+                            ? _labelColor
+                            : _disabledColor,
+                  ),
+                ),
+                
+                const SizedBox(width: 16),
+                
+                // Right-aligned input
+                Expanded(
+                  child: TextField(
+                    controller: widget.controller,
+                    focusNode: _focusNode,
+                    enabled: widget.enabled,
+                    keyboardType: widget.keyboardType,
+                    obscureText: widget.obscureText,
+                    maxLines: 1,
+                    onChanged: widget.onChanged,
+                    onEditingComplete: widget.onEditingComplete,
+                    onSubmitted: widget.onSubmitted,
+                    inputFormatters: widget.inputFormatters,
+                    textInputAction: widget.textInputAction ?? TextInputAction.done,
+                    autofocus: widget.autofocus,
+                    textCapitalization: widget.textCapitalization,
+                    textAlign: TextAlign.end,
+                    maxLength: widget.maxLength,
+                    style: AppTypography.fieldInput.copyWith(
+                      color: widget.enabled ? _textColor : _disabledColor,
+                    ),
+                    decoration: InputDecoration(
+                      isDense: true,
+                      contentPadding: EdgeInsets.zero,
+                      border: InputBorder.none,
+                      counterText: '',
+                      hintText: _hasValue ? null : 'Enter value',
+                      hintStyle: AppTypography.fieldInput.copyWith(
+                        color: _placeholderColor,
+                      ),
+                    ),
+                  ),
+                ),
+                
+                if (widget.suffix != null) ...[
+                  const SizedBox(width: 4),
+                  Padding(
+                    padding: const EdgeInsets.only(right: 12.0),
+                    child: widget.suffix!,
+                  ),
+                ] else ...[
+                  const SizedBox(width: _horizontalPadding),
+                ],
+              ],
+            ),
+          ),
+
+          // Error text for grouped fields
+          if (_effectiveErrorText != null)
+            Padding(
+              padding: const EdgeInsets.only(
+                top: 4.0,
+                left: _horizontalPadding,
+                right: _horizontalPadding,
+              ),
+              child: Text(
+                _effectiveErrorText!,
+                style: AppTypography.fieldError.copyWith(
+                  color: _errorColor,
+                ),
+              ),
+            ),
+        ],
+      );
+    }
+
+    // Non-grouped field with container decoration
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       mainAxisSize: MainAxisSize.min,
@@ -276,71 +379,71 @@ class _AppTextFieldCondensedState extends State<AppTextFieldCondensed>
                   ] else ...[
                     const SizedBox(width: _horizontalPadding),
                   ],
-                  
-                  // Fixed label on the left
-                  Text(
-                    widget.placeholder,
-                    style: AppTypography.fieldLabel.copyWith(
-                      color: _effectiveErrorText != null
-                          ? _errorColor
-                          : widget.enabled
-                              ? _labelColor
-                              : _disabledColor,
-                    ),
-                  ),
-                  
-                  const SizedBox(width: 16),
-                  
-                  // Right-aligned input
-                  Expanded(
-                    child: TextField(
-                      controller: widget.controller,
-                      focusNode: _focusNode,
-                      enabled: widget.enabled,
-                      keyboardType: widget.keyboardType,
-                      obscureText: widget.obscureText,
-                      maxLines: 1,
-                      onChanged: widget.onChanged,
-                      onEditingComplete: widget.onEditingComplete,
-                      onSubmitted: widget.onSubmitted,
-                      inputFormatters: widget.inputFormatters,
-                      textInputAction: widget.textInputAction ?? TextInputAction.done,
-                      autofocus: widget.autofocus,
-                      textCapitalization: widget.textCapitalization,
-                      textAlign: TextAlign.end,
-                      maxLength: widget.maxLength,
-                      style: AppTypography.fieldInput.copyWith(
-                        color: widget.enabled ? _textColor : _disabledColor,
+                    
+                    // Fixed label on the left
+                    Text(
+                      widget.placeholder,
+                      style: AppTypography.fieldLabel.copyWith(
+                        color: _effectiveErrorText != null
+                            ? _errorColor
+                            : widget.enabled
+                                ? _labelColor
+                                : _disabledColor,
                       ),
-                      decoration: InputDecoration(
-                        isDense: true,
-                        contentPadding: EdgeInsets.zero,
-                        border: InputBorder.none,
-                        counterText: '',
-                        hintText: _hasValue ? null : 'Enter value',
-                        hintStyle: AppTypography.fieldInput.copyWith(
-                          color: _placeholderColor,
+                    ),
+                    
+                    const SizedBox(width: 16),
+                    
+                    // Right-aligned input
+                    Expanded(
+                      child: TextField(
+                        controller: widget.controller,
+                        focusNode: _focusNode,
+                        enabled: widget.enabled,
+                        keyboardType: widget.keyboardType,
+                        obscureText: widget.obscureText,
+                        maxLines: 1,
+                        onChanged: widget.onChanged,
+                        onEditingComplete: widget.onEditingComplete,
+                        onSubmitted: widget.onSubmitted,
+                        inputFormatters: widget.inputFormatters,
+                        textInputAction: widget.textInputAction ?? TextInputAction.done,
+                        autofocus: widget.autofocus,
+                        textCapitalization: widget.textCapitalization,
+                        textAlign: TextAlign.end,
+                        maxLength: widget.maxLength,
+                        style: AppTypography.fieldInput.copyWith(
+                          color: widget.enabled ? _textColor : _disabledColor,
+                        ),
+                        decoration: InputDecoration(
+                          isDense: true,
+                          contentPadding: EdgeInsets.zero,
+                          border: InputBorder.none,
+                          counterText: '',
+                          hintText: _hasValue ? null : 'Enter value',
+                          hintStyle: AppTypography.fieldInput.copyWith(
+                            color: _placeholderColor,
+                          ),
                         ),
                       ),
                     ),
-                  ),
-                  
-                  if (widget.suffix != null) ...[
-                    const SizedBox(width: 4),
-                    Padding(
-                      padding: const EdgeInsets.only(right: 12.0),
-                      child: widget.suffix!,
-                    ),
-                  ] else ...[
-                    const SizedBox(width: _horizontalPadding),
+                    
+                    if (widget.suffix != null) ...[
+                      const SizedBox(width: 4),
+                      Padding(
+                        padding: const EdgeInsets.only(right: 12.0),
+                        child: widget.suffix!,
+                      ),
+                    ] else ...[
+                      const SizedBox(width: _horizontalPadding),
+                    ],
                   ],
-                ],
-              ),
+                ),
             );
           },
         ),
 
-        // Error text
+        // Error text for non-grouped fields
         if (_effectiveErrorText != null)
           AnimatedContainer(
             duration: _animationDuration,
@@ -366,6 +469,134 @@ class _AppTextFieldCondensedState extends State<AppTextFieldCondensed>
   Widget _buildMultilineField() {
     final isFloating = _isFocused || _hasValue;
 
+    // When grouped, render without container decoration
+    if (widget.grouped) {
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Container(
+            constraints: BoxConstraints(
+              minHeight: _multilineBaseHeight + ((widget.minLines - 1) * _lineHeight),
+            ),
+            child: Stack(
+              clipBehavior: Clip.none,
+              children: [
+                // Floating label for grouped multiline
+                AnimatedBuilder(
+                  animation: Listenable.merge([_animation, _focusAnimation]),
+                  builder: (context, child) {
+                    final progress = _animation.value;
+                    final textBaseline = 18.0;
+                    final startY = 16.0 + textBaseline + 3.0;
+                    final endY = 6 + textBaseline;
+                    final yPosition = startY - (progress * (startY - endY));
+                    final scale = 1.0 - (progress * 0.25);
+                    final opacity = 0.7 + (progress * 0.3);
+
+                    final labelColor = _effectiveErrorText != null
+                        ? _errorColor
+                        : _labelColor;
+
+                    return Transform(
+                      transform: Matrix4.identity()
+                        ..translate(_horizontalPadding, yPosition - textBaseline)
+                        ..scale(scale),
+                      alignment: Alignment.centerLeft,
+                      child: Opacity(
+                        opacity: opacity,
+                        child: Text(
+                          widget.placeholder,
+                          style: AppTypography.fieldLabel.copyWith(
+                            color: labelColor,
+                          ),
+                        ),
+                      ),
+                    );
+                  },
+                ),
+
+                // Input field for grouped multiline
+                Padding(
+                  padding: EdgeInsets.only(
+                    left: widget.prefix != null ? 0 : _horizontalPadding,
+                    right: widget.suffix != null ? 0 : _horizontalPadding,
+                    top: isFloating ? 24.0 : 16.0,
+                    bottom: isFloating ? 8.0 : 16.0,
+                  ),
+                  child: Row(
+                    children: [
+                      if (widget.prefix != null) ...[
+                        Padding(
+                          padding: const EdgeInsets.only(left: 12.0),
+                          child: widget.prefix!,
+                        ),
+                        const SizedBox(width: 4),
+                      ],
+                      Expanded(
+                        child: TextField(
+                          controller: widget.controller,
+                          focusNode: _focusNode,
+                          enabled: widget.enabled,
+                          keyboardType: TextInputType.multiline,
+                          obscureText: widget.obscureText,
+                          minLines: widget.minLines,
+                          maxLines: null,
+                          onChanged: widget.onChanged,
+                          onEditingComplete: widget.onEditingComplete,
+                          onSubmitted: widget.onSubmitted,
+                          inputFormatters: widget.inputFormatters,
+                          textInputAction: widget.textInputAction ?? TextInputAction.newline,
+                          autofocus: widget.autofocus,
+                          textCapitalization: widget.textCapitalization,
+                          textAlign: widget.textAlign,
+                          maxLength: widget.maxLength,
+                          style: AppTypography.fieldInput.copyWith(
+                            color: widget.enabled ? _textColor : _disabledColor,
+                          ),
+                          textAlignVertical: TextAlignVertical.top,
+                          decoration: InputDecoration(
+                            isDense: true,
+                            contentPadding: EdgeInsets.zero,
+                            border: InputBorder.none,
+                            counterText: '',
+                          ),
+                        ),
+                      ),
+                      if (widget.suffix != null) ...[
+                        const SizedBox(width: 4),
+                        Padding(
+                          padding: const EdgeInsets.only(right: 12.0),
+                          child: widget.suffix!,
+                        ),
+                      ],
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+
+          // Error text for grouped multiline fields
+          if (_effectiveErrorText != null)
+            Padding(
+              padding: const EdgeInsets.only(
+                top: 4.0,
+                left: _horizontalPadding,
+                right: _horizontalPadding,
+              ),
+              child: Text(
+                _effectiveErrorText!,
+                style: AppTypography.fieldError.copyWith(
+                  color: _errorColor,
+                ),
+              ),
+            ),
+        ],
+      );
+    }
+
+    // Non-grouped multiline field with container decoration
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       mainAxisSize: MainAxisSize.min,
