@@ -285,8 +285,8 @@ class _AdaptiveSliverPageState extends State<AdaptiveSliverPage> {
                 title: Text(widget.title),
                 floating: true,
                 pinned: true,
-                leadingPadding:
-                isTablet ? EdgeInsetsDirectional.only(start: padding) : null,
+                // leadingPadding:
+                // isTablet ? EdgeInsetsDirectional.only(start: padding) : null,
                 actions: actionsList.isNotEmpty ? actionsList : null,
                 leading: widget.leading,
               ),

@@ -60,14 +60,19 @@ class AuthApiException implements Exception {
 
 class AuthService {
   final SupabaseClient _supabase;
-  late final GoogleSignIn _googleSignIn;
+  final GoogleSignIn _googleSignIn = GoogleSignIn.instance;
+  bool _isGoogleSignInInitialized = false;
 
-  AuthService() : _supabase = Supabase.instance.client {
-    _googleSignIn = GoogleSignIn(
-      // TODO: Replace with your actual web client ID from Google Cloud Console
-    serverClientId: '954511479486-avfjhihhekild9n04jrre8dafv21q161.apps.googleusercontent.com',
-      scopes: ['openid', 'email', 'profile'],
-    );
+  AuthService() : _supabase = Supabase.instance.client;
+
+  Future<void> _initializeGoogleSignIn() async {
+    if (!_isGoogleSignInInitialized) {
+      await _googleSignIn.initialize(
+        // TODO: Replace with your actual web client ID from Google Cloud Console
+        serverClientId: '954511479486-avfjhihhekild9n04jrre8dafv21q161.apps.googleusercontent.com',
+      );
+      _isGoogleSignInInitialized = true;
+    }
   }
 
   /// Stream of auth state changes
@@ -150,24 +155,25 @@ class AuthService {
   /// Sign in with Google using native authentication
   Future<AuthResponse> signInWithGoogle() async {
     try {
+      // Initialize Google Sign-In if needed
+      await _initializeGoogleSignIn();
+
       // Sign out from any previous session
       await _googleSignIn.signOut();
 
       // Start the Google Sign-In flow
-      final googleUser = await _googleSignIn.signIn();
-      if (googleUser == null) {
-        throw AuthApiException(
-          message: 'Google Sign-In was cancelled',
-          type: AuthErrorType.userCancelled,
-        );
-      }
+      final googleUser = await _googleSignIn.authenticate();
 
-      // Get Google authentication
-      final googleAuth = await googleUser.authentication;
-      final accessToken = googleAuth.accessToken;
+      // Get Google authentication tokens
+      final googleAuth = googleUser.authentication;
       final idToken = googleAuth.idToken;
+      
+      // Get access token for authorization
+      final authClient = googleUser.authorizationClient;
+      final clientAuth = await authClient.authorizeScopes(['openid', 'email', 'profile']);
+      final accessToken = clientAuth.accessToken;
 
-      if (accessToken == null || idToken == null) {
+      if (accessToken.isEmpty || idToken == null) {
         throw AuthApiException(
           message: 'Failed to get Google authentication tokens',
           type: AuthErrorType.unknown,
