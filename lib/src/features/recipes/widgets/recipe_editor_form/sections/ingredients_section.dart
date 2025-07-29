@@ -30,20 +30,23 @@ class IngredientsSection extends StatefulWidget {
 
 class _IngredientsSectionState extends State<IngredientsSection> {
   bool _isDragging = false;
+  int? _draggedIndex;
 
   // Method to handle drag start
-  void _onDragStart() {
+  void _onDragStart(int index) {
     setState(() {
       _isDragging = true;
+      _draggedIndex = index;
       // Unfocus any text fields to prevent the leader-follower error
       FocusScope.of(context).unfocus();
     });
   }
 
   // Method to handle drag end
-  void _onDragEnd() {
+  void _onDragEnd(int index) {
     setState(() {
       _isDragging = false;
+      _draggedIndex = null;
     });
   }
 
@@ -63,8 +66,8 @@ class _IngredientsSectionState extends State<IngredientsSection> {
             physics: const NeverScrollableScrollPhysics(),
             clipBehavior: Clip.none,
             proxyDecorator: defaultProxyDecorator,
-            onReorderStart: (_) => _onDragStart(),
-            onReorderEnd: (_) => _onDragEnd(),
+            onReorderStart: (index) => _onDragStart(index),
+            onReorderEnd: (index) => _onDragEnd(index),
             itemCount: widget.ingredients.length,
             onReorder: widget.onReorderIngredients,
             itemBuilder: (context, index) {
@@ -78,7 +81,7 @@ class _IngredientsSectionState extends State<IngredientsSection> {
                   index: index,
                   ingredient: ingredient,
                   autoFocus: widget.autoFocusIngredientId == ingredient.id && !_isDragging,
-                  isDragging: _isDragging,
+                  isDragging: _draggedIndex == index,
                   onRemove: () => widget.onRemoveIngredient(ingredient.id),
                   onUpdate: (updatedIngredient) =>
                       widget.onUpdateIngredient(ingredient.id, updatedIngredient),
