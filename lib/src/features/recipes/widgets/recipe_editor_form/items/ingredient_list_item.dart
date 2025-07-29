@@ -102,7 +102,8 @@ class _IngredientListItemState extends ConsumerState<IngredientListItem> {
     const borderColor = Colors.grey;
     const borderWidth = 1.0;
     
-    if (!_isGrouped) {
+    if (!_isGrouped || widget.isDragging) {
+      // During drag, use full border to prevent animation glitches
       return Border.all(color: borderColor.shade300, width: borderWidth);
     }
     
@@ -134,7 +135,8 @@ class _IngredientListItemState extends ConsumerState<IngredientListItem> {
   
   // Build inset divider widget for grouped ingredients
   Widget? _buildInsetDivider() {
-    if (!_isGrouped || _isLastInGroup) {
+    if (!_isGrouped || _isLastInGroup || widget.isDragging) {
+      // Hide inset divider during drag to prevent visual conflicts
       return null;
     }
     

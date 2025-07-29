@@ -69,37 +69,10 @@ class _IngredientsSectionState extends State<IngredientsSection> {
             onReorder: widget.onReorderIngredients,
             itemBuilder: (context, index) {
               final ingredient = widget.ingredients[index];
-              
-              // Calculate padding based on grouping
-              final isSection = ingredient.type == 'section';
-              final prevIngredient = index > 0 ? widget.ingredients[index - 1] : null;
-              final nextIngredient = index < widget.ingredients.length - 1 ? widget.ingredients[index + 1] : null;
-              
-              // Determine if this ingredient is part of a group
-              final isGrouped = !isSection;
-              final isFirstInGroup = isGrouped && (index == 0 || prevIngredient?.type == 'section');
-              final isLastInGroup = isGrouped && (index == widget.ingredients.length - 1 || nextIngredient?.type == 'section');
-              
-              // Calculate padding - ensure zero padding between grouped items  
-              EdgeInsets padding;
-              if (isSection) {
-                padding = const EdgeInsets.symmetric(vertical: 4.0);
-              } else if (isFirstInGroup && isLastInGroup) {
-                // Single ungrouped ingredient
-                padding = const EdgeInsets.symmetric(vertical: 4.0);
-              } else if (isFirstInGroup) {
-                // First in group: top padding only
-                padding = const EdgeInsets.only(top: 4.0);
-              } else if (isLastInGroup) {
-                // Last in group: bottom padding only, zero top
-                padding = const EdgeInsets.only(bottom: 4.0);
-              } else {
-                // Middle of group: zero padding to eliminate gaps
-                padding = EdgeInsets.zero;
-              }
-              
+
+
               return Padding(
-                padding: padding,
+                padding: EdgeInsets.zero,
                 key: ValueKey(ingredient.id),
                 child: IngredientListItem(
                   index: index,
