@@ -80,22 +80,21 @@ class _IngredientsSectionState extends State<IngredientsSection> {
               final isFirstInGroup = isGrouped && (index == 0 || prevIngredient?.type == 'section');
               final isLastInGroup = isGrouped && (index == widget.ingredients.length - 1 || nextIngredient?.type == 'section');
               
-              // Apply different padding based on grouping
+              // Calculate padding - ensure zero padding between grouped items  
               EdgeInsets padding;
               if (isSection) {
-                // Sections get normal padding
                 padding = const EdgeInsets.symmetric(vertical: 4.0);
               } else if (isFirstInGroup && isLastInGroup) {
-                // Single ingredient (not grouped) gets normal padding
+                // Single ungrouped ingredient
                 padding = const EdgeInsets.symmetric(vertical: 4.0);
               } else if (isFirstInGroup) {
-                // First in group: normal top, no bottom
+                // First in group: top padding only
                 padding = const EdgeInsets.only(top: 4.0);
               } else if (isLastInGroup) {
-                // Last in group: no top, normal bottom
+                // Last in group: bottom padding only, zero top
                 padding = const EdgeInsets.only(bottom: 4.0);
               } else {
-                // Middle of group: no vertical padding
+                // Middle of group: zero padding to eliminate gaps
                 padding = EdgeInsets.zero;
               }
               

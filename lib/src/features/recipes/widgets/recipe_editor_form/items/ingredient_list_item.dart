@@ -106,15 +106,28 @@ class _IngredientListItemState extends ConsumerState<IngredientListItem> {
       return Border.all(color: borderColor.shade300, width: borderWidth);
     }
     
-    if (_isFirstInGroup) {
-      // First item gets full border
+    if (_isFirstInGroup && _isLastInGroup) {
+      // Single item gets full border
       return Border.all(color: borderColor.shade300, width: borderWidth);
-    } else {
-      // Non-first items omit top border to prevent double borders
+    } else if (_isFirstInGroup) {
+      // First item: no bottom border (inset divider replaces it)
+      return Border(
+        top: BorderSide(color: borderColor.shade300, width: borderWidth),
+        left: BorderSide(color: borderColor.shade300, width: borderWidth),
+        right: BorderSide(color: borderColor.shade300, width: borderWidth),
+      );
+    } else if (_isLastInGroup) {
+      // Last item: no top border, has bottom border
       return Border(
         left: BorderSide(color: borderColor.shade300, width: borderWidth),
         right: BorderSide(color: borderColor.shade300, width: borderWidth),
         bottom: BorderSide(color: borderColor.shade300, width: borderWidth),
+      );
+    } else {
+      // Middle items: only left/right borders (inset divider replaces bottom)
+      return Border(
+        left: BorderSide(color: borderColor.shade300, width: borderWidth),
+        right: BorderSide(color: borderColor.shade300, width: borderWidth),
       );
     }
   }
@@ -126,28 +139,31 @@ class _IngredientListItemState extends ConsumerState<IngredientListItem> {
     }
     
     return Positioned(
-      bottom: -0.5,
+      bottom: 0,
       left: 0,
       right: 0,
-      child: Row(
-        children: [
-          Container(
-            width: 16,
-            height: 1,
-            color: Colors.white,
-          ),
-          Expanded(
-            child: Container(
+      child: Container(
+        height: 1,
+        child: Row(
+          children: [
+            Container(
+              width: 16,
               height: 1,
-              color: Colors.grey.shade300,
+              color: Colors.white,
             ),
-          ),
-          Container(
-            width: 16,
-            height: 1,
-            color: Colors.white,
-          ),
-        ],
+            Expanded(
+              child: Container(
+                height: 1,
+                color: Colors.grey.shade300,
+              ),
+            ),
+            Container(
+              width: 16,
+              height: 1,
+              color: Colors.white,
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -275,7 +291,7 @@ class _IngredientListItemState extends ConsumerState<IngredientListItem> {
     return Container(
       decoration: BoxDecoration(
         color: Colors.red,
-        borderRadius: BorderRadius.circular(8),
+        borderRadius: _getBorderRadius(),
       ),
       child: Slidable(
         enabled: !widget.isDragging,
