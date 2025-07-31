@@ -80,7 +80,8 @@ class PantryItemList extends ConsumerWidget {
 
   Widget _buildCategoryHeader(BuildContext context, String category) {
     final isDarkMode = CupertinoTheme.of(context).brightness == Brightness.dark;
-    final textColor = CupertinoTheme.of(context).textTheme.textStyle.color!;
+    final textColor = CupertinoTheme.of(context).textTheme.textStyle.color ?? 
+        (isDarkMode ? Colors.white : Colors.black);
     final backgroundColor = isDarkMode
         ? Colors.grey.shade900
         : Colors.grey.shade100;
@@ -102,7 +103,8 @@ class PantryItemList extends ConsumerWidget {
 
   Widget _buildPantryItemTile(BuildContext context, WidgetRef ref, PantryItemEntry item) {
     final isDarkMode = CupertinoTheme.of(context).brightness == Brightness.dark;
-    final textColor = CupertinoTheme.of(context).textTheme.textStyle.color!;
+    final textColor = CupertinoTheme.of(context).textTheme.textStyle.color ?? 
+        (isDarkMode ? Colors.white : Colors.black);
     final dividerColor = isDarkMode
         ? Colors.grey.shade800
         : Colors.grey.shade300;
@@ -190,7 +192,8 @@ class PantryItemList extends ConsumerWidget {
 
   Widget _buildAddItemButton(BuildContext context) {
     final isDarkMode = CupertinoTheme.of(context).brightness == Brightness.dark;
-    final textColor = CupertinoTheme.of(context).textTheme.textStyle.color!;
+    final textColor = CupertinoTheme.of(context).textTheme.textStyle.color ?? 
+        (isDarkMode ? Colors.white : Colors.black);
     final borderColor = isDarkMode
         ? Colors.grey.shade600
         : Colors.grey.shade400;
