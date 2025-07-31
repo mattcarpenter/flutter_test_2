@@ -266,45 +266,110 @@ class _IngredientListItemState extends ConsumerState<IngredientListItem> {
     final backgroundColor = Colors.white;
 
     if (isSection) {
-      return Container(
-        decoration: BoxDecoration(
-          color: Colors.grey.shade200,
-          borderRadius: BorderRadius.circular(8),
-        ),
-        child: ListTile(
-          leading: const Icon(Icons.segment),
-          title: Focus(
-            focusNode: _focusNode,
-            child: TextField(
-              decoration: const InputDecoration(
-                hintText: 'Section name',
-                border: InputBorder.none,
-              ),
-              controller: _ingredientController,
-              style: const TextStyle(fontWeight: FontWeight.bold),
-              onChanged: (value) {
-                widget.onUpdate(widget.ingredient.copyWith(name: value));
-              },
-            ),
+      return Padding(
+        padding: const EdgeInsets.symmetric(vertical: 8.0),
+        child: Container(
+          decoration: BoxDecoration(
+            color: Colors.red,
+            borderRadius: BorderRadius.circular(8.0),
           ),
-          trailing: Row(
-            mainAxisSize: MainAxisSize.min,
+          child: Slidable(
+          enabled: !widget.isDragging,
+          endActionPane: ActionPane(
+            motion: const ScrollMotion(),
+            extentRatio: 0.2,
             children: [
-              IconButton(
-                icon: const Icon(Icons.remove_circle_outline),
-                onPressed: widget.onRemove,
-              ),
-              SizedBox(
-                width: 40,
-                child: ReorderableDragStartListener(
-                  index: widget.index,
-                  child: const Icon(Icons.drag_handle),
+              Expanded(
+                child: Center(
+                  child: GestureDetector(
+                    onTap: widget.onRemove,
+                    child: const Icon(
+                      Icons.delete,
+                      color: Colors.white,
+                      size: 24,
+                    ),
+                  ),
                 ),
               ),
             ],
           ),
+          child: ContextMenuWidget(
+            contextMenuIsAllowed: _contextMenuIsAllowed,
+            menuProvider: (_) {
+              return Menu(
+                children: [
+                  MenuAction(
+                    title: 'Convert to ingredient',
+                    image: MenuImage.icon(Icons.food_bank),
+                    callback: () {
+                      // Convert the section to an ingredient
+                      widget.onUpdate(widget.ingredient.copyWith(
+                        type: 'ingredient',
+                        name: widget.ingredient.name.isEmpty ? '' : widget.ingredient.name,
+                        primaryAmount1Value: '',
+                        primaryAmount1Unit: 'g',
+                        primaryAmount1Type: 'weight',
+                      ));
+                    },
+                  ),
+                ],
+              );
+            },
+            child: Stack(
+              children: [
+                Container(
+                  decoration: BoxDecoration(
+                    color: backgroundColor,
+                    border: Border.all(color: Colors.grey.shade300, width: 1.0),
+                    borderRadius: BorderRadius.circular(8.0),
+                  ),
+                  child: Row(
+                    children: [
+                      const SizedBox(width: 12), // Left padding
+                      const Icon(Icons.segment, size: 20), // Leading icon
+                      const SizedBox(width: 12), // Space after icon
+                      Expanded(
+                        child: Focus(
+                          focusNode: _focusNode,
+                          child: TextField(
+                            controller: _ingredientController,
+                            decoration: const InputDecoration(
+                              hintText: 'Section name',
+                              border: InputBorder.none,
+                              contentPadding: EdgeInsets.symmetric(vertical: 12),
+                            ),
+                            style: const TextStyle(fontWeight: FontWeight.bold),
+                            onChanged: (value) {
+                              widget.onUpdate(widget.ingredient.copyWith(name: value));
+                            },
+                            textInputAction: TextInputAction.next,
+                            onSubmitted: (_) => widget.onAddNext(),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 48), // Space for the drag handle
+                    ],
+                  ),
+                ),
+                // Position the drag handle on top so it's clickable
+                Positioned(
+                  right: 0,
+                  top: 0,
+                  bottom: 0,
+                  child: SizedBox(
+                    width: 40,
+                    child: ReorderableDragStartListener(
+                      key: _dragHandleKey,
+                      index: widget.index,
+                      child: const Icon(Icons.drag_handle),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
         ),
-      );
+      ));
     }
 
     return Container(
