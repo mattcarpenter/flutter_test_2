@@ -55,15 +55,15 @@ class _IngredientListItemState extends ConsumerState<IngredientListItem> {
 
   // Grouping detection methods
   bool get _isGrouped => widget.enableGrouping;
-  
+
   bool get _isFirstInGroup {
     if (!_isGrouped) return false;
-    
+
     // Use visual index during drag operations if available
     final effectiveIndex = widget.visualIndex ?? widget.index;
-    
+
     if (effectiveIndex == 0) return true;
-    
+
     // Look backwards to find the first non-section item
     for (int i = effectiveIndex - 1; i >= 0; i--) {
       if (i >= widget.allIngredients.length) continue;
@@ -72,17 +72,17 @@ class _IngredientListItemState extends ConsumerState<IngredientListItem> {
         return false; // Found a non-section item, so we're not first in group
       }
     }
-    
+
     // Only sections found before this item, so this is first in group
     return true;
   }
-  
+
   bool get _isLastInGroup {
     if (!_isGrouped) return false;
-    
+
     // Use visual index during drag operations if available
     final effectiveIndex = widget.visualIndex ?? widget.index;
-    
+
     // During drag operations, check if this is the last visual item
     if (widget.visualIndex != null) {
       final visualArrayLength = widget.allIngredients.length - 1;
@@ -91,12 +91,12 @@ class _IngredientListItemState extends ConsumerState<IngredientListItem> {
       // Normal (non-drag) logic - check if this is the last item
       if (effectiveIndex == widget.allIngredients.length - 1) return true;
     }
-    
+
     // Look forwards to find the first non-section item
-    final maxIndex = widget.visualIndex != null 
+    final maxIndex = widget.visualIndex != null
         ? widget.allIngredients.length - 1  // During drag, array is conceptually shorter
         : widget.allIngredients.length;
-        
+
     for (int i = effectiveIndex + 1; i < maxIndex; i++) {
       if (i >= widget.allIngredients.length) continue;
       final nextItem = widget.allIngredients[i];
@@ -104,17 +104,17 @@ class _IngredientListItemState extends ConsumerState<IngredientListItem> {
         return false; // Found a non-section item, so we're not last in group
       }
     }
-    
+
     // Only sections found after this item, so this is last in group
     return true;
   }
-  
+
   // Border radius calculation for grouping
   BorderRadius _getBorderRadius() {
     if (!_isGrouped) {
       return BorderRadius.circular(8.0);
     }
-    
+
     if (_isFirstInGroup && _isLastInGroup) {
       // Single item in group (shouldn't happen, but handle gracefully)
       return BorderRadius.circular(8.0);
@@ -133,17 +133,17 @@ class _IngredientListItemState extends ConsumerState<IngredientListItem> {
       return BorderRadius.zero;
     }
   }
-  
+
   // Border calculation for grouping
   Border _getBorder() {
     const borderColor = Colors.grey;
     const borderWidth = 1.0;
-    
+
     if (!_isGrouped || widget.isDragging) {
       // During drag, use full border to prevent animation glitches
       return Border.all(color: borderColor.shade300, width: borderWidth);
     }
-    
+
     if (_isFirstInGroup && _isLastInGroup) {
       // Single item gets full border
       return Border.all(color: borderColor.shade300, width: borderWidth);
@@ -169,14 +169,14 @@ class _IngredientListItemState extends ConsumerState<IngredientListItem> {
       );
     }
   }
-  
+
   // Build inset divider widget for grouped ingredients
   Widget? _buildInsetDivider() {
     if (!_isGrouped || _isLastInGroup || widget.isDragging) {
       // Hide inset divider during drag to prevent visual conflicts
       return null;
     }
-    
+
     return Positioned(
       bottom: 0,
       left: 0,
@@ -219,7 +219,7 @@ class _IngredientListItemState extends ConsumerState<IngredientListItem> {
       widget.onFocus(_focusNode.hasFocus);
       setState(() {}); // update background color
     });
-    
+
     if (widget.autoFocus) {
       // Force focus with retry mechanism
       WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -254,13 +254,13 @@ class _IngredientListItemState extends ConsumerState<IngredientListItem> {
   bool _contextMenuIsAllowed(Offset location) {
     return isLocationOutsideKey(location, _dragHandleKey);
   }
-  
+
   void _forceFocus(int attempt) {
     if (attempt >= 10 || !mounted) return;
-    
+
     if (!_focusNode.hasFocus) {
       _focusNode.requestFocus();
-      
+
       // Try again after delay
       Future.delayed(Duration(milliseconds: 50 + (attempt * 25)), () {
         _forceFocus(attempt + 1);
@@ -401,7 +401,7 @@ class _IngredientListItemState extends ConsumerState<IngredientListItem> {
                     child: ReorderableDragStartListener(
                       key: _dragHandleKey,
                       index: widget.index,
-                      child: const Icon(Icons.drag_handle),
+                      child: Icon(Icons.drag_handle, color: Colors.grey.shade400),
                     ),
                   ),
                 ),
@@ -459,8 +459,8 @@ class _IngredientListItemState extends ConsumerState<IngredientListItem> {
                 },
               ),
               MenuAction(
-                title: widget.ingredient.recipeId == null 
-                    ? 'Link to Existing Recipe' 
+                title: widget.ingredient.recipeId == null
+                    ? 'Link to Existing Recipe'
                     : 'Change Linked Recipe',
                 image: MenuImage.icon(Icons.link),
                 callback: () {
@@ -533,7 +533,7 @@ class _IngredientListItemState extends ConsumerState<IngredientListItem> {
                 child: ReorderableDragStartListener(
                   key: _dragHandleKey,
                   index: widget.index,
-                  child: const Icon(Icons.drag_handle),
+                  child: Icon(Icons.drag_handle, color: Colors.grey.shade400),
                 ),
               ),
             ),
@@ -626,7 +626,7 @@ class _RecipeSelectorContentState extends ConsumerState<RecipeSelectorContent> {
                         final recipe = searchState.results[index];
                         return ListTile(
                           title: Text(recipe.title),
-                          subtitle: recipe.description != null 
+                          subtitle: recipe.description != null
                               ? Text(recipe.description!, maxLines: 1, overflow: TextOverflow.ellipsis)
                               : null,
                           onTap: () => widget.onRecipeSelected(recipe),

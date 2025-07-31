@@ -49,15 +49,15 @@ class _StepListItemState extends State<StepListItem> {
 
   // Grouping detection methods
   bool get _isGrouped => widget.enableGrouping;
-  
+
   bool get _isFirstInGroup {
     if (!_isGrouped) return false;
-    
+
     // Use visual index during drag operations if available
     final effectiveIndex = widget.visualIndex ?? widget.index;
-    
+
     if (effectiveIndex == 0) return true;
-    
+
     // Look backwards to find the first non-section item
     for (int i = effectiveIndex - 1; i >= 0; i--) {
       if (i >= widget.allSteps.length) continue;
@@ -66,17 +66,17 @@ class _StepListItemState extends State<StepListItem> {
         return false; // Found a non-section item, so we're not first in group
       }
     }
-    
+
     // Only sections found before this item, so this is first in group
     return true;
   }
-  
+
   bool get _isLastInGroup {
     if (!_isGrouped) return false;
-    
+
     // Use visual index during drag operations if available
     final effectiveIndex = widget.visualIndex ?? widget.index;
-    
+
     // During drag operations, check if this is the last visual item
     if (widget.visualIndex != null) {
       final visualArrayLength = widget.allSteps.length - 1;
@@ -85,12 +85,12 @@ class _StepListItemState extends State<StepListItem> {
       // Normal (non-drag) logic - check if this is the last item
       if (effectiveIndex == widget.allSteps.length - 1) return true;
     }
-    
+
     // Look forwards to find the first non-section item
-    final maxIndex = widget.visualIndex != null 
+    final maxIndex = widget.visualIndex != null
         ? widget.allSteps.length - 1  // During drag, array is conceptually shorter
         : widget.allSteps.length;
-        
+
     for (int i = effectiveIndex + 1; i < maxIndex; i++) {
       if (i >= widget.allSteps.length) continue;
       final nextItem = widget.allSteps[i];
@@ -98,17 +98,17 @@ class _StepListItemState extends State<StepListItem> {
         return false; // Found a non-section item, so we're not last in group
       }
     }
-    
+
     // Only sections found after this item, so this is last in group
     return true;
   }
-  
+
   // Border radius calculation for grouping
   BorderRadius _getBorderRadius() {
     if (!_isGrouped) {
       return BorderRadius.circular(8.0);
     }
-    
+
     if (_isFirstInGroup && _isLastInGroup) {
       // Single item in group
       return BorderRadius.circular(8.0);
@@ -127,17 +127,17 @@ class _StepListItemState extends State<StepListItem> {
       return BorderRadius.zero;
     }
   }
-  
+
   // Border calculation for grouping
   Border _getBorder() {
     const borderColor = Colors.grey;
     const borderWidth = 1.0;
-    
+
     if (!_isGrouped || widget.isDragging) {
       // During drag, use full border to prevent animation glitches
       return Border.all(color: borderColor.shade300, width: borderWidth);
     }
-    
+
     if (_isFirstInGroup && _isLastInGroup) {
       // Single item gets full border
       return Border.all(color: borderColor.shade300, width: borderWidth);
@@ -153,14 +153,14 @@ class _StepListItemState extends State<StepListItem> {
       );
     }
   }
-  
+
   // Build inset divider widget for grouped steps
   Widget? _buildInsetDivider() {
     if (!_isGrouped || _isLastInGroup || widget.isDragging) {
       // Hide inset divider during drag to prevent visual conflicts
       return null;
     }
-    
+
     return Positioned(
       bottom: 0,
       left: 0,
@@ -200,7 +200,7 @@ class _StepListItemState extends State<StepListItem> {
       widget.onFocus(_focusNode.hasFocus);
       setState(() {});
     });
-    
+
     if (widget.autoFocus) {
       // Force focus immediately and repeatedly
       WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -235,13 +235,13 @@ class _StepListItemState extends State<StepListItem> {
   bool _contextMenuIsAllowed(Offset location) {
     return isLocationOutsideKey(location, _dragHandleKey);
   }
-  
+
   void _forceFocus(int attempt) {
     if (attempt >= 10 || !mounted) return;
-    
+
     if (!_focusNode.hasFocus) {
       _focusNode.requestFocus();
-      
+
       // Try again after delay
       Future.delayed(Duration(milliseconds: 50 + (attempt * 25)), () {
         _forceFocus(attempt + 1);
@@ -342,7 +342,7 @@ class _StepListItemState extends State<StepListItem> {
                     child: ReorderableDragStartListener(
                       key: _dragHandleKey,
                       index: widget.index,
-                      child: const Icon(Icons.drag_handle),
+                      child: Icon(Icons.drag_handle, color: Colors.grey.shade400),
                     ),
                   ),
                 ),
@@ -448,7 +448,7 @@ class _StepListItemState extends State<StepListItem> {
                   child: ReorderableDragStartListener(
                     key: _dragHandleKey,
                     index: widget.index,
-                    child: const Icon(Icons.drag_handle),
+                    child: Icon(Icons.drag_handle, color: Colors.grey.shade400),
                   ),
                 ),
               ),
