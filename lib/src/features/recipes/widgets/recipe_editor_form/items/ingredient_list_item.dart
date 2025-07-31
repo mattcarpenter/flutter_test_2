@@ -54,19 +54,27 @@ class _IngredientListItemState extends ConsumerState<IngredientListItem> {
   final GlobalKey _dragHandleKey = GlobalKey();
 
   // Grouping detection methods
-  bool get _isGrouped => widget.enableGrouping && !isSection;
+  bool get _isGrouped => widget.enableGrouping;
   
   bool get _isFirstInGroup {
     if (!_isGrouped) return false;
     
     // Use visual index during drag operations if available
     final effectiveIndex = widget.visualIndex ?? widget.index;
-    final prevIndex = effectiveIndex - 1;
     
     if (effectiveIndex == 0) return true;
-    if (prevIndex < 0 || prevIndex >= widget.allIngredients.length) return true;
     
-    return widget.allIngredients[prevIndex].type == 'section';
+    // Look backwards to find the first non-section item
+    for (int i = effectiveIndex - 1; i >= 0; i--) {
+      if (i >= widget.allIngredients.length) continue;
+      final prevItem = widget.allIngredients[i];
+      if (prevItem.type != 'section') {
+        return false; // Found a non-section item, so we're not first in group
+      }
+    }
+    
+    // Only sections found before this item, so this is first in group
+    return true;
   }
   
   bool get _isLastInGroup {
@@ -75,18 +83,30 @@ class _IngredientListItemState extends ConsumerState<IngredientListItem> {
     // Use visual index during drag operations if available
     final effectiveIndex = widget.visualIndex ?? widget.index;
     
-    // During drag operations, visual array length is reduced by 1 (dragged item)
+    // During drag operations, check if this is the last visual item
     if (widget.visualIndex != null) {
       final visualArrayLength = widget.allIngredients.length - 1;
-      return effectiveIndex == visualArrayLength - 1;
+      if (effectiveIndex == visualArrayLength - 1) return true;
+    } else {
+      // Normal (non-drag) logic - check if this is the last item
+      if (effectiveIndex == widget.allIngredients.length - 1) return true;
     }
     
-    // Normal (non-drag) logic
-    final nextIndex = effectiveIndex + 1;
-    if (effectiveIndex == widget.allIngredients.length - 1) return true;
-    if (nextIndex >= widget.allIngredients.length) return true;
+    // Look forwards to find the first non-section item
+    final maxIndex = widget.visualIndex != null 
+        ? widget.allIngredients.length - 1  // During drag, array is conceptually shorter
+        : widget.allIngredients.length;
+        
+    for (int i = effectiveIndex + 1; i < maxIndex; i++) {
+      if (i >= widget.allIngredients.length) continue;
+      final nextItem = widget.allIngredients[i];
+      if (nextItem.type != 'section') {
+        return false; // Found a non-section item, so we're not last in group
+      }
+    }
     
-    return widget.allIngredients[nextIndex].type == 'section';
+    // Only sections found after this item, so this is last in group
+    return true;
   }
   
   // Border radius calculation for grouping
@@ -266,13 +286,11 @@ class _IngredientListItemState extends ConsumerState<IngredientListItem> {
     final backgroundColor = Colors.white;
 
     if (isSection) {
-      return Padding(
-        padding: const EdgeInsets.symmetric(vertical: 8.0),
-        child: Container(
-          decoration: BoxDecoration(
-            color: Colors.red,
-            borderRadius: BorderRadius.circular(8.0),
-          ),
+      return Container(
+        decoration: BoxDecoration(
+          color: Colors.red,
+          borderRadius: _getBorderRadius(),
+        ),
           child: Slidable(
           enabled: !widget.isDragging,
           endActionPane: ActionPane(
@@ -320,14 +338,12 @@ class _IngredientListItemState extends ConsumerState<IngredientListItem> {
                 Container(
                   decoration: BoxDecoration(
                     color: backgroundColor,
-                    border: Border.all(color: Colors.grey.shade300, width: 1.0),
-                    borderRadius: BorderRadius.circular(8.0),
+                    border: _getBorder(),
+                    borderRadius: _getBorderRadius(),
                   ),
                   child: Row(
                     children: [
                       const SizedBox(width: 12), // Left padding
-                      const Icon(Icons.segment, size: 20), // Leading icon
-                      const SizedBox(width: 12), // Space after icon
                       Expanded(
                         child: Focus(
                           focusNode: _focusNode,
@@ -338,7 +354,7 @@ class _IngredientListItemState extends ConsumerState<IngredientListItem> {
                               border: InputBorder.none,
                               contentPadding: EdgeInsets.symmetric(vertical: 12),
                             ),
-                            style: const TextStyle(fontWeight: FontWeight.bold),
+                            style: TextStyle(fontWeight: FontWeight.bold, color: Colors.grey.shade600),
                             onChanged: (value) {
                               widget.onUpdate(widget.ingredient.copyWith(name: value));
                             },
@@ -365,11 +381,13 @@ class _IngredientListItemState extends ConsumerState<IngredientListItem> {
                     ),
                   ),
                 ),
+                // Add inset divider for grouped sections
+                if (_buildInsetDivider() != null) _buildInsetDivider()!,
               ],
             ),
           ),
         ),
-      ));
+      );
     }
 
     return Container(
