@@ -48,19 +48,27 @@ class _StepListItemState extends State<StepListItem> {
   final GlobalKey _dragHandleKey = GlobalKey();
 
   // Grouping detection methods
-  bool get _isGrouped => widget.enableGrouping && !isSection;
+  bool get _isGrouped => widget.enableGrouping;
   
   bool get _isFirstInGroup {
     if (!_isGrouped) return false;
     
     // Use visual index during drag operations if available
     final effectiveIndex = widget.visualIndex ?? widget.index;
-    final prevIndex = effectiveIndex - 1;
     
     if (effectiveIndex == 0) return true;
-    if (prevIndex < 0 || prevIndex >= widget.allSteps.length) return true;
     
-    return widget.allSteps[prevIndex].type == 'section';
+    // Look backwards to find the first non-section item
+    for (int i = effectiveIndex - 1; i >= 0; i--) {
+      if (i >= widget.allSteps.length) continue;
+      final prevItem = widget.allSteps[i];
+      if (prevItem.type != 'section') {
+        return false; // Found a non-section item, so we're not first in group
+      }
+    }
+    
+    // Only sections found before this item, so this is first in group
+    return true;
   }
   
   bool get _isLastInGroup {
@@ -69,18 +77,30 @@ class _StepListItemState extends State<StepListItem> {
     // Use visual index during drag operations if available
     final effectiveIndex = widget.visualIndex ?? widget.index;
     
-    // During drag operations, visual array length is reduced by 1 (dragged item)
+    // During drag operations, check if this is the last visual item
     if (widget.visualIndex != null) {
       final visualArrayLength = widget.allSteps.length - 1;
-      return effectiveIndex == visualArrayLength - 1;
+      if (effectiveIndex == visualArrayLength - 1) return true;
+    } else {
+      // Normal (non-drag) logic - check if this is the last item
+      if (effectiveIndex == widget.allSteps.length - 1) return true;
     }
     
-    // Normal (non-drag) logic
-    final nextIndex = effectiveIndex + 1;
-    if (effectiveIndex == widget.allSteps.length - 1) return true;
-    if (nextIndex >= widget.allSteps.length) return true;
+    // Look forwards to find the first non-section item
+    final maxIndex = widget.visualIndex != null 
+        ? widget.allSteps.length - 1  // During drag, array is conceptually shorter
+        : widget.allSteps.length;
+        
+    for (int i = effectiveIndex + 1; i < maxIndex; i++) {
+      if (i >= widget.allSteps.length) continue;
+      final nextItem = widget.allSteps[i];
+      if (nextItem.type != 'section') {
+        return false; // Found a non-section item, so we're not last in group
+      }
+    }
     
-    return widget.allSteps[nextIndex].type == 'section';
+    // Only sections found after this item, so this is last in group
+    return true;
   }
   
   // Border radius calculation for grouping
@@ -236,40 +256,100 @@ class _StepListItemState extends State<StepListItem> {
     if (isSection) {
       return Container(
         decoration: BoxDecoration(
-          color: Colors.grey.shade200,
-          borderRadius: BorderRadius.circular(8),
+          color: Colors.red,
+          borderRadius: _getBorderRadius(),
         ),
-        child: ListTile(
-          leading: const Icon(Icons.segment),
-          title: Focus(
-            focusNode: _focusNode,
-            child: TextField(
-              decoration: const InputDecoration(
-                hintText: 'Section name',
-                border: InputBorder.none,
-              ),
-              controller: _textController,
-              style: const TextStyle(fontWeight: FontWeight.bold),
-              onChanged: (value) {
-                widget.onUpdate(widget.step.copyWith(text: value));
-              },
-            ),
-          ),
-          trailing: Row(
-            mainAxisSize: MainAxisSize.min,
+        child: Slidable(
+          enabled: !widget.isDragging,
+          endActionPane: ActionPane(
+            motion: const ScrollMotion(),
+            extentRatio: 0.2,
             children: [
-              IconButton(
-                icon: const Icon(Icons.remove_circle_outline),
-                onPressed: widget.onRemove,
-              ),
-              SizedBox(
-                width: 40,
-                child: ReorderableDragStartListener(
-                  index: widget.index,
-                  child: const Icon(Icons.drag_handle),
+              Expanded(
+                child: Center(
+                  child: GestureDetector(
+                    onTap: widget.onRemove,
+                    child: const Icon(
+                      Icons.delete,
+                      color: Colors.white,
+                      size: 24,
+                    ),
+                  ),
                 ),
               ),
             ],
+          ),
+          child: ContextMenuWidget(
+            contextMenuIsAllowed: _contextMenuIsAllowed,
+            menuProvider: (_) {
+              return Menu(
+                children: [
+                  MenuAction(
+                    title: 'Convert to step',
+                    image: MenuImage.icon(Icons.format_list_numbered),
+                    callback: () {
+                      // Convert the section to a step
+                      widget.onUpdate(widget.step.copyWith(
+                        type: 'step',
+                        text: widget.step.text.isEmpty ? '' : widget.step.text,
+                      ));
+                    },
+                  ),
+                ],
+              );
+            },
+            child: Stack(
+              children: [
+                Container(
+                  decoration: BoxDecoration(
+                    color: backgroundColor,
+                    border: _getBorder(),
+                    borderRadius: _getBorderRadius(),
+                  ),
+                  child: Row(
+                    children: [
+                      const SizedBox(width: 12), // Left padding
+                      Expanded(
+                        child: Focus(
+                          focusNode: _focusNode,
+                          child: TextField(
+                            controller: _textController,
+                            decoration: const InputDecoration(
+                              hintText: 'Section name',
+                              border: InputBorder.none,
+                              contentPadding: EdgeInsets.symmetric(vertical: 12),
+                            ),
+                            style: TextStyle(fontWeight: FontWeight.bold, color: Colors.grey.shade600),
+                            onChanged: (value) {
+                              widget.onUpdate(widget.step.copyWith(text: value));
+                            },
+                            textInputAction: TextInputAction.next,
+                            onSubmitted: (_) => widget.onAddNext(),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 48), // Space for the drag handle
+                    ],
+                  ),
+                ),
+                // Position the drag handle on top so it's clickable
+                Positioned(
+                  right: 0,
+                  top: 0,
+                  bottom: 0,
+                  child: SizedBox(
+                    width: 40,
+                    child: ReorderableDragStartListener(
+                      key: _dragHandleKey,
+                      index: widget.index,
+                      child: const Icon(Icons.drag_handle),
+                    ),
+                  ),
+                ),
+                // Add inset divider for grouped sections
+                if (_buildInsetDivider() != null) _buildInsetDivider()!,
+              ],
+            ),
           ),
         ),
       );
