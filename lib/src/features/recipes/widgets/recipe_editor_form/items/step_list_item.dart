@@ -177,15 +177,16 @@ class _StepListItemState extends State<StepListItem> {
     _textController = TextEditingController(text: widget.step.text);
     _focusNode = FocusNode();
     _focusNode.addListener(() {
+      print('👁️ STEP ${widget.step.id}: Focus node listener - hasFocus=${_focusNode.hasFocus}');
       widget.onFocus(_focusNode.hasFocus);
       setState(() {});
     });
+    print('🎯 STEP ${widget.step.id}: initState - autoFocus=${widget.autoFocus}');
+    
     if (widget.autoFocus) {
-      // Use post-frame callback to ensure widget is fully built before focusing
+      // Force focus immediately and repeatedly
       WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (mounted) {
-          _focusNode.requestFocus();
-        }
+        _forceFocus(0);
       });
     }
   }
@@ -200,10 +201,9 @@ class _StepListItemState extends State<StepListItem> {
 
     // Handle autofocus change
     if (!oldWidget.autoFocus && widget.autoFocus) {
+      print('🎯 STEP ${widget.step.id}: didUpdateWidget - autoFocus changed from false to true');
       WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (mounted) {
-          _focusNode.requestFocus();
-        }
+        _forceFocus(0);
       });
     }
   }
@@ -217,6 +217,23 @@ class _StepListItemState extends State<StepListItem> {
 
   bool _contextMenuIsAllowed(Offset location) {
     return isLocationOutsideKey(location, _dragHandleKey);
+  }
+  
+  void _forceFocus(int attempt) {
+    if (attempt >= 10 || !mounted) return;
+    
+    print('🎯 STEP ${widget.step.id}: _forceFocus attempt $attempt - hasFocus=${_focusNode.hasFocus}');
+    
+    if (!_focusNode.hasFocus) {
+      _focusNode.requestFocus();
+      
+      // Try again after delay
+      Future.delayed(Duration(milliseconds: 50 + (attempt * 25)), () {
+        _forceFocus(attempt + 1);
+      });
+    } else {
+      print('🎯 STEP ${widget.step.id}: Focus successful on attempt $attempt!');
+    }
   }
 
   @override
@@ -322,34 +339,26 @@ class _StepListItemState extends State<StepListItem> {
                   children: [
                     const SizedBox(width: 12), // Add some left padding
                     Expanded(
-                      child: Focus(
+                      child: TextField(
+                        autofocus: widget.autoFocus,
                         focusNode: _focusNode,
-                        child: TextField(
-                          controller: _textController,
-                          decoration: const InputDecoration(
-                            hintText: 'Describe this step',
-                            border: InputBorder.none,
-                            contentPadding: EdgeInsets.symmetric(vertical: 12),
-                          ),
-                          onChanged: (value) {
-                            widget.onUpdate(widget.step.copyWith(text: value));
-                          },
-                          textInputAction: TextInputAction.next,
-                          onSubmitted: (_) {
-                            // Only add next step if this is the last step
-                            final isLastStep = widget.index == widget.allSteps.length - 1;
-                            if (isLastStep) {
-                              widget.onAddNext();
-                            } else {
-                              // Keep focus on current field when not last - delay to override default unfocus
-                              WidgetsBinding.instance.addPostFrameCallback((_) {
-                                if (mounted) {
-                                  _focusNode.requestFocus();
-                                }
-                              });
-                            }
-                          },
+                        controller: _textController,
+                        decoration: const InputDecoration(
+                          hintText: 'Describe this step',
+                          border: InputBorder.none,
+                          contentPadding: EdgeInsets.symmetric(vertical: 12),
                         ),
+                        onChanged: (value) {
+                          widget.onUpdate(widget.step.copyWith(text: value));
+                        },
+                        textInputAction: TextInputAction.next,
+                        onSubmitted: (_) {
+                          // Only add next step if this is the last step
+                          final isLastStep = widget.index == widget.allSteps.length - 1;
+                          if (isLastStep) {
+                            widget.onAddNext();
+                          }
+                        },
                       ),
                     ),
                     const SizedBox(width: 48), // Space for the drag handle
