@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart' hide Step;
+import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:recipe_app/database/models/steps.dart';
 import 'package:super_context_menu/super_context_menu.dart';
 
@@ -8,20 +9,30 @@ class StepListItem extends StatefulWidget {
   final int index;
   final Step step;
   final bool autoFocus;
+  final bool isDragging;
   final VoidCallback onRemove;
   final Function(Step) onUpdate;
   final VoidCallback onAddNext;
   final Function(bool) onFocus;
+  final List<Step> allSteps;
+  final bool enableGrouping;
+  final int? visualIndex;
+  final int? draggedIndex;
 
   const StepListItem({
     Key? key,
     required this.index,
     required this.step,
     required this.autoFocus,
+    required this.isDragging,
     required this.onRemove,
     required this.onUpdate,
     required this.onAddNext,
     required this.onFocus,
+    required this.allSteps,
+    this.enableGrouping = false,
+    this.visualIndex,
+    this.draggedIndex,
   }) : super(key: key);
 
   @override
@@ -36,6 +47,130 @@ class _StepListItemState extends State<StepListItem> {
 
   final GlobalKey _dragHandleKey = GlobalKey();
 
+  // Grouping detection methods
+  bool get _isGrouped => widget.enableGrouping && !isSection;
+  
+  bool get _isFirstInGroup {
+    if (!_isGrouped) return false;
+    
+    // Use visual index during drag operations if available
+    final effectiveIndex = widget.visualIndex ?? widget.index;
+    final prevIndex = effectiveIndex - 1;
+    
+    if (effectiveIndex == 0) return true;
+    if (prevIndex < 0 || prevIndex >= widget.allSteps.length) return true;
+    
+    return widget.allSteps[prevIndex].type == 'section';
+  }
+  
+  bool get _isLastInGroup {
+    if (!_isGrouped) return false;
+    
+    // Use visual index during drag operations if available
+    final effectiveIndex = widget.visualIndex ?? widget.index;
+    
+    // During drag operations, visual array length is reduced by 1 (dragged item)
+    if (widget.visualIndex != null) {
+      final visualArrayLength = widget.allSteps.length - 1;
+      return effectiveIndex == visualArrayLength - 1;
+    }
+    
+    // Normal (non-drag) logic
+    final nextIndex = effectiveIndex + 1;
+    if (effectiveIndex == widget.allSteps.length - 1) return true;
+    if (nextIndex >= widget.allSteps.length) return true;
+    
+    return widget.allSteps[nextIndex].type == 'section';
+  }
+  
+  // Border radius calculation for grouping
+  BorderRadius _getBorderRadius() {
+    if (!_isGrouped) {
+      return BorderRadius.circular(8.0);
+    }
+    
+    if (_isFirstInGroup && _isLastInGroup) {
+      // Single item in group
+      return BorderRadius.circular(8.0);
+    } else if (_isFirstInGroup) {
+      return const BorderRadius.only(
+        topLeft: Radius.circular(8.0),
+        topRight: Radius.circular(8.0),
+      );
+    } else if (_isLastInGroup) {
+      return const BorderRadius.only(
+        bottomLeft: Radius.circular(8.0),
+        bottomRight: Radius.circular(8.0),
+      );
+    } else {
+      // Middle item - no rounded corners
+      return BorderRadius.zero;
+    }
+  }
+  
+  // Border calculation for grouping
+  Border _getBorder() {
+    const borderColor = Colors.grey;
+    const borderWidth = 1.0;
+    
+    if (!_isGrouped || widget.isDragging) {
+      // During drag, use full border to prevent animation glitches
+      return Border.all(color: borderColor.shade300, width: borderWidth);
+    }
+    
+    if (_isFirstInGroup && _isLastInGroup) {
+      // Single item gets full border
+      return Border.all(color: borderColor.shade300, width: borderWidth);
+    } else if (_isFirstInGroup) {
+      // First item: full border
+      return Border.all(color: borderColor.shade300, width: borderWidth);
+    } else {
+      // Non-first items: omit top border to prevent double borders
+      return Border(
+        left: BorderSide(color: borderColor.shade300, width: borderWidth),
+        right: BorderSide(color: borderColor.shade300, width: borderWidth),
+        bottom: BorderSide(color: borderColor.shade300, width: borderWidth),
+      );
+    }
+  }
+  
+  // Build inset divider widget for grouped steps
+  Widget? _buildInsetDivider() {
+    if (!_isGrouped || _isLastInGroup || widget.isDragging) {
+      // Hide inset divider during drag to prevent visual conflicts
+      return null;
+    }
+    
+    return Positioned(
+      bottom: 0,
+      left: 0,
+      right: 0,
+      child: SizedBox(
+        height: 1,
+        child: Row(
+          children: [
+            Container(
+              width: 16,
+              height: 1,
+              color: Colors.white,
+            ),
+            Expanded(
+              child: Container(
+                height: 1,
+                color: Colors.grey.shade300,
+              ),
+            ),
+            Container(
+              width: 16,
+              height: 1,
+              color: Colors.white,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
   @override
   void initState() {
     super.initState();
@@ -46,7 +181,12 @@ class _StepListItemState extends State<StepListItem> {
       setState(() {});
     });
     if (widget.autoFocus) {
-      _focusNode.requestFocus();
+      // Use post-frame callback to ensure widget is fully built before focusing
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) {
+          _focusNode.requestFocus();
+        }
+      });
     }
   }
 
@@ -60,7 +200,11 @@ class _StepListItemState extends State<StepListItem> {
 
     // Handle autofocus change
     if (!oldWidget.autoFocus && widget.autoFocus) {
-      _focusNode.requestFocus();
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) {
+          _focusNode.requestFocus();
+        }
+      });
     }
   }
 
@@ -121,87 +265,116 @@ class _StepListItemState extends State<StepListItem> {
       );
     }
 
-    return ContextMenuWidget(
-      contextMenuIsAllowed: _contextMenuIsAllowed,
-      menuProvider: (_) {
-        return Menu(
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.red,
+        borderRadius: _getBorderRadius(),
+      ),
+      child: Slidable(
+        enabled: !widget.isDragging,
+        endActionPane: ActionPane(
+          motion: const ScrollMotion(),
+          extentRatio: 0.2,
           children: [
-            MenuAction(
-              title: 'Convert to section',
-              image: MenuImage.icon(Icons.segment),
-              callback: () {
-                // Convert the step to a section
-                widget.onUpdate(widget.step.copyWith(
-                    type: 'section',
-                    text: widget.step.text.isEmpty ? 'New Section' : widget.step.text
-                ));
-              },
-            ),
-          ],
-        );
-      },
-      child: Stack(
-        children: [
-          Container(
-            decoration: BoxDecoration(
-              color: backgroundColor,
-              border: Border.all(color: Colors.grey.shade300),
-              borderRadius: BorderRadius.circular(8),
-            ),
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Container(
-                  width: 40,
-                  height: 40,
-                  alignment: Alignment.center,
-                  child: _focusNode.hasFocus
-                      ? IconButton(
-                    icon: const Icon(Icons.remove_circle_outline, size: 20),
-                    padding: EdgeInsets.zero,
-                    onPressed: widget.onRemove,
-                  )
-                      : const SizedBox.shrink(),
-                ),
-                Expanded(
-                  child: Focus(
-                    focusNode: _focusNode,
-                    child: TextField(
-                      controller: _textController,
-                      decoration: const InputDecoration(
-                        hintText: 'Describe this step',
-                        border: InputBorder.none,
-                        contentPadding: EdgeInsets.symmetric(vertical: 12, horizontal: 8),
-                      ),
-                      maxLines: null,
-                      minLines: 2,
-                      onChanged: (value) {
-                        widget.onUpdate(widget.step.copyWith(text: value));
-                      },
-                      textInputAction: TextInputAction.next,
-                      onSubmitted: (_) => widget.onAddNext(),
-                    ),
+            Expanded(
+              child: Center(
+                child: GestureDetector(
+                  onTap: widget.onRemove,
+                  child: const Icon(
+                    Icons.delete,
+                    color: Colors.white,
+                    size: 24,
                   ),
                 ),
-                const SizedBox(width: 48), // Space for the drag handle
-              ],
-            ),
-          ),
-          // Position the drag handle on top so it's clickable
-          Positioned(
-            right: 0,
-            top: 0,
-            bottom: 0,
-            child: SizedBox(
-              width: 40,
-              child: ReorderableDragStartListener(
-                key: _dragHandleKey,
-                index: widget.index,
-                child: const Icon(Icons.drag_handle),
               ),
             ),
+          ],
+        ),
+        child: ContextMenuWidget(
+          contextMenuIsAllowed: _contextMenuIsAllowed,
+          menuProvider: (_) {
+            return Menu(
+              children: [
+                MenuAction(
+                  title: 'Convert to section',
+                  image: MenuImage.icon(Icons.segment),
+                  callback: () {
+                    // Convert the step to a section
+                    widget.onUpdate(widget.step.copyWith(
+                        type: 'section',
+                        text: widget.step.text.isEmpty ? 'New Section' : widget.step.text
+                    ));
+                  },
+                ),
+              ],
+            );
+          },
+          child: Stack(
+            children: [
+              Container(
+                decoration: BoxDecoration(
+                  color: backgroundColor,
+                  border: _getBorder(),
+                  borderRadius: _getBorderRadius(),
+                ),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const SizedBox(width: 12), // Add some left padding
+                    Expanded(
+                      child: Focus(
+                        focusNode: _focusNode,
+                        child: TextField(
+                          controller: _textController,
+                          decoration: const InputDecoration(
+                            hintText: 'Describe this step',
+                            border: InputBorder.none,
+                            contentPadding: EdgeInsets.symmetric(vertical: 12),
+                          ),
+                          onChanged: (value) {
+                            widget.onUpdate(widget.step.copyWith(text: value));
+                          },
+                          textInputAction: TextInputAction.next,
+                          onSubmitted: (_) {
+                            // Only add next step if this is the last step
+                            final isLastStep = widget.index == widget.allSteps.length - 1;
+                            if (isLastStep) {
+                              widget.onAddNext();
+                            } else {
+                              // Keep focus on current field when not last - delay to override default unfocus
+                              WidgetsBinding.instance.addPostFrameCallback((_) {
+                                if (mounted) {
+                                  _focusNode.requestFocus();
+                                }
+                              });
+                            }
+                          },
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 48), // Space for the drag handle
+                  ],
+                ),
+              ),
+              // Position the drag handle on top so it's clickable
+              Positioned(
+                right: 0,
+                top: 0,
+                bottom: 0,
+                child: SizedBox(
+                  width: 40,
+                  child: ReorderableDragStartListener(
+                    key: _dragHandleKey,
+                    index: widget.index,
+                    child: const Icon(Icons.drag_handle),
+                  ),
+                ),
+              ),
+              // Add inset divider for grouped steps
+              if (_buildInsetDivider() != null) _buildInsetDivider()!,
+            ],
           ),
-        ],
+        ),
       ),
     );
   }

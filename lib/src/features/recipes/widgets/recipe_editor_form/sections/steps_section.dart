@@ -30,21 +30,45 @@ class StepsSection extends StatefulWidget {
 
 class _StepsSectionState extends State<StepsSection> {
   bool _isDragging = false;
+  int? _draggedIndex;
 
   // Method to handle drag start
-  void _onDragStart() {
+  void _onDragStart(int index) {
     setState(() {
       _isDragging = true;
+      _draggedIndex = index;
       // Unfocus any text fields to prevent the leader-follower error
       FocusScope.of(context).unfocus();
     });
   }
 
   // Method to handle drag end
-  void _onDragEnd() {
-    setState(() {
-      _isDragging = false;
+  void _onDragEnd(int index) {
+    // Keep both flags for 250ms to match ReorderableListView's animation timing
+    Future.delayed(const Duration(milliseconds: 0), () {
+      if (mounted) {
+        setState(() {
+          _isDragging = false;
+          _draggedIndex = null;
+        });
+      }
     });
+  }
+
+  // Calculate visual index during drag operations
+  int? _getVisualIndex(int index) {
+    if (!_isDragging || _draggedIndex == null) return null;
+
+    // The dragged item doesn't have a visual position (it's floating)
+    if (index == _draggedIndex) return null;
+
+    // Items before the dragged item stay in the same visual position
+    if (index < _draggedIndex!) {
+      return index;
+    }
+
+    // Items after the dragged item shift up by one visual position
+    return index - 1;
   }
 
   @override
@@ -63,23 +87,28 @@ class _StepsSectionState extends State<StepsSection> {
             physics: const NeverScrollableScrollPhysics(),
             clipBehavior: Clip.none,
             proxyDecorator: defaultProxyDecorator,
-            onReorderStart: (_) => _onDragStart(),
-            onReorderEnd: (_) => _onDragEnd(),
+            onReorderStart: (index) => _onDragStart(index),
+            onReorderEnd: (index) => _onDragEnd(index),
             itemCount: widget.steps.length,
             onReorder: widget.onReorderSteps,
             itemBuilder: (context, index) {
               final step = widget.steps[index];
               return Padding(
-                padding: const EdgeInsets.symmetric(vertical: 4.0),
+                padding: EdgeInsets.zero,
                 key: ValueKey(step.id),
                 child: StepListItem(
                   index: index,
                   step: step,
                   autoFocus: widget.autoFocusStepId == step.id && !_isDragging,
+                  isDragging: _draggedIndex == index,
                   onRemove: () => widget.onRemoveStep(step.id),
                   onUpdate: (updatedStep) => widget.onUpdateStep(step.id, updatedStep),
                   onAddNext: () => widget.onAddStep(false),
                   onFocus: (hasFocus) => widget.onFocusChanged(step.id, hasFocus),
+                  allSteps: widget.steps,
+                  enableGrouping: true,
+                  visualIndex: _getVisualIndex(index),
+                  draggedIndex: _draggedIndex,
                 ),
               );
             },
