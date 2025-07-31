@@ -177,11 +177,9 @@ class _StepListItemState extends State<StepListItem> {
     _textController = TextEditingController(text: widget.step.text);
     _focusNode = FocusNode();
     _focusNode.addListener(() {
-      print('👁️ STEP ${widget.step.id}: Focus node listener - hasFocus=${_focusNode.hasFocus}');
       widget.onFocus(_focusNode.hasFocus);
       setState(() {});
     });
-    print('🎯 STEP ${widget.step.id}: initState - autoFocus=${widget.autoFocus}');
     
     if (widget.autoFocus) {
       // Force focus immediately and repeatedly
@@ -201,7 +199,6 @@ class _StepListItemState extends State<StepListItem> {
 
     // Handle autofocus change
     if (!oldWidget.autoFocus && widget.autoFocus) {
-      print('🎯 STEP ${widget.step.id}: didUpdateWidget - autoFocus changed from false to true');
       WidgetsBinding.instance.addPostFrameCallback((_) {
         _forceFocus(0);
       });
@@ -222,8 +219,6 @@ class _StepListItemState extends State<StepListItem> {
   void _forceFocus(int attempt) {
     if (attempt >= 10 || !mounted) return;
     
-    print('🎯 STEP ${widget.step.id}: _forceFocus attempt $attempt - hasFocus=${_focusNode.hasFocus}');
-    
     if (!_focusNode.hasFocus) {
       _focusNode.requestFocus();
       
@@ -231,8 +226,6 @@ class _StepListItemState extends State<StepListItem> {
       Future.delayed(Duration(milliseconds: 50 + (attempt * 25)), () {
         _forceFocus(attempt + 1);
       });
-    } else {
-      print('🎯 STEP ${widget.step.id}: Focus successful on attempt $attempt!');
     }
   }
 

@@ -226,40 +226,15 @@ class RecipeEditorFormState extends ConsumerState<RecipeEditorForm> {
       type: isSection ? 'section' : 'step',
       text: isSection ? 'New Section' : '',
     );
-    print('🚀 PARENT: Adding new step with ID: ${newStep.id}');
-    
     // Clear focus from any currently focused widget
     FocusScope.of(context).unfocus();
     
     setState(() {
       _steps.add(newStep);
       _autoFocusStepId = newStep.id;
-      print('🚀 PARENT: Set _autoFocusStepId to: $_autoFocusStepId');
-    });
-    
-    // Ensure focus happens after rebuild with multiple attempts
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      print('🚀 PARENT: Post-frame callback - _autoFocusStepId is: $_autoFocusStepId');
-      if (mounted && _autoFocusStepId == newStep.id) {
-        print('🚀 PARENT: Focus ID still matches, attempting to force focus...');
-        // Try multiple times with delays to ensure focus lands
-        _attemptFocusNewStep(newStep.id, 0);
-      }
     });
   }
   
-  void _attemptFocusNewStep(String stepId, int attempt) {
-    if (attempt >= 5 || _autoFocusStepId != stepId) return;
-    
-    print('🚀 PARENT: Focus attempt $attempt for step $stepId');
-    
-    // Try again after a delay
-    Future.delayed(Duration(milliseconds: 50 * (attempt + 1)), () {
-      if (mounted && _autoFocusStepId == stepId) {
-        _attemptFocusNewStep(stepId, attempt + 1);
-      }
-    });
-  }
 
   void _removeStep(String id) {
     setState(() {
@@ -392,16 +367,10 @@ class RecipeEditorFormState extends ConsumerState<RecipeEditorForm> {
               onUpdateStep: _updateStep,
               onReorderSteps: _reorderSteps,
               onFocusChanged: (id, hasFocus) {
-                print('🔄 PARENT: Focus changed for step $id: hasFocus=$hasFocus, _autoFocusStepId=$_autoFocusStepId');
                 if (!hasFocus && _autoFocusStepId == id) {
-                  print('🔄 PARENT: Clearing _autoFocusStepId because step $id lost focus');
                   setState(() {
                     _autoFocusStepId = null;
                   });
-                } else if (!hasFocus) {
-                  print('🔄 PARENT: Step $id lost focus but it\'s not the auto-focus target');
-                } else {
-                  print('🔄 PARENT: Step $id gained focus');
                 }
               },
             ),
