@@ -190,6 +190,10 @@ class RecipeEditorFormState extends ConsumerState<RecipeEditorForm> {
       primaryAmount1Unit: isSection ? null : 'g',
       primaryAmount1Type: isSection ? null : 'weight',
     );
+    
+    // Clear focus from any currently focused widget
+    FocusScope.of(context).unfocus();
+    
     setState(() {
       _ingredients.add(newIngredient);
       _autoFocusIngredientId = newIngredient.id;

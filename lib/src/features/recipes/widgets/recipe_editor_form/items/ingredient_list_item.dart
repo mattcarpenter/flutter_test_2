@@ -219,8 +219,12 @@ class _IngredientListItemState extends ConsumerState<IngredientListItem> {
       widget.onFocus(_focusNode.hasFocus);
       setState(() {}); // update background color
     });
+    
     if (widget.autoFocus) {
-      _focusNode.requestFocus();
+      // Force focus with retry mechanism
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        _forceFocus(0);
+      });
     }
   }
 
@@ -234,7 +238,9 @@ class _IngredientListItemState extends ConsumerState<IngredientListItem> {
 
     // Handle autofocus change
     if (!oldWidget.autoFocus && widget.autoFocus) {
-      _focusNode.requestFocus();
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        _forceFocus(0);
+      });
     }
   }
 
@@ -247,6 +253,19 @@ class _IngredientListItemState extends ConsumerState<IngredientListItem> {
 
   bool _contextMenuIsAllowed(Offset location) {
     return isLocationOutsideKey(location, _dragHandleKey);
+  }
+  
+  void _forceFocus(int attempt) {
+    if (attempt >= 10 || !mounted) return;
+    
+    if (!_focusNode.hasFocus) {
+      _focusNode.requestFocus();
+      
+      // Try again after delay
+      Future.delayed(Duration(milliseconds: 50 + (attempt * 25)), () {
+        _forceFocus(attempt + 1);
+      });
+    }
   }
 
   void _showRecipeSelector(BuildContext context) {
@@ -345,22 +364,27 @@ class _IngredientListItemState extends ConsumerState<IngredientListItem> {
                     children: [
                       const SizedBox(width: 12), // Left padding
                       Expanded(
-                        child: Focus(
+                        child: TextField(
+                          autofocus: widget.autoFocus,
                           focusNode: _focusNode,
-                          child: TextField(
-                            controller: _ingredientController,
-                            decoration: const InputDecoration(
-                              hintText: 'Section name',
-                              border: InputBorder.none,
-                              contentPadding: EdgeInsets.symmetric(vertical: 12),
-                            ),
+                          controller: _ingredientController,
+                          decoration: const InputDecoration(
+                            hintText: 'Section name',
+                            border: InputBorder.none,
+                            contentPadding: EdgeInsets.symmetric(vertical: 12),
+                          ),
                             style: TextStyle(fontWeight: FontWeight.bold, color: Colors.grey.shade600),
                             onChanged: (value) {
                               widget.onUpdate(widget.ingredient.copyWith(name: value));
                             },
                             textInputAction: TextInputAction.next,
-                            onSubmitted: (_) => widget.onAddNext(),
-                          ),
+                            onSubmitted: (_) {
+                              // Only add next ingredient if this is the last ingredient
+                              final isLastIngredient = widget.index == widget.allIngredients.length - 1;
+                              if (isLastIngredient) {
+                                widget.onAddNext();
+                              }
+                            },
                         ),
                       ),
                       const SizedBox(width: 48), // Space for the drag handle
@@ -466,20 +490,25 @@ class _IngredientListItemState extends ConsumerState<IngredientListItem> {
                 children: [
                   const SizedBox(width: 12), // Add some left padding
                   Expanded(
-                    child: Focus(
+                    child: TextField(
+                      autofocus: widget.autoFocus,
                       focusNode: _focusNode,
-                      child: TextField(
-                        controller: _ingredientController,
-                        decoration: const InputDecoration(
-                          hintText: 'e.g. 1 cup flour',
-                          border: InputBorder.none,
-                        ),
+                      controller: _ingredientController,
+                      decoration: const InputDecoration(
+                        hintText: 'e.g. 1 cup flour',
+                        border: InputBorder.none,
+                      ),
                         onChanged: (value) {
                           widget.onUpdate(widget.ingredient.copyWith(name: value));
                         },
                         textInputAction: TextInputAction.next,
-                        onSubmitted: (_) => widget.onAddNext(),
-                      ),
+                        onSubmitted: (_) {
+                          // Only add next ingredient if this is the last ingredient
+                          final isLastIngredient = widget.index == widget.allIngredients.length - 1;
+                          if (isLastIngredient) {
+                            widget.onAddNext();
+                          }
+                        },
                     ),
                   ),
                   if (widget.ingredient.recipeId != null) ...[
