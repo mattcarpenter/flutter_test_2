@@ -246,7 +246,7 @@ class _IngredientListItemState extends ConsumerState<IngredientListItem> {
   @override
   Widget build(BuildContext context) {
     final backgroundColor = Colors.white;
-    final backgroundColorSection = Colors.grey.shade200;
+    final backgroundColorSection = Colors.grey.shade100;
 
     if (isSection) {
       return Container(

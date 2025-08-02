@@ -205,7 +205,7 @@ class _StepListItemState extends State<StepListItem> {
   @override
   Widget build(BuildContext context) {
     final backgroundColor = Colors.white;
-    final backgroundColorSection = Colors.grey.shade200;
+    final backgroundColorSection = Colors.grey.shade100;
 
     if (isSection) {
       return Container(
