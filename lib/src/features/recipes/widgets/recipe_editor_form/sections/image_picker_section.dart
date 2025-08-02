@@ -370,7 +370,7 @@ class _ImagePickerSectionState extends ConsumerState<ImagePickerSection> {
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-      height: 88, // Match the actual content height (80 + 4*2 padding)
+      height: 143, // Match the actual content height (135 + 4*2 padding)
       child: AnimatedList(
         key: _listKey,
         scrollDirection: Axis.horizontal,
@@ -382,8 +382,8 @@ class _ImagePickerSectionState extends ConsumerState<ImagePickerSection> {
           } else {
             // Add photo placeholder (always last item) - wrap in animation for consistency
             return SizedBox(
-              width: 88, // Match thumbnail total width (80 + 4*2 padding)
-              height: 88, // Match thumbnail total height (80 + 4*2 padding)
+              width: 143, // Match thumbnail total width (135 + 4*2 padding)
+              height: 143, // Match thumbnail total height (135 + 4*2 padding)
               child: FadeTransition(
                 opacity: animation,
                 child: _buildPlaceholder(),
@@ -441,8 +441,8 @@ class _ImagePickerSectionState extends ConsumerState<ImagePickerSection> {
             borderRadius: BorderRadius.circular(8),
             child: Image.file(
               cachedFile,
-              height: 80,
-              width: 80,
+              height: 135,
+              width: 135,
               fit: BoxFit.cover,
             ),
           ),
@@ -474,8 +474,8 @@ class _ImagePickerSectionState extends ConsumerState<ImagePickerSection> {
       builder: (context, snapshot) {
         if (!snapshot.hasData) {
           return const SizedBox(
-            width: 80,
-            height: 80,
+            width: 135,
+            height: 135,
             child: Center(child: CircularProgressIndicator()),
           );
         }
@@ -488,8 +488,8 @@ class _ImagePickerSectionState extends ConsumerState<ImagePickerSection> {
                 child: LocalOrNetworkImage(
                   filePath: snapshot.data ?? '',
                   url: imageUrl,
-                  height: 80,
-                  width: 80,
+                  height: 135,
+                  width: 135,
                   fit: BoxFit.cover,
                 ),
               ),
@@ -523,8 +523,8 @@ class _ImagePickerSectionState extends ConsumerState<ImagePickerSection> {
         child: ClipRRect(
           borderRadius: BorderRadius.circular(8),
           child: Container(
-            width: 80,
-            height: 80,
+            width: 135,
+            height: 135,
             decoration: const BoxDecoration(),
             child: CustomPaint(
               painter: DashedBorderPainter(
@@ -537,7 +537,7 @@ class _ImagePickerSectionState extends ConsumerState<ImagePickerSection> {
                 child: Icon(
                   Icons.add_a_photo,
                   color: Colors.grey,
-                  size: 24,
+                  size: 36,
                 ),
               ),
             ),
