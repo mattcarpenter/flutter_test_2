@@ -9,6 +9,7 @@ import 'package:uuid/uuid.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../../widgets/app_button.dart';
+import '../../../../../theme/spacing.dart';
 
 import '../../../../../../database/models/recipe_images.dart';
 import 'package:recipe_app/src/managers/upload_queue_manager.dart';
@@ -387,7 +388,7 @@ class _ImagePickerSectionState extends ConsumerState<ImagePickerSection> {
             },
           ),
         ),
-        const SizedBox(height: 12),
+        const SizedBox(height: AppSpacing.md),
         AppButton(
           text: 'Add Photo',
           onPressed: () => _showImagePickerDialog(context),

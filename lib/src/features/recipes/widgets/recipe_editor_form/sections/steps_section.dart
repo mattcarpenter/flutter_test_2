@@ -4,6 +4,7 @@ import 'package:recipe_app/database/models/steps.dart';
 import '../../../../../widgets/app_button.dart';
 import '../items/step_list_item.dart';
 import '../utils/context_menu_utils.dart';
+import '../../../../../theme/spacing.dart';
 
 class StepsSection extends StatefulWidget {
   final List<Step> steps;
@@ -116,10 +117,10 @@ class _StepsSectionState extends State<StepsSection> {
           ),
 
         Padding(
-          padding: const EdgeInsets.only(top: 8.0),
+          padding: const EdgeInsets.only(top: AppSpacing.md),
           child: Wrap(
-            spacing: 8.0,
-            runSpacing: 8.0,
+            spacing: AppSpacing.sm,
+            runSpacing: AppSpacing.sm,
             children: [
               AppButton(
                 text: 'Add Step',

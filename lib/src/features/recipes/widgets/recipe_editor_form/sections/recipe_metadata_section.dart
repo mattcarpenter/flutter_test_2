@@ -6,6 +6,7 @@ import '../../../../../widgets/app_text_field_condensed.dart';
 import '../../../../../widgets/app_text_field_group.dart';
 import '../../../../../widgets/app_duration_picker.dart';
 import '../../../../../widgets/app_duration_picker_condensed.dart';
+import '../../../../../theme/spacing.dart';
 
 class RecipeMetadataSection extends StatelessWidget {
   final TextEditingController titleController;
@@ -28,7 +29,7 @@ class RecipeMetadataSection extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const SizedBox(height: 16),
+        const SizedBox(height: AppSpacing.lg),
         
         // Title and Description grouped together
         AppTextFieldGroup(
@@ -49,7 +50,7 @@ class RecipeMetadataSection extends StatelessWidget {
           ],
         ),
         
-        const SizedBox(height: 12),
+        const SizedBox(height: AppSpacing.md),
 
         // Timing group: Prep Time + Cook Time + Servings
         AppTextFieldGroup(

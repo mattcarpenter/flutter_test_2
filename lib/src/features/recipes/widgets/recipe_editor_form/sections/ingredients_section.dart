@@ -4,6 +4,7 @@ import '../../../../../../database/models/ingredients.dart';
 import '../../../../../widgets/app_button.dart';
 import '../items/ingredient_list_item.dart';
 import '../utils/context_menu_utils.dart';
+import '../../../../../theme/spacing.dart';
 
 class IngredientsSection extends StatefulWidget {
   final List<Ingredient> ingredients;
@@ -120,10 +121,10 @@ class _IngredientsSectionState extends State<IngredientsSection> {
           ),
 
         Padding(
-          padding: const EdgeInsets.only(top: 8.0),
+          padding: const EdgeInsets.only(top: AppSpacing.md),
           child: Wrap(
-            spacing: 8.0,
-            runSpacing: 8.0,
+            spacing: AppSpacing.sm,
+            runSpacing: AppSpacing.sm,
             children: [
               AppButton(
                 text: 'Add Ingredient',

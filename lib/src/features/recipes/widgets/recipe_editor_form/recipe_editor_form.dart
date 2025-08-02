@@ -7,6 +7,8 @@ import 'package:recipe_app/src/managers/upload_queue_manager.dart';
 import 'package:supabase_flutter/supabase_flutter.dart' as supabase_flutter;
 import 'package:uuid/uuid.dart';
 
+import '../../../../theme/spacing.dart';
+
 import '../../../../../database/database.dart';
 import '../../../../../database/models/ingredients.dart';
 import '../../../../providers/recipe_provider.dart';
@@ -316,7 +318,7 @@ class RecipeEditorFormState extends ConsumerState<RecipeEditorForm> {
             // Images Section Header
             const SectionHeader(
               "Images",
-              topSpacing: 24,
+              topSpacing: AppSpacing.xl,
             ),
 
             // Images Section
@@ -329,7 +331,7 @@ class RecipeEditorFormState extends ConsumerState<RecipeEditorForm> {
               },
             ),
 
-            const SizedBox(height: 24),
+            const SizedBox(height: AppSpacing.xl),
 
             // Ingredients Section Header
             const SectionHeader(
@@ -354,7 +356,7 @@ class RecipeEditorFormState extends ConsumerState<RecipeEditorForm> {
               },
             ),
 
-            const SizedBox(height: 24),
+            const SizedBox(height: AppSpacing.xl),
 
             // Steps Section Header
             const SectionHeader(
@@ -379,7 +381,7 @@ class RecipeEditorFormState extends ConsumerState<RecipeEditorForm> {
               },
             ),
 
-            const SizedBox(height: 24),
+            const SizedBox(height: AppSpacing.xl),
 
             // Notes Section Header
             const SectionHeader(

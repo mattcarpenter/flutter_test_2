@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../theme/typography.dart';
+import '../theme/spacing.dart';
 
 class SectionHeader extends StatelessWidget {
   final String title;
@@ -10,7 +11,7 @@ class SectionHeader extends StatelessWidget {
     this.title, {
     super.key,
     this.topSpacing = 0,
-    this.bottomSpacing = 24,
+    this.bottomSpacing = AppSpacing.xl,
   });
 
   @override
