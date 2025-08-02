@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 
 import '../../../../../../database/models/ingredients.dart';
 import '../../../../../widgets/app_button.dart';
+import '../../../../../widgets/adaptive_pull_down/adaptive_pull_down.dart';
+import '../../../../../widgets/adaptive_pull_down/adaptive_menu_item.dart';
 import '../items/ingredient_list_item.dart';
 import '../utils/context_menu_utils.dart';
 import '../../../../../theme/spacing.dart';
@@ -122,27 +124,75 @@ class _IngredientsSectionState extends State<IngredientsSection> {
 
         Padding(
           padding: const EdgeInsets.only(top: AppSpacing.md),
-          child: Wrap(
-            spacing: AppSpacing.sm,
-            runSpacing: AppSpacing.sm,
+          child: Row(
             children: [
-              AppButton(
-                text: 'Add Ingredient',
-                onPressed: () => widget.onAddIngredient(false),
-                theme: AppButtonTheme.secondary,
-                style: AppButtonStyle.outline,
-                shape: AppButtonShape.square,
-                size: AppButtonSize.medium,
-                leadingIcon: const Icon(Icons.add),
+              // Add Ingredient button - flex column 1
+              Expanded(
+                flex: 1,
+                child: AppButton(
+                  text: 'Add Ingredient',
+                  onPressed: () => widget.onAddIngredient(false),
+                  theme: AppButtonTheme.secondary,
+                  style: AppButtonStyle.outline,
+                  shape: AppButtonShape.square,
+                  size: AppButtonSize.medium,
+                  leadingIcon: const Icon(Icons.add),
+                  fullWidth: true,
+                ),
               ),
-              AppButton(
-                text: 'Add Section',
-                onPressed: () => widget.onAddIngredient(true),
-                theme: AppButtonTheme.secondary,
-                style: AppButtonStyle.outline,
-                shape: AppButtonShape.square,
-                size: AppButtonSize.medium,
-                leadingIcon: const Icon(Icons.segment),
+              const SizedBox(width: AppSpacing.sm),
+              
+              // Add Section button - flex column 2  
+              Expanded(
+                flex: 1,
+                child: AppButton(
+                  text: 'Add Section',
+                  onPressed: () => widget.onAddIngredient(true),
+                  theme: AppButtonTheme.secondary,
+                  style: AppButtonStyle.outline,
+                  shape: AppButtonShape.square,
+                  size: AppButtonSize.medium,
+                  leadingIcon: const Icon(Icons.segment),
+                  fullWidth: true,
+                ),
+              ),
+              const SizedBox(width: AppSpacing.sm),
+              
+              // Context menu button - shrinks to content
+              AdaptivePullDownButton(
+                items: [
+                  AdaptiveMenuItem(
+                    title: 'Copy All Ingredients',
+                    icon: const Icon(Icons.copy),
+                    onTap: () {
+                      // TODO: Implement copy functionality
+                    },
+                  ),
+                  AdaptiveMenuItem(
+                    title: 'Clear All Ingredients', 
+                    icon: const Icon(Icons.clear_all),
+                    onTap: () {
+                      // TODO: Implement clear functionality
+                    },
+                  ),
+                ],
+                child: Container(
+                  height: 44, // Match AppButton medium size height
+                  width: 44,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    border: Border.all(
+                      color: Colors.grey.shade300,
+                      width: 1,
+                    ),
+                    color: Colors.white,
+                  ),
+                  child: const Icon(
+                    Icons.more_horiz,
+                    color: Colors.grey,
+                    size: 20,
+                  ),
+                ),
               ),
             ],
           ),

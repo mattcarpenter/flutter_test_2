@@ -165,13 +165,26 @@ class _AppButtonState extends State<AppButton> {
   }
 
   EdgeInsets get _padding {
+    // Reduce horizontal padding when leading icon is present for better balance
+    final hasLeadingIcon = widget.leadingIcon != null && !widget.loading;
+    final horizontalPadding = hasLeadingIcon ? 0.7 : 1.0; // 30% less padding with icon
+    
     switch (widget.size) {
       case AppButtonSize.small:
-        return const EdgeInsets.symmetric(horizontal: 18, vertical: 8);
+        return EdgeInsets.symmetric(
+          horizontal: (18 * horizontalPadding).round().toDouble(), 
+          vertical: 8
+        );
       case AppButtonSize.medium:
-        return const EdgeInsets.symmetric(horizontal: 22, vertical: 10);
+        return EdgeInsets.symmetric(
+          horizontal: (22 * horizontalPadding).round().toDouble(), 
+          vertical: 10
+        );
       case AppButtonSize.large:
-        return const EdgeInsets.symmetric(horizontal: 26, vertical: 14);
+        return EdgeInsets.symmetric(
+          horizontal: (26 * horizontalPadding).round().toDouble(), 
+          vertical: 14
+        );
     }
   }
 
@@ -272,16 +285,20 @@ class _AppButtonState extends State<AppButton> {
                     ),
                     child: widget.leadingIcon!,
                   ),
-                  const SizedBox(width: 8),
+                  const SizedBox(width: 6), // Reduced from 8 to 6
                 ],
-                Text(
-                  widget.text,
-                  style: TextStyle(
-                    color: _textColor,
-                    fontSize: _fontSize,
-                    fontWeight: FontWeight.w600,
-                    fontFamily: 'Inter',
-                    height: 1,
+                Flexible(
+                  child: Text(
+                    widget.text,
+                    style: TextStyle(
+                      color: _textColor,
+                      fontSize: _fontSize,
+                      fontWeight: FontWeight.w600,
+                      fontFamily: 'Inter',
+                      height: 1,
+                    ),
+                    overflow: TextOverflow.ellipsis,
+                    maxLines: 1,
                   ),
                 ),
                 if (widget.trailingIcon != null && !widget.loading) ...[
