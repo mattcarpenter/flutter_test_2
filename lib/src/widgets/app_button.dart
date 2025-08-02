@@ -68,9 +68,9 @@ class _AppButtonState extends State<AppButton> {
       'pressed': Color(0xFF666666),  // Medium gray (40% lighter)
     },
     AppButtonTheme.secondary: {
-      'default': Color(0xFFFF698E),
-      'hover': Color(0xFFCF2751),
-      'pressed': Color(0xFFCF2751),
+      'default': Color(0xFFFF595E),
+      'hover': Color(0xFFFF595E),
+      'pressed': Color(0xFFFF595E),
     },
   };
 
@@ -129,7 +129,7 @@ class _AppButtonState extends State<AppButton> {
       case AppButtonSize.small:
         return 36;
       case AppButtonSize.medium:
-        return 44;
+        return 40;
       case AppButtonSize.large:
         return 52;
     }
@@ -140,7 +140,7 @@ class _AppButtonState extends State<AppButton> {
       case AppButtonSize.small:
         return const EdgeInsets.symmetric(horizontal: 18, vertical: 8);
       case AppButtonSize.medium:
-        return const EdgeInsets.symmetric(horizontal: 22, vertical: 12);
+        return const EdgeInsets.symmetric(horizontal: 22, vertical: 10);
       case AppButtonSize.large:
         return const EdgeInsets.symmetric(horizontal: 26, vertical: 14);
     }
@@ -215,7 +215,7 @@ class _AppButtonState extends State<AppButton> {
             border: widget.style == AppButtonStyle.outline
                 ? Border.all(
                     color: _borderColor,
-                    width: 2,
+                    width: 1,
                   )
                 : null,
           ),

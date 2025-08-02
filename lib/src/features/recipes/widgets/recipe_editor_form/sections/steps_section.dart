@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart' hide Step;
 import 'package:recipe_app/database/models/steps.dart';
 
+import '../../../../../widgets/app_button.dart';
 import '../items/step_list_item.dart';
 import '../utils/context_menu_utils.dart';
 
@@ -120,15 +121,23 @@ class _StepsSectionState extends State<StepsSection> {
             spacing: 8.0,
             runSpacing: 8.0,
             children: [
-              ElevatedButton.icon(
+              AppButton(
+                text: 'Add Step',
                 onPressed: () => widget.onAddStep(false),
-                icon: const Icon(Icons.add),
-                label: const Text('Add Step'),
+                theme: AppButtonTheme.secondary,
+                style: AppButtonStyle.fill,
+                shape: AppButtonShape.square,
+                size: AppButtonSize.medium,
+                leadingIcon: const Icon(Icons.add),
               ),
-              ElevatedButton.icon(
+              AppButton(
+                text: 'Add Section',
                 onPressed: () => widget.onAddStep(true),
-                icon: const Icon(Icons.segment),
-                label: const Text('Add Section'),
+                theme: AppButtonTheme.secondary,
+                style: AppButtonStyle.outline,
+                shape: AppButtonShape.square,
+                size: AppButtonSize.medium,
+                leadingIcon: const Icon(Icons.segment),
               ),
             ],
           ),

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../../../../database/models/ingredients.dart';
+import '../../../../../widgets/app_button.dart';
 import '../items/ingredient_list_item.dart';
 import '../utils/context_menu_utils.dart';
 
@@ -58,15 +59,15 @@ class _IngredientsSectionState extends State<IngredientsSection> {
   // Calculate visual index during drag operations
   int? _getVisualIndex(int index) {
     if (!_isDragging || _draggedIndex == null) return null;
-    
+
     // The dragged item doesn't have a visual position (it's floating)
     if (index == _draggedIndex) return null;
-    
+
     // Items before the dragged item stay in the same visual position
     if (index < _draggedIndex!) {
       return index;
     }
-    
+
     // Items after the dragged item shift up by one visual position
     return index - 1;
   }
@@ -124,15 +125,23 @@ class _IngredientsSectionState extends State<IngredientsSection> {
             spacing: 8.0,
             runSpacing: 8.0,
             children: [
-              ElevatedButton.icon(
+              AppButton(
+                text: 'Add Ingredient',
                 onPressed: () => widget.onAddIngredient(false),
-                icon: const Icon(Icons.add),
-                label: const Text('Add Ingredient'),
+                theme: AppButtonTheme.secondary,
+                style: AppButtonStyle.fill,
+                shape: AppButtonShape.square,
+                size: AppButtonSize.medium,
+                leadingIcon: const Icon(Icons.add),
               ),
-              ElevatedButton.icon(
+              AppButton(
+                text: 'Add Section',
                 onPressed: () => widget.onAddIngredient(true),
-                icon: const Icon(Icons.segment),
-                label: const Text('Add Section'),
+                theme: AppButtonTheme.secondary,
+                style: AppButtonStyle.outline,
+                shape: AppButtonShape.square,
+                size: AppButtonSize.medium,
+                leadingIcon: const Icon(Icons.segment),
               ),
             ],
           ),

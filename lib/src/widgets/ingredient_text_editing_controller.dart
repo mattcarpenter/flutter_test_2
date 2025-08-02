@@ -5,12 +5,12 @@ import '../services/ingredient_parser_service.dart';
 /// for ingredient strings, coloring quantities differently from ingredient names.
 class IngredientTextEditingController extends TextEditingController {
   final IngredientParserService _parser;
-  
+
   // Enhanced caching with language awareness
   String? _lastText;
   Language? _lastLanguage;
   List<QuantitySpan>? _lastQuantities;
-  
+
   IngredientTextEditingController({
     required IngredientParserService parser,
     String? text,
@@ -18,20 +18,20 @@ class IngredientTextEditingController extends TextEditingController {
 
   @override
   TextSpan buildTextSpan({
-    required BuildContext context, 
+    required BuildContext context,
     TextStyle? style,
     required bool withComposing,
   }) {
     final baseStyle = style ?? const TextStyle();
-    
+
     if (text.isEmpty) {
       return TextSpan(text: text, style: baseStyle);
     }
-    
+
     try {
       // Detect language for current text
       final currentLanguage = _parser.detectLanguage(text);
-      
+
       // Use cached result if text and language haven't changed
       List<QuantitySpan> quantities;
       if (text == _lastText && currentLanguage == _lastLanguage && _lastQuantities != null) {
@@ -43,14 +43,14 @@ class IngredientTextEditingController extends TextEditingController {
         _lastLanguage = currentLanguage;
         _lastQuantities = quantities;
       }
-      
+
       if (quantities.isEmpty) {
         return TextSpan(text: text, style: baseStyle);
       }
-      
+
       final children = <TextSpan>[];
       int currentIndex = 0;
-      
+
       // Build TextSpan with blue quantities, black ingredient names
       for (final quantity in quantities) {
         // Text before quantity (ingredient name)
@@ -60,16 +60,16 @@ class IngredientTextEditingController extends TextEditingController {
             style: baseStyle,
           ));
         }
-        
+
         // Quantity with blue color
         children.add(TextSpan(
           text: text.substring(quantity.start, quantity.end),
-          style: baseStyle.copyWith(color: Colors.blue.shade700, fontWeight: FontWeight.w500),
+          style: baseStyle.copyWith(color: Color(0xFFFF595E), fontWeight: FontWeight.w500),
         ));
-        
+
         currentIndex = quantity.end;
       }
-      
+
       // Remaining text after last quantity
       if (currentIndex < text.length) {
         children.add(TextSpan(
@@ -77,7 +77,7 @@ class IngredientTextEditingController extends TextEditingController {
           style: baseStyle,
         ));
       }
-      
+
       return TextSpan(children: children);
     } catch (e) {
       // Fallback to unstyled text if parsing fails
@@ -85,7 +85,7 @@ class IngredientTextEditingController extends TextEditingController {
       return TextSpan(text: text, style: baseStyle);
     }
   }
-  
+
   @override
   void dispose() {
     _lastText = null;

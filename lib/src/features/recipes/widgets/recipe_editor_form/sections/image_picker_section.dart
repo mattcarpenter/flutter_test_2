@@ -8,6 +8,8 @@ import 'package:flutter_image_compress/flutter_image_compress.dart';
 import 'package:uuid/uuid.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../../../widgets/app_button.dart';
+
 import '../../../../../../database/models/recipe_images.dart';
 import 'package:recipe_app/src/managers/upload_queue_manager.dart';
 
@@ -18,24 +20,24 @@ class ImageState {
   final RecipeImage recipeImage;
   final File? cachedFile;  // For fresh images, we cache the File to skip async operations
   final bool isFresh;      // Whether this image was just picked vs loaded from database
-  
+
   const ImageState({
     required this.recipeImage,
     this.cachedFile,
     this.isFresh = false,
   });
-  
+
   /// Create a fresh image state with cached file info
   ImageState.fresh({
     required this.recipeImage,
     required this.cachedFile,
   }) : isFresh = true;
-  
+
   /// Create a persisted image state (from database)
   ImageState.persisted({
     required this.recipeImage,
   }) : cachedFile = null, isFresh = false;
-  
+
   /// Convert to persisted state (after saving to database)
   ImageState toPersisted() {
     return ImageState.persisted(recipeImage: recipeImage);
@@ -87,14 +89,14 @@ class _ImagePickerSectionState extends ConsumerState<ImagePickerSection> {
   void _syncImageStates() {
     final newStates = <ImageState>[];
     final oldStates = List<ImageState>.from(_imageStates);
-    
+
     for (final image in widget.images) {
       // Try to find existing state to preserve fresh status and cached files
       final existingState = oldStates.firstWhere(
         (state) => state.recipeImage.fileName == image.fileName,
         orElse: () => ImageState.persisted(recipeImage: image),
       );
-      
+
       // Update the recipe image but preserve the state info
       newStates.add(ImageState(
         recipeImage: image,
@@ -102,8 +104,8 @@ class _ImagePickerSectionState extends ConsumerState<ImagePickerSection> {
         isFresh: existingState.isFresh,
       ));
     }
-    
-    // For external updates (not from our own _pickImage/_deleteImage), 
+
+    // For external updates (not from our own _pickImage/_deleteImage),
     // we need to handle AnimatedList state changes
     if (mounted && _listKey.currentState != null) {
       // Handle removals (items in old but not in new)
@@ -117,7 +119,7 @@ class _ImagePickerSectionState extends ConsumerState<ImagePickerSection> {
           );
         }
       }
-      
+
       // Handle additions (items in new but not in old)
       for (int i = 0; i < newStates.length; i++) {
         final newState = newStates[i];
@@ -129,7 +131,7 @@ class _ImagePickerSectionState extends ConsumerState<ImagePickerSection> {
         }
       }
     }
-    
+
     setState(() {
       _imageStates = newStates;
     });
@@ -312,7 +314,7 @@ class _ImagePickerSectionState extends ConsumerState<ImagePickerSection> {
   void _deleteImage(int index) async {
     final imageState = _imageStates[index];
     final recipeImage = imageState.recipeImage;
-    
+
     // For fresh images, we can delete the cached file directly
     if (imageState.isFresh && imageState.cachedFile != null) {
       try {
@@ -322,7 +324,7 @@ class _ImagePickerSectionState extends ConsumerState<ImagePickerSection> {
       } catch (e) {
         debugPrint('Error deleting cached file: $e');
       }
-      
+
       // Also delete the full-size version
       try {
         final fullPath = await recipeImage.getFullPath();
@@ -386,10 +388,14 @@ class _ImagePickerSectionState extends ConsumerState<ImagePickerSection> {
           ),
         ),
         const SizedBox(height: 12),
-        ElevatedButton.icon(
+        AppButton(
+          text: 'Add Photo',
           onPressed: () => _showImagePickerDialog(context),
-          icon: const Icon(Icons.add_a_photo),
-          label: const Text("Add Photo"),
+          theme: AppButtonTheme.secondary,
+          style: AppButtonStyle.fill,
+          shape: AppButtonShape.square,
+          size: AppButtonSize.medium,
+          leadingIcon: const Icon(Icons.add_a_photo),
         ),
       ],
     );
@@ -468,7 +474,7 @@ class _ImagePickerSectionState extends ConsumerState<ImagePickerSection> {
   /// Builds a thumbnail for a persisted image using the existing async logic
   Widget _buildPersistedThumbnail(RecipeImage recipeImage, int index) {
     final imageUrl = recipeImage.getPublicUrlForSize(RecipeImageSize.small) ?? '';
-    
+
     return FutureBuilder<String>(
       future: recipeImage.getFullPath(),
       builder: (context, snapshot) {
