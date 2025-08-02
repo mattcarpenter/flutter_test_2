@@ -62,19 +62,8 @@ class _IngredientListItemState extends ConsumerState<IngredientListItem> {
     // Use visual index during drag operations if available
     final effectiveIndex = widget.visualIndex ?? widget.index;
 
-    if (effectiveIndex == 0) return true;
-
-    // Look backwards to find the first non-section item
-    for (int i = effectiveIndex - 1; i >= 0; i--) {
-      if (i >= widget.allIngredients.length) continue;
-      final prevItem = widget.allIngredients[i];
-      if (prevItem.type != 'section') {
-        return false; // Found a non-section item, so we're not first in group
-      }
-    }
-
-    // Only sections found before this item, so this is first in group
-    return true;
+    // Only the very first item (position 0) is first in group
+    return effectiveIndex == 0;
   }
 
   bool get _isLastInGroup {
