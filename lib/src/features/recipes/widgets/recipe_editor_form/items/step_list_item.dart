@@ -154,42 +154,6 @@ class _StepListItemState extends State<StepListItem> {
     }
   }
 
-  // Build inset divider widget for grouped steps
-  Widget? _buildInsetDivider() {
-    if (!_isGrouped || _isLastInGroup || widget.isDragging) {
-      // Hide inset divider during drag to prevent visual conflicts
-      return null;
-    }
-
-    return Positioned(
-      bottom: 0,
-      left: 0,
-      right: 0,
-      child: SizedBox(
-        height: 1,
-        child: Row(
-          children: [
-            Container(
-              width: 16,
-              height: 1,
-              color: Colors.white,
-            ),
-            Expanded(
-              child: Container(
-                height: 1,
-                color: Colors.grey.shade300,
-              ),
-            ),
-            Container(
-              width: 16,
-              height: 1,
-              color: Colors.white,
-            ),
-          ],
-        ),
-      ),
-    );
-  }
 
   @override
   void initState() {
@@ -252,7 +216,7 @@ class _StepListItemState extends State<StepListItem> {
   @override
   Widget build(BuildContext context) {
     final backgroundColor = Colors.white;
-    final backgroundColorSection = Colors.grey.shade100;
+    final backgroundColorSection = Colors.grey.shade200;
 
     if (isSection) {
       return Container(
@@ -347,8 +311,6 @@ class _StepListItemState extends State<StepListItem> {
                     ),
                   ),
                 ),
-                // Add inset divider for grouped sections
-                if (_buildInsetDivider() != null) _buildInsetDivider()!,
               ],
             ),
           ),
@@ -453,8 +415,6 @@ class _StepListItemState extends State<StepListItem> {
                   ),
                 ),
               ),
-              // Add inset divider for grouped steps
-              if (_buildInsetDivider() != null) _buildInsetDivider()!,
             ],
           ),
         ),
