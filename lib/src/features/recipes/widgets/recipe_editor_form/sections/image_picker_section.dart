@@ -8,9 +8,6 @@ import 'package:flutter_image_compress/flutter_image_compress.dart';
 import 'package:uuid/uuid.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../../../widgets/app_button.dart';
-import '../../../../../theme/spacing.dart';
-
 import '../../../../../../database/models/recipe_images.dart';
 import 'package:recipe_app/src/managers/upload_queue_manager.dart';
 
@@ -126,7 +123,7 @@ class _ImagePickerSectionState extends ConsumerState<ImagePickerSection> {
         final newState = newStates[i];
         if (!oldStates.any((s) => s.recipeImage.fileName == newState.recipeImage.fileName)) {
           _listKey.currentState!.insertItem(
-            i,
+            i, // Insert at the correct position
             duration: const Duration(milliseconds: 300),
           );
         }
@@ -228,9 +225,9 @@ class _ImagePickerSectionState extends ConsumerState<ImagePickerSection> {
       _imageStates.add(newImageState);
     });
 
-    // Trigger animated list insertion
+    // Trigger animated list insertion (insert before placeholder)
     _listKey.currentState?.insertItem(
-      _imageStates.length - 1,
+      _imageStates.length - 1, // Insert at the position of the new image
       duration: const Duration(milliseconds: 300),
     );
 
@@ -372,33 +369,29 @@ class _ImagePickerSectionState extends ConsumerState<ImagePickerSection> {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        _imageStates.isEmpty
-            ? const Text("No photos added")
-            : SizedBox(
-          height: 100,
-          child: AnimatedList(
-            key: _listKey,
-            scrollDirection: Axis.horizontal,
-            initialItemCount: _imageStates.length,
-            itemBuilder: (context, index, animation) {
-              return _buildAnimatedThumbnail(_imageStates[index], index, animation);
-            },
-          ),
-        ),
-        const SizedBox(height: AppSpacing.md),
-        AppButton(
-          text: 'Add Photo',
-          onPressed: () => _showImagePickerDialog(context),
-          theme: AppButtonTheme.secondary,
-          style: AppButtonStyle.outline,
-          shape: AppButtonShape.square,
-          size: AppButtonSize.medium,
-          leadingIcon: const Icon(Icons.add_a_photo),
-        ),
-      ],
+    return SizedBox(
+      height: 88, // Match the actual content height (80 + 4*2 padding)
+      child: AnimatedList(
+        key: _listKey,
+        scrollDirection: Axis.horizontal,
+        initialItemCount: _imageStates.length + 1, // +1 for placeholder
+        itemBuilder: (context, index, animation) {
+          if (index < _imageStates.length) {
+            // Regular image thumbnail
+            return _buildAnimatedThumbnail(_imageStates[index], index, animation);
+          } else {
+            // Add photo placeholder (always last item) - wrap in animation for consistency
+            return SizedBox(
+              width: 88, // Match thumbnail total width (80 + 4*2 padding)
+              height: 88, // Match thumbnail total height (80 + 4*2 padding)
+              child: FadeTransition(
+                opacity: animation,
+                child: _buildPlaceholder(),
+              ),
+            );
+          }
+        },
+      ),
     );
   }
 
@@ -462,7 +455,7 @@ class _ImagePickerSectionState extends ConsumerState<ImagePickerSection> {
             child: Container(
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                color: Colors.red.withOpacity(0.7),
+                color: Colors.red.withValues(alpha: 0.7),
               ),
               child: const Icon(Icons.close, size: 18, color: Colors.white),
             ),
@@ -509,7 +502,7 @@ class _ImagePickerSectionState extends ConsumerState<ImagePickerSection> {
                 child: Container(
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
-                    color: Colors.red.withOpacity(0.7),
+                    color: Colors.red.withValues(alpha: 0.7),
                   ),
                   child: const Icon(Icons.close, size: 18, color: Colors.white),
                 ),
@@ -520,4 +513,88 @@ class _ImagePickerSectionState extends ConsumerState<ImagePickerSection> {
       },
     );
   }
+
+  /// Builds the add photo placeholder with dashed border
+  Widget _buildPlaceholder() {
+    return Padding(
+      padding: const EdgeInsets.all(4.0),
+      child: GestureDetector(
+        onTap: () => _showImagePickerDialog(context),
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(8),
+          child: Container(
+            width: 80,
+            height: 80,
+            decoration: const BoxDecoration(),
+            child: CustomPaint(
+              painter: DashedBorderPainter(
+                color: Colors.grey.withValues(alpha: 0.5),
+                borderRadius: 8,
+                dashWidth: 4,
+                dashSpace: 4,
+              ),
+              child: const Center(
+                child: Icon(
+                  Icons.add_a_photo,
+                  color: Colors.grey,
+                  size: 24,
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// Custom painter for dashed border
+class DashedBorderPainter extends CustomPainter {
+  final Color color;
+  final double borderRadius;
+  final double dashWidth;
+  final double dashSpace;
+
+  DashedBorderPainter({
+    required this.color,
+    required this.borderRadius,
+    required this.dashWidth,
+    required this.dashSpace,
+  });
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint()
+      ..color = color
+      ..strokeWidth = 2
+      ..style = PaintingStyle.stroke;
+
+    final rect = Rect.fromLTWH(1, 1, size.width - 2, size.height - 2);
+    final rrect = RRect.fromRectAndRadius(rect, Radius.circular(borderRadius));
+    
+    // Create path for the rounded rectangle
+    final path = Path()..addRRect(rrect);
+    
+    // Draw dashed path
+    _drawDashedPath(canvas, path, paint);
+  }
+
+  void _drawDashedPath(Canvas canvas, Path path, Paint paint) {
+    final pathMetrics = path.computeMetrics();
+    for (final pathMetric in pathMetrics) {
+      double distance = 0.0;
+      while (distance < pathMetric.length) {
+        final nextDistance = distance + dashWidth;
+        final extractPath = pathMetric.extractPath(
+          distance,
+          nextDistance > pathMetric.length ? pathMetric.length : nextDistance,
+        );
+        canvas.drawPath(extractPath, paint);
+        distance = nextDistance + dashSpace;
+      }
+    }
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }
