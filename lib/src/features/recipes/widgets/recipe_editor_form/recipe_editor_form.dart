@@ -321,14 +321,20 @@ class RecipeEditorFormState extends ConsumerState<RecipeEditorForm> {
               topSpacing: AppSpacing.xl,
             ),
 
-            // Images Section
-            ImagePickerSection(
-              images: _recipe.images ?? [],
-              onImagesUpdated: (newImages) {
-                setState(() {
-                  _recipe = _recipe.copyWith(images: Value(newImages));
-                });
-              },
+            // Images Section with edge-to-edge scrolling
+            Transform.translate(
+              offset: const Offset(-16, 0), // Shift left to compensate for padding
+              child: SizedBox(
+                width: MediaQuery.of(context).size.width, // Full screen width
+                child: ImagePickerSection(
+                  images: _recipe.images ?? [],
+                  onImagesUpdated: (newImages) {
+                    setState(() {
+                      _recipe = _recipe.copyWith(images: Value(newImages));
+                    });
+                  },
+                ),
+              ),
             ),
 
             const SizedBox(height: AppSpacing.xl),

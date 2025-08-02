@@ -374,13 +374,15 @@ class _ImagePickerSectionState extends ConsumerState<ImagePickerSection> {
       child: AnimatedList(
         key: _listKey,
         scrollDirection: Axis.horizontal,
+        padding: const EdgeInsets.symmetric(horizontal: 16), // Padding for content
+        clipBehavior: Clip.none,
         initialItemCount: _imageStates.length + 1, // +1 for placeholder
         itemBuilder: (context, index, animation) {
           if (index < _imageStates.length) {
             // Regular image thumbnail
             return _buildAnimatedThumbnail(_imageStates[index], index, animation);
           } else {
-            // Add photo placeholder (always last item) - wrap in animation for consistency
+            // Add photo placeholder (always last item)
             return SizedBox(
               width: 143, // Match thumbnail total width (135 + 4*2 padding)
               height: 143, // Match thumbnail total height (135 + 4*2 padding)
