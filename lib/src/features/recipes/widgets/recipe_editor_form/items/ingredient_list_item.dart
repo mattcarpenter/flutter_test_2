@@ -373,7 +373,7 @@ class _IngredientListItemState extends ConsumerState<IngredientListItem> {
                             border: InputBorder.none,
                             contentPadding: EdgeInsets.symmetric(vertical: 12),
                           ),
-                            style: TextStyle(fontWeight: FontWeight.bold, color: Colors.grey.shade600),
+                            style: TextStyle(fontWeight: FontWeight.w400, color: Colors.grey.shade600),
                             onChanged: (value) {
                               widget.onUpdate(widget.ingredient.copyWith(name: value));
                             },

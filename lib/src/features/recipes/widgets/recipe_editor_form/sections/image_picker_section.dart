@@ -399,24 +399,18 @@ class _ImagePickerSectionState extends ConsumerState<ImagePickerSection> {
 
   /// Builds an animated thumbnail with smooth entry/exit animations
   Widget _buildAnimatedThumbnail(ImageState imageState, int index, Animation<double> animation) {
-    // Use SizeTransition to smoothly allocate horizontal space
-    return SizeTransition(
-      sizeFactor: animation.drive(
-        CurveTween(curve: Curves.easeOutCubic),
-      ),
-      axis: Axis.horizontal,
-      child: Center(
-        // Center ensures the scale animation happens from the true center
-        child: ScaleTransition(
-          scale: animation.drive(
-            Tween<double>(begin: 0.0, end: 1.0).chain(CurveTween(curve: Curves.easeOutBack)),
+    // Use a fixed-width container with scale/fade animations
+    return SizedBox(
+      width: 143, // Fixed width to prevent layout shift
+      child: ScaleTransition(
+        scale: animation.drive(
+          Tween<double>(begin: 0.0, end: 1.0).chain(CurveTween(curve: Curves.easeOutCubic)),
+        ),
+        child: FadeTransition(
+          opacity: animation.drive(
+            Tween<double>(begin: 0.0, end: 1.0).chain(CurveTween(curve: Curves.easeOut)),
           ),
-          child: FadeTransition(
-            opacity: animation.drive(
-              Tween<double>(begin: 0.0, end: 1.0).chain(CurveTween(curve: Curves.easeOut)),
-            ),
-            child: _buildThumbnail(imageState, index),
-          ),
+          child: _buildThumbnail(imageState, index),
         ),
       ),
     );
@@ -450,16 +444,17 @@ class _ImagePickerSectionState extends ConsumerState<ImagePickerSection> {
           ),
         ),
         Positioned(
-          top: 2,
-          right: 2,
+          top: 8,
+          right: 8,
           child: GestureDetector(
             onTap: () => _confirmDeleteImage(index),
             child: Container(
+              padding: const EdgeInsets.all(4),
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                color: Colors.red.withValues(alpha: 0.7),
+                color: Colors.white.withValues(alpha: 0.8),
               ),
-              child: const Icon(Icons.close, size: 18, color: Colors.white),
+              child: const Icon(Icons.close, size: 20, color: Colors.black),
             ),
           ),
         ),
@@ -497,16 +492,17 @@ class _ImagePickerSectionState extends ConsumerState<ImagePickerSection> {
               ),
             ),
             Positioned(
-              top: 2,
-              right: 2,
+              top: 8,
+              right: 8,
               child: GestureDetector(
                 onTap: () => _confirmDeleteImage(index),
                 child: Container(
+                  padding: const EdgeInsets.all(4),
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
-                    color: Colors.red.withValues(alpha: 0.7),
+                    color: Colors.white.withValues(alpha: 0.8),
                   ),
-                  child: const Icon(Icons.close, size: 18, color: Colors.white),
+                  child: const Icon(Icons.close, size: 20, color: Colors.black),
                 ),
               ),
             ),
@@ -537,9 +533,9 @@ class _ImagePickerSectionState extends ConsumerState<ImagePickerSection> {
               ),
               child: const Center(
                 child: Icon(
-                  Icons.add_a_photo,
+                  Icons.add_photo_alternate,
                   color: Colors.grey,
-                  size: 36,
+                  size: 24,
                 ),
               ),
             ),

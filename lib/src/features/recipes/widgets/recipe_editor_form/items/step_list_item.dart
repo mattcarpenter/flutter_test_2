@@ -252,6 +252,7 @@ class _StepListItemState extends State<StepListItem> {
   @override
   Widget build(BuildContext context) {
     final backgroundColor = Colors.white;
+    final backgroundColorSection = Colors.grey.shade100;
 
     if (isSection) {
       return Container(
@@ -302,7 +303,7 @@ class _StepListItemState extends State<StepListItem> {
               children: [
                 Container(
                   decoration: BoxDecoration(
-                    color: backgroundColor,
+                    color: backgroundColorSection,
                     border: _getBorder(),
                     borderRadius: _getBorderRadius(),
                   ),
@@ -319,7 +320,7 @@ class _StepListItemState extends State<StepListItem> {
                               border: InputBorder.none,
                               contentPadding: EdgeInsets.symmetric(vertical: 12),
                             ),
-                            style: TextStyle(fontWeight: FontWeight.bold, color: Colors.grey.shade600),
+                            style: TextStyle(fontWeight: FontWeight.w400, color: Colors.grey.shade600),
                             onChanged: (value) {
                               widget.onUpdate(widget.step.copyWith(text: value));
                             },

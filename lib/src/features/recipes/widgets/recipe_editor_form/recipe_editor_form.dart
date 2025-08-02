@@ -192,10 +192,10 @@ class RecipeEditorFormState extends ConsumerState<RecipeEditorForm> {
       primaryAmount1Unit: isSection ? null : 'g',
       primaryAmount1Type: isSection ? null : 'weight',
     );
-    
+
     // Clear focus from any currently focused widget
     FocusScope.of(context).unfocus();
-    
+
     setState(() {
       _ingredients.add(newIngredient);
       _autoFocusIngredientId = newIngredient.id;
@@ -234,13 +234,13 @@ class RecipeEditorFormState extends ConsumerState<RecipeEditorForm> {
     );
     // Clear focus from any currently focused widget
     FocusScope.of(context).unfocus();
-    
+
     setState(() {
       _steps.add(newStep);
       _autoFocusStepId = newStep.id;
     });
   }
-  
+
 
   void _removeStep(String id) {
     setState(() {
@@ -317,7 +317,7 @@ class RecipeEditorFormState extends ConsumerState<RecipeEditorForm> {
 
             // Images Section Header
             const SectionHeader(
-              "Images",
+              "Add Images",
               topSpacing: AppSpacing.xl,
             ),
 
@@ -341,7 +341,7 @@ class RecipeEditorFormState extends ConsumerState<RecipeEditorForm> {
 
             // Ingredients Section Header
             const SectionHeader(
-              "Ingredients",
+              "Add Ingredients",
               topSpacing: 0,
             ),
 
@@ -366,7 +366,7 @@ class RecipeEditorFormState extends ConsumerState<RecipeEditorForm> {
 
             // Steps Section Header
             const SectionHeader(
-              "Instructions",
+              "Add Instructions",
               topSpacing: 0,
             ),
 
@@ -391,7 +391,7 @@ class RecipeEditorFormState extends ConsumerState<RecipeEditorForm> {
 
             // Notes Section Header
             const SectionHeader(
-              "Notes",
+              "Add Notes",
               topSpacing: 0,
             ),
 
