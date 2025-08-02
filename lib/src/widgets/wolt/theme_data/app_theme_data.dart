@@ -24,7 +24,7 @@ class AppThemeData {
       indicatorColor: Colors.transparent,
       scaffoldBackgroundColor: colorScheme.surface,
       textTheme: textTheme,
-      cardTheme: _cardThemeData,
+      //cardTheme: _cardThemeData,
       outlinedButtonTheme: _outlinedButtonThemeData(textTheme),
       navigationBarTheme: _navigationBarThemeData(textTheme),
       colorScheme: colorScheme,
