@@ -148,64 +148,18 @@ class _IngredientListItemState extends ConsumerState<IngredientListItem> {
       // Single item gets full border
       return Border.all(color: borderColor.shade300, width: borderWidth);
     } else if (_isFirstInGroup) {
-      // First item: no bottom border (inset divider replaces it)
-      return Border(
-        top: BorderSide(color: borderColor.shade300, width: borderWidth),
-        left: BorderSide(color: borderColor.shade300, width: borderWidth),
-        right: BorderSide(color: borderColor.shade300, width: borderWidth),
-      );
-    } else if (_isLastInGroup) {
-      // Last item: no top border, has bottom border
+      // First item: full border
+      return Border.all(color: borderColor.shade300, width: borderWidth);
+    } else {
+      // Non-first items: omit top border to prevent double borders
       return Border(
         left: BorderSide(color: borderColor.shade300, width: borderWidth),
         right: BorderSide(color: borderColor.shade300, width: borderWidth),
         bottom: BorderSide(color: borderColor.shade300, width: borderWidth),
       );
-    } else {
-      // Middle items: only left/right borders (inset divider replaces bottom)
-      return Border(
-        left: BorderSide(color: borderColor.shade300, width: borderWidth),
-        right: BorderSide(color: borderColor.shade300, width: borderWidth),
-      );
     }
   }
 
-  // Build inset divider widget for grouped ingredients
-  Widget? _buildInsetDivider() {
-    if (!_isGrouped || _isLastInGroup || widget.isDragging) {
-      // Hide inset divider during drag to prevent visual conflicts
-      return null;
-    }
-
-    return Positioned(
-      bottom: 0,
-      left: 0,
-      right: 0,
-      child: Container(
-        height: 1,
-        child: Row(
-          children: [
-            Container(
-              width: 16,
-              height: 1,
-              color: Colors.white,
-            ),
-            Expanded(
-              child: Container(
-                height: 1,
-                color: Colors.grey.shade300,
-              ),
-            ),
-            Container(
-              width: 16,
-              height: 1,
-              color: Colors.white,
-            ),
-          ],
-        ),
-      ),
-    );
-  }
 
   @override
   void initState() {
@@ -303,6 +257,7 @@ class _IngredientListItemState extends ConsumerState<IngredientListItem> {
   @override
   Widget build(BuildContext context) {
     final backgroundColor = Colors.white;
+    final backgroundColorSection = Colors.grey.shade200;
 
     if (isSection) {
       return Container(
@@ -356,7 +311,7 @@ class _IngredientListItemState extends ConsumerState<IngredientListItem> {
               children: [
                 Container(
                   decoration: BoxDecoration(
-                    color: backgroundColor,
+                    color: backgroundColorSection,
                     border: _getBorder(),
                     borderRadius: _getBorderRadius(),
                   ),
@@ -405,8 +360,6 @@ class _IngredientListItemState extends ConsumerState<IngredientListItem> {
                     ),
                   ),
                 ),
-                // Add inset divider for grouped sections
-                if (_buildInsetDivider() != null) _buildInsetDivider()!,
               ],
             ),
           ),
@@ -537,8 +490,6 @@ class _IngredientListItemState extends ConsumerState<IngredientListItem> {
                 ),
               ),
             ),
-            // Add inset divider for grouped ingredients
-            if (_buildInsetDivider() != null) _buildInsetDivider()!,
           ],
         ),
       ),
