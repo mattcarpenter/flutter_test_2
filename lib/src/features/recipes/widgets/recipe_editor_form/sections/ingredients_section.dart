@@ -129,7 +129,7 @@ class _IngredientsSectionState extends State<IngredientsSection> {
                 text: 'Add Ingredient',
                 onPressed: () => widget.onAddIngredient(false),
                 theme: AppButtonTheme.secondary,
-                style: AppButtonStyle.fill,
+                style: AppButtonStyle.outline,
                 shape: AppButtonShape.square,
                 size: AppButtonSize.medium,
                 leadingIcon: const Icon(Icons.add),

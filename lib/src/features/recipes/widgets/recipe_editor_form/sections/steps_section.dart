@@ -125,7 +125,7 @@ class _StepsSectionState extends State<StepsSection> {
                 text: 'Add Step',
                 onPressed: () => widget.onAddStep(false),
                 theme: AppButtonTheme.secondary,
-                style: AppButtonStyle.fill,
+                style: AppButtonStyle.outline,
                 shape: AppButtonShape.square,
                 size: AppButtonSize.medium,
                 leadingIcon: const Icon(Icons.add),

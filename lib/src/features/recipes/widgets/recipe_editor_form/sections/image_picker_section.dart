@@ -392,7 +392,7 @@ class _ImagePickerSectionState extends ConsumerState<ImagePickerSection> {
           text: 'Add Photo',
           onPressed: () => _showImagePickerDialog(context),
           theme: AppButtonTheme.secondary,
-          style: AppButtonStyle.fill,
+          style: AppButtonStyle.outline,
           shape: AppButtonShape.square,
           size: AppButtonSize.medium,
           leadingIcon: const Icon(Icons.add_a_photo),

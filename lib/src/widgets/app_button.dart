@@ -10,6 +10,8 @@ enum AppButtonTheme {
 enum AppButtonStyle {
   fill,
   outline,
+  muted,
+  mutedOutline,
 }
 
 /// Shape options for the button
@@ -74,12 +76,29 @@ class _AppButtonState extends State<AppButton> {
     },
   };
 
+  // Generate muted background color (very light version of the theme color)
+  Color get _mutedBackgroundColor {
+    final baseColor = _colors[widget.theme]!['default']!;
+    return Color.lerp(baseColor, Colors.white, 0.9)!;
+  }
+
+  // Generate muted text color (darker version of the theme color)
+  Color get _mutedTextColor {
+    final baseColor = _colors[widget.theme]!['default']!;
+    return Color.lerp(baseColor, Colors.black, 0.3)!;
+  }
+
   Color get _backgroundColor {
-    if (widget.style == AppButtonStyle.outline) {
+    if (widget.style == AppButtonStyle.outline || widget.style == AppButtonStyle.mutedOutline) {
       return Colors.transparent;
     }
 
     final colorMap = _colors[widget.theme]!;
+    
+    if (widget.style == AppButtonStyle.muted) {
+      return _mutedBackgroundColor;
+    }
+    
     if (widget.onPressed == null || widget.loading) {
       return colorMap['default']!.withOpacity(0.5);
     }
@@ -94,6 +113,11 @@ class _AppButtonState extends State<AppButton> {
 
   Color get _borderColor {
     final colorMap = _colors[widget.theme]!;
+    
+    if (widget.style == AppButtonStyle.mutedOutline) {
+      return _mutedTextColor;
+    }
+    
     if (widget.onPressed == null || widget.loading) {
       return colorMap['default']!.withOpacity(0.5);
     }
@@ -107,11 +131,16 @@ class _AppButtonState extends State<AppButton> {
   }
 
   Color get _textColor {
+    final colorMap = _colors[widget.theme]!;
+    
     if (widget.style == AppButtonStyle.fill) {
       return Colors.white;
     }
+    
+    if (widget.style == AppButtonStyle.muted || widget.style == AppButtonStyle.mutedOutline) {
+      return _mutedTextColor;
+    }
 
-    final colorMap = _colors[widget.theme]!;
     if (widget.onPressed == null || widget.loading) {
       return colorMap['default']!.withOpacity(0.5);
     }
@@ -162,8 +191,8 @@ class _AppButtonState extends State<AppButton> {
       // Pill shape - fully rounded
       return BorderRadius.circular(_height / 2);
     } else {
-      // Square shape - slightly rounded corners
-      return BorderRadius.circular(8);
+      // Stadium/racetrack shape - gentle curves on top/bottom, sharper on left/right
+      return BorderRadius.circular(_height / 2.5);
     }
   }
 
@@ -212,7 +241,7 @@ class _AppButtonState extends State<AppButton> {
           decoration: BoxDecoration(
             color: _backgroundColor,
             borderRadius: _borderRadius,
-            border: widget.style == AppButtonStyle.outline
+            border: (widget.style == AppButtonStyle.outline || widget.style == AppButtonStyle.mutedOutline)
                 ? Border.all(
                     color: _borderColor,
                     width: 1,
