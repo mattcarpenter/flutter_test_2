@@ -9,19 +9,19 @@ class AppColorSwatches {
   // Private constructor to prevent instantiation
   AppColorSwatches._();
 
-  /// Neutral palette - grays with slight warm tone for better readability
-  static const MaterialColor neutral = MaterialColor(0xFF6B7280, {
-    50: Color(0xFFF9FAFB),   // Very light gray
-    100: Color(0xFFF3F4F6),  // Light gray (backgrounds)
-    200: Color(0xFFE5E7EB),  // Border gray
-    300: Color(0xFFD1D5DB),  // Medium light gray
-    400: Color(0xFF9CA3AF),  // Placeholder gray
-    500: Color(0xFF6B7280),  // Base gray (labels)
-    600: Color(0xFF4B5563),  // Dark gray
-    700: Color(0xFF374151),  // Darker gray
-    800: Color(0xFF1F2937),  // Very dark gray
-    900: Color(0xFF111827),  // Almost black
-    950: Color(0xFF030712),  // True black for high contrast
+  /// Neutral palette - warm-toned grays for better visual harmony
+  static const MaterialColor neutral = MaterialColor(0xFF6B7078, {
+    50: Color(0xFFFBFAF9),   // Very light warm gray
+    100: Color(0xFFF6F4F3),  // Light warm gray (backgrounds)
+    200: Color(0xFFEBE9E7),  // Warm border gray
+    300: Color(0xFFDBD7D3),  // Medium light warm gray
+    400: Color(0xFFAFA9A3),  // Warm placeholder gray
+    500: Color(0xFF6B7078),  // Base warm gray (labels)
+    600: Color(0xFF63585B),  // Dark warm gray
+    700: Color(0xFF514B51),  // Darker warm gray
+    800: Color(0xFF372F37),  // Very dark warm gray
+    900: Color(0xFF271827),  // Almost black with warm undertone
+    950: Color(0xFF120712),  // True black with subtle warm undertone
   });
 
   /// Primary color - Coral/Salmon red
