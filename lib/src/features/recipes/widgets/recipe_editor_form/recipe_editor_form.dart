@@ -60,6 +60,9 @@ class RecipeEditorFormState extends ConsumerState<RecipeEditorForm> {
   String? _autoFocusIngredientId;
   String? _autoFocusStepId;
 
+  // Scroll controller for better scroll-to-focus behavior
+  final ScrollController _scrollController = ScrollController();
+
   @override
   void initState() {
     super.initState();
@@ -75,6 +78,7 @@ class RecipeEditorFormState extends ConsumerState<RecipeEditorForm> {
     _cookTimeController.dispose();
     _sourceController.dispose();
     _notesController.dispose();
+    _scrollController.dispose();
     super.dispose();
   }
 
@@ -298,6 +302,8 @@ class RecipeEditorFormState extends ConsumerState<RecipeEditorForm> {
     if (!_isInitialized) return const Center(child: CircularProgressIndicator());
 
     return SingleChildScrollView(
+      controller: _scrollController,
+      keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
       child: Padding(
         padding: const EdgeInsets.all(0.0),
         child: Column(

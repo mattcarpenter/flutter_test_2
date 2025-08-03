@@ -371,6 +371,7 @@ class _StepListItemState extends State<StepListItem> {
                         autofocus: widget.autoFocus,
                         focusNode: _focusNode,
                         controller: _textController,
+                        scrollPadding: const EdgeInsets.only(bottom: 200.0), // Keep context visible above
                         decoration: const InputDecoration(
                           hintText: 'Describe this step',
                           border: InputBorder.none,

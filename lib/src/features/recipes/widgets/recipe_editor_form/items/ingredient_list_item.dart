@@ -439,6 +439,7 @@ class _IngredientListItemState extends ConsumerState<IngredientListItem> {
                       autofocus: widget.autoFocus,
                       focusNode: _focusNode,
                       controller: _ingredientController,
+                      scrollPadding: const EdgeInsets.only(bottom: 200.0), // Keep context visible above
                       decoration: const InputDecoration(
                         hintText: 'e.g. 1 cup flour',
                         border: InputBorder.none,

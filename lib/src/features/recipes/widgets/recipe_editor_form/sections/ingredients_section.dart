@@ -49,8 +49,8 @@ class _IngredientsSectionState extends State<IngredientsSection> {
 
   // Method to handle drag end
   void _onDragEnd(int index) {
-    // Keep both flags for 250ms to match ReorderableListView's animation timing
-    Future.delayed(const Duration(milliseconds: 250), () {
+    // Keep both flags for 0ms to match StepsSection timing
+    Future.delayed(const Duration(milliseconds: 0), () {
       if (mounted) {
         setState(() {
           _isDragging = false;
