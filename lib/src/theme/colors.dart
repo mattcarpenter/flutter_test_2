@@ -140,12 +140,12 @@ class AppColors {
 
   // Background colors
   Color get background => brightness == Brightness.light
-      ? AppColorSwatches.neutral[50]!
-      : AppColorSwatches.neutral[900]!;
+      ? Colors.white  // #FFFFFF - better hierarchy, was neutral[50]
+      : const Color(0xFF121212);  // True Material Design dark, was neutral[900]
 
   Color get surface => brightness == Brightness.light
-      ? Colors.white
-      : AppColorSwatches.neutral[800]!;
+      ? const Color(0xFFFAFAFA)  // Very light gray for cards/inputs, was Colors.white
+      : const Color(0xFF1F1F1F);  // Warmer dark gray, was neutral[800]
 
   Color get surfaceVariant => brightness == Brightness.light
       ? AppColorSwatches.neutral[100]!

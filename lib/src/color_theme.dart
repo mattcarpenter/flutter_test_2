@@ -1,6 +1,9 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'theme/colors.dart';
 
+// LEGACY: These static constants are deprecated.
+// Use AppColors.of(context) from theme/colors.dart instead.
 class AppColors {
   // Light Mode Colors
   static const Color primaryLight = Color(0xFFFF595E);
@@ -30,59 +33,55 @@ class AppColors {
 }
 
 class AppTheme {
-  // Light Theme
+  // Helper to create themes using our new color system
   static ThemeData materialLightTheme = ThemeData(
     brightness: Brightness.light,
-    colorScheme: const ColorScheme.light(
-      primary: AppColors.primaryLight,
-      secondary: AppColors.secondaryLight,
-      background: AppColors.backgroundLight,
-      surface: AppColors.surfaceLight,
-      error: AppColors.errorLight,
-      onPrimary: AppColors.onPrimaryLight,
-      onSecondary: AppColors.onSecondaryLight,
-      onBackground: AppColors.onBackgroundLight,
-      onSurface: AppColors.onSurfaceLight,
-      onError: AppColors.onErrorLight,
+    colorScheme: ColorScheme.light(
+      primary: AppColorSwatches.primary[500]!,
+      secondary: AppColorSwatches.secondary[500]!,
+      surface: const Color(0xFFFAFAFA),  // From our new system
+      error: AppColorSwatches.error[600]!,
+      onPrimary: Colors.white,
+      onSecondary: Colors.black,
+      onSurface: AppColorSwatches.neutral[900]!,
+      onError: Colors.white,
     ),
+    scaffoldBackgroundColor: Colors.white,  // From our new system
   );
 
-  static CupertinoThemeData cupertinoLightTheme = const CupertinoThemeData(
+  static CupertinoThemeData cupertinoLightTheme = CupertinoThemeData(
     brightness: Brightness.light,
-    primaryColor: AppColors.primaryLight,
-    //barBackgroundColor: AppColors.backgroundLight,
-    scaffoldBackgroundColor: AppColors.backgroundLight,
+    primaryColor: AppColorSwatches.primary[500]!,
+    scaffoldBackgroundColor: Colors.white,  // From our new system
     textTheme: CupertinoTextThemeData(
-      textStyle: TextStyle(fontFamily: 'Inter'),
-      primaryColor: AppColors.onBackgroundLight,
+      textStyle: const TextStyle(fontFamily: 'Inter'),
+      primaryColor: AppColorSwatches.neutral[900]!,
     ),
   );
 
   // Dark Theme
   static ThemeData materialDarkTheme = ThemeData(
     brightness: Brightness.dark,
-    colorScheme: const ColorScheme.dark(
-      primary: AppColors.primaryDark,
-      secondary: AppColors.secondaryDark,
-      background: AppColors.backgroundDark,
-      surface: AppColors.surfaceDark,
-      error: AppColors.errorDark,
-      onPrimary: AppColors.onPrimaryDark,
-      onSecondary: AppColors.onSecondaryDark,
-      onBackground: AppColors.onBackgroundDark,
-      onSurface: AppColors.onSurfaceDark,
-      onError: AppColors.onErrorDark,
+    colorScheme: ColorScheme.dark(
+      primary: AppColorSwatches.primary[400]!,
+      secondary: AppColorSwatches.secondary[400]!,
+      surface: const Color(0xFF1F1F1F),  // From our new system
+      error: AppColorSwatches.error[400]!,
+      onPrimary: AppColorSwatches.neutral[900]!,
+      onSecondary: Colors.black,
+      onSurface: AppColorSwatches.neutral[50]!,
+      onError: Colors.black,
     ),
+    scaffoldBackgroundColor: const Color(0xFF121212),  // From our new system
   );
 
-  static CupertinoThemeData cupertinoDarkTheme = const CupertinoThemeData(
+  static CupertinoThemeData cupertinoDarkTheme = CupertinoThemeData(
     brightness: Brightness.dark,
-    primaryColor: AppColors.primaryDark,
-    //barBackgroundColor: AppColors.backgroundDark,
-    scaffoldBackgroundColor: AppColors.backgroundDark,
+    primaryColor: AppColorSwatches.primary[400]!,
+    scaffoldBackgroundColor: const Color(0xFF121212),  // From our new system
     textTheme: CupertinoTextThemeData(
-      textStyle: TextStyle(fontFamily: 'Inter'),
-      primaryColor: AppColors.onBackgroundDark,
+      textStyle: const TextStyle(fontFamily: 'Inter'),
+      primaryColor: AppColorSwatches.neutral[50]!,
     ),
   );
 }
