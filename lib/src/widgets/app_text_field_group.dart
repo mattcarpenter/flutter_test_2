@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'app_text_field.dart' show AppTextFieldVariant;
+import '../theme/colors.dart';
 
 class AppTextFieldGroup extends StatefulWidget {
   final List<Widget> children;
@@ -22,22 +23,20 @@ class AppTextFieldGroup extends StatefulWidget {
 class _AppTextFieldGroupState extends State<AppTextFieldGroup> {
   // Design tokens - matching AppTextFieldCondensed
   static const double _borderRadius = 8.0;
-  static const Color _defaultBorderColor = Color(0xFFE5E7EB);
-  static const Color _errorColor = Color(0xFFDC2626);
-  static const Color _filledBackgroundColor = Color(0xFFF3F4F6);
 
   Widget _buildDivider() {
-    final borderColor = widget.errorText != null ? _errorColor : _defaultBorderColor;
+    final colors = AppColors.of(context);
+    final borderColor = widget.errorText != null ? colors.error : colors.border;
     
     return Row(
       children: [
-        // Left inset - white background
+        // Left inset - background color
         Container(
           width: 16,
           height: 1,
           color: widget.variant == AppTextFieldVariant.filled 
-              ? _filledBackgroundColor 
-              : Colors.white,
+              ? colors.inputBackgroundFilled 
+              : colors.surface,
         ),
         // Center divider line
         Expanded(
@@ -46,13 +45,13 @@ class _AppTextFieldGroupState extends State<AppTextFieldGroup> {
             color: borderColor,
           ),
         ),
-        // Right inset - white background
+        // Right inset - background color
         Container(
           width: 16,
           height: 1,
           color: widget.variant == AppTextFieldVariant.filled 
-              ? _filledBackgroundColor 
-              : Colors.white,
+              ? colors.inputBackgroundFilled 
+              : colors.surface,
         ),
       ],
     );
@@ -64,10 +63,11 @@ class _AppTextFieldGroupState extends State<AppTextFieldGroup> {
       return const SizedBox.shrink();
     }
 
-    final borderColor = widget.errorText != null ? _errorColor : _defaultBorderColor;
+    final colors = AppColors.of(context);
+    final borderColor = widget.errorText != null ? colors.error : colors.border;
     final backgroundColor = widget.variant == AppTextFieldVariant.filled
-        ? (widget.enabled ? _filledBackgroundColor : _filledBackgroundColor.withValues(alpha: 0.5))
-        : Colors.white;
+        ? (widget.enabled ? colors.inputBackgroundFilled : colors.inputBackgroundFilled.withOpacity(0.5))
+        : colors.surface;
 
     // Build the list of children with dividers between them
     final List<Widget> childrenWithDividers = [];
@@ -108,8 +108,8 @@ class _AppTextFieldGroupState extends State<AppTextFieldGroup> {
             ),
             child: Text(
               widget.errorText!,
-              style: const TextStyle(
-                color: _errorColor,
+              style: TextStyle(
+                color: colors.error,
                 fontSize: 12,
                 fontWeight: FontWeight.w400,
               ),

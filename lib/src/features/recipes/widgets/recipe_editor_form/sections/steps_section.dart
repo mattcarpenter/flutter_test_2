@@ -7,6 +7,7 @@ import '../../../../../widgets/adaptive_pull_down/adaptive_menu_item.dart';
 import '../items/step_list_item.dart';
 import '../utils/context_menu_utils.dart';
 import '../../../../../theme/spacing.dart';
+import '../../../../../theme/colors.dart';
 
 class StepsSection extends StatefulWidget {
   final List<Step> steps;
@@ -178,14 +179,14 @@ class _StepsSectionState extends State<StepsSection> {
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
                     border: Border.all(
-                      color: Colors.grey.shade300,
+                      color: AppColors.of(context).border,
                       width: 1,
                     ),
-                    color: Colors.white,
+                    color: AppColors.of(context).surface,
                   ),
-                  child: const Icon(
+                  child: Icon(
                     Icons.more_horiz,
-                    color: Colors.grey,
+                    color: AppColors.of(context).textSecondary,
                     size: 20,
                   ),
                 ),

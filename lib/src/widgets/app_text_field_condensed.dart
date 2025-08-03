@@ -124,7 +124,7 @@ class _AppTextFieldCondensedState extends State<AppTextFieldCondensed>
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    
+
     // Initialize color animations with theme-aware colors
     final colors = AppColors.of(context);
     _borderColorAnimation = ColorTween(
@@ -264,7 +264,7 @@ class _AppTextFieldCondensedState extends State<AppTextFieldCondensed>
                 ] else ...[
                   const SizedBox(width: _horizontalPadding),
                 ],
-                
+
                 // Fixed label on the left
                 Text(
                   widget.placeholder,
@@ -276,9 +276,9 @@ class _AppTextFieldCondensedState extends State<AppTextFieldCondensed>
                             : colors.textDisabled,
                   ),
                 ),
-                
+
                 const SizedBox(width: 16),
-                
+
                 // Right-aligned input
                 Expanded(
                   child: TextField(
@@ -312,7 +312,7 @@ class _AppTextFieldCondensedState extends State<AppTextFieldCondensed>
                     ),
                   ),
                 ),
-                
+
                 if (widget.suffix != null) ...[
                   const SizedBox(width: 4),
                   Padding(
@@ -364,7 +364,7 @@ class _AppTextFieldCondensedState extends State<AppTextFieldCondensed>
                     ? (widget.enabled
                         ? colors.inputBackgroundFilled
                         : colors.inputBackgroundFilled.withOpacity(0.5))
-                    : Colors.white,
+                    : colors.surface,
                 borderRadius: _getBorderRadius(),
                 border: _getBorder(borderColor),
               ),
@@ -379,7 +379,7 @@ class _AppTextFieldCondensedState extends State<AppTextFieldCondensed>
                   ] else ...[
                     const SizedBox(width: _horizontalPadding),
                   ],
-                    
+
                     // Fixed label on the left
                     Text(
                       widget.placeholder,
@@ -391,9 +391,9 @@ class _AppTextFieldCondensedState extends State<AppTextFieldCondensed>
                                 : colors.textDisabled,
                       ),
                     ),
-                    
+
                     const SizedBox(width: 16),
-                    
+
                     // Right-aligned input
                     Expanded(
                       child: TextField(
@@ -427,7 +427,7 @@ class _AppTextFieldCondensedState extends State<AppTextFieldCondensed>
                         ),
                       ),
                     ),
-                    
+
                     if (widget.suffix != null) ...[
                       const SizedBox(width: 4),
                       Padding(
@@ -622,7 +622,7 @@ class _AppTextFieldCondensedState extends State<AppTextFieldCondensed>
                           ? (widget.enabled
                               ? colors.inputBackgroundFilled
                               : colors.inputBackgroundFilled.withOpacity(0.5))
-                          : Colors.white,
+                          : colors.surface,
                       borderRadius: _getBorderRadius(),
                       border: _getBorder(borderColor),
                     ),

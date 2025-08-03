@@ -224,10 +224,10 @@ class _AppDurationPickerCondensedState extends State<AppDurationPickerCondensed>
         children: [
           Text(
             label,
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: 14,
               fontWeight: FontWeight.w500,
-              color: Colors.grey,
+              color: AppColors.of(context).textSecondary,
             ),
           ),
           const SizedBox(height: 8),
