@@ -16,6 +16,7 @@ import '../../../../repositories/recipe_repository.dart';
 import '../../../../widgets/section_header.dart';
 import '../../../../widgets/app_text_field.dart';
 import '../../../../widgets/app_text_field_condensed.dart';
+import '../../../../widgets/app_text_field_group.dart';
 import 'sections/ingredients_section.dart';
 import 'sections/recipe_metadata_section.dart';
 import 'sections/steps_section.dart';
@@ -396,22 +397,23 @@ class RecipeEditorFormState extends ConsumerState<RecipeEditorForm> {
             ),
 
             // Source and Notes grouped together
-            AppTextFieldCondensed(
-              controller: _sourceController,
-              placeholder: "Source (optional)",
+            AppTextFieldGroup(
               variant: AppTextFieldVariant.outline,
-              keyboardType: TextInputType.url,
-              first: true,
-              last: false,
-            ),
-            AppTextFieldCondensed(
-              controller: _notesController,
-              placeholder: "General notes about this recipe",
-              variant: AppTextFieldVariant.outline,
-              multiline: true,
-              minLines: 2,
-              first: false,
-              last: true,
+              children: [
+                AppTextFieldCondensed(
+                  controller: _sourceController,
+                  placeholder: "Source (optional)",
+                  keyboardType: TextInputType.url,
+                  grouped: true,
+                ),
+                AppTextFieldCondensed(
+                  controller: _notesController,
+                  placeholder: "General notes about this recipe",
+                  multiline: true,
+                  minLines: 2,
+                  grouped: true,
+                ),
+              ],
             ),
           ],
         ),
