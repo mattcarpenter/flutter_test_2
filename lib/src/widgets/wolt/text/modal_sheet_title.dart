@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:recipe_app/src/theme/typography.dart';
+import 'package:recipe_app/src/theme/colors.dart';
 
 class ModalSheetTitle extends StatelessWidget {
   const ModalSheetTitle(
@@ -13,16 +14,16 @@ class ModalSheetTitle extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = AppColors.of(context);
+    
     return Padding(
       padding: const EdgeInsets.only(top: 16, left: 16, right: 16),
       child: Text(
         text,
         textAlign: textAlign,
-        /*style: Theme.of(context)
-            .textTheme
-            .headlineSmall!
-            .copyWith(fontWeight: FontWeight.bold),*/
-        style: AppTypography.h4
+        style: AppTypography.h4.copyWith(
+          color: colors.textPrimary,
+        ),
       ),
     );
   }

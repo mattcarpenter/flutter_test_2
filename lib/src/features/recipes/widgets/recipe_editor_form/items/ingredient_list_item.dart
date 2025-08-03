@@ -9,6 +9,7 @@ import '../../../../../../database/database.dart';
 import '../../../../../providers/recipe_provider.dart' as recipe_provider;
 import '../../../../../services/ingredient_parser_service.dart';
 import '../../../../../widgets/ingredient_text_editing_controller.dart';
+import '../../../../../theme/colors.dart';
 import '../utils/context_menu_utils.dart';
 
 class IngredientListItem extends ConsumerStatefulWidget {
@@ -125,26 +126,27 @@ class _IngredientListItemState extends ConsumerState<IngredientListItem> {
 
   // Border calculation for grouping
   Border _getBorder() {
-    const borderColor = Colors.grey;
+    final colors = AppColors.of(context);
+    final borderColor = colors.borderStrong;
     const borderWidth = 1.0;
 
     if (!_isGrouped || widget.isDragging) {
       // During drag, use full border to prevent animation glitches
-      return Border.all(color: borderColor.shade300, width: borderWidth);
+      return Border.all(color: borderColor, width: borderWidth);
     }
 
     if (_isFirstInGroup && _isLastInGroup) {
       // Single item gets full border
-      return Border.all(color: borderColor.shade300, width: borderWidth);
+      return Border.all(color: borderColor, width: borderWidth);
     } else if (_isFirstInGroup) {
       // First item: full border
-      return Border.all(color: borderColor.shade300, width: borderWidth);
+      return Border.all(color: borderColor, width: borderWidth);
     } else {
       // Non-first items: omit top border to prevent double borders
       return Border(
-        left: BorderSide(color: borderColor.shade300, width: borderWidth),
-        right: BorderSide(color: borderColor.shade300, width: borderWidth),
-        bottom: BorderSide(color: borderColor.shade300, width: borderWidth),
+        left: BorderSide(color: borderColor, width: borderWidth),
+        right: BorderSide(color: borderColor, width: borderWidth),
+        bottom: BorderSide(color: borderColor, width: borderWidth),
       );
     }
   }
@@ -245,13 +247,14 @@ class _IngredientListItemState extends ConsumerState<IngredientListItem> {
 
   @override
   Widget build(BuildContext context) {
-    final backgroundColor = Colors.white;
-    final backgroundColorSection = Colors.grey.shade100;
+    final colors = AppColors.of(context);
+    final backgroundColor = colors.surface;
+    final backgroundColorSection = colors.surfaceVariant;
 
     if (isSection) {
       return Container(
         decoration: BoxDecoration(
-          color: Colors.red,
+          color: colors.error,
           borderRadius: _getBorderRadius(),
         ),
           child: Slidable(
@@ -264,9 +267,9 @@ class _IngredientListItemState extends ConsumerState<IngredientListItem> {
                 child: Center(
                   child: GestureDetector(
                     onTap: widget.onRemove,
-                    child: const Icon(
+                    child: Icon(
                       Icons.delete,
-                      color: Colors.white,
+                      color: colors.surface,
                       size: 24,
                     ),
                   ),
@@ -317,7 +320,7 @@ class _IngredientListItemState extends ConsumerState<IngredientListItem> {
                             border: InputBorder.none,
                             contentPadding: EdgeInsets.symmetric(vertical: 12),
                           ),
-                            style: TextStyle(fontWeight: FontWeight.w400, color: Colors.grey.shade600),
+                            style: TextStyle(fontWeight: FontWeight.w400, color: colors.textSecondary),
                             onChanged: (value) {
                               widget.onUpdate(widget.ingredient.copyWith(name: value));
                             },
@@ -345,7 +348,7 @@ class _IngredientListItemState extends ConsumerState<IngredientListItem> {
                     child: ReorderableDragStartListener(
                       key: _dragHandleKey,
                       index: widget.index,
-                      child: Icon(Icons.drag_handle, color: Colors.grey.shade400),
+                      child: Icon(Icons.drag_handle, color: colors.textTertiary),
                     ),
                   ),
                 ),
@@ -358,7 +361,7 @@ class _IngredientListItemState extends ConsumerState<IngredientListItem> {
 
     return Container(
       decoration: BoxDecoration(
-        color: Colors.red,
+        color: colors.error,
         borderRadius: _getBorderRadius(),
       ),
       child: Slidable(
@@ -371,9 +374,9 @@ class _IngredientListItemState extends ConsumerState<IngredientListItem> {
               child: Center(
                 child: GestureDetector(
                   onTap: widget.onRemove,
-                  child: const Icon(
+                  child: Icon(
                     Icons.delete,
-                    color: Colors.white,
+                    color: colors.surface,
                     size: 24,
                   ),
                 ),
@@ -475,7 +478,7 @@ class _IngredientListItemState extends ConsumerState<IngredientListItem> {
                 child: ReorderableDragStartListener(
                   key: _dragHandleKey,
                   index: widget.index,
-                  child: Icon(Icons.drag_handle, color: Colors.grey.shade400),
+                  child: Icon(Icons.drag_handle, color: colors.textTertiary),
                 ),
               ),
             ),

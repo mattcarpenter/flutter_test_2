@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../theme/typography.dart';
 import '../theme/spacing.dart';
+import '../theme/colors.dart';
 
 class SectionHeader extends StatelessWidget {
   final String title;
@@ -16,6 +17,8 @@ class SectionHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = AppColors.of(context);
+    
     return Padding(
       padding: EdgeInsets.only(
         top: topSpacing,
@@ -23,7 +26,9 @@ class SectionHeader extends StatelessWidget {
       ),
       child: Text(
         title,
-        style: AppTypography.h5,
+        style: AppTypography.h5.copyWith(
+          color: colors.textPrimary,
+        ),
       ),
     );
   }

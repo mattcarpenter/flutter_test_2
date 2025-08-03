@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../theme/colors.dart';
 
 /// Theme options for the button
 enum AppButtonTheme {
@@ -62,95 +63,91 @@ class _AppButtonState extends State<AppButton> {
   bool _isPressed = false;
   bool _isHovered = false;
 
-  // Color definitions based on Figma design system
-  static const Map<AppButtonTheme, Map<String, Color>> _colors = {
-    AppButtonTheme.primary: {
-      'default': Color(0xFF000000), // Pure black
-      'hover': Color(0xFF333333),   // Dark gray (20% lighter)
-      'pressed': Color(0xFF666666),  // Medium gray (40% lighter)
-    },
-    AppButtonTheme.secondary: {
-      'default': Color(0xFFFF595E),
-      'hover': Color(0xFFFF595E),
-      'pressed': Color(0xFFFF595E),
-    },
-  };
-
-  // Generate muted background color (very light version of the theme color)
-  Color get _mutedBackgroundColor {
-    final baseColor = _colors[widget.theme]!['default']!;
-    return Color.lerp(baseColor, Colors.white, 0.9)!;
-  }
-
-  // Generate muted text color (darker version of the theme color)
-  Color get _mutedTextColor {
-    final baseColor = _colors[widget.theme]!['default']!;
-    return Color.lerp(baseColor, Colors.black, 0.3)!;
+  Color _getThemeColor(AppColors colors, {bool hover = false, bool pressed = false}) {
+    if (widget.theme == AppButtonTheme.primary) {
+      if (pressed) return colors.buttonPrimaryPressed;
+      if (hover) return colors.buttonPrimaryHover;
+      return colors.buttonPrimary;
+    } else {
+      // Secondary uses primary color
+      if (pressed) return colors.primaryVariant;
+      if (hover) return AppColorSwatches.primary[600]!;
+      return colors.primary;
+    }
   }
 
   Color get _backgroundColor {
+    final colors = AppColors.of(context);
+    
     if (widget.style == AppButtonStyle.outline || widget.style == AppButtonStyle.mutedOutline) {
       return Colors.transparent;
     }
 
-    final colorMap = _colors[widget.theme]!;
+    final baseColor = _getThemeColor(colors, hover: _isHovered, pressed: _isPressed);
     
     if (widget.style == AppButtonStyle.muted) {
-      return _mutedBackgroundColor;
+      // Muted style uses very light version of the color
+      return widget.theme == AppButtonTheme.primary
+          ? colors.brightness == Brightness.light
+              ? AppColorSwatches.neutral[100]!
+              : AppColorSwatches.neutral[800]!
+          : colors.brightness == Brightness.light
+              ? AppColorSwatches.primary[50]!
+              : AppColorSwatches.primary[900]!.withOpacity(0.15);
     }
     
     if (widget.onPressed == null || widget.loading) {
-      return colorMap['default']!.withOpacity(0.5);
+      return baseColor.withOpacity(0.5);
     }
-    if (_isPressed) {
-      return colorMap['pressed']!;
-    }
-    if (_isHovered) {
-      return colorMap['hover']!;
-    }
-    return colorMap['default']!;
+    
+    return baseColor;
   }
 
   Color get _borderColor {
-    final colorMap = _colors[widget.theme]!;
+    final colors = AppColors.of(context);
+    final baseColor = _getThemeColor(colors, hover: _isHovered, pressed: _isPressed);
     
     if (widget.style == AppButtonStyle.mutedOutline) {
-      return _mutedTextColor;
+      // Muted outline uses subtle border
+      return widget.theme == AppButtonTheme.primary
+          ? colors.textSecondary
+          : colors.primary;
     }
     
     if (widget.onPressed == null || widget.loading) {
-      return colorMap['default']!.withOpacity(0.5);
+      return baseColor.withOpacity(0.5);
     }
-    if (_isPressed) {
-      return colorMap['pressed']!;
-    }
-    if (_isHovered) {
-      return colorMap['hover']!;
-    }
-    return colorMap['default']!;
+    
+    return baseColor;
   }
 
   Color get _textColor {
-    final colorMap = _colors[widget.theme]!;
+    final colors = AppColors.of(context);
     
     if (widget.style == AppButtonStyle.fill) {
-      return Colors.white;
+      // Filled buttons use contrasting text
+      if (widget.theme == AppButtonTheme.primary) {
+        return colors.onButtonPrimary;
+      } else {
+        return colors.onPrimary;
+      }
     }
     
     if (widget.style == AppButtonStyle.muted || widget.style == AppButtonStyle.mutedOutline) {
-      return _mutedTextColor;
+      // Muted styles use darker text
+      return widget.theme == AppButtonTheme.primary
+          ? colors.textPrimary
+          : colors.primary;
     }
 
+    // Outline styles use theme color for text
+    final baseColor = _getThemeColor(colors, hover: _isHovered, pressed: _isPressed);
+    
     if (widget.onPressed == null || widget.loading) {
-      return colorMap['default']!.withOpacity(0.5);
+      return baseColor.withOpacity(0.5);
     }
-    if (_isPressed) {
-      return colorMap['pressed']!;
-    }
-    if (_isHovered) {
-      return colorMap['hover']!;
-    }
-    return colorMap['default']!;
+    
+    return baseColor;
   }
 
   double get _height {

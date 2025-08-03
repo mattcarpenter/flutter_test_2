@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import '../theme/typography.dart';
+import '../theme/colors.dart';
 
 enum AppTextFieldVariant { filled, outline }
 
@@ -67,8 +68,8 @@ class _AppTextFieldState extends State<AppTextField>
   late AnimationController _focusAnimationController;
   late Animation<double> _animation;
   late Animation<double> _focusAnimation;
-  late Animation<Color?> _borderColorAnimation;
-  late Animation<Color?> _labelColorAnimation;
+  Animation<Color?>? _borderColorAnimation;
+  Animation<Color?>? _labelColorAnimation;
   bool _hasValue = false;
   bool _isFocused = false;
   String? _validationError;
@@ -80,15 +81,6 @@ class _AppTextFieldState extends State<AppTextField>
   // Font sizes now managed by AppTypography system
   static const Duration _animationDuration = Duration(milliseconds: 250);
   static const double _lineHeight = 24.0; // For multiline calculation
-
-  // Colors
-  static const Color _focusColor = Color(0xFFE91E63); // Pink/Magenta
-  static const Color _errorColor = Color(0xFFDC2626); // Red
-  static const Color _defaultBorderColor = Color(0xFFE5E7EB); // Gray 200
-  static const Color _labelColor = Color(0xFF5F6370); // Gray 500
-  static const Color _filledBackgroundColor = Color(0xFFF3F4F6); // Gray 100
-  static const Color _disabledColor = Color(0xFF9CA3AF); // Gray 400
-  static const Color _textColor = Color(0xFF1D2129);
 
   @override
   void initState() {
@@ -120,16 +112,7 @@ class _AppTextFieldState extends State<AppTextField>
       curve: Curves.easeInOut,
     );
 
-    // Animated colors
-    _borderColorAnimation = ColorTween(
-      begin: _defaultBorderColor,
-      end: _focusColor,
-    ).animate(_focusAnimation);
-
-    _labelColorAnimation = ColorTween(
-      begin: _labelColor,
-      end: _focusColor,
-    ).animate(_focusAnimation);
+    // Color animations will be initialized in didChangeDependencies
 
     // Set initial animation states
     if (_hasValue) {
@@ -138,6 +121,23 @@ class _AppTextFieldState extends State<AppTextField>
 
     _focusNode.addListener(_handleFocusChange);
     widget.controller.addListener(_handleTextChange);
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    
+    // Initialize color animations with theme-aware colors
+    final colors = AppColors.of(context);
+    _borderColorAnimation = ColorTween(
+      begin: colors.border,
+      end: colors.focus,
+    ).animate(_focusAnimation);
+
+    _labelColorAnimation = ColorTween(
+      begin: colors.inputLabel,
+      end: colors.focus,
+    ).animate(_focusAnimation);
   }
 
   @override
@@ -197,17 +197,17 @@ class _AppTextFieldState extends State<AppTextField>
     }
   }
 
-  Color get _borderColor {
-    if (widget.errorText != null || _validationError != null) return _errorColor;
-    if (_isFocused) return _focusColor;
-    if (!widget.enabled) return _disabledColor;
-    return _defaultBorderColor;
+  Color _getBorderColor(AppColors colors) {
+    if (widget.errorText != null || _validationError != null) return colors.error;
+    if (_isFocused) return colors.focus;
+    if (!widget.enabled) return colors.textDisabled;
+    return colors.border;
   }
 
-  Color get _labelColorAnimated {
-    if (widget.errorText != null || _validationError != null) return _errorColor;
-    if (_isFocused) return _focusColor;
-    return _labelColor;
+  Color _getLabelColor(AppColors colors) {
+    if (widget.errorText != null || _validationError != null) return colors.error;
+    if (_isFocused) return colors.focus;
+    return colors.inputLabel;
   }
 
   String? get _effectiveErrorText {
@@ -220,6 +220,7 @@ class _AppTextFieldState extends State<AppTextField>
 
   @override
   Widget build(BuildContext context) {
+    final colors = AppColors.of(context);
     final isFloating = _isFocused || _hasValue;
 
     return Column(
@@ -235,8 +236,8 @@ class _AppTextFieldState extends State<AppTextField>
                 animation: _focusAnimation,
                 builder: (context, child) {
                   final borderColor = _effectiveErrorText != null
-                      ? _errorColor
-                      : _borderColorAnimation.value ?? _defaultBorderColor;
+                      ? colors.error
+                      : _borderColorAnimation?.value ?? colors.border;
 
                   // Calculate border radius based on first/last
                   BorderRadius borderRadius;
@@ -295,9 +296,9 @@ class _AppTextFieldState extends State<AppTextField>
                     decoration: BoxDecoration(
                       color: widget.variant == AppTextFieldVariant.filled
                           ? (widget.enabled
-                              ? _filledBackgroundColor
-                              : _filledBackgroundColor.withOpacity(0.5))
-                          : Colors.white,
+                              ? colors.inputBackgroundFilled
+                              : colors.inputBackgroundFilled.withOpacity(0.5))
+                          : colors.surface,
                       borderRadius: borderRadius,
                       border: border,
                     ),
@@ -332,8 +333,8 @@ class _AppTextFieldState extends State<AppTextField>
 
                   // Animated label color
                   final labelColor = _effectiveErrorText != null
-                      ? _errorColor
-                      : _labelColorAnimation.value ?? _labelColor;
+                      ? colors.error
+                      : _labelColorAnimation?.value ?? colors.inputLabel;
 
                   return Transform(
                     transform: Matrix4.identity()
@@ -392,7 +393,7 @@ class _AppTextFieldState extends State<AppTextField>
                           textAlign: widget.textAlign,
                           maxLength: widget.maxLength,
                           style: AppTypography.fieldInput.copyWith(
-                            color: widget.enabled ? _textColor : _disabledColor,
+                            color: widget.enabled ? colors.textPrimary : colors.textDisabled,
                           ),
                           textAlignVertical: _isMultiline
                               ? TextAlignVertical.top
@@ -433,7 +434,7 @@ class _AppTextFieldState extends State<AppTextField>
               child: Text(
                 _effectiveErrorText ?? '',
                 style: AppTypography.fieldError.copyWith(
-                  color: _errorColor,
+                  color: colors.error,
                 ),
               ),
             ),

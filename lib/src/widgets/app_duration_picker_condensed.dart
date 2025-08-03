@@ -2,6 +2,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:wolt_modal_sheet/wolt_modal_sheet.dart';
+import '../theme/colors.dart';
 import 'app_duration_picker.dart' show DurationPickerMode;
 import 'app_text_field.dart' show AppTextFieldVariant;
 
@@ -118,7 +119,7 @@ class _AppDurationPickerCondensedState extends State<AppDurationPickerCondensed>
       context: context,
       pageListBuilder: (context) => [
         WoltModalSheetPage(
-          backgroundColor: Colors.white,
+          backgroundColor: AppColors.of(context).surface,
           hasSabGradient: false,
           leadingNavBarWidget: CupertinoButton(
             padding: const EdgeInsets.symmetric(horizontal: 16.0),
@@ -252,16 +253,17 @@ class _AppDurationPickerCondensedState extends State<AppDurationPickerCondensed>
   }
 
   Widget _buildChip(String text) {
+    final colors = AppColors.of(context);
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       decoration: BoxDecoration(
-        color: const Color(0xFFE3F2FD), // Light blue
+        color: colors.chipBackground,
         borderRadius: BorderRadius.circular(2),
       ),
       child: Text(
         text,
-        style: const TextStyle(
-          color: Color(0xFF1565C0), // Dark blue
+        style: TextStyle(
+          color: colors.chipText,
           fontSize: 12,
           fontWeight: FontWeight.w500,
         ),
@@ -288,7 +290,8 @@ class _AppDurationPickerCondensedState extends State<AppDurationPickerCondensed>
   }
 
   Border _getBorder() {
-    const borderColor = Color(0xFFE5E7EB);
+    final colors = AppColors.of(context);
+    final borderColor = colors.border;
     const borderWidth = 1.0;
 
     if (widget.variant == AppTextFieldVariant.outline) {
@@ -316,6 +319,7 @@ class _AppDurationPickerCondensedState extends State<AppDurationPickerCondensed>
 
   @override
   Widget build(BuildContext context) {
+    final colors = AppColors.of(context);
     final displayText = _displayController.text.isEmpty ? '--:--' : _displayController.text;
     
     // When grouped, render without container decoration
@@ -337,8 +341,8 @@ class _AppDurationPickerCondensedState extends State<AppDurationPickerCondensed>
                     widget.placeholder,
                     style: TextStyle(
                       color: widget.errorText != null 
-                          ? const Color(0xFFDC2626) 
-                          : const Color(0xFF6B7280),
+                          ? colors.error 
+                          : colors.inputLabel,
                       fontSize: 16,
                       fontWeight: FontWeight.w400,
                     ),
@@ -368,8 +372,8 @@ class _AppDurationPickerCondensedState extends State<AppDurationPickerCondensed>
               ),
               child: Text(
                 widget.errorText!,
-                style: const TextStyle(
-                  color: Color(0xFFDC2626),
+                style: TextStyle(
+                  color: colors.error,
                   fontSize: 12,
                   fontWeight: FontWeight.w400,
                 ),
@@ -389,7 +393,7 @@ class _AppDurationPickerCondensedState extends State<AppDurationPickerCondensed>
           child: Container(
             height: 48.0,
             decoration: BoxDecoration(
-              color: widget.enabled ? Colors.white : Colors.grey[50],
+              color: widget.enabled ? colors.surface : colors.surfaceVariant,
               borderRadius: _getBorderRadius(),
               border: _getBorder(),
             ),
@@ -402,8 +406,8 @@ class _AppDurationPickerCondensedState extends State<AppDurationPickerCondensed>
                   widget.placeholder,
                   style: TextStyle(
                     color: widget.errorText != null 
-                        ? const Color(0xFFDC2626) 
-                        : const Color(0xFF6B7280),
+                        ? colors.error 
+                        : colors.inputLabel,
                     fontSize: 16,
                     fontWeight: FontWeight.w400,
                   ),
@@ -433,8 +437,8 @@ class _AppDurationPickerCondensedState extends State<AppDurationPickerCondensed>
             ),
             child: Text(
               widget.errorText!,
-              style: const TextStyle(
-                color: Color(0xFFDC2626),
+              style: TextStyle(
+                color: colors.error,
                 fontSize: 12,
                 fontWeight: FontWeight.w400,
               ),

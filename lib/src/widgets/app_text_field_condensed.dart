@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import '../theme/typography.dart';
+import '../theme/colors.dart';
 import 'app_text_field.dart' show AppTextFieldVariant;
 
 class AppTextFieldCondensed extends StatefulWidget {
@@ -70,8 +71,8 @@ class _AppTextFieldCondensedState extends State<AppTextFieldCondensed>
   late AnimationController _focusAnimationController;
   late Animation<double> _animation;
   late Animation<double> _focusAnimation;
-  late Animation<Color?> _borderColorAnimation;
-  late Animation<Color?> _labelColorAnimation;
+  Animation<Color?>? _borderColorAnimation;
+  Animation<Color?>? _labelColorAnimation;
   bool _hasValue = false;
   bool _isFocused = false;
   String? _validationError;
@@ -83,16 +84,6 @@ class _AppTextFieldCondensedState extends State<AppTextFieldCondensed>
   static const double _horizontalPadding = 16.0;
   static const Duration _animationDuration = Duration(milliseconds: 250);
   static const double _lineHeight = 24.0;
-
-  // Colors
-  static const Color _focusColor = Color(0xFFE91E63);
-  static const Color _errorColor = Color(0xFFDC2626);
-  static const Color _defaultBorderColor = Color(0xFFE5E7EB);
-  static const Color _labelColor = Color(0xFF6B7280);
-  static const Color _filledBackgroundColor = Color(0xFFF3F4F6);
-  static const Color _disabledColor = Color(0xFF9CA3AF);
-  static const Color _textColor = Color(0xFF1D2129);
-  static const Color _placeholderColor = Color(0xFF9CA3AF);
 
   @override
   void initState() {
@@ -120,15 +111,7 @@ class _AppTextFieldCondensedState extends State<AppTextFieldCondensed>
       curve: Curves.easeInOut,
     );
 
-    _borderColorAnimation = ColorTween(
-      begin: _defaultBorderColor,
-      end: _focusColor,
-    ).animate(_focusAnimation);
-
-    _labelColorAnimation = ColorTween(
-      begin: _labelColor,
-      end: _focusColor,
-    ).animate(_focusAnimation);
+    // Color animations will be initialized in didChangeDependencies
 
     if (_hasValue && widget.multiline) {
       _animationController.value = 1.0;
@@ -136,6 +119,23 @@ class _AppTextFieldCondensedState extends State<AppTextFieldCondensed>
 
     _focusNode.addListener(_handleFocusChange);
     widget.controller.addListener(_handleTextChange);
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    
+    // Initialize color animations with theme-aware colors
+    final colors = AppColors.of(context);
+    _borderColorAnimation = ColorTween(
+      begin: colors.border,
+      end: colors.focus,
+    ).animate(_focusAnimation);
+
+    _labelColorAnimation = ColorTween(
+      begin: colors.inputLabel,
+      end: colors.focus,
+    ).animate(_focusAnimation);
   }
 
   @override
@@ -244,7 +244,7 @@ class _AppTextFieldCondensedState extends State<AppTextFieldCondensed>
     }
   }
 
-  Widget _buildSingleLineField() {
+  Widget _buildSingleLineField(AppColors colors) {
     // When grouped, render without container decoration
     if (widget.grouped) {
       return Column(
@@ -270,10 +270,10 @@ class _AppTextFieldCondensedState extends State<AppTextFieldCondensed>
                   widget.placeholder,
                   style: AppTypography.fieldLabel.copyWith(
                     color: _effectiveErrorText != null
-                        ? _errorColor
+                        ? colors.error
                         : widget.enabled
-                            ? _labelColor
-                            : _disabledColor,
+                            ? colors.inputLabel
+                            : colors.textDisabled,
                   ),
                 ),
                 
@@ -298,7 +298,7 @@ class _AppTextFieldCondensedState extends State<AppTextFieldCondensed>
                     textAlign: TextAlign.end,
                     maxLength: widget.maxLength,
                     style: AppTypography.fieldInput.copyWith(
-                      color: widget.enabled ? _textColor : _disabledColor,
+                      color: widget.enabled ? colors.textPrimary : colors.textDisabled,
                     ),
                     decoration: InputDecoration(
                       isDense: true,
@@ -307,7 +307,7 @@ class _AppTextFieldCondensedState extends State<AppTextFieldCondensed>
                       counterText: '',
                       hintText: _hasValue ? null : 'Enter value',
                       hintStyle: AppTypography.fieldInput.copyWith(
-                        color: _placeholderColor,
+                        color: colors.inputPlaceholder,
                       ),
                     ),
                   ),
@@ -337,7 +337,7 @@ class _AppTextFieldCondensedState extends State<AppTextFieldCondensed>
               child: Text(
                 _effectiveErrorText!,
                 style: AppTypography.fieldError.copyWith(
-                  color: _errorColor,
+                  color: colors.error,
                 ),
               ),
             ),
@@ -354,16 +354,16 @@ class _AppTextFieldCondensedState extends State<AppTextFieldCondensed>
           animation: _focusAnimation,
           builder: (context, child) {
             final borderColor = _effectiveErrorText != null
-                ? _errorColor
-                : _borderColorAnimation.value ?? _defaultBorderColor;
+                ? colors.error
+                : _borderColorAnimation?.value ?? colors.border;
 
             return Container(
               height: _condensedHeight,
               decoration: BoxDecoration(
                 color: widget.variant == AppTextFieldVariant.filled
                     ? (widget.enabled
-                        ? _filledBackgroundColor
-                        : _filledBackgroundColor.withValues(alpha: 0.5))
+                        ? colors.inputBackgroundFilled
+                        : colors.inputBackgroundFilled.withOpacity(0.5))
                     : Colors.white,
                 borderRadius: _getBorderRadius(),
                 border: _getBorder(borderColor),
@@ -385,10 +385,10 @@ class _AppTextFieldCondensedState extends State<AppTextFieldCondensed>
                       widget.placeholder,
                       style: AppTypography.fieldLabel.copyWith(
                         color: _effectiveErrorText != null
-                            ? _errorColor
+                            ? colors.error
                             : widget.enabled
-                                ? _labelColor
-                                : _disabledColor,
+                                ? colors.inputLabel
+                                : colors.textDisabled,
                       ),
                     ),
                     
@@ -413,7 +413,7 @@ class _AppTextFieldCondensedState extends State<AppTextFieldCondensed>
                         textAlign: TextAlign.end,
                         maxLength: widget.maxLength,
                         style: AppTypography.fieldInput.copyWith(
-                          color: widget.enabled ? _textColor : _disabledColor,
+                          color: widget.enabled ? colors.textPrimary : colors.textDisabled,
                         ),
                         decoration: InputDecoration(
                           isDense: true,
@@ -422,7 +422,7 @@ class _AppTextFieldCondensedState extends State<AppTextFieldCondensed>
                           counterText: '',
                           hintText: _hasValue ? null : 'Enter value',
                           hintStyle: AppTypography.fieldInput.copyWith(
-                            color: _placeholderColor,
+                            color: colors.inputPlaceholder,
                           ),
                         ),
                       ),
@@ -457,7 +457,7 @@ class _AppTextFieldCondensedState extends State<AppTextFieldCondensed>
               child: Text(
                 _effectiveErrorText ?? '',
                 style: AppTypography.fieldError.copyWith(
-                  color: _errorColor,
+                  color: colors.error,
                 ),
               ),
             ),
@@ -466,7 +466,7 @@ class _AppTextFieldCondensedState extends State<AppTextFieldCondensed>
     );
   }
 
-  Widget _buildMultilineField() {
+  Widget _buildMultilineField(AppColors colors) {
     final isFloating = _isFocused || _hasValue;
 
     // When grouped, render without container decoration
@@ -495,8 +495,8 @@ class _AppTextFieldCondensedState extends State<AppTextFieldCondensed>
                     final opacity = 0.7 + (progress * 0.3);
 
                     final labelColor = _effectiveErrorText != null
-                        ? _errorColor
-                        : _labelColor;
+                        ? colors.error
+                        : colors.inputLabel;
 
                     return Transform(
                       transform: Matrix4.identity()
@@ -552,7 +552,7 @@ class _AppTextFieldCondensedState extends State<AppTextFieldCondensed>
                           textAlign: widget.textAlign,
                           maxLength: widget.maxLength,
                           style: AppTypography.fieldInput.copyWith(
-                            color: widget.enabled ? _textColor : _disabledColor,
+                            color: widget.enabled ? colors.textPrimary : colors.textDisabled,
                           ),
                           textAlignVertical: TextAlignVertical.top,
                           decoration: InputDecoration(
@@ -588,7 +588,7 @@ class _AppTextFieldCondensedState extends State<AppTextFieldCondensed>
               child: Text(
                 _effectiveErrorText!,
                 style: AppTypography.fieldError.copyWith(
-                  color: _errorColor,
+                  color: colors.error,
                 ),
               ),
             ),
@@ -610,8 +610,8 @@ class _AppTextFieldCondensedState extends State<AppTextFieldCondensed>
                 animation: _focusAnimation,
                 builder: (context, child) {
                   final borderColor = _effectiveErrorText != null
-                      ? _errorColor
-                      : _borderColorAnimation.value ?? _defaultBorderColor;
+                      ? colors.error
+                      : _borderColorAnimation?.value ?? colors.border;
 
                   return Container(
                     constraints: BoxConstraints(
@@ -620,8 +620,8 @@ class _AppTextFieldCondensedState extends State<AppTextFieldCondensed>
                     decoration: BoxDecoration(
                       color: widget.variant == AppTextFieldVariant.filled
                           ? (widget.enabled
-                              ? _filledBackgroundColor
-                              : _filledBackgroundColor.withValues(alpha: 0.5))
+                              ? colors.inputBackgroundFilled
+                              : colors.inputBackgroundFilled.withOpacity(0.5))
                           : Colors.white,
                       borderRadius: _getBorderRadius(),
                       border: _getBorder(borderColor),
@@ -643,8 +643,8 @@ class _AppTextFieldCondensedState extends State<AppTextFieldCondensed>
                   final opacity = 0.7 + (progress * 0.3);
 
                   final labelColor = _effectiveErrorText != null
-                      ? _errorColor
-                      : _labelColorAnimation.value ?? _labelColor;
+                      ? colors.error
+                      : _labelColorAnimation?.value ?? colors.inputLabel;
 
                   return Transform(
                     transform: Matrix4.identity()
@@ -700,7 +700,7 @@ class _AppTextFieldCondensedState extends State<AppTextFieldCondensed>
                         textAlign: widget.textAlign,
                         maxLength: widget.maxLength,
                         style: AppTypography.fieldInput.copyWith(
-                          color: widget.enabled ? _textColor : _disabledColor,
+                          color: widget.enabled ? colors.textPrimary : colors.textDisabled,
                         ),
                         textAlignVertical: TextAlignVertical.top,
                         decoration: InputDecoration(
@@ -739,7 +739,7 @@ class _AppTextFieldCondensedState extends State<AppTextFieldCondensed>
               child: Text(
                 _effectiveErrorText ?? '',
                 style: AppTypography.fieldError.copyWith(
-                  color: _errorColor,
+                  color: colors.error,
                 ),
               ),
             ),
@@ -750,10 +750,11 @@ class _AppTextFieldCondensedState extends State<AppTextFieldCondensed>
 
   @override
   Widget build(BuildContext context) {
+    final colors = AppColors.of(context);
     if (widget.multiline) {
-      return _buildMultilineField();
+      return _buildMultilineField(colors);
     } else {
-      return _buildSingleLineField();
+      return _buildSingleLineField(colors);
     }
   }
 }
