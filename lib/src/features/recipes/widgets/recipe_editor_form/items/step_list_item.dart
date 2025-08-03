@@ -192,12 +192,12 @@ class _StepListItemState extends State<StepListItem> {
   }
 
   void _forceFocus(int attempt) {
-    if (attempt >= 10 || !mounted) return;
+    if (attempt >= 10 || !mounted || !widget.autoFocus) return;
 
     if (!_focusNode.hasFocus) {
       _focusNode.requestFocus();
 
-      // Try again after delay
+      // Try again after delay, but only if autoFocus is still true
       Future.delayed(Duration(milliseconds: 50 + (attempt * 25)), () {
         _forceFocus(attempt + 1);
       });
