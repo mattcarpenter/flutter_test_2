@@ -194,9 +194,7 @@ class RecipeEditorFormState extends ConsumerState<RecipeEditorForm> {
       primaryAmount1Type: isSection ? null : 'weight',
     );
 
-    // Clear focus from any currently focused widget
-    FocusScope.of(context).unfocus();
-
+    // Don't unfocus - let Flutter handle the focus transition smoothly
     setState(() {
       _ingredients.add(newIngredient);
       _autoFocusIngredientId = newIngredient.id;
@@ -233,9 +231,7 @@ class RecipeEditorFormState extends ConsumerState<RecipeEditorForm> {
       type: isSection ? 'section' : 'step',
       text: isSection ? 'New Section' : '',
     );
-    // Clear focus from any currently focused widget
-    FocusScope.of(context).unfocus();
-
+    // Don't unfocus - let Flutter handle the focus transition smoothly
     setState(() {
       _steps.add(newStep);
       _autoFocusStepId = newStep.id;
