@@ -326,7 +326,7 @@ class RecipeEditorFormState extends ConsumerState<RecipeEditorForm> {
             Transform.translate(
               offset: const Offset(-16, 0), // Shift left to compensate for padding
               child: SizedBox(
-                width: MediaQuery.of(context).size.width, // Full screen width
+                width: MediaQuery.sizeOf(context).width, // More efficient - only rebuilds on size changes
                 child: ImagePickerSection(
                   images: _recipe.images ?? [],
                   onImagesUpdated: (newImages) {
