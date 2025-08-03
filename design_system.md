@@ -73,6 +73,18 @@ colors.chipBackground  // Chip/tag backgrounds
 final colors = AppColors.of(context);
 Text('Hello', style: TextStyle(color: colors.textPrimary))
 
+// Use appropriate surface levels
+Container(
+  color: colors.surface,        // For input fields, cards
+  child: Text('Input field'),
+)
+
+// Modal backgrounds
+WoltModalSheetPage(
+  backgroundColor: colors.background,  // Same as page background
+  child: content,
+)
+
 // Use swatches for custom components
 Container(color: AppColorSwatches.primary[100])
 ```
@@ -84,7 +96,34 @@ Text('Hello', style: TextStyle(color: Colors.black))
 
 // Use Colors.grey instead of neutral swatch
 Container(color: Colors.grey[200])
+
+// Mix color systems (e.g., Cupertino + custom)
+backgroundColor: CupertinoTheme.of(context).scaffoldBackgroundColor // ❌
 ```
+
+### Surface Hierarchy & Color Philosophy
+
+Our color system follows a clear surface hierarchy to create visual depth and organization:
+
+#### Surface Levels
+1. **Background** (`colors.background`) - Main application background
+   - Used for: Page backgrounds, modal backgrounds
+   - Philosophy: Modals use the same background as pages since overlay darkening provides hierarchy
+   
+2. **Surface** (`colors.surface`) - Elevated elements that sit above the background
+   - Used for: Input fields, cards, elevated containers, floating buttons
+   - Philosophy: Creates clear definition and interaction areas
+   
+3. **Surface Variant** (`colors.surfaceVariant`) - Secondary surfaces
+   - Used for: Disabled states, subtle background variations, section headers
+
+#### Color Relationships
+- **Modal backgrounds**: Use `colors.background` (same as page) - overlay provides hierarchy
+- **Input fields**: Use `colors.surface` - contrast against background for clear interaction
+- **Cards/containers**: Use `colors.surface` - consistent elevation treatment
+- **Disabled elements**: Use `colors.surfaceVariant` - visually de-emphasized
+
+This approach ensures visual consistency and clear information hierarchy across all components.
 
 ### Dark Mode Support
 
@@ -92,6 +131,7 @@ Colors automatically adapt based on `Theme.of(context).brightness`:
 - Light mode uses darker shades for text, lighter shades for backgrounds
 - Dark mode uses lighter shades for text, darker shades for backgrounds
 - Focus and accent colors remain consistent across modes
+- Surface hierarchy maintains consistent relationships in both modes
 
 ## Typography System
 

@@ -5,6 +5,7 @@ import 'package:wolt_modal_sheet/wolt_modal_sheet.dart';
 import '../../../../database/database.dart';
 import '../widgets/recipe_editor_form/recipe_editor_form.dart';
 import '../../../widgets/wolt/text/modal_sheet_title.dart';
+import '../../../theme/colors.dart';
 
 void showRecipeEditorModal(
     BuildContext context, {
@@ -37,16 +38,13 @@ class RecipeEditorModalPage {
     required String pageTitle,
     String? folderId,
   }) {
-    final isDarkMode = CupertinoTheme.of(context).brightness == Brightness.dark;
-    final backgroundColor = isDarkMode
-        ? CupertinoTheme.of(context).barBackgroundColor
-        : CupertinoTheme.of(context).scaffoldBackgroundColor;
+    final colors = AppColors.of(context);
 
     // GlobalKey to access the RecipeEditorForm's state.
     final formKey = GlobalKey<RecipeEditorFormState>();
 
     return WoltModalSheetPage(
-      backgroundColor: backgroundColor,
+      backgroundColor: colors.background,
       // Leading (left) nav bar widget: Cancel button with horizontal padding.
       leadingNavBarWidget: CupertinoButton(
         padding: const EdgeInsets.symmetric(horizontal: 16.0),
