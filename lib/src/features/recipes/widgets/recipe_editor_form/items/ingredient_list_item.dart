@@ -76,27 +76,11 @@ class _IngredientListItemState extends ConsumerState<IngredientListItem> {
     // During drag operations, check if this is the last visual item
     if (widget.visualIndex != null) {
       final visualArrayLength = widget.allIngredients.length - 1;
-      if (effectiveIndex == visualArrayLength - 1) return true;
+      return effectiveIndex == visualArrayLength - 1;
     } else {
       // Normal (non-drag) logic - check if this is the last item
-      if (effectiveIndex == widget.allIngredients.length - 1) return true;
+      return effectiveIndex == widget.allIngredients.length - 1;
     }
-
-    // Look forwards to find the first non-section item
-    final maxIndex = widget.visualIndex != null
-        ? widget.allIngredients.length - 1  // During drag, array is conceptually shorter
-        : widget.allIngredients.length;
-
-    for (int i = effectiveIndex + 1; i < maxIndex; i++) {
-      if (i >= widget.allIngredients.length) continue;
-      final nextItem = widget.allIngredients[i];
-      if (nextItem.type != 'section') {
-        return false; // Found a non-section item, so we're not last in group
-      }
-    }
-
-    // Only sections found after this item, so this is last in group
-    return true;
   }
 
   // Border radius calculation for grouping

@@ -70,27 +70,11 @@ class _StepListItemState extends State<StepListItem> {
     // During drag operations, check if this is the last visual item
     if (widget.visualIndex != null) {
       final visualArrayLength = widget.allSteps.length - 1;
-      if (effectiveIndex == visualArrayLength - 1) return true;
+      return effectiveIndex == visualArrayLength - 1;
     } else {
       // Normal (non-drag) logic - check if this is the last item
-      if (effectiveIndex == widget.allSteps.length - 1) return true;
+      return effectiveIndex == widget.allSteps.length - 1;
     }
-
-    // Look forwards to find the first non-section item
-    final maxIndex = widget.visualIndex != null
-        ? widget.allSteps.length - 1  // During drag, array is conceptually shorter
-        : widget.allSteps.length;
-
-    for (int i = effectiveIndex + 1; i < maxIndex; i++) {
-      if (i >= widget.allSteps.length) continue;
-      final nextItem = widget.allSteps[i];
-      if (nextItem.type != 'section') {
-        return false; // Found a non-section item, so we're not last in group
-      }
-    }
-
-    // Only sections found after this item, so this is last in group
-    return true;
   }
 
   // Border radius calculation for grouping
