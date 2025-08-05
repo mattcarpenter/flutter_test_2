@@ -350,7 +350,9 @@ class _IngredientListItemState extends ConsumerState<IngredientListItem> with Si
                               // Only add next ingredient if this is the last ingredient
                               final isLastIngredient = widget.index == widget.allIngredients.length - 1;
                               if (isLastIngredient) {
-                                widget.onAddNext();
+                                // Prevent focus from moving to steps - keep it here temporarily
+                                _focusNode.requestFocus();
+                                widget.onAddNext(); // Add new ingredient (which will get focus)
                               }
                             },
                         ),
@@ -473,7 +475,9 @@ class _IngredientListItemState extends ConsumerState<IngredientListItem> with Si
                           // Only add next ingredient if this is the last ingredient
                           final isLastIngredient = widget.index == widget.allIngredients.length - 1;
                           if (isLastIngredient) {
-                            widget.onAddNext();
+                            // Prevent focus from moving to steps - keep it here temporarily
+                            _focusNode.requestFocus();
+                            widget.onAddNext(); // Add new ingredient (which will get focus)
                           }
                         },
                     ),

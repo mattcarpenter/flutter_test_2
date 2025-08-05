@@ -406,7 +406,9 @@ class _StepListItemState extends State<StepListItem> with SingleTickerProviderSt
                           // Only add next step if this is the last step
                           final isLastStep = widget.index == widget.allSteps.length - 1;
                           if (isLastStep) {
-                            widget.onAddNext();
+                            // Prevent unwanted focus traversal - keep focus here temporarily
+                            _focusNode.requestFocus();
+                            widget.onAddNext(); // Add new step (which will get focus)
                           }
                         },
                       ),
