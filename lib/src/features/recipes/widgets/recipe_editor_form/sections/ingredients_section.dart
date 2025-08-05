@@ -77,6 +77,7 @@ class _IngredientsSectionState extends State<IngredientsSection> {
   }
 
 
+
   @override
   Widget build(BuildContext context) {
     return Column(
@@ -99,7 +100,6 @@ class _IngredientsSectionState extends State<IngredientsSection> {
             onReorder: widget.onReorderIngredients,
             itemBuilder: (context, index) {
               final ingredient = widget.ingredients[index];
-
 
               return Padding(
                 padding: EdgeInsets.zero,

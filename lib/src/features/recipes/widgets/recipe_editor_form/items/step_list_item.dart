@@ -40,9 +40,12 @@ class StepListItem extends StatefulWidget {
   _StepListItemState createState() => _StepListItemState();
 }
 
-class _StepListItemState extends State<StepListItem> {
+class _StepListItemState extends State<StepListItem> with SingleTickerProviderStateMixin {
   late TextEditingController _textController;
   late FocusNode _focusNode;
+  late AnimationController _animationController;
+  late Animation<double> _heightAnimation;
+  late Animation<double> _opacityAnimation;
 
   bool get isSection => widget.step.type == 'section';
 
@@ -133,6 +136,21 @@ class _StepListItemState extends State<StepListItem> {
   @override
   void initState() {
     super.initState();
+    
+    // Initialize animation controller
+    _animationController = AnimationController(
+      duration: const Duration(milliseconds: 500),
+      vsync: this,
+    );
+    
+    _heightAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
+      CurvedAnimation(parent: _animationController, curve: Curves.easeInOut)
+    );
+    
+    _opacityAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
+      CurvedAnimation(parent: _animationController, curve: Curves.easeInOut)
+    );
+    
     _textController = TextEditingController(text: widget.step.text);
     _focusNode = FocusNode();
     _focusNode.addListener(() {
@@ -140,13 +158,20 @@ class _StepListItemState extends State<StepListItem> {
       setState(() {});
     });
 
+    // Handle new vs existing items
     if (widget.autoFocus) {
-      // Simple focus request - let Flutter handle it
+      // New item - start collapsed and animate in
+      _animationController.forward();
+      
+      // Focus immediately while animating for fluid feel
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (mounted && !_focusNode.hasFocus) {
           _focusNode.requestFocus();
         }
       });
+    } else {
+      // Existing item - start fully expanded
+      _animationController.value = 1.0;
     }
   }
 
@@ -170,6 +195,7 @@ class _StepListItemState extends State<StepListItem> {
 
   @override
   void dispose() {
+    _animationController.dispose();
     _textController.dispose();
     _focusNode.dispose();
     super.dispose();
@@ -186,6 +212,25 @@ class _StepListItemState extends State<StepListItem> {
     final backgroundColor = colors.surface;
     final backgroundColorSection = colors.surfaceVariant;
 
+    return AnimatedBuilder(
+      animation: _animationController,
+      builder: (context, child) {
+        return ClipRect(
+          child: Align(
+            alignment: Alignment.topCenter,
+            heightFactor: _heightAnimation.value,
+            child: Opacity(
+              opacity: _opacityAnimation.value,
+              child: child,
+            ),
+          ),
+        );
+      },
+      child: _buildContent(colors, backgroundColor, backgroundColorSection),
+    );
+  }
+
+  Widget _buildContent(AppColors colors, Color backgroundColor, Color backgroundColorSection) {
     if (isSection) {
       return Container(
         decoration: BoxDecoration(

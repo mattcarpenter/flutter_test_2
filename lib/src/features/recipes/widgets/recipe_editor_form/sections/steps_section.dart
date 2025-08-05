@@ -76,6 +76,7 @@ class _StepsSectionState extends State<StepsSection> {
     return index - 1;
   }
 
+
   @override
   Widget build(BuildContext context) {
     return Column(

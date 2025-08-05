@@ -46,9 +46,12 @@ class IngredientListItem extends ConsumerStatefulWidget {
   ConsumerState<IngredientListItem> createState() => _IngredientListItemState();
 }
 
-class _IngredientListItemState extends ConsumerState<IngredientListItem> {
+class _IngredientListItemState extends ConsumerState<IngredientListItem> with SingleTickerProviderStateMixin {
   late IngredientTextEditingController _ingredientController;
   late FocusNode _focusNode;
+  late AnimationController _animationController;
+  late Animation<double> _heightAnimation;
+  late Animation<double> _opacityAnimation;
 
   bool get isSection => widget.ingredient.type == 'section';
 
@@ -139,6 +142,21 @@ class _IngredientListItemState extends ConsumerState<IngredientListItem> {
   @override
   void initState() {
     super.initState();
+    
+    // Initialize animation controller
+    _animationController = AnimationController(
+      duration: const Duration(milliseconds: 500),
+      vsync: this,
+    );
+    
+    _heightAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
+      CurvedAnimation(parent: _animationController, curve: Curves.easeInOut)
+    );
+    
+    _opacityAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
+      CurvedAnimation(parent: _animationController, curve: Curves.easeInOut)
+    );
+    
     _ingredientController = IngredientTextEditingController(
       parser: IngredientParserService(),
       text: widget.ingredient.name,
@@ -149,13 +167,20 @@ class _IngredientListItemState extends ConsumerState<IngredientListItem> {
       setState(() {}); // update background color
     });
 
+    // Handle new vs existing items
     if (widget.autoFocus) {
-      // Simple focus request - let Flutter handle it
+      // New item - start collapsed and animate in
+      _animationController.forward();
+      
+      // Focus immediately while animating for fluid feel
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (mounted && !_focusNode.hasFocus) {
           _focusNode.requestFocus();
         }
       });
+    } else {
+      // Existing item - start fully expanded
+      _animationController.value = 1.0;
     }
   }
 
@@ -179,6 +204,7 @@ class _IngredientListItemState extends ConsumerState<IngredientListItem> {
 
   @override
   void dispose() {
+    _animationController.dispose();
     _ingredientController.dispose();
     _focusNode.dispose();
     super.dispose();
@@ -227,6 +253,25 @@ class _IngredientListItemState extends ConsumerState<IngredientListItem> {
     final backgroundColor = colors.surface;
     final backgroundColorSection = colors.surfaceVariant;
 
+    return AnimatedBuilder(
+      animation: _animationController,
+      builder: (context, child) {
+        return ClipRect(
+          child: Align(
+            alignment: Alignment.topCenter,
+            heightFactor: _heightAnimation.value,
+            child: Opacity(
+              opacity: _opacityAnimation.value,
+              child: child,
+            ),
+          ),
+        );
+      },
+      child: _buildContent(colors, backgroundColor, backgroundColorSection),
+    );
+  }
+
+  Widget _buildContent(AppColors colors, Color backgroundColor, Color backgroundColorSection) {
     if (isSection) {
       return Container(
         decoration: BoxDecoration(
