@@ -392,7 +392,9 @@ class _StepListItemState extends State<StepListItem> with SingleTickerProviderSt
                         autofocus: widget.autoFocus,
                         focusNode: _focusNode,
                         controller: _textController,
-                        scrollPadding: const EdgeInsets.only(bottom: 200.0), // Keep context visible above
+                        scrollPadding: widget.autoFocus 
+                            ? EdgeInsets.zero // No scrolling for new items to prevent page jump
+                            : const EdgeInsets.only(bottom: 200.0), // Keep context visible above
                         decoration: const InputDecoration(
                           hintText: 'Describe this step',
                           border: InputBorder.none,
