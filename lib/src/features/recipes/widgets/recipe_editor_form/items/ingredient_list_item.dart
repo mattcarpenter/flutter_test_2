@@ -166,9 +166,11 @@ class _IngredientListItemState extends ConsumerState<IngredientListItem> {
     });
 
     if (widget.autoFocus) {
-      // Force focus with retry mechanism
+      // Simple focus request - let Flutter handle it
       WidgetsBinding.instance.addPostFrameCallback((_) {
-        _forceFocus(0);
+        if (mounted && !_focusNode.hasFocus) {
+          _focusNode.requestFocus();
+        }
       });
     }
   }
@@ -184,7 +186,9 @@ class _IngredientListItemState extends ConsumerState<IngredientListItem> {
     // Handle autofocus change
     if (!oldWidget.autoFocus && widget.autoFocus) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
-        _forceFocus(0);
+        if (mounted && !_focusNode.hasFocus) {
+          _focusNode.requestFocus();
+        }
       });
     }
   }
@@ -200,18 +204,6 @@ class _IngredientListItemState extends ConsumerState<IngredientListItem> {
     return isLocationOutsideKey(location, _dragHandleKey);
   }
 
-  void _forceFocus(int attempt) {
-    if (attempt >= 10 || !mounted || !widget.autoFocus) return;
-
-    if (!_focusNode.hasFocus) {
-      _focusNode.requestFocus();
-
-      // Try again after delay, but only if autoFocus is still true
-      Future.delayed(Duration(milliseconds: 50 + (attempt * 25)), () {
-        _forceFocus(attempt + 1);
-      });
-    }
-  }
 
   void _showRecipeSelector(BuildContext context) {
     WoltModalSheet.show(
