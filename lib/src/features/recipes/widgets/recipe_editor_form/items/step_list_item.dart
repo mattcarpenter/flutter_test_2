@@ -166,11 +166,11 @@ class _StepListItemState extends State<StepListItem> with SingleTickerProviderSt
     if (widget.autoFocus) {
       // New item - start collapsed and animate in
       _animationController.forward();
-      
+
       // Focus immediately while animating for fluid feel
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (mounted && !_focusNode.hasFocus) {
-          _focusNode.requestFocus();
+          _focusAndAnchor();
         }
       });
     } else {
@@ -191,7 +191,7 @@ class _StepListItemState extends State<StepListItem> with SingleTickerProviderSt
     if (!oldWidget.autoFocus && widget.autoFocus) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (mounted && !_focusNode.hasFocus) {
-          _focusNode.requestFocus();
+          _focusAndAnchor();
         }
       });
     }
@@ -208,6 +208,20 @@ class _StepListItemState extends State<StepListItem> with SingleTickerProviderSt
 
   bool _contextMenuIsAllowed(Offset location) {
     return isLocationOutsideKey(location, _dragHandleKey);
+  }
+
+  void _focusAndAnchor() {
+    final position = Scrollable.of(context)?.position;
+    final initialOffset = position?.pixels ?? 0.0;
+    _focusNode.requestFocus();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      final pos = Scrollable.of(context)?.position;
+      if (pos != null && pos.pixels != initialOffset) {
+        final target = initialOffset.clamp(0.0, pos.maxScrollExtent);
+        pos.jumpTo(target);
+      }
+    });
   }
 
   void _handleAnimation() {
@@ -326,6 +340,7 @@ class _StepListItemState extends State<StepListItem> with SingleTickerProviderSt
                               border: InputBorder.none,
                               contentPadding: EdgeInsets.symmetric(vertical: 12),
                             ),
+                            scrollPadding: EdgeInsets.zero,
                             style: TextStyle(fontWeight: FontWeight.w400, color: colors.textSecondary),
                             onChanged: (value) {
                               widget.onUpdate(widget.step.copyWith(text: value));
@@ -426,6 +441,7 @@ class _StepListItemState extends State<StepListItem> with SingleTickerProviderSt
                           border: InputBorder.none,
                           contentPadding: EdgeInsets.symmetric(vertical: 12),
                         ),
+                        scrollPadding: EdgeInsets.zero,
                         onChanged: (value) {
                           widget.onUpdate(widget.step.copyWith(text: value));
                         },

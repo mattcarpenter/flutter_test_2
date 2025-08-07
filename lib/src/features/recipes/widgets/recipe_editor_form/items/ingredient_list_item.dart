@@ -175,11 +175,10 @@ class _IngredientListItemState extends ConsumerState<IngredientListItem> with Si
     if (widget.autoFocus) {
       // New item - start collapsed and animate in
       _animationController.forward();
-      
       // Focus immediately while animating for fluid feel
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (mounted && !_focusNode.hasFocus) {
-          _focusNode.requestFocus();
+          _focusAndAnchor();
         }
       });
     } else {
@@ -200,7 +199,7 @@ class _IngredientListItemState extends ConsumerState<IngredientListItem> with Si
     if (!oldWidget.autoFocus && widget.autoFocus) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (mounted && !_focusNode.hasFocus) {
-          _focusNode.requestFocus();
+          _focusAndAnchor();
         }
       });
     }
@@ -217,6 +216,20 @@ class _IngredientListItemState extends ConsumerState<IngredientListItem> with Si
 
   bool _contextMenuIsAllowed(Offset location) {
     return isLocationOutsideKey(location, _dragHandleKey);
+  }
+
+  void _focusAndAnchor() {
+    final position = Scrollable.of(context)?.position;
+    final initialOffset = position?.pixels ?? 0.0;
+    _focusNode.requestFocus();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      final pos = Scrollable.of(context)?.position;
+      if (pos != null && pos.pixels != initialOffset) {
+        final target = initialOffset.clamp(0.0, pos.maxScrollExtent);
+        pos.jumpTo(target);
+      }
+    });
   }
 
   void _handleAnimation() {
@@ -370,6 +383,7 @@ class _IngredientListItemState extends ConsumerState<IngredientListItem> with Si
                             border: InputBorder.none,
                             contentPadding: EdgeInsets.symmetric(vertical: 12),
                           ),
+                          scrollPadding: EdgeInsets.zero,
                             style: TextStyle(fontWeight: FontWeight.w400, color: colors.textSecondary),
                             onChanged: (value) {
                               widget.onUpdate(widget.ingredient.copyWith(name: value));
@@ -495,6 +509,7 @@ class _IngredientListItemState extends ConsumerState<IngredientListItem> with Si
                         hintText: 'e.g. 1 cup flour',
                         border: InputBorder.none,
                       ),
+                      scrollPadding: EdgeInsets.zero,
                         onChanged: (value) {
                           widget.onUpdate(widget.ingredient.copyWith(name: value));
                         },
