@@ -36,9 +36,42 @@ class IngredientsSection extends StatefulWidget {
 class _IngredientsSectionState extends State<IngredientsSection> {
   bool _isDragging = false;
   int? _draggedIndex;
+  
+  // Memoized visual indices to avoid recalculation on every build
+  final Map<int, int?> _cachedVisualIndices = {};
+  
+  // Track which items actually need visual updates (performance optimization)
+  final Set<int> _visuallyAffectedItems = {};
 
   // Method to handle drag start
   void _onDragStart(int index) {
+    // Pre-calculate all visual indices once instead of on every build
+    _cachedVisualIndices.clear();
+    _visuallyAffectedItems.clear();
+    
+    for (int i = 0; i < widget.ingredients.length; i++) {
+      int? visualIndex;
+      
+      // The dragged item doesn't have a visual position (it's floating)
+      if (i == index) {
+        visualIndex = null;
+        _visuallyAffectedItems.add(i); // Dragged item changes
+      }
+      // Items before the dragged item stay in the same visual position  
+      else if (i < index) {
+        visualIndex = i;
+        // Only first item before drag might change border (if it becomes last in group)
+        if (i == index - 1) _visuallyAffectedItems.add(i);
+      }
+      // Items after the dragged item shift up by one visual position
+      else {
+        visualIndex = i - 1;
+        _visuallyAffectedItems.add(i); // All items after change position
+      }
+      
+      _cachedVisualIndices[i] = visualIndex;
+    }
+    
     setState(() {
       _isDragging = true;
       _draggedIndex = index;
@@ -55,25 +88,17 @@ class _IngredientsSectionState extends State<IngredientsSection> {
         setState(() {
           _isDragging = false;
           _draggedIndex = null;
+          _cachedVisualIndices.clear();
+          _visuallyAffectedItems.clear();
         });
       }
     });
   }
 
-  // Calculate visual index during drag operations
+  // Fast lookup of pre-calculated visual index (performance optimized)
   int? _getVisualIndex(int index) {
     if (!_isDragging || _draggedIndex == null) return null;
-
-    // The dragged item doesn't have a visual position (it's floating)
-    if (index == _draggedIndex) return null;
-
-    // Items before the dragged item stay in the same visual position
-    if (index < _draggedIndex!) {
-      return index;
-    }
-
-    // Items after the dragged item shift up by one visual position
-    return index - 1;
+    return _cachedVisualIndices[index];
   }
 
 
