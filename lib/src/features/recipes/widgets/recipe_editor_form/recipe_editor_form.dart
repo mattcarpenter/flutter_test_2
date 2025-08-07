@@ -60,7 +60,7 @@ class RecipeEditorFormState extends ConsumerState<RecipeEditorForm> {
   String? _autoFocusIngredientId;
   String? _autoFocusStepId;
 
-  // Scroll controller for better scroll-to-focus behavior
+  // Scroll controller for the main form
   final ScrollController _scrollController = ScrollController();
 
   @override
