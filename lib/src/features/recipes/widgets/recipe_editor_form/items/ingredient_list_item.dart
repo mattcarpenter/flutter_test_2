@@ -56,6 +56,8 @@ class _IngredientListItemState extends ConsumerState<IngredientListItem> with Si
   bool get isSection => widget.ingredient.type == 'section';
 
   final GlobalKey _dragHandleKey = GlobalKey();
+  final GlobalKey _sizeKey = GlobalKey();
+  double _previousHeight = 0.0;
 
   // Grouping detection methods
   bool get _isGrouped => widget.enableGrouping;
@@ -152,10 +154,12 @@ class _IngredientListItemState extends ConsumerState<IngredientListItem> with Si
     _heightAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
       CurvedAnimation(parent: _animationController, curve: Curves.easeInOut)
     );
-    
+
     _opacityAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
       CurvedAnimation(parent: _animationController, curve: Curves.easeInOut)
     );
+
+    _animationController.addListener(_handleAnimation);
     
     _ingredientController = IngredientTextEditingController(
       parser: IngredientParserService(),
@@ -204,6 +208,7 @@ class _IngredientListItemState extends ConsumerState<IngredientListItem> with Si
 
   @override
   void dispose() {
+    _animationController.removeListener(_handleAnimation);
     _animationController.dispose();
     _ingredientController.dispose();
     _focusNode.dispose();
@@ -212,6 +217,29 @@ class _IngredientListItemState extends ConsumerState<IngredientListItem> with Si
 
   bool _contextMenuIsAllowed(Offset location) {
     return isLocationOutsideKey(location, _dragHandleKey);
+  }
+
+  void _handleAnimation() {
+    if (!widget.autoFocus) return;
+    if (widget.index != widget.allIngredients.length - 1) return;
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      final renderBox = _sizeKey.currentContext?.findRenderObject() as RenderBox?;
+      if (renderBox == null) return;
+      final currentHeight = renderBox.size.height;
+      final delta = currentHeight - _previousHeight;
+      if (delta > 0) {
+        final position = Scrollable.of(context)?.position;
+        if (position != null) {
+          final newOffset = (position.pixels + delta).clamp(0.0, position.maxScrollExtent);
+          if (newOffset != position.pixels) {
+            position.jumpTo(newOffset);
+          }
+        }
+      }
+      _previousHeight = currentHeight;
+    });
   }
 
 
@@ -257,6 +285,7 @@ class _IngredientListItemState extends ConsumerState<IngredientListItem> with Si
       animation: _animationController,
       builder: (context, child) {
         return ClipRect(
+          key: _sizeKey,
           child: Align(
             alignment: Alignment.topCenter,
             heightFactor: _heightAnimation.value,
