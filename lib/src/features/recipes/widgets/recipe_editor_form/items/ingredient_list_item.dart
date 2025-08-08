@@ -56,8 +56,11 @@ class _IngredientListItemState extends ConsumerState<IngredientListItem> with Si
   bool get isSection => widget.ingredient.type == 'section';
 
   final GlobalKey _dragHandleKey = GlobalKey();
-  final GlobalKey _sizeKey = GlobalKey();
-  double _previousHeight = 0.0;
+
+  // Reserve space for a newly inserted row so underlying controls
+  // don't flash into view while the row animates its height.
+  static const double _placeholderHeight = 72.0;
+  bool _keepPlaceholder = false;
 
   // Grouping detection methods
   bool get _isGrouped => widget.enableGrouping;
@@ -159,7 +162,11 @@ class _IngredientListItemState extends ConsumerState<IngredientListItem> with Si
       CurvedAnimation(parent: _animationController, curve: Curves.easeInOut)
     );
 
-    _animationController.addListener(_handleAnimation);
+    _animationController.addStatusListener((status) {
+      if (status == AnimationStatus.completed) {
+        setState(() => _keepPlaceholder = false);
+      }
+    });
     
     _ingredientController = IngredientTextEditingController(
       parser: IngredientParserService(),
@@ -173,16 +180,14 @@ class _IngredientListItemState extends ConsumerState<IngredientListItem> with Si
 
     // Handle new vs existing items
     if (widget.autoFocus) {
-      // New item - start collapsed and animate in
+      _keepPlaceholder = true;
       _animationController.forward();
-      // Focus immediately while animating for fluid feel
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (mounted && !_focusNode.hasFocus) {
-          _focusAndAnchor();
+          _focusNode.requestFocus();
         }
       });
     } else {
-      // Existing item - start fully expanded
       _animationController.value = 1.0;
     }
   }
@@ -199,7 +204,7 @@ class _IngredientListItemState extends ConsumerState<IngredientListItem> with Si
     if (!oldWidget.autoFocus && widget.autoFocus) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (mounted && !_focusNode.hasFocus) {
-          _focusAndAnchor();
+          _focusNode.requestFocus();
         }
       });
     }
@@ -207,7 +212,6 @@ class _IngredientListItemState extends ConsumerState<IngredientListItem> with Si
 
   @override
   void dispose() {
-    _animationController.removeListener(_handleAnimation);
     _animationController.dispose();
     _ingredientController.dispose();
     _focusNode.dispose();
@@ -216,43 +220,6 @@ class _IngredientListItemState extends ConsumerState<IngredientListItem> with Si
 
   bool _contextMenuIsAllowed(Offset location) {
     return isLocationOutsideKey(location, _dragHandleKey);
-  }
-
-  void _focusAndAnchor() {
-    final position = Scrollable.of(context)?.position;
-    final initialOffset = position?.pixels ?? 0.0;
-    _focusNode.requestFocus();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (!mounted) return;
-      final pos = Scrollable.of(context)?.position;
-      if (pos != null && pos.pixels != initialOffset) {
-        final target = initialOffset.clamp(0.0, pos.maxScrollExtent);
-        pos.jumpTo(target);
-      }
-    });
-  }
-
-  void _handleAnimation() {
-    if (!widget.autoFocus) return;
-    if (widget.index != widget.allIngredients.length - 1) return;
-
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (!mounted) return;
-      final renderBox = _sizeKey.currentContext?.findRenderObject() as RenderBox?;
-      if (renderBox == null) return;
-      final currentHeight = renderBox.size.height;
-      final delta = currentHeight - _previousHeight;
-      if (delta > 0) {
-        final position = Scrollable.of(context)?.position;
-        if (position != null) {
-          final newOffset = (position.pixels + delta).clamp(0.0, position.maxScrollExtent);
-          if (newOffset != position.pixels) {
-            position.jumpTo(newOffset);
-          }
-        }
-      }
-      _previousHeight = currentHeight;
-    });
   }
 
 
@@ -297,8 +264,7 @@ class _IngredientListItemState extends ConsumerState<IngredientListItem> with Si
     return AnimatedBuilder(
       animation: _animationController,
       builder: (context, child) {
-        return ClipRect(
-          key: _sizeKey,
+        Widget animated = ClipRect(
           child: Align(
             alignment: Alignment.topCenter,
             heightFactor: _heightAnimation.value,
@@ -308,6 +274,10 @@ class _IngredientListItemState extends ConsumerState<IngredientListItem> with Si
             ),
           ),
         );
+        if (_keepPlaceholder) {
+          animated = SizedBox(height: _placeholderHeight, child: animated);
+        }
+        return animated;
       },
       child: _buildContent(colors, backgroundColor, backgroundColorSection),
     );

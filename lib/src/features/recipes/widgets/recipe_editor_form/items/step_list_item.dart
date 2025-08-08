@@ -50,8 +50,11 @@ class _StepListItemState extends State<StepListItem> with SingleTickerProviderSt
   bool get isSection => widget.step.type == 'section';
 
   final GlobalKey _dragHandleKey = GlobalKey();
-  final GlobalKey _sizeKey = GlobalKey();
-  double _previousHeight = 0.0;
+
+  // Reserve space for newly inserted rows during their entry animation
+  // so controls below don't briefly appear and shift away.
+  static const double _placeholderHeight = 72.0;
+  bool _keepPlaceholder = false;
 
   // Grouping detection methods
   bool get _isGrouped => widget.enableGrouping;
@@ -153,7 +156,11 @@ class _StepListItemState extends State<StepListItem> with SingleTickerProviderSt
       CurvedAnimation(parent: _animationController, curve: Curves.easeInOut)
     );
 
-    _animationController.addListener(_handleAnimation);
+    _animationController.addStatusListener((status) {
+      if (status == AnimationStatus.completed) {
+        setState(() => _keepPlaceholder = false);
+      }
+    });
     
     _textController = TextEditingController(text: widget.step.text);
     _focusNode = FocusNode();
@@ -164,17 +171,14 @@ class _StepListItemState extends State<StepListItem> with SingleTickerProviderSt
 
     // Handle new vs existing items
     if (widget.autoFocus) {
-      // New item - start collapsed and animate in
+      _keepPlaceholder = true;
       _animationController.forward();
-
-      // Focus immediately while animating for fluid feel
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (mounted && !_focusNode.hasFocus) {
-          _focusAndAnchor();
+          _focusNode.requestFocus();
         }
       });
     } else {
-      // Existing item - start fully expanded
       _animationController.value = 1.0;
     }
   }
@@ -191,7 +195,7 @@ class _StepListItemState extends State<StepListItem> with SingleTickerProviderSt
     if (!oldWidget.autoFocus && widget.autoFocus) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (mounted && !_focusNode.hasFocus) {
-          _focusAndAnchor();
+          _focusNode.requestFocus();
         }
       });
     }
@@ -199,7 +203,6 @@ class _StepListItemState extends State<StepListItem> with SingleTickerProviderSt
 
   @override
   void dispose() {
-    _animationController.removeListener(_handleAnimation);
     _animationController.dispose();
     _textController.dispose();
     _focusNode.dispose();
@@ -208,43 +211,6 @@ class _StepListItemState extends State<StepListItem> with SingleTickerProviderSt
 
   bool _contextMenuIsAllowed(Offset location) {
     return isLocationOutsideKey(location, _dragHandleKey);
-  }
-
-  void _focusAndAnchor() {
-    final position = Scrollable.of(context)?.position;
-    final initialOffset = position?.pixels ?? 0.0;
-    _focusNode.requestFocus();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (!mounted) return;
-      final pos = Scrollable.of(context)?.position;
-      if (pos != null && pos.pixels != initialOffset) {
-        final target = initialOffset.clamp(0.0, pos.maxScrollExtent);
-        pos.jumpTo(target);
-      }
-    });
-  }
-
-  void _handleAnimation() {
-    if (!widget.autoFocus) return;
-    if (widget.index != widget.allSteps.length - 1) return;
-
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (!mounted) return;
-      final renderBox = _sizeKey.currentContext?.findRenderObject() as RenderBox?;
-      if (renderBox == null) return;
-      final currentHeight = renderBox.size.height;
-      final delta = currentHeight - _previousHeight;
-      if (delta > 0) {
-        final position = Scrollable.of(context)?.position;
-        if (position != null) {
-          final newOffset = (position.pixels + delta).clamp(0.0, position.maxScrollExtent);
-          if (newOffset != position.pixels) {
-            position.jumpTo(newOffset);
-          }
-        }
-      }
-      _previousHeight = currentHeight;
-    });
   }
 
 
@@ -257,8 +223,7 @@ class _StepListItemState extends State<StepListItem> with SingleTickerProviderSt
     return AnimatedBuilder(
       animation: _animationController,
       builder: (context, child) {
-        return ClipRect(
-          key: _sizeKey,
+        Widget animated = ClipRect(
           child: Align(
             alignment: Alignment.topCenter,
             heightFactor: _heightAnimation.value,
@@ -268,6 +233,10 @@ class _StepListItemState extends State<StepListItem> with SingleTickerProviderSt
             ),
           ),
         );
+        if (_keepPlaceholder) {
+          animated = SizedBox(height: _placeholderHeight, child: animated);
+        }
+        return animated;
       },
       child: _buildContent(colors, backgroundColor, backgroundColorSection),
     );
