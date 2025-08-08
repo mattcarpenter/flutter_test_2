@@ -51,6 +51,11 @@ class _StepListItemState extends State<StepListItem> with SingleTickerProviderSt
 
   final GlobalKey _dragHandleKey = GlobalKey();
 
+  // Reserve space for newly inserted rows during their entry animation
+  // so controls below don't briefly appear and shift away.
+  static const double _placeholderHeight = 72.0;
+  bool _keepPlaceholder = false;
+
   // Grouping detection methods
   bool get _isGrouped => widget.enableGrouping;
 
@@ -146,10 +151,16 @@ class _StepListItemState extends State<StepListItem> with SingleTickerProviderSt
     _heightAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
       CurvedAnimation(parent: _animationController, curve: Curves.easeInOut)
     );
-    
+
     _opacityAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
       CurvedAnimation(parent: _animationController, curve: Curves.easeInOut)
     );
+
+    _animationController.addStatusListener((status) {
+      if (status == AnimationStatus.completed) {
+        setState(() => _keepPlaceholder = false);
+      }
+    });
     
     _textController = TextEditingController(text: widget.step.text);
     _focusNode = FocusNode();
@@ -160,17 +171,14 @@ class _StepListItemState extends State<StepListItem> with SingleTickerProviderSt
 
     // Handle new vs existing items
     if (widget.autoFocus) {
-      // New item - start collapsed and animate in
+      _keepPlaceholder = true;
       _animationController.forward();
-      
-      // Focus immediately while animating for fluid feel
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (mounted && !_focusNode.hasFocus) {
           _focusNode.requestFocus();
         }
       });
     } else {
-      // Existing item - start fully expanded
       _animationController.value = 1.0;
     }
   }
@@ -215,7 +223,7 @@ class _StepListItemState extends State<StepListItem> with SingleTickerProviderSt
     return AnimatedBuilder(
       animation: _animationController,
       builder: (context, child) {
-        return ClipRect(
+        Widget animated = ClipRect(
           child: Align(
             alignment: Alignment.topCenter,
             heightFactor: _heightAnimation.value,
@@ -225,6 +233,10 @@ class _StepListItemState extends State<StepListItem> with SingleTickerProviderSt
             ),
           ),
         );
+        if (_keepPlaceholder) {
+          animated = SizedBox(height: _placeholderHeight, child: animated);
+        }
+        return animated;
       },
       child: _buildContent(colors, backgroundColor, backgroundColorSection),
     );
@@ -297,6 +309,7 @@ class _StepListItemState extends State<StepListItem> with SingleTickerProviderSt
                               border: InputBorder.none,
                               contentPadding: EdgeInsets.symmetric(vertical: 12),
                             ),
+                            scrollPadding: EdgeInsets.zero,
                             style: TextStyle(fontWeight: FontWeight.w400, color: colors.textSecondary),
                             onChanged: (value) {
                               widget.onUpdate(widget.step.copyWith(text: value));
@@ -397,6 +410,7 @@ class _StepListItemState extends State<StepListItem> with SingleTickerProviderSt
                           border: InputBorder.none,
                           contentPadding: EdgeInsets.symmetric(vertical: 12),
                         ),
+                        scrollPadding: EdgeInsets.zero,
                         onChanged: (value) {
                           widget.onUpdate(widget.step.copyWith(text: value));
                         },
