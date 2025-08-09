@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:wolt_modal_sheet/wolt_modal_sheet.dart';
 import '../../../../providers/pantry_provider.dart';
+import '../../../../theme/colors.dart';
 
 /// Shows a bottom sheet for selecting category filters
 void showCategoryFilterSheet(
@@ -16,6 +17,7 @@ void showCategoryFilterSheet(
     pageListBuilder: (modalContext) {
       return [
         WoltModalSheetPage(
+          backgroundColor: AppColors.of(modalContext).background,
           hasTopBarLayer: true,
           isTopBarLayerAlwaysVisible: true,
           topBarTitle: const Text('Filter by Category'),

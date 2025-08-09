@@ -4,6 +4,7 @@ import 'package:wolt_modal_sheet/wolt_modal_sheet.dart';
 import '../../../../../database/database.dart';
 import '../../../../../database/models/pantry_items.dart';
 import '../../../../providers/pantry_provider.dart';
+import '../../../../theme/colors.dart';
 import '../../models/pantry_filter_sort.dart';
 
 /// Shows a bottom sheet with pantry filtering options
@@ -19,6 +20,7 @@ void showPantryFilterSheet(
     pageListBuilder: (modalContext) {
       return [
         WoltModalSheetPage(
+          backgroundColor: AppColors.of(modalContext).background,
           hasTopBarLayer: true,
           isTopBarLayerAlwaysVisible: true,
           topBarTitle: const Text('Filter Pantry Items'),

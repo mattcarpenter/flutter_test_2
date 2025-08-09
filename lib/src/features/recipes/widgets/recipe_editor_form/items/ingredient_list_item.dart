@@ -223,6 +223,7 @@ class _IngredientListItemState extends ConsumerState<IngredientListItem> with Si
       pageListBuilder: (modalContext) {
         return [
           WoltModalSheetPage(
+            backgroundColor: AppColors.of(modalContext).background,
             hasTopBarLayer: true,
             isTopBarLayerAlwaysVisible: true,
             topBarTitle: const Text('Link to Recipe'),

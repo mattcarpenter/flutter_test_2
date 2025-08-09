@@ -2,6 +2,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:wolt_modal_sheet/wolt_modal_sheet.dart';
 import '../../../providers/meal_plan_provider.dart';
+import '../../../theme/colors.dart';
 import '../../../widgets/wolt/text/modal_sheet_title.dart';
 
 void showAddNoteToMealPlanModal(BuildContext context, String date) {
@@ -24,13 +25,8 @@ class AddNoteToMealPlanModalPage {
     required BuildContext context,
     required String date,
   }) {
-    final isDarkMode = CupertinoTheme.of(context).brightness == Brightness.dark;
-    final backgroundColor = isDarkMode
-        ? CupertinoTheme.of(context).barBackgroundColor
-        : CupertinoTheme.of(context).scaffoldBackgroundColor;
-
     return WoltModalSheetPage(
-      backgroundColor: backgroundColor,
+      backgroundColor: AppColors.of(context).background,
       leadingNavBarWidget: CupertinoButton(
         padding: const EdgeInsets.symmetric(horizontal: 16.0),
         onPressed: () => Navigator.of(context).pop(),

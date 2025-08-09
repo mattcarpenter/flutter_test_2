@@ -4,6 +4,7 @@ import 'package:recipe_app/src/providers/recipe_provider.dart' as recipe_provide
 import 'package:recipe_app/src/providers/cook_provider.dart';
 import 'package:wolt_modal_sheet/wolt_modal_sheet.dart';
 import '../../../../../database/database.dart';
+import '../../../../theme/colors.dart';
 import 'cook_modal_search_results.dart';
 
 void showAddRecipeSearchModal(BuildContext context, {required String cookId}) {
@@ -14,6 +15,7 @@ void showAddRecipeSearchModal(BuildContext context, {required String cookId}) {
     pageListBuilder: (modalContext) {
       return [
         WoltModalSheetPage(
+          backgroundColor: AppColors.of(modalContext).background,
           hasTopBarLayer: true,
           isTopBarLayerAlwaysVisible: true,
           topBarTitle: const Text('Add Recipe to Cook'),

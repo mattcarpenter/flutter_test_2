@@ -4,6 +4,7 @@ import 'package:wolt_modal_sheet/wolt_modal_sheet.dart';
 import '../../../../database/database.dart';
 import '../../../providers/recipe_provider.dart' as recipe_provider;
 import '../../../providers/meal_plan_provider.dart';
+import '../../../theme/colors.dart';
 import '../../../widgets/wolt/text/modal_sheet_title.dart';
 import '../widgets/meal_plan_recipe_search_results.dart';
 
@@ -27,13 +28,8 @@ class AddRecipeToMealPlanModalPage {
     required BuildContext context,
     required String date,
   }) {
-    final isDarkMode = CupertinoTheme.of(context).brightness == Brightness.dark;
-    final backgroundColor = isDarkMode
-        ? CupertinoTheme.of(context).barBackgroundColor
-        : CupertinoTheme.of(context).scaffoldBackgroundColor;
-
     return WoltModalSheetPage(
-      backgroundColor: backgroundColor,
+      backgroundColor: AppColors.of(context).background,
       leadingNavBarWidget: CupertinoButton(
         padding: const EdgeInsets.symmetric(horizontal: 16.0),
         onPressed: () => Navigator.of(context).pop(),

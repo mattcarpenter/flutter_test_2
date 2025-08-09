@@ -5,6 +5,7 @@ import 'package:recipe_app/database/database.dart';
 import 'package:recipe_app/database/models/pantry_items.dart'; // For StockStatus enum
 import 'package:recipe_app/src/providers/pantry_provider.dart';
 import 'package:recipe_app/src/providers/recipe_provider.dart';
+import 'package:recipe_app/src/theme/colors.dart';
 
 /// Shows a bottom sheet with a list of pantry items that can be selected
 void showPantryItemSelectorBottomSheet({
@@ -19,6 +20,7 @@ void showPantryItemSelectorBottomSheet({
     pageListBuilder: (modalContext) {
       return [
         WoltModalSheetPage(
+          backgroundColor: AppColors.of(modalContext).background,
           hasTopBarLayer: true,
           isTopBarLayerAlwaysVisible: true,
           topBarTitle: const Text('Select Pantry Item'),

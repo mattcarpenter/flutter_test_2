@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:wolt_modal_sheet/wolt_modal_sheet.dart';
 import 'package:recipe_app/src/providers/cook_provider.dart';
+import '../../../../theme/colors.dart';
 import './cook_content.dart';
 
 void showCookModal(BuildContext context, {
@@ -21,6 +22,7 @@ void showCookModal(BuildContext context, {
     pageListBuilder: (modalContext) {
       return [
         WoltModalSheetPage(
+          backgroundColor: AppColors.of(modalContext).background,
           hasTopBarLayer: true,
           isTopBarLayerAlwaysVisible: true,
           leadingNavBarWidget: IconButton(

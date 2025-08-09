@@ -6,6 +6,7 @@ import 'package:wolt_modal_sheet/wolt_modal_sheet.dart';
 
 import '../../../models/recipe_folder.model.dart';
 import '../../../providers/recipe_folder_provider.dart';
+import '../../../theme/colors.dart';
 import '../../../widgets/wolt/button/wolt_elevated_button.dart';
 import '../../../widgets/wolt/button/wolt_modal_sheet_back_button.dart';
 import '../../../widgets/wolt/button/wolt_modal_sheet_close_button.dart';
@@ -49,11 +50,8 @@ class AddFolderModalPage {
     final TextEditingController _folderNameController = TextEditingController();
     final ValueNotifier<bool> submitted = ValueNotifier<bool>(false);
 
-    final isDarkMode = CupertinoTheme.of(context).brightness == Brightness.dark;
-    final Color backgroundColor = isDarkMode ? CupertinoTheme.of(context).barBackgroundColor : CupertinoTheme.of(context).scaffoldBackgroundColor;
-
     return WoltModalSheetPage(
-      backgroundColor: backgroundColor,
+      backgroundColor: AppColors.of(context).background,
       stickyActionBar: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
         child: Row(

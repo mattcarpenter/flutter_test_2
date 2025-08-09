@@ -2,6 +2,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:wolt_modal_sheet/wolt_modal_sheet.dart';
+import '../theme/colors.dart';
 import 'app_text_field.dart';
 
 enum DurationPickerMode {
@@ -134,16 +135,11 @@ class _DurationPickerModalPage {
     required DurationPickerMode mode,
     required ValueChanged<int> onUpdate,
   }) {
-    final isDarkMode = CupertinoTheme.of(context).brightness == Brightness.dark;
-    final backgroundColor = isDarkMode
-        ? CupertinoTheme.of(context).barBackgroundColor
-        : CupertinoTheme.of(context).scaffoldBackgroundColor;
-
     // Create a GlobalKey to access the content widget
     final contentKey = GlobalKey<_DurationPickerContentState>();
 
     return WoltModalSheetPage(
-      backgroundColor: backgroundColor,
+      backgroundColor: AppColors.of(context).background,
       leadingNavBarWidget: CupertinoButton(
         padding: const EdgeInsets.symmetric(horizontal: 16.0),
         onPressed: () => Navigator.of(context).pop(),

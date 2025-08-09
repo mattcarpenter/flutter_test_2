@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:wolt_modal_sheet/wolt_modal_sheet.dart';
 import '../../../../../database/models/pantry_items.dart';
+import '../../../../theme/colors.dart';
 import '../../models/pantry_filter_sort.dart';
 
 /// Shows a bottom sheet for selecting stock status filters
@@ -17,6 +18,7 @@ void showStockStatusFilterSheet(
     pageListBuilder: (modalContext) {
       return [
         WoltModalSheetPage(
+          backgroundColor: AppColors.of(modalContext).background,
           hasTopBarLayer: true,
           isTopBarLayerAlwaysVisible: true,
           topBarTitle: const Text('Filter by Stock Status'),

@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:wolt_modal_sheet/wolt_modal_sheet.dart';
 
 import '../../../../database/database.dart';
+import '../../../theme/colors.dart';
 import '../../../widgets/wolt/text/modal_sheet_title.dart';
 import '../widgets/pantry_item_form.dart';
 
@@ -33,16 +34,11 @@ class UpdatePantryItemModalPage {
     required PantryItemEntry pantryItem,
     required String pageTitle,
   }) {
-    final isDarkMode = CupertinoTheme.of(context).brightness == Brightness.dark;
-    final backgroundColor = isDarkMode
-        ? CupertinoTheme.of(context).barBackgroundColor
-        : CupertinoTheme.of(context).scaffoldBackgroundColor;
-
     // GlobalKey to access the PantryItemForm's state.
     final formKey = GlobalKey<PantryItemFormState>();
 
     return WoltModalSheetPage(
-      backgroundColor: backgroundColor,
+      backgroundColor: AppColors.of(context).background,
       // Leading (left) nav bar widget: Cancel button with horizontal padding.
       leadingNavBarWidget: CupertinoButton(
         padding: const EdgeInsets.symmetric(horizontal: 16.0),

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:wolt_modal_sheet/wolt_modal_sheet.dart';
+import '../../../../theme/colors.dart';
 import '../../models/recipe_filter_sort.dart';
 
 /// Shows a bottom sheet with recipe filtering options
@@ -17,6 +18,7 @@ void showRecipeFilterSheet(
     pageListBuilder: (modalContext) {
       return [
         WoltModalSheetPage(
+          backgroundColor: AppColors.of(modalContext).background,
           hasTopBarLayer: true,
           isTopBarLayerAlwaysVisible: true,
           topBarTitle: const Text('Filter Recipes'),
