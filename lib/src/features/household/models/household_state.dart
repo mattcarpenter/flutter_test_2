@@ -6,7 +6,7 @@ import 'household_invite.dart';
 part 'household_state.freezed.dart';
 
 @freezed
-class HouseholdState with _$HouseholdState {
+abstract class HouseholdState with _$HouseholdState {
   const factory HouseholdState({
     HouseholdEntry? currentHousehold,
     @Default([]) List<HouseholdMember> members,
@@ -22,7 +22,7 @@ class HouseholdState with _$HouseholdState {
 
   bool get hasHousehold => currentHousehold != null;
   bool get hasPendingInvites => incomingInvites.isNotEmpty;
-  
+
   // Helper to get current user's membership
   HouseholdMember? getCurrentUserMembership(String currentUserId) {
     try {
@@ -33,12 +33,12 @@ class HouseholdState with _$HouseholdState {
       return null;
     }
   }
-  
+
   bool isOwner(String currentUserId) {
     final membership = getCurrentUserMembership(currentUserId);
     return membership?.isOwner ?? false;
   }
-  
+
   bool canManageMembers(String currentUserId) {
     final membership = getCurrentUserMembership(currentUserId);
     return membership?.canManageMembers ?? false;

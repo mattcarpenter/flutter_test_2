@@ -2,56 +2,62 @@
 part of '../brick.g.dart';
 
 Future<SharedPermission> _$SharedPermissionFromSupabase(
-    Map<String, dynamic> data,
-    {required SupabaseProvider provider,
-    OfflineFirstWithSupabaseRepository? repository}) async {
+  Map<String, dynamic> data, {
+  required SupabaseProvider provider,
+  OfflineFirstWithSupabaseRepository? repository,
+}) async {
   return SharedPermission(
-      id: data['id'] as String?,
-      entityType: data['entity_type'] as String,
-      entityId: data['entity_id'] as String,
-      ownerId: data['owner_id'] as String,
-      targetUserId: data['target_user_id'] as String,
-      accessLevel: data['access_level'] as String);
+    id: data['id'] as String?,
+    entityType: data['entity_type'] as String,
+    entityId: data['entity_id'] as String,
+    ownerId: data['owner_id'] as String,
+    targetUserId: data['target_user_id'] as String,
+    accessLevel: data['access_level'] as String,
+  );
 }
 
 Future<Map<String, dynamic>> _$SharedPermissionToSupabase(
-    SharedPermission instance,
-    {required SupabaseProvider provider,
-    OfflineFirstWithSupabaseRepository? repository}) async {
+  SharedPermission instance, {
+  required SupabaseProvider provider,
+  OfflineFirstWithSupabaseRepository? repository,
+}) async {
   return {
     'id': instance.id,
     'entity_type': instance.entityType,
     'entity_id': instance.entityId,
     'owner_id': instance.ownerId,
     'target_user_id': instance.targetUserId,
-    'access_level': instance.accessLevel
+    'access_level': instance.accessLevel,
   };
 }
 
-Future<SharedPermission> _$SharedPermissionFromSqlite(Map<String, dynamic> data,
-    {required SqliteProvider provider,
-    OfflineFirstWithSupabaseRepository? repository}) async {
+Future<SharedPermission> _$SharedPermissionFromSqlite(
+  Map<String, dynamic> data, {
+  required SqliteProvider provider,
+  OfflineFirstWithSupabaseRepository? repository,
+}) async {
   return SharedPermission(
-      id: data['id'] as String,
-      entityType: data['entity_type'] as String,
-      entityId: data['entity_id'] as String,
-      ownerId: data['owner_id'] as String,
-      targetUserId: data['target_user_id'] as String,
-      accessLevel: data['access_level'] as String)
-    ..primaryKey = data['_brick_id'] as int;
+    id: data['id'] as String,
+    entityType: data['entity_type'] as String,
+    entityId: data['entity_id'] as String,
+    ownerId: data['owner_id'] as String,
+    targetUserId: data['target_user_id'] as String,
+    accessLevel: data['access_level'] as String,
+  )..primaryKey = data['_brick_id'] as int;
 }
 
 Future<Map<String, dynamic>> _$SharedPermissionToSqlite(
-    SharedPermission instance,
-    {required SqliteProvider provider,
-    OfflineFirstWithSupabaseRepository? repository}) async {
+  SharedPermission instance, {
+  required SqliteProvider provider,
+  OfflineFirstWithSupabaseRepository? repository,
+}) async {
   return {
     'id': instance.id,
     'entity_type': instance.entityType,
     'entity_id': instance.entityId,
     'owner_id': instance.ownerId,
     'target_user_id': instance.targetUserId,
-    'access_level': instance.accessLevel
+    'access_level': instance.accessLevel,
   };
 }
 
@@ -89,7 +95,7 @@ class SharedPermissionAdapter
     'accessLevel': const RuntimeSupabaseColumnDefinition(
       association: false,
       columnName: 'access_level',
-    )
+    ),
   };
   @override
   final ignoreDuplicates = false;
@@ -140,14 +146,18 @@ class SharedPermissionAdapter
       columnName: 'access_level',
       iterable: false,
       type: String,
-    )
+    ),
   };
   @override
   Future<int?> primaryKeyByUniqueColumns(
-      SharedPermission instance, DatabaseExecutor executor) async {
-    final results = await executor.rawQuery('''
+    SharedPermission instance,
+    DatabaseExecutor executor,
+  ) async {
+    final results = await executor.rawQuery(
+      '''
         SELECT * FROM `SharedPermission` WHERE id = ? LIMIT 1''',
-        [instance.id]);
+      [instance.id],
+    );
 
     // SQFlite returns [{}] when no results are found
     if (results.isEmpty || (results.length == 1 && results.first.isEmpty)) {
@@ -161,27 +171,43 @@ class SharedPermissionAdapter
   final String tableName = 'SharedPermission';
 
   @override
-  Future<SharedPermission> fromSupabase(Map<String, dynamic> input,
-          {required provider,
-          covariant OfflineFirstWithSupabaseRepository? repository}) async =>
-      await _$SharedPermissionFromSupabase(input,
-          provider: provider, repository: repository);
+  Future<SharedPermission> fromSupabase(
+    Map<String, dynamic> input, {
+    required provider,
+    covariant OfflineFirstWithSupabaseRepository? repository,
+  }) async => await _$SharedPermissionFromSupabase(
+    input,
+    provider: provider,
+    repository: repository,
+  );
   @override
-  Future<Map<String, dynamic>> toSupabase(SharedPermission input,
-          {required provider,
-          covariant OfflineFirstWithSupabaseRepository? repository}) async =>
-      await _$SharedPermissionToSupabase(input,
-          provider: provider, repository: repository);
+  Future<Map<String, dynamic>> toSupabase(
+    SharedPermission input, {
+    required provider,
+    covariant OfflineFirstWithSupabaseRepository? repository,
+  }) async => await _$SharedPermissionToSupabase(
+    input,
+    provider: provider,
+    repository: repository,
+  );
   @override
-  Future<SharedPermission> fromSqlite(Map<String, dynamic> input,
-          {required provider,
-          covariant OfflineFirstWithSupabaseRepository? repository}) async =>
-      await _$SharedPermissionFromSqlite(input,
-          provider: provider, repository: repository);
+  Future<SharedPermission> fromSqlite(
+    Map<String, dynamic> input, {
+    required provider,
+    covariant OfflineFirstWithSupabaseRepository? repository,
+  }) async => await _$SharedPermissionFromSqlite(
+    input,
+    provider: provider,
+    repository: repository,
+  );
   @override
-  Future<Map<String, dynamic>> toSqlite(SharedPermission input,
-          {required provider,
-          covariant OfflineFirstWithSupabaseRepository? repository}) async =>
-      await _$SharedPermissionToSqlite(input,
-          provider: provider, repository: repository);
+  Future<Map<String, dynamic>> toSqlite(
+    SharedPermission input, {
+    required provider,
+    covariant OfflineFirstWithSupabaseRepository? repository,
+  }) async => await _$SharedPermissionToSqlite(
+    input,
+    provider: provider,
+    repository: repository,
+  );
 }

@@ -1,65 +1,83 @@
 // GENERATED CODE DO NOT EDIT
 part of '../brick.g.dart';
 
-Future<RecipeStep> _$RecipeStepFromSupabase(Map<String, dynamic> data,
-    {required SupabaseProvider provider,
-    OfflineFirstWithSupabaseRepository? repository}) async {
+Future<RecipeStep> _$RecipeStepFromSupabase(
+  Map<String, dynamic> data, {
+  required SupabaseProvider provider,
+  OfflineFirstWithSupabaseRepository? repository,
+}) async {
   return RecipeStep(
-      recipe: await RecipeAdapter().fromSupabase(data['recipe'],
-          provider: provider, repository: repository),
-      position: data['position'] as int,
-      entryType: data['entry_type'] as String,
-      text: data['text'] as String,
-      timerDuration: data['timer_duration'] == null
-          ? null
-          : data['timer_duration'] as int?,
-      id: data['id'] as String?);
+    recipe: await RecipeAdapter().fromSupabase(
+      data['recipe'],
+      provider: provider,
+      repository: repository,
+    ),
+    position: data['position'] as int,
+    entryType: data['entry_type'] as String,
+    text: data['text'] as String,
+    timerDuration: data['timer_duration'] == null
+        ? null
+        : data['timer_duration'] as int?,
+    id: data['id'] as String?,
+  );
 }
 
-Future<Map<String, dynamic>> _$RecipeStepToSupabase(RecipeStep instance,
-    {required SupabaseProvider provider,
-    OfflineFirstWithSupabaseRepository? repository}) async {
+Future<Map<String, dynamic>> _$RecipeStepToSupabase(
+  RecipeStep instance, {
+  required SupabaseProvider provider,
+  OfflineFirstWithSupabaseRepository? repository,
+}) async {
   return {
-    'recipe': await RecipeAdapter().toSupabase(instance.recipe,
-        provider: provider, repository: repository),
+    'recipe': await RecipeAdapter().toSupabase(
+      instance.recipe,
+      provider: provider,
+      repository: repository,
+    ),
     'position': instance.position,
     'entry_type': instance.entryType,
     'text': instance.text,
     'timer_duration': instance.timerDuration,
-    'id': instance.id
+    'id': instance.id,
   };
 }
 
-Future<RecipeStep> _$RecipeStepFromSqlite(Map<String, dynamic> data,
-    {required SqliteProvider provider,
-    OfflineFirstWithSupabaseRepository? repository}) async {
+Future<RecipeStep> _$RecipeStepFromSqlite(
+  Map<String, dynamic> data, {
+  required SqliteProvider provider,
+  OfflineFirstWithSupabaseRepository? repository,
+}) async {
   return RecipeStep(
-      recipe: (await repository!.getAssociation<Recipe>(
-        Query.where('primaryKey', data['recipe_Recipe_brick_id'] as int,
-            limit1: true),
-      ))!
-          .first,
-      position: data['position'] as int,
-      entryType: data['entry_type'] as String,
-      text: data['text'] as String,
-      timerDuration: data['timer_duration'] == null
-          ? null
-          : data['timer_duration'] as int?,
-      id: data['id'] as String)
-    ..primaryKey = data['_brick_id'] as int;
+    recipe: (await repository!.getAssociation<Recipe>(
+      Query.where(
+        'primaryKey',
+        data['recipe_Recipe_brick_id'] as int,
+        limit1: true,
+      ),
+    ))!.first,
+    position: data['position'] as int,
+    entryType: data['entry_type'] as String,
+    text: data['text'] as String,
+    timerDuration: data['timer_duration'] == null
+        ? null
+        : data['timer_duration'] as int?,
+    id: data['id'] as String,
+  )..primaryKey = data['_brick_id'] as int;
 }
 
-Future<Map<String, dynamic>> _$RecipeStepToSqlite(RecipeStep instance,
-    {required SqliteProvider provider,
-    OfflineFirstWithSupabaseRepository? repository}) async {
+Future<Map<String, dynamic>> _$RecipeStepToSqlite(
+  RecipeStep instance, {
+  required SqliteProvider provider,
+  OfflineFirstWithSupabaseRepository? repository,
+}) async {
   return {
-    'recipe_Recipe_brick_id': instance.recipe.primaryKey ??
+    'recipe_Recipe_brick_id':
+        instance.recipe.primaryKey ??
         await provider.upsert<Recipe>(instance.recipe, repository: repository),
     'position': instance.position,
     'entry_type': instance.entryType,
     'text': instance.text,
     'timer_duration': instance.timerDuration,
-    'id': instance.id
+    'id': instance.id,
   };
 }
 
@@ -98,7 +116,7 @@ class RecipeStepAdapter extends OfflineFirstWithSupabaseAdapter<RecipeStep> {
     'id': const RuntimeSupabaseColumnDefinition(
       association: false,
       columnName: 'id',
-    )
+    ),
   };
   @override
   final ignoreDuplicates = false;
@@ -149,13 +167,18 @@ class RecipeStepAdapter extends OfflineFirstWithSupabaseAdapter<RecipeStep> {
       columnName: 'id',
       iterable: false,
       type: String,
-    )
+    ),
   };
   @override
   Future<int?> primaryKeyByUniqueColumns(
-      RecipeStep instance, DatabaseExecutor executor) async {
-    final results = await executor.rawQuery('''
-        SELECT * FROM `RecipeStep` WHERE id = ? LIMIT 1''', [instance.id]);
+    RecipeStep instance,
+    DatabaseExecutor executor,
+  ) async {
+    final results = await executor.rawQuery(
+      '''
+        SELECT * FROM `RecipeStep` WHERE id = ? LIMIT 1''',
+      [instance.id],
+    );
 
     // SQFlite returns [{}] when no results are found
     if (results.isEmpty || (results.length == 1 && results.first.isEmpty)) {
@@ -169,27 +192,43 @@ class RecipeStepAdapter extends OfflineFirstWithSupabaseAdapter<RecipeStep> {
   final String tableName = 'RecipeStep';
 
   @override
-  Future<RecipeStep> fromSupabase(Map<String, dynamic> input,
-          {required provider,
-          covariant OfflineFirstWithSupabaseRepository? repository}) async =>
-      await _$RecipeStepFromSupabase(input,
-          provider: provider, repository: repository);
+  Future<RecipeStep> fromSupabase(
+    Map<String, dynamic> input, {
+    required provider,
+    covariant OfflineFirstWithSupabaseRepository? repository,
+  }) async => await _$RecipeStepFromSupabase(
+    input,
+    provider: provider,
+    repository: repository,
+  );
   @override
-  Future<Map<String, dynamic>> toSupabase(RecipeStep input,
-          {required provider,
-          covariant OfflineFirstWithSupabaseRepository? repository}) async =>
-      await _$RecipeStepToSupabase(input,
-          provider: provider, repository: repository);
+  Future<Map<String, dynamic>> toSupabase(
+    RecipeStep input, {
+    required provider,
+    covariant OfflineFirstWithSupabaseRepository? repository,
+  }) async => await _$RecipeStepToSupabase(
+    input,
+    provider: provider,
+    repository: repository,
+  );
   @override
-  Future<RecipeStep> fromSqlite(Map<String, dynamic> input,
-          {required provider,
-          covariant OfflineFirstWithSupabaseRepository? repository}) async =>
-      await _$RecipeStepFromSqlite(input,
-          provider: provider, repository: repository);
+  Future<RecipeStep> fromSqlite(
+    Map<String, dynamic> input, {
+    required provider,
+    covariant OfflineFirstWithSupabaseRepository? repository,
+  }) async => await _$RecipeStepFromSqlite(
+    input,
+    provider: provider,
+    repository: repository,
+  );
   @override
-  Future<Map<String, dynamic>> toSqlite(RecipeStep input,
-          {required provider,
-          covariant OfflineFirstWithSupabaseRepository? repository}) async =>
-      await _$RecipeStepToSqlite(input,
-          provider: provider, repository: repository);
+  Future<Map<String, dynamic>> toSqlite(
+    RecipeStep input, {
+    required provider,
+    covariant OfflineFirstWithSupabaseRepository? repository,
+  }) async => await _$RecipeStepToSqlite(
+    input,
+    provider: provider,
+    repository: repository,
+  );
 }

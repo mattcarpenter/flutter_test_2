@@ -421,28 +421,22 @@ class $RecipesTable extends Recipes with TableInfo<$RecipesTable, RecipeEntry> {
   late final GeneratedColumn<int> deletedAt = GeneratedColumn<int>(
       'deleted_at', aliasedName, true,
       type: DriftSqlType.int, requiredDuringInsert: false);
-  static const VerificationMeta _ingredientsMeta =
-      const VerificationMeta('ingredients');
   @override
   late final GeneratedColumnWithTypeConverter<List<Ingredient>?, String>
       ingredients = GeneratedColumn<String>('ingredients', aliasedName, true,
               type: DriftSqlType.string, requiredDuringInsert: false)
           .withConverter<List<Ingredient>?>(
               $RecipesTable.$converteringredientsn);
-  static const VerificationMeta _stepsMeta = const VerificationMeta('steps');
   @override
   late final GeneratedColumnWithTypeConverter<List<Step>?, String> steps =
       GeneratedColumn<String>('steps', aliasedName, true,
               type: DriftSqlType.string, requiredDuringInsert: false)
           .withConverter<List<Step>?>($RecipesTable.$converterstepsn);
-  static const VerificationMeta _folderIdsMeta =
-      const VerificationMeta('folderIds');
   @override
   late final GeneratedColumnWithTypeConverter<List<String>?, String> folderIds =
       GeneratedColumn<String>('folder_ids', aliasedName, true,
               type: DriftSqlType.string, requiredDuringInsert: false)
           .withConverter<List<String>?>($RecipesTable.$converterfolderIdsn);
-  static const VerificationMeta _imagesMeta = const VerificationMeta('images');
   @override
   late final GeneratedColumnWithTypeConverter<List<RecipeImage>?, String>
       images = GeneratedColumn<String>('images', aliasedName, true,
@@ -557,10 +551,6 @@ class $RecipesTable extends Recipes with TableInfo<$RecipesTable, RecipeEntry> {
       context.handle(_deletedAtMeta,
           deletedAt.isAcceptableOrUnknown(data['deleted_at']!, _deletedAtMeta));
     }
-    context.handle(_ingredientsMeta, const VerificationResult.success());
-    context.handle(_stepsMeta, const VerificationResult.success());
-    context.handle(_folderIdsMeta, const VerificationResult.success());
-    context.handle(_imagesMeta, const VerificationResult.success());
     return context;
   }
 
@@ -4828,7 +4818,6 @@ class $CooksTable extends Cooks with TableInfo<$CooksTable, CookEntry> {
       type: DriftSqlType.int,
       requiredDuringInsert: false,
       defaultValue: const Constant(0));
-  static const VerificationMeta _statusMeta = const VerificationMeta('status');
   @override
   late final GeneratedColumnWithTypeConverter<CookStatus, String> status =
       GeneratedColumn<String>('status', aliasedName, false,
@@ -4920,7 +4909,6 @@ class $CooksTable extends Cooks with TableInfo<$CooksTable, CookEntry> {
           currentStepIndex.isAcceptableOrUnknown(
               data['current_step_index']!, _currentStepIndexMeta));
     }
-    context.handle(_statusMeta, const VerificationResult.success());
     if (data.containsKey('started_at')) {
       context.handle(_startedAtMeta,
           startedAt.isAcceptableOrUnknown(data['started_at']!, _startedAtMeta));
@@ -5415,8 +5403,6 @@ class $PantryItemsTable extends PantryItems
   late final GeneratedColumn<String> name = GeneratedColumn<String>(
       'name', aliasedName, false,
       type: DriftSqlType.string, requiredDuringInsert: true);
-  static const VerificationMeta _stockStatusMeta =
-      const VerificationMeta('stockStatus');
   @override
   late final GeneratedColumnWithTypeConverter<StockStatus, int> stockStatus =
       GeneratedColumn<int>('stock_status', aliasedName, false,
@@ -5501,7 +5487,6 @@ class $PantryItemsTable extends PantryItems
   late final GeneratedColumn<int> deletedAt = GeneratedColumn<int>(
       'deleted_at', aliasedName, true,
       type: DriftSqlType.int, requiredDuringInsert: false);
-  static const VerificationMeta _termsMeta = const VerificationMeta('terms');
   @override
   late final GeneratedColumnWithTypeConverter<List<PantryItemTerm>?, String>
       terms = GeneratedColumn<String>('terms', aliasedName, true,
@@ -5553,7 +5538,6 @@ class $PantryItemsTable extends PantryItems
     } else if (isInserting) {
       context.missing(_nameMeta);
     }
-    context.handle(_stockStatusMeta, const VerificationResult.success());
     if (data.containsKey('is_staple')) {
       context.handle(_isStapleMeta,
           isStaple.isAcceptableOrUnknown(data['is_staple']!, _isStapleMeta));
@@ -5608,7 +5592,6 @@ class $PantryItemsTable extends PantryItems
       context.handle(_deletedAtMeta,
           deletedAt.isAcceptableOrUnknown(data['deleted_at']!, _deletedAtMeta));
     }
-    context.handle(_termsMeta, const VerificationResult.success());
     if (data.containsKey('category')) {
       context.handle(_categoryMeta,
           category.isAcceptableOrUnknown(data['category']!, _categoryMeta));
@@ -6632,7 +6615,6 @@ class $ShoppingListItemsTable extends ShoppingListItems
   late final GeneratedColumn<String> name = GeneratedColumn<String>(
       'name', aliasedName, false,
       type: DriftSqlType.string, requiredDuringInsert: true);
-  static const VerificationMeta _termsMeta = const VerificationMeta('terms');
   @override
   late final GeneratedColumnWithTypeConverter<List<String>?, String> terms =
       GeneratedColumn<String>('terms', aliasedName, true,
@@ -6742,7 +6724,6 @@ class $ShoppingListItemsTable extends ShoppingListItems
     } else if (isInserting) {
       context.missing(_nameMeta);
     }
-    context.handle(_termsMeta, const VerificationResult.success());
     if (data.containsKey('category')) {
       context.handle(_categoryMeta,
           category.isAcceptableOrUnknown(data['category']!, _categoryMeta));
@@ -8326,7 +8307,6 @@ class $MealPlansTable extends MealPlans
   late final GeneratedColumn<String> householdId = GeneratedColumn<String>(
       'household_id', aliasedName, true,
       type: DriftSqlType.string, requiredDuringInsert: false);
-  static const VerificationMeta _itemsMeta = const VerificationMeta('items');
   @override
   late final GeneratedColumnWithTypeConverter<List<MealPlanItem>?, String>
       items = GeneratedColumn<String>('items', aliasedName, true,
@@ -8382,7 +8362,6 @@ class $MealPlansTable extends MealPlans
           householdId.isAcceptableOrUnknown(
               data['household_id']!, _householdIdMeta));
     }
-    context.handle(_itemsMeta, const VerificationResult.success());
     if (data.containsKey('created_at')) {
       context.handle(_createdAtMeta,
           createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta));
@@ -8751,7 +8730,6 @@ class $UserSubscriptionsTable extends UserSubscriptions
   late final GeneratedColumn<String> householdId = GeneratedColumn<String>(
       'household_id', aliasedName, true,
       type: DriftSqlType.string, requiredDuringInsert: false);
-  static const VerificationMeta _statusMeta = const VerificationMeta('status');
   @override
   late final GeneratedColumnWithTypeConverter<SubscriptionStatus, String>
       status = GeneratedColumn<String>('status', aliasedName, false,
@@ -8760,8 +8738,6 @@ class $UserSubscriptionsTable extends UserSubscriptions
               defaultValue: const Constant('none'))
           .withConverter<SubscriptionStatus>(
               $UserSubscriptionsTable.$converterstatus);
-  static const VerificationMeta _entitlementsMeta =
-      const VerificationMeta('entitlements');
   @override
   late final GeneratedColumnWithTypeConverter<List<String>, String>
       entitlements = GeneratedColumn<String>('entitlements', aliasedName, false,
@@ -8859,8 +8835,6 @@ class $UserSubscriptionsTable extends UserSubscriptions
           householdId.isAcceptableOrUnknown(
               data['household_id']!, _householdIdMeta));
     }
-    context.handle(_statusMeta, const VerificationResult.success());
-    context.handle(_entitlementsMeta, const VerificationResult.success());
     if (data.containsKey('expires_at')) {
       context.handle(_expiresAtMeta,
           expiresAt.isAcceptableOrUnknown(data['expires_at']!, _expiresAtMeta));

@@ -1,3 +1,4 @@
+// dart format width=80
 // coverage:ignore-file
 // GENERATED CODE - DO NOT MODIFY BY HAND
 // ignore_for_file: type=lint
@@ -9,94 +10,58 @@ part of 'auth_error.dart';
 // FreezedGenerator
 // **************************************************************************
 
+// dart format off
 T _$identity<T>(T value) => value;
-
-final _privateConstructorUsedError = UnsupportedError(
-    'It seems like you constructed your class using `MyClass._()`. This constructor is only meant to be used by freezed and you are not supposed to need it nor use it.\nPlease check the documentation here for more information: https://github.com/rrousselGit/freezed#adding-getters-and-methods-to-our-models');
 
 /// @nodoc
 mixin _$AuthError {
-  String get message => throw _privateConstructorUsedError;
-  String? get code => throw _privateConstructorUsedError;
-  String? get details => throw _privateConstructorUsedError;
-  AuthErrorType get type => throw _privateConstructorUsedError;
+  String get message;
+  String? get code;
+  String? get details;
+  AuthErrorType get type;
 
   /// Create a copy of AuthError
   /// with the given fields replaced by the non-null parameter values.
   @JsonKey(includeFromJson: false, includeToJson: false)
-  $AuthErrorCopyWith<AuthError> get copyWith =>
-      throw _privateConstructorUsedError;
-}
-
-/// @nodoc
-abstract class $AuthErrorCopyWith<$Res> {
-  factory $AuthErrorCopyWith(AuthError value, $Res Function(AuthError) then) =
-      _$AuthErrorCopyWithImpl<$Res, AuthError>;
-  @useResult
-  $Res call(
-      {String message, String? code, String? details, AuthErrorType type});
-}
-
-/// @nodoc
-class _$AuthErrorCopyWithImpl<$Res, $Val extends AuthError>
-    implements $AuthErrorCopyWith<$Res> {
-  _$AuthErrorCopyWithImpl(this._value, this._then);
-
-  // ignore: unused_field
-  final $Val _value;
-  // ignore: unused_field
-  final $Res Function($Val) _then;
-
-  /// Create a copy of AuthError
-  /// with the given fields replaced by the non-null parameter values.
   @pragma('vm:prefer-inline')
+  $AuthErrorCopyWith<AuthError> get copyWith =>
+      _$AuthErrorCopyWithImpl<AuthError>(this as AuthError, _$identity);
+
   @override
-  $Res call({
-    Object? message = null,
-    Object? code = freezed,
-    Object? details = freezed,
-    Object? type = null,
-  }) {
-    return _then(_value.copyWith(
-      message: null == message
-          ? _value.message
-          : message // ignore: cast_nullable_to_non_nullable
-              as String,
-      code: freezed == code
-          ? _value.code
-          : code // ignore: cast_nullable_to_non_nullable
-              as String?,
-      details: freezed == details
-          ? _value.details
-          : details // ignore: cast_nullable_to_non_nullable
-              as String?,
-      type: null == type
-          ? _value.type
-          : type // ignore: cast_nullable_to_non_nullable
-              as AuthErrorType,
-    ) as $Val);
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        (other.runtimeType == runtimeType &&
+            other is AuthError &&
+            (identical(other.message, message) || other.message == message) &&
+            (identical(other.code, code) || other.code == code) &&
+            (identical(other.details, details) || other.details == details) &&
+            (identical(other.type, type) || other.type == type));
+  }
+
+  @override
+  int get hashCode => Object.hash(runtimeType, message, code, details, type);
+
+  @override
+  String toString() {
+    return 'AuthError(message: $message, code: $code, details: $details, type: $type)';
   }
 }
 
 /// @nodoc
-abstract class _$$AuthErrorImplCopyWith<$Res>
-    implements $AuthErrorCopyWith<$Res> {
-  factory _$$AuthErrorImplCopyWith(
-          _$AuthErrorImpl value, $Res Function(_$AuthErrorImpl) then) =
-      __$$AuthErrorImplCopyWithImpl<$Res>;
-  @override
+abstract mixin class $AuthErrorCopyWith<$Res> {
+  factory $AuthErrorCopyWith(AuthError value, $Res Function(AuthError) _then) =
+      _$AuthErrorCopyWithImpl;
   @useResult
   $Res call(
       {String message, String? code, String? details, AuthErrorType type});
 }
 
 /// @nodoc
-class __$$AuthErrorImplCopyWithImpl<$Res>
-    extends _$AuthErrorCopyWithImpl<$Res, _$AuthErrorImpl>
-    implements _$$AuthErrorImplCopyWith<$Res> {
-  __$$AuthErrorImplCopyWithImpl(
-      _$AuthErrorImpl _value, $Res Function(_$AuthErrorImpl) _then)
-      : super(_value, _then);
+class _$AuthErrorCopyWithImpl<$Res> implements $AuthErrorCopyWith<$Res> {
+  _$AuthErrorCopyWithImpl(this._self, this._then);
+
+  final AuthError _self;
+  final $Res Function(AuthError) _then;
 
   /// Create a copy of AuthError
   /// with the given fields replaced by the non-null parameter values.
@@ -108,21 +73,21 @@ class __$$AuthErrorImplCopyWithImpl<$Res>
     Object? details = freezed,
     Object? type = null,
   }) {
-    return _then(_$AuthErrorImpl(
+    return _then(_self.copyWith(
       message: null == message
-          ? _value.message
+          ? _self.message
           : message // ignore: cast_nullable_to_non_nullable
               as String,
       code: freezed == code
-          ? _value.code
+          ? _self.code
           : code // ignore: cast_nullable_to_non_nullable
               as String?,
       details: freezed == details
-          ? _value.details
+          ? _self.details
           : details // ignore: cast_nullable_to_non_nullable
               as String?,
       type: null == type
-          ? _value.type
+          ? _self.type
           : type // ignore: cast_nullable_to_non_nullable
               as AuthErrorType,
     ));
@@ -131,8 +96,8 @@ class __$$AuthErrorImplCopyWithImpl<$Res>
 
 /// @nodoc
 
-class _$AuthErrorImpl extends _AuthError {
-  const _$AuthErrorImpl(
+class _AuthError extends AuthError {
+  const _AuthError(
       {required this.message,
       this.code,
       this.details,
@@ -149,16 +114,19 @@ class _$AuthErrorImpl extends _AuthError {
   @JsonKey()
   final AuthErrorType type;
 
+  /// Create a copy of AuthError
+  /// with the given fields replaced by the non-null parameter values.
   @override
-  String toString() {
-    return 'AuthError(message: $message, code: $code, details: $details, type: $type)';
-  }
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  @pragma('vm:prefer-inline')
+  _$AuthErrorCopyWith<_AuthError> get copyWith =>
+      __$AuthErrorCopyWithImpl<_AuthError>(this, _$identity);
 
   @override
   bool operator ==(Object other) {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
-            other is _$AuthErrorImpl &&
+            other is _AuthError &&
             (identical(other.message, message) || other.message == message) &&
             (identical(other.code, code) || other.code == code) &&
             (identical(other.details, details) || other.details == details) &&
@@ -168,36 +136,60 @@ class _$AuthErrorImpl extends _AuthError {
   @override
   int get hashCode => Object.hash(runtimeType, message, code, details, type);
 
+  @override
+  String toString() {
+    return 'AuthError(message: $message, code: $code, details: $details, type: $type)';
+  }
+}
+
+/// @nodoc
+abstract mixin class _$AuthErrorCopyWith<$Res>
+    implements $AuthErrorCopyWith<$Res> {
+  factory _$AuthErrorCopyWith(
+          _AuthError value, $Res Function(_AuthError) _then) =
+      __$AuthErrorCopyWithImpl;
+  @override
+  @useResult
+  $Res call(
+      {String message, String? code, String? details, AuthErrorType type});
+}
+
+/// @nodoc
+class __$AuthErrorCopyWithImpl<$Res> implements _$AuthErrorCopyWith<$Res> {
+  __$AuthErrorCopyWithImpl(this._self, this._then);
+
+  final _AuthError _self;
+  final $Res Function(_AuthError) _then;
+
   /// Create a copy of AuthError
   /// with the given fields replaced by the non-null parameter values.
-  @JsonKey(includeFromJson: false, includeToJson: false)
   @override
   @pragma('vm:prefer-inline')
-  _$$AuthErrorImplCopyWith<_$AuthErrorImpl> get copyWith =>
-      __$$AuthErrorImplCopyWithImpl<_$AuthErrorImpl>(this, _$identity);
+  $Res call({
+    Object? message = null,
+    Object? code = freezed,
+    Object? details = freezed,
+    Object? type = null,
+  }) {
+    return _then(_AuthError(
+      message: null == message
+          ? _self.message
+          : message // ignore: cast_nullable_to_non_nullable
+              as String,
+      code: freezed == code
+          ? _self.code
+          : code // ignore: cast_nullable_to_non_nullable
+              as String?,
+      details: freezed == details
+          ? _self.details
+          : details // ignore: cast_nullable_to_non_nullable
+              as String?,
+      type: null == type
+          ? _self.type
+          : type // ignore: cast_nullable_to_non_nullable
+              as AuthErrorType,
+    ));
+  }
 }
 
-abstract class _AuthError extends AuthError {
-  const factory _AuthError(
-      {required final String message,
-      final String? code,
-      final String? details,
-      final AuthErrorType type}) = _$AuthErrorImpl;
-  const _AuthError._() : super._();
-
-  @override
-  String get message;
-  @override
-  String? get code;
-  @override
-  String? get details;
-  @override
-  AuthErrorType get type;
-
-  /// Create a copy of AuthError
-  /// with the given fields replaced by the non-null parameter values.
-  @override
-  @JsonKey(includeFromJson: false, includeToJson: false)
-  _$$AuthErrorImplCopyWith<_$AuthErrorImpl> get copyWith =>
-      throw _privateConstructorUsedError;
-}
+// dart format on

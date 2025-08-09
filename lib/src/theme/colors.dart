@@ -287,4 +287,18 @@ class AppColors {
   Color get inputLabel => brightness == Brightness.light
       ? AppColorSwatches.neutral[500]!
       : AppColorSwatches.neutral[400]!;
+
+  // Content text colors (for list items, descriptions, user-generated content)
+  Color get contentPrimary => textPrimary;  // Main content text (ingredient names, step descriptions)
+  
+  Color get contentSecondary => textSecondary;  // Supporting content (section headers in lists)
+  
+  Color get contentHint => inputPlaceholder;  // Content placeholder hints ('e.g. 1 cup flour')
+
+  // UI text colors (for interface elements, form controls, navigation)
+  Color get uiLabel => inputLabel;  // Form field labels, button labels
+  
+  Color get uiSecondary => textTertiary;  // Secondary interface elements (drag handles)
+  
+  Color get uiHint => inputPlaceholder;  // Form field placeholders ('Enter value')
 }

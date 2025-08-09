@@ -2,33 +2,35 @@
 part of '../brick.g.dart';
 
 Future<RecipeIngredient> _$RecipeIngredientFromSupabase(
-    Map<String, dynamic> data,
-    {required SupabaseProvider provider,
-    OfflineFirstWithSupabaseRepository? repository}) async {
+  Map<String, dynamic> data, {
+  required SupabaseProvider provider,
+  OfflineFirstWithSupabaseRepository? repository,
+}) async {
   return RecipeIngredient(
-      recipeId: data['recipe_id'] as String,
-      position: data['position'] as int,
-      entryType: data['entry_type'] as String,
-      text: data['text'] as String,
-      note: data['note'] == null ? null : data['note'] as String?,
-      unit1: data['unit1'] == null ? null : data['unit1'] as String?,
-      quantity1:
-          data['quantity1'] == null ? null : data['quantity1'] as double?,
-      unit2: data['unit2'] == null ? null : data['unit2'] as String?,
-      quantity2:
-          data['quantity2'] == null ? null : data['quantity2'] as double?,
-      totalUnit:
-          data['total_unit'] == null ? null : data['total_unit'] as String?,
-      totalQuantity: data['total_quantity'] == null
-          ? null
-          : data['total_quantity'] as double?,
-      id: data['id'] as String?);
+    recipeId: data['recipe_id'] as String,
+    position: data['position'] as int,
+    entryType: data['entry_type'] as String,
+    text: data['text'] as String,
+    note: data['note'] == null ? null : data['note'] as String?,
+    unit1: data['unit1'] == null ? null : data['unit1'] as String?,
+    quantity1: data['quantity1'] == null ? null : data['quantity1'] as double?,
+    unit2: data['unit2'] == null ? null : data['unit2'] as String?,
+    quantity2: data['quantity2'] == null ? null : data['quantity2'] as double?,
+    totalUnit: data['total_unit'] == null
+        ? null
+        : data['total_unit'] as String?,
+    totalQuantity: data['total_quantity'] == null
+        ? null
+        : data['total_quantity'] as double?,
+    id: data['id'] as String?,
+  );
 }
 
 Future<Map<String, dynamic>> _$RecipeIngredientToSupabase(
-    RecipeIngredient instance,
-    {required SupabaseProvider provider,
-    OfflineFirstWithSupabaseRepository? repository}) async {
+  RecipeIngredient instance, {
+  required SupabaseProvider provider,
+  OfflineFirstWithSupabaseRepository? repository,
+}) async {
   return {
     'recipe_id': instance.recipeId,
     'position': instance.position,
@@ -41,38 +43,40 @@ Future<Map<String, dynamic>> _$RecipeIngredientToSupabase(
     'quantity2': instance.quantity2,
     'total_unit': instance.totalUnit,
     'total_quantity': instance.totalQuantity,
-    'id': instance.id
+    'id': instance.id,
   };
 }
 
-Future<RecipeIngredient> _$RecipeIngredientFromSqlite(Map<String, dynamic> data,
-    {required SqliteProvider provider,
-    OfflineFirstWithSupabaseRepository? repository}) async {
+Future<RecipeIngredient> _$RecipeIngredientFromSqlite(
+  Map<String, dynamic> data, {
+  required SqliteProvider provider,
+  OfflineFirstWithSupabaseRepository? repository,
+}) async {
   return RecipeIngredient(
-      recipeId: data['recipe_id'] as String,
-      position: data['position'] as int,
-      entryType: data['entry_type'] as String,
-      text: data['text'] as String,
-      note: data['note'] == null ? null : data['note'] as String?,
-      unit1: data['unit1'] == null ? null : data['unit1'] as String?,
-      quantity1:
-          data['quantity1'] == null ? null : data['quantity1'] as double?,
-      unit2: data['unit2'] == null ? null : data['unit2'] as String?,
-      quantity2:
-          data['quantity2'] == null ? null : data['quantity2'] as double?,
-      totalUnit:
-          data['total_unit'] == null ? null : data['total_unit'] as String?,
-      totalQuantity: data['total_quantity'] == null
-          ? null
-          : data['total_quantity'] as double?,
-      id: data['id'] as String)
-    ..primaryKey = data['_brick_id'] as int;
+    recipeId: data['recipe_id'] as String,
+    position: data['position'] as int,
+    entryType: data['entry_type'] as String,
+    text: data['text'] as String,
+    note: data['note'] == null ? null : data['note'] as String?,
+    unit1: data['unit1'] == null ? null : data['unit1'] as String?,
+    quantity1: data['quantity1'] == null ? null : data['quantity1'] as double?,
+    unit2: data['unit2'] == null ? null : data['unit2'] as String?,
+    quantity2: data['quantity2'] == null ? null : data['quantity2'] as double?,
+    totalUnit: data['total_unit'] == null
+        ? null
+        : data['total_unit'] as String?,
+    totalQuantity: data['total_quantity'] == null
+        ? null
+        : data['total_quantity'] as double?,
+    id: data['id'] as String,
+  )..primaryKey = data['_brick_id'] as int;
 }
 
 Future<Map<String, dynamic>> _$RecipeIngredientToSqlite(
-    RecipeIngredient instance,
-    {required SqliteProvider provider,
-    OfflineFirstWithSupabaseRepository? repository}) async {
+  RecipeIngredient instance, {
+  required SqliteProvider provider,
+  OfflineFirstWithSupabaseRepository? repository,
+}) async {
   return {
     'recipe_id': instance.recipeId,
     'position': instance.position,
@@ -85,7 +89,7 @@ Future<Map<String, dynamic>> _$RecipeIngredientToSqlite(
     'quantity2': instance.quantity2,
     'total_unit': instance.totalUnit,
     'total_quantity': instance.totalQuantity,
-    'id': instance.id
+    'id': instance.id,
   };
 }
 
@@ -147,7 +151,7 @@ class RecipeIngredientAdapter
     'id': const RuntimeSupabaseColumnDefinition(
       association: false,
       columnName: 'id',
-    )
+    ),
   };
   @override
   final ignoreDuplicates = false;
@@ -234,14 +238,18 @@ class RecipeIngredientAdapter
       columnName: 'id',
       iterable: false,
       type: String,
-    )
+    ),
   };
   @override
   Future<int?> primaryKeyByUniqueColumns(
-      RecipeIngredient instance, DatabaseExecutor executor) async {
-    final results = await executor.rawQuery('''
+    RecipeIngredient instance,
+    DatabaseExecutor executor,
+  ) async {
+    final results = await executor.rawQuery(
+      '''
         SELECT * FROM `RecipeIngredient` WHERE id = ? LIMIT 1''',
-        [instance.id]);
+      [instance.id],
+    );
 
     // SQFlite returns [{}] when no results are found
     if (results.isEmpty || (results.length == 1 && results.first.isEmpty)) {
@@ -255,27 +263,43 @@ class RecipeIngredientAdapter
   final String tableName = 'RecipeIngredient';
 
   @override
-  Future<RecipeIngredient> fromSupabase(Map<String, dynamic> input,
-          {required provider,
-          covariant OfflineFirstWithSupabaseRepository? repository}) async =>
-      await _$RecipeIngredientFromSupabase(input,
-          provider: provider, repository: repository);
+  Future<RecipeIngredient> fromSupabase(
+    Map<String, dynamic> input, {
+    required provider,
+    covariant OfflineFirstWithSupabaseRepository? repository,
+  }) async => await _$RecipeIngredientFromSupabase(
+    input,
+    provider: provider,
+    repository: repository,
+  );
   @override
-  Future<Map<String, dynamic>> toSupabase(RecipeIngredient input,
-          {required provider,
-          covariant OfflineFirstWithSupabaseRepository? repository}) async =>
-      await _$RecipeIngredientToSupabase(input,
-          provider: provider, repository: repository);
+  Future<Map<String, dynamic>> toSupabase(
+    RecipeIngredient input, {
+    required provider,
+    covariant OfflineFirstWithSupabaseRepository? repository,
+  }) async => await _$RecipeIngredientToSupabase(
+    input,
+    provider: provider,
+    repository: repository,
+  );
   @override
-  Future<RecipeIngredient> fromSqlite(Map<String, dynamic> input,
-          {required provider,
-          covariant OfflineFirstWithSupabaseRepository? repository}) async =>
-      await _$RecipeIngredientFromSqlite(input,
-          provider: provider, repository: repository);
+  Future<RecipeIngredient> fromSqlite(
+    Map<String, dynamic> input, {
+    required provider,
+    covariant OfflineFirstWithSupabaseRepository? repository,
+  }) async => await _$RecipeIngredientFromSqlite(
+    input,
+    provider: provider,
+    repository: repository,
+  );
   @override
-  Future<Map<String, dynamic>> toSqlite(RecipeIngredient input,
-          {required provider,
-          covariant OfflineFirstWithSupabaseRepository? repository}) async =>
-      await _$RecipeIngredientToSqlite(input,
-          provider: provider, repository: repository);
+  Future<Map<String, dynamic>> toSqlite(
+    RecipeIngredient input, {
+    required provider,
+    covariant OfflineFirstWithSupabaseRepository? repository,
+  }) async => await _$RecipeIngredientToSqlite(
+    input,
+    provider: provider,
+    repository: repository,
+  );
 }

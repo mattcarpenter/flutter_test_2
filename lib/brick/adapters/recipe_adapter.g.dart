@@ -1,50 +1,61 @@
 // GENERATED CODE DO NOT EDIT
 part of '../brick.g.dart';
 
-Future<Recipe> _$RecipeFromSupabase(Map<String, dynamic> data,
-    {required SupabaseProvider provider,
-    OfflineFirstWithSupabaseRepository? repository}) async {
+Future<Recipe> _$RecipeFromSupabase(
+  Map<String, dynamic> data, {
+  required SupabaseProvider provider,
+  OfflineFirstWithSupabaseRepository? repository,
+}) async {
   return Recipe(
-      title: data['title'] as String,
-      description:
-          data['description'] == null ? null : data['description'] as String?,
-      rating: data['rating'] as int,
-      language: data['language'] as String,
-      servings: data['servings'] == null ? null : data['servings'] as int?,
-      prepTime: data['prep_time'] == null ? null : data['prep_time'] as int?,
-      cookTime: data['cook_time'] == null ? null : data['cook_time'] as int?,
-      totalTime: data['total_time'] == null ? null : data['total_time'] as int?,
-      source: data['source'] == null ? null : data['source'] as String?,
-      nutrition:
-          data['nutrition'] == null ? null : data['nutrition'] as String?,
-      generalNotes: data['general_notes'] == null
-          ? null
-          : data['general_notes'] as String?,
-      userId: data['user_id'] == null ? null : data['user_id'] as String?,
-      folder: data['folder'] == null
-          ? null
-          : await RecipeFolderAdapter().fromSupabase(data['folder'],
-              provider: provider, repository: repository),
-      household: data['household'] == null
-          ? null
-          : await HouseholdAdapter().fromSupabase(data['household'],
-              provider: provider, repository: repository),
-      createdAt: data['created_at'] == null
-          ? null
-          : data['created_at'] == null
-              ? null
-              : DateTime.tryParse(data['created_at'] as String),
-      updatedAt: data['updated_at'] == null
-          ? null
-          : data['updated_at'] == null
-              ? null
-              : DateTime.tryParse(data['updated_at'] as String),
-      id: data['id'] as String?);
+    title: data['title'] as String,
+    description: data['description'] == null
+        ? null
+        : data['description'] as String?,
+    rating: data['rating'] as int,
+    language: data['language'] as String,
+    servings: data['servings'] == null ? null : data['servings'] as int?,
+    prepTime: data['prep_time'] == null ? null : data['prep_time'] as int?,
+    cookTime: data['cook_time'] == null ? null : data['cook_time'] as int?,
+    totalTime: data['total_time'] == null ? null : data['total_time'] as int?,
+    source: data['source'] == null ? null : data['source'] as String?,
+    nutrition: data['nutrition'] == null ? null : data['nutrition'] as String?,
+    generalNotes: data['general_notes'] == null
+        ? null
+        : data['general_notes'] as String?,
+    userId: data['user_id'] == null ? null : data['user_id'] as String?,
+    folder: data['folder'] == null
+        ? null
+        : await RecipeFolderAdapter().fromSupabase(
+            data['folder'],
+            provider: provider,
+            repository: repository,
+          ),
+    household: data['household'] == null
+        ? null
+        : await HouseholdAdapter().fromSupabase(
+            data['household'],
+            provider: provider,
+            repository: repository,
+          ),
+    createdAt: data['created_at'] == null
+        ? null
+        : data['created_at'] == null
+        ? null
+        : DateTime.tryParse(data['created_at'] as String),
+    updatedAt: data['updated_at'] == null
+        ? null
+        : data['updated_at'] == null
+        ? null
+        : DateTime.tryParse(data['updated_at'] as String),
+    id: data['id'] as String?,
+  );
 }
 
-Future<Map<String, dynamic>> _$RecipeToSupabase(Recipe instance,
-    {required SupabaseProvider provider,
-    OfflineFirstWithSupabaseRepository? repository}) async {
+Future<Map<String, dynamic>> _$RecipeToSupabase(
+  Recipe instance, {
+  required SupabaseProvider provider,
+  OfflineFirstWithSupabaseRepository? repository,
+}) async {
   return {
     'title': instance.title,
     'description': instance.description,
@@ -59,76 +70,88 @@ Future<Map<String, dynamic>> _$RecipeToSupabase(Recipe instance,
     'general_notes': instance.generalNotes,
     'user_id': instance.userId,
     'folder': instance.folder != null
-        ? await RecipeFolderAdapter().toSupabase(instance.folder!,
-            provider: provider, repository: repository)
+        ? await RecipeFolderAdapter().toSupabase(
+            instance.folder!,
+            provider: provider,
+            repository: repository,
+          )
         : null,
     'household': instance.household != null
-        ? await HouseholdAdapter().toSupabase(instance.household!,
-            provider: provider, repository: repository)
+        ? await HouseholdAdapter().toSupabase(
+            instance.household!,
+            provider: provider,
+            repository: repository,
+          )
         : null,
     'created_at': instance.createdAt?.toIso8601String(),
     'updated_at': instance.updatedAt?.toIso8601String(),
-    'id': instance.id
+    'id': instance.id,
   };
 }
 
-Future<Recipe> _$RecipeFromSqlite(Map<String, dynamic> data,
-    {required SqliteProvider provider,
-    OfflineFirstWithSupabaseRepository? repository}) async {
+Future<Recipe> _$RecipeFromSqlite(
+  Map<String, dynamic> data, {
+  required SqliteProvider provider,
+  OfflineFirstWithSupabaseRepository? repository,
+}) async {
   return Recipe(
-      title: data['title'] as String,
-      description:
-          data['description'] == null ? null : data['description'] as String?,
-      rating: data['rating'] as int,
-      language: data['language'] as String,
-      servings: data['servings'] == null ? null : data['servings'] as int?,
-      prepTime: data['prep_time'] == null ? null : data['prep_time'] as int?,
-      cookTime: data['cook_time'] == null ? null : data['cook_time'] as int?,
-      totalTime: data['total_time'] == null ? null : data['total_time'] as int?,
-      source: data['source'] == null ? null : data['source'] as String?,
-      nutrition:
-          data['nutrition'] == null ? null : data['nutrition'] as String?,
-      generalNotes: data['general_notes'] == null
-          ? null
-          : data['general_notes'] as String?,
-      userId: data['user_id'] == null ? null : data['user_id'] as String?,
-      folder: data['folder_RecipeFolder_brick_id'] == null
-          ? null
-          : (data['folder_RecipeFolder_brick_id'] > -1
+    title: data['title'] as String,
+    description: data['description'] == null
+        ? null
+        : data['description'] as String?,
+    rating: data['rating'] as int,
+    language: data['language'] as String,
+    servings: data['servings'] == null ? null : data['servings'] as int?,
+    prepTime: data['prep_time'] == null ? null : data['prep_time'] as int?,
+    cookTime: data['cook_time'] == null ? null : data['cook_time'] as int?,
+    totalTime: data['total_time'] == null ? null : data['total_time'] as int?,
+    source: data['source'] == null ? null : data['source'] as String?,
+    nutrition: data['nutrition'] == null ? null : data['nutrition'] as String?,
+    generalNotes: data['general_notes'] == null
+        ? null
+        : data['general_notes'] as String?,
+    userId: data['user_id'] == null ? null : data['user_id'] as String?,
+    folder: data['folder_RecipeFolder_brick_id'] == null
+        ? null
+        : (data['folder_RecipeFolder_brick_id'] > -1
               ? (await repository?.getAssociation<RecipeFolder>(
                   Query.where(
-                      'primaryKey', data['folder_RecipeFolder_brick_id'] as int,
-                      limit1: true),
-                ))
-                  ?.first
+                    'primaryKey',
+                    data['folder_RecipeFolder_brick_id'] as int,
+                    limit1: true,
+                  ),
+                ))?.first
               : null),
-      household: data['household_Household_brick_id'] == null
-          ? null
-          : (data['household_Household_brick_id'] > -1
+    household: data['household_Household_brick_id'] == null
+        ? null
+        : (data['household_Household_brick_id'] > -1
               ? (await repository?.getAssociation<Household>(
                   Query.where(
-                      'primaryKey', data['household_Household_brick_id'] as int,
-                      limit1: true),
-                ))
-                  ?.first
+                    'primaryKey',
+                    data['household_Household_brick_id'] as int,
+                    limit1: true,
+                  ),
+                ))?.first
               : null),
-      createdAt: data['created_at'] == null
-          ? null
-          : data['created_at'] == null
-              ? null
-              : DateTime.tryParse(data['created_at'] as String),
-      updatedAt: data['updated_at'] == null
-          ? null
-          : data['updated_at'] == null
-              ? null
-              : DateTime.tryParse(data['updated_at'] as String),
-      id: data['id'] as String)
-    ..primaryKey = data['_brick_id'] as int;
+    createdAt: data['created_at'] == null
+        ? null
+        : data['created_at'] == null
+        ? null
+        : DateTime.tryParse(data['created_at'] as String),
+    updatedAt: data['updated_at'] == null
+        ? null
+        : data['updated_at'] == null
+        ? null
+        : DateTime.tryParse(data['updated_at'] as String),
+    id: data['id'] as String,
+  )..primaryKey = data['_brick_id'] as int;
 }
 
-Future<Map<String, dynamic>> _$RecipeToSqlite(Recipe instance,
-    {required SqliteProvider provider,
-    OfflineFirstWithSupabaseRepository? repository}) async {
+Future<Map<String, dynamic>> _$RecipeToSqlite(
+  Recipe instance, {
+  required SqliteProvider provider,
+  OfflineFirstWithSupabaseRepository? repository,
+}) async {
   return {
     'title': instance.title,
     'description': instance.description,
@@ -144,17 +167,21 @@ Future<Map<String, dynamic>> _$RecipeToSqlite(Recipe instance,
     'user_id': instance.userId,
     'folder_RecipeFolder_brick_id': instance.folder != null
         ? instance.folder!.primaryKey ??
-            await provider.upsert<RecipeFolder>(instance.folder!,
-                repository: repository)
+              await provider.upsert<RecipeFolder>(
+                instance.folder!,
+                repository: repository,
+              )
         : null,
     'household_Household_brick_id': instance.household != null
         ? instance.household!.primaryKey ??
-            await provider.upsert<Household>(instance.household!,
-                repository: repository)
+              await provider.upsert<Household>(
+                instance.household!,
+                repository: repository,
+              )
         : null,
     'created_at': instance.createdAt?.toIso8601String(),
     'updated_at': instance.updatedAt?.toIso8601String(),
-    'id': instance.id
+    'id': instance.id,
   };
 }
 
@@ -241,7 +268,7 @@ class RecipeAdapter extends OfflineFirstWithSupabaseAdapter<Recipe> {
     'id': const RuntimeSupabaseColumnDefinition(
       association: false,
       columnName: 'id',
-    )
+    ),
   };
   @override
   final ignoreDuplicates = false;
@@ -358,13 +385,18 @@ class RecipeAdapter extends OfflineFirstWithSupabaseAdapter<Recipe> {
       columnName: 'id',
       iterable: false,
       type: String,
-    )
+    ),
   };
   @override
   Future<int?> primaryKeyByUniqueColumns(
-      Recipe instance, DatabaseExecutor executor) async {
-    final results = await executor.rawQuery('''
-        SELECT * FROM `Recipe` WHERE id = ? LIMIT 1''', [instance.id]);
+    Recipe instance,
+    DatabaseExecutor executor,
+  ) async {
+    final results = await executor.rawQuery(
+      '''
+        SELECT * FROM `Recipe` WHERE id = ? LIMIT 1''',
+      [instance.id],
+    );
 
     // SQFlite returns [{}] when no results are found
     if (results.isEmpty || (results.length == 1 && results.first.isEmpty)) {
@@ -378,26 +410,40 @@ class RecipeAdapter extends OfflineFirstWithSupabaseAdapter<Recipe> {
   final String tableName = 'Recipe';
 
   @override
-  Future<Recipe> fromSupabase(Map<String, dynamic> input,
-          {required provider,
-          covariant OfflineFirstWithSupabaseRepository? repository}) async =>
-      await _$RecipeFromSupabase(input,
-          provider: provider, repository: repository);
+  Future<Recipe> fromSupabase(
+    Map<String, dynamic> input, {
+    required provider,
+    covariant OfflineFirstWithSupabaseRepository? repository,
+  }) async => await _$RecipeFromSupabase(
+    input,
+    provider: provider,
+    repository: repository,
+  );
   @override
-  Future<Map<String, dynamic>> toSupabase(Recipe input,
-          {required provider,
-          covariant OfflineFirstWithSupabaseRepository? repository}) async =>
-      await _$RecipeToSupabase(input,
-          provider: provider, repository: repository);
+  Future<Map<String, dynamic>> toSupabase(
+    Recipe input, {
+    required provider,
+    covariant OfflineFirstWithSupabaseRepository? repository,
+  }) async => await _$RecipeToSupabase(
+    input,
+    provider: provider,
+    repository: repository,
+  );
   @override
-  Future<Recipe> fromSqlite(Map<String, dynamic> input,
-          {required provider,
-          covariant OfflineFirstWithSupabaseRepository? repository}) async =>
-      await _$RecipeFromSqlite(input,
-          provider: provider, repository: repository);
+  Future<Recipe> fromSqlite(
+    Map<String, dynamic> input, {
+    required provider,
+    covariant OfflineFirstWithSupabaseRepository? repository,
+  }) async => await _$RecipeFromSqlite(
+    input,
+    provider: provider,
+    repository: repository,
+  );
   @override
-  Future<Map<String, dynamic>> toSqlite(Recipe input,
-          {required provider,
-          covariant OfflineFirstWithSupabaseRepository? repository}) async =>
+  Future<Map<String, dynamic>> toSqlite(
+    Recipe input, {
+    required provider,
+    covariant OfflineFirstWithSupabaseRepository? repository,
+  }) async =>
       await _$RecipeToSqlite(input, provider: provider, repository: repository);
 }

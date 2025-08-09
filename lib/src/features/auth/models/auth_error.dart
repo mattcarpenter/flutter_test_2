@@ -3,7 +3,7 @@ import 'package:freezed_annotation/freezed_annotation.dart';
 part 'auth_error.freezed.dart';
 
 @freezed
-class AuthError with _$AuthError {
+abstract class AuthError with _$AuthError {
   const factory AuthError({
     required String message,
     String? code,
@@ -40,7 +40,7 @@ class AuthError with _$AuthError {
         type: AuthErrorType.network,
       );
     }
-    
+
     return AuthError(
       message: exception.toString(),
       type: AuthErrorType.unknown,

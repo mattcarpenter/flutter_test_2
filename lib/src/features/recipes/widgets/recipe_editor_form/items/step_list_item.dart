@@ -4,6 +4,7 @@ import 'package:recipe_app/database/models/steps.dart';
 import 'package:super_context_menu/super_context_menu.dart';
 
 import '../../../../../theme/colors.dart';
+import '../../../../../theme/typography.dart';
 import '../utils/context_menu_utils.dart';
 
 class StepListItem extends StatefulWidget {
@@ -292,12 +293,17 @@ class _StepListItemState extends State<StepListItem> with SingleTickerProviderSt
                           focusNode: _focusNode,
                           child: TextField(
                             controller: _textController,
-                            decoration: const InputDecoration(
-                              hintText: 'Section name',
-                              border: InputBorder.none,
-                              contentPadding: EdgeInsets.symmetric(vertical: 12),
+                            style: AppTypography.bodySmall.copyWith(
+                              color: colors.contentSecondary,
                             ),
-                            style: TextStyle(fontWeight: FontWeight.w400, color: colors.textSecondary),
+                            decoration: InputDecoration(
+                              hintText: 'Section name',
+                              hintStyle: AppTypography.bodySmall.copyWith(
+                                color: colors.contentHint,
+                              ),
+                              border: InputBorder.none,
+                              contentPadding: const EdgeInsets.symmetric(vertical: 12),
+                            ),
                             onChanged: (value) {
                               widget.onUpdate(widget.step.copyWith(text: value));
                             },
@@ -320,7 +326,7 @@ class _StepListItemState extends State<StepListItem> with SingleTickerProviderSt
                     child: ReorderableDragStartListener(
                       key: _dragHandleKey,
                       index: widget.index,
-                      child: Icon(Icons.drag_handle, color: colors.textTertiary),
+                      child: Icon(Icons.drag_handle, color: colors.uiSecondary),
                     ),
                   ),
                 ),
@@ -392,10 +398,16 @@ class _StepListItemState extends State<StepListItem> with SingleTickerProviderSt
                         autofocus: widget.autoFocus,
                         focusNode: _focusNode,
                         controller: _textController,
-                        decoration: const InputDecoration(
+                        style: AppTypography.body.copyWith(
+                          color: colors.contentPrimary,
+                        ),
+                        decoration: InputDecoration(
                           hintText: 'Describe this step',
+                          hintStyle: AppTypography.body.copyWith(
+                            color: colors.contentHint,
+                          ),
                           border: InputBorder.none,
-                          contentPadding: EdgeInsets.symmetric(vertical: 12),
+                          contentPadding: const EdgeInsets.symmetric(vertical: 12),
                         ),
                         onChanged: (value) {
                           widget.onUpdate(widget.step.copyWith(text: value));
@@ -426,7 +438,7 @@ class _StepListItemState extends State<StepListItem> with SingleTickerProviderSt
                   child: ReorderableDragStartListener(
                     key: _dragHandleKey,
                     index: widget.index,
-                    child: Icon(Icons.drag_handle, color: colors.textTertiary),
+                    child: Icon(Icons.drag_handle, color: colors.uiSecondary),
                   ),
                 ),
               ),

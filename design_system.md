@@ -47,22 +47,28 @@ Provides semantic color names that automatically adapt to light/dark mode:
 // Always use this pattern for theme-aware colors
 final colors = AppColors.of(context);
 
-// Text colors
-colors.textPrimary     // Main text
-colors.textSecondary   // Supporting text
-colors.textTertiary    // Subtle text
-colors.textDisabled    // Disabled text
+// Content text colors (for user content, list items, descriptions)
+colors.contentPrimary     // Main content text (ingredient names, step descriptions)
+colors.contentSecondary   // Supporting content (section headers in lists)
+colors.contentHint        // Content placeholder hints ('e.g. 1 cup flour')
 
-// UI colors
-colors.surface         // Background surfaces
-colors.border          // Borders and dividers
-colors.focus           // Focus states
-colors.error           // Error states
+// UI text colors (for interface elements, forms, controls)
+colors.uiLabel            // Form field labels, button labels
+colors.uiSecondary        // Secondary interface elements (drag handles)
+colors.uiHint             // Form field placeholders ('Enter value')
 
-// Form colors
-colors.inputLabel      // Form field labels
-colors.inputPlaceholder // Placeholder text
-colors.chipBackground  // Chip/tag backgrounds
+// Base text colors (use content/UI variants when possible)
+colors.textPrimary        // Main text (fallback)
+colors.textSecondary      // Supporting text (fallback)
+colors.textTertiary       // Subtle text (fallback)
+colors.textDisabled       // Disabled text
+
+// Surface and interaction colors
+colors.surface            // Background surfaces
+colors.border             // Borders and dividers
+colors.focus              // Focus states
+colors.error              // Error states
+colors.chipBackground     // Chip/tag backgrounds
 ```
 
 ### Implementation Guidelines
@@ -173,6 +179,35 @@ AppTypography.fieldInput   // 16px, w400 - Text field content
 AppTypography.fieldLabel   // 16px, w300 - Field labels
 AppTypography.fieldError   // 12px - Error messages
 AppTypography.fieldHelper  // 12px - Helper text
+```
+
+### Typography & Color Pairing Guidelines
+
+**Content Text (Recipe Lists, User Content):**
+```dart
+// Primary content - ingredient names, step descriptions
+AppTypography.body.copyWith(color: colors.contentPrimary)
+
+// Secondary content - section headers in lists
+AppTypography.bodySmall.copyWith(color: colors.contentSecondary)
+
+// Content hints - placeholder text in content areas
+AppTypography.body.copyWith(color: colors.contentHint)
+```
+
+**Interface Text (Forms, Controls, Navigation):**
+```dart
+// Form field labels
+AppTypography.fieldLabel.copyWith(color: colors.uiLabel)
+
+// Form input text
+AppTypography.fieldInput.copyWith(color: colors.textPrimary)
+
+// Form placeholders
+AppTypography.fieldInput.copyWith(color: colors.uiHint)
+
+// Secondary UI elements (drag handles, etc.)
+AppTypography.caption.copyWith(color: colors.uiSecondary)
 ```
 
 ### Modal & Dialog Typography Guidelines
