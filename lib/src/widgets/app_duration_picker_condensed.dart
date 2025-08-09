@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:wolt_modal_sheet/wolt_modal_sheet.dart';
 import '../theme/colors.dart';
+import '../theme/typography.dart';
+import '../theme/spacing.dart';
 import 'app_duration_picker.dart' show DurationPickerMode;
 import 'app_text_field.dart' show AppTextFieldVariant;
 
@@ -146,16 +148,18 @@ class _AppDurationPickerCondensedState extends State<AppDurationPickerCondensed>
             },
             child: const Text('Update'),
           ),
-          pageTitle: const Padding(
-            padding: EdgeInsets.symmetric(horizontal: 16.0),
+          pageTitle: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
             child: Text(
               'Select Duration',
-              style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+              style: AppTypography.h4.copyWith(
+                color: AppColors.of(context).textPrimary,
+              ),
             ),
           ),
           child: Container(
             height: 250,
-            padding: const EdgeInsets.symmetric(horizontal: 16.0),
+            padding: const EdgeInsets.fromLTRB(AppSpacing.lg, AppSpacing.xl, AppSpacing.lg, AppSpacing.lg),
             child: _buildPickerContent(),
           ),
         ),
@@ -174,7 +178,17 @@ class _AppDurationPickerCondensedState extends State<AppDurationPickerCondensed>
               itemCount: 24,
               label: 'hours',
             ),
-            const Text(':', style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
+            Padding(
+              padding: const EdgeInsets.only(top: AppSpacing.lg + AppSpacing.xs), // Align with picker content
+              child: Text(
+                ':',
+                style: TextStyle(
+                  fontSize: 24,
+                  fontWeight: FontWeight.w300,
+                  color: AppColors.of(context).textSecondary,
+                ),
+              ),
+            ),
             _buildPicker(
               controller: _minutesScrollController,
               itemCount: 60,
@@ -197,13 +211,33 @@ class _AppDurationPickerCondensedState extends State<AppDurationPickerCondensed>
               itemCount: 24,
               label: 'hours',
             ),
-            const Text(':', style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
+            Padding(
+              padding: const EdgeInsets.only(top: AppSpacing.lg + AppSpacing.xs), // Align with picker content
+              child: Text(
+                ':',
+                style: TextStyle(
+                  fontSize: 24,
+                  fontWeight: FontWeight.w300,
+                  color: AppColors.of(context).textSecondary,
+                ),
+              ),
+            ),
             _buildPicker(
               controller: _minutesScrollController,
               itemCount: 60,
               label: 'minutes',
             ),
-            const Text(':', style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
+            Padding(
+              padding: const EdgeInsets.only(top: AppSpacing.lg + AppSpacing.xs), // Align with picker content
+              child: Text(
+                ':',
+                style: TextStyle(
+                  fontSize: 24,
+                  fontWeight: FontWeight.w300,
+                  color: AppColors.of(context).textSecondary,
+                ),
+              ),
+            ),
             _buildPicker(
               controller: _secondsScrollController,
               itemCount: 60,
@@ -219,18 +253,17 @@ class _AppDurationPickerCondensedState extends State<AppDurationPickerCondensed>
     required int itemCount,
     required String label,
   }) {
+    final colors = AppColors.of(context);
     return Expanded(
       child: Column(
         children: [
           Text(
             label,
-            style: TextStyle(
-              fontSize: 14,
-              fontWeight: FontWeight.w500,
-              color: AppColors.of(context).textSecondary,
+            style: AppTypography.bodySmall.copyWith(
+              color: colors.textSecondary,
             ),
           ),
-          const SizedBox(height: 8),
+          const SizedBox(height: AppSpacing.md),
           Expanded(
             child: CupertinoPicker(
               scrollController: controller,
@@ -241,7 +274,9 @@ class _AppDurationPickerCondensedState extends State<AppDurationPickerCondensed>
                 (index) => Center(
                   child: Text(
                     index.toString().padLeft(2, '0'),
-                    style: const TextStyle(fontSize: 20),
+                    style: AppTypography.h5.copyWith(
+                      color: colors.textPrimary,
+                    ),
                   ),
                 ),
               ),

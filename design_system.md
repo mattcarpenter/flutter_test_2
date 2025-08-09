@@ -145,8 +145,8 @@ Our typography system provides semantic text styles that create consistent hiera
 AppTypography.h1  // 28px, bold - Page titles
 AppTypography.h2  // 24px, bold - Major sections
 AppTypography.h3  // 20px, w600 - Subsections
-AppTypography.h4  // 18px, bold - Modal titles
-AppTypography.h5  // 16px, w600 - Section headers
+AppTypography.h4  // 18px, bold - Modal titles, dialog headers
+AppTypography.h5  // 16px, w600 - Section headers, prominent selections
 ```
 
 #### Body Text Styles
@@ -162,7 +162,7 @@ AppTypography.bodySmall  // 14px - Supporting content
 ```dart
 AppTypography.input     // 16px - Form inputs
 AppTypography.label     // 16px, w500 - UI labels
-AppTypography.caption   // 12px - Small supporting text
+AppTypography.caption   // 12px - Small supporting text, picker labels
 AppTypography.overline  // 11px, w500, spaced - Overline text
 ```
 
@@ -173,6 +173,23 @@ AppTypography.fieldInput   // 16px, w400 - Text field content
 AppTypography.fieldLabel   // 16px, w300 - Field labels
 AppTypography.fieldError   // 12px - Error messages
 AppTypography.fieldHelper  // 12px - Helper text
+```
+
+### Modal & Dialog Typography Guidelines
+
+For consistent modal and dialog design:
+
+```dart
+// Modal titles
+AppTypography.h4.copyWith(color: colors.textPrimary)    // Modal headers
+
+// Picker components  
+AppTypography.h5.copyWith(color: colors.textPrimary)    // Selected values
+AppTypography.bodySmall.copyWith(color: colors.textSecondary)  // Labels
+
+// Modal body content
+AppTypography.body.copyWith(color: colors.textPrimary)  // Descriptions
+AppTypography.bodySmall.copyWith(color: colors.textSecondary)  // Helper text
 ```
 
 ### Implementation Guidelines
@@ -188,8 +205,10 @@ Text(
 
 // Use appropriate hierarchy
 AppTypography.h2    // Page section
-AppTypography.h5    // Subsection
+AppTypography.h4    // Modal titles
+AppTypography.h5    // Subsection, picker values
 AppTypography.body  // Content
+AppTypography.bodySmall  // Supporting content, picker labels
 ```
 
 **❌ Don't:**

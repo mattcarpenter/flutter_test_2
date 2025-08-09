@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:wolt_modal_sheet/wolt_modal_sheet.dart';
 import '../theme/colors.dart';
+import '../theme/typography.dart';
+import '../theme/spacing.dart';
 import 'app_text_field.dart';
 
 enum DurationPickerMode {
@@ -154,11 +156,13 @@ class _DurationPickerModalPage {
         },
         child: const Text('Update'),
       ),
-      pageTitle: const Padding(
-        padding: EdgeInsets.symmetric(horizontal: 16.0),
+      pageTitle: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
         child: Text(
           'Select Duration',
-          style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+          style: AppTypography.h4.copyWith(
+            color: AppColors.of(context).textPrimary,
+          ),
         ),
       ),
       child: _DurationPickerContent(
@@ -236,17 +240,16 @@ class _DurationPickerContentState extends State<_DurationPickerContent> {
     required ValueChanged<int> onSelectedItemChanged,
     required String Function(int) itemBuilder,
   }) {
+    final colors = AppColors.of(context);
     return Column(
       children: [
         Text(
           label,
-          style: const TextStyle(
-            fontSize: 13,
-            color: Colors.grey,
-            fontWeight: FontWeight.w500,
+          style: AppTypography.bodySmall.copyWith(
+            color: colors.textSecondary,
           ),
         ),
-        const SizedBox(height: 8),
+        const SizedBox(height: AppSpacing.md),
         SizedBox(
           height: 160,
           width: 80,
@@ -262,9 +265,8 @@ class _DurationPickerContentState extends State<_DurationPickerContent> {
               (index) => Center(
                 child: Text(
                   itemBuilder(index),
-                  style: const TextStyle(
-                    fontSize: 20,
-                    fontWeight: FontWeight.w400,
+                  style: AppTypography.h5.copyWith(
+                    color: AppColors.of(context).textPrimary,
                   ),
                 ),
               ),
@@ -276,14 +278,14 @@ class _DurationPickerContentState extends State<_DurationPickerContent> {
   }
 
   Widget _buildSeparator() {
-    return const Padding(
-      padding: EdgeInsets.only(top: 21), // Align with picker content
+    return Padding(
+      padding: const EdgeInsets.only(top: AppSpacing.lg + AppSpacing.xs), // Align with picker content after label
       child: Text(
         ':',
         style: TextStyle(
           fontSize: 24,
           fontWeight: FontWeight.w300,
-          color: Colors.grey,
+          color: AppColors.of(context).textSecondary,
         ),
       ),
     );
@@ -292,10 +294,11 @@ class _DurationPickerContentState extends State<_DurationPickerContent> {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.all(24.0),
+      padding: const EdgeInsets.fromLTRB(AppSpacing.lg, AppSpacing.xl, AppSpacing.lg, AppSpacing.lg),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
+          const SizedBox(height: AppSpacing.md), // Additional space after title
           // Picker wheels
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
