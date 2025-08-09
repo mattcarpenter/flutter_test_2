@@ -2,12 +2,11 @@ import 'package:flutter/material.dart';
 
 import '../../../../../../database/models/ingredients.dart';
 import '../../../../../widgets/app_button.dart';
-import '../../../../../widgets/adaptive_pull_down/adaptive_pull_down.dart';
+import '../../../../../widgets/app_overflow_button.dart';
 import '../../../../../widgets/adaptive_pull_down/adaptive_menu_item.dart';
 import '../items/ingredient_list_item.dart';
 import '../utils/context_menu_utils.dart';
 import '../../../../../theme/spacing.dart';
-import '../../../../../theme/colors.dart';
 
 class IngredientsSection extends StatefulWidget {
   final List<Ingredient> ingredients;
@@ -184,8 +183,8 @@ class _IngredientsSectionState extends State<IngredientsSection> {
               ),
               const SizedBox(width: AppSpacing.sm),
               
-              // Context menu button - shrinks to content
-              AdaptivePullDownButton(
+              // Context menu button - compact overflow style
+              AppOverflowButton(
                 items: [
                   AdaptiveMenuItem(
                     title: 'Copy All Ingredients',
@@ -202,23 +201,6 @@ class _IngredientsSectionState extends State<IngredientsSection> {
                     },
                   ),
                 ],
-                child: Container(
-                  height: 44, // Match AppButton medium size height
-                  width: 44,
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    border: Border.all(
-                      color: AppColors.of(context).border,
-                      width: 1,
-                    ),
-                    color: AppColors.of(context).surface,
-                  ),
-                  child: Icon(
-                    Icons.more_horiz,
-                    color: AppColors.of(context).textSecondary,
-                    size: 20,
-                  ),
-                ),
               ),
             ],
           ),

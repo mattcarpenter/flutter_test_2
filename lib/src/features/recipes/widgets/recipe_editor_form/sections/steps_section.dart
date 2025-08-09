@@ -2,12 +2,11 @@ import 'package:flutter/material.dart' hide Step;
 import 'package:recipe_app/database/models/steps.dart';
 
 import '../../../../../widgets/app_button.dart';
-import '../../../../../widgets/adaptive_pull_down/adaptive_pull_down.dart';
+import '../../../../../widgets/app_overflow_button.dart';
 import '../../../../../widgets/adaptive_pull_down/adaptive_menu_item.dart';
 import '../items/step_list_item.dart';
 import '../utils/context_menu_utils.dart';
 import '../../../../../theme/spacing.dart';
-import '../../../../../theme/colors.dart';
 
 class StepsSection extends StatefulWidget {
   final List<Step> steps;
@@ -181,8 +180,8 @@ class _StepsSectionState extends State<StepsSection> {
               ),
               const SizedBox(width: AppSpacing.sm),
               
-              // Context menu button - shrinks to content
-              AdaptivePullDownButton(
+              // Context menu button - compact overflow style
+              AppOverflowButton(
                 items: [
                   AdaptiveMenuItem(
                     title: 'Copy All Steps',
@@ -199,23 +198,6 @@ class _StepsSectionState extends State<StepsSection> {
                     },
                   ),
                 ],
-                child: Container(
-                  height: 44, // Match AppButton medium size height
-                  width: 44,
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    border: Border.all(
-                      color: AppColors.of(context).border,
-                      width: 1,
-                    ),
-                    color: AppColors.of(context).surface,
-                  ),
-                  child: Icon(
-                    Icons.more_horiz,
-                    color: AppColors.of(context).textSecondary,
-                    size: 20,
-                  ),
-                ),
               ),
             ],
           ),
