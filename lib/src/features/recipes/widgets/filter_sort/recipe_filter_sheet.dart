@@ -19,22 +19,19 @@ void showRecipeFilterSheet(
       return [
         WoltModalSheetPage(
           backgroundColor: AppColors.of(modalContext).background,
-          hasTopBarLayer: true,
-          isTopBarLayerAlwaysVisible: true,
-          topBarTitle: const Text('Filter Recipes'),
-          leadingNavBarWidget: IconButton(
-            icon: const Icon(Icons.close),
-            onPressed: () {
-              Navigator.of(modalContext).pop();
-            },
-          ),
-          trailingNavBarWidget: TextButton(
+          leadingNavBarWidget: TextButton(
             onPressed: () {
               // Clear all filters
               onFilterChanged(initialState.clearFilters());
               Navigator.of(modalContext).pop();
             },
             child: const Text('Clear All'),
+          ),
+          trailingNavBarWidget: IconButton(
+            icon: const Icon(Icons.close),
+            onPressed: () {
+              Navigator.of(modalContext).pop();
+            },
           ),
           child: RecipeFilterContent(
             initialState: initialState,
