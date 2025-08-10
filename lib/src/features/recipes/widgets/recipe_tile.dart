@@ -122,37 +122,45 @@ class _RecipeTileState extends State<RecipeTile> with SingleTickerProviderStateM
         const double spacingAboveName = 8.0;
         const double recipeNameHeight = 20.0;
         const double spacingBetweenNameAndDetails = 4.0;
+        const double subtitleHeight = 16.0;
         const double bottomSpacing = 8.0;
-        const double detailsHeightSingleRow = 28.0;
-        const double detailsHeightDoubleRow = 48.0;
 
-        // Check if we have enough space for the time & difficulty on one row
-        final isWideEnoughForOneRow = tileWidth > 140;
-
-        // Determine actual content height based on layout
-        final detailsHeight = isWideEnoughForOneRow ? detailsHeightSingleRow : detailsHeightDoubleRow;
-        final fixedContentHeight = spacingAboveName + recipeNameHeight + spacingBetweenNameAndDetails + detailsHeight + bottomSpacing;
+        // Calculate fixed content height
+        final fixedContentHeight = spacingAboveName + recipeNameHeight +
+                                  spacingBetweenNameAndDetails + subtitleHeight + bottomSpacing;
 
         // Compute the dynamic image height
         final imageHeight = tileHeight - fixedContentHeight;
 
         // Format time display
-        String timeDisplay = 'N/A';
+        String timeDisplay = '';
         if (widget.recipe.totalTime != null) {
-          timeDisplay = '${widget.recipe.totalTime} mins';
+          timeDisplay = '${widget.recipe.totalTime} min';
         } else if (widget.recipe.prepTime != null && widget.recipe.cookTime != null) {
-          timeDisplay = '${(widget.recipe.prepTime ?? 0) + (widget.recipe.cookTime ?? 0)} mins';
-        } else if (widget.recipe.prepTime != null) {
-          timeDisplay = '${widget.recipe.prepTime} mins';
-        } else if (widget.recipe.cookTime != null) {
-          timeDisplay = '${widget.recipe.cookTime} mins';
+          final totalTime = (widget.recipe.prepTime ?? 0) + (widget.recipe.cookTime ?? 0);
+          if (totalTime > 0) {
+            timeDisplay = '$totalTime min';
+          }
+        } else if (widget.recipe.prepTime != null && widget.recipe.prepTime! > 0) {
+          timeDisplay = '${widget.recipe.prepTime} min';
+        } else if (widget.recipe.cookTime != null && widget.recipe.cookTime! > 0) {
+          timeDisplay = '${widget.recipe.cookTime} min';
         }
 
-        // Determine difficulty
-        String difficulty = 'Medium';
-        if (widget.recipe.rating != null) {
-          if (widget.recipe.rating! <= 2) difficulty = 'Easy';
-          else if (widget.recipe.rating! >= 4) difficulty = 'Hard';
+        // Format servings display
+        String servingsDisplay = '';
+        if (widget.recipe.servings != null && widget.recipe.servings! > 0) {
+          servingsDisplay = '${widget.recipe.servings} serving${widget.recipe.servings! > 1 ? 's' : ''}';
+        }
+
+        // Combine time and servings with bullet separator
+        String subtitleText = '';
+        if (timeDisplay.isNotEmpty && servingsDisplay.isNotEmpty) {
+          subtitleText = '$timeDisplay • $servingsDisplay';
+        } else if (timeDisplay.isNotEmpty) {
+          subtitleText = timeDisplay;
+        } else if (servingsDisplay.isNotEmpty) {
+          subtitleText = servingsDisplay;
         }
 
         // Get the cover image
@@ -160,16 +168,9 @@ class _RecipeTileState extends State<RecipeTile> with SingleTickerProviderStateM
         final coverImageUrl = coverImage?.getPublicUrlForSize(RecipeImageSize.small) ?? '';
 
         return Container(
-          // Add a solid background color to fix the transparency issue
-          foregroundDecoration: BoxDecoration(
-            border: Border.all(color: Colors.grey.shade300, width: 1),
-            borderRadius: BorderRadius.circular(12),
-          ),
           decoration: BoxDecoration(
             color: Colors.white,
-            borderRadius: BorderRadius.circular(12),
           ),
-          clipBehavior: Clip.antiAlias,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -178,12 +179,23 @@ class _RecipeTileState extends State<RecipeTile> with SingleTickerProviderStateM
                 future: coverImage?.getFullPath() ?? Future.value(''),
                 builder: (context, snapshot) {
                   final coverImageFilePath = snapshot.data ?? '';
-                  return LocalOrNetworkImage(
-                    filePath: coverImageFilePath,
-                    url: coverImageUrl,
-                    height: imageHeight,
-                    width: double.infinity,
-                    fit: BoxFit.cover,
+                  // Apply racetrack-style rounding to the image
+                  // Top: sharper sides (x=6), gentler top curve (y=12)
+                  // Bottom: gentler sides (x=12), sharper bottom curve (y=6) - inverted for racetrack
+                  return ClipRRect(
+                    borderRadius: BorderRadius.only(
+                      topLeft: Radius.elliptical(10, 10),      // x=6 (sharper), y=12 (gentler)
+                      topRight: Radius.elliptical(10, 10),     // x=6 (sharper), y=12 (gentler)
+                      bottomLeft: Radius.elliptical(10, 10),   // x=12 (gentler), y=6 (sharper) - inverted
+                      bottomRight: Radius.elliptical(10, 10),  // x=12 (gentler), y=6 (sharper) - inverted
+                    ),
+                    child: LocalOrNetworkImage(
+                      filePath: coverImageFilePath,
+                      url: coverImageUrl,
+                      height: imageHeight,
+                      width: double.infinity,
+                      fit: BoxFit.cover,
+                    ),
                   );
                 },
               ),
@@ -202,13 +214,19 @@ class _RecipeTileState extends State<RecipeTile> with SingleTickerProviderStateM
                 ),
               ),
               const SizedBox(height: spacingBetweenNameAndDetails),
-              // Details area (time + difficulty chip)
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 8),
-                child: isWideEnoughForOneRow
-                    ? _buildSingleRowDetails(context, timeDisplay, difficulty)
-                    : _buildDoubleRowDetails(context, timeDisplay, difficulty),
-              ),
+              // Subtitle with time and servings
+              if (subtitleText.isNotEmpty)
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 8),
+                  child: Text(
+                    subtitleText,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                      color: Colors.grey.shade600,
+                    ),
+                  ),
+                ),
               const SizedBox(height: bottomSpacing),
             ],
           ),
@@ -217,52 +235,4 @@ class _RecipeTileState extends State<RecipeTile> with SingleTickerProviderStateM
     );
   }
 
-  Widget _buildSingleRowDetails(BuildContext context, String timeDisplay, String difficulty) {
-    return Row(
-      children: [
-        Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(Icons.access_time, size: 14, color: Colors.grey.shade600),
-            const SizedBox(width: 4),
-            Text(timeDisplay, style: Theme.of(context).textTheme.bodySmall),
-          ],
-        ),
-        const Spacer(),
-        Container(
-          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-          decoration: BoxDecoration(
-            color: Colors.grey.shade200,
-            borderRadius: BorderRadius.circular(16),
-          ),
-          child: Text(difficulty, style: Theme.of(context).textTheme.bodySmall),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildDoubleRowDetails(BuildContext context, String timeDisplay, String difficulty) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(Icons.access_time, size: 14, color: Colors.grey.shade600),
-            const SizedBox(width: 4),
-            Text(timeDisplay, style: Theme.of(context).textTheme.bodySmall),
-          ],
-        ),
-        const SizedBox(height: 4),
-        Container(
-          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-          decoration: BoxDecoration(
-            color: Colors.grey.shade200,
-            borderRadius: BorderRadius.circular(16),
-          ),
-          child: Text(difficulty, style: Theme.of(context).textTheme.bodySmall),
-        ),
-      ],
-    );
-  }
 }
