@@ -94,6 +94,12 @@ class _AppRadioButtonState extends State<AppRadioButton>
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
                 color: widget.selected ? colors.primary : Colors.transparent,
+                border: widget.selected 
+                    ? null 
+                    : Border.all(
+                        color: colors.border.withOpacity(0.7),
+                        width: 1.5,
+                      ),
               ),
               child: widget.selected
                   ? Icon(

@@ -3,6 +3,7 @@ import 'package:wolt_modal_sheet/wolt_modal_sheet.dart';
 import '../../../../widgets/app_button.dart';
 import '../../../../widgets/app_radio_button_group.dart';
 import '../../../../theme/spacing.dart';
+import '../../../../theme/colors.dart';
 import '../../models/recipe_filter_sort.dart';
 
 /// A modal for selecting recipe sort options and direction
@@ -25,6 +26,7 @@ class RecipeSortModal {
       context: context,
       pageListBuilder: (modalSheetContext) => [
         WoltModalSheetPage(
+          backgroundColor: AppColors.of(modalSheetContext).background,
           hasSabGradient: false,
           topBarTitle: const Text('Sort Options'),
           isTopBarLayerAlwaysVisible: true,
@@ -35,7 +37,7 @@ class RecipeSortModal {
           child: Padding(
             padding: const EdgeInsets.fromLTRB(
               AppSpacing.xl,
-              AppSpacing.lg,
+              AppSpacing.md,
               AppSpacing.xl,
               AppSpacing.xl,
             ),
@@ -45,31 +47,52 @@ class RecipeSortModal {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    // Sort Direction Toggle Button
-                    AppButton(
-                      text: selectedSortDirection == SortDirection.ascending 
-                          ? 'Ascending' 
-                          : 'Descending',
-                      onPressed: () {
-                        setState(() {
-                          selectedSortDirection = selectedSortDirection == SortDirection.ascending
-                              ? SortDirection.descending
-                              : SortDirection.ascending;
-                        });
-                        onSortDirectionChanged(selectedSortDirection);
-                      },
-                      theme: AppButtonTheme.primary,
-                      style: AppButtonStyle.outline,
-                      size: AppButtonSize.small,
-                      leadingIcon: Icon(
-                        selectedSortDirection == SortDirection.ascending
-                            ? Icons.keyboard_arrow_up
-                            : Icons.keyboard_arrow_down,
-                        size: 18,
-                      ),
+                    // Sort Direction Row
+                    Row(
+                      children: [
+                        Expanded(
+                          child: Text(
+                            'Sort Direction',
+                            textAlign: TextAlign.right,
+                            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                              fontWeight: FontWeight.w500,
+                              color: Theme.of(context).textTheme.bodyMedium?.color?.withOpacity(0.8),
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 16), // Space between label and button
+                        Container(
+                          margin: const EdgeInsets.only(right: 12), // Align centers with radio buttons
+                          child: GestureDetector(
+                          onTap: () {
+                            setState(() {
+                              selectedSortDirection = selectedSortDirection == SortDirection.ascending
+                                  ? SortDirection.descending
+                                  : SortDirection.ascending;
+                            });
+                            onSortDirectionChanged(selectedSortDirection);
+                          },
+                          child: Container(
+                            width: 28,
+                            height: 28,
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              color: Theme.of(context).primaryColor.withOpacity(0.15),
+                            ),
+                            child: Icon(
+                              selectedSortDirection == SortDirection.ascending
+                                  ? Icons.keyboard_arrow_up
+                                  : Icons.keyboard_arrow_down,
+                              size: 20,
+                              color: Theme.of(context).primaryColor,
+                            ),
+                          ),
+                          ),
+                        ),
+                      ],
                     ),
                     
-                    const SizedBox(height: AppSpacing.xl),
+                    const SizedBox(height: AppSpacing.lg),
                     
                     // Sort Options Radio Group
                     AppRadioButtonGroup<SortOption>(
@@ -82,8 +105,6 @@ class RecipeSortModal {
                         onSortOptionChanged(newOption);
                       },
                     ),
-                    
-                    const SizedBox(height: AppSpacing.xl),
                   ],
                 );
               },

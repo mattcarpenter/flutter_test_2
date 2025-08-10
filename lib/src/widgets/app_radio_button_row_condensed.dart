@@ -81,32 +81,36 @@ class AppRadioButtonRowCondensed extends StatelessWidget {
     
     // When grouped, render without container decoration
     if (grouped) {
-      return SizedBox(
-        height: _condensedHeight,
-        child: Row(
-          children: [
-            const SizedBox(width: _horizontalPadding),
-            
-            // Label on the left
-            Expanded(
-              child: Text(
-                label,
-                style: AppTypography.fieldLabel.copyWith(
-                  color: colors.inputLabel,
+      return GestureDetector(
+        onTap: onTap,
+        child: Container(
+          height: _condensedHeight,
+          color: Colors.transparent, // Needed for tap detection
+          child: Row(
+            children: [
+              const SizedBox(width: _horizontalPadding),
+              
+              // Label on the left
+              Expanded(
+                child: Text(
+                  label,
+                  style: AppTypography.fieldLabel.copyWith(
+                    color: colors.inputLabel,
+                  ),
                 ),
               ),
-            ),
-            
-            const SizedBox(width: 16),
-            
-            // Radio button on the right
-            AppRadioButton(
-              selected: selected,
-              onTap: onTap,
-            ),
-            
-            const SizedBox(width: _horizontalPadding),
-          ],
+              
+              const SizedBox(width: 16),
+              
+              // Radio button on the right (no onTap - handled by row)
+              AppRadioButton(
+                selected: selected,
+                onTap: null,
+              ),
+              
+              const SizedBox(width: _horizontalPadding),
+            ],
+          ),
         ),
       );
     }
@@ -137,10 +141,10 @@ class AppRadioButtonRowCondensed extends StatelessWidget {
             
             const SizedBox(width: 16),
             
-            // Radio button on the right
+            // Radio button on the right (no onTap - handled by row)
             AppRadioButton(
               selected: selected,
-              onTap: onTap,
+              onTap: null,
             ),
             
             const SizedBox(width: _horizontalPadding),
