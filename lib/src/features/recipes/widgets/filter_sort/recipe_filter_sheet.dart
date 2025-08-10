@@ -2,6 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:wolt_modal_sheet/wolt_modal_sheet.dart';
 import '../../../../theme/colors.dart';
+import '../../../../theme/typography.dart';
+import '../../../../theme/spacing.dart';
+import '../../../../widgets/app_button.dart';
 import '../../models/recipe_filter_sort.dart';
 
 /// Shows a bottom sheet with recipe filtering options
@@ -42,9 +45,6 @@ void showRecipeFilterSheet(
           ),
         ),
       ];
-    },
-    onModalDismissedWithBarrierTap: () {
-      Navigator.of(context).pop();
     },
   );
 }
@@ -93,150 +93,165 @@ class _RecipeFilterContentState extends ConsumerState<RecipeFilterContent> {
 
   @override
   Widget build(BuildContext context) {
-    return SizedBox(
-      height: MediaQuery.of(context).size.height * 0.7,
-      child: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Expanded(
-              child: SingleChildScrollView(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    _buildCookTimeFilter(),
-                    const Divider(),
-                    _buildRatingFilter(),
-                    const Divider(),
-                    _buildPantryMatchFilter(),
-                  ],
-                ),
-              ),
-            ),
-            const SizedBox(height: 16),
-            SizedBox(
-              width: double.infinity,
-              child: ElevatedButton(
-                onPressed: () {
-                  print('Applying filters: ${filterState.activeFilters}');
-                  widget.onFilterChanged(filterState);
-                },
-                child: const Text('Apply Filters'),
-              ),
-            ),
-          ],
-        ),
+    final colors = AppColors.of(context);
+    
+    return Padding(
+      padding: EdgeInsets.fromLTRB(
+        AppSpacing.lg,
+        AppSpacing.sm, // Reduced top spacing
+        AppSpacing.lg,
+        AppSpacing.lg,
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisSize: MainAxisSize.min, // Size to content
+        children: [
+          _buildCookTimeFilter(),
+          SizedBox(height: AppSpacing.xl), // Replace divider with spacing
+          _buildRatingFilter(),
+          SizedBox(height: AppSpacing.xl), // Replace divider with spacing
+          _buildPantryMatchFilter(),
+          SizedBox(height: AppSpacing.xl), // Extra margin before Apply button
+          AppButton(
+            text: 'Apply Filters',
+            onPressed: () {
+              print('Applying filters: ${filterState.activeFilters}');
+              widget.onFilterChanged(filterState);
+            },
+            fullWidth: true,
+          ),
+        ],
       ),
     );
   }
 
   Widget _buildCookTimeFilter() {
+    final colors = AppColors.of(context);
     final selectedValue = filterState.activeFilters[FilterType.cookTime] as CookTimeFilter?;
     
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Padding(
-          padding: EdgeInsets.symmetric(vertical: 8.0),
-          child: Text(
-            'Cook Time',
-            style: TextStyle(
-              fontSize: 18,
-              fontWeight: FontWeight.bold,
+        Padding(
+          padding: EdgeInsets.only(bottom: AppSpacing.md),
+          child: Center(
+            child: Text(
+              'Cook Time',
+              style: AppTypography.h5.copyWith(
+                color: colors.textPrimary,
+              ),
             ),
           ),
         ),
-        Wrap(
-          spacing: 8.0,
-          runSpacing: 8.0,
-          children: CookTimeFilter.values.map((filter) {
+        SizedBox(
+          width: double.infinity,
+          child: Wrap(
+            spacing: AppSpacing.sm,
+            runSpacing: AppSpacing.sm,
+            alignment: WrapAlignment.center,
+            children: CookTimeFilter.values.map((filter) {
             final isSelected = selectedValue == filter;
-            return FilterChip(
-              label: Text(filter.label),
-              selected: isSelected,
-              onSelected: (selected) {
-                _updateFilter(
-                  FilterType.cookTime, 
-                  selected ? filter : null
-                );
-              },
-            );
-          }).toList(),
+              return AppButton(
+                text: filter.label,
+                size: AppButtonSize.small,
+                style: isSelected ? AppButtonStyle.fill : AppButtonStyle.outline,
+                onPressed: () {
+                  _updateFilter(
+                    FilterType.cookTime, 
+                    isSelected ? null : filter
+                  );
+                },
+              );
+            }).toList(),
+          ),
         ),
       ],
     );
   }
 
   Widget _buildRatingFilter() {
+    final colors = AppColors.of(context);
     final selectedValue = filterState.activeFilters[FilterType.rating] as RatingFilter?;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Padding(
-          padding: EdgeInsets.symmetric(vertical: 8.0),
-          child: Text(
-            'Rating',
-            style: TextStyle(
-              fontSize: 18,
-              fontWeight: FontWeight.bold,
+        Padding(
+          padding: EdgeInsets.only(bottom: AppSpacing.md),
+          child: Center(
+            child: Text(
+              'Rating',
+              style: AppTypography.h5.copyWith(
+                color: colors.textPrimary,
+              ),
             ),
           ),
         ),
-        Wrap(
-          spacing: 8.0,
-          runSpacing: 8.0,
-          children: RatingFilter.values.map((filter) {
-            final isSelected = selectedValue == filter;
-            return FilterChip(
-              label: Text(filter.label),
-              selected: isSelected,
-              onSelected: (selected) {
-                _updateFilter(
-                  FilterType.rating, 
-                  selected ? filter : null
-                );
-              },
-            );
-          }).toList(),
+        SizedBox(
+          width: double.infinity,
+          child: Wrap(
+            spacing: AppSpacing.sm,
+            runSpacing: AppSpacing.sm,
+            alignment: WrapAlignment.center,
+            children: RatingFilter.values.map((filter) {
+              final isSelected = selectedValue == filter;
+              return AppButton(
+                text: filter.label,
+                size: AppButtonSize.small,
+                style: isSelected ? AppButtonStyle.fill : AppButtonStyle.outline,
+                onPressed: () {
+                  _updateFilter(
+                    FilterType.rating, 
+                    isSelected ? null : filter
+                  );
+                },
+              );
+            }).toList(),
+          ),
         ),
       ],
     );
   }
 
   Widget _buildPantryMatchFilter() {
+    final colors = AppColors.of(context);
     final selectedValue = filterState.activeFilters[FilterType.pantryMatch] as PantryMatchFilter?;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Padding(
-          padding: EdgeInsets.symmetric(vertical: 8.0),
-          child: Text(
-            'Pantry Match',
-            style: TextStyle(
-              fontSize: 18,
-              fontWeight: FontWeight.bold,
+        Padding(
+          padding: EdgeInsets.only(bottom: AppSpacing.md),
+          child: Center(
+            child: Text(
+              'Pantry Match',
+              style: AppTypography.h5.copyWith(
+                color: colors.textPrimary,
+              ),
             ),
           ),
         ),
-        Wrap(
-          spacing: 8.0,
-          runSpacing: 8.0,
-          children: PantryMatchFilter.values.map((filter) {
-            final isSelected = selectedValue == filter;
-            return FilterChip(
-              label: Text(filter.label),
-              selected: isSelected,
-              onSelected: (selected) {
-                _updateFilter(
-                  FilterType.pantryMatch, 
-                  selected ? filter : null
-                );
-              },
-            );
-          }).toList(),
+        SizedBox(
+          width: double.infinity,
+          child: Wrap(
+            spacing: AppSpacing.sm,
+            runSpacing: AppSpacing.sm,
+            alignment: WrapAlignment.center,
+            children: PantryMatchFilter.values.map((filter) {
+              final isSelected = selectedValue == filter;
+              return AppButton(
+                text: filter.label,
+                size: AppButtonSize.small,
+                style: isSelected ? AppButtonStyle.fill : AppButtonStyle.outline,
+                onPressed: () {
+                  _updateFilter(
+                    FilterType.pantryMatch, 
+                    isSelected ? null : filter
+                  );
+                },
+              );
+            }).toList(),
+          ),
         ),
       ],
     );

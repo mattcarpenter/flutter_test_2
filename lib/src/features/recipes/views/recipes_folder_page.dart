@@ -257,7 +257,7 @@ class _SortHeaderDelegate extends SliverPersistentHeaderDelegate {
                 onPressed: null, // Let GestureDetector handle taps
                 visuallyEnabled: true, // Keep button looking enabled
                 theme: AppButtonTheme.primary,
-                style: AppButtonStyle.outline,
+                style: AppButtonStyle.mutedOutline,
                 size: AppButtonSize.small,
                 leadingIcon: Icon(
                   sortDirection == SortDirection.ascending
@@ -276,6 +276,7 @@ class _SortHeaderDelegate extends SliverPersistentHeaderDelegate {
               children: [
                 AppButtonVariants.iconOnly(
                   icon: const Icon(Icons.tune),  // Let IconTheme handle the size
+                  style: AppButtonStyle.mutedOutline,
                   onPressed: () {
                     print('Current filter state: ${filterState.activeFilters}');
 
@@ -300,7 +301,6 @@ class _SortHeaderDelegate extends SliverPersistentHeaderDelegate {
                     );
                   },
                   theme: AppButtonTheme.primary,
-                  style: AppButtonStyle.outline,
                   size: AppButtonSize.small,
                 ),
                 // Red dot indicator

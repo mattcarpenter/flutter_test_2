@@ -84,13 +84,13 @@ class _AppButtonState extends State<AppButton> {
 
   Color get _backgroundColor {
     final colors = AppColors.of(context);
-    
+
     if (widget.style == AppButtonStyle.outline || widget.style == AppButtonStyle.mutedOutline) {
       return Colors.transparent;
     }
 
     final baseColor = _getThemeColor(colors, hover: _isHovered, pressed: _isPressed);
-    
+
     if (widget.style == AppButtonStyle.muted) {
       // Muted style uses very light version of the color
       return widget.theme == AppButtonTheme.primary
@@ -101,37 +101,37 @@ class _AppButtonState extends State<AppButton> {
               ? AppColorSwatches.primary[50]!
               : AppColorSwatches.primary[900]!.withOpacity(0.15);
     }
-    
+
     // Check visuallyEnabled to override disabled appearance
     if ((widget.onPressed == null && !widget.visuallyEnabled) || widget.loading) {
       return baseColor.withOpacity(0.5);
     }
-    
+
     return baseColor;
   }
 
   Color get _borderColor {
     final colors = AppColors.of(context);
     final baseColor = _getThemeColor(colors, hover: _isHovered, pressed: _isPressed);
-    
+
     if (widget.style == AppButtonStyle.mutedOutline) {
-      // Muted outline uses subtle border
+      // Muted outline uses very subtle border
       return widget.theme == AppButtonTheme.primary
-          ? colors.textSecondary
-          : colors.primary;
+          ? colors.textPrimary.withOpacity(0.35) // Very light border
+          : colors.primary.withOpacity(0.35);
     }
-    
+
     // Check visuallyEnabled to override disabled appearance
     if ((widget.onPressed == null && !widget.visuallyEnabled) || widget.loading) {
       return baseColor.withOpacity(0.5);
     }
-    
+
     return baseColor;
   }
 
   Color get _textColor {
     final colors = AppColors.of(context);
-    
+
     if (widget.style == AppButtonStyle.fill) {
       // Filled buttons use contrasting text
       if (widget.theme == AppButtonTheme.primary) {
@@ -140,22 +140,29 @@ class _AppButtonState extends State<AppButton> {
         return colors.onPrimary;
       }
     }
-    
-    if (widget.style == AppButtonStyle.muted || widget.style == AppButtonStyle.mutedOutline) {
-      // Muted styles use darker text
+
+    if (widget.style == AppButtonStyle.muted) {
+      // Muted style uses darker text
       return widget.theme == AppButtonTheme.primary
           ? colors.textPrimary
           : colors.primary;
     }
 
+    if (widget.style == AppButtonStyle.mutedOutline) {
+      // Muted outline uses lighter text
+      return widget.theme == AppButtonTheme.primary
+          ? colors.textPrimary.withOpacity(0.65)
+          : colors.primary.withOpacity(0.65);
+    }
+
     // Outline styles use theme color for text
     final baseColor = _getThemeColor(colors, hover: _isHovered, pressed: _isPressed);
-    
+
     // Check visuallyEnabled to override disabled appearance
     if ((widget.onPressed == null && !widget.visuallyEnabled) || widget.loading) {
       return baseColor.withOpacity(0.5);
     }
-    
+
     return baseColor;
   }
 
@@ -182,25 +189,25 @@ class _AppButtonState extends State<AppButton> {
           return const EdgeInsets.all(18);
       }
     }
-    
+
     // Reduce horizontal padding when leading icon is present for better balance
     final hasLeadingIcon = widget.leadingIcon != null && !widget.loading;
     final horizontalPadding = hasLeadingIcon ? 0.7 : 1.0; // 30% less padding with icon
-    
+
     switch (widget.size) {
       case AppButtonSize.small:
         return EdgeInsets.symmetric(
-          horizontal: (18 * horizontalPadding).round().toDouble(), 
+          horizontal: (18 * horizontalPadding).round().toDouble(),
           vertical: 8
         );
       case AppButtonSize.medium:
         return EdgeInsets.symmetric(
-          horizontal: (22 * horizontalPadding).round().toDouble(), 
+          horizontal: (22 * horizontalPadding).round().toDouble(),
           vertical: 10
         );
       case AppButtonSize.large:
         return EdgeInsets.symmetric(
-          horizontal: (26 * horizontalPadding).round().toDouble(), 
+          horizontal: (26 * horizontalPadding).round().toDouble(),
           vertical: 14
         );
     }
@@ -218,7 +225,7 @@ class _AppButtonState extends State<AppButton> {
           return 24;
       }
     }
-    
+
     switch (widget.size) {
       case AppButtonSize.small:
         return 12;
@@ -285,16 +292,16 @@ class _AppButtonState extends State<AppButton> {
           decoration: BoxDecoration(
             color: _backgroundColor,
             borderRadius: _borderRadius,
-            border: (widget.style == AppButtonStyle.outline || widget.style == AppButtonStyle.mutedOutline)
-                ? Border.all(
-                    color: _borderColor,
-                    width: 1,
-                  )
-                : null,
+            border: Border.all(
+              color: (widget.style == AppButtonStyle.outline || widget.style == AppButtonStyle.mutedOutline)
+                  ? _borderColor
+                  : Colors.transparent,
+              width: 1,
+            ),
           ),
           child: Padding(
             padding: _padding,
-            child: widget.iconOnly 
+            child: widget.iconOnly
               ? widget.loading
                   ? Center(
                       child: SizedBox(
