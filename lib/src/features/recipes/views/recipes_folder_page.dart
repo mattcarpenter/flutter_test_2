@@ -8,10 +8,11 @@ import '../../../providers/recipe_filter_sort_provider.dart';
 import '../../../providers/recipe_provider.dart';
 import '../../../widgets/adaptive_pull_down/adaptive_menu_item.dart';
 import '../../../widgets/adaptive_pull_down/adaptive_pull_down.dart';
+import '../../../widgets/app_button.dart';
 import '../models/recipe_filter_sort.dart';
 import '../utils/filter_utils.dart';
 import '../widgets/filter_sort/recipe_filter_sheet.dart';
-import '../widgets/filter_sort/recipe_sort_dropdown.dart';
+import '../widgets/filter_sort/recipe_sort_modal.dart';
 import '../widgets/recipe_list.dart';
 import '../widgets/recipe_search_results.dart';
 import 'add_recipe_modal.dart';
@@ -228,8 +229,6 @@ class _SortHeaderDelegate extends SliverPersistentHeaderDelegate {
 
   @override
   Widget build(BuildContext context, double shrinkOffset, bool overlapsContent) {
-    // Use the filter state passed through the constructor
-
     // Use Material widget to get elevation/shadow
     return Material(
       elevation: overlapsContent ? 1.0 : 0.0, // Apply elevation only when content scrolls under
@@ -238,80 +237,90 @@ class _SortHeaderDelegate extends SliverPersistentHeaderDelegate {
         height: minExtent,
         padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
         child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          crossAxisAlignment: CrossAxisAlignment.center, // Ensure vertical alignment
+          mainAxisAlignment: MainAxisAlignment.start, // Left-align buttons
+          crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-          // Filter button with counter badge
-          Material(
-            // Use Material for proper ink effects
-            color: Colors.transparent,
-            child: InkWell(
-              borderRadius: BorderRadius.circular(8),
+            // Sort button with current sort label and direction icon
+            GestureDetector(
               onTap: () {
-                // Use the current filter state
-                print('Current filter state: ${filterState.activeFilters}');
-
-                showRecipeFilterSheet(
+                RecipeSortModal.show(
                   context,
-                  initialState: filterState,
-                  onFilterChanged: (newState) {
-                    // Use a more direct approach to update filters
-                    print('Filter sheet returned state: ${newState.activeFilters}');
-
-                    final container = ProviderScope.containerOf(context);
-                    final notifier = container.read(recipeFolderFilterSortProvider.notifier);
-
-                    // Clear all existing filters first
-                    notifier.clearFilters();
-
-                    // Add all filters from new state
-                    for (final entry in newState.activeFilters.entries) {
-                      print('Adding filter: ${entry.key} = ${entry.value}');
-                      notifier.updateFilter(entry.key, entry.value);
-                    }
-                  },
+                  currentSortOption: sortOption,
+                  currentSortDirection: sortDirection,
+                  onSortOptionChanged: onSortOptionChanged,
+                  onSortDirectionChanged: onSortDirectionChanged,
+                  showPantryMatchOption: showPantryMatchOption,
                 );
               },
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 4.0),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  crossAxisAlignment: CrossAxisAlignment.center, // Ensure vertical alignment
-                  children: [
-                    const Icon(Icons.filter_list),
-                    if (filterState.hasFilters)
-                      Container(
-                        margin: const EdgeInsets.only(left: 4),
-                        padding: const EdgeInsets.all(4),
-                        decoration: BoxDecoration(
-                          color: Theme.of(context).colorScheme.primary,
-                          shape: BoxShape.circle,
-                        ),
-                        child: Text(
-                          filterState.filterCount.toString(),
-                          style: TextStyle(
-                            color: Theme.of(context).colorScheme.onPrimary,
-                            fontSize: 12,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                      ),
-                  ],
+              child: AppButton(
+                text: sortOption.label,
+                onPressed: null, // Let GestureDetector handle taps
+                visuallyEnabled: true, // Keep button looking enabled
+                theme: AppButtonTheme.primary,
+                style: AppButtonStyle.outline,
+                size: AppButtonSize.small,
+                leadingIcon: Icon(
+                  sortDirection == SortDirection.ascending
+                      ? Icons.keyboard_arrow_up
+                      : Icons.keyboard_arrow_down,
+                  size: 18,
                 ),
               ),
             ),
-          ),
+            
+            const SizedBox(width: 12), // Space between buttons
+            
+            // Filter button with red dot indicator when filters active
+            Stack(
+              clipBehavior: Clip.none,
+              children: [
+                AppButtonVariants.iconOnly(
+                  icon: const Icon(Icons.tune),  // Let IconTheme handle the size
+                  onPressed: () {
+                    print('Current filter state: ${filterState.activeFilters}');
 
-          // Sort dropdown
-          RecipeSortDropdown(
-            sortOption: sortOption,
-            sortDirection: sortDirection,
-            onSortOptionChanged: onSortOptionChanged,
-            onSortDirectionChanged: onSortDirectionChanged,
-            showPantryMatchOption: showPantryMatchOption,
-          ),
-        ],
-      ),
+                    showRecipeFilterSheet(
+                      context,
+                      initialState: filterState,
+                      onFilterChanged: (newState) {
+                        print('Filter sheet returned state: ${newState.activeFilters}');
+
+                        final container = ProviderScope.containerOf(context);
+                        final notifier = container.read(recipeFolderFilterSortProvider.notifier);
+
+                        // Clear all existing filters first
+                        notifier.clearFilters();
+
+                        // Add all filters from new state
+                        for (final entry in newState.activeFilters.entries) {
+                          print('Adding filter: ${entry.key} = ${entry.value}');
+                          notifier.updateFilter(entry.key, entry.value);
+                        }
+                      },
+                    );
+                  },
+                  theme: AppButtonTheme.primary,
+                  style: AppButtonStyle.outline,
+                  size: AppButtonSize.small,
+                ),
+                // Red dot indicator
+                if (filterState.hasFilters)
+                  Positioned(
+                    bottom: 2,
+                    left: 2,
+                    child: Container(
+                      width: 8,
+                      height: 8,
+                      decoration: const BoxDecoration(
+                        color: Colors.red,
+                        shape: BoxShape.circle,
+                      ),
+                    ),
+                  ),
+              ],
+            ),
+          ],
+        ),
       ),
     );
   }

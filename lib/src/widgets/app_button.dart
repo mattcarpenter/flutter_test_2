@@ -40,6 +40,9 @@ class AppButton extends StatefulWidget {
   final Widget? leadingIcon;
   final Widget? trailingIcon;
   final bool fullWidth;
+  final bool iconOnly;
+  final Widget? icon;
+  final bool visuallyEnabled;
 
   const AppButton({
     Key? key,
@@ -53,6 +56,9 @@ class AppButton extends StatefulWidget {
     this.leadingIcon,
     this.trailingIcon,
     this.fullWidth = false,
+    this.iconOnly = false,
+    this.icon,
+    this.visuallyEnabled = false,
   }) : super(key: key);
 
   @override
@@ -96,7 +102,8 @@ class _AppButtonState extends State<AppButton> {
               : AppColorSwatches.primary[900]!.withOpacity(0.15);
     }
     
-    if (widget.onPressed == null || widget.loading) {
+    // Check visuallyEnabled to override disabled appearance
+    if ((widget.onPressed == null && !widget.visuallyEnabled) || widget.loading) {
       return baseColor.withOpacity(0.5);
     }
     
@@ -114,7 +121,8 @@ class _AppButtonState extends State<AppButton> {
           : colors.primary;
     }
     
-    if (widget.onPressed == null || widget.loading) {
+    // Check visuallyEnabled to override disabled appearance
+    if ((widget.onPressed == null && !widget.visuallyEnabled) || widget.loading) {
       return baseColor.withOpacity(0.5);
     }
     
@@ -143,7 +151,8 @@ class _AppButtonState extends State<AppButton> {
     // Outline styles use theme color for text
     final baseColor = _getThemeColor(colors, hover: _isHovered, pressed: _isPressed);
     
-    if (widget.onPressed == null || widget.loading) {
+    // Check visuallyEnabled to override disabled appearance
+    if ((widget.onPressed == null && !widget.visuallyEnabled) || widget.loading) {
       return baseColor.withOpacity(0.5);
     }
     
@@ -162,6 +171,18 @@ class _AppButtonState extends State<AppButton> {
   }
 
   EdgeInsets get _padding {
+    // Icon-only buttons get equal padding on all sides for square appearance
+    if (widget.iconOnly) {
+      switch (widget.size) {
+        case AppButtonSize.small:
+          return const EdgeInsets.all(10);
+        case AppButtonSize.medium:
+          return const EdgeInsets.all(12);
+        case AppButtonSize.large:
+          return const EdgeInsets.all(18);
+      }
+    }
+    
     // Reduce horizontal padding when leading icon is present for better balance
     final hasLeadingIcon = widget.leadingIcon != null && !widget.loading;
     final horizontalPadding = hasLeadingIcon ? 0.7 : 1.0; // 30% less padding with icon
@@ -186,6 +207,18 @@ class _AppButtonState extends State<AppButton> {
   }
 
   double get _fontSize {
+    // Icon-only buttons use larger icon sizes for better visibility
+    if (widget.iconOnly) {
+      switch (widget.size) {
+        case AppButtonSize.small:
+          return 16;  // Increased from 12 for better visibility
+        case AppButtonSize.medium:
+          return 18;
+        case AppButtonSize.large:
+          return 24;
+      }
+    }
+    
     switch (widget.size) {
       case AppButtonSize.small:
         return 12;
@@ -235,15 +268,16 @@ class _AppButtonState extends State<AppButton> {
   @override
   Widget build(BuildContext context) {
     final isEnabled = widget.onPressed != null && !widget.loading;
+    final showEnabledCursor = isEnabled || widget.visuallyEnabled;
 
     return MouseRegion(
       onEnter: (_) => _handleHover(true),
       onExit: (_) => _handleHover(false),
-      cursor: isEnabled ? SystemMouseCursors.click : SystemMouseCursors.basic,
+      cursor: showEnabledCursor ? SystemMouseCursors.click : SystemMouseCursors.basic,
       child: GestureDetector(
-        onTapDown: _handleTapDown,
-        onTapUp: _handleTapUp,
-        onTapCancel: _handleTapCancel,
+        onTapDown: isEnabled ? _handleTapDown : null,
+        onTapUp: isEnabled ? _handleTapUp : null,
+        onTapCancel: isEnabled ? _handleTapCancel : null,
         onTap: isEnabled ? widget.onPressed : null,
         child: AnimatedContainer(
           duration: const Duration(milliseconds: 150),
@@ -260,56 +294,81 @@ class _AppButtonState extends State<AppButton> {
           ),
           child: Padding(
             padding: _padding,
-            child: Row(
-              mainAxisSize: widget.fullWidth ? MainAxisSize.max : MainAxisSize.min,
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                if (widget.loading) ...[
-                  SizedBox(
-                    width: _fontSize,
-                    height: _fontSize,
-                    child: CircularProgressIndicator(
-                      strokeWidth: 2,
-                      valueColor: AlwaysStoppedAnimation<Color>(_textColor),
+            child: widget.iconOnly 
+              ? widget.loading
+                  ? Center(
+                      child: SizedBox(
+                        width: _fontSize,
+                        height: _fontSize,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                          valueColor: AlwaysStoppedAnimation<Color>(_textColor),
+                        ),
+                      ),
+                    )
+                  : Container(
+                      alignment: Alignment.center,
+                      child: Transform.translate(
+                        offset: const Offset(1, -2), // Nudge 1px right, 2px up
+                        child: IconTheme(
+                          data: IconThemeData(
+                            size: _fontSize,
+                            color: _textColor,
+                          ),
+                          child: widget.icon ?? widget.leadingIcon ?? const SizedBox(),
+                        ),
+                      ),
+                    )
+              : Row(
+                  mainAxisSize: widget.fullWidth ? MainAxisSize.max : MainAxisSize.min,
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    if (widget.loading) ...[
+                      SizedBox(
+                        width: _fontSize,
+                        height: _fontSize,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                          valueColor: AlwaysStoppedAnimation<Color>(_textColor),
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                    ] else if (widget.leadingIcon != null) ...[
+                      IconTheme(
+                        data: IconThemeData(
+                          size: _fontSize,
+                          color: _textColor,
+                        ),
+                        child: widget.leadingIcon!,
+                      ),
+                      const SizedBox(width: 6), // Reduced from 8 to 6
+                    ],
+                    Flexible(
+                      child: Text(
+                        widget.text,
+                        style: TextStyle(
+                          color: _textColor,
+                          fontSize: _fontSize,
+                          fontWeight: FontWeight.w600,
+                          fontFamily: 'Inter',
+                          height: 1,
+                        ),
+                        overflow: TextOverflow.ellipsis,
+                        maxLines: 1,
+                      ),
                     ),
-                  ),
-                  const SizedBox(width: 8),
-                ] else if (widget.leadingIcon != null) ...[
-                  IconTheme(
-                    data: IconThemeData(
-                      size: _fontSize,
-                      color: _textColor,
-                    ),
-                    child: widget.leadingIcon!,
-                  ),
-                  const SizedBox(width: 6), // Reduced from 8 to 6
-                ],
-                Flexible(
-                  child: Text(
-                    widget.text,
-                    style: TextStyle(
-                      color: _textColor,
-                      fontSize: _fontSize,
-                      fontWeight: FontWeight.w600,
-                      fontFamily: 'Inter',
-                      height: 1,
-                    ),
-                    overflow: TextOverflow.ellipsis,
-                    maxLines: 1,
-                  ),
+                    if (widget.trailingIcon != null && !widget.loading) ...[
+                      const SizedBox(width: 8),
+                      IconTheme(
+                        data: IconThemeData(
+                          size: _fontSize,
+                          color: _textColor,
+                        ),
+                        child: widget.trailingIcon!,
+                      ),
+                    ],
+                  ],
                 ),
-                if (widget.trailingIcon != null && !widget.loading) ...[
-                  const SizedBox(width: 8),
-                  IconTheme(
-                    data: IconThemeData(
-                      size: _fontSize,
-                      color: _textColor,
-                    ),
-                    child: widget.trailingIcon!,
-                  ),
-                ],
-              ],
-            ),
           ),
         ),
       ),
@@ -416,6 +475,31 @@ extension AppButtonVariants on AppButton {
       leadingIcon: leadingIcon,
       trailingIcon: trailingIcon,
       fullWidth: fullWidth,
+    );
+  }
+
+  /// Creates an icon-only button
+  static AppButton iconOnly({
+    required Widget icon,
+    VoidCallback? onPressed,
+    AppButtonTheme theme = AppButtonTheme.primary,
+    AppButtonStyle style = AppButtonStyle.outline,
+    AppButtonShape shape = AppButtonShape.round,
+    AppButtonSize size = AppButtonSize.small,
+    bool loading = false,
+    bool visuallyEnabled = false,
+  }) {
+    return AppButton(
+      text: '',
+      onPressed: onPressed,
+      theme: theme,
+      style: style,
+      shape: shape,
+      size: size,
+      loading: loading,
+      iconOnly: true,
+      icon: icon,
+      visuallyEnabled: visuallyEnabled,
     );
   }
 }
