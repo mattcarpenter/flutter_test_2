@@ -114,6 +114,7 @@ class _RecipeFilterContentState extends ConsumerState<RecipeFilterContent> {
           SizedBox(height: AppSpacing.xl), // Extra margin before Apply button
           AppButton(
             text: 'Apply Filters',
+            theme: AppButtonTheme.secondary,
             onPressed: () {
               print('Applying filters: ${filterState.activeFilters}');
               widget.onFilterChanged(filterState);
@@ -154,7 +155,7 @@ class _RecipeFilterContentState extends ConsumerState<RecipeFilterContent> {
               return AppButton(
                 text: filter.label,
                 size: AppButtonSize.small,
-                style: isSelected ? AppButtonStyle.fill : AppButtonStyle.outline,
+                style: isSelected ? AppButtonStyle.fill : AppButtonStyle.mutedOutline,
                 onPressed: () {
                   _updateFilter(
                     FilterType.cookTime, 
@@ -198,7 +199,7 @@ class _RecipeFilterContentState extends ConsumerState<RecipeFilterContent> {
               return AppButton(
                 text: filter.label,
                 size: AppButtonSize.small,
-                style: isSelected ? AppButtonStyle.fill : AppButtonStyle.outline,
+                style: isSelected ? AppButtonStyle.fill : AppButtonStyle.mutedOutline,
                 onPressed: () {
                   _updateFilter(
                     FilterType.rating, 
@@ -242,7 +243,7 @@ class _RecipeFilterContentState extends ConsumerState<RecipeFilterContent> {
               return AppButton(
                 text: filter.label,
                 size: AppButtonSize.small,
-                style: isSelected ? AppButtonStyle.fill : AppButtonStyle.outline,
+                style: isSelected ? AppButtonStyle.fill : AppButtonStyle.mutedOutline,
                 onPressed: () {
                   _updateFilter(
                     FilterType.pantryMatch, 
