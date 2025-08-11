@@ -118,19 +118,10 @@ class _RecipeTileState extends State<RecipeTile> with SingleTickerProviderStateM
         final tileWidth = constraints.maxWidth;
         final tileHeight = constraints.maxHeight;
 
-        // Constants for spacing and text height
+        // Constants for spacing only - heights will be dynamic
         const double spacingAboveName = 8.0;
-        const double recipeNameHeight = 20.0;
         const double spacingBetweenNameAndDetails = 4.0;
-        const double subtitleHeight = 16.0;
         const double bottomSpacing = 8.0;
-
-        // Calculate fixed content height
-        final fixedContentHeight = spacingAboveName + recipeNameHeight +
-                                  spacingBetweenNameAndDetails + subtitleHeight + bottomSpacing;
-
-        // Compute the dynamic image height
-        final imageHeight = tileHeight - fixedContentHeight;
 
         // Format time display
         String timeDisplay = '';
@@ -174,62 +165,61 @@ class _RecipeTileState extends State<RecipeTile> with SingleTickerProviderStateM
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Use FutureBuilder to wait for the file path
-              FutureBuilder<String>(
-                future: coverImage?.getFullPath() ?? Future.value(''),
-                builder: (context, snapshot) {
-                  final coverImageFilePath = snapshot.data ?? '';
-                  
-                  // Check if we have an image to display
-                  final hasImage = coverImageFilePath.isNotEmpty || coverImageUrl.isNotEmpty;
-                  
-                  // Apply racetrack-style rounding to the image or placeholder
-                  return ClipRRect(
-                    borderRadius: BorderRadius.only(
-                      topLeft: Radius.elliptical(10, 10),      
-                      topRight: Radius.elliptical(10, 10),     
-                      bottomLeft: Radius.elliptical(10, 10),   
-                      bottomRight: Radius.elliptical(10, 10),  
-                    ),
-                    child: hasImage
-                        ? LocalOrNetworkImage(
-                            filePath: coverImageFilePath,
-                            url: coverImageUrl,
-                            height: imageHeight,
-                            width: double.infinity,
-                            fit: BoxFit.cover,
-                          )
-                        : Container(
-                            height: imageHeight,
-                            width: double.infinity,
-                            color: Colors.grey[100],
-                            child: Center(
-                              child: Icon(
-                                Icons.restaurant_menu,
-                                size: 32,
-                                color: Colors.grey[400],
+              // Image takes up remaining space - dynamic height
+              Expanded(
+                child: FutureBuilder<String>(
+                  future: coverImage?.getFullPath() ?? Future.value(''),
+                  builder: (context, snapshot) {
+                    final coverImageFilePath = snapshot.data ?? '';
+                    
+                    // Check if we have an image to display
+                    final hasImage = coverImageFilePath.isNotEmpty || coverImageUrl.isNotEmpty;
+                    
+                    // Apply racetrack-style rounding to the image or placeholder
+                    return ClipRRect(
+                      borderRadius: BorderRadius.only(
+                        topLeft: Radius.elliptical(10, 10),      
+                        topRight: Radius.elliptical(10, 10),     
+                        bottomLeft: Radius.elliptical(10, 10),   
+                        bottomRight: Radius.elliptical(10, 10),  
+                      ),
+                      child: hasImage
+                          ? LocalOrNetworkImage(
+                              filePath: coverImageFilePath,
+                              url: coverImageUrl,
+                              height: double.infinity,  // Fill expanded space
+                              width: double.infinity,
+                              fit: BoxFit.cover,
+                            )
+                          : Container(
+                              height: double.infinity,  // Fill expanded space
+                              width: double.infinity,
+                              color: Colors.grey[100],
+                              child: Center(
+                                child: Icon(
+                                  Icons.restaurant_menu,
+                                  size: 32,
+                                  color: Colors.grey[400],
+                                ),
                               ),
                             ),
-                          ),
-                  );
-                },
+                    );
+                  },
+                ),
               ),
               const SizedBox(height: spacingAboveName),
-              // Recipe name (fixed height)
+              // Recipe name - dynamic height (1-2 lines)
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 8),
-                child: SizedBox(
-                  height: recipeNameHeight,
-                  child: Text(
-                    widget.recipe.title,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: Theme.of(context).textTheme.titleSmall,
-                  ),
+                child: Text(
+                  widget.recipe.title,
+                  maxLines: 2,  // Allow wrapping to 2 lines
+                  overflow: TextOverflow.ellipsis,  // Ellipsis at end of 2nd line
+                  style: Theme.of(context).textTheme.titleSmall,
                 ),
               ),
               const SizedBox(height: spacingBetweenNameAndDetails),
-              // Subtitle with time and servings
+              // Subtitle with time and servings - positioned right under title
               if (subtitleText.isNotEmpty)
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 8),
