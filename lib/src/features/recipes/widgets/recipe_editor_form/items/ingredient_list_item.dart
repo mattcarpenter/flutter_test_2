@@ -9,8 +9,10 @@ import '../../../../../../database/database.dart';
 import '../../../../../providers/recipe_provider.dart' as recipe_provider;
 import '../../../../../services/ingredient_parser_service.dart';
 import '../../../../../widgets/ingredient_text_editing_controller.dart';
+import '../../../../../widgets/recipe_list_item.dart';
 import '../../../../../theme/colors.dart';
 import '../../../../../theme/typography.dart';
+import '../../../../../theme/spacing.dart';
 import '../utils/context_menu_utils.dart';
 
 class IngredientListItem extends ConsumerStatefulWidget {
@@ -543,6 +545,7 @@ class RecipeSelectorContent extends ConsumerStatefulWidget {
 class _RecipeSelectorContentState extends ConsumerState<RecipeSelectorContent> {
   final TextEditingController _searchController = TextEditingController();
   final FocusNode _searchFocusNode = FocusNode();
+  String _searchQuery = '';
 
   @override
   void initState() {
@@ -564,17 +567,41 @@ class _RecipeSelectorContentState extends ConsumerState<RecipeSelectorContent> {
   }
 
   void _onSearchChanged(String query) {
+    setState(() {
+      _searchQuery = query;
+    });
     ref.read(recipe_provider.cookModalRecipeSearchProvider.notifier).search(query);
   }
 
   @override
   Widget build(BuildContext context) {
     final searchState = ref.watch(recipe_provider.cookModalRecipeSearchProvider);
+    final allRecipesAsync = ref.watch(recipe_provider.recipeNotifierProvider);
+
+    // Determine which recipes to show
+    List<RecipeEntry> recipesToShow = [];
+    bool isLoading = false;
+    String? errorMessage;
+
+    if (_searchQuery.isEmpty) {
+      // Show all recipes when no search query
+      allRecipesAsync.when(
+        data: (recipesWithFolders) {
+          recipesToShow = recipesWithFolders.map((r) => r.recipe).toList();
+        },
+        loading: () => isLoading = true,
+        error: (error, _) => errorMessage = error.toString(),
+      );
+    } else {
+      // Show search results when there's a query
+      recipesToShow = searchState.results;
+      isLoading = searchState.isLoading;
+    }
 
     return SizedBox(
       height: MediaQuery.of(context).size.height * 0.7,
       child: Padding(
-        padding: const EdgeInsets.all(16.0),
+        padding: const EdgeInsets.all(AppSpacing.lg),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -588,33 +615,56 @@ class _RecipeSelectorContentState extends ConsumerState<RecipeSelectorContent> {
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(8.0),
                 ),
-                contentPadding: const EdgeInsets.symmetric(vertical: 12.0),
+                contentPadding: const EdgeInsets.symmetric(vertical: AppSpacing.md),
               ),
               onChanged: _onSearchChanged,
             ),
 
-            const SizedBox(height: 20),
+            const SizedBox(height: AppSpacing.lg),
 
-            // Search results
+            // Recipe list
             Expanded(
-              child: searchState.results.isEmpty && !searchState.isLoading
-                  ? const Center(
-                      child: Text('Search for recipes to link to this ingredient'),
-                    )
-                  : ListView.builder(
-                      itemCount: searchState.results.length,
-                      itemBuilder: (context, index) {
-                        final recipe = searchState.results[index];
-                        return ListTile(
-                          title: Text(recipe.title),
-                          subtitle: recipe.description != null
-                              ? Text(recipe.description!, maxLines: 1, overflow: TextOverflow.ellipsis)
-                              : null,
-                          onTap: () => widget.onRecipeSelected(recipe),
-                          trailing: const Icon(Icons.arrow_forward_ios),
-                        );
-                      },
-                    ),
+              child: isLoading
+                  ? const Center(child: CircularProgressIndicator())
+                  : errorMessage != null
+                      ? Center(child: Text('Error: $errorMessage'))
+                      : recipesToShow.isEmpty
+                          ? Center(
+                              child: Column(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Icon(
+                                    Icons.search_off,
+                                    size: 48,
+                                    color: AppColorSwatches.neutral[400],
+                                  ),
+                                  const SizedBox(height: AppSpacing.md),
+                                  Text(
+                                    _searchQuery.isEmpty 
+                                        ? 'No recipes found'
+                                        : 'No recipes match "$_searchQuery"',
+                                    style: AppTypography.body.copyWith(
+                                      color: AppColors.of(context).textSecondary,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            )
+                          : ListView.builder(
+                              itemCount: recipesToShow.length,
+                              itemBuilder: (context, index) {
+                                final recipe = recipesToShow[index];
+                                return RecipeListItem(
+                                  recipe: recipe,
+                                  onTap: () => widget.onRecipeSelected(recipe),
+                                  trailing: Icon(
+                                    Icons.arrow_forward_ios,
+                                    size: 16,
+                                    color: AppColors.of(context).textTertiary,
+                                  ),
+                                );
+                              },
+                            ),
             ),
           ],
         ),
