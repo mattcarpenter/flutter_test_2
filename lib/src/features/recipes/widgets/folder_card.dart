@@ -10,6 +10,7 @@ class FolderCard extends ConsumerStatefulWidget {
   final String folderId;
   final String folderName;
   final int recipeCount;
+  final double thumbnailSize;
   final VoidCallback onTap;
   final VoidCallback onDelete;
 
@@ -18,6 +19,7 @@ class FolderCard extends ConsumerStatefulWidget {
     required this.folderId,
     required this.folderName,
     required this.recipeCount,
+    required this.thumbnailSize,
     required this.onTap,
     required this.onDelete,
   }) : super(key: key);
@@ -86,6 +88,7 @@ class _FolderCardState extends ConsumerState<FolderCard> with SingleTickerProvid
             folderId: widget.folderId,
             folderName: widget.folderName,
             recipeCount: widget.recipeCount,
+            thumbnailSize: widget.thumbnailSize,
             onDelete: _startDeletionAnimation,
           ),
         ),
@@ -98,6 +101,7 @@ class _FolderCardContextMenu extends ConsumerWidget {
   final String folderId;
   final String folderName;
   final int recipeCount;
+  final double thumbnailSize;
   final VoidCallback onDelete;
 
   const _FolderCardContextMenu({
@@ -105,6 +109,7 @@ class _FolderCardContextMenu extends ConsumerWidget {
     required this.folderId,
     required this.folderName,
     required this.recipeCount,
+    required this.thumbnailSize,
     required this.onDelete,
   }) : super(key: key);
 
@@ -115,17 +120,20 @@ class _FolderCardContextMenu extends ConsumerWidget {
         folderId: folderId,
         folderName: folderName,
         recipeCount: recipeCount,
+        thumbnailSize: thumbnailSize,
       ),
       previewBuilder: (context, child) => _FolderCardContent(
         folderId: folderId,
         folderName: folderName,
         recipeCount: recipeCount,
+        thumbnailSize: thumbnailSize,
         isPreview: true,
       ),
       child: _FolderCardContent(
         folderId: folderId,
         folderName: folderName,
         recipeCount: recipeCount,
+        thumbnailSize: thumbnailSize,
         isChild: true,
       ),
       menuProvider: (_) {
@@ -148,6 +156,7 @@ class _FolderCardContent extends ConsumerWidget {
   final String folderId;
   final String folderName;
   final int recipeCount;
+  final double thumbnailSize;
   final bool isPreview;
   final bool isChild;
 
@@ -156,6 +165,7 @@ class _FolderCardContent extends ConsumerWidget {
     required this.folderId,
     required this.folderName,
     required this.recipeCount,
+    required this.thumbnailSize,
     this.isPreview = false,
     this.isChild = false,
   }) : super(key: key);
@@ -177,10 +187,10 @@ class _FolderCardContent extends ConsumerWidget {
       ),
       child: Row(
         children: [
-          // Thumbnail section (left) - fill available height
+          // Thumbnail section (left) - responsive size
           Container(
-            width: 54, // Match the row height for square
-            height: 54, // Match the row height for square
+            width: thumbnailSize,
+            height: thumbnailSize,
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(6.0), // Slightly smaller radius
               color: CupertinoColors.systemGrey6,
@@ -216,6 +226,7 @@ class _FolderCardContent extends ConsumerWidget {
                       .copyWith(
                         fontSize: 13, // Reduced by 1px (was 14)
                         fontWeight: FontWeight.w600,
+                        color: CupertinoColors.label, // Explicit adaptive color
                       ),
                   maxLines: 1, // Only 1 line
                   overflow: TextOverflow.ellipsis,
@@ -228,7 +239,7 @@ class _FolderCardContent extends ConsumerWidget {
                       .textStyle
                       .copyWith(
                         fontSize: 12, // Smaller font
-                        color: CupertinoColors.secondaryLabel,
+                        color: CupertinoColors.secondaryLabel, // This is already adaptive
                       ),
                   maxLines: 1, // Only 1 line
                   overflow: TextOverflow.ellipsis,

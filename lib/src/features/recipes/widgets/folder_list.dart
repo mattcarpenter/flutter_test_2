@@ -62,25 +62,37 @@ class _FolderListState extends ConsumerState<FolderList> {
               // Use a simple responsive grid approach instead of WoltResponsiveLayoutGrid
               return LayoutBuilder(
                 builder: (context, constraints) {
-                  // Calculate number of columns based on available width
-                  int getColumnCount(double width) {
-                    if (width < 900) {
-                      return 2; // 2 columns on mobile
-                    } else if (width < 1200) {
-                      return 3; // 3 columns on tablet
-                    } else if (width < 1600) {
-                      return 4; // 4 columns on larger tablet/small desktop
-                    } else {
-                      return 5; // 5 columns on desktop
-                    }
+                  // Responsive configuration based on screen width
+                  late final int columnCount;
+                  late final double cardHeight;
+                  late final double thumbnailSize;
+                  
+                  if (constraints.maxWidth < 600) {
+                    // Mobile - shorter cards to accommodate longer folder names
+                    columnCount = 2;
+                    cardHeight = 70.0;
+                    thumbnailSize = 54.0;
+                  } else if (constraints.maxWidth < 900) {
+                    // Large Mobile
+                    columnCount = 3;
+                    cardHeight = 90.0;
+                    thumbnailSize = 72.0;
+                  } else if (constraints.maxWidth < 1200) {
+                    // iPad
+                    columnCount = 4;
+                    cardHeight = 100.0;
+                    thumbnailSize = 82.0;
+                  } else {
+                    // Large/Desktop
+                    columnCount = 5;
+                    cardHeight = 110.0;
+                    thumbnailSize = 92.0;
                   }
 
-                  final columnCount = getColumnCount(constraints.maxWidth);
-                  final spacing = 12.0; // Reduced gutter
-                  final horizontalMargin = 16.0; // Add left/right margins
+                  final spacing = 12.0;
+                  final horizontalMargin = 16.0;
                   final availableWidth = constraints.maxWidth - (spacing * (columnCount - 1)) - (horizontalMargin * 2);
                   final cardWidth = availableWidth / columnCount;
-                  final cardHeight = cardWidth / 2.5; // 2.5:1 aspect ratio
 
                   return Padding(
                     padding: EdgeInsets.symmetric(horizontal: horizontalMargin),
@@ -100,6 +112,7 @@ class _FolderListState extends ConsumerState<FolderList> {
                             folderId: folder.id,
                             folderName: folder.name,
                             recipeCount: count,
+                            thumbnailSize: thumbnailSize,
                             onTap: () {
                               context.push('/recipes/folder/${folder.id}', extra: {
                                 'folderTitle': folder.name,
@@ -121,6 +134,7 @@ class _FolderListState extends ConsumerState<FolderList> {
                             folderId: regularFolder.id,
                             folderName: regularFolder.name,
                             recipeCount: count,
+                            thumbnailSize: thumbnailSize,
                             onTap: () {
                               context.push('/recipes/folder/${regularFolder.id}', extra: {
                                 'folderTitle': regularFolder.name,
