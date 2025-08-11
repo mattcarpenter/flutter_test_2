@@ -43,7 +43,7 @@ class RecipesTab extends ConsumerWidget {
       slivers: [
         SliverToBoxAdapter(
           child: Padding(
-            padding: const EdgeInsets.fromLTRB(16, 8, 16, 0), // Match filter button spacing
+            padding: const EdgeInsets.fromLTRB(16, 16, 16, 0), // Consistent top spacing
             child: Text(
               'Recipe Folders',
               style: CupertinoTheme.of(context)
@@ -60,7 +60,7 @@ class RecipesTab extends ConsumerWidget {
         const SliverToBoxAdapter(
           child: PinnedRecipesSection(),
         ),
-        // Recently viewed recipes section
+        // Recently viewed recipes section  
         const SliverToBoxAdapter(
           child: RecentlyViewedSection(),
         ),

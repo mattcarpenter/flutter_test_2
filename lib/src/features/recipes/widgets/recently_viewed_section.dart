@@ -30,7 +30,7 @@ class RecentlyViewedSection extends ConsumerWidget {
           children: [
             // Section header with title and "View All" button
             Padding(
-              padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
+              padding: const EdgeInsets.fromLTRB(AppSpacing.lg, AppSpacing.sm, AppSpacing.lg, 0), // 16px left/right, 8px top
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
@@ -51,7 +51,7 @@ class RecentlyViewedSection extends ConsumerWidget {
               ),
             ),
 
-            const SizedBox(height: AppSpacing.sm),
+            const SizedBox(height: AppSpacing.sm), // 8px consistent gap
 
             // Single column list using RecipeListItem
             ...recentlyViewedRecipes.map((recipe) {
@@ -70,8 +70,8 @@ class RecentlyViewedSection extends ConsumerWidget {
               );
             }),
             
-            // Bottom margin to prevent scroll feedback loops
-            const SizedBox(height: AppSpacing.xxl),
+            // Bottom margin to prevent scroll feedback loops  
+            const SizedBox(height: AppSpacing.lg), // 16px - enough to prevent issues without excess space
           ],
         );
       },

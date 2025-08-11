@@ -5,6 +5,7 @@ import '../../../../database/database.dart';
 import '../../../constants/folder_constants.dart';
 import '../../../providers/recipe_folder_provider.dart';
 import '../../../providers/recipe_provider.dart';
+import '../../../theme/spacing.dart';
 import 'folder_card.dart';
 
 class FolderList extends ConsumerStatefulWidget {
@@ -45,7 +46,7 @@ class _FolderListState extends ConsumerState<FolderList> {
     final folderCounts = ref.watch(recipeFolderCountProvider);
 
     return Padding(
-      padding: const EdgeInsets.only(top: 16.0, bottom: 24.0), // More space from section titles
+      padding: const EdgeInsets.only(top: AppSpacing.md, bottom: AppSpacing.lg), // 12px top, 16px bottom
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [

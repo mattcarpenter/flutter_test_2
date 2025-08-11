@@ -29,7 +29,7 @@ class PinnedRecipesSection extends ConsumerWidget {
           children: [
             // Section header with title and "View All" button
             Padding(
-              padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
+              padding: const EdgeInsets.fromLTRB(AppSpacing.lg, AppSpacing.lg, AppSpacing.lg, 0), // 16px all around
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
@@ -50,11 +50,11 @@ class PinnedRecipesSection extends ConsumerWidget {
               ),
             ),
 
-            const SizedBox(height: 8),
+            const SizedBox(height: AppSpacing.sm), // 8px consistent gap
 
             // Horizontal scrolling list
             SizedBox(
-              height: 200, // Fixed height for the horizontal scroll area
+              height: 180, // Reduced height to better fit content
               child: ListView.builder(
                 scrollDirection: Axis.horizontal,
                 padding: EdgeInsets.zero,
