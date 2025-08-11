@@ -316,7 +316,7 @@ class _AppButtonState extends State<AppButton> {
                   : Container(
                       alignment: Alignment.center,
                       child: Transform.translate(
-                        offset: const Offset(0.5, -2), // Center horizontally, slight upward nudge for optical balance
+                        offset: const Offset(0.5, -2.5), // Center horizontally, slight upward nudge for optical balance
                         child: IconTheme(
                           data: IconThemeData(
                             size: _fontSize,
