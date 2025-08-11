@@ -7,6 +7,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../../../database/database.dart';
 import '../../../providers/recipe_provider.dart';
+import '../../../theme/spacing.dart';
 
 class RecipesList extends ConsumerWidget {
   final List<RecipeEntry> recipes;
@@ -17,7 +18,7 @@ class RecipesList extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final screenWidth = MediaQuery.of(context).size.width - 32; // Account for padding
-    
+
     // Calculate number of columns based on screen width
     // More fluid responsive behavior
     int crossAxisCount;
@@ -36,12 +37,12 @@ class RecipesList extends ConsumerWidget {
     }
 
     return SliverPadding(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(AppSpacing.lg),  // 16px padding
       sliver: SliverGrid(
         gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
           crossAxisCount: crossAxisCount,
-          mainAxisSpacing: 16.0,
-          crossAxisSpacing: 16.0,
+          mainAxisSpacing: AppSpacing.xs,  // 8px vertical spacing
+          crossAxisSpacing: AppSpacing.lg,  // 16px horizontal spacing
           childAspectRatio: 1.0, // Keep cards square
         ),
         delegate: SliverChildBuilderDelegate(

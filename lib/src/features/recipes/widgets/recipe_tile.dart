@@ -179,23 +179,38 @@ class _RecipeTileState extends State<RecipeTile> with SingleTickerProviderStateM
                 future: coverImage?.getFullPath() ?? Future.value(''),
                 builder: (context, snapshot) {
                   final coverImageFilePath = snapshot.data ?? '';
-                  // Apply racetrack-style rounding to the image
-                  // Top: sharper sides (x=6), gentler top curve (y=12)
-                  // Bottom: gentler sides (x=12), sharper bottom curve (y=6) - inverted for racetrack
+                  
+                  // Check if we have an image to display
+                  final hasImage = coverImageFilePath.isNotEmpty || coverImageUrl.isNotEmpty;
+                  
+                  // Apply racetrack-style rounding to the image or placeholder
                   return ClipRRect(
                     borderRadius: BorderRadius.only(
-                      topLeft: Radius.elliptical(10, 10),      // x=6 (sharper), y=12 (gentler)
-                      topRight: Radius.elliptical(10, 10),     // x=6 (sharper), y=12 (gentler)
-                      bottomLeft: Radius.elliptical(10, 10),   // x=12 (gentler), y=6 (sharper) - inverted
-                      bottomRight: Radius.elliptical(10, 10),  // x=12 (gentler), y=6 (sharper) - inverted
+                      topLeft: Radius.elliptical(10, 10),      
+                      topRight: Radius.elliptical(10, 10),     
+                      bottomLeft: Radius.elliptical(10, 10),   
+                      bottomRight: Radius.elliptical(10, 10),  
                     ),
-                    child: LocalOrNetworkImage(
-                      filePath: coverImageFilePath,
-                      url: coverImageUrl,
-                      height: imageHeight,
-                      width: double.infinity,
-                      fit: BoxFit.cover,
-                    ),
+                    child: hasImage
+                        ? LocalOrNetworkImage(
+                            filePath: coverImageFilePath,
+                            url: coverImageUrl,
+                            height: imageHeight,
+                            width: double.infinity,
+                            fit: BoxFit.cover,
+                          )
+                        : Container(
+                            height: imageHeight,
+                            width: double.infinity,
+                            color: Colors.grey[100],
+                            child: Center(
+                              child: Icon(
+                                Icons.restaurant_menu,
+                                size: 32,
+                                color: Colors.grey[400],
+                              ),
+                            ),
+                          ),
                   );
                 },
               ),
