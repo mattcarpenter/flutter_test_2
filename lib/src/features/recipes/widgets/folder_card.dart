@@ -177,10 +177,10 @@ class _FolderCardContent extends ConsumerWidget {
       ),
       child: Row(
         children: [
-          // Thumbnail section (left) - made square
+          // Thumbnail section (left) - fill available height
           Container(
-            width: 48, // Smaller and square
-            height: 48, // Same as width for square
+            width: 54, // Match the row height for square
+            height: 54, // Match the row height for square
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(6.0), // Slightly smaller radius
               color: CupertinoColors.systemGrey6,
@@ -214,7 +214,7 @@ class _FolderCardContent extends ConsumerWidget {
                       .textTheme
                       .textStyle
                       .copyWith(
-                        fontSize: 14, // Smaller font
+                        fontSize: 13, // Reduced by 1px (was 14)
                         fontWeight: FontWeight.w600,
                       ),
                   maxLines: 1, // Only 1 line
@@ -334,10 +334,12 @@ class _ThumbnailImageState extends State<_ThumbnailImage> {
       return _buildFolderIcon();
     }
 
-    return LocalOrNetworkImage(
-      filePath: _cachedImagePath!,
-      url: _cachedImageUrl!,
-      fit: BoxFit.cover,
+    return SizedBox.expand(
+      child: LocalOrNetworkImage(
+        filePath: _cachedImagePath!,
+        url: _cachedImageUrl!,
+        fit: BoxFit.cover,
+      ),
     );
   }
 
