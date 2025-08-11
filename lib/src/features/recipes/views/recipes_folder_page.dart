@@ -88,10 +88,10 @@ class RecipesFolderPage extends ConsumerWidget {
         });
       },
       slivers: [
-        // Sort dropdown in a SliverPersistentHeader - make sure it's pinned
+        // Sort dropdown in a SliverPersistentHeader
         SliverPersistentHeader(
-          pinned: false, // Essential to keep it visible when scrolling
-          floating: true, // Setting to false to ensure pinned behavior takes precedence
+          pinned: false,
+          floating: false, // Disable floating to prevent scroll feedback loop
           delegate: _SortHeaderDelegate(
             sortOption: filterSortState.activeSortOption,
             sortDirection: filterSortState.sortDirection,

@@ -37,7 +37,12 @@ class RecipesList extends ConsumerWidget {
     }
 
     return SliverPadding(
-      padding: const EdgeInsets.all(AppSpacing.lg),  // 16px padding
+      padding: const EdgeInsets.fromLTRB(
+        AppSpacing.lg,  // 16px left
+        AppSpacing.lg,  // 16px top
+        AppSpacing.lg,  // 16px right
+        100,  // Extra bottom padding to prevent scroll issues
+      ),
       sliver: SliverGrid(
         gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
           crossAxisCount: crossAxisCount,
