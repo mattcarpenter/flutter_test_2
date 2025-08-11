@@ -38,7 +38,7 @@ class PinnedRecipesSection extends ConsumerWidget {
                     style: CupertinoTheme.of(context)
                         .textTheme
                         .navLargeTitleTextStyle
-                        .copyWith(fontSize: 20, fontWeight: FontWeight.w600),
+                        .copyWith(fontSize: 18, fontWeight: FontWeight.w600),
                   ),
                   TextButton(
                     onPressed: () {
