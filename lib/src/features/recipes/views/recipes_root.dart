@@ -41,9 +41,9 @@ class RecipesTab extends ConsumerWidget {
       slivers: [
         SliverToBoxAdapter(
           child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16),
+            padding: const EdgeInsets.fromLTRB(16, 8, 16, 0), // Match filter button spacing
             child: Text(
-              'Folders',
+              'Recipe Folders',
               style: CupertinoTheme.of(context)
                   .textTheme
                   .navLargeTitleTextStyle
