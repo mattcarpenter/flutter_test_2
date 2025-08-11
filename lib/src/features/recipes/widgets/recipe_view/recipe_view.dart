@@ -6,6 +6,7 @@ import 'package:recipe_app/src/features/recipes/widgets/recipe_view/recipe_ingre
 import 'package:recipe_app/src/features/recipes/widgets/recipe_view/recipe_steps_view.dart';
 import 'package:recipe_app/src/providers/pantry_provider.dart';
 import 'package:recipe_app/src/providers/recipe_provider.dart';
+import '../../../../providers/recently_viewed_provider.dart';
 
 import '../../../../../database/database.dart';
 import '../../../../repositories/recipe_repository.dart';
@@ -41,6 +42,9 @@ class _RecipeViewState extends ConsumerState<RecipeView> {
       ref.invalidate(recipeIngredientMatchesProvider(widget.recipeId));
       ref.read(recipeIngredientMatchesProvider(widget.recipeId).future);
       
+      // Track this recipe as recently viewed
+      ref.read(recentlyViewedProvider.notifier).addRecentlyViewed(widget.recipeId);
+      
       print("Initialized recipe view for ${widget.recipeId}, refreshed providers");
     });
   }
@@ -53,6 +57,10 @@ class _RecipeViewState extends ConsumerState<RecipeView> {
       Future.microtask(() {
         ref.invalidate(recipeIngredientMatchesProvider(widget.recipeId));
         ref.read(recipeIngredientMatchesProvider(widget.recipeId).future);
+        
+        // Track the new recipe as recently viewed
+        ref.read(recentlyViewedProvider.notifier).addRecentlyViewed(widget.recipeId);
+        
         print("Recipe ID changed, refreshed providers");
       });
     }

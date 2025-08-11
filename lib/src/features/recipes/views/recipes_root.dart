@@ -15,6 +15,7 @@ import 'add_folder_modal.dart';
 import '../widgets/folder_list.dart';
 import '../widgets/recipe_list.dart';
 import '../widgets/pinned_recipes_section.dart';
+import '../widgets/recently_viewed_section.dart';
 import 'add_recipe_modal.dart';
 
 class RecipesTab extends ConsumerWidget {
@@ -58,6 +59,10 @@ class RecipesTab extends ConsumerWidget {
         // Pinned recipes section
         const SliverToBoxAdapter(
           child: PinnedRecipesSection(),
+        ),
+        // Recently viewed recipes section
+        const SliverToBoxAdapter(
+          child: RecentlyViewedSection(),
         ),
       ],
       trailing: AdaptivePullDownButton(
