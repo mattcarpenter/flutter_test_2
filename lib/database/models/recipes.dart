@@ -30,6 +30,8 @@ class Recipes extends Table {
   IntColumn get createdAt => integer().nullable()();
   IntColumn get updatedAt => integer().nullable()();
   IntColumn get deletedAt => integer().nullable()();
+  IntColumn get pinned => integer().nullable().withDefault(const Constant(0))();
+  IntColumn get pinnedAt => integer().nullable()();
   TextColumn get ingredients => text().map(const IngredientListConverter()).nullable()();
   TextColumn get steps => text().map(const StepListConverter()).nullable()();
   TextColumn get folderIds => text().nullable().map(StringListTypeConverter())();

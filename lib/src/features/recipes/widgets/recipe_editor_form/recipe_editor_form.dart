@@ -108,6 +108,8 @@ class RecipeEditorFormState extends ConsumerState<RecipeEditorForm> {
         ingredients: [],
         steps: [],
         folderIds: folderIds,
+        pinned: 0,
+        pinnedAt: null,
       );
       _isNewRecipe = true;
       _titleController.text = _recipe.title;

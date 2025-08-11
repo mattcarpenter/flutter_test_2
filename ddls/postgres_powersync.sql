@@ -98,6 +98,8 @@ CREATE TABLE public.recipes (
                                 created_at bigint NULL,
                                 updated_at bigint NULL,
                                 deleted_at bigint NULL,
+                                pinned integer NOT NULL DEFAULT 0,
+                                pinned_at bigint NULL,
                                 folder_ids text null,
                                 images text null,
                                 CONSTRAINT recipes_pkey PRIMARY KEY (id),

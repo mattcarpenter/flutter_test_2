@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 import '../../../../../database/models/recipe_images.dart';
 import '../../../../widgets/local_or_network_image.dart';
+import '../pin_button.dart';
 
 class RecipeImageGallery extends StatefulWidget {
   final List<RecipeImage> images;
+  final String recipeId;
 
-  const RecipeImageGallery({Key? key, required this.images}) : super(key: key);
+  const RecipeImageGallery({Key? key, required this.images, required this.recipeId}) : super(key: key);
 
   @override
   State<RecipeImageGallery> createState() => _RecipeImageGalleryState();
@@ -114,10 +116,21 @@ class _RecipeImageGalleryState extends State<RecipeImageGallery> {
             child: Center(child: CircularProgressIndicator()),
           );
         }
-        return LocalOrNetworkImage(
-          filePath: snapshot.data ?? '',
-          url: imageUrl,
-          fit: BoxFit.cover,
+        return Stack(
+          fit: StackFit.expand,
+          children: [
+            LocalOrNetworkImage(
+              filePath: snapshot.data ?? '',
+              url: imageUrl,
+              fit: BoxFit.cover,
+            ),
+            // Pin button overlay
+            Positioned(
+              top: 12,
+              right: 12,
+              child: PinButton(recipeId: widget.recipeId),
+            ),
+          ],
         );
       },
     );

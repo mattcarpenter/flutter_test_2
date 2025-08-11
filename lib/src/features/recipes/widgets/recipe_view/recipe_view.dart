@@ -84,7 +84,7 @@ class _RecipeViewState extends ConsumerState<RecipeView> {
           children: [
             // Image Gallery
             if (recipe.images != null && recipe.images!.isNotEmpty)
-              RecipeImageGallery(images: recipe.images!),
+              RecipeImageGallery(images: recipe.images!, recipeId: recipe.id),
 
             const SizedBox(height: 16),
 

@@ -223,6 +223,8 @@ class RecipeRepository {
       r.folder_ids AS recipe_folder_ids,
       r.images AS recipe_images,
       r.deleted_at AS recipe_deleted_at,
+      r.pinned AS recipe_pinned,
+      r.pinned_at AS recipe_pinned_at,
       
       f.id AS folder_id, 
       f.name AS folder_name,
@@ -264,6 +266,8 @@ class RecipeRepository {
             createdAt: row.read<int?>('recipe_created_at'),
             updatedAt: row.read<int?>('recipe_updated_at'),
             deletedAt: row.read<int?>('recipe_deleted_at'),
+            pinned: row.read<int?>('recipe_pinned'),
+            pinnedAt: row.read<int?>('recipe_pinned_at'),
 
             // Convert JSON String to List<Ingredient>
             ingredients: row.read<String?>('recipe_ingredients') != null
@@ -324,6 +328,8 @@ class RecipeRepository {
       r.folder_ids AS recipe_folder_ids,
       r.images AS recipe_images,
       r.deleted_at AS recipe_deleted_at,
+      r.pinned AS recipe_pinned,
+      r.pinned_at AS recipe_pinned_at,
       
       f.id AS folder_id, 
       f.name AS folder_name,
@@ -371,6 +377,8 @@ class RecipeRepository {
             createdAt: row.read<int?>('recipe_created_at'),
             updatedAt: row.read<int?>('recipe_updated_at'),
             deletedAt: row.read<int?>('recipe_deleted_at'),
+            pinned: row.read<int?>('recipe_pinned'),
+            pinnedAt: row.read<int?>('recipe_pinned_at'),
 
             // Convert JSON String to List<Ingredient>
             ingredients: row.read<String?>('recipe_ingredients') != null
@@ -513,6 +521,8 @@ class RecipeRepository {
       createdAt: row.read<int?>('created_at'),
       updatedAt: row.read<int?>('updated_at'),
       deletedAt: row.read<int?>('deleted_at'),
+      pinned: row.read<int?>('pinned'),
+      pinnedAt: row.read<int?>('pinned_at'),
       ingredients: row.read<String?>('ingredients') != null
           ? const IngredientListConverter().fromSql(row.read<String>('ingredients'))
           : [],
@@ -912,6 +922,38 @@ class RecipeRepository {
       .get();
     
     return recipes;
+  }
+
+  // Toggle pin status for a recipe
+  Future<bool> toggleRecipePin(String recipeId, bool pinned) async {
+    final recipe = await getRecipeById(recipeId);
+    if (recipe != null) {
+      final updatedRecipe = recipe.copyWith(
+        pinned: Value(pinned ? 1 : 0),
+        pinnedAt: Value(pinned ? DateTime.now().millisecondsSinceEpoch : null),
+        updatedAt: Value(DateTime.now().millisecondsSinceEpoch),
+      );
+      return updateRecipe(updatedRecipe);
+    }
+    return false;
+  }
+
+  // Get pinned recipes, sorted by most recently pinned first
+  Future<List<RecipeEntry>> getPinnedRecipes({int limit = 10}) async {
+    return (_db.select(_db.recipes)
+      ..where((tbl) => tbl.pinned.equals(1) & tbl.deletedAt.isNull())
+      ..orderBy([(tbl) => OrderingTerm.desc(tbl.pinnedAt)])
+      ..limit(limit))
+      .get();
+  }
+
+  // Watch pinned recipes stream
+  Stream<List<RecipeEntry>> watchPinnedRecipes({int limit = 10}) {
+    return (_db.select(_db.recipes)
+      ..where((tbl) => tbl.pinned.equals(1) & tbl.deletedAt.isNull())
+      ..orderBy([(tbl) => OrderingTerm.desc(tbl.pinnedAt)])
+      ..limit(limit))
+      .watch();
   }
 }
 

@@ -280,6 +280,20 @@ class RecipeNotifier extends StateNotifier<AsyncValue<List<RecipeWithFolders>>> 
     }
   }
 
+  /// Toggle pin status for a recipe
+  Future<void> togglePin(String recipeId) async {
+    try {
+      // Get current recipe to check pin status
+      final recipe = await _repository.getRecipeById(recipeId);
+      if (recipe != null) {
+        final isCurrentlyPinned = (recipe.pinned ?? 0) == 1;
+        await _repository.toggleRecipePin(recipeId, !isCurrentlyPinned);
+      }
+    } catch (e, stack) {
+      state = AsyncValue.error(e, stack);
+    }
+  }
+
   /// Loads recipes from assets/recipes.json and adds them to the database
   ///
   /// [limit] controls how many recipes to import (null means import all)
@@ -625,5 +639,11 @@ final recipeIngredientMatchesProvider = FutureProvider.family<RecipeIngredientMa
     }
   },
 );
+
+/// Provider for pinned recipes stream
+final pinnedRecipesProvider = StreamProvider<List<RecipeEntry>>((ref) {
+  final repository = ref.watch(recipeRepositoryProvider);
+  return repository.watchPinnedRecipes();
+});
 
 

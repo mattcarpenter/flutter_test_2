@@ -85,6 +85,8 @@ Schema schema = const Schema(([
     Column.integer('created_at'),
     Column.integer('updated_at'),
     Column.integer('deleted_at'),
+    Column.integer('pinned'),
+    Column.integer('pinned_at'),
     Column.text('ingredients'),
     Column.text('steps'),
     Column.text('folder_ids'),

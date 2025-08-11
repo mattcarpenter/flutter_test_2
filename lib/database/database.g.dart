@@ -421,6 +421,19 @@ class $RecipesTable extends Recipes with TableInfo<$RecipesTable, RecipeEntry> {
   late final GeneratedColumn<int> deletedAt = GeneratedColumn<int>(
       'deleted_at', aliasedName, true,
       type: DriftSqlType.int, requiredDuringInsert: false);
+  static const VerificationMeta _pinnedMeta = const VerificationMeta('pinned');
+  @override
+  late final GeneratedColumn<int> pinned = GeneratedColumn<int>(
+      'pinned', aliasedName, true,
+      type: DriftSqlType.int,
+      requiredDuringInsert: false,
+      defaultValue: const Constant(0));
+  static const VerificationMeta _pinnedAtMeta =
+      const VerificationMeta('pinnedAt');
+  @override
+  late final GeneratedColumn<int> pinnedAt = GeneratedColumn<int>(
+      'pinned_at', aliasedName, true,
+      type: DriftSqlType.int, requiredDuringInsert: false);
   @override
   late final GeneratedColumnWithTypeConverter<List<Ingredient>?, String>
       ingredients = GeneratedColumn<String>('ingredients', aliasedName, true,
@@ -461,6 +474,8 @@ class $RecipesTable extends Recipes with TableInfo<$RecipesTable, RecipeEntry> {
         createdAt,
         updatedAt,
         deletedAt,
+        pinned,
+        pinnedAt,
         ingredients,
         steps,
         folderIds,
@@ -551,6 +566,14 @@ class $RecipesTable extends Recipes with TableInfo<$RecipesTable, RecipeEntry> {
       context.handle(_deletedAtMeta,
           deletedAt.isAcceptableOrUnknown(data['deleted_at']!, _deletedAtMeta));
     }
+    if (data.containsKey('pinned')) {
+      context.handle(_pinnedMeta,
+          pinned.isAcceptableOrUnknown(data['pinned']!, _pinnedMeta));
+    }
+    if (data.containsKey('pinned_at')) {
+      context.handle(_pinnedAtMeta,
+          pinnedAt.isAcceptableOrUnknown(data['pinned_at']!, _pinnedAtMeta));
+    }
     return context;
   }
 
@@ -594,6 +617,10 @@ class $RecipesTable extends Recipes with TableInfo<$RecipesTable, RecipeEntry> {
           .read(DriftSqlType.int, data['${effectivePrefix}updated_at']),
       deletedAt: attachedDatabase.typeMapping
           .read(DriftSqlType.int, data['${effectivePrefix}deleted_at']),
+      pinned: attachedDatabase.typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}pinned']),
+      pinnedAt: attachedDatabase.typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}pinned_at']),
       ingredients: $RecipesTable.$converteringredientsn.fromSql(attachedDatabase
           .typeMapping
           .read(DriftSqlType.string, data['${effectivePrefix}ingredients'])),
@@ -649,6 +676,8 @@ class RecipeEntry extends DataClass implements Insertable<RecipeEntry> {
   final int? createdAt;
   final int? updatedAt;
   final int? deletedAt;
+  final int? pinned;
+  final int? pinnedAt;
   final List<Ingredient>? ingredients;
   final List<Step>? steps;
   final List<String>? folderIds;
@@ -671,6 +700,8 @@ class RecipeEntry extends DataClass implements Insertable<RecipeEntry> {
       this.createdAt,
       this.updatedAt,
       this.deletedAt,
+      this.pinned,
+      this.pinnedAt,
       this.ingredients,
       this.steps,
       this.folderIds,
@@ -724,6 +755,12 @@ class RecipeEntry extends DataClass implements Insertable<RecipeEntry> {
     }
     if (!nullToAbsent || deletedAt != null) {
       map['deleted_at'] = Variable<int>(deletedAt);
+    }
+    if (!nullToAbsent || pinned != null) {
+      map['pinned'] = Variable<int>(pinned);
+    }
+    if (!nullToAbsent || pinnedAt != null) {
+      map['pinned_at'] = Variable<int>(pinnedAt);
     }
     if (!nullToAbsent || ingredients != null) {
       map['ingredients'] = Variable<String>(
@@ -790,6 +827,11 @@ class RecipeEntry extends DataClass implements Insertable<RecipeEntry> {
       deletedAt: deletedAt == null && nullToAbsent
           ? const Value.absent()
           : Value(deletedAt),
+      pinned:
+          pinned == null && nullToAbsent ? const Value.absent() : Value(pinned),
+      pinnedAt: pinnedAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(pinnedAt),
       ingredients: ingredients == null && nullToAbsent
           ? const Value.absent()
           : Value(ingredients),
@@ -824,6 +866,8 @@ class RecipeEntry extends DataClass implements Insertable<RecipeEntry> {
       createdAt: serializer.fromJson<int?>(json['createdAt']),
       updatedAt: serializer.fromJson<int?>(json['updatedAt']),
       deletedAt: serializer.fromJson<int?>(json['deletedAt']),
+      pinned: serializer.fromJson<int?>(json['pinned']),
+      pinnedAt: serializer.fromJson<int?>(json['pinnedAt']),
       ingredients: serializer.fromJson<List<Ingredient>?>(json['ingredients']),
       steps: serializer.fromJson<List<Step>?>(json['steps']),
       folderIds: serializer.fromJson<List<String>?>(json['folderIds']),
@@ -851,6 +895,8 @@ class RecipeEntry extends DataClass implements Insertable<RecipeEntry> {
       'createdAt': serializer.toJson<int?>(createdAt),
       'updatedAt': serializer.toJson<int?>(updatedAt),
       'deletedAt': serializer.toJson<int?>(deletedAt),
+      'pinned': serializer.toJson<int?>(pinned),
+      'pinnedAt': serializer.toJson<int?>(pinnedAt),
       'ingredients': serializer.toJson<List<Ingredient>?>(ingredients),
       'steps': serializer.toJson<List<Step>?>(steps),
       'folderIds': serializer.toJson<List<String>?>(folderIds),
@@ -876,6 +922,8 @@ class RecipeEntry extends DataClass implements Insertable<RecipeEntry> {
           Value<int?> createdAt = const Value.absent(),
           Value<int?> updatedAt = const Value.absent(),
           Value<int?> deletedAt = const Value.absent(),
+          Value<int?> pinned = const Value.absent(),
+          Value<int?> pinnedAt = const Value.absent(),
           Value<List<Ingredient>?> ingredients = const Value.absent(),
           Value<List<Step>?> steps = const Value.absent(),
           Value<List<String>?> folderIds = const Value.absent(),
@@ -899,6 +947,8 @@ class RecipeEntry extends DataClass implements Insertable<RecipeEntry> {
         createdAt: createdAt.present ? createdAt.value : this.createdAt,
         updatedAt: updatedAt.present ? updatedAt.value : this.updatedAt,
         deletedAt: deletedAt.present ? deletedAt.value : this.deletedAt,
+        pinned: pinned.present ? pinned.value : this.pinned,
+        pinnedAt: pinnedAt.present ? pinnedAt.value : this.pinnedAt,
         ingredients: ingredients.present ? ingredients.value : this.ingredients,
         steps: steps.present ? steps.value : this.steps,
         folderIds: folderIds.present ? folderIds.value : this.folderIds,
@@ -927,6 +977,8 @@ class RecipeEntry extends DataClass implements Insertable<RecipeEntry> {
       createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
       updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
       deletedAt: data.deletedAt.present ? data.deletedAt.value : this.deletedAt,
+      pinned: data.pinned.present ? data.pinned.value : this.pinned,
+      pinnedAt: data.pinnedAt.present ? data.pinnedAt.value : this.pinnedAt,
       ingredients:
           data.ingredients.present ? data.ingredients.value : this.ingredients,
       steps: data.steps.present ? data.steps.value : this.steps,
@@ -955,6 +1007,8 @@ class RecipeEntry extends DataClass implements Insertable<RecipeEntry> {
           ..write('createdAt: $createdAt, ')
           ..write('updatedAt: $updatedAt, ')
           ..write('deletedAt: $deletedAt, ')
+          ..write('pinned: $pinned, ')
+          ..write('pinnedAt: $pinnedAt, ')
           ..write('ingredients: $ingredients, ')
           ..write('steps: $steps, ')
           ..write('folderIds: $folderIds, ')
@@ -982,6 +1036,8 @@ class RecipeEntry extends DataClass implements Insertable<RecipeEntry> {
         createdAt,
         updatedAt,
         deletedAt,
+        pinned,
+        pinnedAt,
         ingredients,
         steps,
         folderIds,
@@ -1008,6 +1064,8 @@ class RecipeEntry extends DataClass implements Insertable<RecipeEntry> {
           other.createdAt == this.createdAt &&
           other.updatedAt == this.updatedAt &&
           other.deletedAt == this.deletedAt &&
+          other.pinned == this.pinned &&
+          other.pinnedAt == this.pinnedAt &&
           other.ingredients == this.ingredients &&
           other.steps == this.steps &&
           other.folderIds == this.folderIds &&
@@ -1032,6 +1090,8 @@ class RecipesCompanion extends UpdateCompanion<RecipeEntry> {
   final Value<int?> createdAt;
   final Value<int?> updatedAt;
   final Value<int?> deletedAt;
+  final Value<int?> pinned;
+  final Value<int?> pinnedAt;
   final Value<List<Ingredient>?> ingredients;
   final Value<List<Step>?> steps;
   final Value<List<String>?> folderIds;
@@ -1055,6 +1115,8 @@ class RecipesCompanion extends UpdateCompanion<RecipeEntry> {
     this.createdAt = const Value.absent(),
     this.updatedAt = const Value.absent(),
     this.deletedAt = const Value.absent(),
+    this.pinned = const Value.absent(),
+    this.pinnedAt = const Value.absent(),
     this.ingredients = const Value.absent(),
     this.steps = const Value.absent(),
     this.folderIds = const Value.absent(),
@@ -1079,6 +1141,8 @@ class RecipesCompanion extends UpdateCompanion<RecipeEntry> {
     this.createdAt = const Value.absent(),
     this.updatedAt = const Value.absent(),
     this.deletedAt = const Value.absent(),
+    this.pinned = const Value.absent(),
+    this.pinnedAt = const Value.absent(),
     this.ingredients = const Value.absent(),
     this.steps = const Value.absent(),
     this.folderIds = const Value.absent(),
@@ -1103,6 +1167,8 @@ class RecipesCompanion extends UpdateCompanion<RecipeEntry> {
     Expression<int>? createdAt,
     Expression<int>? updatedAt,
     Expression<int>? deletedAt,
+    Expression<int>? pinned,
+    Expression<int>? pinnedAt,
     Expression<String>? ingredients,
     Expression<String>? steps,
     Expression<String>? folderIds,
@@ -1127,6 +1193,8 @@ class RecipesCompanion extends UpdateCompanion<RecipeEntry> {
       if (createdAt != null) 'created_at': createdAt,
       if (updatedAt != null) 'updated_at': updatedAt,
       if (deletedAt != null) 'deleted_at': deletedAt,
+      if (pinned != null) 'pinned': pinned,
+      if (pinnedAt != null) 'pinned_at': pinnedAt,
       if (ingredients != null) 'ingredients': ingredients,
       if (steps != null) 'steps': steps,
       if (folderIds != null) 'folder_ids': folderIds,
@@ -1153,6 +1221,8 @@ class RecipesCompanion extends UpdateCompanion<RecipeEntry> {
       Value<int?>? createdAt,
       Value<int?>? updatedAt,
       Value<int?>? deletedAt,
+      Value<int?>? pinned,
+      Value<int?>? pinnedAt,
       Value<List<Ingredient>?>? ingredients,
       Value<List<Step>?>? steps,
       Value<List<String>?>? folderIds,
@@ -1176,6 +1246,8 @@ class RecipesCompanion extends UpdateCompanion<RecipeEntry> {
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
       deletedAt: deletedAt ?? this.deletedAt,
+      pinned: pinned ?? this.pinned,
+      pinnedAt: pinnedAt ?? this.pinnedAt,
       ingredients: ingredients ?? this.ingredients,
       steps: steps ?? this.steps,
       folderIds: folderIds ?? this.folderIds,
@@ -1238,6 +1310,12 @@ class RecipesCompanion extends UpdateCompanion<RecipeEntry> {
     if (deletedAt.present) {
       map['deleted_at'] = Variable<int>(deletedAt.value);
     }
+    if (pinned.present) {
+      map['pinned'] = Variable<int>(pinned.value);
+    }
+    if (pinnedAt.present) {
+      map['pinned_at'] = Variable<int>(pinnedAt.value);
+    }
     if (ingredients.present) {
       map['ingredients'] = Variable<String>(
           $RecipesTable.$converteringredientsn.toSql(ingredients.value));
@@ -1280,6 +1358,8 @@ class RecipesCompanion extends UpdateCompanion<RecipeEntry> {
           ..write('createdAt: $createdAt, ')
           ..write('updatedAt: $updatedAt, ')
           ..write('deletedAt: $deletedAt, ')
+          ..write('pinned: $pinned, ')
+          ..write('pinnedAt: $pinnedAt, ')
           ..write('ingredients: $ingredients, ')
           ..write('steps: $steps, ')
           ..write('folderIds: $folderIds, ')
@@ -9618,6 +9698,8 @@ typedef $$RecipesTableCreateCompanionBuilder = RecipesCompanion Function({
   Value<int?> createdAt,
   Value<int?> updatedAt,
   Value<int?> deletedAt,
+  Value<int?> pinned,
+  Value<int?> pinnedAt,
   Value<List<Ingredient>?> ingredients,
   Value<List<Step>?> steps,
   Value<List<String>?> folderIds,
@@ -9642,6 +9724,8 @@ typedef $$RecipesTableUpdateCompanionBuilder = RecipesCompanion Function({
   Value<int?> createdAt,
   Value<int?> updatedAt,
   Value<int?> deletedAt,
+  Value<int?> pinned,
+  Value<int?> pinnedAt,
   Value<List<Ingredient>?> ingredients,
   Value<List<Step>?> steps,
   Value<List<String>?> folderIds,
@@ -9708,6 +9792,12 @@ class $$RecipesTableFilterComposer
 
   ColumnFilters<int> get deletedAt => $composableBuilder(
       column: $table.deletedAt, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<int> get pinned => $composableBuilder(
+      column: $table.pinned, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<int> get pinnedAt => $composableBuilder(
+      column: $table.pinnedAt, builder: (column) => ColumnFilters(column));
 
   ColumnWithTypeConverterFilters<List<Ingredient>?, List<Ingredient>, String>
       get ingredients => $composableBuilder(
@@ -9791,6 +9881,12 @@ class $$RecipesTableOrderingComposer
   ColumnOrderings<int> get deletedAt => $composableBuilder(
       column: $table.deletedAt, builder: (column) => ColumnOrderings(column));
 
+  ColumnOrderings<int> get pinned => $composableBuilder(
+      column: $table.pinned, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<int> get pinnedAt => $composableBuilder(
+      column: $table.pinnedAt, builder: (column) => ColumnOrderings(column));
+
   ColumnOrderings<String> get ingredients => $composableBuilder(
       column: $table.ingredients, builder: (column) => ColumnOrderings(column));
 
@@ -9864,6 +9960,12 @@ class $$RecipesTableAnnotationComposer
   GeneratedColumn<int> get deletedAt =>
       $composableBuilder(column: $table.deletedAt, builder: (column) => column);
 
+  GeneratedColumn<int> get pinned =>
+      $composableBuilder(column: $table.pinned, builder: (column) => column);
+
+  GeneratedColumn<int> get pinnedAt =>
+      $composableBuilder(column: $table.pinnedAt, builder: (column) => column);
+
   GeneratedColumnWithTypeConverter<List<Ingredient>?, String> get ingredients =>
       $composableBuilder(
           column: $table.ingredients, builder: (column) => column);
@@ -9918,6 +10020,8 @@ class $$RecipesTableTableManager extends RootTableManager<
             Value<int?> createdAt = const Value.absent(),
             Value<int?> updatedAt = const Value.absent(),
             Value<int?> deletedAt = const Value.absent(),
+            Value<int?> pinned = const Value.absent(),
+            Value<int?> pinnedAt = const Value.absent(),
             Value<List<Ingredient>?> ingredients = const Value.absent(),
             Value<List<Step>?> steps = const Value.absent(),
             Value<List<String>?> folderIds = const Value.absent(),
@@ -9942,6 +10046,8 @@ class $$RecipesTableTableManager extends RootTableManager<
             createdAt: createdAt,
             updatedAt: updatedAt,
             deletedAt: deletedAt,
+            pinned: pinned,
+            pinnedAt: pinnedAt,
             ingredients: ingredients,
             steps: steps,
             folderIds: folderIds,
@@ -9966,6 +10072,8 @@ class $$RecipesTableTableManager extends RootTableManager<
             Value<int?> createdAt = const Value.absent(),
             Value<int?> updatedAt = const Value.absent(),
             Value<int?> deletedAt = const Value.absent(),
+            Value<int?> pinned = const Value.absent(),
+            Value<int?> pinnedAt = const Value.absent(),
             Value<List<Ingredient>?> ingredients = const Value.absent(),
             Value<List<Step>?> steps = const Value.absent(),
             Value<List<String>?> folderIds = const Value.absent(),
@@ -9990,6 +10098,8 @@ class $$RecipesTableTableManager extends RootTableManager<
             createdAt: createdAt,
             updatedAt: updatedAt,
             deletedAt: deletedAt,
+            pinned: pinned,
+            pinnedAt: pinnedAt,
             ingredients: ingredients,
             steps: steps,
             folderIds: folderIds,

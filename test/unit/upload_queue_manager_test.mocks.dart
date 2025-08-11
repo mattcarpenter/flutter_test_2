@@ -1019,6 +1019,45 @@ class MockRecipeRepository extends _i1.Mock implements _i11.RecipeRepository {
         returnValue:
             _i6.Future<List<_i3.RecipeEntry>>.value(<_i3.RecipeEntry>[]),
       ) as _i6.Future<List<_i3.RecipeEntry>>);
+
+  @override
+  _i6.Future<bool> toggleRecipePin(
+    String? recipeId,
+    bool? pinned,
+  ) =>
+      (super.noSuchMethod(
+        Invocation.method(
+          #toggleRecipePin,
+          [
+            recipeId,
+            pinned,
+          ],
+        ),
+        returnValue: _i6.Future<bool>.value(false),
+      ) as _i6.Future<bool>);
+
+  @override
+  _i6.Future<List<_i3.RecipeEntry>> getPinnedRecipes({int? limit = 10}) =>
+      (super.noSuchMethod(
+        Invocation.method(
+          #getPinnedRecipes,
+          [],
+          {#limit: limit},
+        ),
+        returnValue:
+            _i6.Future<List<_i3.RecipeEntry>>.value(<_i3.RecipeEntry>[]),
+      ) as _i6.Future<List<_i3.RecipeEntry>>);
+
+  @override
+  _i6.Stream<List<_i3.RecipeEntry>> watchPinnedRecipes({int? limit = 10}) =>
+      (super.noSuchMethod(
+        Invocation.method(
+          #watchPinnedRecipes,
+          [],
+          {#limit: limit},
+        ),
+        returnValue: _i6.Stream<List<_i3.RecipeEntry>>.empty(),
+      ) as _i6.Stream<List<_i3.RecipeEntry>>);
 }
 
 /// A class which mocks [AppDatabase].

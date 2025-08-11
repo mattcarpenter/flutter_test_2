@@ -14,6 +14,7 @@ import '../widgets/recipe_search_results.dart';
 import 'add_folder_modal.dart';
 import '../widgets/folder_list.dart';
 import '../widgets/recipe_list.dart';
+import '../widgets/pinned_recipes_section.dart';
 import 'add_recipe_modal.dart';
 
 class RecipesTab extends ConsumerWidget {
@@ -54,21 +55,10 @@ class RecipesTab extends ConsumerWidget {
         const SliverToBoxAdapter(
           child: FolderList(currentPageTitle: 'Recipes')
         ),
-        // Header as a sliver.
-        SliverToBoxAdapter(
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16),
-            child: Text(
-              'Recipes',
-              style: CupertinoTheme.of(context)
-                  .textTheme
-                  .navLargeTitleTextStyle
-                  .copyWith(fontSize: 20, fontWeight: FontWeight.w600),
-            ),
-          ),
+        // Pinned recipes section
+        const SliverToBoxAdapter(
+          child: PinnedRecipesSection(),
         ),
-        // The recipes grid sliver.
-        //RecipesList(recipes: dummyRecipes),
       ],
       trailing: AdaptivePullDownButton(
         items: [
