@@ -42,8 +42,7 @@ class PinnedRecipesSection extends ConsumerWidget {
                   ),
                   TextButton(
                     onPressed: () {
-                      // TODO: Navigate to a dedicated pinned recipes page
-                      // For now, we'll just ignore this - user said we'll implement behavior later
+                      context.push('/recipes/pinned');
                     },
                     child: const Text('View All'),
                   ),

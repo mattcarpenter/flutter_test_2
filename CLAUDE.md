@@ -61,6 +61,52 @@ flutter analyze
 flutter format .
 ```
 
+## Design System and Theming
+
+**IMPORTANT**: Always use the centralized design system constants instead of hardcoding values.
+
+### Theme Constants
+
+1. **Spacing**: Use `AppSpacing` constants from `lib/src/theme/spacing.dart`
+   ```dart
+   import '../theme/spacing.dart';
+   
+   // Instead of: EdgeInsets.all(16)
+   // Use: EdgeInsets.all(AppSpacing.lg)
+   
+   // Available: AppSpacing.xs (4px), .sm (8px), .md (12px), .lg (16px), .xl (24px), .xxl (32px)
+   ```
+
+2. **Colors**: Use `AppColors` and `AppColorSwatches` from `lib/src/theme/colors.dart`
+   ```dart
+   import '../theme/colors.dart';
+   
+   // Theme-aware colors (adapt to light/dark mode):
+   AppColors.of(context).textSecondary
+   AppColors.of(context).border
+   
+   // Fixed color swatches:
+   AppColorSwatches.neutral[400]
+   AppColorSwatches.primary[500]
+   ```
+
+3. **Typography**: Use `AppTypography` constants from `lib/src/theme/typography.dart`
+   ```dart
+   import '../theme/typography.dart';
+   
+   // Instead of: TextStyle(fontSize: 16, fontWeight: FontWeight.w600)
+   // Use: AppTypography.h5
+   
+   // Available: h1-h5, body, bodyLarge, bodySmall, label, caption, etc.
+   ```
+
+### Design System Rules
+
+- **Never hardcode spacing values** - always use AppSpacing constants
+- **Never hardcode colors** - use AppColors for theme-aware colors or AppColorSwatches for fixed colors  
+- **Prefer semantic typography** - use AppTypography over custom TextStyle when possible
+- **Follow existing patterns** - examine similar components before creating new styling
+
 ## Architecture Overview
 
 ### Application Structure

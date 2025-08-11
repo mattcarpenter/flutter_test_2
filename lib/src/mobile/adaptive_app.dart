@@ -7,6 +7,7 @@ import 'package:go_router/go_router.dart';
 import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
 import 'package:recipe_app/src/features/recipes/views/recipe_page.dart';
 import 'package:recipe_app/src/features/recipes/views/recipes_folder_page.dart';
+import 'package:recipe_app/src/features/recipes/views/pinned_recipes_page.dart';
 import 'package:recipe_app/src/mobile/utils/adaptive_sheet_page.dart';
 
 import '../color_theme.dart';
@@ -332,6 +333,13 @@ class _AdaptiveApp2State extends State<AdaptiveApp2> {
                           ),
                         );
                       },
+                    ),
+                    GoRoute(
+                      path: 'pinned',
+                      pageBuilder: (context, state) => _platformPage(
+                        state: state,
+                        child: const PinnedRecipesPage(),
+                      ),
                     ),
                   ],
                   pageBuilder: (context, state) => _platformPage(
