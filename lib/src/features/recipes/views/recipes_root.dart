@@ -10,6 +10,7 @@ import '../../../mobile/utils/adaptive_sliver_page.dart';
 import '../../../providers/recipe_provider.dart';
 import '../../../widgets/adaptive_pull_down/adaptive_menu_item.dart';
 import '../../../widgets/adaptive_pull_down/adaptive_pull_down.dart';
+import '../../../widgets/app_circle_button.dart';
 import '../widgets/recipe_search_results.dart';
 import 'add_folder_modal.dart';
 import '../widgets/folder_list.dart';
@@ -81,7 +82,9 @@ class RecipesTab extends ConsumerWidget {
             },
           )
         ],
-        child: const Icon(CupertinoIcons.add_circled),
+        child: const AppCircleButton(
+          icon: AppCircleButtonIcon.ellipsis,
+        ),
       ),
       leading: const Icon(CupertinoIcons.person_2),
     );

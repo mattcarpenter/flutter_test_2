@@ -71,7 +71,7 @@ class RecentlyViewedSection extends ConsumerWidget {
             }),
             
             // Bottom margin to prevent scroll feedback loops  
-            const SizedBox(height: AppSpacing.lg), // 16px - enough to prevent issues without excess space
+            const SizedBox(height: 80), // Extra space to prevent scroll bounce at bottom
           ],
         );
       },
