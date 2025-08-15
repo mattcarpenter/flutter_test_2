@@ -9,6 +9,7 @@ import '../../../providers/recipe_provider.dart';
 import '../../../widgets/adaptive_pull_down/adaptive_menu_item.dart';
 import '../../../widgets/adaptive_pull_down/adaptive_pull_down.dart';
 import '../../../widgets/app_button.dart';
+import '../../../widgets/app_circle_button.dart';
 import '../models/recipe_filter_sort.dart';
 import '../utils/filter_utils.dart';
 import '../widgets/filter_sort/recipe_filter_sheet.dart';
@@ -201,7 +202,9 @@ class RecipesFolderPage extends ConsumerWidget {
             },
           )
         ],
-        child: const Icon(CupertinoIcons.add_circled),
+        child: const AppCircleButton(
+          icon: AppCircleButtonIcon.plus,
+        ),
       ),
       previousPageTitle: previousPageTitle,
       automaticallyImplyLeading: true,

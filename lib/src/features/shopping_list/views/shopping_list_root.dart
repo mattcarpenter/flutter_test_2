@@ -6,6 +6,7 @@ import '../../../mobile/utils/adaptive_sliver_page.dart';
 import '../../../providers/shopping_list_provider.dart';
 import '../../../widgets/adaptive_pull_down/adaptive_menu_item.dart';
 import '../../../widgets/adaptive_pull_down/adaptive_pull_down.dart';
+import '../../../widgets/app_circle_button.dart';
 import '../widgets/shopping_list_dropdown.dart';
 import '../widgets/shopping_list_items_list.dart';
 import '../widgets/shopping_list_selection_fab.dart';
@@ -94,7 +95,9 @@ class ShoppingListTab extends ConsumerWidget {
                 },
               ),
             ],
-            child: const Icon(CupertinoIcons.add_circled),
+            child: const AppCircleButton(
+              icon: AppCircleButtonIcon.ellipsis,
+            ),
           ),
         ),
         // Floating Action Button for bulk actions

@@ -5,6 +5,7 @@ import '../theme/colors.dart';
 enum AppCircleButtonIcon {
   plus,
   ellipsis,
+  pencil,
 }
 
 class AppCircleButton extends StatelessWidget {
@@ -25,6 +26,8 @@ class AppCircleButton extends StatelessWidget {
         return CupertinoIcons.plus;
       case AppCircleButtonIcon.ellipsis:
         return CupertinoIcons.ellipsis;
+      case AppCircleButtonIcon.pencil:
+        return CupertinoIcons.pencil;
     }
   }
 

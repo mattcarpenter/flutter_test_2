@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../../mobile/utils/adaptive_sliver_page.dart';
 import '../../../widgets/adaptive_pull_down/adaptive_menu_item.dart';
 import '../../../widgets/adaptive_pull_down/adaptive_pull_down.dart';
+import '../../../widgets/app_circle_button.dart';
 import '../widgets/recipe_view/recipe_view.dart';
 
 class RecipePage extends StatelessWidget {
@@ -36,7 +37,9 @@ class RecipePage extends StatelessWidget {
           }
           ),
         ],
-        child: const Icon(CupertinoIcons.pencil_circle),
+        child: const AppCircleButton(
+          icon: AppCircleButtonIcon.pencil,
+        ),
       ),
       automaticallyImplyLeading: true,
       previousPageTitle: previousPageTitle,

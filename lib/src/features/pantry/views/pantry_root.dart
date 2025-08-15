@@ -7,6 +7,7 @@ import '../../../providers/pantry_provider.dart';
 import '../../../providers/pantry_filter_sort_provider.dart';
 import '../../../widgets/adaptive_pull_down/adaptive_menu_item.dart';
 import '../../../widgets/adaptive_pull_down/adaptive_pull_down.dart';
+import '../../../widgets/app_circle_button.dart';
 import '../models/pantry_filter_sort.dart';
 import '../widgets/filter_sort/pantry_filter_chips.dart';
 import '../widgets/filter_sort/pantry_sort_dropdown.dart';
@@ -114,7 +115,9 @@ class PantryTab extends ConsumerWidget {
                 },
               )
             ],
-            child: const Icon(CupertinoIcons.add_circled),
+            child: const AppCircleButton(
+              icon: AppCircleButtonIcon.plus,
+            ),
           ),
         ),
         // Floating Action Button for selection
