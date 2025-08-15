@@ -17,7 +17,7 @@ class AppCircleButton extends StatelessWidget {
     Key? key,
     required this.icon,
     this.onPressed,
-    this.size = 32.0,
+    this.size = 30.0,
   }) : super(key: key);
 
   IconData get _iconData {
@@ -35,16 +35,16 @@ class AppCircleButton extends StatelessWidget {
   Widget build(BuildContext context) {
     final brightness = Theme.of(context).brightness;
     final isLight = brightness == Brightness.light;
-    
+
     // Adaptive colors based on theme
     final backgroundColor = isLight
         ? AppColorSwatches.primary[100]! // Very light coral
         : AppColorSwatches.primary[900]!.withOpacity(0.3); // Dark coral with opacity
-    
+
     final iconColor = isLight
         ? AppColorSwatches.primary[500]! // Use base vibrant coral instead of dark
         : AppColorSwatches.primary[300]!; // Light coral
-    
+
     // Pressed state colors
     final pressedBackgroundColor = isLight
         ? AppColorSwatches.primary[200]! // Slightly darker on press
@@ -62,8 +62,9 @@ class AppCircleButton extends StatelessWidget {
         child: Center(
           child: Icon(
             _iconData,
-            size: size * 0.5, // Icon is 50% of button size
+            size: size * 0.55, // Icon is 55% of button size for bolder appearance
             color: iconColor,
+            weight: 800, // Make icons bolder
           ),
         ),
       ),
