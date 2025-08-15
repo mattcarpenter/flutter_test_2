@@ -45,12 +45,23 @@ class RecipesTab extends ConsumerWidget {
         SliverToBoxAdapter(
           child: Padding(
             padding: const EdgeInsets.fromLTRB(16, 16, 16, 0), // Consistent top spacing
-            child: Text(
-              'Recipe Folders',
-              style: CupertinoTheme.of(context)
-                  .textTheme
-                  .navLargeTitleTextStyle
-                  .copyWith(fontSize: 20, fontWeight: FontWeight.w600),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  'Recipe Folders',
+                  style: CupertinoTheme.of(context)
+                      .textTheme
+                      .navLargeTitleTextStyle
+                      .copyWith(fontSize: 20, fontWeight: FontWeight.w600),
+                ),
+                AppCircleButton(
+                  icon: AppCircleButtonIcon.plus,
+                  onPressed: () {
+                    showAddFolderModal(context);
+                  },
+                ),
+              ],
             ),
           ),
         ),

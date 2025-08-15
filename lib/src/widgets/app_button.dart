@@ -23,6 +23,7 @@ enum AppButtonShape {
 
 /// Size options for the button
 enum AppButtonSize {
+  extraSmall,
   small,
   medium,
   large,
@@ -168,6 +169,8 @@ class _AppButtonState extends State<AppButton> {
 
   double get _height {
     switch (widget.size) {
+      case AppButtonSize.extraSmall:
+        return 28;
       case AppButtonSize.small:
         return 36;
       case AppButtonSize.medium:
@@ -181,6 +184,8 @@ class _AppButtonState extends State<AppButton> {
     // Icon-only buttons get equal padding on all sides for square appearance
     if (widget.iconOnly) {
       switch (widget.size) {
+        case AppButtonSize.extraSmall:
+          return const EdgeInsets.all(8);
         case AppButtonSize.small:
           return const EdgeInsets.all(10);
         case AppButtonSize.medium:
@@ -195,6 +200,11 @@ class _AppButtonState extends State<AppButton> {
     final horizontalPadding = hasLeadingIcon ? 0.7 : 1.0; // 30% less padding with icon
 
     switch (widget.size) {
+      case AppButtonSize.extraSmall:
+        return EdgeInsets.symmetric(
+          horizontal: (14 * horizontalPadding).round().toDouble(),
+          vertical: 6
+        );
       case AppButtonSize.small:
         return EdgeInsets.symmetric(
           horizontal: (18 * horizontalPadding).round().toDouble(),
@@ -217,6 +227,8 @@ class _AppButtonState extends State<AppButton> {
     // Icon-only buttons use larger icon sizes for better visibility
     if (widget.iconOnly) {
       switch (widget.size) {
+        case AppButtonSize.extraSmall:
+          return 14;
         case AppButtonSize.small:
           return 16;  // Increased from 12 for better visibility
         case AppButtonSize.medium:
@@ -227,6 +239,8 @@ class _AppButtonState extends State<AppButton> {
     }
 
     switch (widget.size) {
+      case AppButtonSize.extraSmall:
+        return 11;
       case AppButtonSize.small:
         return 12;
       case AppButtonSize.medium:
