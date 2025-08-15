@@ -272,17 +272,20 @@ class _SortHeaderDelegate extends SliverPersistentHeaderDelegate {
                 leadingIconOffset: const Offset(0, -1.0), // Slight upward nudge for better vertical centering
               ),
             ),
-            
+
             const SizedBox(width: 12), // Space between buttons
-            
+
             // Filter button with red dot indicator when filters active
             Stack(
               clipBehavior: Clip.none,
               children: [
-                AppButtonVariants.iconOnly(
-                  icon: const Icon(Icons.tune),  // Let IconTheme handle the size
+                AppButton(
+                  text: 'Filter',
+                  leadingIcon: const Icon(Icons.tune),
                   style: AppButtonStyle.mutedOutline,
                   shape: AppButtonShape.square, // Racetrack style
+                  size: AppButtonSize.small,
+                  theme: AppButtonTheme.primary,
                   onPressed: () {
                     print('Current filter state: ${filterState.activeFilters}');
 
@@ -306,8 +309,6 @@ class _SortHeaderDelegate extends SliverPersistentHeaderDelegate {
                       },
                     );
                   },
-                  theme: AppButtonTheme.primary,
-                  size: AppButtonSize.small,
                 ),
                 // Red dot indicator
                 if (filterState.hasFilters)
