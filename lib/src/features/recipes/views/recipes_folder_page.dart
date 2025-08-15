@@ -261,6 +261,7 @@ class _SortHeaderDelegate extends SliverPersistentHeaderDelegate {
                 visuallyEnabled: true, // Keep button looking enabled
                 theme: AppButtonTheme.primary,
                 style: AppButtonStyle.mutedOutline,
+                shape: AppButtonShape.square, // Racetrack style
                 size: AppButtonSize.small,
                 leadingIcon: Icon(
                   sortDirection == SortDirection.ascending
@@ -268,6 +269,7 @@ class _SortHeaderDelegate extends SliverPersistentHeaderDelegate {
                       : Icons.keyboard_arrow_down,
                   size: 18,
                 ),
+                leadingIconOffset: const Offset(0, -1.0), // Slight upward nudge for better vertical centering
               ),
             ),
             
@@ -280,6 +282,7 @@ class _SortHeaderDelegate extends SliverPersistentHeaderDelegate {
                 AppButtonVariants.iconOnly(
                   icon: const Icon(Icons.tune),  // Let IconTheme handle the size
                   style: AppButtonStyle.mutedOutline,
+                  shape: AppButtonShape.square, // Racetrack style
                   onPressed: () {
                     print('Current filter state: ${filterState.activeFilters}');
 

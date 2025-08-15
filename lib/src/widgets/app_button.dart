@@ -44,6 +44,7 @@ class AppButton extends StatefulWidget {
   final bool iconOnly;
   final Widget? icon;
   final bool visuallyEnabled;
+  final Offset leadingIconOffset;
 
   const AppButton({
     Key? key,
@@ -60,6 +61,7 @@ class AppButton extends StatefulWidget {
     this.iconOnly = false,
     this.icon,
     this.visuallyEnabled = false,
+    this.leadingIconOffset = Offset.zero,
   }) : super(key: key);
 
   @override
@@ -255,8 +257,8 @@ class _AppButtonState extends State<AppButton> {
       // Pill shape - fully rounded
       return BorderRadius.circular(_height / 2);
     } else {
-      // Stadium/racetrack shape - gentle curves on top/bottom, sharper on left/right
-      return BorderRadius.circular(_height / 2.5);
+      // Racetrack shape - more subtle curves
+      return BorderRadius.circular(_height / 4);
     }
   }
 
@@ -355,12 +357,15 @@ class _AppButtonState extends State<AppButton> {
                       ),
                       const SizedBox(width: 8),
                     ] else if (widget.leadingIcon != null) ...[
-                      IconTheme(
-                        data: IconThemeData(
-                          size: _fontSize,
-                          color: _textColor,
+                      Transform.translate(
+                        offset: widget.leadingIconOffset,
+                        child: IconTheme(
+                          data: IconThemeData(
+                            size: _fontSize,
+                            color: _textColor,
+                          ),
+                          child: widget.leadingIcon!,
                         ),
-                        child: widget.leadingIcon!,
                       ),
                       const SizedBox(width: 6), // Reduced from 8 to 6
                     ],
@@ -409,6 +414,7 @@ extension AppButtonVariants on AppButton {
     Widget? leadingIcon,
     Widget? trailingIcon,
     bool fullWidth = false,
+    Offset leadingIconOffset = Offset.zero,
   }) {
     return AppButton(
       text: text,
@@ -421,6 +427,7 @@ extension AppButtonVariants on AppButton {
       leadingIcon: leadingIcon,
       trailingIcon: trailingIcon,
       fullWidth: fullWidth,
+      leadingIconOffset: leadingIconOffset,
     );
   }
 
@@ -434,6 +441,7 @@ extension AppButtonVariants on AppButton {
     Widget? leadingIcon,
     Widget? trailingIcon,
     bool fullWidth = false,
+    Offset leadingIconOffset = Offset.zero,
   }) {
     return AppButton(
       text: text,
@@ -446,6 +454,7 @@ extension AppButtonVariants on AppButton {
       leadingIcon: leadingIcon,
       trailingIcon: trailingIcon,
       fullWidth: fullWidth,
+      leadingIconOffset: leadingIconOffset,
     );
   }
 
@@ -459,6 +468,7 @@ extension AppButtonVariants on AppButton {
     Widget? leadingIcon,
     Widget? trailingIcon,
     bool fullWidth = false,
+    Offset leadingIconOffset = Offset.zero,
   }) {
     return AppButton(
       text: text,
@@ -471,6 +481,7 @@ extension AppButtonVariants on AppButton {
       leadingIcon: leadingIcon,
       trailingIcon: trailingIcon,
       fullWidth: fullWidth,
+      leadingIconOffset: leadingIconOffset,
     );
   }
 
@@ -484,6 +495,7 @@ extension AppButtonVariants on AppButton {
     Widget? leadingIcon,
     Widget? trailingIcon,
     bool fullWidth = false,
+    Offset leadingIconOffset = Offset.zero,
   }) {
     return AppButton(
       text: text,
@@ -496,6 +508,7 @@ extension AppButtonVariants on AppButton {
       leadingIcon: leadingIcon,
       trailingIcon: trailingIcon,
       fullWidth: fullWidth,
+      leadingIconOffset: leadingIconOffset,
     );
   }
 
@@ -509,6 +522,7 @@ extension AppButtonVariants on AppButton {
     AppButtonSize size = AppButtonSize.small,
     bool loading = false,
     bool visuallyEnabled = false,
+    Offset leadingIconOffset = Offset.zero,
   }) {
     return AppButton(
       text: '',
@@ -521,6 +535,7 @@ extension AppButtonVariants on AppButton {
       iconOnly: true,
       icon: icon,
       visuallyEnabled: visuallyEnabled,
+      leadingIconOffset: leadingIconOffset,
     );
   }
 }
