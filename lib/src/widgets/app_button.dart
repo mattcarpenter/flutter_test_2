@@ -572,6 +572,36 @@ extension AppButtonVariants on AppButton {
     );
   }
 
+  /// Creates a muted outline button
+  static AppButton mutedOutline({
+    required String text,
+    VoidCallback? onPressed,
+    AppButtonTheme theme = AppButtonTheme.primary,
+    AppButtonShape shape = AppButtonShape.round,
+    AppButtonSize size = AppButtonSize.medium,
+    bool loading = false,
+    Widget? leadingIcon,
+    Widget? trailingIcon,
+    bool fullWidth = false,
+    Offset leadingIconOffset = Offset.zero,
+    Offset trailingIconOffset = Offset.zero,
+  }) {
+    return AppButton(
+      text: text,
+      onPressed: onPressed,
+      theme: theme,
+      style: AppButtonStyle.mutedOutline,
+      shape: shape,
+      size: size,
+      loading: loading,
+      leadingIcon: leadingIcon,
+      trailingIcon: trailingIcon,
+      fullWidth: fullWidth,
+      leadingIconOffset: leadingIconOffset,
+      trailingIconOffset: trailingIconOffset,
+    );
+  }
+
   /// Creates an icon-only button
   static AppButton iconOnly({
     required Widget icon,

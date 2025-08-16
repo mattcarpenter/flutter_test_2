@@ -154,7 +154,7 @@ class _AddFolderFormState extends ConsumerState<AddFolderForm> {
         Row(
           children: [
             Expanded(
-              child: AppButtonVariants.secondaryOutline(
+              child: AppButtonVariants.mutedOutline(
                 text: 'Cancel',
                 size: AppButtonSize.large,
                 shape: AppButtonShape.square,
