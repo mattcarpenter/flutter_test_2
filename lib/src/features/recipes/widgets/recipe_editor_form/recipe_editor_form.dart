@@ -119,6 +119,13 @@ class RecipeEditorFormState extends ConsumerState<RecipeEditorForm> {
     });
   }
 
+  // Handle folder assignment changes
+  void _updateFolderIds(List<String> newFolderIds) {
+    setState(() {
+      _recipe = _recipe.copyWith(folderIds: Value(newFolderIds));
+    });
+  }
+
   Future<void> saveRecipe() async {
     if (!_isInitialized) return;
     // Build your updatedRecipe from form state.
@@ -318,6 +325,8 @@ class RecipeEditorFormState extends ConsumerState<RecipeEditorForm> {
               servingsController: _servingsController,
               prepTimeController: _prepTimeController,
               cookTimeController: _cookTimeController,
+              currentFolderIds: _recipe.folderIds ?? [],
+              onFolderIdsChanged: _updateFolderIds,
             ),
 
             // Images Section Header

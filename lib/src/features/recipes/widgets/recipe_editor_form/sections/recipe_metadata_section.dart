@@ -7,6 +7,7 @@ import '../../../../../widgets/app_text_field_group.dart';
 import '../../../../../widgets/app_duration_picker.dart';
 import '../../../../../widgets/app_duration_picker_condensed.dart';
 import '../../../../../theme/spacing.dart';
+import '../items/folder_assignment_row.dart';
 
 class RecipeMetadataSection extends StatelessWidget {
   final TextEditingController titleController;
@@ -14,6 +15,8 @@ class RecipeMetadataSection extends StatelessWidget {
   final TextEditingController servingsController;
   final TextEditingController prepTimeController;
   final TextEditingController cookTimeController;
+  final List<String> currentFolderIds;
+  final ValueChanged<List<String>> onFolderIdsChanged;
 
   const RecipeMetadataSection({
     super.key,
@@ -22,6 +25,8 @@ class RecipeMetadataSection extends StatelessWidget {
     required this.servingsController,
     required this.prepTimeController,
     required this.cookTimeController,
+    required this.currentFolderIds,
+    required this.onFolderIdsChanged,
   });
 
   @override
@@ -52,7 +57,7 @@ class RecipeMetadataSection extends StatelessWidget {
         
         const SizedBox(height: AppSpacing.md),
 
-        // Timing group: Prep Time + Cook Time + Servings
+        // Timing group: Prep Time + Cook Time + Servings + Folders
         AppTextFieldGroup(
           variant: AppTextFieldVariant.outline,
           children: [
@@ -73,6 +78,11 @@ class RecipeMetadataSection extends StatelessWidget {
               placeholder: "Servings",
               keyboardType: TextInputType.number,
               inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+              grouped: true,
+            ),
+            FolderAssignmentRow(
+              currentFolderIds: currentFolderIds,
+              onFolderIdsChanged: onFolderIdsChanged,
               grouped: true,
             ),
           ],

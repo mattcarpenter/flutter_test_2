@@ -11,8 +11,8 @@ import '../../../widgets/app_button.dart';
 import '../../../widgets/app_text_field.dart';
 import '../../../theme/typography.dart';
 
-void showAddFolderModal(BuildContext context) {
-  WoltModalSheet.show(
+Future<String?> showAddFolderModal(BuildContext context) {
+  return WoltModalSheet.show<String>(
     useRootNavigator: true,
     context: context,
     pageListBuilder: (bottomSheetContext) => [
