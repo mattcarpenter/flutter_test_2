@@ -344,47 +344,95 @@ class _AppButtonState extends State<AppButton> {
                     )
               : Row(
                   mainAxisSize: widget.fullWidth ? MainAxisSize.max : MainAxisSize.min,
-                  mainAxisAlignment: MainAxisAlignment.center,
+                  mainAxisAlignment: widget.trailingIcon != null 
+                      ? MainAxisAlignment.spaceBetween 
+                      : MainAxisAlignment.center,
                   children: [
-                    if (widget.loading) ...[
-                      SizedBox(
-                        width: _fontSize,
-                        height: _fontSize,
-                        child: CircularProgressIndicator(
-                          strokeWidth: 2,
-                          valueColor: AlwaysStoppedAnimation<Color>(_textColor),
-                        ),
-                      ),
-                      const SizedBox(width: 8),
-                    ] else if (widget.leadingIcon != null) ...[
-                      Transform.translate(
-                        offset: widget.leadingIconOffset,
-                        child: IconTheme(
-                          data: IconThemeData(
-                            size: _fontSize,
-                            color: _textColor,
+                    // Leading content (icon + text) - grouped together when trailing icon exists
+                    if (widget.trailingIcon != null && !widget.loading)
+                      Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          if (widget.loading) ...[
+                            SizedBox(
+                              width: _fontSize,
+                              height: _fontSize,
+                              child: CircularProgressIndicator(
+                                strokeWidth: 2,
+                                valueColor: AlwaysStoppedAnimation<Color>(_textColor),
+                              ),
+                            ),
+                            const SizedBox(width: 8),
+                          ] else if (widget.leadingIcon != null) ...[
+                            Transform.translate(
+                              offset: widget.leadingIconOffset,
+                              child: IconTheme(
+                                data: IconThemeData(
+                                  size: _fontSize,
+                                  color: _textColor,
+                                ),
+                                child: widget.leadingIcon!,
+                              ),
+                            ),
+                            const SizedBox(width: 6),
+                          ],
+                          Text(
+                            widget.text,
+                            style: TextStyle(
+                              color: _textColor,
+                              fontSize: _fontSize,
+                              fontWeight: FontWeight.w600,
+                              fontFamily: 'Inter',
+                              height: 1,
+                            ),
+                            overflow: TextOverflow.ellipsis,
+                            maxLines: 1,
                           ),
-                          child: widget.leadingIcon!,
+                        ],
+                      )
+                    else ...[
+                      // Original behavior when no trailing icon
+                      if (widget.loading) ...[
+                        SizedBox(
+                          width: _fontSize,
+                          height: _fontSize,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2,
+                            valueColor: AlwaysStoppedAnimation<Color>(_textColor),
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                      ] else if (widget.leadingIcon != null) ...[
+                        Transform.translate(
+                          offset: widget.leadingIconOffset,
+                          child: IconTheme(
+                            data: IconThemeData(
+                              size: _fontSize,
+                              color: _textColor,
+                            ),
+                            child: widget.leadingIcon!,
+                          ),
+                        ),
+                        const SizedBox(width: 6), // Reduced from 8 to 6
+                      ],
+                      Flexible(
+                        child: Text(
+                          widget.text,
+                          style: TextStyle(
+                            color: _textColor,
+                            fontSize: _fontSize,
+                            fontWeight: FontWeight.w600,
+                            fontFamily: 'Inter',
+                            height: 1,
+                          ),
+                          overflow: TextOverflow.ellipsis,
+                          maxLines: 1,
                         ),
                       ),
-                      const SizedBox(width: 6), // Reduced from 8 to 6
                     ],
-                    Flexible(
-                      child: Text(
-                        widget.text,
-                        style: TextStyle(
-                          color: _textColor,
-                          fontSize: _fontSize,
-                          fontWeight: FontWeight.w600,
-                          fontFamily: 'Inter',
-                          height: 1,
-                        ),
-                        overflow: TextOverflow.ellipsis,
-                        maxLines: 1,
-                      ),
-                    ),
-                    if (widget.trailingIcon != null && !widget.loading) ...[
-                      const SizedBox(width: 8),
+                    
+                    // Trailing icon - positioned at the end
+                    if (widget.trailingIcon != null && !widget.loading)
                       IconTheme(
                         data: IconThemeData(
                           size: _fontSize,
@@ -392,7 +440,6 @@ class _AppButtonState extends State<AppButton> {
                         ),
                         child: widget.trailingIcon!,
                       ),
-                    ],
                   ],
                 ),
           ),

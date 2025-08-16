@@ -12,8 +12,7 @@ import '../../../widgets/app_button.dart';
 import '../../../widgets/app_circle_button.dart';
 import '../models/recipe_filter_sort.dart';
 import '../utils/filter_utils.dart';
-import '../widgets/filter_sort/recipe_filter_sheet.dart';
-import '../widgets/filter_sort/recipe_sort_modal.dart';
+import '../widgets/filter_sort/unified_sort_filter_sheet.dart';
 import '../widgets/recipe_list.dart';
 import '../widgets/recipe_search_results.dart';
 import 'add_recipe_modal.dart';
@@ -89,22 +88,28 @@ class RecipesFolderPage extends ConsumerWidget {
         });
       },
       slivers: [
-        // Sort dropdown in a SliverPersistentHeader
+        // Unified Sort/Filter header
         SliverPersistentHeader(
           pinned: false,
-          floating: false, // Disable floating to prevent scroll feedback loop
-          delegate: _SortHeaderDelegate(
-            sortOption: filterSortState.activeSortOption,
-            sortDirection: filterSortState.sortDirection,
-            filterState: filterSortState, // Pass the filter state
-            onSortOptionChanged: (option) {
-              ref.read(recipeFolderFilterSortProvider.notifier).updateSortOption(option);
+          floating: false,
+          delegate: _UnifiedHeaderDelegate(
+            filterSortState: filterSortState,
+            folderId: folderId,
+            onStateChanged: (newState) {
+              final notifier = ref.read(recipeFolderFilterSortProvider.notifier);
+              
+              // Clear all existing filters first
+              notifier.clearFilters();
+              
+              // Update sort
+              notifier.updateSortOption(newState.activeSortOption);
+              notifier.updateSortDirection(newState.sortDirection);
+              
+              // Add all filters from new state
+              for (final entry in newState.activeFilters.entries) {
+                notifier.updateFilter(entry.key, entry.value);
+              }
             },
-            onSortDirectionChanged: (direction) {
-              ref.read(recipeFolderFilterSortProvider.notifier).updateSortDirection(direction);
-            },
-            // Only show pantry match sort option in pantry context
-            showPantryMatchOption: false,
           ),
         ),
 
@@ -212,119 +217,89 @@ class RecipesFolderPage extends ConsumerWidget {
   }
 }
 
-/// Delegate for the sort dropdown in a sliver persistent header
-class _SortHeaderDelegate extends SliverPersistentHeaderDelegate {
-  final SortOption sortOption;
-  final SortDirection sortDirection;
-  final Function(SortOption) onSortOptionChanged;
-  final Function(SortDirection) onSortDirectionChanged;
-  final bool showPantryMatchOption;
-  final RecipeFilterSortState filterState; // Store the filter state
+/// Delegate for the unified sort/filter header
+class _UnifiedHeaderDelegate extends SliverPersistentHeaderDelegate {
+  final RecipeFilterSortState filterSortState;
+  final String? folderId;
+  final Function(RecipeFilterSortState) onStateChanged;
 
-  _SortHeaderDelegate({
-    required this.sortOption,
-    required this.sortDirection,
-    required this.onSortOptionChanged,
-    required this.onSortDirectionChanged,
-    required this.filterState, // Add to constructor
-    this.showPantryMatchOption = false,
+  _UnifiedHeaderDelegate({
+    required this.filterSortState,
+    required this.folderId,
+    required this.onStateChanged,
   });
 
   @override
   Widget build(BuildContext context, double shrinkOffset, bool overlapsContent) {
-    // Use Material widget to get elevation/shadow
     return Material(
-      elevation: overlapsContent ? 1.0 : 0.0, // Apply elevation only when content scrolls under
-      color: Colors.white.withOpacity(0.95),
+      elevation: overlapsContent ? 1.0 : 0.0,
+      color: Colors.white.withValues(alpha: 0.95),
       child: Container(
         height: minExtent,
         padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
+        constraints: const BoxConstraints(maxWidth: 800), // Max width for wider screens
         child: Row(
-          mainAxisAlignment: MainAxisAlignment.start, // Left-align buttons
-          crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            // Sort button with current sort label and direction icon
-            GestureDetector(
-              onTap: () {
-                RecipeSortModal.show(
-                  context,
-                  currentSortOption: sortOption,
-                  currentSortDirection: sortDirection,
-                  onSortOptionChanged: onSortOptionChanged,
-                  onSortDirectionChanged: onSortDirectionChanged,
-                  showPantryMatchOption: showPantryMatchOption,
-                );
-              },
-              child: AppButton(
-                text: sortOption.label,
-                onPressed: null, // Let GestureDetector handle taps
-                visuallyEnabled: true, // Keep button looking enabled
-                theme: AppButtonTheme.primary,
-                style: AppButtonStyle.mutedOutline,
-                shape: AppButtonShape.square, // Racetrack style
-                size: AppButtonSize.small,
-                leadingIcon: Icon(
-                  sortDirection == SortDirection.ascending
-                      ? Icons.keyboard_arrow_up
-                      : Icons.keyboard_arrow_down,
-                  size: 18,
-                ),
-                leadingIconOffset: const Offset(0, -1.0), // Slight upward nudge for better vertical centering
-              ),
-            ),
-
-            const SizedBox(width: 12), // Space between buttons
-
-            // Filter button with red dot indicator when filters active
-            Stack(
-              clipBehavior: Clip.none,
-              children: [
-                AppButton(
-                  text: 'Filter',
-                  leadingIcon: const Icon(Icons.tune),
-                  style: AppButtonStyle.mutedOutline,
-                  shape: AppButtonShape.square, // Racetrack style
-                  size: AppButtonSize.small,
-                  theme: AppButtonTheme.primary,
-                  onPressed: () {
-                    print('Current filter state: ${filterState.activeFilters}');
-
-                    showRecipeFilterSheet(
-                      context,
-                      initialState: filterState,
-                      onFilterChanged: (newState) {
-                        print('Filter sheet returned state: ${newState.activeFilters}');
-
-                        final container = ProviderScope.containerOf(context);
-                        final notifier = container.read(recipeFolderFilterSortProvider.notifier);
-
-                        // Clear all existing filters first
-                        notifier.clearFilters();
-
-                        // Add all filters from new state
-                        for (final entry in newState.activeFilters.entries) {
-                          print('Adding filter: ${entry.key} = ${entry.value}');
-                          notifier.updateFilter(entry.key, entry.value);
-                        }
-                      },
-                    );
-                  },
-                ),
-                // Red dot indicator
-                if (filterState.hasFilters)
-                  Positioned(
-                    bottom: 2,
-                    left: 2,
-                    child: Container(
-                      width: 8,
-                      height: 8,
-                      decoration: const BoxDecoration(
-                        color: Colors.red,
-                        shape: BoxShape.circle,
+            // Unified Sort/Filter button (takes available space)
+            Expanded(
+              child: Stack(
+                clipBehavior: Clip.none,
+                children: [
+                  AppButton(
+                    text: 'Sort by ${filterSortState.activeSortOption.label}',
+                    leadingIcon: const Icon(Icons.filter_list), // Filter funnel icon
+                    trailingIcon: Icon(
+                      filterSortState.sortDirection == SortDirection.ascending
+                          ? Icons.keyboard_arrow_up
+                          : Icons.keyboard_arrow_down,
+                      size: 18,
+                    ),
+                    style: AppButtonStyle.mutedOutline,
+                    shape: AppButtonShape.square,
+                    size: AppButtonSize.small,
+                    theme: AppButtonTheme.primary,
+                    fullWidth: true,
+                    onPressed: () {
+                      showUnifiedSortFilterSheet(
+                        context,
+                        initialState: filterSortState,
+                        onStateChanged: onStateChanged,
+                        showPantryMatchOption: false,
+                      );
+                    },
+                  ),
+                  // Active filters indicator
+                  if (filterSortState.hasFilters)
+                    Positioned(
+                      top: -2,
+                      right: -2,
+                      child: Container(
+                        width: 8,
+                        height: 8,
+                        decoration: const BoxDecoration(
+                          color: Colors.red,
+                          shape: BoxShape.circle,
+                        ),
                       ),
                     ),
-                  ),
-              ],
+                ],
+              ),
+            ),
+            
+            const SizedBox(width: 12),
+            
+            // Add Recipe button (fixed width)
+            AppButton(
+              text: 'Add Recipe',
+              leadingIcon: const Icon(Icons.add),
+              style: AppButtonStyle.fill,
+              shape: AppButtonShape.square,
+              size: AppButtonSize.small,
+              theme: AppButtonTheme.primary,
+              onPressed: () {
+                final saveFolderId = folderId == kUncategorizedFolderId ? null : folderId;
+                showRecipeEditorModal(context, folderId: saveFolderId);
+              },
             ),
           ],
         ),
@@ -333,20 +308,17 @@ class _SortHeaderDelegate extends SliverPersistentHeaderDelegate {
   }
 
   @override
-  double get maxExtent => 48.0; // Slightly taller for better touch targets
+  double get maxExtent => 48.0;
 
   @override
   double get minExtent => 48.0;
 
   @override
-  bool shouldRebuild(covariant _SortHeaderDelegate oldDelegate) {
-    return oldDelegate.sortOption != sortOption ||
-           oldDelegate.sortDirection != sortDirection ||
-           oldDelegate.showPantryMatchOption != showPantryMatchOption ||
-           oldDelegate.filterState.filterCount != filterState.filterCount ||
-           oldDelegate.filterState.hasFilters != filterState.hasFilters;
+  bool shouldRebuild(covariant _UnifiedHeaderDelegate oldDelegate) {
+    return oldDelegate.filterSortState != filterSortState ||
+           oldDelegate.folderId != folderId;
   }
 
   @override
-  TickerProvider? get vsync => null; // No animation needed
+  TickerProvider? get vsync => null;
 }
