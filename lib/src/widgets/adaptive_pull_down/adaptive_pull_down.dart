@@ -32,6 +32,14 @@ class AdaptivePullDownButton extends StatelessWidget {
             child: child,
           );
         },
+        routeTheme: const PullDownMenuRouteTheme(
+          shadow: BoxShadow(
+            color: Color(0x33000000), // Black with 20% opacity
+            blurRadius: 64,
+            offset: Offset(0, 6),
+            spreadRadius: 14,
+          ),
+        ),
       );
     } else {
       // Android (or other platforms): Use a Material PopupMenuButton.
@@ -42,11 +50,10 @@ class AdaptivePullDownButton extends StatelessWidget {
               value: item,
               child: Row(
                 children: [
-                  if (item.icon != null)
-                    Padding(
-                      padding: const EdgeInsets.only(right: 8.0),
-                      child: item.icon!,
-                    ),
+                  Padding(
+                    padding: const EdgeInsets.only(right: 8.0),
+                    child: item.icon,
+                  ),
                   Text(item.title),
                 ],
               ),
