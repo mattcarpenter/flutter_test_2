@@ -68,8 +68,6 @@ class _AppTextFieldState extends State<AppTextField>
   late AnimationController _focusAnimationController;
   late Animation<double> _animation;
   late Animation<double> _focusAnimation;
-  Animation<Color?>? _borderColorAnimation;
-  Animation<Color?>? _labelColorAnimation;
   bool _hasValue = false;
   bool _isFocused = false;
   String? _validationError;
@@ -123,22 +121,6 @@ class _AppTextFieldState extends State<AppTextField>
     widget.controller.addListener(_handleTextChange);
   }
 
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    
-    // Initialize color animations with theme-aware colors
-    final colors = AppColors.of(context);
-    _borderColorAnimation = ColorTween(
-      begin: colors.border,
-      end: colors.focus,
-    ).animate(_focusAnimation);
-
-    _labelColorAnimation = ColorTween(
-      begin: colors.inputLabel,
-      end: colors.focus,
-    ).animate(_focusAnimation);
-  }
 
   @override
   void dispose() {
@@ -197,18 +179,6 @@ class _AppTextFieldState extends State<AppTextField>
     }
   }
 
-  Color _getBorderColor(AppColors colors) {
-    if (widget.errorText != null || _validationError != null) return colors.error;
-    if (_isFocused) return colors.focus;
-    if (!widget.enabled) return colors.textDisabled;
-    return colors.border;
-  }
-
-  Color _getLabelColor(AppColors colors) {
-    if (widget.errorText != null || _validationError != null) return colors.error;
-    if (_isFocused) return colors.focus;
-    return colors.inputLabel;
-  }
 
   String? get _effectiveErrorText {
     return widget.errorText ?? _validationError;
@@ -237,7 +207,7 @@ class _AppTextFieldState extends State<AppTextField>
                 builder: (context, child) {
                   final borderColor = _effectiveErrorText != null
                       ? colors.error
-                      : _borderColorAnimation?.value ?? colors.border;
+                      : colors.border;
 
                   // Calculate border radius based on first/last
                   BorderRadius borderRadius;
@@ -261,20 +231,20 @@ class _AppTextFieldState extends State<AppTextField>
                     borderRadius = BorderRadius.zero;
                   }
 
-                  // Calculate border based on first/last and focus state
+                  // Calculate border based on first/last position
                   Border border;
                   if (widget.variant == AppTextFieldVariant.outline) {
-                    final borderWidth = _isFocused ? 2.0 : 1.0;
+                    const borderWidth = 1.0;
 
-                    // When focused, always show full border regardless of position
-                    if (_isFocused || widget.first) {
-                      // Focused items or first item - full border
+                    // First item gets full border, others avoid top border to prevent doubles
+                    if (widget.first) {
+                      // First item - full border
                       border = Border.all(
                         color: borderColor,
                         width: borderWidth,
                       );
                     } else {
-                      // Not focused and not first - no top border to avoid doubles
+                      // Not first - no top border to avoid doubles
                       border = Border(
                         left: BorderSide(color: borderColor, width: borderWidth),
                         right: BorderSide(color: borderColor, width: borderWidth),
@@ -331,10 +301,10 @@ class _AppTextFieldState extends State<AppTextField>
                   // Subtle opacity change for polish
                   final opacity = 0.7 + (progress * 0.3);
 
-                  // Animated label color
+                  // Label color
                   final labelColor = _effectiveErrorText != null
                       ? colors.error
-                      : _labelColorAnimation?.value ?? colors.inputLabel;
+                      : colors.inputLabel;
 
                   return Transform(
                     transform: Matrix4.identity()

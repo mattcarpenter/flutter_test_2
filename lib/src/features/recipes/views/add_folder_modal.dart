@@ -4,14 +4,12 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart' as supabase_flutter;
 import 'package:wolt_modal_sheet/wolt_modal_sheet.dart';
 
-import '../../../models/recipe_folder.model.dart';
 import '../../../providers/recipe_folder_provider.dart';
 import '../../../theme/colors.dart';
-import '../../../widgets/wolt/button/wolt_elevated_button.dart';
-import '../../../widgets/wolt/button/wolt_modal_sheet_back_button.dart';
-import '../../../widgets/wolt/button/wolt_modal_sheet_close_button.dart';
-import '../../../widgets/wolt/text/modal_sheet_subtitle.dart';
-import '../../../widgets/wolt/text/modal_sheet_title.dart';
+import '../../../theme/spacing.dart';
+import '../../../widgets/app_button.dart';
+import '../../../widgets/app_text_field.dart';
+import '../../../theme/typography.dart';
 
 void showAddFolderModal(BuildContext context) {
   WoltModalSheet.show(
@@ -26,7 +24,6 @@ void showAddFolderModal(BuildContext context) {
           // Construct a RecipeFolder using the folderName.
           final userId = supabase_flutter.Supabase.instance.client.auth.currentUser?.id;
 
-          final folder = RecipeFolder(name: folderName, userId: userId);
           // Use the notifier to add the folder.
           container
               .read(recipeFolderNotifierProvider.notifier)
@@ -46,93 +43,139 @@ class AddFolderModalPage {
     required BuildContext context,
     required Function(String folderName) onFolderAdded,
   }) {
-    final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
-    final TextEditingController _folderNameController = TextEditingController();
-    final ValueNotifier<bool> submitted = ValueNotifier<bool>(false);
-
+    final TextEditingController folderNameController = TextEditingController();
     return WoltModalSheetPage(
       backgroundColor: AppColors.of(context).background,
-      stickyActionBar: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            // Cancel button closes modal.
-            Expanded(
-              child: WoltElevatedButton(
-                theme: WoltElevatedButtonTheme.secondary,
-                onPressed: () {
-                  Navigator.of(_formKey.currentContext!).pop();
-                },
-                enabled: true,
-                child: const Text('Cancel'),
-              ),
-            ),
-            const SizedBox(width: 10),
-            // Add button validates input.
-            Expanded(
-              child: WoltElevatedButton(
-                onPressed: () {
-                  if (_folderNameController.text.trim().isEmpty) {
-                    submitted.value = true;
-                    return;
-                  }
-                  onFolderAdded(_folderNameController.text.trim());
-                },
-                enabled: true,
-                child: const Text('Add'),
-              ),
-            ),
-          ],
+      hasTopBarLayer: true,
+      isTopBarLayerAlwaysVisible: true,
+      topBarTitle: Text(
+        'New Recipe Folder',
+        style: AppTypography.h5.copyWith(
+          color: AppColors.of(context).textPrimary,
         ),
       ),
-      pageTitle: const ModalSheetTitle('New Folder'),
-      trailingNavBarWidget: const WoltModalSheetCloseButton(),
       child: Padding(
-        padding: const EdgeInsets.fromLTRB(16, 16, 16, 80),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            CupertinoTextField(
-              controller: _folderNameController,
-              placeholder: "Enter folder name",
-              padding: const EdgeInsets.all(12),
-              decoration: BoxDecoration(
-                border: Border.all(color: Colors.grey.shade400),
-                borderRadius: BorderRadius.circular(8),
+        padding: EdgeInsets.fromLTRB(AppSpacing.lg, AppSpacing.lg, AppSpacing.lg, AppSpacing.lg),
+        child: AddFolderForm(
+          controller: folderNameController,
+          onSubmitted: onFolderAdded,
+        ),
+      ),
+    );
+  }
+}
+
+class AddFolderForm extends ConsumerStatefulWidget {
+  final TextEditingController controller;
+  final Function(String folderName) onSubmitted;
+
+  const AddFolderForm({
+    super.key,
+    required this.controller,
+    required this.onSubmitted,
+  });
+
+  @override
+  ConsumerState<AddFolderForm> createState() => _AddFolderFormState();
+}
+
+class _AddFolderFormState extends ConsumerState<AddFolderForm> {
+  bool _isCreating = false;
+  bool _showError = false;
+
+  @override
+  void dispose() {
+    widget.controller.dispose();
+    super.dispose();
+  }
+
+  void _submitForm() async {
+    final folderName = widget.controller.text.trim();
+    if (folderName.isEmpty) {
+      setState(() {
+        _showError = true;
+      });
+      return;
+    }
+
+    setState(() {
+      _isCreating = true;
+      _showError = false;
+    });
+
+    try {
+      widget.onSubmitted(folderName);
+    } catch (e) {
+      if (mounted) {
+        setState(() {
+          _isCreating = false;
+        });
+      }
+    }
+  }
+
+  void _onTextChanged(String value) {
+    // Clear error when user starts typing
+    if (_showError && value.trim().isNotEmpty) {
+      setState(() {
+        _showError = false;
+      });
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        AppTextField(
+          controller: widget.controller,
+          placeholder: 'Enter folder name',
+          autofocus: true,
+          enabled: !_isCreating,
+          onChanged: _onTextChanged,
+          onSubmitted: (_) => _submitForm(),
+          textInputAction: TextInputAction.done,
+        ),
+        if (_showError) ...[
+          SizedBox(height: AppSpacing.xs),
+          Padding(
+            padding: EdgeInsets.only(left: AppSpacing.lg),
+            child: Text(
+              'Folder name is required',
+              style: AppTypography.fieldError.copyWith(
+                color: AppColors.of(context).error,
               ),
-              onChanged: (value) {
-                // If user types something, clear the error.
-                if (value.trim().isNotEmpty && submitted.value) {
-                  submitted.value = false;
-                }
-              },
             ),
-            const SizedBox(height: 8),
-            // Fixed-height container for error message.
-            Container(
-              height: 28,
-              alignment: Alignment.centerLeft,
-              padding: const EdgeInsets.only(left: 8),
-              child: ValueListenableBuilder<bool>(
-                valueListenable: submitted,
-                builder: (context, hasSubmitted, child) {
-                  return Text(
-                    hasSubmitted && _folderNameController.text.trim().isEmpty
-                        ? "Folder name is required"
-                        : " ", // Placeholder to reserve space.
-                    style: const TextStyle(
-                      color: Colors.red,
-                      fontSize: 16,
-                    ),
-                  );
+          ),
+        ],
+        SizedBox(height: AppSpacing.xl),
+        Row(
+          children: [
+            Expanded(
+              child: AppButtonVariants.secondaryOutline(
+                text: 'Cancel',
+                size: AppButtonSize.large,
+                shape: AppButtonShape.square,
+                onPressed: _isCreating ? null : () {
+                  Navigator.of(context).pop();
                 },
               ),
             ),
-            const SizedBox(height: 32),
+            SizedBox(width: AppSpacing.sm),
+            Expanded(
+              child: AppButtonVariants.primaryFilled(
+                text: 'Add',
+                size: AppButtonSize.large,
+                shape: AppButtonShape.square,
+                onPressed: _isCreating ? null : _submitForm,
+                loading: _isCreating,
+              ),
+            ),
           ],
         ),
-      ),
+      ],
     );
   }
 }
