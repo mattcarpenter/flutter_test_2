@@ -45,6 +45,7 @@ class AppButton extends StatefulWidget {
   final Widget? icon;
   final bool visuallyEnabled;
   final Offset leadingIconOffset;
+  final Offset trailingIconOffset;
 
   const AppButton({
     Key? key,
@@ -62,6 +63,7 @@ class AppButton extends StatefulWidget {
     this.icon,
     this.visuallyEnabled = false,
     this.leadingIconOffset = Offset.zero,
+    this.trailingIconOffset = Offset.zero,
   }) : super(key: key);
 
   @override
@@ -433,12 +435,15 @@ class _AppButtonState extends State<AppButton> {
                     
                     // Trailing icon - positioned at the end
                     if (widget.trailingIcon != null && !widget.loading)
-                      IconTheme(
-                        data: IconThemeData(
-                          size: _fontSize,
-                          color: _textColor,
+                      Transform.translate(
+                        offset: widget.trailingIconOffset,
+                        child: IconTheme(
+                          data: IconThemeData(
+                            size: _fontSize,
+                            color: _textColor,
+                          ),
+                          child: widget.trailingIcon!,
                         ),
-                        child: widget.trailingIcon!,
                       ),
                   ],
                 ),
@@ -462,6 +467,7 @@ extension AppButtonVariants on AppButton {
     Widget? trailingIcon,
     bool fullWidth = false,
     Offset leadingIconOffset = Offset.zero,
+    Offset trailingIconOffset = Offset.zero,
   }) {
     return AppButton(
       text: text,
@@ -475,6 +481,7 @@ extension AppButtonVariants on AppButton {
       trailingIcon: trailingIcon,
       fullWidth: fullWidth,
       leadingIconOffset: leadingIconOffset,
+      trailingIconOffset: trailingIconOffset,
     );
   }
 
@@ -489,6 +496,7 @@ extension AppButtonVariants on AppButton {
     Widget? trailingIcon,
     bool fullWidth = false,
     Offset leadingIconOffset = Offset.zero,
+    Offset trailingIconOffset = Offset.zero,
   }) {
     return AppButton(
       text: text,
@@ -502,6 +510,7 @@ extension AppButtonVariants on AppButton {
       trailingIcon: trailingIcon,
       fullWidth: fullWidth,
       leadingIconOffset: leadingIconOffset,
+      trailingIconOffset: trailingIconOffset,
     );
   }
 
@@ -516,6 +525,7 @@ extension AppButtonVariants on AppButton {
     Widget? trailingIcon,
     bool fullWidth = false,
     Offset leadingIconOffset = Offset.zero,
+    Offset trailingIconOffset = Offset.zero,
   }) {
     return AppButton(
       text: text,
@@ -529,6 +539,7 @@ extension AppButtonVariants on AppButton {
       trailingIcon: trailingIcon,
       fullWidth: fullWidth,
       leadingIconOffset: leadingIconOffset,
+      trailingIconOffset: trailingIconOffset,
     );
   }
 
@@ -543,6 +554,7 @@ extension AppButtonVariants on AppButton {
     Widget? trailingIcon,
     bool fullWidth = false,
     Offset leadingIconOffset = Offset.zero,
+    Offset trailingIconOffset = Offset.zero,
   }) {
     return AppButton(
       text: text,
@@ -556,6 +568,7 @@ extension AppButtonVariants on AppButton {
       trailingIcon: trailingIcon,
       fullWidth: fullWidth,
       leadingIconOffset: leadingIconOffset,
+      trailingIconOffset: trailingIconOffset,
     );
   }
 
@@ -570,6 +583,7 @@ extension AppButtonVariants on AppButton {
     bool loading = false,
     bool visuallyEnabled = false,
     Offset leadingIconOffset = Offset.zero,
+    Offset trailingIconOffset = Offset.zero,
   }) {
     return AppButton(
       text: '',
@@ -583,6 +597,7 @@ extension AppButtonVariants on AppButton {
       icon: icon,
       visuallyEnabled: visuallyEnabled,
       leadingIconOffset: leadingIconOffset,
+      trailingIconOffset: trailingIconOffset,
     );
   }
 }

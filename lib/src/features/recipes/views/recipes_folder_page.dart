@@ -97,14 +97,14 @@ class RecipesFolderPage extends ConsumerWidget {
             folderId: folderId,
             onStateChanged: (newState) {
               final notifier = ref.read(recipeFolderFilterSortProvider.notifier);
-              
+
               // Clear all existing filters first
               notifier.clearFilters();
-              
+
               // Update sort
               notifier.updateSortOption(newState.activeSortOption);
               notifier.updateSortDirection(newState.sortDirection);
-              
+
               // Add all filters from new state
               for (final entry in newState.activeFilters.entries) {
                 notifier.updateFilter(entry.key, entry.value);
@@ -254,6 +254,7 @@ class _UnifiedHeaderDelegate extends SliverPersistentHeaderDelegate {
                           : Icons.keyboard_arrow_down,
                       size: 18,
                     ),
+                    trailingIconOffset: const Offset(0, -1.0), // Slight upward nudge for small size
                     style: AppButtonStyle.mutedOutline,
                     shape: AppButtonShape.square,
                     size: AppButtonSize.small,
@@ -285,17 +286,17 @@ class _UnifiedHeaderDelegate extends SliverPersistentHeaderDelegate {
                 ],
               ),
             ),
-            
+
             const SizedBox(width: 12),
-            
+
             // Add Recipe button (fixed width)
             AppButton(
               text: 'Add Recipe',
               leadingIcon: const Icon(Icons.add),
-              style: AppButtonStyle.fill,
+              style: AppButtonStyle.outline,
               shape: AppButtonShape.square,
               size: AppButtonSize.small,
-              theme: AppButtonTheme.primary,
+              theme: AppButtonTheme.secondary,
               onPressed: () {
                 final saveFolderId = folderId == kUncategorizedFolderId ? null : folderId;
                 showRecipeEditorModal(context, folderId: saveFolderId);
