@@ -17,7 +17,7 @@ class AppCircleButton extends StatelessWidget {
     Key? key,
     required this.icon,
     this.onPressed,
-    this.size = 30.0,
+    this.size = 26.0,
   }) : super(key: key);
 
   IconData get _iconData {
