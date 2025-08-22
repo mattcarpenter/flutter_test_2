@@ -6,6 +6,7 @@ import '../../../theme/colors.dart';
 import '../../../theme/spacing.dart';
 import '../../../theme/typography.dart';
 import '../../../widgets/app_button.dart';
+import '../../../widgets/app_checkbox_group.dart';
 import '../../../providers/recipe_folder_provider.dart';
 import '../views/add_folder_modal.dart';
 
@@ -98,16 +99,6 @@ class FolderSelectionContentState extends ConsumerState<FolderSelectionContent> 
     _selectedFolderIds = Set<String>.from(widget.currentFolderIds);
   }
 
-  void _toggleFolder(String folderId) {
-    setState(() {
-      if (_selectedFolderIds.contains(folderId)) {
-        _selectedFolderIds.remove(folderId);
-      } else {
-        _selectedFolderIds.add(folderId);
-      }
-    });
-  }
-
   void saveChanges() {
     widget.onFolderIdsChanged(_selectedFolderIds.toList());
   }
@@ -163,27 +154,22 @@ class FolderSelectionContentState extends ConsumerState<FolderSelectionContent> 
                   );
                 }
 
-                return SingleChildScrollView(
-                  child: Column(
-                    children: folders.map((folder) {
-                      final isSelected = _selectedFolderIds.contains(folder.id);
-                      
-                      return CheckboxListTile(
-                        title: Text(
-                          folder.name,
-                          style: AppTypography.body.copyWith(
-                            color: colors.textPrimary,
-                          ),
-                        ),
-                        value: isSelected,
-                        onChanged: (bool? value) {
-                          _toggleFolder(folder.id);
-                        },
-                        contentPadding: EdgeInsets.zero,
-                        controlAffinity: ListTileControlAffinity.leading,
-                      );
-                    }).toList(),
-                  ),
+                // Convert folders to checkbox options
+                final folderOptions = folders.map((folder) => 
+                  CheckboxOption<String>(
+                    value: folder.id,
+                    label: folder.name,
+                  )
+                ).toList();
+
+                return AppCheckboxGroup<String>(
+                  options: folderOptions,
+                  selectedValues: _selectedFolderIds,
+                  onChanged: (newSelection) {
+                    setState(() {
+                      _selectedFolderIds = newSelection;
+                    });
+                  },
                 );
               },
               loading: () => const Center(
