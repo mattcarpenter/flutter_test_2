@@ -8,7 +8,8 @@ import '../../../providers/recipe_folder_provider.dart';
 import '../../../theme/colors.dart';
 import '../../../theme/spacing.dart';
 import '../../../widgets/app_button.dart';
-import '../../../widgets/app_text_field.dart';
+import '../../../widgets/app_text_field_simple.dart';
+import '../../../widgets/wolt/text/modal_sheet_title.dart';
 import '../../../theme/typography.dart';
 
 Future<String?> showAddFolderModal(BuildContext context) {
@@ -46,19 +47,29 @@ class AddFolderModalPage {
     final TextEditingController folderNameController = TextEditingController();
     return WoltModalSheetPage(
       backgroundColor: AppColors.of(context).background,
-      hasTopBarLayer: true,
-      isTopBarLayerAlwaysVisible: true,
-      topBarTitle: Text(
-        'New Recipe Folder',
-        style: AppTypography.h5.copyWith(
-          color: AppColors.of(context).textPrimary,
-        ),
-      ),
+      // Removed hasTopBarLayer and isTopBarLayerAlwaysVisible to eliminate border
+      hasTopBarLayer: false,
+      isTopBarLayerAlwaysVisible: false,
       child: Padding(
-        padding: EdgeInsets.fromLTRB(AppSpacing.lg, AppSpacing.lg, AppSpacing.lg, AppSpacing.lg),
-        child: AddFolderForm(
-          controller: folderNameController,
-          onSubmitted: onFolderAdded,
+        // Extra top padding for better spacing above title
+        padding: EdgeInsets.fromLTRB(AppSpacing.lg, AppSpacing.xl, AppSpacing.lg, AppSpacing.lg),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            // Title with custom spacing
+            Text(
+              'New Recipe Folder',
+              style: AppTypography.h4.copyWith(
+                color: AppColors.of(context).textPrimary,
+              ),
+            ),
+            SizedBox(height: AppSpacing.xl),
+            AddFolderForm(
+              controller: folderNameController,
+              onSubmitted: onFolderAdded,
+            ),
+          ],
         ),
       ),
     );
@@ -129,7 +140,7 @@ class _AddFolderFormState extends ConsumerState<AddFolderForm> {
       crossAxisAlignment: CrossAxisAlignment.start,
       mainAxisSize: MainAxisSize.min,
       children: [
-        AppTextField(
+        AppTextFieldSimple(
           controller: widget.controller,
           placeholder: 'Enter folder name',
           autofocus: true,
@@ -137,24 +148,13 @@ class _AddFolderFormState extends ConsumerState<AddFolderForm> {
           onChanged: _onTextChanged,
           onSubmitted: (_) => _submitForm(),
           textInputAction: TextInputAction.done,
+          errorText: _showError ? 'Folder name is required' : null,
         ),
-        if (_showError) ...[
-          SizedBox(height: AppSpacing.xs),
-          Padding(
-            padding: EdgeInsets.only(left: AppSpacing.lg),
-            child: Text(
-              'Folder name is required',
-              style: AppTypography.fieldError.copyWith(
-                color: AppColors.of(context).error,
-              ),
-            ),
-          ),
-        ],
         SizedBox(height: AppSpacing.xl),
         Row(
           children: [
             Expanded(
-              child: AppButtonVariants.mutedOutline(
+              child: AppButtonVariants.secondaryOutline(
                 text: 'Cancel',
                 size: AppButtonSize.large,
                 shape: AppButtonShape.square,
@@ -165,7 +165,7 @@ class _AddFolderFormState extends ConsumerState<AddFolderForm> {
             ),
             SizedBox(width: AppSpacing.sm),
             Expanded(
-              child: AppButtonVariants.primaryFilled(
+              child: AppButtonVariants.secondaryFilled(
                 text: 'Add',
                 size: AppButtonSize.large,
                 shape: AppButtonShape.square,

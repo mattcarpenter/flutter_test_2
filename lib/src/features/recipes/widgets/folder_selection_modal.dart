@@ -7,6 +7,7 @@ import '../../../theme/spacing.dart';
 import '../../../theme/typography.dart';
 import '../../../widgets/app_button.dart';
 import '../../../widgets/app_checkbox_group.dart';
+import '../../../widgets/wolt/text/modal_sheet_title.dart';
 import '../../../providers/recipe_folder_provider.dart';
 import '../views/add_folder_modal.dart';
 
@@ -16,7 +17,7 @@ void showFolderSelectionModal(
   required ValueChanged<List<String>> onFolderIdsChanged,
 }) {
   final GlobalKey<FolderSelectionContentState> contentKey = GlobalKey<FolderSelectionContentState>();
-  
+
   WoltModalSheet.show(
     useRootNavigator: true,
     context: context,
@@ -42,14 +43,9 @@ class FolderSelectionModalPage {
   }) {
     return WoltModalSheetPage(
       backgroundColor: AppColors.of(context).background,
-      hasTopBarLayer: true,
-      isTopBarLayerAlwaysVisible: true,
-      topBarTitle: Text(
-        'Recipe Folders',
-        style: AppTypography.h5.copyWith(
-          color: AppColors.of(context).textPrimary,
-        ),
-      ),
+      // Removed hasTopBarLayer and isTopBarLayerAlwaysVisible to eliminate border
+      hasTopBarLayer: false,
+      isTopBarLayerAlwaysVisible: false,
       leadingNavBarWidget: TextButton(
         onPressed: () {
           Navigator.of(context).pop();
@@ -65,11 +61,41 @@ class FolderSelectionModalPage {
         child: const Text('Save'),
       ),
       child: Padding(
-        padding: EdgeInsets.fromLTRB(AppSpacing.lg, AppSpacing.lg, AppSpacing.lg, AppSpacing.lg),
-        child: FolderSelectionContent(
-          key: contentKey,
-          currentFolderIds: currentFolderIds,
-          onFolderIdsChanged: onFolderIdsChanged,
+        // Extra top padding for better spacing above title
+        padding: EdgeInsets.fromLTRB(AppSpacing.lg, AppSpacing.xl, AppSpacing.lg, AppSpacing.lg),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            // Title row with Add Folder button
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  'Add Recipe to Folders',
+                  style: AppTypography.h4.copyWith(
+                    color: AppColors.of(context).textPrimary,
+                  ),
+                ),
+                TextButton(
+                  onPressed: () {
+                    showAddFolderModal(context).then((newFolderName) {
+                      if (newFolderName != null) {
+                        // The folder was created, recipeFolderNotifierProvider will update
+                      }
+                    });
+                  },
+                  child: const Text('Add Folder'),
+                ),
+              ],
+            ),
+            SizedBox(height: AppSpacing.lg),
+            FolderSelectionContent(
+              key: contentKey,
+              currentFolderIds: currentFolderIds,
+              onFolderIdsChanged: onFolderIdsChanged,
+            ),
+          ],
         ),
       ),
     );
@@ -103,15 +129,6 @@ class FolderSelectionContentState extends ConsumerState<FolderSelectionContent> 
     widget.onFolderIdsChanged(_selectedFolderIds.toList());
   }
 
-  void _addNewFolder() {
-    showAddFolderModal(context).then((newFolderName) {
-      if (newFolderName != null) {
-        // The folder was created, refresh our selection if needed
-        // The recipeFolderNotifierProvider will automatically update
-        // and we'll see the new folder in our list
-      }
-    });
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -155,7 +172,7 @@ class FolderSelectionContentState extends ConsumerState<FolderSelectionContent> 
                 }
 
                 // Convert folders to checkbox options
-                final folderOptions = folders.map((folder) => 
+                final folderOptions = folders.map((folder) =>
                   CheckboxOption<String>(
                     value: folder.id,
                     label: folder.name,
@@ -187,15 +204,6 @@ class FolderSelectionContentState extends ConsumerState<FolderSelectionContent> 
           ),
         ),
 
-        SizedBox(height: AppSpacing.lg),
-
-        // Add folder button
-        AppButtonVariants.secondaryOutline(
-          text: 'Add New Folder',
-          size: AppButtonSize.medium,
-          shape: AppButtonShape.square,
-          onPressed: _addNewFolder,
-        ),
       ],
     );
   }
