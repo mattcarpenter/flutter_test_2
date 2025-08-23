@@ -153,6 +153,7 @@ Table(recipeTagsTable, [
 ### Sync Rules Configuration
 
 **Update `ddls/sync-rules.yaml`:**
+(add selects to existing buckets if applicable)
 
 ```yaml
 belongs_to_user:
@@ -860,6 +861,11 @@ SizedBox(height: AppSpacing.lg),
 - Form validation
 
 ## Migration Strategy
+
+Please write a markdown document in the analysis directory with instructions for updating supabase/postgres.
+I will use the supabase GUI to add the new column to the recipes table then probably just use the sql editor
+to create the triggers and RLS policies. I'll then just take the entire powersync sync-rules yaml file after
+you update it and paste that into the powersync GUI to deploy.
 
 1. **Phase 1**: Database schema and infrastructure
    - Deploy DDL changes
