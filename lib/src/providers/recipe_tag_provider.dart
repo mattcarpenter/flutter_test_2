@@ -29,20 +29,22 @@ class RecipeTagNotifier extends StateNotifier<AsyncValue<List<RecipeTagEntry>>> 
     super.dispose();
   }
 
-  /// Add a new tag
-  Future<void> addTag({
+  /// Add a new tag and return its ID
+  Future<String?> addTag({
     required String name,
     required String color,
     String? userId,
   }) async {
     try {
-      await _repository.addTag(
+      final newTag = await _repository.addTag(
         name: name,
         color: color,
         userId: userId,
       );
+      return newTag.id;
     } catch (e, stack) {
       state = AsyncValue.error(e, stack);
+      return null;
     }
   }
 

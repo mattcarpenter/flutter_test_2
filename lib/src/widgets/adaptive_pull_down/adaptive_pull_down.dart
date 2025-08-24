@@ -23,6 +23,7 @@ class AdaptivePullDownButton extends StatelessWidget {
           return PullDownMenuItem(
             title: item.title,
             icon: item.icon.icon,
+            iconColor: item.icon.color,
             onTap: item.onTap,
           );
         }).toList(),

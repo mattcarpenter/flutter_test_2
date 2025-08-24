@@ -90,7 +90,6 @@ class TagSelectionContent extends ConsumerStatefulWidget {
 class TagSelectionContentState extends ConsumerState<TagSelectionContent> {
   late Set<String> _selectedTagIds;
   final TextEditingController _newTagController = TextEditingController();
-  String _newTagColor = TagColors.toHex(TagColors.defaultColor);
   String? _errorMessage;
 
   @override
@@ -134,18 +133,24 @@ class TagSelectionContentState extends ConsumerState<TagSelectionContent> {
 
     try {
       final userId = supabase_flutter.Supabase.instance.client.auth.currentUser?.id;
-      await ref.read(recipeTagNotifierProvider.notifier).addTag(
+      // Use default color for new tags
+      final newTagColor = TagColors.toHex(TagColors.defaultColor);
+      final newTagId = await ref.read(recipeTagNotifierProvider.notifier).addTag(
         name: tagName,
-        color: _newTagColor,
+        color: newTagColor,
         userId: userId,
       );
       
+      // Auto-select the newly created tag
+      if (newTagId != null) {
+        setState(() {
+          _selectedTagIds.add(newTagId);
+          _errorMessage = null;
+        });
+      }
+      
       // Clear the form
       _newTagController.clear();
-      _newTagColor = TagColors.toHex(TagColors.defaultColor);
-      setState(() {
-        _errorMessage = null;
-      });
     } catch (e) {
       setState(() {
         _errorMessage = 'Failed to create tag: $e';
@@ -289,21 +294,6 @@ class TagSelectionContentState extends ConsumerState<TagSelectionContent> {
                     },
                   ),
                 ),
-                SizedBox(width: AppSpacing.md),
-                
-                // Color preview
-                Container(
-                  width: 32,
-                  height: 32,
-                  decoration: BoxDecoration(
-                    color: TagColors.fromHex(_newTagColor),
-                    shape: BoxShape.circle,
-                    border: Border.all(
-                      color: colors.border,
-                      width: 1,
-                    ),
-                  ),
-                ),
               ],
             ),
             
@@ -316,45 +306,6 @@ class TagSelectionContentState extends ConsumerState<TagSelectionContent> {
                 ),
               ),
             ],
-            
-            SizedBox(height: AppSpacing.md),
-            
-            // Color selection buttons
-            Wrap(
-              spacing: AppSpacing.sm,
-              runSpacing: AppSpacing.sm,
-              children: TagColors.palette.map((color) {
-                final colorHex = TagColors.toHex(color);
-                final isSelected = colorHex == _newTagColor;
-                
-                return GestureDetector(
-                  onTap: () {
-                    setState(() {
-                      _newTagColor = colorHex;
-                    });
-                  },
-                  child: Container(
-                    width: 32,
-                    height: 32,
-                    decoration: BoxDecoration(
-                      color: color,
-                      shape: BoxShape.circle,
-                      border: Border.all(
-                        color: isSelected ? colors.textPrimary : colors.border,
-                        width: isSelected ? 2 : 1,
-                      ),
-                    ),
-                    child: isSelected
-                        ? Icon(
-                            Icons.check,
-                            color: Colors.white,
-                            size: 16,
-                          )
-                        : null,
-                  ),
-                );
-              }).toList(),
-            ),
             
             SizedBox(height: AppSpacing.lg),
             
