@@ -266,25 +266,25 @@ class TagSelectionContentState extends ConsumerState<TagSelectionContent> {
         
         SizedBox(height: AppSpacing.lg),
         
-        // Add new tag section
+        // Add new tag section - compact single row
         Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              'Add New Tag',
-              style: AppTypography.fieldLabel.copyWith(
-                color: colors.textPrimary,
+              'Create New Tag',
+              style: AppTypography.caption.copyWith(
+                color: colors.textSecondary,
               ),
             ),
-            SizedBox(height: AppSpacing.sm),
+            SizedBox(height: AppSpacing.xs),
             
-            // Tag name input with color indicator
+            // Tag name input and button on same row
             Row(
               children: [
                 Expanded(
                   child: AppTextFieldSimple(
                     controller: _newTagController,
-                    placeholder: 'Enter tag name',
+                    placeholder: 'Tag name',
                     onChanged: (_) {
                       if (_errorMessage != null) {
                         setState(() {
@@ -294,31 +294,28 @@ class TagSelectionContentState extends ConsumerState<TagSelectionContent> {
                     },
                   ),
                 ),
+                SizedBox(width: AppSpacing.sm),
+                AppButton(
+                  text: 'Add',
+                  onPressed: _addNewTag,
+                  theme: AppButtonTheme.secondary,
+                  style: AppButtonStyle.outline,
+                  shape: AppButtonShape.square,
+                  size: AppButtonSize.large,
+                  fullWidth: false,
+                ),
               ],
             ),
             
             if (_errorMessage != null) ...[
-              SizedBox(height: AppSpacing.sm),
+              SizedBox(height: AppSpacing.xs),
               Text(
                 _errorMessage!,
-                style: AppTypography.bodySmall.copyWith(
+                style: AppTypography.caption.copyWith(
                   color: colors.error,
                 ),
               ),
             ],
-            
-            SizedBox(height: AppSpacing.lg),
-            
-            // Add tag button
-            AppButton(
-              text: 'Add Tag',
-              onPressed: _addNewTag,
-              theme: AppButtonTheme.primary,
-              style: AppButtonStyle.fill,
-              shape: AppButtonShape.square,
-              size: AppButtonSize.medium,
-              fullWidth: true,
-            ),
           ],
         ),
       ],
