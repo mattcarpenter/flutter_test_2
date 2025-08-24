@@ -151,6 +151,22 @@ class UnifiedFilterSortNotifier extends Notifier<UnifiedFilterSortState> {
       );
       filters[FilterType.pantryMatch] = pantryMatchFilter;
     }
+    
+    // Load tags filter
+    final tagsStr = prefs.getStringList('${prefsKey}_filter_tags');
+    final tagsModeStr = prefs.getString('${prefsKey}_filter_tags_mode');
+    if (tagsStr != null && tagsStr.isNotEmpty) {
+      final mode = tagsModeStr != null 
+        ? TagFilterMode.values.firstWhere(
+            (m) => m.name == tagsModeStr,
+            orElse: () => TagFilterMode.or,
+          )
+        : TagFilterMode.or;
+      filters[FilterType.tags] = TagFilter(
+        selectedTagIds: tagsStr,
+        mode: mode,
+      );
+    }
 
     return UnifiedFilterSortState(
       activeFilters: filters,
@@ -282,6 +298,12 @@ class UnifiedFilterSortNotifier extends Notifier<UnifiedFilterSortState> {
           final pantryMatchFilter = filterValue as PantryMatchFilter;
           prefs.setString('${prefsKey}_filter_pantryMatch', pantryMatchFilter.name);
           break;
+          
+        case FilterType.tags:
+          final tagFilter = filterValue as TagFilter;
+          prefs.setStringList('${prefsKey}_filter_tags', tagFilter.selectedTagIds);
+          prefs.setString('${prefsKey}_filter_tags_mode', tagFilter.mode.name);
+          break;
       }
     }
 
@@ -294,6 +316,10 @@ class UnifiedFilterSortNotifier extends Notifier<UnifiedFilterSortState> {
     }
     if (!state.activeFilters.containsKey(FilterType.pantryMatch)) {
       prefs.remove('${prefsKey}_filter_pantryMatch');
+    }
+    if (!state.activeFilters.containsKey(FilterType.tags)) {
+      prefs.remove('${prefsKey}_filter_tags');
+      prefs.remove('${prefsKey}_filter_tags_mode');
     }
   }
 }

@@ -6,6 +6,7 @@ enum FilterType {
   cookTime,
   rating,
   pantryMatch,
+  tags,
 }
 
 /// Filter options for cook time
@@ -43,6 +44,45 @@ enum PantryMatchFilter {
   const PantryMatchFilter(this.label, this.percentage);
   final String label;
   final int percentage;
+}
+
+/// Mode for tag filtering
+enum TagFilterMode {
+  and, // Recipe must have ALL selected tags
+  or,  // Recipe must have at least ONE selected tag
+}
+
+/// Filter options for tags
+class TagFilter {
+  final List<String> selectedTagIds;
+  final TagFilterMode mode;
+  
+  const TagFilter({
+    required this.selectedTagIds,
+    this.mode = TagFilterMode.or,
+  });
+  
+  TagFilter copyWith({
+    List<String>? selectedTagIds,
+    TagFilterMode? mode,
+  }) {
+    return TagFilter(
+      selectedTagIds: selectedTagIds ?? this.selectedTagIds,
+      mode: mode ?? this.mode,
+    );
+  }
+  
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is TagFilter &&
+          runtimeType == other.runtimeType &&
+          mode == other.mode &&
+          selectedTagIds.length == other.selectedTagIds.length &&
+          selectedTagIds.every((id) => other.selectedTagIds.contains(id));
+
+  @override
+  int get hashCode => Object.hash(selectedTagIds, mode);
 }
 
 /// Sorting options for recipes
@@ -185,6 +225,27 @@ extension RecipeFiltering on List<RecipeEntry> {
             // We'll skip it in this function and handle it in RecipesFolderPage
             print('Skipping pantry match filter in RecipeFiltering extension');
             continue;
+            
+          case FilterType.tags:
+            final tagFilter = filterValue as TagFilter;
+            if (tagFilter.selectedTagIds.isEmpty) continue;
+            
+            final recipeTags = recipe.tagIds ?? [];
+            bool matches = false;
+            
+            if (tagFilter.mode == TagFilterMode.and) {
+              // Recipe must have ALL selected tags
+              matches = tagFilter.selectedTagIds.every(
+                (tagId) => recipeTags.contains(tagId)
+              );
+            } else {
+              // Recipe must have at least ONE selected tag
+              matches = tagFilter.selectedTagIds.any(
+                (tagId) => recipeTags.contains(tagId)
+              );
+            }
+            
+            if (!matches) return false;
         }
       }
       
@@ -266,6 +327,27 @@ extension RecipePantryMatchFiltering on List<RecipePantryMatch> {
             if (!matches) {
               return false;
             }
+            
+          case FilterType.tags:
+            final tagFilter = filterValue as TagFilter;
+            if (tagFilter.selectedTagIds.isEmpty) continue;
+            
+            final recipeTags = recipe.tagIds ?? [];
+            bool tagMatches = false;
+            
+            if (tagFilter.mode == TagFilterMode.and) {
+              // Recipe must have ALL selected tags
+              tagMatches = tagFilter.selectedTagIds.every(
+                (tagId) => recipeTags.contains(tagId)
+              );
+            } else {
+              // Recipe must have at least ONE selected tag
+              tagMatches = tagFilter.selectedTagIds.any(
+                (tagId) => recipeTags.contains(tagId)
+              );
+            }
+            
+            if (!tagMatches) return false;
         }
       }
       

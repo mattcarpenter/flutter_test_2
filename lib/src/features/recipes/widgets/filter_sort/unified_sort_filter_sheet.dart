@@ -1,6 +1,9 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:wolt_modal_sheet/wolt_modal_sheet.dart';
+import '../../../../constants/tag_colors.dart';
+import '../../../../providers/recipe_tag_provider.dart';
 import '../../../../theme/colors.dart';
 import '../../../../theme/typography.dart';
 import '../../../../theme/spacing.dart';
@@ -74,6 +77,10 @@ class UnifiedSortFilterContent extends ConsumerStatefulWidget {
 
 class _UnifiedSortFilterContentState extends ConsumerState<UnifiedSortFilterContent> {
   late RecipeFilterSortState currentState;
+  
+  // Local state for tag filter
+  late Set<String> _selectedTagIds;
+  late TagFilterMode _tagFilterMode;
 
   @override
   void initState() {
@@ -86,6 +93,11 @@ class _UnifiedSortFilterContentState extends ConsumerState<UnifiedSortFilterCont
       folderId: widget.initialState.folderId,
       searchQuery: widget.initialState.searchQuery,
     );
+    
+    // Initialize tag filter state
+    final existingTagFilter = currentState.activeFilters[FilterType.tags] as TagFilter?;
+    _selectedTagIds = existingTagFilter?.selectedTagIds.toSet() ?? {};
+    _tagFilterMode = existingTagFilter?.mode ?? TagFilterMode.or;
   }
 
   void _updateFilter(FilterType type, dynamic value) {
@@ -105,6 +117,18 @@ class _UnifiedSortFilterContentState extends ConsumerState<UnifiedSortFilterCont
         sortDirection: direction,
       );
     });
+  }
+  
+  void _updateTagFilter() {
+    if (_selectedTagIds.isEmpty) {
+      currentState = currentState.withoutFilter(FilterType.tags);
+    } else {
+      final tagFilter = TagFilter(
+        selectedTagIds: _selectedTagIds.toList(),
+        mode: _tagFilterMode,
+      );
+      currentState = currentState.withFilter(FilterType.tags, tagFilter);
+    }
   }
 
   @override
@@ -141,12 +165,16 @@ class _UnifiedSortFilterContentState extends ConsumerState<UnifiedSortFilterCont
           SizedBox(height: AppSpacing.xl),
           _buildPantryMatchFilter(),
           SizedBox(height: AppSpacing.xl),
+          _buildTagsFilter(),
+          SizedBox(height: AppSpacing.xl),
           
           // Apply button
           AppButton(
             text: 'Apply Changes',
             theme: AppButtonTheme.secondary,
             onPressed: () {
+              // Update tag filter in current state before applying
+              _updateTagFilter();
               widget.onStateChanged(currentState);
             },
             fullWidth: true,
@@ -371,6 +399,94 @@ class _UnifiedSortFilterContentState extends ConsumerState<UnifiedSortFilterCont
           ),
         ),
       ],
+    );
+  }
+  
+  Widget _buildTagsFilter() {
+    final colors = AppColors.of(context);
+    final tagsAsync = ref.watch(recipeTagNotifierProvider);
+    
+    return tagsAsync.when(
+      data: (tags) {
+        if (tags.isEmpty) {
+          return const SizedBox.shrink();
+        }
+        
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Header row with toggle switch
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  'Tags',
+                  style: AppTypography.h5.copyWith(
+                    color: colors.textPrimary,
+                  ),
+                ),
+                Row(
+                  children: [
+                    Text(
+                      'Must have all tags',
+                      style: AppTypography.caption.copyWith(
+                        color: colors.textSecondary,
+                      ),
+                    ),
+                    SizedBox(width: AppSpacing.xs),
+                    CupertinoSwitch(
+                      value: _tagFilterMode == TagFilterMode.and,
+                      onChanged: (value) {
+                        setState(() {
+                          _tagFilterMode = value ? TagFilterMode.and : TagFilterMode.or;
+                        });
+                      },
+                    ),
+                  ],
+                ),
+              ],
+            ),
+            SizedBox(height: AppSpacing.md),
+            
+            // Tags wrapped buttons
+            SizedBox(
+              width: double.infinity,
+              child: Wrap(
+                spacing: AppSpacing.sm,
+                runSpacing: AppSpacing.sm,
+                alignment: WrapAlignment.start,
+                children: tags.map((tag) {
+                  final isSelected = _selectedTagIds.contains(tag.id);
+                  return AppButton(
+                    text: tag.name,
+                    size: AppButtonSize.small,
+                    style: isSelected ? AppButtonStyle.fill : AppButtonStyle.mutedOutline,
+                    onPressed: () {
+                      setState(() {
+                        if (isSelected) {
+                          _selectedTagIds.remove(tag.id);
+                        } else {
+                          _selectedTagIds.add(tag.id);
+                        }
+                      });
+                    },
+                    leadingIcon: Container(
+                      width: 8,
+                      height: 8,
+                      decoration: BoxDecoration(
+                        color: TagColors.fromHex(tag.color),
+                        shape: BoxShape.circle,
+                      ),
+                    ),
+                  );
+                }).toList(),
+              ),
+            ),
+          ],
+        );
+      },
+      loading: () => const SizedBox(height: 48),
+      error: (_, __) => const SizedBox.shrink(),
     );
   }
 }

@@ -1,7 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:recipe_app/database/database.dart';
 import 'package:recipe_app/src/features/recipes/models/recipe_filter_sort.dart';
-import 'package:recipe_app/src/models/recipe_pantry_match.dart';
 import 'package:recipe_app/src/providers/recipe_provider.dart';
 import 'package:recipe_app/src/providers/recipe_filter_sort_provider.dart';
 
@@ -65,6 +64,10 @@ class FilterUtils {
               recipeMatchPercentages
             ));
           }
+          break;
+          
+        case FilterType.tags:
+          predicates.add(_buildTagFilter(value as TagFilter));
           break;
       }
     });
@@ -263,6 +266,26 @@ class FilterUtils {
           return matchPercentage >= 75;
         case PantryMatchFilter.perfectMatch:
           return matchPercentage == 100;
+      }
+    };
+  }
+  
+  static bool Function(RecipeEntry) _buildTagFilter(TagFilter filter) {
+    return (recipe) {
+      if (filter.selectedTagIds.isEmpty) return true;
+      
+      final recipeTags = recipe.tagIds ?? [];
+      
+      if (filter.mode == TagFilterMode.and) {
+        // Recipe must have ALL selected tags
+        return filter.selectedTagIds.every(
+          (tagId) => recipeTags.contains(tagId)
+        );
+      } else {
+        // Recipe must have at least ONE selected tag
+        return filter.selectedTagIds.any(
+          (tagId) => recipeTags.contains(tagId)
+        );
       }
     };
   }
