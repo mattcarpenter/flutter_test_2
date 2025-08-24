@@ -11,6 +11,10 @@ BEGIN
     SET household_id = NULL
     WHERE user_id = OLD.user_id AND household_id = OLD.household_id;
 
+    UPDATE public.recipe_tags
+    SET household_id = NULL
+    WHERE user_id = OLD.user_id AND household_id = OLD.household_id;
+
     UPDATE public.meal_plans
     SET household_id = NULL, updated_at = EXTRACT(EPOCH FROM NOW()) * 1000
     WHERE user_id = OLD.user_id AND household_id = OLD.household_id;
@@ -63,6 +67,10 @@ BEGIN
     WHERE user_id = NEW.user_id AND household_id IS NULL;
 
     UPDATE public.recipe_folders
+    SET household_id = NEW.household_id
+    WHERE user_id = NEW.user_id AND household_id IS NULL;
+
+    UPDATE public.recipe_tags
     SET household_id = NEW.household_id
     WHERE user_id = NEW.user_id AND household_id IS NULL;
 

@@ -7,6 +7,7 @@ bucket_definitions:
     parameters: SELECT request.user_id() as user_id
     data:
       - SELECT * FROM public.recipe_folders WHERE recipe_folders.user_id = bucket.user_id
+      - SELECT * FROM public.recipe_tags WHERE recipe_tags.user_id = bucket.user_id
       - SELECT * FROM public.recipes WHERE recipes.user_id = bucket.user_id
 
   # Data that belongs to a household the user is an active member of
@@ -14,6 +15,7 @@ bucket_definitions:
     parameters: SELECT household_id FROM household_members WHERE user_id = request.user_id() AND is_active = 1
     data:
       - SELECT * FROM public.recipe_folders WHERE household_id = bucket.household_id
+      - SELECT * FROM public.recipe_tags WHERE household_id = bucket.household_id
       - SELECT * FROM public.recipes WHERE household_id = bucket.household_id
 
   # All members of the user's household

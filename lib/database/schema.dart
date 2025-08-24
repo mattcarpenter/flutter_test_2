@@ -2,6 +2,7 @@ import 'package:powersync/powersync.dart';
 
 // Define the table name as a constant.
 const recipeFoldersTable = 'recipe_folders';
+const recipeTagsTable = 'recipe_tags';
 const recipesTable = 'recipes';
 const householdsTable = 'households';
 const householdMembersTable = 'household_members';
@@ -68,6 +69,15 @@ Schema schema = const Schema(([
     Column.text('household_id'),
     Column.integer('deleted_at'),
   ]),
+  Table(recipeTagsTable, [
+    Column.text('name'),
+    Column.text('color'),
+    Column.text('user_id'),
+    Column.text('household_id'),
+    Column.integer('created_at'),
+    Column.integer('updated_at'),
+    Column.integer('deleted_at'),
+  ]),
   Table(recipesTable, [
     Column.text('title'),
     Column.text('description'),
@@ -90,6 +100,7 @@ Schema schema = const Schema(([
     Column.text('ingredients'),
     Column.text('steps'),
     Column.text('folder_ids'),
+    Column.text('tag_ids'),
     Column.text('images'),
   ]),
   Table(householdsTable, [

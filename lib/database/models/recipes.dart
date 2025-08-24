@@ -35,6 +35,7 @@ class Recipes extends Table {
   TextColumn get ingredients => text().map(const IngredientListConverter()).nullable()();
   TextColumn get steps => text().map(const StepListConverter()).nullable()();
   TextColumn get folderIds => text().nullable().map(StringListTypeConverter())();
+  TextColumn get tagIds => text().nullable().map(StringListTypeConverter())();
   TextColumn get images => text().nullable().map(const RecipeImageListConverter())();
 }
 

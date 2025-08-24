@@ -26,6 +26,12 @@ class RecipeNotifier extends StateNotifier<AsyncValue<List<RecipeWithFolders>>> 
   RecipeNotifier(this._repository) : super(const AsyncValue.loading()) {
     _subscription = _repository.watchRecipesWithFolders().listen(
           (recipesWithFolders) {
+        print('🔍 [RecipeProvider] Loaded ${recipesWithFolders.length} recipes with folders');
+        // Debug: check tagIds for first few recipes
+        for (int i = 0; i < recipesWithFolders.length && i < 3; i++) {
+          final recipe = recipesWithFolders[i].recipe;
+          print('🔍 [RecipeProvider] Recipe ${recipe.id} (${recipe.title}) tagIds: ${recipe.tagIds}');
+        }
         state = AsyncValue.data(recipesWithFolders);
       },
       onError: (error, stack) {
@@ -61,6 +67,7 @@ class RecipeNotifier extends StateNotifier<AsyncValue<List<RecipeWithFolders>>> 
     List<Ingredient>? ingredients,
     List<Step>? steps,
     List<String>? folderIds,
+    List<String>? tagIds,
     List<RecipeImage>? images,
   }) async {
     try {
@@ -119,6 +126,7 @@ class RecipeNotifier extends StateNotifier<AsyncValue<List<RecipeWithFolders>>> 
         ingredients: Value(processedIngredients),
         steps: Value(steps),
         folderIds: Value(folderIds ?? []),
+        tagIds: Value(tagIds ?? []),
         images: Value(images),
       );
 
@@ -380,6 +388,7 @@ class RecipeNotifier extends StateNotifier<AsyncValue<List<RecipeWithFolders>>> 
           ingredients: Value(ingredients),
           steps: Value(steps),
           folderIds: const Value([]),
+          tagIds: const Value([]),
           images: const Value([]),
         );
 

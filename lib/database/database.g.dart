@@ -316,6 +316,430 @@ class RecipeFoldersCompanion extends UpdateCompanion<RecipeFolderEntry> {
   }
 }
 
+class $RecipeTagsTable extends RecipeTags
+    with TableInfo<$RecipeTagsTable, RecipeTagEntry> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $RecipeTagsTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<String> id = GeneratedColumn<String>(
+      'id', aliasedName, false,
+      type: DriftSqlType.string,
+      requiredDuringInsert: false,
+      defaultConstraints: GeneratedColumn.constraintIsAlways('UNIQUE'),
+      clientDefault: () => const Uuid().v4());
+  static const VerificationMeta _nameMeta = const VerificationMeta('name');
+  @override
+  late final GeneratedColumn<String> name = GeneratedColumn<String>(
+      'name', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _colorMeta = const VerificationMeta('color');
+  @override
+  late final GeneratedColumn<String> color = GeneratedColumn<String>(
+      'color', aliasedName, false,
+      type: DriftSqlType.string,
+      requiredDuringInsert: false,
+      defaultValue: const Constant('#4285F4'));
+  static const VerificationMeta _userIdMeta = const VerificationMeta('userId');
+  @override
+  late final GeneratedColumn<String> userId = GeneratedColumn<String>(
+      'user_id', aliasedName, true,
+      type: DriftSqlType.string, requiredDuringInsert: false);
+  static const VerificationMeta _householdIdMeta =
+      const VerificationMeta('householdId');
+  @override
+  late final GeneratedColumn<String> householdId = GeneratedColumn<String>(
+      'household_id', aliasedName, true,
+      type: DriftSqlType.string, requiredDuringInsert: false);
+  static const VerificationMeta _createdAtMeta =
+      const VerificationMeta('createdAt');
+  @override
+  late final GeneratedColumn<int> createdAt = GeneratedColumn<int>(
+      'created_at', aliasedName, true,
+      type: DriftSqlType.int, requiredDuringInsert: false);
+  static const VerificationMeta _updatedAtMeta =
+      const VerificationMeta('updatedAt');
+  @override
+  late final GeneratedColumn<int> updatedAt = GeneratedColumn<int>(
+      'updated_at', aliasedName, true,
+      type: DriftSqlType.int, requiredDuringInsert: false);
+  static const VerificationMeta _deletedAtMeta =
+      const VerificationMeta('deletedAt');
+  @override
+  late final GeneratedColumn<int> deletedAt = GeneratedColumn<int>(
+      'deleted_at', aliasedName, true,
+      type: DriftSqlType.int, requiredDuringInsert: false);
+  @override
+  List<GeneratedColumn> get $columns =>
+      [id, name, color, userId, householdId, createdAt, updatedAt, deletedAt];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'recipe_tags';
+  @override
+  VerificationContext validateIntegrity(Insertable<RecipeTagEntry> instance,
+      {bool isInserting = false}) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    }
+    if (data.containsKey('name')) {
+      context.handle(
+          _nameMeta, name.isAcceptableOrUnknown(data['name']!, _nameMeta));
+    } else if (isInserting) {
+      context.missing(_nameMeta);
+    }
+    if (data.containsKey('color')) {
+      context.handle(
+          _colorMeta, color.isAcceptableOrUnknown(data['color']!, _colorMeta));
+    }
+    if (data.containsKey('user_id')) {
+      context.handle(_userIdMeta,
+          userId.isAcceptableOrUnknown(data['user_id']!, _userIdMeta));
+    }
+    if (data.containsKey('household_id')) {
+      context.handle(
+          _householdIdMeta,
+          householdId.isAcceptableOrUnknown(
+              data['household_id']!, _householdIdMeta));
+    }
+    if (data.containsKey('created_at')) {
+      context.handle(_createdAtMeta,
+          createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta));
+    }
+    if (data.containsKey('updated_at')) {
+      context.handle(_updatedAtMeta,
+          updatedAt.isAcceptableOrUnknown(data['updated_at']!, _updatedAtMeta));
+    }
+    if (data.containsKey('deleted_at')) {
+      context.handle(_deletedAtMeta,
+          deletedAt.isAcceptableOrUnknown(data['deleted_at']!, _deletedAtMeta));
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => const {};
+  @override
+  RecipeTagEntry map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return RecipeTagEntry(
+      id: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}id'])!,
+      name: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}name'])!,
+      color: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}color'])!,
+      userId: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}user_id']),
+      householdId: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}household_id']),
+      createdAt: attachedDatabase.typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}created_at']),
+      updatedAt: attachedDatabase.typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}updated_at']),
+      deletedAt: attachedDatabase.typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}deleted_at']),
+    );
+  }
+
+  @override
+  $RecipeTagsTable createAlias(String alias) {
+    return $RecipeTagsTable(attachedDatabase, alias);
+  }
+}
+
+class RecipeTagEntry extends DataClass implements Insertable<RecipeTagEntry> {
+  final String id;
+  final String name;
+  final String color;
+  final String? userId;
+  final String? householdId;
+  final int? createdAt;
+  final int? updatedAt;
+  final int? deletedAt;
+  const RecipeTagEntry(
+      {required this.id,
+      required this.name,
+      required this.color,
+      this.userId,
+      this.householdId,
+      this.createdAt,
+      this.updatedAt,
+      this.deletedAt});
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<String>(id);
+    map['name'] = Variable<String>(name);
+    map['color'] = Variable<String>(color);
+    if (!nullToAbsent || userId != null) {
+      map['user_id'] = Variable<String>(userId);
+    }
+    if (!nullToAbsent || householdId != null) {
+      map['household_id'] = Variable<String>(householdId);
+    }
+    if (!nullToAbsent || createdAt != null) {
+      map['created_at'] = Variable<int>(createdAt);
+    }
+    if (!nullToAbsent || updatedAt != null) {
+      map['updated_at'] = Variable<int>(updatedAt);
+    }
+    if (!nullToAbsent || deletedAt != null) {
+      map['deleted_at'] = Variable<int>(deletedAt);
+    }
+    return map;
+  }
+
+  RecipeTagsCompanion toCompanion(bool nullToAbsent) {
+    return RecipeTagsCompanion(
+      id: Value(id),
+      name: Value(name),
+      color: Value(color),
+      userId:
+          userId == null && nullToAbsent ? const Value.absent() : Value(userId),
+      householdId: householdId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(householdId),
+      createdAt: createdAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(createdAt),
+      updatedAt: updatedAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(updatedAt),
+      deletedAt: deletedAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(deletedAt),
+    );
+  }
+
+  factory RecipeTagEntry.fromJson(Map<String, dynamic> json,
+      {ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return RecipeTagEntry(
+      id: serializer.fromJson<String>(json['id']),
+      name: serializer.fromJson<String>(json['name']),
+      color: serializer.fromJson<String>(json['color']),
+      userId: serializer.fromJson<String?>(json['userId']),
+      householdId: serializer.fromJson<String?>(json['householdId']),
+      createdAt: serializer.fromJson<int?>(json['createdAt']),
+      updatedAt: serializer.fromJson<int?>(json['updatedAt']),
+      deletedAt: serializer.fromJson<int?>(json['deletedAt']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<String>(id),
+      'name': serializer.toJson<String>(name),
+      'color': serializer.toJson<String>(color),
+      'userId': serializer.toJson<String?>(userId),
+      'householdId': serializer.toJson<String?>(householdId),
+      'createdAt': serializer.toJson<int?>(createdAt),
+      'updatedAt': serializer.toJson<int?>(updatedAt),
+      'deletedAt': serializer.toJson<int?>(deletedAt),
+    };
+  }
+
+  RecipeTagEntry copyWith(
+          {String? id,
+          String? name,
+          String? color,
+          Value<String?> userId = const Value.absent(),
+          Value<String?> householdId = const Value.absent(),
+          Value<int?> createdAt = const Value.absent(),
+          Value<int?> updatedAt = const Value.absent(),
+          Value<int?> deletedAt = const Value.absent()}) =>
+      RecipeTagEntry(
+        id: id ?? this.id,
+        name: name ?? this.name,
+        color: color ?? this.color,
+        userId: userId.present ? userId.value : this.userId,
+        householdId: householdId.present ? householdId.value : this.householdId,
+        createdAt: createdAt.present ? createdAt.value : this.createdAt,
+        updatedAt: updatedAt.present ? updatedAt.value : this.updatedAt,
+        deletedAt: deletedAt.present ? deletedAt.value : this.deletedAt,
+      );
+  RecipeTagEntry copyWithCompanion(RecipeTagsCompanion data) {
+    return RecipeTagEntry(
+      id: data.id.present ? data.id.value : this.id,
+      name: data.name.present ? data.name.value : this.name,
+      color: data.color.present ? data.color.value : this.color,
+      userId: data.userId.present ? data.userId.value : this.userId,
+      householdId:
+          data.householdId.present ? data.householdId.value : this.householdId,
+      createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
+      updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
+      deletedAt: data.deletedAt.present ? data.deletedAt.value : this.deletedAt,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('RecipeTagEntry(')
+          ..write('id: $id, ')
+          ..write('name: $name, ')
+          ..write('color: $color, ')
+          ..write('userId: $userId, ')
+          ..write('householdId: $householdId, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('deletedAt: $deletedAt')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(
+      id, name, color, userId, householdId, createdAt, updatedAt, deletedAt);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is RecipeTagEntry &&
+          other.id == this.id &&
+          other.name == this.name &&
+          other.color == this.color &&
+          other.userId == this.userId &&
+          other.householdId == this.householdId &&
+          other.createdAt == this.createdAt &&
+          other.updatedAt == this.updatedAt &&
+          other.deletedAt == this.deletedAt);
+}
+
+class RecipeTagsCompanion extends UpdateCompanion<RecipeTagEntry> {
+  final Value<String> id;
+  final Value<String> name;
+  final Value<String> color;
+  final Value<String?> userId;
+  final Value<String?> householdId;
+  final Value<int?> createdAt;
+  final Value<int?> updatedAt;
+  final Value<int?> deletedAt;
+  final Value<int> rowid;
+  const RecipeTagsCompanion({
+    this.id = const Value.absent(),
+    this.name = const Value.absent(),
+    this.color = const Value.absent(),
+    this.userId = const Value.absent(),
+    this.householdId = const Value.absent(),
+    this.createdAt = const Value.absent(),
+    this.updatedAt = const Value.absent(),
+    this.deletedAt = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  RecipeTagsCompanion.insert({
+    this.id = const Value.absent(),
+    required String name,
+    this.color = const Value.absent(),
+    this.userId = const Value.absent(),
+    this.householdId = const Value.absent(),
+    this.createdAt = const Value.absent(),
+    this.updatedAt = const Value.absent(),
+    this.deletedAt = const Value.absent(),
+    this.rowid = const Value.absent(),
+  }) : name = Value(name);
+  static Insertable<RecipeTagEntry> custom({
+    Expression<String>? id,
+    Expression<String>? name,
+    Expression<String>? color,
+    Expression<String>? userId,
+    Expression<String>? householdId,
+    Expression<int>? createdAt,
+    Expression<int>? updatedAt,
+    Expression<int>? deletedAt,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (name != null) 'name': name,
+      if (color != null) 'color': color,
+      if (userId != null) 'user_id': userId,
+      if (householdId != null) 'household_id': householdId,
+      if (createdAt != null) 'created_at': createdAt,
+      if (updatedAt != null) 'updated_at': updatedAt,
+      if (deletedAt != null) 'deleted_at': deletedAt,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  RecipeTagsCompanion copyWith(
+      {Value<String>? id,
+      Value<String>? name,
+      Value<String>? color,
+      Value<String?>? userId,
+      Value<String?>? householdId,
+      Value<int?>? createdAt,
+      Value<int?>? updatedAt,
+      Value<int?>? deletedAt,
+      Value<int>? rowid}) {
+    return RecipeTagsCompanion(
+      id: id ?? this.id,
+      name: name ?? this.name,
+      color: color ?? this.color,
+      userId: userId ?? this.userId,
+      householdId: householdId ?? this.householdId,
+      createdAt: createdAt ?? this.createdAt,
+      updatedAt: updatedAt ?? this.updatedAt,
+      deletedAt: deletedAt ?? this.deletedAt,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<String>(id.value);
+    }
+    if (name.present) {
+      map['name'] = Variable<String>(name.value);
+    }
+    if (color.present) {
+      map['color'] = Variable<String>(color.value);
+    }
+    if (userId.present) {
+      map['user_id'] = Variable<String>(userId.value);
+    }
+    if (householdId.present) {
+      map['household_id'] = Variable<String>(householdId.value);
+    }
+    if (createdAt.present) {
+      map['created_at'] = Variable<int>(createdAt.value);
+    }
+    if (updatedAt.present) {
+      map['updated_at'] = Variable<int>(updatedAt.value);
+    }
+    if (deletedAt.present) {
+      map['deleted_at'] = Variable<int>(deletedAt.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('RecipeTagsCompanion(')
+          ..write('id: $id, ')
+          ..write('name: $name, ')
+          ..write('color: $color, ')
+          ..write('userId: $userId, ')
+          ..write('householdId: $householdId, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('deletedAt: $deletedAt, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
 class $RecipesTable extends Recipes with TableInfo<$RecipesTable, RecipeEntry> {
   @override
   final GeneratedDatabase attachedDatabase;
@@ -451,6 +875,11 @@ class $RecipesTable extends Recipes with TableInfo<$RecipesTable, RecipeEntry> {
               type: DriftSqlType.string, requiredDuringInsert: false)
           .withConverter<List<String>?>($RecipesTable.$converterfolderIdsn);
   @override
+  late final GeneratedColumnWithTypeConverter<List<String>?, String> tagIds =
+      GeneratedColumn<String>('tag_ids', aliasedName, true,
+              type: DriftSqlType.string, requiredDuringInsert: false)
+          .withConverter<List<String>?>($RecipesTable.$convertertagIdsn);
+  @override
   late final GeneratedColumnWithTypeConverter<List<RecipeImage>?, String>
       images = GeneratedColumn<String>('images', aliasedName, true,
               type: DriftSqlType.string, requiredDuringInsert: false)
@@ -479,6 +908,7 @@ class $RecipesTable extends Recipes with TableInfo<$RecipesTable, RecipeEntry> {
         ingredients,
         steps,
         folderIds,
+        tagIds,
         images
       ];
   @override
@@ -629,6 +1059,9 @@ class $RecipesTable extends Recipes with TableInfo<$RecipesTable, RecipeEntry> {
       folderIds: $RecipesTable.$converterfolderIdsn.fromSql(attachedDatabase
           .typeMapping
           .read(DriftSqlType.string, data['${effectivePrefix}folder_ids'])),
+      tagIds: $RecipesTable.$convertertagIdsn.fromSql(attachedDatabase
+          .typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}tag_ids'])),
       images: $RecipesTable.$converterimagesn.fromSql(attachedDatabase
           .typeMapping
           .read(DriftSqlType.string, data['${effectivePrefix}images'])),
@@ -652,6 +1085,10 @@ class $RecipesTable extends Recipes with TableInfo<$RecipesTable, RecipeEntry> {
       StringListTypeConverter();
   static TypeConverter<List<String>?, String?> $converterfolderIdsn =
       NullAwareTypeConverter.wrap($converterfolderIds);
+  static TypeConverter<List<String>, String> $convertertagIds =
+      StringListTypeConverter();
+  static TypeConverter<List<String>?, String?> $convertertagIdsn =
+      NullAwareTypeConverter.wrap($convertertagIds);
   static TypeConverter<List<RecipeImage>, String> $converterimages =
       const RecipeImageListConverter();
   static TypeConverter<List<RecipeImage>?, String?> $converterimagesn =
@@ -681,6 +1118,7 @@ class RecipeEntry extends DataClass implements Insertable<RecipeEntry> {
   final List<Ingredient>? ingredients;
   final List<Step>? steps;
   final List<String>? folderIds;
+  final List<String>? tagIds;
   final List<RecipeImage>? images;
   const RecipeEntry(
       {required this.id,
@@ -705,6 +1143,7 @@ class RecipeEntry extends DataClass implements Insertable<RecipeEntry> {
       this.ingredients,
       this.steps,
       this.folderIds,
+      this.tagIds,
       this.images});
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -774,6 +1213,10 @@ class RecipeEntry extends DataClass implements Insertable<RecipeEntry> {
       map['folder_ids'] =
           Variable<String>($RecipesTable.$converterfolderIdsn.toSql(folderIds));
     }
+    if (!nullToAbsent || tagIds != null) {
+      map['tag_ids'] =
+          Variable<String>($RecipesTable.$convertertagIdsn.toSql(tagIds));
+    }
     if (!nullToAbsent || images != null) {
       map['images'] =
           Variable<String>($RecipesTable.$converterimagesn.toSql(images));
@@ -840,6 +1283,8 @@ class RecipeEntry extends DataClass implements Insertable<RecipeEntry> {
       folderIds: folderIds == null && nullToAbsent
           ? const Value.absent()
           : Value(folderIds),
+      tagIds:
+          tagIds == null && nullToAbsent ? const Value.absent() : Value(tagIds),
       images:
           images == null && nullToAbsent ? const Value.absent() : Value(images),
     );
@@ -871,6 +1316,7 @@ class RecipeEntry extends DataClass implements Insertable<RecipeEntry> {
       ingredients: serializer.fromJson<List<Ingredient>?>(json['ingredients']),
       steps: serializer.fromJson<List<Step>?>(json['steps']),
       folderIds: serializer.fromJson<List<String>?>(json['folderIds']),
+      tagIds: serializer.fromJson<List<String>?>(json['tagIds']),
       images: serializer.fromJson<List<RecipeImage>?>(json['images']),
     );
   }
@@ -900,6 +1346,7 @@ class RecipeEntry extends DataClass implements Insertable<RecipeEntry> {
       'ingredients': serializer.toJson<List<Ingredient>?>(ingredients),
       'steps': serializer.toJson<List<Step>?>(steps),
       'folderIds': serializer.toJson<List<String>?>(folderIds),
+      'tagIds': serializer.toJson<List<String>?>(tagIds),
       'images': serializer.toJson<List<RecipeImage>?>(images),
     };
   }
@@ -927,6 +1374,7 @@ class RecipeEntry extends DataClass implements Insertable<RecipeEntry> {
           Value<List<Ingredient>?> ingredients = const Value.absent(),
           Value<List<Step>?> steps = const Value.absent(),
           Value<List<String>?> folderIds = const Value.absent(),
+          Value<List<String>?> tagIds = const Value.absent(),
           Value<List<RecipeImage>?> images = const Value.absent()}) =>
       RecipeEntry(
         id: id ?? this.id,
@@ -952,6 +1400,7 @@ class RecipeEntry extends DataClass implements Insertable<RecipeEntry> {
         ingredients: ingredients.present ? ingredients.value : this.ingredients,
         steps: steps.present ? steps.value : this.steps,
         folderIds: folderIds.present ? folderIds.value : this.folderIds,
+        tagIds: tagIds.present ? tagIds.value : this.tagIds,
         images: images.present ? images.value : this.images,
       );
   RecipeEntry copyWithCompanion(RecipesCompanion data) {
@@ -983,6 +1432,7 @@ class RecipeEntry extends DataClass implements Insertable<RecipeEntry> {
           data.ingredients.present ? data.ingredients.value : this.ingredients,
       steps: data.steps.present ? data.steps.value : this.steps,
       folderIds: data.folderIds.present ? data.folderIds.value : this.folderIds,
+      tagIds: data.tagIds.present ? data.tagIds.value : this.tagIds,
       images: data.images.present ? data.images.value : this.images,
     );
   }
@@ -1012,6 +1462,7 @@ class RecipeEntry extends DataClass implements Insertable<RecipeEntry> {
           ..write('ingredients: $ingredients, ')
           ..write('steps: $steps, ')
           ..write('folderIds: $folderIds, ')
+          ..write('tagIds: $tagIds, ')
           ..write('images: $images')
           ..write(')'))
         .toString();
@@ -1041,6 +1492,7 @@ class RecipeEntry extends DataClass implements Insertable<RecipeEntry> {
         ingredients,
         steps,
         folderIds,
+        tagIds,
         images
       ]);
   @override
@@ -1069,6 +1521,7 @@ class RecipeEntry extends DataClass implements Insertable<RecipeEntry> {
           other.ingredients == this.ingredients &&
           other.steps == this.steps &&
           other.folderIds == this.folderIds &&
+          other.tagIds == this.tagIds &&
           other.images == this.images);
 }
 
@@ -1095,6 +1548,7 @@ class RecipesCompanion extends UpdateCompanion<RecipeEntry> {
   final Value<List<Ingredient>?> ingredients;
   final Value<List<Step>?> steps;
   final Value<List<String>?> folderIds;
+  final Value<List<String>?> tagIds;
   final Value<List<RecipeImage>?> images;
   final Value<int> rowid;
   const RecipesCompanion({
@@ -1120,6 +1574,7 @@ class RecipesCompanion extends UpdateCompanion<RecipeEntry> {
     this.ingredients = const Value.absent(),
     this.steps = const Value.absent(),
     this.folderIds = const Value.absent(),
+    this.tagIds = const Value.absent(),
     this.images = const Value.absent(),
     this.rowid = const Value.absent(),
   });
@@ -1146,6 +1601,7 @@ class RecipesCompanion extends UpdateCompanion<RecipeEntry> {
     this.ingredients = const Value.absent(),
     this.steps = const Value.absent(),
     this.folderIds = const Value.absent(),
+    this.tagIds = const Value.absent(),
     this.images = const Value.absent(),
     this.rowid = const Value.absent(),
   }) : title = Value(title);
@@ -1172,6 +1628,7 @@ class RecipesCompanion extends UpdateCompanion<RecipeEntry> {
     Expression<String>? ingredients,
     Expression<String>? steps,
     Expression<String>? folderIds,
+    Expression<String>? tagIds,
     Expression<String>? images,
     Expression<int>? rowid,
   }) {
@@ -1198,6 +1655,7 @@ class RecipesCompanion extends UpdateCompanion<RecipeEntry> {
       if (ingredients != null) 'ingredients': ingredients,
       if (steps != null) 'steps': steps,
       if (folderIds != null) 'folder_ids': folderIds,
+      if (tagIds != null) 'tag_ids': tagIds,
       if (images != null) 'images': images,
       if (rowid != null) 'rowid': rowid,
     });
@@ -1226,6 +1684,7 @@ class RecipesCompanion extends UpdateCompanion<RecipeEntry> {
       Value<List<Ingredient>?>? ingredients,
       Value<List<Step>?>? steps,
       Value<List<String>?>? folderIds,
+      Value<List<String>?>? tagIds,
       Value<List<RecipeImage>?>? images,
       Value<int>? rowid}) {
     return RecipesCompanion(
@@ -1251,6 +1710,7 @@ class RecipesCompanion extends UpdateCompanion<RecipeEntry> {
       ingredients: ingredients ?? this.ingredients,
       steps: steps ?? this.steps,
       folderIds: folderIds ?? this.folderIds,
+      tagIds: tagIds ?? this.tagIds,
       images: images ?? this.images,
       rowid: rowid ?? this.rowid,
     );
@@ -1328,6 +1788,10 @@ class RecipesCompanion extends UpdateCompanion<RecipeEntry> {
       map['folder_ids'] = Variable<String>(
           $RecipesTable.$converterfolderIdsn.toSql(folderIds.value));
     }
+    if (tagIds.present) {
+      map['tag_ids'] =
+          Variable<String>($RecipesTable.$convertertagIdsn.toSql(tagIds.value));
+    }
     if (images.present) {
       map['images'] =
           Variable<String>($RecipesTable.$converterimagesn.toSql(images.value));
@@ -1363,6 +1827,7 @@ class RecipesCompanion extends UpdateCompanion<RecipeEntry> {
           ..write('ingredients: $ingredients, ')
           ..write('steps: $steps, ')
           ..write('folderIds: $folderIds, ')
+          ..write('tagIds: $tagIds, ')
           ..write('images: $images, ')
           ..write('rowid: $rowid')
           ..write(')'))
@@ -9456,6 +9921,7 @@ abstract class _$AppDatabase extends GeneratedDatabase {
   _$AppDatabase(QueryExecutor e) : super(e);
   $AppDatabaseManager get managers => $AppDatabaseManager(this);
   late final $RecipeFoldersTable recipeFolders = $RecipeFoldersTable(this);
+  late final $RecipeTagsTable recipeTags = $RecipeTagsTable(this);
   late final $RecipesTable recipes = $RecipesTable(this);
   late final $RecipeSharesTable recipeShares = $RecipeSharesTable(this);
   late final $HouseholdMembersTable householdMembers =
@@ -9487,6 +9953,7 @@ abstract class _$AppDatabase extends GeneratedDatabase {
   @override
   List<DatabaseSchemaEntity> get allSchemaEntities => [
         recipeFolders,
+        recipeTags,
         recipes,
         recipeShares,
         householdMembers,
@@ -9680,6 +10147,222 @@ typedef $$RecipeFoldersTableProcessedTableManager = ProcessedTableManager<
     ),
     RecipeFolderEntry,
     PrefetchHooks Function()>;
+typedef $$RecipeTagsTableCreateCompanionBuilder = RecipeTagsCompanion Function({
+  Value<String> id,
+  required String name,
+  Value<String> color,
+  Value<String?> userId,
+  Value<String?> householdId,
+  Value<int?> createdAt,
+  Value<int?> updatedAt,
+  Value<int?> deletedAt,
+  Value<int> rowid,
+});
+typedef $$RecipeTagsTableUpdateCompanionBuilder = RecipeTagsCompanion Function({
+  Value<String> id,
+  Value<String> name,
+  Value<String> color,
+  Value<String?> userId,
+  Value<String?> householdId,
+  Value<int?> createdAt,
+  Value<int?> updatedAt,
+  Value<int?> deletedAt,
+  Value<int> rowid,
+});
+
+class $$RecipeTagsTableFilterComposer
+    extends Composer<_$AppDatabase, $RecipeTagsTable> {
+  $$RecipeTagsTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get id => $composableBuilder(
+      column: $table.id, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get name => $composableBuilder(
+      column: $table.name, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get color => $composableBuilder(
+      column: $table.color, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get userId => $composableBuilder(
+      column: $table.userId, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get householdId => $composableBuilder(
+      column: $table.householdId, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<int> get createdAt => $composableBuilder(
+      column: $table.createdAt, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<int> get updatedAt => $composableBuilder(
+      column: $table.updatedAt, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<int> get deletedAt => $composableBuilder(
+      column: $table.deletedAt, builder: (column) => ColumnFilters(column));
+}
+
+class $$RecipeTagsTableOrderingComposer
+    extends Composer<_$AppDatabase, $RecipeTagsTable> {
+  $$RecipeTagsTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get id => $composableBuilder(
+      column: $table.id, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get name => $composableBuilder(
+      column: $table.name, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get color => $composableBuilder(
+      column: $table.color, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get userId => $composableBuilder(
+      column: $table.userId, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get householdId => $composableBuilder(
+      column: $table.householdId, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<int> get createdAt => $composableBuilder(
+      column: $table.createdAt, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<int> get updatedAt => $composableBuilder(
+      column: $table.updatedAt, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<int> get deletedAt => $composableBuilder(
+      column: $table.deletedAt, builder: (column) => ColumnOrderings(column));
+}
+
+class $$RecipeTagsTableAnnotationComposer
+    extends Composer<_$AppDatabase, $RecipeTagsTable> {
+  $$RecipeTagsTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get name =>
+      $composableBuilder(column: $table.name, builder: (column) => column);
+
+  GeneratedColumn<String> get color =>
+      $composableBuilder(column: $table.color, builder: (column) => column);
+
+  GeneratedColumn<String> get userId =>
+      $composableBuilder(column: $table.userId, builder: (column) => column);
+
+  GeneratedColumn<String> get householdId => $composableBuilder(
+      column: $table.householdId, builder: (column) => column);
+
+  GeneratedColumn<int> get createdAt =>
+      $composableBuilder(column: $table.createdAt, builder: (column) => column);
+
+  GeneratedColumn<int> get updatedAt =>
+      $composableBuilder(column: $table.updatedAt, builder: (column) => column);
+
+  GeneratedColumn<int> get deletedAt =>
+      $composableBuilder(column: $table.deletedAt, builder: (column) => column);
+}
+
+class $$RecipeTagsTableTableManager extends RootTableManager<
+    _$AppDatabase,
+    $RecipeTagsTable,
+    RecipeTagEntry,
+    $$RecipeTagsTableFilterComposer,
+    $$RecipeTagsTableOrderingComposer,
+    $$RecipeTagsTableAnnotationComposer,
+    $$RecipeTagsTableCreateCompanionBuilder,
+    $$RecipeTagsTableUpdateCompanionBuilder,
+    (
+      RecipeTagEntry,
+      BaseReferences<_$AppDatabase, $RecipeTagsTable, RecipeTagEntry>
+    ),
+    RecipeTagEntry,
+    PrefetchHooks Function()> {
+  $$RecipeTagsTableTableManager(_$AppDatabase db, $RecipeTagsTable table)
+      : super(TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$RecipeTagsTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$RecipeTagsTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$RecipeTagsTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback: ({
+            Value<String> id = const Value.absent(),
+            Value<String> name = const Value.absent(),
+            Value<String> color = const Value.absent(),
+            Value<String?> userId = const Value.absent(),
+            Value<String?> householdId = const Value.absent(),
+            Value<int?> createdAt = const Value.absent(),
+            Value<int?> updatedAt = const Value.absent(),
+            Value<int?> deletedAt = const Value.absent(),
+            Value<int> rowid = const Value.absent(),
+          }) =>
+              RecipeTagsCompanion(
+            id: id,
+            name: name,
+            color: color,
+            userId: userId,
+            householdId: householdId,
+            createdAt: createdAt,
+            updatedAt: updatedAt,
+            deletedAt: deletedAt,
+            rowid: rowid,
+          ),
+          createCompanionCallback: ({
+            Value<String> id = const Value.absent(),
+            required String name,
+            Value<String> color = const Value.absent(),
+            Value<String?> userId = const Value.absent(),
+            Value<String?> householdId = const Value.absent(),
+            Value<int?> createdAt = const Value.absent(),
+            Value<int?> updatedAt = const Value.absent(),
+            Value<int?> deletedAt = const Value.absent(),
+            Value<int> rowid = const Value.absent(),
+          }) =>
+              RecipeTagsCompanion.insert(
+            id: id,
+            name: name,
+            color: color,
+            userId: userId,
+            householdId: householdId,
+            createdAt: createdAt,
+            updatedAt: updatedAt,
+            deletedAt: deletedAt,
+            rowid: rowid,
+          ),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .toList(),
+          prefetchHooksCallback: null,
+        ));
+}
+
+typedef $$RecipeTagsTableProcessedTableManager = ProcessedTableManager<
+    _$AppDatabase,
+    $RecipeTagsTable,
+    RecipeTagEntry,
+    $$RecipeTagsTableFilterComposer,
+    $$RecipeTagsTableOrderingComposer,
+    $$RecipeTagsTableAnnotationComposer,
+    $$RecipeTagsTableCreateCompanionBuilder,
+    $$RecipeTagsTableUpdateCompanionBuilder,
+    (
+      RecipeTagEntry,
+      BaseReferences<_$AppDatabase, $RecipeTagsTable, RecipeTagEntry>
+    ),
+    RecipeTagEntry,
+    PrefetchHooks Function()>;
 typedef $$RecipesTableCreateCompanionBuilder = RecipesCompanion Function({
   Value<String> id,
   required String title,
@@ -9703,6 +10386,7 @@ typedef $$RecipesTableCreateCompanionBuilder = RecipesCompanion Function({
   Value<List<Ingredient>?> ingredients,
   Value<List<Step>?> steps,
   Value<List<String>?> folderIds,
+  Value<List<String>?> tagIds,
   Value<List<RecipeImage>?> images,
   Value<int> rowid,
 });
@@ -9729,6 +10413,7 @@ typedef $$RecipesTableUpdateCompanionBuilder = RecipesCompanion Function({
   Value<List<Ingredient>?> ingredients,
   Value<List<Step>?> steps,
   Value<List<String>?> folderIds,
+  Value<List<String>?> tagIds,
   Value<List<RecipeImage>?> images,
   Value<int> rowid,
 });
@@ -9814,6 +10499,11 @@ class $$RecipesTableFilterComposer
           column: $table.folderIds,
           builder: (column) => ColumnWithTypeConverterFilters(column));
 
+  ColumnWithTypeConverterFilters<List<String>?, List<String>, String>
+      get tagIds => $composableBuilder(
+          column: $table.tagIds,
+          builder: (column) => ColumnWithTypeConverterFilters(column));
+
   ColumnWithTypeConverterFilters<List<RecipeImage>?, List<RecipeImage>, String>
       get images => $composableBuilder(
           column: $table.images,
@@ -9896,6 +10586,9 @@ class $$RecipesTableOrderingComposer
   ColumnOrderings<String> get folderIds => $composableBuilder(
       column: $table.folderIds, builder: (column) => ColumnOrderings(column));
 
+  ColumnOrderings<String> get tagIds => $composableBuilder(
+      column: $table.tagIds, builder: (column) => ColumnOrderings(column));
+
   ColumnOrderings<String> get images => $composableBuilder(
       column: $table.images, builder: (column) => ColumnOrderings(column));
 }
@@ -9976,6 +10669,9 @@ class $$RecipesTableAnnotationComposer
   GeneratedColumnWithTypeConverter<List<String>?, String> get folderIds =>
       $composableBuilder(column: $table.folderIds, builder: (column) => column);
 
+  GeneratedColumnWithTypeConverter<List<String>?, String> get tagIds =>
+      $composableBuilder(column: $table.tagIds, builder: (column) => column);
+
   GeneratedColumnWithTypeConverter<List<RecipeImage>?, String> get images =>
       $composableBuilder(column: $table.images, builder: (column) => column);
 }
@@ -10025,6 +10721,7 @@ class $$RecipesTableTableManager extends RootTableManager<
             Value<List<Ingredient>?> ingredients = const Value.absent(),
             Value<List<Step>?> steps = const Value.absent(),
             Value<List<String>?> folderIds = const Value.absent(),
+            Value<List<String>?> tagIds = const Value.absent(),
             Value<List<RecipeImage>?> images = const Value.absent(),
             Value<int> rowid = const Value.absent(),
           }) =>
@@ -10051,6 +10748,7 @@ class $$RecipesTableTableManager extends RootTableManager<
             ingredients: ingredients,
             steps: steps,
             folderIds: folderIds,
+            tagIds: tagIds,
             images: images,
             rowid: rowid,
           ),
@@ -10077,6 +10775,7 @@ class $$RecipesTableTableManager extends RootTableManager<
             Value<List<Ingredient>?> ingredients = const Value.absent(),
             Value<List<Step>?> steps = const Value.absent(),
             Value<List<String>?> folderIds = const Value.absent(),
+            Value<List<String>?> tagIds = const Value.absent(),
             Value<List<RecipeImage>?> images = const Value.absent(),
             Value<int> rowid = const Value.absent(),
           }) =>
@@ -10103,6 +10802,7 @@ class $$RecipesTableTableManager extends RootTableManager<
             ingredients: ingredients,
             steps: steps,
             folderIds: folderIds,
+            tagIds: tagIds,
             images: images,
             rowid: rowid,
           ),
@@ -14076,6 +14776,8 @@ class $AppDatabaseManager {
   $AppDatabaseManager(this._db);
   $$RecipeFoldersTableTableManager get recipeFolders =>
       $$RecipeFoldersTableTableManager(_db, _db.recipeFolders);
+  $$RecipeTagsTableTableManager get recipeTags =>
+      $$RecipeTagsTableTableManager(_db, _db.recipeTags);
   $$RecipesTableTableManager get recipes =>
       $$RecipesTableTableManager(_db, _db.recipes);
   $$RecipeSharesTableTableManager get recipeShares =>

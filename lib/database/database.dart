@@ -2,6 +2,7 @@ import 'package:drift/drift.dart';
 import 'package:drift_sqlite_async/drift_sqlite_async.dart';
 import 'package:powersync/powersync.dart' hide Table;
 import 'package:recipe_app/database/models/recipe_folders.dart';
+import 'package:recipe_app/database/models/recipe_tags.dart';
 import 'package:recipe_app/database/models/recipes.dart';
 import 'package:uuid/uuid.dart';
 
@@ -32,7 +33,7 @@ import 'converters.dart';
 
 part 'database.g.dart';
 
-@DriftDatabase(tables: [RecipeFolders, Recipes, RecipeShares, HouseholdMembers, Households, HouseholdInvites, UploadQueues, IngredientTermQueues, PantryItemTermQueues, ShoppingListItemTermQueues, Cooks, PantryItems, IngredientTermOverrides, ShoppingListItems, ShoppingLists, Converters, MealPlans, UserSubscriptions])
+@DriftDatabase(tables: [RecipeFolders, RecipeTags, Recipes, RecipeShares, HouseholdMembers, Households, HouseholdInvites, UploadQueues, IngredientTermQueues, PantryItemTermQueues, ShoppingListItemTermQueues, Cooks, PantryItems, IngredientTermOverrides, ShoppingListItems, ShoppingLists, Converters, MealPlans, UserSubscriptions])
 class AppDatabase extends _$AppDatabase {
   AppDatabase(PowerSyncDatabase db) : super(SqliteAsyncDriftConnection(db));
 

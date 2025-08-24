@@ -560,3 +560,53 @@ CREATE POLICY "Users can delete meal_plans"
     auth.uid() = user_id
         OR (household_id IS NOT NULL AND is_household_member(household_id, auth.uid()))
     );
+
+-- RECIPE TAGS -------------------------------
+ALTER TABLE recipe_tags ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "Users can view own recipe tags"
+    ON public.recipe_tags
+    FOR SELECT 
+    USING (user_id = auth.uid());
+
+CREATE POLICY "Users can view household recipe tags"
+    ON public.recipe_tags
+    FOR SELECT 
+    USING (
+        household_id IN (
+            SELECT household_id 
+            FROM household_members 
+            WHERE user_id = auth.uid() 
+            AND is_active = 1
+        )
+    );
+
+CREATE POLICY "Users can insert recipe tags"
+    ON public.recipe_tags
+    FOR INSERT 
+    WITH CHECK (
+        user_id = auth.uid() 
+        OR household_id IN (
+            SELECT household_id 
+            FROM household_members 
+            WHERE user_id = auth.uid() 
+            AND is_active = 1
+        )
+    );
+
+CREATE POLICY "Users can update own recipe tags"
+    ON public.recipe_tags
+    FOR UPDATE 
+    USING (user_id = auth.uid());
+
+CREATE POLICY "Users can update household recipe tags"
+    ON public.recipe_tags
+    FOR UPDATE 
+    USING (
+        household_id IN (
+            SELECT household_id 
+            FROM household_members 
+            WHERE user_id = auth.uid() 
+            AND is_active = 1
+        )
+    );

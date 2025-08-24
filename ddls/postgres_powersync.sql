@@ -77,7 +77,26 @@ CREATE INDEX IF NOT EXISTS recipe_folders_user_idx
 CREATE INDEX IF NOT EXISTS recipe_folders_household_idx
     ON public.recipe_folders USING btree (household_id) TABLESPACE pg_default;
 
--- 4. RECIPES (Depends on recipe_folders, households, and auth.users)
+-- 4a. RECIPE TAGS (Depends on households and auth.users)
+CREATE TABLE public.recipe_tags (
+    id uuid NOT NULL DEFAULT extensions.uuid_generate_v4(),
+    name text NOT NULL,
+    color text NOT NULL DEFAULT '#4285F4',
+    user_id uuid NULL,
+    household_id uuid NULL,
+    created_at bigint NULL,
+    updated_at bigint NULL,
+    deleted_at bigint NULL,
+    CONSTRAINT recipe_tags_pkey PRIMARY KEY (id),
+    CONSTRAINT recipe_tags_user_id_fkey FOREIGN KEY (user_id) REFERENCES auth.users (id) ON DELETE CASCADE,
+    CONSTRAINT recipe_tags_household_id_fkey FOREIGN KEY (household_id) REFERENCES public.households (id) ON DELETE CASCADE
+) TABLESPACE pg_default;
+
+CREATE INDEX IF NOT EXISTS recipe_tags_user_id_idx ON public.recipe_tags(user_id);
+CREATE INDEX IF NOT EXISTS recipe_tags_household_id_idx ON public.recipe_tags(household_id);
+CREATE INDEX IF NOT EXISTS recipe_tags_deleted_at_idx ON public.recipe_tags(deleted_at);
+
+-- 4b. RECIPES (Depends on recipe_folders, households, and auth.users)
 CREATE TABLE public.recipes (
                                 id uuid NOT NULL DEFAULT extensions.uuid_generate_v4(),
                                 title text NOT NULL,
@@ -101,6 +120,7 @@ CREATE TABLE public.recipes (
                                 pinned integer NOT NULL DEFAULT 0,
                                 pinned_at bigint NULL,
                                 folder_ids text null,
+                                tag_ids text null,
                                 images text null,
                                 CONSTRAINT recipes_pkey PRIMARY KEY (id),
                                 CONSTRAINT recipes_household_id_fkey FOREIGN KEY (household_id) REFERENCES public.households (id) ON DELETE CASCADE,

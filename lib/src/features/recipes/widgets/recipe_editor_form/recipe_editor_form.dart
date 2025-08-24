@@ -20,6 +20,8 @@ import '../../../../widgets/app_text_field_group.dart';
 import 'sections/ingredients_section.dart';
 import 'sections/recipe_metadata_section.dart';
 import 'sections/steps_section.dart';
+import 'items/tag_chips_row.dart';
+import '../tag_selection_modal.dart';
 
 class RecipeEditorForm extends ConsumerStatefulWidget {
   final RecipeEntry? initialRecipe; // null for new recipe, non-null for editing
@@ -86,6 +88,8 @@ class RecipeEditorFormState extends ConsumerState<RecipeEditorForm> {
     if (widget.initialRecipe != null) {
       // Update scenario: pre-populate fields.
       _recipe = widget.initialRecipe!;
+      print('🔍 [RecipeEditor] Loading existing recipe: ${_recipe.id}');
+      print('🔍 [RecipeEditor] Recipe tagIds: ${_recipe.tagIds}');
       _isNewRecipe = false;
       _titleController.text = _recipe.title;
       _descriptionController.text = _recipe.description ?? '';
@@ -128,6 +132,7 @@ class RecipeEditorFormState extends ConsumerState<RecipeEditorForm> {
 
   Future<void> saveRecipe() async {
     if (!_isInitialized) return;
+    print('🔍 [RecipeEditor] Saving recipe with tagIds: ${_recipe.tagIds}');
     // Build your updatedRecipe from form state.
     final updatedRecipe = _recipe.copyWith(
       title: _titleController.text,
@@ -141,6 +146,7 @@ class RecipeEditorFormState extends ConsumerState<RecipeEditorForm> {
       steps: Value(_steps),
       images: Value(_recipe.images),
       folderIds: Value(_recipe.folderIds),
+      tagIds: Value(_recipe.tagIds),
       updatedAt: Value(DateTime.now().millisecondsSinceEpoch),
     );
 
@@ -162,6 +168,7 @@ class RecipeEditorFormState extends ConsumerState<RecipeEditorForm> {
           steps: updatedRecipe.steps,
           images: updatedRecipe.images,
           folderIds: updatedRecipe.folderIds,
+          tagIds: updatedRecipe.tagIds,
         );
         setState(() {
           _isNewRecipe = false;
@@ -428,9 +435,31 @@ class RecipeEditorFormState extends ConsumerState<RecipeEditorForm> {
                 ),
               ],
             ),
+
+            const SizedBox(height: AppSpacing.xl),
+
+            // Tags Section
+            TagChipsRow(
+              tagIds: _recipe.tagIds ?? [],
+              onEditTags: () {
+                showTagSelectionModal(
+                  context,
+                  currentTagIds: _recipe.tagIds ?? [],
+                  onTagIdsChanged: _updateTagIds,
+                );
+              },
+            ),
           ],
         ),
       ),
     );
+  }
+
+  void _updateTagIds(List<String> newTagIds) {
+    print('🔍 [RecipeEditor] Updating tagIds from ${_recipe.tagIds} to $newTagIds');
+    setState(() {
+      _recipe = _recipe.copyWith(tagIds: Value(newTagIds));
+    });
+    print('🔍 [RecipeEditor] Recipe tagIds after update: ${_recipe.tagIds}');
   }
 }

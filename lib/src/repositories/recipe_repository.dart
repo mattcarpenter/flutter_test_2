@@ -78,6 +78,7 @@ class RecipeRepository {
 
   // Update a recipe.
   Future<bool> updateRecipe(RecipeEntry recipe) async {
+    print('🔍 [RecipeRepository] Updating recipe ${recipe.id} with tagIds: ${recipe.tagIds}');
     final result = await _db.update(_db.recipes).replace(recipe);
 
     // Queue ingredients for canonicalization if they exist
@@ -221,6 +222,7 @@ class RecipeRepository {
       r.ingredients AS recipe_ingredients,
       r.steps AS recipe_steps,
       r.folder_ids AS recipe_folder_ids,
+      r.tag_ids AS recipe_tag_ids,
       r.images AS recipe_images,
       r.deleted_at AS recipe_deleted_at,
       r.pinned AS recipe_pinned,
@@ -284,6 +286,10 @@ class RecipeRepository {
                 : [],
 
             folderIds: List<String>.from(jsonDecode(row.read<String>('recipe_folder_ids'))),
+            
+            tagIds: row.read<String?>('recipe_tag_ids') != null
+                ? List<String>.from(jsonDecode(row.read<String>('recipe_tag_ids')))
+                : [],
           );
           recipeMap[recipeId] = RecipeWithFolders(recipe: recipe, folders: []);
         }
@@ -326,6 +332,7 @@ class RecipeRepository {
       r.ingredients AS recipe_ingredients,
       r.steps AS recipe_steps,
       r.folder_ids AS recipe_folder_ids,
+      r.tag_ids AS recipe_tag_ids,
       r.images AS recipe_images,
       r.deleted_at AS recipe_deleted_at,
       r.pinned AS recipe_pinned,
@@ -353,6 +360,21 @@ class RecipeRepository {
     ).watch();
 
     return query.map((rows) {
+      print('🔍 [RecipeRepository] watchRecipesWithFolders SQL returned ${rows.length} rows');
+      
+      // Debug: Check if tag_ids column exists and has data for our test recipe
+      _db.customSelect('SELECT id, title, tag_ids FROM recipes WHERE id = ? LIMIT 1', 
+        variables: [Variable.withString('02d5b515-0159-47da-b562-08f28fa78dd6')]
+      ).getSingleOrNull().then((result) {
+        if (result != null) {
+          print('🔍 [RecipeRepository] Direct SQL check for test recipe: ${result.data}');
+        } else {
+          print('🔍 [RecipeRepository] Test recipe not found in direct SQL query');
+        }
+      }).catchError((e) {
+        print('🔍 [RecipeRepository] Direct SQL error (probably missing column): $e');
+      });
+      
       // Group rows by recipe id
       final Map<String, RecipeWithFolders> recipeMap = {};
       for (final row in rows) {
@@ -394,6 +416,10 @@ class RecipeRepository {
                 ? List<String>.from(jsonDecode(row.read<String>('recipe_folder_ids')))
                 : [],
 
+            tagIds: row.read<String?>('recipe_tag_ids') != null
+                ? List<String>.from(jsonDecode(row.read<String>('recipe_tag_ids')))
+                : [],
+
             images: row.read<String?>('recipe_images') != null
                 ? const RecipeImageListConverter().fromSql(row.read<String>('recipe_images'))
                 : [],
@@ -417,9 +443,28 @@ class RecipeRepository {
   }
 
   Stream<RecipeEntry?> watchRecipeById(String id) {
+    // First, let's check what's actually in the database with a raw query
+    _db.customSelect(
+      'SELECT id, title, tag_ids FROM recipes WHERE id = ?',
+      variables: [Variable.withString(id)]
+    ).getSingleOrNull().then((rawResult) {
+      if (rawResult != null) {
+        print('🔍 [RecipeRepository] Raw DB data for $id: ${rawResult.data}');
+        final tagIdsRaw = rawResult.data['tag_ids'];
+        print('🔍 [RecipeRepository] Raw tag_ids value: "$tagIdsRaw" (type: ${tagIdsRaw.runtimeType})');
+      }
+    }).catchError((e) {
+      print('🔍 [RecipeRepository] Raw query error: $e');
+    });
+    
     return (_db.select(_db.recipes)
       ..where((tbl) => tbl.id.equals(id)))
-        .watchSingleOrNull();
+        .watchSingleOrNull().map((recipe) {
+          if (recipe != null) {
+            print('🔍 [RecipeRepository] Loaded recipe ${recipe.id} with tagIds: ${recipe.tagIds}');
+          }
+          return recipe;
+        });
   }
 
   Future<void> removeFolderIdFromAllRecipes(String folderId) async {
@@ -439,6 +484,28 @@ class RecipeRepository {
       final updatedFolderIds = List<String>.from(recipe.folderIds ?? [])..remove(folderId);
       final updatedRecipe = recipe.copyWith(
         folderIds: Value(updatedFolderIds),
+        updatedAt: Value(DateTime.now().millisecondsSinceEpoch),
+      );
+      await updateRecipe(updatedRecipe);
+    }
+  }
+
+  Future<void> removeTagIdFromAllRecipes(String tagId) async {
+    // Get all recipes that aren't deleted
+    final recipesQuery = _db.select(_db.recipes)
+      ..where((tbl) => tbl.deletedAt.isNull());
+    final recipes = await recipesQuery.get();
+    
+    // Filter to recipes that contain this tag ID
+    final recipesToUpdate = recipes.where((recipe) {
+      return recipe.tagIds != null && recipe.tagIds!.contains(tagId);
+    }).toList();
+    
+    // Update each recipe by removing the tag ID
+    for (final recipe in recipesToUpdate) {
+      final updatedTagIds = List<String>.from(recipe.tagIds ?? [])..remove(tagId);
+      final updatedRecipe = recipe.copyWith(
+        tagIds: Value(updatedTagIds),
         updatedAt: Value(DateTime.now().millisecondsSinceEpoch),
       );
       await updateRecipe(updatedRecipe);

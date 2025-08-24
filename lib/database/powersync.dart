@@ -409,6 +409,16 @@ Future<void> _claimOrphanedRecords(String userId) async {
       ..where((f) => f.userId.equals('')))
       .write(RecipeFoldersCompanion(userId: Value(userId)));
     
+    // Update recipe tags - handle NULL userId
+    await (appDb.update(appDb.recipeTags)
+      ..where((t) => t.userId.isNull()))
+      .write(RecipeTagsCompanion(userId: Value(userId)));
+    
+    // Update recipe tags - handle empty string userId
+    await (appDb.update(appDb.recipeTags)
+      ..where((t) => t.userId.equals('')))
+      .write(RecipeTagsCompanion(userId: Value(userId)));
+    
     // Update cooks - handle NULL userId
     await (appDb.update(appDb.cooks)
       ..where((c) => c.userId.isNull()))
