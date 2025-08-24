@@ -26,12 +26,6 @@ class RecipeNotifier extends StateNotifier<AsyncValue<List<RecipeWithFolders>>> 
   RecipeNotifier(this._repository) : super(const AsyncValue.loading()) {
     _subscription = _repository.watchRecipesWithFolders().listen(
           (recipesWithFolders) {
-        print('🔍 [RecipeProvider] Loaded ${recipesWithFolders.length} recipes with folders');
-        // Debug: check tagIds for first few recipes
-        for (int i = 0; i < recipesWithFolders.length && i < 3; i++) {
-          final recipe = recipesWithFolders[i].recipe;
-          print('🔍 [RecipeProvider] Recipe ${recipe.id} (${recipe.title}) tagIds: ${recipe.tagIds}');
-        }
         state = AsyncValue.data(recipesWithFolders);
       },
       onError: (error, stack) {

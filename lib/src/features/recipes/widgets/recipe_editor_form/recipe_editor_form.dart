@@ -88,8 +88,6 @@ class RecipeEditorFormState extends ConsumerState<RecipeEditorForm> {
     if (widget.initialRecipe != null) {
       // Update scenario: pre-populate fields.
       _recipe = widget.initialRecipe!;
-      print('🔍 [RecipeEditor] Loading existing recipe: ${_recipe.id}');
-      print('🔍 [RecipeEditor] Recipe tagIds: ${_recipe.tagIds}');
       _isNewRecipe = false;
       _titleController.text = _recipe.title;
       _descriptionController.text = _recipe.description ?? '';
@@ -132,7 +130,6 @@ class RecipeEditorFormState extends ConsumerState<RecipeEditorForm> {
 
   Future<void> saveRecipe() async {
     if (!_isInitialized) return;
-    print('🔍 [RecipeEditor] Saving recipe with tagIds: ${_recipe.tagIds}');
     // Build your updatedRecipe from form state.
     final updatedRecipe = _recipe.copyWith(
       title: _titleController.text,
@@ -456,10 +453,8 @@ class RecipeEditorFormState extends ConsumerState<RecipeEditorForm> {
   }
 
   void _updateTagIds(List<String> newTagIds) {
-    print('🔍 [RecipeEditor] Updating tagIds from ${_recipe.tagIds} to $newTagIds');
     setState(() {
       _recipe = _recipe.copyWith(tagIds: Value(newTagIds));
     });
-    print('🔍 [RecipeEditor] Recipe tagIds after update: ${_recipe.tagIds}');
   }
 }

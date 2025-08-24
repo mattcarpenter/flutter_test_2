@@ -96,9 +96,7 @@ class TagSelectionContentState extends ConsumerState<TagSelectionContent> {
   @override
   void initState() {
     super.initState();
-    print('🔍 [TagSelectionModal] Received currentTagIds: ${widget.currentTagIds}');
     _selectedTagIds = Set<String>.from(widget.currentTagIds);
-    print('🔍 [TagSelectionModal] Initialized _selectedTagIds: $_selectedTagIds');
   }
 
   @override

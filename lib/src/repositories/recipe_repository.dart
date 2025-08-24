@@ -78,7 +78,6 @@ class RecipeRepository {
 
   // Update a recipe.
   Future<bool> updateRecipe(RecipeEntry recipe) async {
-    print('🔍 [RecipeRepository] Updating recipe ${recipe.id} with tagIds: ${recipe.tagIds}');
     final result = await _db.update(_db.recipes).replace(recipe);
 
     // Queue ingredients for canonicalization if they exist
@@ -360,21 +359,6 @@ class RecipeRepository {
     ).watch();
 
     return query.map((rows) {
-      print('🔍 [RecipeRepository] watchRecipesWithFolders SQL returned ${rows.length} rows');
-      
-      // Debug: Check if tag_ids column exists and has data for our test recipe
-      _db.customSelect('SELECT id, title, tag_ids FROM recipes WHERE id = ? LIMIT 1', 
-        variables: [Variable.withString('02d5b515-0159-47da-b562-08f28fa78dd6')]
-      ).getSingleOrNull().then((result) {
-        if (result != null) {
-          print('🔍 [RecipeRepository] Direct SQL check for test recipe: ${result.data}');
-        } else {
-          print('🔍 [RecipeRepository] Test recipe not found in direct SQL query');
-        }
-      }).catchError((e) {
-        print('🔍 [RecipeRepository] Direct SQL error (probably missing column): $e');
-      });
-      
       // Group rows by recipe id
       final Map<String, RecipeWithFolders> recipeMap = {};
       for (final row in rows) {
@@ -443,28 +427,9 @@ class RecipeRepository {
   }
 
   Stream<RecipeEntry?> watchRecipeById(String id) {
-    // First, let's check what's actually in the database with a raw query
-    _db.customSelect(
-      'SELECT id, title, tag_ids FROM recipes WHERE id = ?',
-      variables: [Variable.withString(id)]
-    ).getSingleOrNull().then((rawResult) {
-      if (rawResult != null) {
-        print('🔍 [RecipeRepository] Raw DB data for $id: ${rawResult.data}');
-        final tagIdsRaw = rawResult.data['tag_ids'];
-        print('🔍 [RecipeRepository] Raw tag_ids value: "$tagIdsRaw" (type: ${tagIdsRaw.runtimeType})');
-      }
-    }).catchError((e) {
-      print('🔍 [RecipeRepository] Raw query error: $e');
-    });
-    
     return (_db.select(_db.recipes)
       ..where((tbl) => tbl.id.equals(id)))
-        .watchSingleOrNull().map((recipe) {
-          if (recipe != null) {
-            print('🔍 [RecipeRepository] Loaded recipe ${recipe.id} with tagIds: ${recipe.tagIds}');
-          }
-          return recipe;
-        });
+        .watchSingleOrNull();
   }
 
   Future<void> removeFolderIdFromAllRecipes(String folderId) async {

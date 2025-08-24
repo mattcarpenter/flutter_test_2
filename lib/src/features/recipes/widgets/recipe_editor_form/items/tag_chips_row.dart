@@ -21,16 +21,13 @@ class TagChipsRow extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    print('🔍 [TagChipsRow] Received tagIds: $tagIds');
     final tagsAsync = ref.watch(recipeTagNotifierProvider);
     
     return tagsAsync.when(
       data: (allTags) {
-        print('🔍 [TagChipsRow] All available tags: ${allTags.map((t) => '${t.id}:${t.name}').toList()}');
         final selectedTags = allTags
             .where((tag) => tagIds.contains(tag.id))
             .toList();
-        print('🔍 [TagChipsRow] Selected tags: ${selectedTags.map((t) => '${t.id}:${t.name}').toList()}');
         
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,

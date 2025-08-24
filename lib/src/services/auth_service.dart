@@ -188,7 +188,6 @@ class AuthService {
       final googleAuth = googleUser.authentication;
       final idToken = googleAuth.idToken;
       
-      debugPrint('🔍 Got authentication object');
       debugPrint('   Has idToken: ${idToken != null}');
       
       // In v7.x, we need to get accessToken differently
@@ -216,7 +215,6 @@ class AuthService {
         );
       }
       
-      debugPrint('🔍 Final token check:');
       debugPrint('   Has accessToken: ${accessToken != null}');
       debugPrint('   Has idToken: ${idToken != null}');
 
