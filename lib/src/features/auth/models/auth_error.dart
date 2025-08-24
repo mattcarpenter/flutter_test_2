@@ -65,6 +65,7 @@ abstract class AuthError with _$AuthError {
       case AuthErrorType.sessionExpired:
         return 'Your session has expired. Please sign in again.';
       case AuthErrorType.userCancelled:
+      case AuthErrorType.cancelled:
         return 'Sign-in was cancelled.';
       case AuthErrorType.notSupported:
         return 'This sign-in method is not supported on your device.';
@@ -83,6 +84,7 @@ enum AuthErrorType {
   rateLimited,
   sessionExpired,
   userCancelled,
+  cancelled,
   notSupported,
   unknown,
 }

@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:flutter/foundation.dart';
@@ -60,20 +61,29 @@ class AuthApiException implements Exception {
 
 class AuthService {
   final SupabaseClient _supabase;
+  
+  // Google Sign-In v7.x approach - use instance and initialize
   final GoogleSignIn _googleSignIn = GoogleSignIn.instance;
-  bool _isGoogleSignInInitialized = false;
+  bool _isInitialized = false;
+  
+  // Debug counter to track multiple calls
+  static int _signInCallCount = 0;
 
   AuthService() : _supabase = Supabase.instance.client;
 
-  Future<void> _initializeGoogleSignIn() async {
-    if (!_isGoogleSignInInitialized) {
+  Future<void> _ensureInitialized() async {
+    if (!_isInitialized) {
       await _googleSignIn.initialize(
-        // TODO: Replace with your actual web client ID from Google Cloud Console
-        serverClientId: '954511479486-avfjhihhekild9n04jrre8dafv21q161.apps.googleusercontent.com',
+        // iOS Client ID from Info.plist (for iOS authentication)
+        clientId: '954511479486-avfjhihhekild9n04jrre8dafv21q161.apps.googleusercontent.com',
+        // Web Client ID (this should be the ONLY one in Supabase dashboard)
+        serverClientId: '954511479486-tqc04eefqqk06usqkcic4sct2v9u8eko.apps.googleusercontent.com',
       );
-      _isGoogleSignInInitialized = true;
+      _isInitialized = true;
+      debugPrint('🔧 GoogleSignIn initialized with client IDs');
     }
   }
+
 
   /// Stream of auth state changes
   Stream<AuthChangeEvent> get authStateChanges {
@@ -152,54 +162,116 @@ class AuthService {
     }
   }
 
-  /// Sign in with Google using native authentication
+  /// Sign in with Google using native authentication (v7.x compatible with Supabase)
   Future<AuthResponse> signInWithGoogle() async {
     try {
-      // Initialize Google Sign-In if needed
-      await _initializeGoogleSignIn();
+      _signInCallCount++;
+      debugPrint('🔥 GOOGLE SIGN-IN CALLED #$_signInCallCount');
+      
+      await _ensureInitialized();
+      
+      debugPrint('Google Sign-In: Starting v7.x compatible flow');
 
-      // Sign out from any previous session
-      await _googleSignIn.signOut();
-
-      // Start the Google Sign-In flow
+      // Try lightweight authentication first (no UI if already signed in)
+      debugPrint('🚀 Attempting lightweight authentication...');
+      await _googleSignIn.attemptLightweightAuthentication();
+      
+      // Now authenticate (this should minimize consent screens)
+      debugPrint('🚀 About to call authenticate()...');
       final googleUser = await _googleSignIn.authenticate();
+      
+      debugPrint('✅ authenticate() completed, user: ${googleUser.displayName}');
 
-      // Get Google authentication tokens
+      debugPrint('Google Sign-In: User signed in, getting tokens');
+
+      // Get Google authentication tokens - but v7.x has different token access
       final googleAuth = googleUser.authentication;
       final idToken = googleAuth.idToken;
       
-      // Get access token for authorization
-      final authClient = googleUser.authorizationClient;
-      final clientAuth = await authClient.authorizeScopes(['openid', 'email', 'profile']);
-      final accessToken = clientAuth.accessToken;
-
-      if (accessToken.isEmpty || idToken == null) {
+      debugPrint('🔍 Got authentication object');
+      debugPrint('   Has idToken: ${idToken != null}');
+      
+      // In v7.x, we need to get accessToken differently
+      String? accessToken;
+      try {
+        // Try to use the authorization client for access token
+        final authClient = googleUser.authorizationClient;
+        final authorization = await authClient.authorizationForScopes(['openid', 'email', 'profile']);
+        
+        if (authorization != null) {
+          accessToken = authorization.accessToken;
+          debugPrint('   Got access token from existing authorization');
+        } else {
+          // Need to authorize scopes
+          debugPrint('   No existing authorization, requesting scopes...');
+          final newAuth = await authClient.authorizeScopes(['openid', 'email', 'profile']);
+          accessToken = newAuth.accessToken;
+          debugPrint('   Got access token from new authorization');
+        }
+      } catch (e) {
+        debugPrint('   Error getting access token: $e');
         throw AuthApiException(
-          message: 'Failed to get Google authentication tokens',
+          message: 'Failed to get access token: $e',
+          type: AuthErrorType.unknown,
+        );
+      }
+      
+      debugPrint('🔍 Final token check:');
+      debugPrint('   Has accessToken: ${accessToken != null}');
+      debugPrint('   Has idToken: ${idToken != null}');
+
+      if (accessToken == null || accessToken.isEmpty) {
+        throw AuthApiException(
+          message: 'No Access Token found',
+          type: AuthErrorType.unknown,
+        );
+      }
+      if (idToken == null) {
+        throw AuthApiException(
+          message: 'No ID Token found',
           type: AuthErrorType.unknown,
         );
       }
 
-      // Exchange tokens with Supabase (requires "Skip nonce check" enabled in Supabase Dashboard)
-      final response = await _supabase.auth.signInWithIdToken(
+      debugPrint('Google Sign-In: Got tokens, attempting Supabase authentication');
+      
+      // DEBUG: Let's decode the ID token to see what's actually in it
+      debugPrint('=== TOKEN DEBUG INFO ===');
+      debugPrint('Access Token (first 50 chars): ${accessToken.substring(0, 50)}...');
+      debugPrint('ID Token (first 50 chars): ${idToken.substring(0, 50)}...');
+      
+      // Decode the ID token payload to see the audience
+      try {
+        final parts = idToken.split('.');
+        if (parts.length == 3) {
+          // Decode the payload (middle part)
+          String payload = parts[1];
+          // Add padding if needed
+          while (payload.length % 4 != 0) {
+            payload += '=';
+          }
+          final decoded = utf8.decode(base64Url.decode(payload));
+          debugPrint('ID Token Payload: $decoded');
+        }
+      } catch (e) {
+        debugPrint('Failed to decode token: $e');
+      }
+      debugPrint('=== END TOKEN DEBUG ===');
+
+      // Exchange tokens with Supabase using exact documented approach
+      return await _supabase.auth.signInWithIdToken(
         provider: OAuthProvider.google,
         idToken: idToken,
         accessToken: accessToken,
       );
-
-      if (response.user == null || response.session == null) {
-        throw AuthApiException(
-          message: 'Failed to authenticate with Supabase',
-          type: AuthErrorType.unknown,
-        );
-      }
-
-      return response;
     } on AuthException catch (e) {
       debugPrint('Google sign in error: ${e.message}');
       throw AuthApiException.fromAuthException(e);
     } catch (e) {
       debugPrint('Google sign in error: $e');
+      if (e is AuthApiException) {
+        rethrow;
+      }
       throw AuthApiException.fromException(Exception(e.toString()));
     }
   }
