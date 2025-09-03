@@ -136,3 +136,9 @@ bucket_definitions:
     parameters: SELECT request.user_id() as user_id
     data:
       - SELECT * FROM public.user_subscriptions WHERE user_id = bucket.user_id
+
+  # Household subscriptions - users can view subscriptions from their household
+  user_subscriptions_household_access:
+    parameters: SELECT household_id FROM household_members WHERE user_id = request.user_id() AND is_active = 1
+    data:
+      - SELECT * FROM public.user_subscriptions WHERE household_id = bucket.household_id

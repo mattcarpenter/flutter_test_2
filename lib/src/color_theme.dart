@@ -53,6 +53,7 @@ class AppTheme {
     //barBackgroundColor: AppColors.backgroundLight,
     scaffoldBackgroundColor: AppColors.backgroundLight,
     textTheme: CupertinoTextThemeData(
+      textStyle: TextStyle(fontFamily: 'Inter'),
       primaryColor: AppColors.onBackgroundLight,
     ),
   );
@@ -80,6 +81,7 @@ class AppTheme {
     //barBackgroundColor: AppColors.backgroundDark,
     scaffoldBackgroundColor: AppColors.backgroundDark,
     textTheme: CupertinoTextThemeData(
+      textStyle: TextStyle(fontFamily: 'Inter'),
       primaryColor: AppColors.onBackgroundDark,
     ),
   );

@@ -52,15 +52,9 @@ class _IngredientsSectionState extends State<IngredientsSection> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text(
-          "Ingredients",
-          style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-        ),
-        const SizedBox(height: 8),
-
         if (widget.ingredients.isEmpty)
           const Padding(
-            padding: EdgeInsets.all(16.0),
+            padding: EdgeInsets.symmetric(vertical: 16.0),
             child: Text("No ingredients added yet."),
           )
         else
@@ -75,33 +69,67 @@ class _IngredientsSectionState extends State<IngredientsSection> {
             onReorder: widget.onReorderIngredients,
             itemBuilder: (context, index) {
               final ingredient = widget.ingredients[index];
+              
+              // Calculate padding based on grouping
+              final isSection = ingredient.type == 'section';
+              final prevIngredient = index > 0 ? widget.ingredients[index - 1] : null;
+              final nextIngredient = index < widget.ingredients.length - 1 ? widget.ingredients[index + 1] : null;
+              
+              // Determine if this ingredient is part of a group
+              final isGrouped = !isSection;
+              final isFirstInGroup = isGrouped && (index == 0 || prevIngredient?.type == 'section');
+              final isLastInGroup = isGrouped && (index == widget.ingredients.length - 1 || nextIngredient?.type == 'section');
+              
+              // Apply different padding based on grouping
+              EdgeInsets padding;
+              if (isSection) {
+                // Sections get normal padding
+                padding = const EdgeInsets.symmetric(vertical: 4.0);
+              } else if (isFirstInGroup && isLastInGroup) {
+                // Single ingredient (not grouped) gets normal padding
+                padding = const EdgeInsets.symmetric(vertical: 4.0);
+              } else if (isFirstInGroup) {
+                // First in group: normal top, no bottom
+                padding = const EdgeInsets.only(top: 4.0);
+              } else if (isLastInGroup) {
+                // Last in group: no top, normal bottom
+                padding = const EdgeInsets.only(bottom: 4.0);
+              } else {
+                // Middle of group: no vertical padding
+                padding = EdgeInsets.zero;
+              }
+              
               return Padding(
-                padding: const EdgeInsets.symmetric(vertical: 4.0),
+                padding: padding,
                 key: ValueKey(ingredient.id),
                 child: IngredientListItem(
                   index: index,
                   ingredient: ingredient,
                   autoFocus: widget.autoFocusIngredientId == ingredient.id && !_isDragging,
+                  isDragging: _isDragging,
                   onRemove: () => widget.onRemoveIngredient(ingredient.id),
                   onUpdate: (updatedIngredient) =>
                       widget.onUpdateIngredient(ingredient.id, updatedIngredient),
                   onAddNext: () => widget.onAddIngredient(false),
                   onFocus: (hasFocus) => widget.onFocusChanged(ingredient.id, hasFocus),
+                  allIngredients: widget.ingredients,
+                  enableGrouping: true,
                 ),
               );
             },
           ),
 
         Padding(
-          padding: const EdgeInsets.symmetric(vertical: 8.0),
-          child: Row(
+          padding: const EdgeInsets.only(top: 8.0),
+          child: Wrap(
+            spacing: 8.0,
+            runSpacing: 8.0,
             children: [
               ElevatedButton.icon(
                 onPressed: () => widget.onAddIngredient(false),
                 icon: const Icon(Icons.add),
                 label: const Text('Add Ingredient'),
               ),
-              const SizedBox(width: 8),
               ElevatedButton.icon(
                 onPressed: () => widget.onAddIngredient(true),
                 icon: const Icon(Icons.segment),

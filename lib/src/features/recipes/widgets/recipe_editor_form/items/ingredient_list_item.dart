@@ -1,31 +1,40 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:super_context_menu/super_context_menu.dart';
 import 'package:wolt_modal_sheet/wolt_modal_sheet.dart';
 
 import '../../../../../../database/models/ingredients.dart';
 import '../../../../../../database/database.dart';
 import '../../../../../providers/recipe_provider.dart' as recipe_provider;
+import '../../../../../services/ingredient_parser_service.dart';
+import '../../../../../widgets/ingredient_text_editing_controller.dart';
 import '../utils/context_menu_utils.dart';
 
 class IngredientListItem extends ConsumerStatefulWidget {
   final int index;
   final Ingredient ingredient;
   final bool autoFocus;
+  final bool isDragging;
   final VoidCallback onRemove;
   final Function(Ingredient) onUpdate;
   final VoidCallback onAddNext;
   final Function(bool) onFocus;
+  final List<Ingredient> allIngredients;
+  final bool enableGrouping;
 
   const IngredientListItem({
     Key? key,
     required this.index,
     required this.ingredient,
     required this.autoFocus,
+    required this.isDragging,
     required this.onRemove,
     required this.onUpdate,
     required this.onAddNext,
     required this.onFocus,
+    required this.allIngredients,
+    this.enableGrouping = false,
   }) : super(key: key);
 
   @override
@@ -33,21 +42,123 @@ class IngredientListItem extends ConsumerStatefulWidget {
 }
 
 class _IngredientListItemState extends ConsumerState<IngredientListItem> {
-  late TextEditingController _nameController;
-  TextEditingController? _amountController;
+  late IngredientTextEditingController _ingredientController;
   late FocusNode _focusNode;
 
   bool get isSection => widget.ingredient.type == 'section';
 
   final GlobalKey _dragHandleKey = GlobalKey();
 
+  // Grouping detection methods
+  bool get _isGrouped => widget.enableGrouping && !isSection;
+  
+  Ingredient? get _prevIngredient {
+    if (widget.index <= 0) return null;
+    return widget.allIngredients[widget.index - 1];
+  }
+  
+  Ingredient? get _nextIngredient {
+    if (widget.index >= widget.allIngredients.length - 1) return null;
+    return widget.allIngredients[widget.index + 1];
+  }
+  
+  bool get _isFirstInGroup {
+    if (!_isGrouped) return false;
+    return widget.index == 0 || (_prevIngredient?.type == 'section');
+  }
+  
+  bool get _isLastInGroup {
+    if (!_isGrouped) return false;
+    return widget.index == widget.allIngredients.length - 1 || (_nextIngredient?.type == 'section');
+  }
+  
+  // Border radius calculation for grouping
+  BorderRadius _getBorderRadius() {
+    if (!_isGrouped) {
+      return BorderRadius.circular(8.0);
+    }
+    
+    if (_isFirstInGroup && _isLastInGroup) {
+      // Single item in group (shouldn't happen, but handle gracefully)
+      return BorderRadius.circular(8.0);
+    } else if (_isFirstInGroup) {
+      return const BorderRadius.only(
+        topLeft: Radius.circular(8.0),
+        topRight: Radius.circular(8.0),
+      );
+    } else if (_isLastInGroup) {
+      return const BorderRadius.only(
+        bottomLeft: Radius.circular(8.0),
+        bottomRight: Radius.circular(8.0),
+      );
+    } else {
+      // Middle item - no rounded corners
+      return BorderRadius.zero;
+    }
+  }
+  
+  // Border calculation for grouping
+  Border _getBorder() {
+    const borderColor = Colors.grey;
+    const borderWidth = 1.0;
+    
+    if (!_isGrouped) {
+      return Border.all(color: borderColor.shade300, width: borderWidth);
+    }
+    
+    if (_isFirstInGroup) {
+      // First item gets full border
+      return Border.all(color: borderColor.shade300, width: borderWidth);
+    } else {
+      // Non-first items omit top border to prevent double borders
+      return Border(
+        left: BorderSide(color: borderColor.shade300, width: borderWidth),
+        right: BorderSide(color: borderColor.shade300, width: borderWidth),
+        bottom: BorderSide(color: borderColor.shade300, width: borderWidth),
+      );
+    }
+  }
+  
+  // Build inset divider widget for grouped ingredients
+  Widget? _buildInsetDivider() {
+    if (!_isGrouped || _isLastInGroup) {
+      return null;
+    }
+    
+    return Positioned(
+      bottom: -0.5,
+      left: 0,
+      right: 0,
+      child: Row(
+        children: [
+          Container(
+            width: 16,
+            height: 1,
+            color: Colors.white,
+          ),
+          Expanded(
+            child: Container(
+              height: 1,
+              color: Colors.grey.shade300,
+            ),
+          ),
+          Container(
+            width: 16,
+            height: 1,
+            color: Colors.white,
+          ),
+        ],
+      ),
+    );
+  }
+
   @override
   void initState() {
     super.initState();
-    _nameController = TextEditingController(text: widget.ingredient.name);
-    if (!isSection) {
-      _amountController = TextEditingController(text: widget.ingredient.primaryAmount1Value ?? '');
-    }
+    _ingredientController = IngredientTextEditingController(
+      parser: IngredientParserService(),
+      text: widget.ingredient.name,
+    );
     _focusNode = FocusNode();
     _focusNode.addListener(() {
       widget.onFocus(_focusNode.hasFocus);
@@ -62,12 +173,8 @@ class _IngredientListItemState extends ConsumerState<IngredientListItem> {
   void didUpdateWidget(covariant IngredientListItem oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.ingredient.name != widget.ingredient.name &&
-        _nameController.text != widget.ingredient.name) {
-      _nameController.text = widget.ingredient.name;
-    }
-    if (!isSection &&
-        oldWidget.ingredient.primaryAmount1Value != widget.ingredient.primaryAmount1Value) {
-      _amountController?.text = widget.ingredient.primaryAmount1Value ?? '';
+        _ingredientController.text != widget.ingredient.name) {
+      _ingredientController.text = widget.ingredient.name;
     }
 
     // Handle autofocus change
@@ -78,8 +185,7 @@ class _IngredientListItemState extends ConsumerState<IngredientListItem> {
 
   @override
   void dispose() {
-    _nameController.dispose();
-    _amountController?.dispose();
+    _ingredientController.dispose();
     _focusNode.dispose();
     super.dispose();
   }
@@ -139,7 +245,7 @@ class _IngredientListItemState extends ConsumerState<IngredientListItem> {
                 hintText: 'Section name',
                 border: InputBorder.none,
               ),
-              controller: _nameController,
+              controller: _ingredientController,
               style: const TextStyle(fontWeight: FontWeight.bold),
               onChanged: (value) {
                 widget.onUpdate(widget.ingredient.copyWith(name: value));
@@ -166,121 +272,130 @@ class _IngredientListItemState extends ConsumerState<IngredientListItem> {
       );
     }
 
-    return ContextMenuWidget(
-      contextMenuIsAllowed: _contextMenuIsAllowed,
-      menuProvider: (_) {
-        return Menu(
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.red,
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: Slidable(
+        enabled: !widget.isDragging,
+        endActionPane: ActionPane(
+          motion: const ScrollMotion(),
+          extentRatio: 0.2,
           children: [
-            MenuAction(
-              title: 'Convert to section',
-              image: MenuImage.icon(Icons.segment),
-              callback: () {
-                // Convert the ingredient to a section
-                widget.onUpdate(widget.ingredient.copyWith(
-                  type: 'section',
-                  name: widget.ingredient.name.isEmpty ? 'New Section' : widget.ingredient.name,
-                  primaryAmount1Value: null,
-                  primaryAmount1Unit: null,
-                  primaryAmount1Type: null,
-                ));
-              },
+            Expanded(
+              child: Center(
+                child: GestureDetector(
+                  onTap: widget.onRemove,
+                  child: const Icon(
+                    Icons.delete,
+                    color: Colors.white,
+                    size: 24,
+                  ),
+                ),
+              ),
             ),
-            MenuAction(
-              title: widget.ingredient.recipeId == null 
-                  ? 'Link to Existing Recipe' 
-                  : 'Change Linked Recipe',
-              image: MenuImage.icon(Icons.link),
-              callback: () {
-                _showRecipeSelector(context);
-              },
-            ),
-            if (widget.ingredient.recipeId != null)
+          ],
+        ),
+        child: ContextMenuWidget(
+        contextMenuIsAllowed: _contextMenuIsAllowed,
+        menuProvider: (_) {
+          return Menu(
+            children: [
               MenuAction(
-                title: 'Remove Recipe Link',
-                image: MenuImage.icon(Icons.link_off),
+                title: 'Convert to section',
+                image: MenuImage.icon(Icons.segment),
                 callback: () {
-                  widget.onUpdate(widget.ingredient.copyWith(recipeId: ''));
+                  // Convert the ingredient to a section
+                  widget.onUpdate(widget.ingredient.copyWith(
+                    type: 'section',
+                    name: widget.ingredient.name.isEmpty ? 'New Section' : widget.ingredient.name,
+                    primaryAmount1Value: null,
+                    primaryAmount1Unit: null,
+                    primaryAmount1Type: null,
+                  ));
                 },
               ),
-          ],
-        );
-      },
-      child: Stack(
-        children: [
-          Container(
-            decoration: BoxDecoration(
-              color: backgroundColor,
-              border: Border.all(color: Colors.grey.shade300),
-              borderRadius: BorderRadius.circular(8),
-            ),
-            child: Row(
-              children: [
-                IconButton(
-                  icon: const Icon(Icons.remove_circle_outline),
-                  onPressed: widget.onRemove,
+              MenuAction(
+                title: widget.ingredient.recipeId == null 
+                    ? 'Link to Existing Recipe' 
+                    : 'Change Linked Recipe',
+                image: MenuImage.icon(Icons.link),
+                callback: () {
+                  _showRecipeSelector(context);
+                },
+              ),
+              if (widget.ingredient.recipeId != null)
+                MenuAction(
+                  title: 'Remove Recipe Link',
+                  image: MenuImage.icon(Icons.link_off),
+                  callback: () {
+                    widget.onUpdate(widget.ingredient.copyWith(recipeId: ''));
+                  },
                 ),
-                SizedBox(
-                  width: 70,
-                  child: TextField(
-                    controller: _amountController,
-                    decoration: const InputDecoration(
-                      hintText: 'Amt',
-                      border: InputBorder.none,
-                      contentPadding: EdgeInsets.symmetric(horizontal: 8),
-                    ),
-                    keyboardType: TextInputType.number,
-                    onChanged: (value) {
-                      widget.onUpdate(widget.ingredient.copyWith(primaryAmount1Value: value));
-                    },
-                  ),
-                ),
-                const Text('g', style: TextStyle(color: Colors.grey)),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: Focus(
-                    focusNode: _focusNode,
-                    child: TextField(
-                      controller: _nameController,
-                      decoration: const InputDecoration(
-                        hintText: 'Ingredient name',
-                        border: InputBorder.none,
+            ],
+          );
+        },
+        child: Stack(
+          children: [
+            Container(
+              decoration: BoxDecoration(
+                color: backgroundColor,
+                border: _getBorder(),
+                borderRadius: _getBorderRadius(),
+              ),
+              child: Row(
+                children: [
+                  const SizedBox(width: 12), // Add some left padding
+                  Expanded(
+                    child: Focus(
+                      focusNode: _focusNode,
+                      child: TextField(
+                        controller: _ingredientController,
+                        decoration: const InputDecoration(
+                          hintText: 'e.g. 1 cup flour',
+                          border: InputBorder.none,
+                        ),
+                        onChanged: (value) {
+                          widget.onUpdate(widget.ingredient.copyWith(name: value));
+                        },
+                        textInputAction: TextInputAction.next,
+                        onSubmitted: (_) => widget.onAddNext(),
                       ),
-                      onChanged: (value) {
-                        widget.onUpdate(widget.ingredient.copyWith(name: value));
-                      },
-                      textInputAction: TextInputAction.next,
-                      onSubmitted: (_) => widget.onAddNext(),
                     ),
                   ),
-                ),
-                if (widget.ingredient.recipeId != null) ...[
-                  const SizedBox(width: 4),
-                  Icon(
-                    Icons.link,
-                    size: 16,
-                    color: Theme.of(context).primaryColor,
-                  ),
+                  if (widget.ingredient.recipeId != null) ...[
+                    const SizedBox(width: 4),
+                    Icon(
+                      Icons.link,
+                      size: 16,
+                      color: Theme.of(context).primaryColor,
+                    ),
+                  ],
+                  const SizedBox(width: 48), // Space for the drag handle
                 ],
-                const SizedBox(width: 48), // Space for the drag handle
-              ],
-            ),
-          ),
-          // Position the drag handle on top so it's clickable
-          Positioned(
-            right: 0,
-            top: 0,
-            bottom: 0,
-            child: SizedBox(
-              width: 40,
-              child: ReorderableDragStartListener(
-                key: _dragHandleKey,
-                index: widget.index,
-                child: const Icon(Icons.drag_handle),
               ),
             ),
-          ),
-        ],
+            // Position the drag handle on top so it's clickable
+            Positioned(
+              right: 0,
+              top: 0,
+              bottom: 0,
+              child: SizedBox(
+                width: 40,
+                child: ReorderableDragStartListener(
+                  key: _dragHandleKey,
+                  index: widget.index,
+                  child: const Icon(Icons.drag_handle),
+                ),
+              ),
+            ),
+            // Add inset divider for grouped ingredients
+            if (_buildInsetDivider() != null) _buildInsetDivider()!,
+          ],
+        ),
       ),
+    ),
     );
   }
 }

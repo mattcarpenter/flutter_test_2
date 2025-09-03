@@ -1,12 +1,12 @@
 import 'dart:convert';
 import 'package:drift/drift.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:uuid/uuid.dart';
 import '../../database/database.dart';
 import '../../database/models/ingredient_term_queues.dart';
 import '../../database/models/ingredients.dart';
 import '../../database/powersync.dart';
+import '../services/ingredient_parser_service.dart';
 
 class IngredientTermQueueRepository {
   final AppDatabase _db;
@@ -39,11 +39,16 @@ class IngredientTermQueueRepository {
     final now = DateTime.now().millisecondsSinceEpoch;
 
     // Prepare ingredient data for the API request
-    // Extract only what's needed for the canonicalization API
+    // Parse the ingredient string to extract clean name for canonicalization
+    final parserService = IngredientParserService();
+    final parseResult = parserService.parse(ingredient.name);
+    
     final Map<String, dynamic> apiIngredientData = {
-      'name': ingredient.name,
-      'quantity': _extractQuantity(ingredient),
-      'unit': _extractUnit(ingredient),
+      'name': parseResult.cleanName.isNotEmpty 
+          ? parseResult.cleanName 
+          : ingredient.name, // Fallback to original if parsing fails
+      'quantity': null,
+      'unit': null,
     };
 
     // Generate a UUID for the entry
@@ -92,23 +97,6 @@ class IngredientTermQueueRepository {
         .go();
   }
 
-  /// Helper function to extract the primary quantity from an ingredient
-  double? _extractQuantity(Ingredient ingredient) {
-    if (ingredient.primaryAmount1Value != null) {
-      try {
-        return double.parse(ingredient.primaryAmount1Value!);
-      } catch (e) {
-        // If it's not a number, return null
-        return null;
-      }
-    }
-    return null;
-  }
-
-  /// Helper function to extract the primary unit from an ingredient
-  String? _extractUnit(Ingredient ingredient) {
-    return ingredient.primaryAmount1Unit;
-  }
 }
 
 final ingredientTermQueueRepositoryProvider = Provider<IngredientTermQueueRepository>((ref) {

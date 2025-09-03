@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:recipe_app/src/theme/typography.dart';
 
 class ModalSheetTitle extends StatelessWidget {
   const ModalSheetTitle(
@@ -17,10 +18,11 @@ class ModalSheetTitle extends StatelessWidget {
       child: Text(
         text,
         textAlign: textAlign,
-        style: Theme.of(context)
+        /*style: Theme.of(context)
             .textTheme
             .headlineSmall!
-            .copyWith(fontWeight: FontWeight.bold),
+            .copyWith(fontWeight: FontWeight.bold),*/
+        style: AppTypography.h4
       ),
     );
   }

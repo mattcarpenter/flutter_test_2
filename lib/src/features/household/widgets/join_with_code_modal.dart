@@ -1,21 +1,68 @@
 import 'package:flutter/cupertino.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:wolt_modal_sheet/wolt_modal_sheet.dart';
 import '../../../widgets/error_dialog.dart';
 import '../../../widgets/success_dialog.dart';
+import '../../../widgets/wolt/text/modal_sheet_title.dart';
+import '../../../widgets/wolt/button/wolt_elevated_button.dart';
 import '../utils/error_messages.dart';
 
-class JoinWithCodeModal extends StatefulWidget {
+void showJoinWithCodeModal(BuildContext context, Function(String inviteCode) onAcceptInvite) {
+  WoltModalSheet.show(
+    useRootNavigator: true,
+    context: context,
+    pageListBuilder: (bottomSheetContext) => [
+      JoinWithCodeModalPage.build(
+        context: bottomSheetContext,
+        onAcceptInvite: onAcceptInvite,
+      ),
+    ],
+  );
+}
+
+class JoinWithCodeModalPage {
+  JoinWithCodeModalPage._();
+
+  static WoltModalSheetPage build({
+    required BuildContext context,
+    required Function(String inviteCode) onAcceptInvite,
+  }) {
+    final isDarkMode = CupertinoTheme.of(context).brightness == Brightness.dark;
+    final backgroundColor = isDarkMode
+        ? CupertinoTheme.of(context).barBackgroundColor
+        : CupertinoTheme.of(context).scaffoldBackgroundColor;
+
+    return WoltModalSheetPage(
+      backgroundColor: backgroundColor,
+      leadingNavBarWidget: CupertinoButton(
+        padding: const EdgeInsets.symmetric(horizontal: 16.0),
+        onPressed: () {
+          Navigator.of(context).pop();
+        },
+        child: const Text('Cancel'),
+      ),
+      pageTitle: const ModalSheetTitle('Join Household'),
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(16, 16, 16, 16),
+        child: JoinWithCodeForm(onAcceptInvite: onAcceptInvite),
+      ),
+    );
+  }
+}
+
+class JoinWithCodeForm extends ConsumerStatefulWidget {
   final Function(String inviteCode) onAcceptInvite;
 
-  const JoinWithCodeModal({
+  const JoinWithCodeForm({
     super.key,
     required this.onAcceptInvite,
   });
 
   @override
-  State<JoinWithCodeModal> createState() => _JoinWithCodeModalState();
+  ConsumerState<JoinWithCodeForm> createState() => _JoinWithCodeFormState();
 }
 
-class _JoinWithCodeModalState extends State<JoinWithCodeModal> {
+class _JoinWithCodeFormState extends ConsumerState<JoinWithCodeForm> {
   final _controller = TextEditingController();
   bool _isJoining = false;
 
@@ -60,43 +107,38 @@ class _JoinWithCodeModalState extends State<JoinWithCodeModal> {
 
   @override
   Widget build(BuildContext context) {
-    return CupertinoActionSheet(
-      title: const Text('Join Household'),
-      message: const Text('Enter the invitation code'),
-      actions: [
-        Container(
-          padding: const EdgeInsets.all(16),
-          child: Column(
-            children: [
-              CupertinoTextField(
-                controller: _controller,
-                placeholder: 'Invitation code',
-                autofocus: true,
-                enabled: !_isJoining,
-                onSubmitted: (_) => _joinHousehold(),
-              ),
-              const SizedBox(height: 16),
-              Row(
-                children: [
-                  Expanded(
-                    child: CupertinoButton(
-                      onPressed: _isJoining ? null : () => Navigator.of(context).pop(),
-                      child: const Text('Cancel'),
-                    ),
-                  ),
-                  const SizedBox(width: 8),
-                  Expanded(
-                    child: CupertinoButton.filled(
-                      onPressed: _isJoining ? null : _joinHousehold,
-                      child: _isJoining
-                          ? const CupertinoActivityIndicator(color: CupertinoColors.white)
-                          : const Text('Join'),
-                    ),
-                  ),
-                ],
-              ),
-            ],
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        const Text(
+          'Enter the invitation code',
+          style: TextStyle(
+            color: CupertinoColors.secondaryLabel,
+            fontSize: 14,
           ),
+        ),
+        const SizedBox(height: 16),
+        CupertinoTextField(
+          controller: _controller,
+          placeholder: 'Invitation code',
+          autofocus: true,
+          enabled: !_isJoining,
+          onSubmitted: (_) => _joinHousehold(),
+          padding: const EdgeInsets.all(12),
+        ),
+        const SizedBox(height: 24),
+        SizedBox(
+          width: double.infinity,
+          child: _isJoining
+              ? const CupertinoButton(
+                  onPressed: null,
+                  child: CupertinoActivityIndicator(color: CupertinoColors.white),
+                )
+              : WoltElevatedButton(
+                  onPressed: _joinHousehold,
+                  child: const Text('Join Household'),
+                ),
         ),
       ],
     );

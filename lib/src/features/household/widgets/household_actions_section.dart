@@ -77,45 +77,19 @@ class HouseholdActionsSection extends ConsumerWidget {
         return;
       }
 
-      showCupertinoModalPopup<void>(
-        context: context,
-        builder: (context) => LeaveHouseholdModal(
-          isOwner: true,
-          otherMembers: otherMembers,
-          onLeaveHousehold: onLeaveHousehold,
-        ),
+      showLeaveHouseholdModal(
+        context,
+        true,
+        otherMembers,
+        onLeaveHousehold,
       );
     } else {
-      // Regular member leave confirmation
-      showCupertinoDialog(
-        context: context,
-        builder: (context) => CupertinoAlertDialog(
-          title: const Text('Leave Household'),
-          content: const Text('Are you sure you want to leave this household? You will lose access to all shared recipes and data.'),
-          actions: [
-            CupertinoDialogAction(
-              child: const Text('Cancel'),
-              onPressed: () => Navigator.of(context).pop(),
-            ),
-            CupertinoDialogAction(
-              isDestructiveAction: true,
-              onPressed: () async {
-                Navigator.of(context).pop();
-                try {
-                  await onLeaveHousehold(null);
-                } catch (e) {
-                  if (context.mounted) {
-                    await ErrorDialog.show(
-                      context,
-                      message: HouseholdErrorMessages.getDisplayMessage(e.toString()),
-                    );
-                  }
-                }
-              },
-              child: const Text('Leave'),
-            ),
-          ],
-        ),
+      // Regular member - showLeaveHouseholdModal handles non-owner case
+      showLeaveHouseholdModal(
+        context,
+        false,
+        [],
+        onLeaveHousehold,
       );
     }
   }

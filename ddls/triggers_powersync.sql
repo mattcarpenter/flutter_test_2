@@ -23,11 +23,11 @@ BEGIN
     UPDATE public.shopping_lists
     SET household_id = NULL, updated_at = EXTRACT(EPOCH FROM NOW()) * 1000
     WHERE user_id = OLD.user_id AND household_id = OLD.household_id;
-    
+
     UPDATE public.shopping_list_items
     SET household_id = NULL, updated_at = EXTRACT(EPOCH FROM NOW()) * 1000
     WHERE shopping_list_id IN (
-        SELECT id FROM public.shopping_lists 
+        SELECT id FROM public.shopping_lists
         WHERE user_id = OLD.user_id AND household_id IS NULL
     );
 
@@ -78,11 +78,11 @@ BEGIN
     UPDATE public.shopping_lists
     SET household_id = NEW.household_id, updated_at = EXTRACT(EPOCH FROM NOW()) * 1000
     WHERE user_id = NEW.user_id AND household_id IS NULL;
-    
+
     UPDATE public.shopping_list_items
     SET household_id = NEW.household_id, updated_at = EXTRACT(EPOCH FROM NOW()) * 1000
     WHERE shopping_list_id IN (
-        SELECT id FROM public.shopping_lists 
+        SELECT id FROM public.shopping_lists
         WHERE user_id = NEW.user_id AND household_id = NEW.household_id
     );
 
@@ -133,11 +133,11 @@ BEGIN
     UPDATE public.shopping_lists
     SET household_id = NEW.household_id, updated_at = EXTRACT(EPOCH FROM NOW()) * 1000
     WHERE user_id = NEW.user_id AND household_id IS NULL;
-    
+
     UPDATE public.shopping_list_items
     SET household_id = NEW.household_id, updated_at = EXTRACT(EPOCH FROM NOW()) * 1000
     WHERE shopping_list_id IN (
-        SELECT id FROM public.shopping_lists 
+        SELECT id FROM public.shopping_lists
         WHERE user_id = NEW.user_id AND household_id = NEW.household_id
     );
 
@@ -318,7 +318,7 @@ BEGIN
     FROM public.household_members hm
     WHERE hm.user_id = user_id_param AND hm.is_active = 1
     LIMIT 1;
-    
+
     RETURN household_id_result;
 END;
 $$ LANGUAGE plpgsql;
@@ -490,3 +490,86 @@ CREATE TRIGGER trg_assign_household_on_recipe_ingredient_term_overrides_insert
     BEFORE INSERT ON public.recipe_ingredient_term_overrides
     FOR EACH ROW
 EXECUTE FUNCTION assign_household_on_recipe_ingredient_term_overrides_insert();
+
+-- TODO: ADD TO MAC MINI SUPABASE
+CREATE OR REPLACE FUNCTION assign_household_on_recipe_folders_insert()
+    RETURNS TRIGGER AS $$
+DECLARE
+    user_household uuid;
+BEGIN
+    IF NEW.household_id IS NULL THEN
+        user_household := get_user_active_household(NEW.user_id);
+        IF user_household IS NOT NULL THEN
+            NEW.household_id := user_household;
+        END IF;
+    END IF;
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER trg_assign_household_on_recipe_folders_insert
+    BEFORE INSERT ON public.recipe_folders
+    FOR EACH ROW
+EXECUTE FUNCTION assign_household_on_recipe_folders_insert();
+
+-- HOUSEHOLD SUBSCRIPTION SHARING TRIGGERS ----------------------------------------
+-- These triggers automatically update subscription household_id when users join/leave households
+
+-- Function to update subscription household_id when user joins household
+CREATE OR REPLACE FUNCTION update_subscription_household_on_join()
+RETURNS TRIGGER AS $$
+BEGIN
+  -- When user joins/activates in household, update their subscription
+  UPDATE public.user_subscriptions
+  SET household_id = NEW.household_id,
+      updated_at = EXTRACT(EPOCH FROM NOW()) * 1000
+  WHERE user_id = NEW.user_id
+    AND status = 'active'
+    AND entitlements::jsonb ? 'plus';
+
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+-- Trigger for household joining (INSERT)
+CREATE TRIGGER trg_update_subscription_household_on_join_insert
+AFTER INSERT ON public.household_members
+FOR EACH ROW
+WHEN (NEW.is_active = 1)
+EXECUTE FUNCTION update_subscription_household_on_join();
+
+-- Trigger for household activation (UPDATE)
+CREATE TRIGGER trg_update_subscription_household_on_join_update
+AFTER UPDATE ON public.household_members
+FOR EACH ROW
+WHEN (OLD.is_active = 0 AND NEW.is_active = 1)
+EXECUTE FUNCTION update_subscription_household_on_join();
+
+-- Function to remove subscription household_id when user leaves household
+CREATE OR REPLACE FUNCTION update_subscription_household_on_leave()
+RETURNS TRIGGER AS $$
+BEGIN
+  -- When user leaves/deactivates from household, remove household_id from their subscription
+  UPDATE public.user_subscriptions
+  SET household_id = NULL,
+      updated_at = EXTRACT(EPOCH FROM NOW()) * 1000
+  WHERE user_id = OLD.user_id
+    AND household_id = OLD.household_id;
+
+  RETURN OLD;
+END;
+$$ LANGUAGE plpgsql;
+
+-- Trigger for household leaving (UPDATE)
+CREATE TRIGGER trg_update_subscription_household_on_leave_update
+AFTER UPDATE ON public.household_members
+FOR EACH ROW
+WHEN (OLD.is_active = 1 AND NEW.is_active = 0)
+EXECUTE FUNCTION update_subscription_household_on_leave();
+
+-- Trigger for household leaving (DELETE)
+CREATE TRIGGER trg_update_subscription_household_on_leave_delete
+AFTER DELETE ON public.household_members
+FOR EACH ROW
+WHEN (OLD.is_active = 1)
+EXECUTE FUNCTION update_subscription_household_on_leave();

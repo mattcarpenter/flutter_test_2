@@ -8,10 +8,12 @@ import 'package:supabase_flutter/supabase_flutter.dart' as supabase_flutter;
 import 'package:uuid/uuid.dart';
 
 import '../../../../../database/database.dart';
-import '../../../../../database/models/ingredient_terms.dart';
 import '../../../../../database/models/ingredients.dart';
 import '../../../../providers/recipe_provider.dart';
 import '../../../../repositories/recipe_repository.dart';
+import '../../../../widgets/section_header.dart';
+import '../../../../widgets/app_text_field.dart';
+import '../../../../widgets/app_text_field_condensed.dart';
 import 'sections/ingredients_section.dart';
 import 'sections/recipe_metadata_section.dart';
 import 'sections/steps_section.dart';
@@ -290,7 +292,7 @@ class RecipeEditorFormState extends ConsumerState<RecipeEditorForm> {
 
     return SingleChildScrollView(
       child: Padding(
-        padding: const EdgeInsets.all(16.0),
+        padding: const EdgeInsets.all(0.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -301,11 +303,15 @@ class RecipeEditorFormState extends ConsumerState<RecipeEditorForm> {
               servingsController: _servingsController,
               prepTimeController: _prepTimeController,
               cookTimeController: _cookTimeController,
-              sourceController: _sourceController,
             ),
 
-            const SizedBox(height: 24),
+            // Images Section Header
+            const SectionHeader(
+              "Images",
+              topSpacing: 24,
+            ),
 
+            // Images Section
             ImagePickerSection(
               images: _recipe.images ?? [],
               onImagesUpdated: (newImages) {
@@ -316,6 +322,12 @@ class RecipeEditorFormState extends ConsumerState<RecipeEditorForm> {
             ),
 
             const SizedBox(height: 24),
+
+            // Ingredients Section Header
+            const SectionHeader(
+              "Ingredients",
+              topSpacing: 0,
+            ),
 
             // Ingredients Section
             IngredientsSection(
@@ -336,6 +348,12 @@ class RecipeEditorFormState extends ConsumerState<RecipeEditorForm> {
 
             const SizedBox(height: 24),
 
+            // Steps Section Header
+            const SectionHeader(
+              "Instructions",
+              topSpacing: 0,
+            ),
+
             // Steps Section
             StepsSection(
               steps: _steps,
@@ -355,37 +373,30 @@ class RecipeEditorFormState extends ConsumerState<RecipeEditorForm> {
 
             const SizedBox(height: 24),
 
-            // Notes Section
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const Text(
-                  "Notes",
-                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                ),
-                const SizedBox(height: 8),
-                TextField(
-                  controller: _notesController,
-                  decoration: InputDecoration(
-                    hintText: "General notes about this recipe",
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    contentPadding: const EdgeInsets.all(12),
-                  ),
-                  maxLines: 4,
-                ),
-              ],
+            // Notes Section Header
+            const SectionHeader(
+              "Notes",
+              topSpacing: 0,
             ),
 
-            // Save Button
-            /*Padding(
-              padding: const EdgeInsets.symmetric(vertical: 16.0),
-              child: ElevatedButton(
-                onPressed: saveRecipe,
-                child: Text(_isNewRecipe ? 'Create Recipe' : 'Update Recipe'),
-              ),
-            ),*/
+            // Source and Notes grouped together
+            AppTextFieldCondensed(
+              controller: _sourceController,
+              placeholder: "Source (optional)",
+              variant: AppTextFieldVariant.outline,
+              keyboardType: TextInputType.url,
+              first: true,
+              last: false,
+            ),
+            AppTextFieldCondensed(
+              controller: _notesController,
+              placeholder: "General notes about this recipe",
+              variant: AppTextFieldVariant.outline,
+              multiline: true,
+              minLines: 2,
+              first: false,
+              last: true,
+            ),
           ],
         ),
       ),

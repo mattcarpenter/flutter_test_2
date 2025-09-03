@@ -372,11 +372,6 @@ class _ImagePickerSectionState extends ConsumerState<ImagePickerSection> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text(
-          "Photos",
-          style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-        ),
-        const SizedBox(height: 8),
         _imageStates.isEmpty
             ? const Text("No photos added")
             : SizedBox(

@@ -18,10 +18,29 @@ bucket_definitions:
 
   # All members of the user's household
   household_membership:
-    parameters: SELECT household_id FROM household_members WHERE user_id = request.user_id()
+    parameters: SELECT household_id FROM household_members WHERE user_id = request.user_id() AND is_active = 1
     data:
       - SELECT * FROM public.household_members WHERE household_id = bucket.household_id
+      - SELECT * FROM public.households WHERE id = bucket.household_id
 
+  # Owns household
+  household_ownership:
+    parameters: SELECT request.user_id() as user_id
+    data:
+      - SELECT * FROM public.households WHERE user_id = bucket.user_id
+
+  # Household invites for the user
+  household_invites_for_user:
+    parameters: SELECT request.user_id() as user_id
+    data:
+      - SELECT * FROM public.household_invites WHERE invited_by_user_id = bucket.user_id OR accepted_by_user_id = bucket.user_id
+
+  household_invites_by_email:
+    parameters: SELECT email FROM auth.users WHERE id = request.user_id()
+    data:
+      - SELECT * FROM public.household_invites
+        WHERE email = bucket.email
+        AND status = 'pending'
 
   # Shared folders: Direct share where the folder is explicitly shared with the current user.
   shared_folder_direct:
@@ -101,3 +120,25 @@ bucket_definitions:
     parameters: SELECT household_id FROM household_members WHERE user_id = request.user_id() AND is_active = 1
     data:
       - SELECT * FROM public.converters WHERE household_id = bucket.household_id
+
+  meal_plans_belongs_to_user:
+    parameters: SELECT request.user_id() as user_id
+    data:
+      - SELECT * FROM public.meal_plans WHERE user_id = bucket.user_id
+
+  meal_plans_belongs_to_household:
+    parameters: SELECT household_id FROM household_members WHERE user_id = request.user_id() AND is_active = 1
+    data:
+      - SELECT * FROM public.meal_plans WHERE household_id = bucket.household_id
+
+  # User subscriptions - users can view their own subscription
+  user_subscriptions_belongs_to_user:
+    parameters: SELECT request.user_id() as user_id
+    data:
+      - SELECT * FROM public.user_subscriptions WHERE user_id = bucket.user_id
+
+  # Household subscriptions - users can view subscriptions from their household
+  user_subscriptions_household_access:
+    parameters: SELECT household_id FROM household_members WHERE user_id = request.user_id() AND is_active = 1
+    data:
+      - SELECT * FROM public.user_subscriptions WHERE household_id = bucket.household_id
