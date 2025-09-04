@@ -180,13 +180,26 @@ class Menu extends ConsumerWidget {
             onRouteGo('/household');
           },
         ),
+        MenuItem(
+          index: 8,
+          title: 'Settings',
+          icon: CupertinoIcons.settings,
+          isActive: selectedIndex == 9,
+          color: primaryColor,
+          textColor: textColor,
+          activeTextColor: activeTextColor,
+          backgroundColor: backgroundColor,
+          onTap: (_) {
+            onRouteGo('/settings');
+          },
+        ),
         // Auth menu item - conditional based on authentication state
         if (!isAuthenticated)
           MenuItem(
-            index: 8,
+            index: 9,
             title: 'Sign In',
             icon: CupertinoIcons.person_circle,
-            isActive: selectedIndex == 9,
+            isActive: selectedIndex == 10,
             color: primaryColor,
             textColor: textColor,
             activeTextColor: activeTextColor,
@@ -197,7 +210,7 @@ class Menu extends ConsumerWidget {
           ),
         if (isAuthenticated)
           MenuItem(
-            index: 8,
+            index: 9,
             title: 'Sign Out',
             icon: CupertinoIcons.person_circle_fill,
             isActive: false, // Sign out never active

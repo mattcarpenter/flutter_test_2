@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'package:drift/drift.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:uuid/uuid.dart';
@@ -93,6 +94,66 @@ class RecipeTagRepository {
           ..where((tbl) => tbl.id.isIn(tagIds) & tbl.deletedAt.isNull())
           ..orderBy([(t) => OrderingTerm(expression: t.name)]))
         .get();
+  }
+  
+  /// Get recipe counts for all tags
+  /// Returns a map of tag ID to recipe count
+  Future<Map<String, int>> getRecipeCountsByTag() async {
+    // Query to count recipes for each tag
+    // Since tag_ids is stored as JSON array, we need to use JSON functions
+    final results = await _db.customSelect(
+      '''
+      SELECT 
+        r.tag_ids,
+        COUNT(*) as recipe_count
+      FROM recipes r
+      WHERE r.deleted_at IS NULL 
+        AND r.tag_ids IS NOT NULL 
+        AND r.tag_ids != '[]'
+      GROUP BY r.tag_ids
+      '''
+    ).get();
+    
+    // Process results to extract individual tag counts
+    final Map<String, int> tagCounts = {};
+    
+    for (final row in results) {
+      final tagIdsJson = row.data['tag_ids'] as String?;
+      final recipeCount = row.data['recipe_count'] as int;
+      
+      if (tagIdsJson != null && tagIdsJson.isNotEmpty && tagIdsJson != '[]') {
+        try {
+          // Parse the JSON array of tag IDs
+          final tagIdsList = (jsonDecode(tagIdsJson) as List<dynamic>).cast<String>();
+          
+          // Add count to each tag in the recipe
+          for (final tagId in tagIdsList) {
+            tagCounts[tagId] = (tagCounts[tagId] ?? 0) + recipeCount;
+          }
+        } catch (e) {
+          // Skip malformed JSON
+          continue;
+        }
+      }
+    }
+    
+    return tagCounts;
+  }
+  
+  /// Get recipe count for a specific tag
+  Future<int> getRecipeCountForTag(String tagId) async {
+    final result = await _db.customSelect(
+      '''
+      SELECT COUNT(*) as count
+      FROM recipes r
+      WHERE r.deleted_at IS NULL 
+        AND r.tag_ids IS NOT NULL
+        AND json_extract(r.tag_ids, '\$') LIKE '%"' || ? || '"%'
+      ''',
+      variables: [Variable.withString(tagId)]
+    ).getSingleOrNull();
+    
+    return result?.data['count'] as int? ?? 0;
   }
 }
 

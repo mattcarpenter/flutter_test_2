@@ -21,6 +21,8 @@ import '../features/auth/views/auth_landing_page.dart';
 import '../features/auth/views/sign_in_page.dart';
 import '../features/auth/views/sign_up_page.dart';
 import '../features/auth/views/forgot_password_page.dart';
+import '../features/settings/views/settings_page.dart';
+import '../features/settings/views/manage_tags_page.dart';
 import '../features/meal_plans/views/meal_plans_root.dart';
 import '../features/meal_plans/views/meal_plans_sub_page.dart';
 import '../features/recipes/views/recipes_root.dart';
@@ -237,6 +239,49 @@ class _AdaptiveApp2State extends State<AdaptiveApp2> {
               child: HouseholdSharingPage(
                 onMenuPressed: () {
                   _householdPageShellKey.currentState?.toggleDrawer();
+                },
+              ),
+            ),
+          ),
+        ],
+      ),
+      ShellRoute(
+        pageBuilder: (BuildContext context, GoRouterState state, Widget child) {
+          return CustomTransitionPage<void>(
+            key: state.pageKey,
+            child: child,
+            transitionDuration: const Duration(milliseconds: 400),
+            reverseTransitionDuration: const Duration(milliseconds: 400),
+            transitionsBuilder: (context, animation, secondaryAnimation, child) =>
+                CupertinoTabPageTransition(
+                  animation: animation,
+                  child: isTablet
+                      ? child
+                      : MainPageShell(
+                    key: _mainPageShellKey,
+                    child: child,
+                    showBottomNavBar: false,
+                  ),
+                ),
+          );
+        },
+        routes: [
+          GoRoute(
+            path: '/settings',
+            routes: [
+              GoRoute(
+                path: 'tags',
+                pageBuilder: (context, state) => _platformPage(
+                  state: state,
+                  child: const ManageTagsPage(),
+                ),
+              ),
+            ],
+            pageBuilder: (context, state) => _platformPage(
+              state: state,
+              child: SettingsPage(
+                onMenuPressed: () {
+                  _mainPageShellKey.currentState?.toggleDrawer();
                 },
               ),
             ),
