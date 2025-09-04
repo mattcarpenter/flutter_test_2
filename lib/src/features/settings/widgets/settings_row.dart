@@ -56,7 +56,7 @@ class _SettingsRowState extends State<SettingsRow> {
       ),
       color: _isPressed && widget.enabled 
           ? colors.surfaceVariant 
-          : colors.surface,
+          : (colors.brightness == Brightness.light ? Colors.white : colors.surface),
       child: Row(
         children: [
           if (widget.leading != null) ...[

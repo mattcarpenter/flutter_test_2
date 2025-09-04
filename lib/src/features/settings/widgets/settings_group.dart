@@ -20,11 +20,13 @@ class SettingsGroup extends StatelessWidget {
     
     return Row(
       children: [
-        // Left inset - background color to match the group
+        // Left inset - white background to match the group
         Container(
           width: 16,
           height: 1,
-          color: colors.surface,
+          color: colors.brightness == Brightness.light 
+              ? Colors.white 
+              : colors.surface,
         ),
         // Center divider line
         Expanded(
@@ -33,11 +35,13 @@ class SettingsGroup extends StatelessWidget {
             color: colors.border,
           ),
         ),
-        // Right inset - background color
+        // Right inset - white background
         Container(
           width: 16,
           height: 1,
-          color: colors.surface,
+          color: colors.brightness == Brightness.light 
+              ? Colors.white 
+              : colors.surface,
         ),
       ],
     );
@@ -63,13 +67,13 @@ class SettingsGroup extends StatelessWidget {
     return Container(
       margin: margin ?? const EdgeInsets.symmetric(horizontal: 16),
       decoration: BoxDecoration(
-        color: colors.surface,
+        color: colors.brightness == Brightness.light
+            ? Colors.white
+            : colors.surface,
         borderRadius: BorderRadius.circular(_borderRadius),
-        border: Border.all(
-          color: colors.border,
-          width: 1,
-        ),
+        // Remove border for cleaner iOS look
       ),
+      clipBehavior: Clip.antiAlias,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: childrenWithDividers,

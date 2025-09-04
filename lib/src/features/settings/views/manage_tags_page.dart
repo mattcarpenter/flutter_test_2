@@ -43,19 +43,31 @@ class ManageTagsPage extends ConsumerWidget {
       }
     });
 
-    return AdaptiveSliverPage(
-      title: 'Manage Tags',
-      automaticallyImplyLeading: true,
-      body: tagManagementState.isLoading
-          ? const Center(
-              child: CupertinoActivityIndicator(),
-            )
-          : RefreshIndicator(
-              onRefresh: () => tagManagementNotifier.refresh(),
-              child: tagManagementState.tags.isEmpty
-                  ? _buildEmptyState(context, colors)
-                  : _buildTagsList(context, tagManagementState, tagManagementNotifier),
-            ),
+    final backgroundColor = colors.brightness == Brightness.light
+        ? AppColorSwatches.neutral[100]!
+        : colors.background;
+
+    return CupertinoTheme(
+      data: CupertinoTheme.of(context).copyWith(
+        scaffoldBackgroundColor: backgroundColor,
+      ),
+      child: AdaptiveSliverPage(
+        title: 'Manage Tags',
+        automaticallyImplyLeading: true,
+        body: Container(
+          color: backgroundColor,
+          child: tagManagementState.isLoading
+              ? const Center(
+                  child: CupertinoActivityIndicator(),
+                )
+              : RefreshIndicator(
+                  onRefresh: () => tagManagementNotifier.refresh(),
+                  child: tagManagementState.tags.isEmpty
+                      ? _buildEmptyState(context, colors)
+                      : _buildTagsList(context, tagManagementState, tagManagementNotifier),
+                ),
+        ),
+      ),
     );
   }
 
@@ -97,15 +109,13 @@ class ManageTagsPage extends ConsumerWidget {
     TagManagementState state,
     TagManagementNotifier notifier,
   ) {
-    return Padding(
-      padding: EdgeInsets.all(AppSpacing.lg),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          SizedBox(height: AppSpacing.md),
-          
-          // Tags section
-          SettingsGroup(
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        SizedBox(height: AppSpacing.xl),
+        
+        // Tags section
+        SettingsGroup(
             children: state.tags.map((tag) {
               final recipeCount = state.recipeCounts[tag.id] ?? 0;
               
@@ -120,20 +130,25 @@ class ManageTagsPage extends ConsumerWidget {
                 },
               );
             }).toList(),
-          ),
-          
-          SizedBox(height: AppSpacing.lg),
-          
-          // Help text
-          Text(
+        ),
+        
+        SizedBox(height: AppSpacing.lg),
+        
+        // Help text
+        Padding(
+          padding: EdgeInsets.symmetric(horizontal: AppSpacing.lg),
+          child: Text(
             'Tap a color circle to change the tag color. '
             'Deleting a tag will remove it from all recipes.',
             style: AppTypography.caption.copyWith(
               color: AppColors.of(context).textSecondary,
             ),
           ),
-        ],
-      ),
+        ),
+        
+        // Add bottom spacing to ensure last item is visible
+        SizedBox(height: AppSpacing.xl * 3),
+      ],
     );
   }
 }
