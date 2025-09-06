@@ -69,7 +69,7 @@ class _AppTextFieldSimpleState extends State<AppTextFieldSimple> {
   static const double _fieldHeight = 56.0;
   static const double _borderRadius = 8.0;
   static const double _horizontalPadding = 16.0;
-  static const double _verticalPadding = 16.0;
+  static const double _verticalPadding = 15.0;
 
   @override
   void initState() {

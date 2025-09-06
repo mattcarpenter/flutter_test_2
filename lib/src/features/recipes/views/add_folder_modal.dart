@@ -148,7 +148,7 @@ class _AddFolderFormState extends ConsumerState<AddFolderForm> {
       children: [
         AppTextFieldSimple(
           controller: widget.controller,
-          placeholder: 'Enter folder name',
+          placeholder: 'Search',
           autofocus: true,
           enabled: !_isCreating,
           onChanged: _onTextChanged,

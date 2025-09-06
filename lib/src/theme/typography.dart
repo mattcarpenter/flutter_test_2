@@ -134,7 +134,7 @@ class AppTypography {
 
   // Form-specific styles - for text field components
   static TextStyle get fieldInput => TextStyle(
-    fontSize: 16,
+    fontSize: 17,
     fontWeight: FontWeight.w400,
     height: Platform.isIOS ? 1.6 : 1.5,
     fontFamily: _fontFamily,
@@ -142,8 +142,8 @@ class AppTypography {
   );
 
   static TextStyle get fieldLabel => TextStyle(
-    fontSize: 16,
-    fontWeight: FontWeight.w300,
+    fontSize: 17,
+    fontWeight: FontWeight.w400,
     height: Platform.isIOS ? 1.3 : 1.2,
     fontFamily: _fontFamily,
     letterSpacing: -0.31,
