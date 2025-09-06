@@ -18,7 +18,7 @@ Future<String?> showAddFolderModal(BuildContext context) {
     context: context,
     pageListBuilder: (bottomSheetContext) => [
       AddFolderModalPage.build(
-        context: context,
+        context: bottomSheetContext,
         onFolderAdded: (String folderName) {
           // Get the provider container from the modal context.
           final container = ProviderScope.containerOf(bottomSheetContext);
@@ -46,7 +46,9 @@ class AddFolderModalPage {
   }) {
     final TextEditingController folderNameController = TextEditingController();
     return WoltModalSheetPage(
+      navBarHeight: 55,
       backgroundColor: AppColors.of(context).background,
+      surfaceTintColor: Colors.transparent,
       hasTopBarLayer: false,
       isTopBarLayerAlwaysVisible: false,
       trailingNavBarWidget: Padding(
@@ -68,7 +70,7 @@ class AddFolderModalPage {
                 color: AppColors.of(context).textPrimary,
               ),
             ),
-            SizedBox(height: AppSpacing.xl),
+            SizedBox(height: AppSpacing.lg),
             AddFolderForm(
               controller: folderNameController,
               onSubmitted: onFolderAdded,

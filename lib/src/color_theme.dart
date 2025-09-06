@@ -54,7 +54,7 @@ class AppTheme {
     primaryColor: AppColorSwatches.primary[500]!,
     scaffoldBackgroundColor: Colors.white,  // From our new system
     textTheme: CupertinoTextThemeData(
-      textStyle: const TextStyle(fontFamily: 'Inter'),
+      // textStyle: const TextStyle(fontFamily: 'Inter'), // Commented out - let iOS use SF Pro
       primaryColor: AppColorSwatches.neutral[900]!,
     ),
   );
@@ -80,7 +80,7 @@ class AppTheme {
     primaryColor: AppColorSwatches.primary[400]!,
     scaffoldBackgroundColor: const Color(0xFF121212),  // From our new system
     textTheme: CupertinoTextThemeData(
-      textStyle: const TextStyle(fontFamily: 'Inter'),
+      // textStyle: const TextStyle(fontFamily: 'Inter'), // Commented out - let iOS use SF Pro
       primaryColor: AppColorSwatches.neutral[50]!,
     ),
   );

@@ -105,7 +105,7 @@ class _AppTextFieldSimpleState extends State<AppTextFieldSimple> {
   Widget build(BuildContext context) {
     final colors = AppColors.of(context);
     final effectiveMaxLines = widget.multiline ? (widget.maxLines ?? 4) : 1;
-    
+
     // Determine border color
     final borderColor = _effectiveErrorText != null
         ? colors.error
@@ -131,7 +131,7 @@ class _AppTextFieldSimpleState extends State<AppTextFieldSimple> {
       onEditingComplete: widget.onEditingComplete,
       onSubmitted: widget.onSubmitted,
       inputFormatters: widget.inputFormatters,
-      textInputAction: widget.textInputAction ?? 
+      textInputAction: widget.textInputAction ??
           (widget.multiline ? TextInputAction.newline : TextInputAction.done),
       autofocus: widget.autofocus,
       textCapitalization: widget.textCapitalization,
@@ -150,7 +150,7 @@ class _AppTextFieldSimpleState extends State<AppTextFieldSimple> {
           vertical: _verticalPadding,
         ),
         filled: true,
-        fillColor: colors.surface,
+        fillColor: colors.input,
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(_borderRadius),
           borderSide: BorderSide(

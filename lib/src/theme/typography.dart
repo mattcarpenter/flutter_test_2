@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
 
 /// Semantic typography system for consistent text styling across the app.
@@ -5,128 +6,151 @@ import 'package:flutter/material.dart';
 /// This class provides a centralized set of text styles that align with
 /// design system semantics (h1, h2, etc.) while maintaining consistency
 /// with existing app patterns.
+///
+/// Platform-aware implementation:
+/// - iOS: Uses San Francisco (SF Pro) system font with w600 weights
+/// - Other platforms: Uses Inter font with appropriate fallbacks
 class AppTypography {
+  // Platform-aware font configuration
+  static String? get _fontFamily => Platform.isIOS ? null : 'Inter'; // null = system font on iOS
+  static FontWeight get _boldWeight => Platform.isIOS ? FontWeight.w600 : FontWeight.bold;
+  static FontWeight get _semiBoldWeight => FontWeight.w600;
+  static FontWeight get _mediumWeight => FontWeight.w500;
+  static double? get _letterSpacing => Platform.isIOS ? -0.41 : 0; // SF Pro handles spacing automatically
   // Headings - for page titles, section headers, and content hierarchy
-  static const TextStyle h1 = TextStyle(
+  static TextStyle get h1 => TextStyle(
     fontSize: 28,
-    fontWeight: FontWeight.bold,
-    height: 1.2,
-    fontFamily: 'Inter',
-    color: Color(0xFF1D2129),
+    fontWeight: _boldWeight,
+    height: Platform.isIOS ? 1.3 : 1.2, // iOS needs slightly more line height
+    fontFamily: _fontFamily,
+    letterSpacing: _letterSpacing,
+    color: const Color(0xFF1D2129),
   );
 
-  static const TextStyle h2 = TextStyle(
+  static TextStyle get h2 => TextStyle(
     fontSize: 24,
-    fontWeight: FontWeight.bold,
-    height: 1.2,
-    fontFamily: 'Inter',
-    color: Color(0xFF1D2129),
+    fontWeight: _boldWeight,
+    height: Platform.isIOS ? 1.3 : 1.2,
+    fontFamily: _fontFamily,
+    letterSpacing: _letterSpacing,
+    color: const Color(0xFF1D2129),
   );
 
-  static const TextStyle h3 = TextStyle(
+  static TextStyle get h3 => TextStyle(
     fontSize: 20,
-    fontWeight: FontWeight.w600,
-    height: 1.3,
-    fontFamily: 'Inter',
-    color: Color(0xFF1D2129),
+    fontWeight: _semiBoldWeight,
+    height: Platform.isIOS ? 1.4 : 1.3,
+    fontFamily: _fontFamily,
+    letterSpacing: _letterSpacing,
+    color: const Color(0xFF1D2129),
   );
 
-  static const TextStyle h4 = TextStyle(
+  static TextStyle get h4 => TextStyle(
     fontSize: 18,
-    fontWeight: FontWeight.bold,
-    letterSpacing: 0,
-    height: 1.3,
-    fontFamily: 'Inter',
-    color: Color(0xFF1D2129),
+    fontWeight: _boldWeight,
+    height: Platform.isIOS ? 1.4 : 1.3,
+    fontFamily: _fontFamily,
+    letterSpacing: _letterSpacing,
+    color: const Color(0xFF1D2129),
   );
 
-  static const TextStyle h5 = TextStyle(
+  static TextStyle get h5 => TextStyle(
     fontSize: 16,
-    fontWeight: FontWeight.w600,
-    height: 1.4,
-    fontFamily: 'Inter',
-    color: Color(0xFF1D2129),
+    fontWeight: _semiBoldWeight,
+    height: Platform.isIOS ? 1.5 : 1.4,
+    fontFamily: _fontFamily,
+    letterSpacing: _letterSpacing,
+    color: const Color(0xFF1D2129),
   );
 
   // Body text - for main content and readable text
-  static const TextStyle bodyLarge = TextStyle(
+  static TextStyle get bodyLarge => TextStyle(
     fontSize: 16,
     fontWeight: FontWeight.normal,
-    height: 1.5,
-    fontFamily: 'Inter',
+    height: Platform.isIOS ? 1.6 : 1.5,
+    fontFamily: _fontFamily,
+    letterSpacing: _letterSpacing,
   );
 
-  static const TextStyle body = TextStyle(
+  static TextStyle get body => TextStyle(
     fontSize: 15,
     fontWeight: FontWeight.normal,
-    height: 1.5,
-    fontFamily: 'Inter',
+    height: Platform.isIOS ? 1.6 : 1.5,
+    fontFamily: _fontFamily,
+    letterSpacing: _letterSpacing,
   );
 
-  static const TextStyle bodySmall = TextStyle(
+  static TextStyle get bodySmall => TextStyle(
     fontSize: 14,
     fontWeight: FontWeight.normal,
-    height: 1.4,
-    fontFamily: 'Inter',
+    height: Platform.isIOS ? 1.5 : 1.4,
+    fontFamily: _fontFamily,
+    letterSpacing: _letterSpacing,
   );
 
   // UI text - for form inputs, labels, and interface elements
-  static const TextStyle input = TextStyle(
+  static TextStyle get input => TextStyle(
     fontSize: 16,
     fontWeight: FontWeight.normal,
-    height: 1.4,
-    fontFamily: 'Inter',
+    height: Platform.isIOS ? 1.5 : 1.4,
+    fontFamily: _fontFamily,
+    letterSpacing: _letterSpacing,
   );
 
-  static const TextStyle label = TextStyle(
+  static TextStyle get label => TextStyle(
     fontSize: 16,
-    fontWeight: FontWeight.w500,
-    height: 1.2,
-    fontFamily: 'Inter',
+    fontWeight: _mediumWeight,
+    height: Platform.isIOS ? 1.3 : 1.2,
+    fontFamily: _fontFamily,
+    letterSpacing: _letterSpacing,
   );
 
-  static const TextStyle caption = TextStyle(
+  static TextStyle get caption => TextStyle(
     fontSize: 12,
     fontWeight: FontWeight.normal,
-    height: 1.3,
-    fontFamily: 'Inter',
+    height: Platform.isIOS ? 1.4 : 1.3,
+    fontFamily: _fontFamily,
+    letterSpacing: _letterSpacing,
   );
 
-  static const TextStyle overline = TextStyle(
+  static TextStyle get overline => TextStyle(
     fontSize: 11,
-    fontWeight: FontWeight.w500,
-    height: 1.3,
-    letterSpacing: 0.5,
-    fontFamily: 'Inter',
+    fontWeight: _mediumWeight,
+    height: Platform.isIOS ? 1.4 : 1.3,
+    fontFamily: _fontFamily,
+    letterSpacing: Platform.isIOS ? null : 0.5, // iOS handles spacing
   );
 
   // Form-specific styles - for text field components
-  static const TextStyle fieldInput = TextStyle(
+  static TextStyle get fieldInput => TextStyle(
     fontSize: 16,
     fontWeight: FontWeight.w400,
-    letterSpacing: 0,
-    height: 1.5,
-    fontFamily: 'Inter',
+    height: Platform.isIOS ? 1.6 : 1.5,
+    fontFamily: _fontFamily,
+    letterSpacing: _letterSpacing,
   );
 
-  static const TextStyle fieldLabel = TextStyle(
+  static TextStyle get fieldLabel => TextStyle(
     fontSize: 16,
     fontWeight: FontWeight.w300,
-    height: 1.2,
-    fontFamily: 'Inter',
+    height: Platform.isIOS ? 1.3 : 1.2,
+    fontFamily: _fontFamily,
+    letterSpacing: _letterSpacing,
   );
 
-  static const TextStyle fieldError = TextStyle(
+  static TextStyle get fieldError => TextStyle(
     fontSize: 12,
     fontWeight: FontWeight.normal,
-    height: 1.3,
-    fontFamily: 'Inter',
+    height: Platform.isIOS ? 1.4 : 1.3,
+    fontFamily: _fontFamily,
+    letterSpacing: _letterSpacing,
   );
 
-  static const TextStyle fieldHelper = TextStyle(
+  static TextStyle get fieldHelper => TextStyle(
     fontSize: 12,
     fontWeight: FontWeight.normal,
-    height: 1.3,
-    fontFamily: 'Inter',
+    height: Platform.isIOS ? 1.4 : 1.3,
+    fontFamily: _fontFamily,
+    letterSpacing: _letterSpacing,
   );
 }

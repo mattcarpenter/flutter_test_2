@@ -29,6 +29,7 @@ class AppColorSwatches {
     50:  Color(0xFFFFFFFF),
     100: Color(0xFFFFFFFF),
     200: Color(0xFFFBFBFB),
+    250: Color(0xFFF2F2F2),
     300: Color(0xFFE8E8E8),
     400: Color(0xFFB6B6B6),
     500: Color(0xFF7A7A7A),
@@ -157,6 +158,10 @@ class AppColors {
   Color get background => brightness == Brightness.light
       ? Colors.white  // #FFFFFF - better hierarchy, was neutral[50]
       : const Color(0xFF121212);  // True Material Design dark, was neutral[900]
+
+  Color get input => brightness == Brightness.light
+      ? AppColorSwatches.neutral[250]!
+      : AppColorSwatches.neutral[800]!;
 
   Color get surface => brightness == Brightness.light
       ? const Color(0xFFFAFAFA)  // Very light gray for cards/inputs, was Colors.white
