@@ -8,11 +8,13 @@ import 'package:flutter/material.dart';
 /// with existing app patterns.
 ///
 /// Platform-aware implementation:
-/// - iOS: Uses San Francisco (SF Pro) system font with w600 weights
+/// - iOS: Uses SF Rounded for headings, SF Pro for body text, w600 weights
 /// - Other platforms: Uses Inter font with appropriate fallbacks
 class AppTypography {
   // Platform-aware font configuration
   static String? get _fontFamily => Platform.isIOS ? null : 'Inter'; // null = system font on iOS
+  static String? get _headingFontFamily => Platform.isIOS ? 'SF Pro Rounded' : 'Inter'; // SF Rounded for iOS headings
+  static String? get _buttonFontFamily => Platform.isIOS ? 'SF Pro Rounded' : 'Inter';
   static FontWeight get _boldWeight => Platform.isIOS ? FontWeight.w600 : FontWeight.bold;
   static FontWeight get _semiBoldWeight => FontWeight.w600;
   static FontWeight get _mediumWeight => FontWeight.w500;
@@ -22,7 +24,7 @@ class AppTypography {
     fontSize: 28,
     fontWeight: _boldWeight,
     height: Platform.isIOS ? 1.3 : 1.2, // iOS needs slightly more line height
-    fontFamily: _fontFamily,
+    fontFamily: _headingFontFamily,
     letterSpacing: _letterSpacing,
     color: const Color(0xFF1D2129),
   );
@@ -31,7 +33,7 @@ class AppTypography {
     fontSize: 24,
     fontWeight: _boldWeight,
     height: Platform.isIOS ? 1.3 : 1.2,
-    fontFamily: _fontFamily,
+    fontFamily: _headingFontFamily,
     letterSpacing: _letterSpacing,
     color: const Color(0xFF1D2129),
   );
@@ -40,7 +42,7 @@ class AppTypography {
     fontSize: 20,
     fontWeight: _semiBoldWeight,
     height: Platform.isIOS ? 1.4 : 1.3,
-    fontFamily: _fontFamily,
+    fontFamily: _headingFontFamily,
     letterSpacing: _letterSpacing,
     color: const Color(0xFF1D2129),
   );
@@ -49,8 +51,8 @@ class AppTypography {
     fontSize: 18,
     fontWeight: _boldWeight,
     height: Platform.isIOS ? 1.4 : 1.3,
-    fontFamily: _fontFamily,
-    letterSpacing: _letterSpacing,
+    fontFamily: _headingFontFamily,
+    letterSpacing: 0.37,
     color: const Color(0xFF1D2129),
   );
 
@@ -58,7 +60,7 @@ class AppTypography {
     fontSize: 16,
     fontWeight: _semiBoldWeight,
     height: Platform.isIOS ? 1.5 : 1.4,
-    fontFamily: _fontFamily,
+    fontFamily: _headingFontFamily,
     letterSpacing: _letterSpacing,
     color: const Color(0xFF1D2129),
   );
@@ -121,13 +123,22 @@ class AppTypography {
     letterSpacing: Platform.isIOS ? null : 0.5, // iOS handles spacing
   );
 
+  // Button text - for button labels and call-to-action text
+  static TextStyle get button => TextStyle(
+    fontSize: 16, // Will be overridden by AppButton's dynamic sizing
+    fontWeight: _semiBoldWeight,
+    height: 1,
+    fontFamily: _buttonFontFamily,
+    letterSpacing: 0.41,
+  );
+
   // Form-specific styles - for text field components
   static TextStyle get fieldInput => TextStyle(
     fontSize: 16,
     fontWeight: FontWeight.w400,
     height: Platform.isIOS ? 1.6 : 1.5,
     fontFamily: _fontFamily,
-    letterSpacing: _letterSpacing,
+    letterSpacing: -0.31,
   );
 
   static TextStyle get fieldLabel => TextStyle(
@@ -135,7 +146,7 @@ class AppTypography {
     fontWeight: FontWeight.w300,
     height: Platform.isIOS ? 1.3 : 1.2,
     fontFamily: _fontFamily,
-    letterSpacing: _letterSpacing,
+    letterSpacing: -0.31,
   );
 
   static TextStyle get fieldError => TextStyle(

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../theme/colors.dart';
+import '../theme/typography.dart';
 
 /// Theme options for the button
 enum AppButtonTheme {
@@ -254,6 +255,25 @@ class _AppButtonState extends State<AppButton> {
     }
   }
 
+  // SF Pro Rounded letter spacing based on Apple's typography guidelines
+  double get _letterSpacing {
+    switch (_fontSize.toInt()) {
+      case 11:
+      case 12:
+        return 0.0; // Small sizes use default spacing
+      case 14:
+        return 0.48; // +0.48 for 14px
+      case 16:
+        return 0.41; // +0.41 for 16px
+      case 18:
+        return 0.37; // +0.37 for 18px
+      case 24:
+        return 0.35; // +0.35 for 24px
+      default:
+        return 0.41; // Default fallback
+    }
+  }
+
   BorderRadius get _borderRadius {
     if (widget.shape == AppButtonShape.round) {
       // Pill shape - fully rounded
@@ -380,12 +400,10 @@ class _AppButtonState extends State<AppButton> {
                           ],
                           Text(
                             widget.text,
-                            style: TextStyle(
+                            style: AppTypography.button.copyWith(
                               color: _textColor,
                               fontSize: _fontSize,
-                              fontWeight: FontWeight.w600,
-                              fontFamily: 'Inter',
-                              height: 1,
+                              letterSpacing: _letterSpacing,
                             ),
                             overflow: TextOverflow.ellipsis,
                             maxLines: 1,
@@ -420,12 +438,10 @@ class _AppButtonState extends State<AppButton> {
                       Flexible(
                         child: Text(
                           widget.text,
-                          style: TextStyle(
+                          style: AppTypography.button.copyWith(
                             color: _textColor,
                             fontSize: _fontSize,
-                            fontWeight: FontWeight.w600,
-                            fontFamily: 'Inter',
-                            height: 1,
+                            letterSpacing: _letterSpacing,
                           ),
                           overflow: TextOverflow.ellipsis,
                           maxLines: 1,
