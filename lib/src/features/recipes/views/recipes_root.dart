@@ -8,6 +8,8 @@ import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
 import 'package:wolt_modal_sheet/wolt_modal_sheet.dart';
 import '../../../mobile/utils/adaptive_sliver_page.dart';
 import '../../../providers/recipe_provider.dart';
+import '../../../theme/colors.dart';
+import '../../../theme/typography.dart';
 import '../../../widgets/adaptive_pull_down/adaptive_menu_item.dart';
 import '../../../widgets/adaptive_pull_down/adaptive_pull_down.dart';
 import '../../../widgets/app_circle_button.dart';
@@ -50,10 +52,9 @@ class RecipesTab extends ConsumerWidget {
               children: [
                 Text(
                   'Recipe Folders',
-                  style: CupertinoTheme.of(context)
-                      .textTheme
-                      .navLargeTitleTextStyle
-                      .copyWith(fontSize: 20, fontWeight: FontWeight.w600),
+                  style: AppTypography.h3.copyWith(
+                    color: AppColors.of(context).textPrimary,
+                  ),
                 ),
                 AppCircleButton(
                   icon: AppCircleButtonIcon.plus,

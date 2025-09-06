@@ -3,7 +3,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../../providers/recently_viewed_provider.dart';
+import '../../../theme/colors.dart';
 import '../../../theme/spacing.dart';
+import '../../../theme/typography.dart';
 import '../../../widgets/recipe_list_item.dart';
 
 class RecentlyViewedSection extends ConsumerWidget {
@@ -36,10 +38,9 @@ class RecentlyViewedSection extends ConsumerWidget {
                 children: [
                   Text(
                     'Recently Viewed',
-                    style: CupertinoTheme.of(context)
-                        .textTheme
-                        .navLargeTitleTextStyle
-                        .copyWith(fontSize: 18, fontWeight: FontWeight.w600),
+                    style: AppTypography.h4.copyWith(
+                      color: AppColors.of(context).textPrimary,
+                    ),
                   ),
                   TextButton(
                     onPressed: () {

@@ -15,7 +15,7 @@ class AppTypography {
   static String? get _fontFamily => Platform.isIOS ? null : 'Inter'; // null = system font on iOS
   static String? get _headingFontFamily => Platform.isIOS ? 'SF Pro Rounded' : 'Inter'; // SF Rounded for iOS headings
   static String? get _buttonFontFamily => Platform.isIOS ? 'SF Pro Rounded' : 'Inter';
-  static FontWeight get _boldWeight => Platform.isIOS ? FontWeight.w600 : FontWeight.bold;
+  static FontWeight get _boldWeight => Platform.isIOS ? FontWeight.w700 : FontWeight.bold;
   static FontWeight get _semiBoldWeight => FontWeight.w600;
   static FontWeight get _mediumWeight => FontWeight.w500;
   static double? get _letterSpacing => Platform.isIOS ? -0.41 : 0; // SF Pro handles spacing automatically
@@ -43,7 +43,7 @@ class AppTypography {
     fontWeight: _semiBoldWeight,
     height: Platform.isIOS ? 1.4 : 1.3,
     fontFamily: _headingFontFamily,
-    letterSpacing: _letterSpacing,
+    letterSpacing: 0.36,
     color: const Color(0xFF1D2129),
   );
 
@@ -126,7 +126,7 @@ class AppTypography {
   // Button text - for button labels and call-to-action text
   static TextStyle get button => TextStyle(
     fontSize: 16, // Will be overridden by AppButton's dynamic sizing
-    fontWeight: _semiBoldWeight,
+    fontWeight: _boldWeight,
     height: 1,
     fontFamily: _buttonFontFamily,
     letterSpacing: 0.41,

@@ -3,7 +3,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../../providers/recipe_provider.dart';
+import '../../../theme/colors.dart';
 import '../../../theme/spacing.dart';
+import '../../../theme/typography.dart';
 import 'pinned_recipe_card.dart';
 
 class PinnedRecipesSection extends ConsumerWidget {
@@ -35,10 +37,9 @@ class PinnedRecipesSection extends ConsumerWidget {
                 children: [
                   Text(
                     'Pinned Recipes',
-                    style: CupertinoTheme.of(context)
-                        .textTheme
-                        .navLargeTitleTextStyle
-                        .copyWith(fontSize: 18, fontWeight: FontWeight.w600),
+                    style: AppTypography.h4.copyWith(
+                      color: AppColors.of(context).textPrimary,
+                    ),
                   ),
                   TextButton(
                     onPressed: () {
