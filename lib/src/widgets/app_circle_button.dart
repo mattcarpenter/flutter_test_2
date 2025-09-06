@@ -6,6 +6,7 @@ enum AppCircleButtonIcon {
   plus,
   ellipsis,
   pencil,
+  close,
 }
 
 class AppCircleButton extends StatelessWidget {
@@ -28,6 +29,8 @@ class AppCircleButton extends StatelessWidget {
         return CupertinoIcons.ellipsis;
       case AppCircleButtonIcon.pencil:
         return CupertinoIcons.pencil;
+      case AppCircleButtonIcon.close:
+        return CupertinoIcons.clear;
     }
   }
 

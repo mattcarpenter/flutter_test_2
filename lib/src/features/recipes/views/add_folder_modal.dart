@@ -8,8 +8,8 @@ import '../../../providers/recipe_folder_provider.dart';
 import '../../../theme/colors.dart';
 import '../../../theme/spacing.dart';
 import '../../../widgets/app_button.dart';
+import '../../../widgets/app_circle_button.dart';
 import '../../../widgets/app_text_field_simple.dart';
-import '../../../widgets/wolt/text/modal_sheet_title.dart';
 import '../../../theme/typography.dart';
 
 Future<String?> showAddFolderModal(BuildContext context) {
@@ -47,17 +47,21 @@ class AddFolderModalPage {
     final TextEditingController folderNameController = TextEditingController();
     return WoltModalSheetPage(
       backgroundColor: AppColors.of(context).background,
-      // Removed hasTopBarLayer and isTopBarLayerAlwaysVisible to eliminate border
       hasTopBarLayer: false,
       isTopBarLayerAlwaysVisible: false,
+      trailingNavBarWidget: Padding(
+        padding: EdgeInsets.only(right: AppSpacing.lg),
+        child: AppCircleButton(
+          icon: AppCircleButtonIcon.close,
+          onPressed: () => Navigator.of(context).pop(),
+        ),
+      ),
       child: Padding(
-        // Extra top padding for better spacing above title
-        padding: EdgeInsets.fromLTRB(AppSpacing.lg, AppSpacing.xl, AppSpacing.lg, AppSpacing.lg),
+        padding: EdgeInsets.fromLTRB(AppSpacing.lg, 0, AppSpacing.lg, AppSpacing.lg),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           mainAxisSize: MainAxisSize.min,
           children: [
-            // Title with custom spacing
             Text(
               'New Recipe Folder',
               style: AppTypography.h4.copyWith(
@@ -151,29 +155,13 @@ class _AddFolderFormState extends ConsumerState<AddFolderForm> {
           errorText: _showError ? 'Folder name is required' : null,
         ),
         SizedBox(height: AppSpacing.xl),
-        Row(
-          children: [
-            Expanded(
-              child: AppButtonVariants.secondaryOutline(
-                text: 'Cancel',
-                size: AppButtonSize.large,
-                shape: AppButtonShape.square,
-                onPressed: _isCreating ? null : () {
-                  Navigator.of(context).pop();
-                },
-              ),
-            ),
-            SizedBox(width: AppSpacing.sm),
-            Expanded(
-              child: AppButtonVariants.secondaryFilled(
-                text: 'Add',
-                size: AppButtonSize.large,
-                shape: AppButtonShape.square,
-                onPressed: _isCreating ? null : _submitForm,
-                loading: _isCreating,
-              ),
-            ),
-          ],
+        AppButtonVariants.secondaryFilled(
+          text: 'Create New Folder',
+          size: AppButtonSize.large,
+          shape: AppButtonShape.square,
+          onPressed: _isCreating ? null : _submitForm,
+          loading: _isCreating,
+          fullWidth: true,
         ),
       ],
     );

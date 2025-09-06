@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 /// Comprehensive color swatch system for the app.
-/// 
+///
 /// This provides a consistent set of color swatches with shades from 50-900,
 /// following Material Design principles. Each swatch can be accessed with
 /// bracket notation, e.g., AppColorSwatches.primary[300].
@@ -10,7 +10,7 @@ class AppColorSwatches {
   AppColorSwatches._();
 
   /// Neutral palette - warm-toned grays for better visual harmony
-  static const MaterialColor neutral = MaterialColor(0xFF6B7078, {
+  /*static const MaterialColor neutral = MaterialColor(0xFF6B7078, {
     50: Color(0xFFFBFAF9),   // Very light warm gray
     100: Color(0xFFF6F4F3),  // Light warm gray (backgrounds)
     200: Color(0xFFEBE9E7),  // Warm border gray
@@ -22,6 +22,21 @@ class AppColorSwatches {
     800: Color(0xFF372F37),  // Very dark warm gray
     900: Color(0xFF271827),  // Almost black with warm undertone
     950: Color(0xFF120712),  // True black with subtle warm undertone
+  });*/
+
+  // Updated neutral pallette with no tone
+  static const MaterialColor neutral = MaterialColor(0xFF222222, {
+    50:  Color(0xFFFFFFFF),
+    100: Color(0xFFFFFFFF),
+    200: Color(0xFFFBFBFB),
+    300: Color(0xFFE8E8E8),
+    400: Color(0xFFB6B6B6),
+    500: Color(0xFF7A7A7A),
+    600: Color(0xFF646464),
+    700: Color(0xFF545454),
+    800: Color(0xFF373737),
+    900: Color(0xFF222222), // Pure neutral target
+    950: Color(0xFF0D0D0D),
   });
 
   /// Primary color - Coral/Salmon red
@@ -124,7 +139,7 @@ class AppColorSwatches {
 }
 
 /// Theme-aware color resolution.
-/// 
+///
 /// This class provides semantic color getters that automatically adapt
 /// to the current theme brightness (light/dark mode).
 class AppColors {
@@ -290,15 +305,15 @@ class AppColors {
 
   // Content text colors (for list items, descriptions, user-generated content)
   Color get contentPrimary => textPrimary;  // Main content text (ingredient names, step descriptions)
-  
+
   Color get contentSecondary => textSecondary;  // Supporting content (section headers in lists)
-  
+
   Color get contentHint => inputPlaceholder;  // Content placeholder hints ('e.g. 1 cup flour')
 
   // UI text colors (for interface elements, form controls, navigation)
   Color get uiLabel => inputLabel;  // Form field labels, button labels
-  
+
   Color get uiSecondary => textTertiary;  // Secondary interface elements (drag handles)
-  
+
   Color get uiHint => inputPlaceholder;  // Form field placeholders ('Enter value')
 }
