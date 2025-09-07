@@ -105,6 +105,10 @@ dependency_overrides:
 
 flutter:
   fonts:
+    - family: Playfair Display
+      fonts:
+        - asset: assets/fonts/CrimsonText-Regular.ttf
+          weight: 700
     - family: Inter
       fonts:
         - asset: assets/fonts/InterVariable.ttf

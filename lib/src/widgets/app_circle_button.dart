@@ -1,4 +1,3 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import '../theme/colors.dart';
 
@@ -24,20 +23,20 @@ class AppCircleButton extends StatelessWidget {
     Key? key,
     required this.icon,
     this.onPressed,
-    this.size = 26.0,
+    this.size = 28.0,
     this.variant = AppCircleButtonVariant.primary,
   }) : super(key: key);
 
   IconData get _iconData {
     switch (icon) {
       case AppCircleButtonIcon.plus:
-        return CupertinoIcons.plus;
+        return Icons.add;
       case AppCircleButtonIcon.ellipsis:
-        return CupertinoIcons.ellipsis;
+        return Icons.more_horiz;
       case AppCircleButtonIcon.pencil:
-        return CupertinoIcons.pencil;
+        return Icons.edit;
       case AppCircleButtonIcon.close:
-        return CupertinoIcons.clear;
+        return Icons.close;
     }
   }
 
@@ -57,7 +56,7 @@ class AppCircleButton extends StatelessWidget {
             ? AppColorSwatches.primary[150]! // Very light coral
             : AppColorSwatches.primary[900]!.withOpacity(0.3); // Dark coral with opacity
         iconColor = isLight
-            ? AppColorSwatches.primary[600]! // Use base vibrant coral instead of dark
+            ? AppColorSwatches.primary[500]! // Use base vibrant coral instead of dark
             : AppColorSwatches.primary[300]!; // Light coral
         pressedBackgroundColor = isLight
             ? AppColorSwatches.primary[200]! // Slightly darker on press
@@ -68,7 +67,7 @@ class AppCircleButton extends StatelessWidget {
             ? AppColorSwatches.neutral[250]! // Light neutral
             : AppColorSwatches.neutral[800]!.withOpacity(0.3); // Dark neutral with opacity
         iconColor = isLight
-            ? AppColorSwatches.neutral[600]! // Medium neutral
+            ? AppColorSwatches.neutral[500]! // Medium neutral
             : AppColorSwatches.neutral[400]!; // Light neutral
         pressedBackgroundColor = isLight
             ? AppColorSwatches.neutral[300]! // Slightly darker on press
@@ -86,11 +85,16 @@ class AppCircleButton extends StatelessWidget {
           color: backgroundColor,
         ),
         child: Center(
-          child: Icon(
-            _iconData,
-            size: size * 0.55, // Icon is 55% of button size for bolder appearance
-            color: iconColor,
-            weight: 800, // Make icons bolder
+          child: Text(
+            String.fromCharCode(_iconData.codePoint),
+            style: TextStyle(
+              inherit: false,
+              fontSize: size * 0.6, // Icon is 60% of button size for better visibility
+              fontWeight: FontWeight.w900, // Maximum boldness
+              fontFamily: _iconData.fontFamily,
+              package: _iconData.fontPackage,
+              color: iconColor,
+            ),
           ),
         ),
       ),

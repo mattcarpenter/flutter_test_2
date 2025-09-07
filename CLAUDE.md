@@ -107,6 +107,75 @@ flutter format .
 - **Prefer semantic typography** - use AppTypography over custom TextStyle when possible
 - **Follow existing patterns** - examine similar components before creating new styling
 
+## Bottom Sheet (Wolt Modal) Design Guidelines
+
+Follow the pattern in `lib/src/features/recipes/views/add_folder_modal.dart` for all new modals:
+
+### Header Setup
+- Set `navBarHeight: 55`
+- No `pageTitle` property - include title in child content
+- Background: `AppColors.of(context).background`
+- Surface tint: `Colors.transparent`
+- Has top bar layer: `false`
+- Close button: `AppCircleButton` with `neutral` variant in `trailingNavBarWidget`
+- Close button padding: `EdgeInsets.only(right: AppSpacing.lg)`
+
+### Content Layout
+- Content padding: `EdgeInsets.fromLTRB(AppSpacing.lg, 0, AppSpacing.lg, AppSpacing.lg)`
+- Title: Text widget with `AppTypography.h4` and `AppColors.of(context).textPrimary`
+- Title is first element in content (not in nav bar)
+
+### Form Spacing
+- Title to form: `AppSpacing.lg` (16px)
+- Between form elements: `AppSpacing.xl` (24px) or `AppSpacing.lg` (16px)
+- Bottom padding: `AppSpacing.sm` after form if needed
+
+### Form Elements
+- Input fields: `AppTextFieldSimple` with 8px border radius
+- Primary button: `AppButtonVariants.primaryFilled` with:
+  - `size: AppButtonSize.large` (52px height)
+  - `shape: AppButtonShape.square` (8px radius to match inputs)
+  - `fullWidth: true`
+- Button state: Disabled when input is empty (shows 50% opacity)
+- Track input state to enable/disable button dynamically
+
+### Visual Consistency
+- Border radius: 8px for both inputs and buttons (matching radius)
+- Button uses primary color with white text
+- Close button uses neutral gray colors (not primary)
+- Disable submit buttons until form has valid input
+
+### Example Implementation
+```dart
+// See lib/src/features/recipes/views/add_folder_modal.dart for reference
+WoltModalSheetPage(
+  navBarHeight: 55,
+  backgroundColor: AppColors.of(context).background,
+  surfaceTintColor: Colors.transparent,
+  hasTopBarLayer: false,
+  trailingNavBarWidget: Padding(
+    padding: EdgeInsets.only(right: AppSpacing.lg),
+    child: AppCircleButton(
+      icon: AppCircleButtonIcon.close,
+      variant: AppCircleButtonVariant.neutral,
+      onPressed: () => Navigator.of(context).pop(),
+    ),
+  ),
+  child: Padding(
+    padding: EdgeInsets.fromLTRB(AppSpacing.lg, 0, AppSpacing.lg, AppSpacing.lg),
+    child: Column(
+      children: [
+        Text('Modal Title', style: AppTypography.h4),
+        SizedBox(height: AppSpacing.lg),
+        // Form content here
+      ],
+    ),
+  ),
+)
+```
+
+**Note**: Older modals may use different patterns (CupertinoButton navigation, ModalSheetTitle). These should be updated to match the new pattern when refactored.
+
 ## Architecture Overview
 
 ### Application Structure

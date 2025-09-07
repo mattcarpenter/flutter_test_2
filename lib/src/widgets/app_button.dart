@@ -77,9 +77,10 @@ class _AppButtonState extends State<AppButton> {
 
   Color _getThemeColor(AppColors colors, {bool hover = false, bool pressed = false}) {
     if (widget.theme == AppButtonTheme.primary) {
-      if (pressed) return colors.buttonPrimaryPressed;
-      if (hover) return colors.buttonPrimaryHover;
-      return colors.buttonPrimary;
+      // Primary uses main primary color
+      if (pressed) return AppColorSwatches.primary[700]!;
+      if (hover) return AppColorSwatches.primary[600]!;
+      return colors.primary;
     } else {
       // Secondary uses primary color
       if (pressed) return colors.primaryVariant;
@@ -118,7 +119,6 @@ class _AppButtonState extends State<AppButton> {
 
   Color get _borderColor {
     final colors = AppColors.of(context);
-    final baseColor = _getThemeColor(colors, hover: _isHovered, pressed: _isPressed);
 
     if (widget.style == AppButtonStyle.mutedOutline) {
       // Muted outline uses very subtle border
@@ -126,6 +126,14 @@ class _AppButtonState extends State<AppButton> {
           ? colors.textPrimary.withOpacity(0.35) // Very light border
           : colors.primary.withOpacity(0.35);
     }
+
+    // For outline styles, use the theme color for border
+    if (widget.style == AppButtonStyle.outline) {
+      return _getThemeColor(colors, hover: _isHovered, pressed: _isPressed);
+    }
+
+    // For other styles, use the background color logic
+    final baseColor = _getThemeColor(colors, hover: _isHovered, pressed: _isPressed);
 
     // Check visuallyEnabled to override disabled appearance
     if ((widget.onPressed == null && !widget.visuallyEnabled) || widget.loading) {
@@ -141,8 +149,10 @@ class _AppButtonState extends State<AppButton> {
     if (widget.style == AppButtonStyle.fill) {
       // Filled buttons use contrasting text
       if (widget.theme == AppButtonTheme.primary) {
-        return colors.onButtonPrimary;
+        // Primary uses white text on primary background
+        return colors.onPrimary;
       } else {
+        // Secondary uses contrasting text
         return colors.onPrimary;
       }
     }
@@ -279,8 +289,8 @@ class _AppButtonState extends State<AppButton> {
       // Pill shape - fully rounded
       return BorderRadius.circular(_height / 2);
     } else {
-      // Racetrack shape - more subtle curves
-      return BorderRadius.circular(_height / 4);
+      // Square shape - fixed 8px radius to match text inputs
+      return BorderRadius.circular(8.0);
     }
   }
 

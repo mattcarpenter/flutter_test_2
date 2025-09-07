@@ -76,6 +76,7 @@ class AddFolderModalPage {
               controller: folderNameController,
               onSubmitted: onFolderAdded,
             ),
+            SizedBox(height: AppSpacing.sm),
           ],
         ),
       ),
@@ -100,11 +101,31 @@ class AddFolderForm extends ConsumerStatefulWidget {
 class _AddFolderFormState extends ConsumerState<AddFolderForm> {
   bool _isCreating = false;
   bool _showError = false;
+  bool _hasInput = false;
+
+  @override
+  void initState() {
+    super.initState();
+    // Check if there's initial text
+    _hasInput = widget.controller.text.trim().isNotEmpty;
+    // Listen to text changes
+    widget.controller.addListener(_updateHasInput);
+  }
 
   @override
   void dispose() {
+    widget.controller.removeListener(_updateHasInput);
     widget.controller.dispose();
     super.dispose();
+  }
+
+  void _updateHasInput() {
+    final hasInput = widget.controller.text.trim().isNotEmpty;
+    if (hasInput != _hasInput) {
+      setState(() {
+        _hasInput = hasInput;
+      });
+    }
   }
 
   void _submitForm() async {
@@ -157,12 +178,12 @@ class _AddFolderFormState extends ConsumerState<AddFolderForm> {
           textInputAction: TextInputAction.done,
           errorText: _showError ? 'Folder name is required' : null,
         ),
-        SizedBox(height: AppSpacing.xl),
-        AppButtonVariants.secondaryFilled(
+        SizedBox(height: AppSpacing.lg),
+        AppButtonVariants.primaryFilled(
           text: 'Create New Folder',
           size: AppButtonSize.large,
           shape: AppButtonShape.square,
-          onPressed: _isCreating ? null : _submitForm,
+          onPressed: (_isCreating || !_hasInput) ? null : _submitForm,
           loading: _isCreating,
           fullWidth: true,
         ),
