@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:super_context_menu/super_context_menu.dart';
 import '../../../providers/folder_thumbnail_provider.dart';
+import '../../../theme/colors.dart';
 import '../../../widgets/local_or_network_image.dart';
 import '../../../../database/models/recipe_images.dart';
 
@@ -172,28 +173,29 @@ class _FolderCardContent extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final backgroundColor = CupertinoTheme.of(context).scaffoldBackgroundColor;
     final thumbnailAsyncValue = ref.watch(folderThumbnailProvider(folderId));
 
     return Container(
-      padding: const EdgeInsets.all(8.0), // Reduced padding
       decoration: BoxDecoration(
-        color: backgroundColor,
+        color: AppColors.of(context).surfaceElevated,
         border: Border.all(
-          color: CupertinoColors.systemGrey4, // Middle gray - darker than systemGrey5
-          width: 0.5, // Keep thin stroke
+          color: AppColors.of(context).surfaceElevatedBorder,
+          width: 0.5,
         ),
         borderRadius: BorderRadius.circular(12.0),
       ),
+      clipBehavior: Clip.hardEdge, // Ensure content is clipped to border radius
       child: Row(
         children: [
-          // Thumbnail section (left) - responsive size
+          // Thumbnail section - slightly narrower than square
           Container(
             width: thumbnailSize,
-            height: thumbnailSize,
             decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(6.0), // Slightly smaller radius
               color: CupertinoColors.systemGrey6,
+              borderRadius: const BorderRadius.only(
+                topRight: Radius.circular(8.0),
+                bottomRight: Radius.circular(8.0),
+              ),
             ),
             clipBehavior: Clip.hardEdge,
             child: thumbnailAsyncValue.when(
@@ -209,42 +211,43 @@ class _FolderCardContent extends ConsumerWidget {
             ),
           ),
           
-          const SizedBox(width: 8.0), // Reduced spacing
-          
-          // Text content section (right)
+          // Text content section with padding
           Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisAlignment: MainAxisAlignment.center,
-              mainAxisSize: MainAxisSize.min, // Important: minimize column height
-              children: [
-                Text(
-                  folderName,
-                  style: CupertinoTheme.of(context)
-                      .textTheme
-                      .textStyle
-                      .copyWith(
-                        fontSize: 13, // Reduced by 1px (was 14)
-                        fontWeight: FontWeight.w600,
-                        color: CupertinoColors.label, // Explicit adaptive color
-                      ),
-                  maxLines: 1, // Only 1 line
-                  overflow: TextOverflow.ellipsis,
-                ),
-                const SizedBox(height: 1.0), // Reduced spacing
-                Text(
-                  '$recipeCount recipes',
-                  style: CupertinoTheme.of(context)
-                      .textTheme
-                      .textStyle
-                      .copyWith(
-                        fontSize: 12, // Smaller font
-                        color: CupertinoColors.secondaryLabel, // This is already adaptive
-                      ),
-                  maxLines: 1, // Only 1 line
-                  overflow: TextOverflow.ellipsis,
-                ),
-              ],
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 8.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisAlignment: MainAxisAlignment.center,
+                mainAxisSize: MainAxisSize.min, // Important: minimize column height
+                children: [
+                  Text(
+                    folderName,
+                    style: CupertinoTheme.of(context)
+                        .textTheme
+                        .textStyle
+                        .copyWith(
+                          fontSize: 13, // Reduced by 1px (was 14)
+                          fontWeight: FontWeight.w600,
+                          color: CupertinoColors.label, // Explicit adaptive color
+                        ),
+                    maxLines: 1, // Only 1 line
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  const SizedBox(height: 1.0), // Reduced spacing
+                  Text(
+                    '$recipeCount recipes',
+                    style: CupertinoTheme.of(context)
+                        .textTheme
+                        .textStyle
+                        .copyWith(
+                          fontSize: 12, // Smaller font
+                          color: CupertinoColors.secondaryLabel, // This is already adaptive
+                        ),
+                    maxLines: 1, // Only 1 line
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ],
+              ),
             ),
           ),
         ],
@@ -310,7 +313,7 @@ class _ThumbnailImageState extends State<_ThumbnailImage> {
     try {
       final imagePath = await widget.thumbnailImage!.getFullPath();
       final imageUrl = widget.thumbnailImage!.getPublicUrlForSize(RecipeImageSize.small) ?? '';
-      
+
       if (mounted) {
         setState(() {
           _cachedImagePath = imagePath;
