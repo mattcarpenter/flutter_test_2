@@ -38,7 +38,7 @@ class PinnedRecipesSection extends ConsumerWidget {
                   Text(
                     'Pinned Recipes',
                     style: AppTypography.h2.copyWith(
-                      color: AppColors.of(context).textPrimary,
+                      color: AppColors.of(context).headingSecondary,
                     ),
                   ),
                   TextButton(

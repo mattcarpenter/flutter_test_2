@@ -52,7 +52,7 @@ class AppTheme {
   static CupertinoThemeData cupertinoLightTheme = CupertinoThemeData(
     brightness: Brightness.light,
     primaryColor: AppColorSwatches.primary[500]!,
-    scaffoldBackgroundColor: Colors.white,  // From our new system
+    scaffoldBackgroundColor: AppColorSwatches.surface[75]!,  // From our new system
     textTheme: CupertinoTextThemeData(
       // textStyle: const TextStyle(fontFamily: 'Inter'), // Commented out - let iOS use SF Pro
       primaryColor: AppColorSwatches.neutral[900]!,

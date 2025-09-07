@@ -119,6 +119,22 @@ class AppColorSwatches {
     900: Color(0xFF0D47A1),  // Darkest
   });
 
+  static const MaterialColor surface = MaterialColor(0xFFD9BCA3, {
+    50:  Color(0xFFFCF9F7), // Almost white, warm tint
+    75:  Color(0xFFF9F4F3), // Midpoint between 50 & 100 (new step)
+    100: Color(0xFFF6EFE9), // Very pale beige
+    150: Color(0xFFEFE4DB), // Soft cream
+    200: Color(0xFFE6D7C9), // Light sand
+    300: Color(0xFFE0CCBB), // Pale tan
+    400: Color(0xFFDCC3AF), // Muted beige
+    500: Color(0xFFD9BCA3), // Base surface (warm sandy beige)
+    600: Color(0xFFC3A68F), // Medium beige-brown
+    700: Color(0xFFA68974), // Warm taupe
+    800: Color(0xFF876C5B), // Dark taupe / mocha
+    900: Color(0xFF5E4A3C), // Rich brown
+  });
+
+
   /// Success/Green color palette
   static const MaterialColor success = MaterialColor(0xFF10B981, {
     50: Color(0xFFECFDF5),   // Lightest
@@ -232,6 +248,13 @@ class AppColors {
   Color get textDisabled => brightness == Brightness.light
       ? AppColorSwatches.neutral[400]!
       : AppColorSwatches.neutral[600]!;
+
+  // Heading colors for visual hierarchy
+  Color get headingPrimary => textPrimary;  // Main headings (same as textPrimary)
+
+  Color get headingSecondary => brightness == Brightness.light
+      ? AppColorSwatches.neutral[800]!  // #373737 - slightly lighter than textPrimary
+      : AppColorSwatches.neutral[200]!;  // #FBFBFB - slightly darker than textPrimary
 
   // Border colors
   Color get border => brightness == Brightness.light

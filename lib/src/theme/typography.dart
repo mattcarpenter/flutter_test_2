@@ -1,6 +1,5 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
-import 'colors.dart';
 
 /// Semantic typography system for consistent text styling across the app.
 ///
@@ -37,7 +36,7 @@ class AppTypography {
     height: Platform.isIOS ? 1.3 : 1.2,
     fontFamily: _headingFontFamilyAlternate,
     //letterSpacing: _letterSpacing,
-    color: AppColorSwatches.neutral[700], // Slightly lighter than main body text
+    color: const Color(0xFF1D2129),
   );
 
   static TextStyle get h3 => TextStyle(

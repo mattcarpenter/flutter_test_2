@@ -53,7 +53,7 @@ class RecipesTab extends ConsumerWidget {
                 Text(
                   'Recipe Folders',
                   style: AppTypography.h2.copyWith(
-                    color: AppColors.of(context).textPrimary,
+                    color: AppColors.of(context).headingSecondary,
                   ),
                 ),
                 AppCircleButton(
