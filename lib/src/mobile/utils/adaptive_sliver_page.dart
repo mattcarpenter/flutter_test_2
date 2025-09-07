@@ -3,6 +3,9 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:super_cupertino_navigation_bar/super_cupertino_navigation_bar.dart';
 
+import '../../theme/colors.dart';
+import '../../theme/typography.dart';
+
 /// A custom SearchDelegate that defers building suggestions/results
 /// to the provided searchResultsBuilder.
 class AdaptiveSearchDelegate extends SearchDelegate<String> {
@@ -172,7 +175,12 @@ class _AdaptiveSliverPageState extends State<AdaptiveSliverPage> {
                               widget.onSearchChanged?.call(value);
                             },
                           ),
-                          largeTitle: Text(widget.title),
+                          largeTitle: Text(
+                              widget.title,
+                              style: AppTypography.h1.copyWith(
+                                color: AppColors.of(context).textPrimary,
+                              ),
+                          ),
                           transitionBetweenRoutes: true,
                           previousPageTitle: widget.previousPageTitle,
                           trailing: Padding(
@@ -190,7 +198,10 @@ class _AdaptiveSliverPageState extends State<AdaptiveSliverPage> {
                               : null,
                         )
                       : CupertinoSliverNavigationBar(
-                          largeTitle: Text(widget.title),
+                          largeTitle: Text(widget.title,
+                              style: AppTypography.h1.copyWith(
+                                color: AppColors.of(context).textPrimary,
+                              )),
                           transitionBetweenRoutes: true,
                           previousPageTitle: widget.previousPageTitle,
                           trailing: Padding(
@@ -213,7 +224,10 @@ class _AdaptiveSliverPageState extends State<AdaptiveSliverPage> {
                               widget.onSearchChanged?.call(value);
                             },
                           ),
-                          largeTitle: Text(widget.title),
+                          largeTitle: Text(widget.title,
+                              style: AppTypography.h1.copyWith(
+                                color: AppColors.of(context).textPrimary,
+                              )),
                           transitionBetweenRoutes: true,
                           previousPageTitle: widget.previousPageTitle,
                           trailing: widget.trailing,
@@ -231,7 +245,10 @@ class _AdaptiveSliverPageState extends State<AdaptiveSliverPage> {
                               : null,
                         )
                       : CupertinoSliverNavigationBar(
-                          largeTitle: Text(widget.title),
+                          largeTitle: Text(widget.title,
+                              style: AppTypography.h1.copyWith(
+                                color: AppColors.of(context).textPrimary,
+                              )),
                           transitionBetweenRoutes: true,
                           previousPageTitle: widget.previousPageTitle,
                           trailing: widget.trailing,
@@ -282,7 +299,10 @@ class _AdaptiveSliverPageState extends State<AdaptiveSliverPage> {
             keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
             slivers: [
               SliverAppBar(
-                title: Text(widget.title),
+                title: Text(widget.title,
+                    style: AppTypography.h1.copyWith(
+                      color: AppColors.of(context).textPrimary,
+                    )),
                 floating: true,
                 pinned: true,
                 // leadingPadding:

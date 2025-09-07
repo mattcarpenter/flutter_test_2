@@ -38,7 +38,7 @@ class RecentlyViewedSection extends ConsumerWidget {
                 children: [
                   Text(
                     'Recently Viewed',
-                    style: AppTypography.h4.copyWith(
+                    style: AppTypography.h2.copyWith(
                       color: AppColors.of(context).textPrimary,
                     ),
                   ),
@@ -70,8 +70,8 @@ class RecentlyViewedSection extends ConsumerWidget {
                 ),
               );
             }),
-            
-            // Bottom margin to prevent scroll feedback loops  
+
+            // Bottom margin to prevent scroll feedback loops
             const SizedBox(height: 80), // Extra space to prevent scroll bounce at bottom
           ],
         );

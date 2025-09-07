@@ -52,7 +52,7 @@ class RecipesTab extends ConsumerWidget {
               children: [
                 Text(
                   'Recipe Folders',
-                  style: AppTypography.h3.copyWith(
+                  style: AppTypography.h2.copyWith(
                     color: AppColors.of(context).textPrimary,
                   ),
                 ),
@@ -73,7 +73,7 @@ class RecipesTab extends ConsumerWidget {
         const SliverToBoxAdapter(
           child: PinnedRecipesSection(),
         ),
-        // Recently viewed recipes section  
+        // Recently viewed recipes section
         const SliverToBoxAdapter(
           child: RecentlyViewedSection(),
         ),

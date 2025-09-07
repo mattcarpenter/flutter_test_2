@@ -107,7 +107,7 @@ flutter:
   fonts:
     - family: Playfair Display
       fonts:
-        - asset: assets/fonts/CrimsonText-Regular.ttf
+        - asset: assets/fonts/Unna-Bold.ttf
           weight: 700
     - family: Inter
       fonts:

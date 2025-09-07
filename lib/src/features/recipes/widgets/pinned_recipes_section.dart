@@ -37,7 +37,7 @@ class PinnedRecipesSection extends ConsumerWidget {
                 children: [
                   Text(
                     'Pinned Recipes',
-                    style: AppTypography.h4.copyWith(
+                    style: AppTypography.h2.copyWith(
                       color: AppColors.of(context).textPrimary,
                     ),
                   ),
@@ -64,7 +64,7 @@ class PinnedRecipesSection extends ConsumerWidget {
                   final recipe = pinnedRecipes[index];
                   final isFirst = index == 0;
                   final isLast = index == pinnedRecipes.length - 1;
-                  
+
                   return Container(
                     margin: EdgeInsets.only(
                       left: isFirst ? 16.0 : 0.0,  // First card aligns with headers
