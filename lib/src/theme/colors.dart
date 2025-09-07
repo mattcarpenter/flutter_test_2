@@ -26,6 +26,7 @@ class AppColorSwatches {
 
   // Updated neutral pallette with no tone
   static const MaterialColor neutral = MaterialColor(0xFF222222, {
+    0:   Color(0xFFFFFFFF),
     50:  Color(0xFFFFFFFF),
     100: Color(0xFFFFFFFF),
     200: Color(0xFFFBFBFB),
@@ -198,6 +199,10 @@ class AppColors {
       ? Colors.white  // #FFFFFF - better hierarchy, was neutral[50]
       : const Color(0xFF121212);  // True Material Design dark, was neutral[900]
 
+  Color get scaffoldBackground => brightness == Brightness.light
+      ? AppColorSwatches.surface[75]!  // #F9F4F3 - matches Cupertino theme
+      : const Color(0xFF121212);  // Matches dark theme scaffold
+
   Color get input => brightness == Brightness.light
       ? AppColorSwatches.neutral[250]!
       : AppColorSwatches.neutral[800]!;
@@ -212,7 +217,7 @@ class AppColors {
 
   // Elevated card surface - subtle elevation through color
   Color get surfaceElevated => brightness == Brightness.light
-      ? AppColorSwatches.surface[100]!  // Soft cream
+      ? AppColorSwatches.neutral[0]!  // Soft cream
       : AppColorSwatches.neutral[800]!;  // Slightly elevated dark surface
 
   // Border for elevated surfaces - complements the surfaceElevated background

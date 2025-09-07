@@ -5,6 +5,7 @@ import 'package:super_context_menu/super_context_menu.dart';
 import '../../../../database/database.dart';
 import '../../../../database/models/recipe_images.dart';
 import '../../../widgets/local_or_network_image.dart';
+import '../../../theme/colors.dart';
 import '../views/add_recipe_modal.dart';
 
 class RecipeTile extends StatefulWidget {
@@ -163,7 +164,7 @@ class _RecipeTileState extends State<RecipeTile> with SingleTickerProviderStateM
 
         return Container(
           decoration: BoxDecoration(
-            color: Colors.transparent,
+            color: AppColors.of(context).scaffoldBackground,
           ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,

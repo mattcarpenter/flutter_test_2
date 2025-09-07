@@ -178,10 +178,10 @@ class _FolderCardContent extends ConsumerWidget {
     return Container(
       decoration: BoxDecoration(
         color: AppColors.of(context).surfaceElevated,
-        border: Border.all(
+        /*border: Border.all(
           color: AppColors.of(context).surfaceElevatedBorder,
           width: 0.5,
-        ),
+        ),*/
         borderRadius: BorderRadius.circular(12.0),
       ),
       clipBehavior: Clip.hardEdge, // Ensure content is clipped to border radius
@@ -210,7 +210,7 @@ class _FolderCardContent extends ConsumerWidget {
               data: (thumbnailImage) => _ThumbnailImage(thumbnailImage: thumbnailImage),
             ),
           ),
-          
+
           // Text content section with padding
           Expanded(
             child: Padding(
@@ -349,10 +349,13 @@ class _ThumbnailImageState extends State<_ThumbnailImage> {
     }
 
     return SizedBox.expand(
-      child: LocalOrNetworkImage(
-        filePath: _cachedImagePath!,
-        url: _cachedImageUrl!,
-        fit: BoxFit.cover,
+      child: Opacity(
+        opacity: 0.75,
+        child: LocalOrNetworkImage(
+          filePath: _cachedImagePath!,
+          url: _cachedImageUrl!,
+          fit: BoxFit.cover,
+        ),
       ),
     );
   }
