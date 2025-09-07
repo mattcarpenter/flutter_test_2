@@ -9,16 +9,23 @@ enum AppCircleButtonIcon {
   close,
 }
 
+enum AppCircleButtonVariant {
+  primary,
+  neutral,
+}
+
 class AppCircleButton extends StatelessWidget {
   final AppCircleButtonIcon icon;
   final VoidCallback? onPressed;
   final double size;
+  final AppCircleButtonVariant variant;
 
   const AppCircleButton({
     Key? key,
     required this.icon,
     this.onPressed,
     this.size = 26.0,
+    this.variant = AppCircleButtonVariant.primary,
   }) : super(key: key);
 
   IconData get _iconData {
@@ -39,19 +46,35 @@ class AppCircleButton extends StatelessWidget {
     final brightness = Theme.of(context).brightness;
     final isLight = brightness == Brightness.light;
 
-    // Adaptive colors based on theme
-    final backgroundColor = isLight
-        ? AppColorSwatches.primary[100]! // Very light coral
-        : AppColorSwatches.primary[900]!.withOpacity(0.3); // Dark coral with opacity
+    // Adaptive colors based on variant
+    final Color backgroundColor;
+    final Color iconColor;
+    final Color pressedBackgroundColor;
 
-    final iconColor = isLight
-        ? AppColorSwatches.primary[500]! // Use base vibrant coral instead of dark
-        : AppColorSwatches.primary[300]!; // Light coral
-
-    // Pressed state colors
-    final pressedBackgroundColor = isLight
-        ? AppColorSwatches.primary[200]! // Slightly darker on press
-        : AppColorSwatches.primary[900]!.withOpacity(0.4);
+    switch (variant) {
+      case AppCircleButtonVariant.primary:
+        backgroundColor = isLight
+            ? AppColorSwatches.primary[150]! // Very light coral
+            : AppColorSwatches.primary[900]!.withOpacity(0.3); // Dark coral with opacity
+        iconColor = isLight
+            ? AppColorSwatches.primary[600]! // Use base vibrant coral instead of dark
+            : AppColorSwatches.primary[300]!; // Light coral
+        pressedBackgroundColor = isLight
+            ? AppColorSwatches.primary[200]! // Slightly darker on press
+            : AppColorSwatches.primary[900]!.withOpacity(0.4);
+        break;
+      case AppCircleButtonVariant.neutral:
+        backgroundColor = isLight
+            ? AppColorSwatches.neutral[250]! // Light neutral
+            : AppColorSwatches.neutral[800]!.withOpacity(0.3); // Dark neutral with opacity
+        iconColor = isLight
+            ? AppColorSwatches.neutral[600]! // Medium neutral
+            : AppColorSwatches.neutral[400]!; // Light neutral
+        pressedBackgroundColor = isLight
+            ? AppColorSwatches.neutral[300]! // Slightly darker on press
+            : AppColorSwatches.neutral[800]!.withOpacity(0.4);
+        break;
+    }
 
     return GestureDetector(
       onTap: onPressed,

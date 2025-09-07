@@ -55,6 +55,7 @@ class AddFolderModalPage {
         padding: EdgeInsets.only(right: AppSpacing.lg),
         child: AppCircleButton(
           icon: AppCircleButtonIcon.close,
+          variant: AppCircleButtonVariant.neutral,
           onPressed: () => Navigator.of(context).pop(),
         ),
       ),
@@ -148,7 +149,7 @@ class _AddFolderFormState extends ConsumerState<AddFolderForm> {
       children: [
         AppTextFieldSimple(
           controller: widget.controller,
-          placeholder: 'Search',
+          placeholder: 'Enter Folder Name',
           autofocus: true,
           enabled: !_isCreating,
           onChanged: _onTextChanged,

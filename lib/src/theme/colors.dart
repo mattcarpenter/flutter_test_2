@@ -41,7 +41,7 @@ class AppColorSwatches {
   });
 
   /// Primary color - Coral/Salmon red
-  static const MaterialColor primary = MaterialColor(0xFFFF595E, {
+  /*static const MaterialColor primary = MaterialColor(0xFFFF595E, {
     50: Color(0xFFFFF1F1),   // Lightest tint
     100: Color(0xFFFFE1E2),  // Very light
     200: Color(0xFFFFC7C9),  // Light
@@ -52,7 +52,30 @@ class AppColorSwatches {
     700: Color(0xFFC92428),  // Dark
     800: Color(0xFFA52322),  // Darker
     900: Color(0xFF8A2522),  // Darkest
+  });*/
+
+  static const MaterialColor primary = MaterialColor(0xFFF27405, {
+    50:  Color(0xFFFFF4E8), // Very pale cream
+    100: Color(0xFFFFE6CC), // Soft apricot
+    150: Color(0xFFFFD7B3), // Light peach (extra step)
+    200: Color(0xFFFFBF80), // Muted orange
+    300: Color(0xFFFF9F40), // Bright pumpkin
+    400: Color(0xFFFF861A), // Vivid orange
+    500: Color(0xFFF27405), // Base (bold orange)
+    600: Color(0xFFD36204), // Burnt orange
+    700: Color(0xFFAA4E03), // Deep amber
+    800: Color(0xFF803B02), // Dark umber
+    900: Color(0xFF552801), // Almost black brown-orange
   });
+
+
+
+
+
+
+
+
+
 
   /// Secondary color - Teal/Cyan
   static const MaterialColor secondary = MaterialColor(0xFF03DAC6, {
