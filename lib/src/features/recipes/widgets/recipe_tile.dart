@@ -118,10 +118,13 @@ class _RecipeTileState extends State<RecipeTile> with SingleTickerProviderStateM
         final tileWidth = constraints.maxWidth;
         final tileHeight = constraints.maxHeight;
 
-        // Constants for spacing only - heights will be dynamic
+        // Constants for spacing and text area height
         const double spacingAboveName = 8.0;
         const double spacingBetweenNameAndDetails = 4.0;
         const double bottomSpacing = 8.0;
+        
+        // Reserve fixed space for text content (2 lines title + 1 line subtitle + spacing)
+        const double reservedTextHeight = 66.0; // 8 + 32 + 4 + 14 + 8
 
         // Format time display
         String timeDisplay = '';
@@ -160,13 +163,15 @@ class _RecipeTileState extends State<RecipeTile> with SingleTickerProviderStateM
 
         return Container(
           decoration: BoxDecoration(
-            color: Colors.white,
+            color: Colors.transparent,
           ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Image takes up remaining space - dynamic height
-              Expanded(
+              // Image takes up calculated space, leaving room for text
+              Container(
+                height: tileHeight - reservedTextHeight,
+                width: double.infinity,
                 child: FutureBuilder<String>(
                   future: coverImage?.getFullPath() ?? Future.value(''),
                   builder: (context, snapshot) {
@@ -187,12 +192,12 @@ class _RecipeTileState extends State<RecipeTile> with SingleTickerProviderStateM
                           ? LocalOrNetworkImage(
                               filePath: coverImageFilePath,
                               url: coverImageUrl,
-                              height: double.infinity,  // Fill expanded space
+                              height: double.infinity,  // Fill container space
                               width: double.infinity,
                               fit: BoxFit.cover,
                             )
                           : Container(
-                              height: double.infinity,  // Fill expanded space
+                              height: double.infinity,  // Fill container space
                               width: double.infinity,
                               color: Colors.grey[100],
                               child: Center(
