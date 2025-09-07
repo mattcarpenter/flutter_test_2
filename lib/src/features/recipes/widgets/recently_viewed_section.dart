@@ -38,7 +38,7 @@ class RecentlyViewedSection extends ConsumerWidget {
                 children: [
                   Text(
                     'Recently Viewed',
-                    style: AppTypography.h2.copyWith(
+                    style: AppTypography.h2Serif.copyWith(
                       color: AppColors.of(context).headingSecondary,
                     ),
                   ),

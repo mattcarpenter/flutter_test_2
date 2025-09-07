@@ -20,12 +20,12 @@ class AppTypography {
   static FontWeight get _semiBoldWeight => FontWeight.w600;
   static FontWeight get _mediumWeight => FontWeight.w500;
   static double? get _letterSpacing => Platform.isIOS ? -0.41 : 0; // SF Pro handles spacing automatically
-  // Headings - for page titles, section headers, and content hierarchy
+  // Headings - for page titles, section headers, and content hierarchy (SF Pro Rounded)
   static TextStyle get h1 => TextStyle(
     fontSize: 32,
     fontWeight: _boldWeight,
     height: Platform.isIOS ? 1.3 : 1.2, // iOS needs slightly more line height
-    fontFamily: _headingFontFamilyAlternate,
+    fontFamily: _headingFontFamily,
     letterSpacing: _letterSpacing,
     color: const Color(0xFF1D2129),
   );
@@ -34,8 +34,8 @@ class AppTypography {
     fontSize: 24,
     fontWeight: _boldWeight,
     height: Platform.isIOS ? 1.3 : 1.2,
-    fontFamily: _headingFontFamilyAlternate,
-    //letterSpacing: _letterSpacing,
+    fontFamily: _headingFontFamily,
+    letterSpacing: _letterSpacing,
     color: const Color(0xFF1D2129),
   );
 
@@ -43,8 +43,8 @@ class AppTypography {
     fontSize: 20,
     fontWeight: _semiBoldWeight,
     height: Platform.isIOS ? 1.4 : 1.3,
-    fontFamily: _headingFontFamilyAlternate,
-    //letterSpacing: 0.36,
+    fontFamily: _headingFontFamily,
+    letterSpacing: 0.36,
     color: const Color(0xFF1D2129),
   );
 
@@ -52,8 +52,42 @@ class AppTypography {
     fontSize: 18,
     fontWeight: _boldWeight,
     height: Platform.isIOS ? 1.4 : 1.3,
+    fontFamily: _headingFontFamily,
+    letterSpacing: 0.37,
+    color: const Color(0xFF1D2129),
+  );
+
+  // Serif headings - for editorial content and section titles (Playfair Display)
+  static TextStyle get h1Serif => TextStyle(
+    fontSize: 32,
+    fontWeight: _boldWeight,
+    height: Platform.isIOS ? 1.3 : 1.2,
     fontFamily: _headingFontFamilyAlternate,
-    //letterSpacing: 0.37,
+    letterSpacing: _letterSpacing,
+    color: const Color(0xFF1D2129),
+  );
+
+  static TextStyle get h2Serif => TextStyle(
+    fontSize: 24,
+    fontWeight: _boldWeight,
+    height: Platform.isIOS ? 1.3 : 1.2,
+    fontFamily: _headingFontFamilyAlternate,
+    color: const Color(0xFF1D2129),
+  );
+
+  static TextStyle get h3Serif => TextStyle(
+    fontSize: 20,
+    fontWeight: _semiBoldWeight,
+    height: Platform.isIOS ? 1.4 : 1.3,
+    fontFamily: _headingFontFamilyAlternate,
+    color: const Color(0xFF1D2129),
+  );
+
+  static TextStyle get h4Serif => TextStyle(
+    fontSize: 18,
+    fontWeight: _boldWeight,
+    height: Platform.isIOS ? 1.4 : 1.3,
+    fontFamily: _headingFontFamilyAlternate,
     color: const Color(0xFF1D2129),
   );
 

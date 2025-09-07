@@ -177,7 +177,7 @@ class _AdaptiveSliverPageState extends State<AdaptiveSliverPage> {
                           ),
                           largeTitle: Text(
                               widget.title,
-                              style: AppTypography.h1.copyWith(
+                              style: AppTypography.h1Serif.copyWith(
                                 color: AppColors.of(context).textPrimary,
                               ),
                           ),
@@ -199,7 +199,7 @@ class _AdaptiveSliverPageState extends State<AdaptiveSliverPage> {
                         )
                       : CupertinoSliverNavigationBar(
                           largeTitle: Text(widget.title,
-                              style: AppTypography.h1.copyWith(
+                              style: AppTypography.h1Serif.copyWith(
                                 color: AppColors.of(context).textPrimary,
                               )),
                           transitionBetweenRoutes: true,
@@ -225,7 +225,7 @@ class _AdaptiveSliverPageState extends State<AdaptiveSliverPage> {
                             },
                           ),
                           largeTitle: Text(widget.title,
-                              style: AppTypography.h1.copyWith(
+                              style: AppTypography.h1Serif.copyWith(
                                 color: AppColors.of(context).textPrimary,
                               )),
                           transitionBetweenRoutes: true,
@@ -246,7 +246,7 @@ class _AdaptiveSliverPageState extends State<AdaptiveSliverPage> {
                         )
                       : CupertinoSliverNavigationBar(
                           largeTitle: Text(widget.title,
-                              style: AppTypography.h1.copyWith(
+                              style: AppTypography.h1Serif.copyWith(
                                 color: AppColors.of(context).textPrimary,
                               )),
                           transitionBetweenRoutes: true,
@@ -300,7 +300,7 @@ class _AdaptiveSliverPageState extends State<AdaptiveSliverPage> {
             slivers: [
               SliverAppBar(
                 title: Text(widget.title,
-                    style: AppTypography.h1.copyWith(
+                    style: AppTypography.h1Serif.copyWith(
                       color: AppColors.of(context).textPrimary,
                     )),
                 floating: true,

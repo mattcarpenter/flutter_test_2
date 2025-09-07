@@ -52,7 +52,7 @@ class RecipesTab extends ConsumerWidget {
               children: [
                 Text(
                   'Recipe Folders',
-                  style: AppTypography.h2.copyWith(
+                  style: AppTypography.h2Serif.copyWith(
                     color: AppColors.of(context).headingSecondary,
                   ),
                 ),
