@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:super_context_menu/super_context_menu.dart';
 import '../../../providers/folder_thumbnail_provider.dart';
 import '../../../theme/colors.dart';
+import '../../../theme/spacing.dart';
 import '../../../widgets/local_or_network_image.dart';
 import '../../../../database/models/recipe_images.dart';
 
@@ -187,34 +188,35 @@ class _FolderCardContent extends ConsumerWidget {
       clipBehavior: Clip.hardEdge, // Ensure content is clipped to border radius
       child: Row(
         children: [
-          // Thumbnail section - slightly narrower than square
-          Container(
-            width: thumbnailSize,
-            decoration: BoxDecoration(
-              color: CupertinoColors.systemGrey6,
-              borderRadius: const BorderRadius.only(
-                topRight: Radius.circular(8.0),
-                bottomRight: Radius.circular(8.0),
+          // Thumbnail section - square with margins
+          Padding(
+            padding: const EdgeInsets.fromLTRB(6.0, 4.0, 4.0, 4.0), // Minimal padding with left compensation
+            child: Container(
+              width: thumbnailSize,
+              height: thumbnailSize,
+              decoration: BoxDecoration(
+                color: CupertinoColors.systemGrey6,
+                borderRadius: BorderRadius.circular(8.0), // Rounded corners on all sides
               ),
-            ),
-            clipBehavior: Clip.hardEdge,
-            child: thumbnailAsyncValue.when(
-              loading: () => const Center(
-                child: SizedBox(
-                  width: 20,
-                  height: 20,
-                  child: CircularProgressIndicator(strokeWidth: 2),
+              clipBehavior: Clip.hardEdge,
+              child: thumbnailAsyncValue.when(
+                loading: () => const Center(
+                  child: SizedBox(
+                    width: 20,
+                    height: 20,
+                    child: CircularProgressIndicator(strokeWidth: 2),
+                  ),
                 ),
+                error: (error, stack) => _buildFolderIcon(),
+                data: (thumbnailImage) => _ThumbnailImage(thumbnailImage: thumbnailImage),
               ),
-              error: (error, stack) => _buildFolderIcon(),
-              data: (thumbnailImage) => _ThumbnailImage(thumbnailImage: thumbnailImage),
             ),
           ),
 
-          // Text content section with padding
+          // Text content section with adjusted padding
           Expanded(
             child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 8.0),
+              padding: const EdgeInsets.only(right: AppSpacing.md),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 mainAxisAlignment: MainAxisAlignment.center,
@@ -349,13 +351,10 @@ class _ThumbnailImageState extends State<_ThumbnailImage> {
     }
 
     return SizedBox.expand(
-      child: Opacity(
-        opacity: 0.75,
-        child: LocalOrNetworkImage(
-          filePath: _cachedImagePath!,
-          url: _cachedImageUrl!,
-          fit: BoxFit.cover,
-        ),
+      child: LocalOrNetworkImage(
+        filePath: _cachedImagePath!,
+        url: _cachedImageUrl!,
+        fit: BoxFit.cover,
       ),
     );
   }
