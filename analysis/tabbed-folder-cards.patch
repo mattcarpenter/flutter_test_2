@@ -1,0 +1,135 @@
+diff --git a/lib/src/features/recipes/widgets/folder_card.dart b/lib/src/features/recipes/widgets/folder_card.dart
+index 061638c..be87ae6 100644
+--- a/lib/src/features/recipes/widgets/folder_card.dart
++++ b/lib/src/features/recipes/widgets/folder_card.dart
+@@ -8,6 +8,80 @@ import '../../../theme/spacing.dart';
+ import '../../../widgets/local_or_network_image.dart';
+ import '../../../../database/models/recipe_images.dart';
+ 
++/// Custom clipper to create a folder tab shape
++class FolderTabClipper extends CustomClipper<Path> {
++  final double tabWidth;
++  final double stepDown;
++  final double cornerRadius;
++  final double transitionCurve;
++
++  const FolderTabClipper({
++    required this.tabWidth,
++    this.stepDown = 10.0,
++    this.cornerRadius = 12.0,
++    this.transitionCurve = 8.0,
++  });
++
++  @override
++  Path getClip(Size size) {
++    final path = Path();
++    
++    // Start from bottom-left corner with radius
++    path.moveTo(0, size.height - cornerRadius);
++    path.quadraticBezierTo(0, size.height, cornerRadius, size.height);
++    
++    // Bottom edge
++    path.lineTo(size.width - cornerRadius, size.height);
++    
++    // Bottom-right corner
++    path.quadraticBezierTo(
++      size.width, size.height,
++      size.width, size.height - cornerRadius,
++    );
++    
++    // Right edge up to the body top
++    path.lineTo(size.width, stepDown + cornerRadius);
++    
++    // Top-right corner of body section
++    path.quadraticBezierTo(
++      size.width, stepDown,
++      size.width - cornerRadius, stepDown,
++    );
++    
++    // Top edge of body section, moving left towards the tab transition
++    path.lineTo(tabWidth + transitionCurve * 2, stepDown);
++    
++    // Smooth curve up and over the "elbow" then back to horizontal
++    path.cubicTo(
++      tabWidth + transitionCurve, stepDown,        // First control point (start curving up)
++      tabWidth + transitionCurve, 0,               // Second control point (peak of curve)
++      tabWidth, 0,                                 // End point back at horizontal (top of tab)
++    );
++    
++    // Horizontal top edge of tab with rounded corner
++    path.lineTo(tabWidth - cornerRadius, 0);
++    
++    // Continue top edge to left
++    path.lineTo(cornerRadius, 0);
++    
++    // Top-left corner
++    path.quadraticBezierTo(0, 0, 0, cornerRadius);
++    
++    // Left edge down to start
++    path.close();
++    
++    return path;
++  }
++
++  @override
++  bool shouldReclip(FolderTabClipper oldClipper) {
++    return tabWidth != oldClipper.tabWidth ||
++           stepDown != oldClipper.stepDown ||
++           cornerRadius != oldClipper.cornerRadius ||
++           transitionCurve != oldClipper.transitionCurve;
++  }
++}
++
+ class FolderCard extends ConsumerStatefulWidget {
+   final String folderId;
+   final String folderName;
+@@ -175,18 +249,30 @@ class _FolderCardContent extends ConsumerWidget {
+   @override
+   Widget build(BuildContext context, WidgetRef ref) {
+     final thumbnailAsyncValue = ref.watch(folderThumbnailProvider(folderId));
+-
+-    return Container(
+-      decoration: BoxDecoration(
+-        color: AppColors.of(context).surfaceElevated,
+-        /*border: Border.all(
+-          color: AppColors.of(context).surfaceElevatedBorder,
+-          width: 0.5,
+-        ),*/
+-        borderRadius: BorderRadius.circular(12.0),
++    
++    // Calculate tab width based on thumbnail size and padding - slightly reduced
++    final double tabWidth = thumbnailSize + 12.0 + 6.0; // left padding + thumbnail + minimal right space
++
++    return ClipPath(
++      clipper: FolderTabClipper(
++        tabWidth: tabWidth,
++        stepDown: 8.0, // How much lower the body section is
++        cornerRadius: 12.0,
++        transitionCurve: 6.0,
+       ),
+-      clipBehavior: Clip.hardEdge, // Ensure content is clipped to border radius
+-      child: Row(
++      child: Container(
++        decoration: BoxDecoration(
++          color: AppColors.of(context).surfaceElevated,
++          // Add subtle shadow for depth
++          boxShadow: [
++            BoxShadow(
++              color: Colors.black.withOpacity(0.08),
++              blurRadius: 4,
++              offset: const Offset(0, 2),
++            ),
++          ],
++        ),
++        child: Row(
+         children: [
+           // Thumbnail section - square with margins
+           Padding(
+@@ -254,6 +340,7 @@ class _FolderCardContent extends ConsumerWidget {
+           ),
+         ],
+       ),
++      ),
+     );
+   }
+ 

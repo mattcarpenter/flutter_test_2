@@ -233,7 +233,7 @@ class _UnifiedHeaderDelegate extends SliverPersistentHeaderDelegate {
   Widget build(BuildContext context, double shrinkOffset, bool overlapsContent) {
     return Material(
       elevation: overlapsContent ? 1.0 : 0.0,
-      color: Colors.white.withValues(alpha: 0.95),
+      color: Colors.transparent,
       child: Container(
         height: minExtent,
         padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
