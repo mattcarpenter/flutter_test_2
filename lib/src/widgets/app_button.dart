@@ -123,8 +123,8 @@ class _AppButtonState extends State<AppButton> {
     if (widget.style == AppButtonStyle.mutedOutline) {
       // Muted outline uses very subtle border
       return widget.theme == AppButtonTheme.primary
-          ? colors.textPrimary.withOpacity(0.35) // Very light border
-          : colors.primary.withOpacity(0.35);
+          ? colors.textPrimary.withOpacity(0.20) // Even lighter border
+          : colors.primary.withOpacity(0.20);
     }
 
     // For outline styles, use the theme color for border
@@ -165,10 +165,10 @@ class _AppButtonState extends State<AppButton> {
     }
 
     if (widget.style == AppButtonStyle.mutedOutline) {
-      // Muted outline uses lighter text
+      // Muted outline uses darker text (improved readability)
       return widget.theme == AppButtonTheme.primary
-          ? colors.textPrimary.withOpacity(0.65)
-          : colors.primary.withOpacity(0.65);
+          ? colors.textPrimary.withOpacity(0.85)
+          : colors.primary.withOpacity(0.85);
     }
 
     // Outline styles use theme color for text
@@ -379,11 +379,13 @@ class _AppButtonState extends State<AppButton> {
                   mainAxisAlignment: widget.trailingIcon != null 
                       ? MainAxisAlignment.spaceBetween 
                       : MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
                     // Leading content (icon + text) - grouped together when trailing icon exists
                     if (widget.trailingIcon != null && !widget.loading)
                       Row(
                         mainAxisSize: MainAxisSize.min,
+                        crossAxisAlignment: CrossAxisAlignment.center,
                         children: [
                           if (widget.loading) ...[
                             SizedBox(
