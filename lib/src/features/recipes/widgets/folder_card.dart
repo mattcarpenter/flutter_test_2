@@ -190,7 +190,7 @@ class _FolderCardContent extends ConsumerWidget {
         children: [
           // Thumbnail section - square with margins
           Padding(
-            padding: const EdgeInsets.fromLTRB(6.0, 4.0, 4.0, 4.0), // Minimal padding with left compensation
+            padding: const EdgeInsets.fromLTRB(12.0, 6.0, 6.0, 6.0), // More left padding for equal visual margins
             child: Container(
               width: thumbnailSize,
               height: thumbnailSize,

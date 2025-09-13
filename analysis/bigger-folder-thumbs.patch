@@ -1,0 +1,48 @@
+diff --git a/lib/src/features/recipes/widgets/folder_card.dart b/lib/src/features/recipes/widgets/folder_card.dart
+index 864bf3e..061638c 100644
+--- a/lib/src/features/recipes/widgets/folder_card.dart
++++ b/lib/src/features/recipes/widgets/folder_card.dart
+@@ -190,7 +190,7 @@ class _FolderCardContent extends ConsumerWidget {
+         children: [
+           // Thumbnail section - square with margins
+           Padding(
+-            padding: const EdgeInsets.fromLTRB(6.0, 4.0, 4.0, 4.0), // Minimal padding with left compensation
++            padding: const EdgeInsets.fromLTRB(12.0, 6.0, 6.0, 6.0), // More left padding for equal visual margins
+             child: Container(
+               width: thumbnailSize,
+               height: thumbnailSize,
+diff --git a/lib/src/features/recipes/widgets/folder_list.dart b/lib/src/features/recipes/widgets/folder_list.dart
+index c384e5d..e7d60d6 100644
+--- a/lib/src/features/recipes/widgets/folder_list.dart
++++ b/lib/src/features/recipes/widgets/folder_list.dart
+@@ -69,25 +69,25 @@ class _FolderListState extends ConsumerState<FolderList> {
+                   late final double thumbnailSize;
+                   
+                   if (constraints.maxWidth < 600) {
+-                    // Mobile - larger thumbnails with minimal margins
++                    // Mobile - shorter cards with smaller square thumbnails
+                     columnCount = 2;
+                     cardHeight = 70.0;
+-                    thumbnailSize = 58.0;  // Larger thumbnail, less margin
++                    thumbnailSize = 46.0;  // Reduced for equal margins
+                   } else if (constraints.maxWidth < 900) {
+                     // Large Mobile
+                     columnCount = 3;
+                     cardHeight = 90.0;
+-                    thumbnailSize = 78.0;  // Larger thumbnail, less margin
++                    thumbnailSize = 66.0;  // Reduced for equal margins
+                   } else if (constraints.maxWidth < 1200) {
+                     // iPad
+                     columnCount = 4;
+                     cardHeight = 100.0;
+-                    thumbnailSize = 88.0;  // Larger thumbnail, less margin
++                    thumbnailSize = 76.0;  // Reduced for equal margins
+                   } else {
+                     // Large/Desktop
+                     columnCount = 5;
+                     cardHeight = 110.0;
+-                    thumbnailSize = 98.0;  // Larger thumbnail, less margin
++                    thumbnailSize = 86.0;  // Reduced for equal margins
+                   }
+ 
+                   final spacing = 12.0;

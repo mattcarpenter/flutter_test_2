@@ -69,25 +69,25 @@ class _FolderListState extends ConsumerState<FolderList> {
                   late final double thumbnailSize;
                   
                   if (constraints.maxWidth < 600) {
-                    // Mobile - larger thumbnails with minimal margins
+                    // Mobile - shorter cards with smaller square thumbnails
                     columnCount = 2;
                     cardHeight = 70.0;
-                    thumbnailSize = 58.0;  // Larger thumbnail, less margin
+                    thumbnailSize = 46.0;  // Reduced for equal margins
                   } else if (constraints.maxWidth < 900) {
                     // Large Mobile
                     columnCount = 3;
                     cardHeight = 90.0;
-                    thumbnailSize = 78.0;  // Larger thumbnail, less margin
+                    thumbnailSize = 66.0;  // Reduced for equal margins
                   } else if (constraints.maxWidth < 1200) {
                     // iPad
                     columnCount = 4;
                     cardHeight = 100.0;
-                    thumbnailSize = 88.0;  // Larger thumbnail, less margin
+                    thumbnailSize = 76.0;  // Reduced for equal margins
                   } else {
                     // Large/Desktop
                     columnCount = 5;
                     cardHeight = 110.0;
-                    thumbnailSize = 98.0;  // Larger thumbnail, less margin
+                    thumbnailSize = 86.0;  // Reduced for equal margins
                   }
 
                   final spacing = 12.0;
