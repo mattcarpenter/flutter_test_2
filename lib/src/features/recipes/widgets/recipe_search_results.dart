@@ -7,7 +7,7 @@ import '../../../providers/recipe_provider.dart';
 import '../models/recipe_filter_sort.dart';
 import '../utils/filter_utils.dart';
 import 'filter_sort/unified_sort_filter_sheet.dart';
-import 'filter_sort/recipe_sort_dropdown.dart';
+import '../../../widgets/app_button.dart';
 
 class RecipeSearchResults extends ConsumerWidget {
   final String? folderId;
@@ -121,83 +121,75 @@ class RecipeSearchResults extends ConsumerWidget {
         Padding(
           padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
           child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            mainAxisAlignment: MainAxisAlignment.start,
             children: [
-              // Filter button with counter badge
-              GestureDetector(
-                onTap: () {
-                  showUnifiedSortFilterSheet(
-                    context,
-                    initialState: filterSortState,
-                    showPantryMatchOption: true,
-                    onStateChanged: (newState) {
-                      // Use the updated active filters
-                      for (final entry in filterSortState.activeFilters.entries) {
-                        if (!newState.activeFilters.containsKey(entry.key)) {
+              // Unified filter and sort button
+              Stack(
+                clipBehavior: Clip.none,
+                children: [
+                  AppButton(
+                    text: 'Filter and Sort',
+                    leadingIcon: const Icon(Icons.tune),
+                    style: AppButtonStyle.mutedOutline,
+                    shape: AppButtonShape.square,
+                    size: AppButtonSize.medium,
+                    theme: AppButtonTheme.primary,
+                    onPressed: () {
+                      showUnifiedSortFilterSheet(
+                        context,
+                        initialState: filterSortState,
+                        showPantryMatchOption: true,
+                        onStateChanged: (newState) {
+                          // Use the updated active filters
+                          for (final entry in filterSortState.activeFilters.entries) {
+                            if (!newState.activeFilters.containsKey(entry.key)) {
+                              ref.read(recipeSearchFilterSortProvider.notifier)
+                                .updateFilter(entry.key, null);
+                            }
+                          }
+
+                          for (final entry in newState.activeFilters.entries) {
+                            ref.read(recipeSearchFilterSortProvider.notifier)
+                              .updateFilter(entry.key, entry.value);
+                          }
+
+                          // Update sort options
                           ref.read(recipeSearchFilterSortProvider.notifier)
-                            .updateFilter(entry.key, null);
-                        }
-                      }
+                            .updateSortOption(newState.activeSortOption);
+                          ref.read(recipeSearchFilterSortProvider.notifier)
+                            .updateSortDirection(newState.sortDirection);
 
-                      for (final entry in newState.activeFilters.entries) {
-                        ref.read(recipeSearchFilterSortProvider.notifier)
-                          .updateFilter(entry.key, entry.value);
-                      }
-
-                      if (onFilterSortStateChanged != null) {
-                        // Convert RecipeFilterSortState to UnifiedFilterSortState
-                        final unifiedState = UnifiedFilterSortState(
-                          activeFilters: newState.activeFilters,
-                          activeSortOption: newState.activeSortOption,
-                          sortDirection: newState.sortDirection,
-                          folderId: newState.folderId,
-                          searchQuery: newState.searchQuery,
-                          context: FilterContext.recipeSearch,
-                        );
-                        onFilterSortStateChanged!(unifiedState);
-                      }
+                          if (onFilterSortStateChanged != null) {
+                            // Convert RecipeFilterSortState to UnifiedFilterSortState
+                            final unifiedState = UnifiedFilterSortState(
+                              activeFilters: newState.activeFilters,
+                              activeSortOption: newState.activeSortOption,
+                              sortDirection: newState.sortDirection,
+                              folderId: newState.folderId,
+                              searchQuery: newState.searchQuery,
+                              context: FilterContext.recipeSearch,
+                            );
+                            onFilterSortStateChanged!(unifiedState);
+                          }
+                        },
+                      );
                     },
-                  );
-                },
-                child: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 8.0),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      const Icon(Icons.filter_list),
-                      if (filterSortState.hasFilters)
-                        Container(
-                          margin: const EdgeInsets.only(left: 4),
-                          padding: const EdgeInsets.all(4),
-                          decoration: BoxDecoration(
-                            color: Theme.of(context).colorScheme.primary,
-                            shape: BoxShape.circle,
-                          ),
-                          child: Text(
-                            filterSortState.filterCount.toString(),
-                            style: TextStyle(
-                              color: Theme.of(context).colorScheme.onPrimary,
-                              fontSize: 12,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                        ),
-                    ],
                   ),
-                ),
-              ),
-
-              // Sort dropdown
-              RecipeSortDropdown(
-                sortOption: filterSortState.activeSortOption,
-                sortDirection: filterSortState.sortDirection,
-                onSortOptionChanged: (option) {
-                  ref.read(recipeSearchFilterSortProvider.notifier).updateSortOption(option);
-                },
-                onSortDirectionChanged: (direction) {
-                  ref.read(recipeSearchFilterSortProvider.notifier).updateSortDirection(direction);
-                },
-                showPantryMatchOption: true,
+                  // Active filters indicator
+                  if (filterSortState.hasFilters)
+                    Positioned(
+                      top: -2,
+                      right: -2,
+                      child: Container(
+                        width: 8,
+                        height: 8,
+                        decoration: const BoxDecoration(
+                          color: Colors.red,
+                          shape: BoxShape.circle,
+                        ),
+                      ),
+                    ),
+                ],
               ),
             ],
           ),
