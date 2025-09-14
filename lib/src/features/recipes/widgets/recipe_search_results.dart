@@ -8,6 +8,8 @@ import '../models/recipe_filter_sort.dart';
 import '../utils/filter_utils.dart';
 import 'filter_sort/unified_sort_filter_sheet.dart';
 import '../../../widgets/app_button.dart';
+import '../../../widgets/recipe_list_item.dart';
+import '../../../theme/spacing.dart';
 
 class RecipeSearchResults extends ConsumerWidget {
   final String? folderId;
@@ -207,26 +209,62 @@ class RecipeSearchResults extends ConsumerWidget {
           ),
         ),
 
-        // Results list
+        // Results list with responsive layout
         Expanded(
-          child: ListView.builder(
-            padding: const EdgeInsets.all(16),
-            itemCount: results.length,
-            itemBuilder: (context, index) {
-              final recipe = results[index];
-              return ListTile(
-                title: Text(recipe.title),
-                subtitle: Text(recipe.description ?? ''),
-                onTap: () {
-                  if (onResultSelected != null) {
-                    onResultSelected!(recipe);
-                  }
-                },
-              );
-            },
-          ),
+          child: _buildResponsiveGrid(context, results, onResultSelected),
         ),
       ],
     );
+  }
+
+  Widget _buildResponsiveGrid(BuildContext context, List<RecipeEntry> recipes, void Function(RecipeEntry)? onResultSelected) {
+    final screenWidth = MediaQuery.of(context).size.width;
+    
+    // Responsive layout: 1 column mobile, 2 columns wider screens
+    final crossAxisCount = screenWidth < 600 ? 1 : 2;
+
+    if (crossAxisCount == 1) {
+      // Single column - use simple list
+      return ListView.builder(
+        padding: const EdgeInsets.only(top: AppSpacing.sm),
+        itemCount: recipes.length,
+        itemBuilder: (context, index) {
+          final recipe = recipes[index];
+          return RecipeListItem(
+            recipe: recipe,
+            onTap: () {
+              if (onResultSelected != null) {
+                onResultSelected(recipe);
+              }
+            },
+          );
+        },
+      );
+    } else {
+      // Two column grid
+      return Padding(
+        padding: const EdgeInsets.fromLTRB(AppSpacing.lg, AppSpacing.sm, AppSpacing.lg, AppSpacing.lg),
+        child: GridView.builder(
+        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+          crossAxisCount: crossAxisCount,
+          mainAxisSpacing: AppSpacing.sm,
+          crossAxisSpacing: AppSpacing.lg,
+          childAspectRatio: 4.0, // Wide aspect ratio for recipe list items
+        ),
+        itemCount: recipes.length,
+        itemBuilder: (context, index) {
+          final recipe = recipes[index];
+          return RecipeListItem(
+            recipe: recipe,
+            onTap: () {
+              if (onResultSelected != null) {
+                onResultSelected(recipe);
+              }
+            },
+          );
+        },
+      ),
+      );
+    }
   }
 }
