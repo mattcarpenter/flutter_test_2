@@ -293,12 +293,12 @@ class _StepListItemState extends State<StepListItem> with SingleTickerProviderSt
                           focusNode: _focusNode,
                           child: TextField(
                             controller: _textController,
-                            style: AppTypography.bodySmall.copyWith(
+                            style: AppTypography.fieldInput.copyWith(
                               color: colors.contentSecondary,
                             ),
                             decoration: InputDecoration(
                               hintText: 'Section name',
-                              hintStyle: AppTypography.bodySmall.copyWith(
+                              hintStyle: AppTypography.fieldInput.copyWith(
                                 color: colors.contentHint,
                               ),
                               border: InputBorder.none,
@@ -398,12 +398,12 @@ class _StepListItemState extends State<StepListItem> with SingleTickerProviderSt
                         autofocus: widget.autoFocus,
                         focusNode: _focusNode,
                         controller: _textController,
-                        style: AppTypography.body.copyWith(
+                        style: AppTypography.fieldInput.copyWith(
                           color: colors.contentPrimary,
                         ),
                         decoration: InputDecoration(
                           hintText: 'Describe this step',
-                          hintStyle: AppTypography.body.copyWith(
+                          hintStyle: AppTypography.fieldInput.copyWith(
                             color: colors.contentHint,
                           ),
                           border: InputBorder.none,

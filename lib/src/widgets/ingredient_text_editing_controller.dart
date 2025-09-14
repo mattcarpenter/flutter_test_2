@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../services/ingredient_parser_service.dart';
+import '../theme/colors.dart';
 
 /// Custom TextEditingController that provides real-time syntax highlighting
 /// for ingredient strings, coloring quantities differently from ingredient names.
@@ -64,7 +65,7 @@ class IngredientTextEditingController extends TextEditingController {
         // Quantity with blue color
         children.add(TextSpan(
           text: text.substring(quantity.start, quantity.end),
-          style: baseStyle.copyWith(color: Color(0xFFFF595E), fontWeight: FontWeight.w500),
+          style: baseStyle.copyWith(color: AppColorSwatches.primary[500], fontWeight: FontWeight.w500),
         ));
 
         currentIndex = quantity.end;

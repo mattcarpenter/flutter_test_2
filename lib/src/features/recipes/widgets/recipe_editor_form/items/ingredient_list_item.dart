@@ -340,12 +340,12 @@ class _IngredientListItemState extends ConsumerState<IngredientListItem> with Si
                           autofocus: widget.autoFocus,
                           focusNode: _focusNode,
                           controller: _ingredientController,
-                          style: AppTypography.bodySmall.copyWith(
+                          style: AppTypography.fieldInput.copyWith(
                             color: colors.contentSecondary,
                           ),
                           decoration: InputDecoration(
                             hintText: 'Section name',
-                            hintStyle: AppTypography.bodySmall.copyWith(
+                            hintStyle: AppTypography.fieldInput.copyWith(
                               color: colors.contentHint,
                             ),
                             border: InputBorder.none,
@@ -471,12 +471,12 @@ class _IngredientListItemState extends ConsumerState<IngredientListItem> with Si
                       autofocus: widget.autoFocus,
                       focusNode: _focusNode,
                       controller: _ingredientController,
-                      style: AppTypography.body.copyWith(
+                      style: AppTypography.fieldInput.copyWith(
                         color: colors.contentPrimary,
                       ),
                       decoration: InputDecoration(
                         hintText: 'e.g. 1 cup flour',
-                        hintStyle: AppTypography.body.copyWith(
+                        hintStyle: AppTypography.fieldInput.copyWith(
                           color: colors.contentHint,
                         ),
                         border: InputBorder.none,
