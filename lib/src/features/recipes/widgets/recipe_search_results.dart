@@ -6,7 +6,7 @@ import '../../../providers/recipe_filter_sort_provider.dart';
 import '../../../providers/recipe_provider.dart';
 import '../models/recipe_filter_sort.dart';
 import '../utils/filter_utils.dart';
-import 'filter_sort/recipe_filter_sheet.dart';
+import 'filter_sort/unified_sort_filter_sheet.dart';
 import 'filter_sort/recipe_sort_dropdown.dart';
 
 class RecipeSearchResults extends ConsumerWidget {
@@ -126,10 +126,11 @@ class RecipeSearchResults extends ConsumerWidget {
               // Filter button with counter badge
               GestureDetector(
                 onTap: () {
-                  showRecipeFilterSheet(
+                  showUnifiedSortFilterSheet(
                     context,
                     initialState: filterSortState,
-                    onFilterChanged: (newState) {
+                    showPantryMatchOption: true,
+                    onStateChanged: (newState) {
                       // Use the updated active filters
                       for (final entry in filterSortState.activeFilters.entries) {
                         if (!newState.activeFilters.containsKey(entry.key)) {
@@ -196,7 +197,7 @@ class RecipeSearchResults extends ConsumerWidget {
                 onSortDirectionChanged: (direction) {
                   ref.read(recipeSearchFilterSortProvider.notifier).updateSortDirection(direction);
                 },
-                showPantryMatchOption: false,
+                showPantryMatchOption: true,
               ),
             ],
           ),

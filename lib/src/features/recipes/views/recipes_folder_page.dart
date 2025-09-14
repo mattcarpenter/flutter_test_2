@@ -256,7 +256,7 @@ class _UnifiedHeaderDelegate extends SliverPersistentHeaderDelegate {
                       context,
                       initialState: filterSortState,
                       onStateChanged: onStateChanged,
-                      showPantryMatchOption: false,
+                      showPantryMatchOption: true,
                     );
                   },
                 ),

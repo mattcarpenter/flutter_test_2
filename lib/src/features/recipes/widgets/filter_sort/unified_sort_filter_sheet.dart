@@ -86,6 +86,11 @@ class UnifiedSortFilterContent extends ConsumerStatefulWidget {
 class _UnifiedSortFilterContentState extends ConsumerState<UnifiedSortFilterContent> {
   late RecipeFilterSortState currentState;
 
+  // Local state for multi-select filters
+  late Set<CookTimeFilter> _selectedCookTimes;
+  late Set<RatingFilter> _selectedRatings;
+  late double _pantryMatchPercentage;
+
   // Local state for tag filter
   late Set<String> _selectedTagIds;
   late TagFilterMode _tagFilterMode;
@@ -102,20 +107,22 @@ class _UnifiedSortFilterContentState extends ConsumerState<UnifiedSortFilterCont
       searchQuery: widget.initialState.searchQuery,
     );
 
+    // Initialize cook time filter state
+    final existingCookTimeFilter = currentState.activeFilters[FilterType.cookTime] as CookTimeMultiFilter?;
+    _selectedCookTimes = existingCookTimeFilter?.selectedFilters.toSet() ?? {};
+
+    // Initialize rating filter state
+    final existingRatingFilter = currentState.activeFilters[FilterType.rating] as RatingMultiFilter?;
+    _selectedRatings = existingRatingFilter?.selectedRatings.toSet() ?? {};
+
+    // Initialize pantry match filter state
+    final existingPantryFilter = currentState.activeFilters[FilterType.pantryMatch] as PantryMatchSliderFilter?;
+    _pantryMatchPercentage = existingPantryFilter?.percentage ?? 0.0;
+
     // Initialize tag filter state
     final existingTagFilter = currentState.activeFilters[FilterType.tags] as TagFilter?;
     _selectedTagIds = existingTagFilter?.selectedTagIds.toSet() ?? {};
     _tagFilterMode = existingTagFilter?.mode ?? TagFilterMode.or;
-  }
-
-  void _updateFilter(FilterType type, dynamic value) {
-    setState(() {
-      if (value == null) {
-        currentState = currentState.withoutFilter(type);
-      } else {
-        currentState = currentState.withFilter(type, value);
-      }
-    });
   }
 
   void _updateSort(SortOption option, SortDirection direction) {
@@ -127,7 +134,38 @@ class _UnifiedSortFilterContentState extends ConsumerState<UnifiedSortFilterCont
     });
   }
 
-  void _updateTagFilter() {
+  void _updateAllFilters() {
+    // Update cook time filter
+    if (_selectedCookTimes.isEmpty) {
+      currentState = currentState.withoutFilter(FilterType.cookTime);
+    } else {
+      final cookTimeFilter = CookTimeMultiFilter(
+        selectedFilters: _selectedCookTimes,
+      );
+      currentState = currentState.withFilter(FilterType.cookTime, cookTimeFilter);
+    }
+
+    // Update rating filter
+    if (_selectedRatings.isEmpty) {
+      currentState = currentState.withoutFilter(FilterType.rating);
+    } else {
+      final ratingFilter = RatingMultiFilter(
+        selectedRatings: _selectedRatings,
+      );
+      currentState = currentState.withFilter(FilterType.rating, ratingFilter);
+    }
+
+    // Update pantry match filter
+    if (_pantryMatchPercentage == 0.0) {
+      currentState = currentState.withoutFilter(FilterType.pantryMatch);
+    } else {
+      final pantryFilter = PantryMatchSliderFilter(
+        percentage: _pantryMatchPercentage,
+      );
+      currentState = currentState.withFilter(FilterType.pantryMatch, pantryFilter);
+    }
+
+    // Update tag filter
     if (_selectedTagIds.isEmpty) {
       currentState = currentState.withoutFilter(FilterType.tags);
     } else {
@@ -141,8 +179,6 @@ class _UnifiedSortFilterContentState extends ConsumerState<UnifiedSortFilterCont
 
   @override
   Widget build(BuildContext context) {
-    final colors = AppColors.of(context);
-
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       mainAxisSize: MainAxisSize.min,
@@ -196,8 +232,8 @@ class _UnifiedSortFilterContentState extends ConsumerState<UnifiedSortFilterCont
                 text: 'Apply Changes',
                 theme: AppButtonTheme.secondary,
                 onPressed: () {
-                  // Update tag filter in current state before applying
-                  _updateTagFilter();
+                  // Update all filters in current state before applying
+                  _updateAllFilters();
                   widget.onStateChanged(currentState);
                 },
                 fullWidth: true,
@@ -303,7 +339,6 @@ class _UnifiedSortFilterContentState extends ConsumerState<UnifiedSortFilterCont
 
   Widget _buildCookTimeFilter() {
     final colors = AppColors.of(context);
-    final selectedValue = currentState.activeFilters[FilterType.cookTime] as CookTimeFilter?;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -324,16 +359,19 @@ class _UnifiedSortFilterContentState extends ConsumerState<UnifiedSortFilterCont
             runSpacing: AppSpacing.sm,
             alignment: WrapAlignment.start,
             children: CookTimeFilter.values.map((filter) {
-            final isSelected = selectedValue == filter;
+              final isSelected = _selectedCookTimes.contains(filter);
               return AppButton(
                 text: filter.label,
                 size: AppButtonSize.small,
                 style: isSelected ? AppButtonStyle.fill : AppButtonStyle.mutedOutline,
                 onPressed: () {
-                  _updateFilter(
-                    FilterType.cookTime,
-                    isSelected ? null : filter
-                  );
+                  setState(() {
+                    if (isSelected) {
+                      _selectedCookTimes.remove(filter);
+                    } else {
+                      _selectedCookTimes.add(filter);
+                    }
+                  });
                 },
               );
             }).toList(),
@@ -345,7 +383,6 @@ class _UnifiedSortFilterContentState extends ConsumerState<UnifiedSortFilterCont
 
   Widget _buildRatingFilter() {
     final colors = AppColors.of(context);
-    final selectedValue = currentState.activeFilters[FilterType.rating] as RatingFilter?;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -366,16 +403,19 @@ class _UnifiedSortFilterContentState extends ConsumerState<UnifiedSortFilterCont
             runSpacing: AppSpacing.sm,
             alignment: WrapAlignment.start,
             children: RatingFilter.values.map((filter) {
-              final isSelected = selectedValue == filter;
+              final isSelected = _selectedRatings.contains(filter);
               return AppButton(
-                text: filter.label,
+                text: filter.stars,
                 size: AppButtonSize.small,
                 style: isSelected ? AppButtonStyle.fill : AppButtonStyle.mutedOutline,
                 onPressed: () {
-                  _updateFilter(
-                    FilterType.rating,
-                    isSelected ? null : filter
-                  );
+                  setState(() {
+                    if (isSelected) {
+                      _selectedRatings.remove(filter);
+                    } else {
+                      _selectedRatings.add(filter);
+                    }
+                  });
                 },
               );
             }).toList(),
@@ -386,8 +426,22 @@ class _UnifiedSortFilterContentState extends ConsumerState<UnifiedSortFilterCont
   }
 
   Widget _buildPantryMatchFilter() {
+    if (!widget.showPantryMatchOption) {
+      return const SizedBox.shrink();
+    }
+
     final colors = AppColors.of(context);
-    final selectedValue = currentState.activeFilters[FilterType.pantryMatch] as PantryMatchFilter?;
+
+    // Get the label for the current percentage
+    String getSliderLabel(double value) {
+      final percent = (value * 100).round();
+      if (percent == 0) return "Match any recipe (Stock not required)";
+      if (percent == 25) return 'A few ingredients in stock (25%)';
+      if (percent == 50) return 'At least half ingredients in stock (50%)';
+      if (percent == 75) return 'Most ingredients in stock (75%)';
+      if (percent == 100) return 'All ingredients in stock (100%)';
+      return '$percent% match';
+    }
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -401,26 +455,35 @@ class _UnifiedSortFilterContentState extends ConsumerState<UnifiedSortFilterCont
             ),
           ),
         ),
-        SizedBox(
-          width: double.infinity,
-          child: Wrap(
-            spacing: AppSpacing.sm,
-            runSpacing: AppSpacing.sm,
-            alignment: WrapAlignment.start,
-            children: PantryMatchFilter.values.map((filter) {
-              final isSelected = selectedValue == filter;
-              return AppButton(
-                text: filter.label,
-                size: AppButtonSize.small,
-                style: isSelected ? AppButtonStyle.fill : AppButtonStyle.mutedOutline,
-                onPressed: () {
-                  _updateFilter(
-                    FilterType.pantryMatch,
-                    isSelected ? null : filter
-                  );
-                },
-              );
-            }).toList(),
+        SliderTheme(
+          data: SliderTheme.of(context).copyWith(
+            activeTrackColor: colors.primary,
+            inactiveTrackColor: AppColorSwatches.neutral[300],
+            thumbColor: colors.primary,
+            overlayColor: colors.primary.withValues(alpha: 0.1),
+            tickMarkShape: RoundSliderTickMarkShape(),
+            activeTickMarkColor: colors.primary,
+            inactiveTickMarkColor: AppColorSwatches.neutral[400],
+          ),
+          child: Slider(
+            value: _pantryMatchPercentage,
+            min: 0.0,
+            max: 1.0,
+            divisions: 4, // 5 stops: 0%, 25%, 50%, 75%, 100%
+            onChanged: (value) {
+              setState(() {
+                _pantryMatchPercentage = value;
+              });
+            },
+          ),
+        ),
+        Padding(
+          padding: EdgeInsets.only(top: AppSpacing.xs),
+          child: Text(
+            getSliderLabel(_pantryMatchPercentage),
+            style: AppTypography.body.copyWith(
+              color: colors.textSecondary,
+            ),
           ),
         ),
       ],

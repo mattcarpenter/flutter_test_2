@@ -46,10 +46,10 @@ class FilterUtils {
     filterState.activeFilters.forEach((type, value) {
       switch (type) {
         case FilterType.cookTime:
-          predicates.add(_buildCookTimeFilter(value as CookTimeFilter));
+          predicates.add(_buildCookTimeFilter(value as CookTimeMultiFilter));
           break;
         case FilterType.rating:
-          predicates.add(_buildRatingFilter(value as RatingFilter));
+          predicates.add(_buildRatingFilter(value as RatingMultiFilter));
           break;
         case FilterType.pantryMatch:
           if (pantryMatchesAsyncValue.value != null) {
@@ -60,7 +60,7 @@ class FilterUtils {
             }
 
             predicates.add(_buildPantryMatchFilter(
-              value as PantryMatchFilter,
+              value as PantryMatchSliderFilter,
               recipeMatchPercentages
             ));
           }
@@ -220,53 +220,56 @@ class FilterUtils {
   }
 
   // Private predicate builder functions
-  static bool Function(RecipeEntry) _buildCookTimeFilter(CookTimeFilter filter) {
+  static bool Function(RecipeEntry) _buildCookTimeFilter(CookTimeMultiFilter filter) {
     return (recipe) {
+      if (filter.selectedFilters.isEmpty) return true;
+      
       final totalTime = recipe.totalTime ??
                        (recipe.prepTime ?? 0) + (recipe.cookTime ?? 0);
 
       // Skip if we don't have time information
       if (totalTime == 0) return true;
 
-      switch (filter) {
-        case CookTimeFilter.under30Min:
-          return totalTime <= 30;
-        case CookTimeFilter.between30And60Min:
-          return totalTime > 30 && totalTime <= 60;
-        case CookTimeFilter.between1And2Hours:
-          return totalTime > 60 && totalTime <= 120;
-        case CookTimeFilter.over2Hours:
-          return totalTime > 120;
-      }
+      // Check if recipe matches ANY of the selected time ranges
+      return filter.selectedFilters.any((cookTimeFilter) {
+        switch (cookTimeFilter) {
+          case CookTimeFilter.under30Min:
+            return totalTime <= 30;
+          case CookTimeFilter.between30And60Min:
+            return totalTime > 30 && totalTime <= 60;
+          case CookTimeFilter.between1And2Hours:
+            return totalTime > 60 && totalTime <= 120;
+          case CookTimeFilter.over2Hours:
+            return totalTime > 120;
+        }
+      });
     };
   }
 
-  static bool Function(RecipeEntry) _buildRatingFilter(RatingFilter filter) {
+  static bool Function(RecipeEntry) _buildRatingFilter(RatingMultiFilter filter) {
     return (recipe) {
+      if (filter.selectedRatings.isEmpty) return true;
+      
       // Skip if recipe has no rating
       if (recipe.rating == null) return true;
-      return recipe.rating! >= filter.value;
+      
+      // Check if recipe rating exactly matches ANY of the selected ratings
+      return filter.selectedRatings.any((ratingFilter) => 
+        recipe.rating == ratingFilter.value
+      );
     };
   }
 
   static bool Function(RecipeEntry) _buildPantryMatchFilter(
-    PantryMatchFilter filter,
+    PantryMatchSliderFilter filter,
     Map<String, int> recipeMatchPercentages,
   ) {
     return (recipe) {
       // If recipe isn't in the match data, its match percentage is 0
       final matchPercentage = recipeMatchPercentages[recipe.id] ?? 0;
 
-      switch (filter) {
-        case PantryMatchFilter.anyMatch:
-          return matchPercentage > 0;
-        case PantryMatchFilter.goodMatch:
-          return matchPercentage >= 50;
-        case PantryMatchFilter.greatMatch:
-          return matchPercentage >= 75;
-        case PantryMatchFilter.perfectMatch:
-          return matchPercentage == 100;
-      }
+      // Check if recipe match percentage meets the minimum threshold
+      return matchPercentage >= filter.percentageInt;
     };
   }
   

@@ -21,29 +21,115 @@ enum CookTimeFilter {
   final int minutes;
 }
 
+/// Multi-select filter for cook time
+class CookTimeMultiFilter {
+  final Set<CookTimeFilter> selectedFilters;
+  
+  const CookTimeMultiFilter({
+    required this.selectedFilters,
+  });
+  
+  CookTimeMultiFilter copyWith({
+    Set<CookTimeFilter>? selectedFilters,
+  }) {
+    return CookTimeMultiFilter(
+      selectedFilters: selectedFilters ?? this.selectedFilters,
+    );
+  }
+  
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is CookTimeMultiFilter &&
+          runtimeType == other.runtimeType &&
+          selectedFilters.length == other.selectedFilters.length &&
+          selectedFilters.every((filter) => other.selectedFilters.contains(filter));
+
+  @override
+  int get hashCode => selectedFilters.hashCode;
+}
+
 /// Filter options for recipe rating
 enum RatingFilter {
-  oneStar('1+ Stars', 1),
-  twoStars('2+ Stars', 2),
-  threeStars('3+ Stars', 3),
-  fourStars('4+ Stars', 4),
-  fiveStars('5 Stars', 5);
+  oneStar('1', 1),
+  twoStars('2', 2),
+  threeStars('3', 3),
+  fourStars('4', 4),
+  fiveStars('5', 5);
 
   const RatingFilter(this.label, this.value);
   final String label;
   final int value;
+  
+  /// Returns star icons for display
+  String get stars => '★' * value;
 }
 
-/// Filter options for pantry match percentage
-enum PantryMatchFilter {
-  anyMatch('Any match (>0%)', 0),
-  goodMatch('Good match (>50%)', 50),
-  greatMatch('Great match (>75%)', 75),
-  perfectMatch('Perfect match (100%)', 100);
+/// Multi-select filter for rating
+class RatingMultiFilter {
+  final Set<RatingFilter> selectedRatings;
+  
+  const RatingMultiFilter({
+    required this.selectedRatings,
+  });
+  
+  RatingMultiFilter copyWith({
+    Set<RatingFilter>? selectedRatings,
+  }) {
+    return RatingMultiFilter(
+      selectedRatings: selectedRatings ?? this.selectedRatings,
+    );
+  }
+  
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is RatingMultiFilter &&
+          runtimeType == other.runtimeType &&
+          selectedRatings.length == other.selectedRatings.length &&
+          selectedRatings.every((rating) => other.selectedRatings.contains(rating));
 
-  const PantryMatchFilter(this.label, this.percentage);
-  final String label;
-  final int percentage;
+  @override
+  int get hashCode => selectedRatings.hashCode;
+}
+
+/// Slider-based filter for pantry match percentage
+class PantryMatchSliderFilter {
+  final double percentage; // 0.0 to 1.0
+  
+  const PantryMatchSliderFilter({
+    required this.percentage,
+  });
+  
+  int get percentageInt => (percentage * 100).round();
+  
+  String get label {
+    final percent = percentageInt;
+    if (percent == 0) return 'Any match';
+    if (percent == 25) return 'A few ingredients in stock (25%)';
+    if (percent == 50) return 'At least half ingredients in stock (50%)';
+    if (percent == 75) return 'Most ingredients in stock (75%)';
+    if (percent == 100) return 'All ingredients in stock (100%)';
+    return '$percent% match'; // Fallback for other values
+  }
+  
+  PantryMatchSliderFilter copyWith({
+    double? percentage,
+  }) {
+    return PantryMatchSliderFilter(
+      percentage: percentage ?? this.percentage,
+    );
+  }
+  
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is PantryMatchSliderFilter &&
+          runtimeType == other.runtimeType &&
+          percentage == other.percentage;
+
+  @override
+  int get hashCode => percentage.hashCode;
 }
 
 /// Mode for tag filtering
@@ -187,38 +273,46 @@ extension RecipeFiltering on List<RecipeEntry> {
         
         switch (filterType) {
           case FilterType.cookTime:
-            final cookTimeFilter = filterValue as CookTimeFilter;
+            final cookTimeFilter = filterValue as CookTimeMultiFilter;
+            if (cookTimeFilter.selectedFilters.isEmpty) continue;
+            
             final totalTime = recipe.totalTime ?? 
                              (recipe.prepTime ?? 0) + (recipe.cookTime ?? 0);
             
             // Skip if we don't have time information
             if (totalTime == 0) continue;
             
-            bool matches = false;
-            switch (cookTimeFilter) {
-              case CookTimeFilter.under30Min:
-                matches = totalTime <= 30;
-                break;
-              case CookTimeFilter.between30And60Min:
-                matches = totalTime > 30 && totalTime <= 60;
-                break;
-              case CookTimeFilter.between1And2Hours:
-                matches = totalTime > 60 && totalTime <= 120;
-                break;
-              case CookTimeFilter.over2Hours:
-                matches = totalTime > 120;
-                break;
-            }
+            // Check if recipe matches ANY of the selected time ranges
+            bool matches = cookTimeFilter.selectedFilters.any((filter) {
+              switch (filter) {
+                case CookTimeFilter.under30Min:
+                  return totalTime <= 30;
+                case CookTimeFilter.between30And60Min:
+                  return totalTime > 30 && totalTime <= 60;
+                case CookTimeFilter.between1And2Hours:
+                  return totalTime > 60 && totalTime <= 120;
+                case CookTimeFilter.over2Hours:
+                  return totalTime > 120;
+              }
+            });
             
             if (!matches) {
               return false;
             }
             
           case FilterType.rating:
-            final ratingFilter = filterValue as RatingFilter;
+            final ratingFilter = filterValue as RatingMultiFilter;
+            if (ratingFilter.selectedRatings.isEmpty) continue;
+            
             // Skip if recipe has no rating
             if (recipe.rating == null) continue;
-            if (recipe.rating! < ratingFilter.value) return false;
+            
+            // Check if recipe rating exactly matches ANY of the selected ratings
+            bool matches = ratingFilter.selectedRatings.any((filter) => 
+              recipe.rating == filter.value
+            );
+            
+            if (!matches) return false;
             
           case FilterType.pantryMatch:
             // This filter needs to be applied separately with pantry match data
@@ -271,60 +365,53 @@ extension RecipePantryMatchFiltering on List<RecipePantryMatch> {
         
         switch (filterType) {
           case FilterType.cookTime:
-            final cookTimeFilter = filterValue as CookTimeFilter;
+            final cookTimeFilter = filterValue as CookTimeMultiFilter;
+            if (cookTimeFilter.selectedFilters.isEmpty) continue;
+            
             final totalTime = recipe.totalTime ?? 
                              (recipe.prepTime ?? 0) + (recipe.cookTime ?? 0);
             
             // Skip if we don't have time information
             if (totalTime == 0) continue;
             
-            bool matches = false;
-            switch (cookTimeFilter) {
-              case CookTimeFilter.under30Min:
-                matches = totalTime <= 30;
-                break;
-              case CookTimeFilter.between30And60Min:
-                matches = totalTime > 30 && totalTime <= 60;
-                break;
-              case CookTimeFilter.between1And2Hours:
-                matches = totalTime > 60 && totalTime <= 120;
-                break;
-              case CookTimeFilter.over2Hours:
-                matches = totalTime > 120;
-                break;
-            }
+            // Check if recipe matches ANY of the selected time ranges
+            bool matches = cookTimeFilter.selectedFilters.any((filter) {
+              switch (filter) {
+                case CookTimeFilter.under30Min:
+                  return totalTime <= 30;
+                case CookTimeFilter.between30And60Min:
+                  return totalTime > 30 && totalTime <= 60;
+                case CookTimeFilter.between1And2Hours:
+                  return totalTime > 60 && totalTime <= 120;
+                case CookTimeFilter.over2Hours:
+                  return totalTime > 120;
+              }
+            });
             
             if (!matches) {
               return false;
             }
             
           case FilterType.rating:
-            final ratingFilter = filterValue as RatingFilter;
+            final ratingFilter = filterValue as RatingMultiFilter;
+            if (ratingFilter.selectedRatings.isEmpty) continue;
+            
             // Skip if recipe has no rating
             if (recipe.rating == null) continue;
-            if (recipe.rating! < ratingFilter.value) return false;
+            
+            // Check if recipe rating exactly matches ANY of the selected ratings
+            bool matches = ratingFilter.selectedRatings.any((filter) => 
+              recipe.rating == filter.value
+            );
+            
+            if (!matches) return false;
             
           case FilterType.pantryMatch:
-            final pantryMatchFilter = filterValue as PantryMatchFilter;
+            final pantryMatchFilter = filterValue as PantryMatchSliderFilter;
             final matchPercentage = match.matchPercentage;
             
-            bool matches = false;
-            switch (pantryMatchFilter) {
-              case PantryMatchFilter.anyMatch:
-                matches = matchPercentage > 0;
-                break;
-              case PantryMatchFilter.goodMatch:
-                matches = matchPercentage > 50;
-                break;
-              case PantryMatchFilter.greatMatch:
-                matches = matchPercentage > 75;
-                break;
-              case PantryMatchFilter.perfectMatch:
-                matches = matchPercentage == 100;
-                break;
-            }
-            
-            if (!matches) {
+            // Check if recipe match percentage meets the minimum threshold
+            if (matchPercentage < pantryMatchFilter.percentageInt) {
               return false;
             }
             

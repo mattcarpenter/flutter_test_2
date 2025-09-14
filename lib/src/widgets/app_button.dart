@@ -222,8 +222,8 @@ class _AppButtonState extends State<AppButton> {
         );
       case AppButtonSize.small:
         return EdgeInsets.symmetric(
-          horizontal: (18 * horizontalPadding).round().toDouble(),
-          vertical: 8
+          horizontal: (14 * horizontalPadding).round().toDouble(),
+          vertical: 6
         );
       case AppButtonSize.medium:
         return EdgeInsets.symmetric(

@@ -122,34 +122,46 @@ class UnifiedFilterSortNotifier extends Notifier<UnifiedFilterSortState> {
     // Filters are more complex - store as separate keys
     final Map<FilterType, dynamic> filters = {};
 
-    // Load cook time filter
-    final cookTimeStr = prefs.getString('${prefsKey}_filter_cookTime');
-    if (cookTimeStr != null) {
-      final cookTimeFilter = CookTimeFilter.values.firstWhere(
-        (filter) => filter.name == cookTimeStr,
-        orElse: () => CookTimeFilter.under30Min,
-      );
-      filters[FilterType.cookTime] = cookTimeFilter;
+    // Load cook time filter (multi-select)
+    final cookTimeList = prefs.getStringList('${prefsKey}_filter_cookTime');
+    if (cookTimeList != null && cookTimeList.isNotEmpty) {
+      final selectedFilters = cookTimeList
+          .map((name) => CookTimeFilter.values.cast<CookTimeFilter?>().firstWhere(
+                (filter) => filter?.name == name,
+                orElse: () => null,
+              ))
+          .whereType<CookTimeFilter>()
+          .toSet();
+      if (selectedFilters.isNotEmpty) {
+        filters[FilterType.cookTime] = CookTimeMultiFilter(
+          selectedFilters: selectedFilters,
+        );
+      }
     }
 
-    // Load rating filter
-    final ratingStr = prefs.getString('${prefsKey}_filter_rating');
-    if (ratingStr != null) {
-      final ratingFilter = RatingFilter.values.firstWhere(
-        (filter) => filter.name == ratingStr,
-        orElse: () => RatingFilter.fourStars,
-      );
-      filters[FilterType.rating] = ratingFilter;
+    // Load rating filter (multi-select)
+    final ratingList = prefs.getStringList('${prefsKey}_filter_rating');
+    if (ratingList != null && ratingList.isNotEmpty) {
+      final selectedRatings = ratingList
+          .map((name) => RatingFilter.values.cast<RatingFilter?>().firstWhere(
+                (filter) => filter?.name == name,
+                orElse: () => null,
+              ))
+          .whereType<RatingFilter>()
+          .toSet();
+      if (selectedRatings.isNotEmpty) {
+        filters[FilterType.rating] = RatingMultiFilter(
+          selectedRatings: selectedRatings,
+        );
+      }
     }
 
-    // Load pantry match filter
-    final pantryMatchStr = prefs.getString('${prefsKey}_filter_pantryMatch');
-    if (pantryMatchStr != null) {
-      final pantryMatchFilter = PantryMatchFilter.values.firstWhere(
-        (filter) => filter.name == pantryMatchStr,
-        orElse: () => PantryMatchFilter.goodMatch,
+    // Load pantry match filter (slider)
+    final pantryMatchValue = prefs.getDouble('${prefsKey}_filter_pantryMatch');
+    if (pantryMatchValue != null && pantryMatchValue > 0) {
+      filters[FilterType.pantryMatch] = PantryMatchSliderFilter(
+        percentage: pantryMatchValue,
       );
-      filters[FilterType.pantryMatch] = pantryMatchFilter;
     }
     
     // Load tags filter
@@ -285,18 +297,20 @@ class UnifiedFilterSortNotifier extends Notifier<UnifiedFilterSortState> {
 
       switch (filterType) {
         case FilterType.cookTime:
-          final cookTimeFilter = filterValue as CookTimeFilter;
-          prefs.setString('${prefsKey}_filter_cookTime', cookTimeFilter.name);
+          final cookTimeFilter = filterValue as CookTimeMultiFilter;
+          final names = cookTimeFilter.selectedFilters.map((f) => f.name).toList();
+          prefs.setStringList('${prefsKey}_filter_cookTime', names);
           break;
 
         case FilterType.rating:
-          final ratingFilter = filterValue as RatingFilter;
-          prefs.setString('${prefsKey}_filter_rating', ratingFilter.name);
+          final ratingFilter = filterValue as RatingMultiFilter;
+          final names = ratingFilter.selectedRatings.map((r) => r.name).toList();
+          prefs.setStringList('${prefsKey}_filter_rating', names);
           break;
 
         case FilterType.pantryMatch:
-          final pantryMatchFilter = filterValue as PantryMatchFilter;
-          prefs.setString('${prefsKey}_filter_pantryMatch', pantryMatchFilter.name);
+          final pantryMatchFilter = filterValue as PantryMatchSliderFilter;
+          prefs.setDouble('${prefsKey}_filter_pantryMatch', pantryMatchFilter.percentage);
           break;
           
         case FilterType.tags:
