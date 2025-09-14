@@ -64,13 +64,13 @@ class AppCircleButton extends StatelessWidget {
         break;
       case AppCircleButtonVariant.neutral:
         backgroundColor = isLight
-            ? AppColorSwatches.neutral[250]! // Light neutral
+            ? AppColorSwatches.neutral[300]! // One shade darker neutral
             : AppColorSwatches.neutral[800]!.withOpacity(0.3); // Dark neutral with opacity
         iconColor = isLight
             ? AppColorSwatches.neutral[500]! // Medium neutral
             : AppColorSwatches.neutral[400]!; // Light neutral
         pressedBackgroundColor = isLight
-            ? AppColorSwatches.neutral[300]! // Slightly darker on press
+            ? AppColorSwatches.neutral[400]! // Darker on press
             : AppColorSwatches.neutral[800]!.withOpacity(0.4);
         break;
     }

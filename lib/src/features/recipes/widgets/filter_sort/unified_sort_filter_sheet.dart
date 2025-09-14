@@ -695,7 +695,7 @@ class _SortSectionState extends ConsumerState<_SortSection> {
                   ),
                   style: AppButtonStyle.mutedOutline,
                   shape: AppButtonShape.square,
-                  size: AppButtonSize.small,
+                  size: AppButtonSize.medium,
                   theme: AppButtonTheme.primary,
                   fullWidth: true,
                   onPressed: null, // AdaptivePullDownButton handles the tap
@@ -722,7 +722,7 @@ class _SortSectionState extends ConsumerState<_SortSection> {
               ),
               style: AppButtonStyle.mutedOutline,
               shape: AppButtonShape.square,
-              size: AppButtonSize.small,
+              size: AppButtonSize.medium,
               theme: AppButtonTheme.primary,
               onPressed: () {
                 final newDirection = widget.controller.sortDirection == SortDirection.ascending
