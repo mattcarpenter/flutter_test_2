@@ -45,6 +45,7 @@ class RecipeEditorModalPage {
 
     return WoltModalSheetPage(
       backgroundColor: colors.background,
+      surfaceTintColor: Colors.transparent,
       // Leading (left) nav bar widget: Cancel button with horizontal padding.
       leadingNavBarWidget: CupertinoButton(
         padding: const EdgeInsets.symmetric(horizontal: 16.0),
