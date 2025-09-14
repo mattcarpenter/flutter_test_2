@@ -3,6 +3,7 @@ import '../../database/database.dart';
 import '../../database/models/recipe_images.dart';
 import '../theme/spacing.dart';
 import '../theme/colors.dart';
+import '../utils/duration_formatter.dart';
 import 'local_or_network_image.dart';
 
 class RecipeListItem extends StatelessWidget {
@@ -26,16 +27,16 @@ class RecipeListItem extends StatelessWidget {
     // Format time display (same logic as RecipeTile)
     String timeDisplay = '';
     if (recipe.totalTime != null) {
-      timeDisplay = '${recipe.totalTime} min';
+      timeDisplay = DurationFormatter.formatMinutes(recipe.totalTime!);
     } else if (recipe.prepTime != null && recipe.cookTime != null) {
       final totalTime = (recipe.prepTime ?? 0) + (recipe.cookTime ?? 0);
       if (totalTime > 0) {
-        timeDisplay = '$totalTime min';
+        timeDisplay = DurationFormatter.formatMinutes(totalTime);
       }
     } else if (recipe.prepTime != null && recipe.prepTime! > 0) {
-      timeDisplay = '${recipe.prepTime} min';
+      timeDisplay = DurationFormatter.formatMinutes(recipe.prepTime!);
     } else if (recipe.cookTime != null && recipe.cookTime! > 0) {
-      timeDisplay = '${recipe.cookTime} min';
+      timeDisplay = DurationFormatter.formatMinutes(recipe.cookTime!);
     }
 
     // Format servings display

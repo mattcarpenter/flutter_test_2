@@ -5,6 +5,7 @@ import 'package:wolt_modal_sheet/wolt_modal_sheet.dart';
 import '../theme/colors.dart';
 import '../theme/typography.dart';
 import '../theme/spacing.dart';
+import '../utils/duration_formatter.dart';
 import 'app_duration_picker.dart' show DurationPickerMode;
 import 'app_text_field.dart' show AppTextFieldVariant;
 
@@ -84,27 +85,11 @@ class _AppDurationPickerCondensedState extends State<AppDurationPickerCondensed>
 
   void _updateDisplayValue() {
     final duration = _parseDuration();
-    final newDisplayText = _formatDuration(duration);
+    final newDisplayText = DurationFormatter.formatDuration(duration);
     if (_displayController.text != newDisplayText) {
       setState(() {
         _displayController.text = newDisplayText;
       });
-    }
-  }
-
-  String _formatDuration(Duration duration) {
-    if (duration == Duration.zero) return '';
-    
-    final hours = duration.inHours;
-    final minutes = duration.inMinutes % 60;
-    final totalMinutes = duration.inMinutes;
-    
-    if (hours == 0) {
-      return '$totalMinutes min';
-    } else if (minutes == 0) {
-      return '$hours hr';
-    } else {
-      return '${hours}h ${minutes}m';
     }
   }
 

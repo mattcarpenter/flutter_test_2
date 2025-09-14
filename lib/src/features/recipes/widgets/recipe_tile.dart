@@ -6,6 +6,7 @@ import '../../../../database/database.dart';
 import '../../../../database/models/recipe_images.dart';
 import '../../../widgets/local_or_network_image.dart';
 import '../../../theme/colors.dart';
+import '../../../utils/duration_formatter.dart';
 import '../views/add_recipe_modal.dart';
 
 class RecipeTile extends StatefulWidget {
@@ -130,16 +131,16 @@ class _RecipeTileState extends State<RecipeTile> with SingleTickerProviderStateM
         // Format time display
         String timeDisplay = '';
         if (widget.recipe.totalTime != null) {
-          timeDisplay = '${widget.recipe.totalTime} min';
+          timeDisplay = DurationFormatter.formatMinutes(widget.recipe.totalTime!);
         } else if (widget.recipe.prepTime != null && widget.recipe.cookTime != null) {
           final totalTime = (widget.recipe.prepTime ?? 0) + (widget.recipe.cookTime ?? 0);
           if (totalTime > 0) {
-            timeDisplay = '$totalTime min';
+            timeDisplay = DurationFormatter.formatMinutes(totalTime);
           }
         } else if (widget.recipe.prepTime != null && widget.recipe.prepTime! > 0) {
-          timeDisplay = '${widget.recipe.prepTime} min';
+          timeDisplay = DurationFormatter.formatMinutes(widget.recipe.prepTime!);
         } else if (widget.recipe.cookTime != null && widget.recipe.cookTime! > 0) {
-          timeDisplay = '${widget.recipe.cookTime} min';
+          timeDisplay = DurationFormatter.formatMinutes(widget.recipe.cookTime!);
         }
 
         // Format servings display

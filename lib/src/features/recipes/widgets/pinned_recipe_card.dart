@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../../../database/database.dart';
 import '../../../../database/models/recipe_images.dart';
+import '../../../utils/duration_formatter.dart';
 import '../../../widgets/local_or_network_image.dart';
 
 class PinnedRecipeCard extends StatelessWidget {
@@ -22,16 +23,16 @@ class PinnedRecipeCard extends StatelessWidget {
     // Format time display
     String timeDisplay = '';
     if (recipe.totalTime != null) {
-      timeDisplay = '${recipe.totalTime} min';
+      timeDisplay = DurationFormatter.formatMinutes(recipe.totalTime!);
     } else if (recipe.prepTime != null && recipe.cookTime != null) {
       final totalTime = (recipe.prepTime ?? 0) + (recipe.cookTime ?? 0);
       if (totalTime > 0) {
-        timeDisplay = '$totalTime min';
+        timeDisplay = DurationFormatter.formatMinutes(totalTime);
       }
     } else if (recipe.prepTime != null && recipe.prepTime! > 0) {
-      timeDisplay = '${recipe.prepTime} min';
+      timeDisplay = DurationFormatter.formatMinutes(recipe.prepTime!);
     } else if (recipe.cookTime != null && recipe.cookTime! > 0) {
-      timeDisplay = '${recipe.cookTime} min';
+      timeDisplay = DurationFormatter.formatMinutes(recipe.cookTime!);
     }
 
     // Format servings display
