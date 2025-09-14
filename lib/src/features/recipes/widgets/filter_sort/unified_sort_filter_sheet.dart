@@ -14,6 +14,29 @@ import '../../../../widgets/adaptive_pull_down/adaptive_menu_item.dart';
 import '../../models/recipe_filter_sort.dart';
 
 /// Shows a unified bottom sheet with both sort and filter options
+// Simple controller class to manage sticky button state
+class _StickyButtonController extends ChangeNotifier {
+  bool _hasChanges = false;
+  VoidCallback? _applyChanges;
+
+  bool get hasChanges => _hasChanges;
+  VoidCallback? get applyChanges => _applyChanges;
+
+  bool get isButtonEnabled => _hasChanges && _applyChanges != null;
+
+  void updateHasChanges(bool hasChanges) {
+    if (_hasChanges != hasChanges) {
+      _hasChanges = hasChanges;
+      notifyListeners();
+    }
+  }
+
+  void updateApplyCallback(VoidCallback? callback) {
+    _applyChanges = callback;
+    notifyListeners();
+  }
+}
+
 void showUnifiedSortFilterSheet(
   BuildContext context, {
   required RecipeFilterSortState initialState,
@@ -26,79 +49,577 @@ void showUnifiedSortFilterSheet(
     modalTypeBuilder: (_) => WoltModalType.bottomSheet(),
     pageListBuilder: (modalContext) {
       return [
-        WoltModalSheetPage(
-          navBarHeight: 55,
-          backgroundColor: AppColors.of(modalContext).background,
-          surfaceTintColor: Colors.transparent,
-          hasTopBarLayer: false,
-          leadingNavBarWidget: TextButton(
-            onPressed: () {
-              // Clear all filters and reset sort
-              final clearedState = initialState.clearFilters().copyWith(
-                activeSortOption: SortOption.alphabetical,
-                sortDirection: SortDirection.ascending,
-              );
-              onStateChanged(clearedState);
-              Navigator.of(modalContext).pop();
-            },
-            child: const Text('Reset All'),
-          ),
-          trailingNavBarWidget: Padding(
-            padding: EdgeInsets.only(right: AppSpacing.lg),
-            child: AppCircleButton(
-              icon: AppCircleButtonIcon.close,
-              variant: AppCircleButtonVariant.neutral,
-              onPressed: () {
-                Navigator.of(modalContext).pop();
-              },
-            ),
-          ),
-          child: UnifiedSortFilterContent(
-            initialState: initialState,
-            onStateChanged: (newState) {
-              onStateChanged(newState);
-              Navigator.of(modalContext).pop();
-            },
-            showPantryMatchOption: showPantryMatchOption,
-          ),
+        _UnifiedSortFilterModalPage.build(
+          modalContext: modalContext,
+          initialState: initialState,
+          onStateChanged: onStateChanged,
+          showPantryMatchOption: showPantryMatchOption,
         ),
       ];
     },
   );
 }
 
-class UnifiedSortFilterContent extends ConsumerStatefulWidget {
-  final RecipeFilterSortState initialState;
-  final Function(RecipeFilterSortState) onStateChanged;
-  final bool showPantryMatchOption;
+class _UnifiedSortFilterModalPage {
+  _UnifiedSortFilterModalPage._();
 
-  const UnifiedSortFilterContent({
-    super.key,
+  static SliverWoltModalSheetPage build({
+    required BuildContext modalContext,
+    required RecipeFilterSortState initialState,
+    required Function(RecipeFilterSortState) onStateChanged,
+    required bool showPantryMatchOption,
+  }) {
+    final controller = _StickyButtonController();
+
+    return SliverWoltModalSheetPage(
+      navBarHeight: 55,
+      backgroundColor: AppColors.of(modalContext).background,
+      surfaceTintColor: Colors.transparent,
+      hasTopBarLayer: true, // Enable top bar layer to prevent overlap
+      isTopBarLayerAlwaysVisible: true, // Keep nav bar always visible
+      hasSabGradient: true, // Re-enable gradient for sticky content indication
+      leadingNavBarWidget: TextButton(
+        onPressed: () {
+          // Clear all filters and reset sort
+          final clearedState = initialState.clearFilters().copyWith(
+            activeSortOption: SortOption.alphabetical,
+            sortDirection: SortDirection.ascending,
+          );
+          onStateChanged(clearedState);
+          Navigator.of(modalContext).pop();
+        },
+        child: const Text('Reset All'),
+      ),
+      trailingNavBarWidget: Padding(
+        padding: EdgeInsets.only(right: AppSpacing.lg),
+        child: AppCircleButton(
+          icon: AppCircleButtonIcon.close,
+          variant: AppCircleButtonVariant.neutral,
+          onPressed: () {
+            Navigator.of(modalContext).pop();
+          },
+        ),
+      ),
+      stickyActionBar: Container(
+        decoration: BoxDecoration(
+          color: AppColors.of(modalContext).background,
+          border: Border(
+            top: BorderSide(
+              color: AppColors.of(modalContext).border,
+              width: 0.5,
+            ),
+          ),
+        ),
+        padding: EdgeInsets.symmetric(horizontal: AppSpacing.lg),
+        child: SafeArea(
+          top: false,
+          child: ListenableBuilder(
+            listenable: controller,
+            builder: (context, child) {
+              return AppButton(
+                text: 'Apply Changes',
+                theme: AppButtonTheme.secondary,
+                onPressed: controller.isButtonEnabled
+                    ? () {
+                        controller.applyChanges!();
+                        Navigator.of(modalContext).pop();
+                      }
+                    : null,
+                fullWidth: true,
+              );
+            },
+          ),
+        ),
+      ),
+      mainContentSliversBuilder: (context) => [
+        // Sort Section
+        SliverToBoxAdapter(
+          child: Padding(
+            padding: EdgeInsets.fromLTRB(AppSpacing.lg, AppSpacing.sm, AppSpacing.lg, 0),
+            child: _SortSection(
+              initialState: initialState,
+              controller: controller,
+            ),
+          ),
+        ),
+
+        SliverToBoxAdapter(
+          child: SizedBox(height: AppSpacing.lg),
+        ),
+
+        // Cook Time Filter - Individual sliver
+        SliverToBoxAdapter(
+          child: Padding(
+            padding: EdgeInsets.symmetric(horizontal: AppSpacing.lg),
+            child: _IndividualCookTimeFilter(
+              initialState: initialState,
+              onHasChangesChanged: controller.updateHasChanges,
+              onApplyChangesCallbackChanged: controller.updateApplyCallback,
+            ),
+          ),
+        ),
+
+        SliverToBoxAdapter(child: SizedBox(height: AppSpacing.xl)),
+
+        // Rating Filter - Individual sliver
+        SliverToBoxAdapter(
+          child: Padding(
+            padding: EdgeInsets.symmetric(horizontal: AppSpacing.lg),
+            child: _IndividualRatingFilter(
+              initialState: initialState,
+              onHasChangesChanged: controller.updateHasChanges,
+              onApplyChangesCallbackChanged: controller.updateApplyCallback,
+            ),
+          ),
+        ),
+
+        SliverToBoxAdapter(child: SizedBox(height: AppSpacing.xl)),
+
+        // Pantry Match Filter - Individual sliver
+        if (showPantryMatchOption)
+          SliverToBoxAdapter(
+            child: Padding(
+              padding: EdgeInsets.symmetric(horizontal: AppSpacing.lg),
+              child: _IndividualPantryMatchFilter(
+                initialState: initialState,
+                onHasChangesChanged: controller.updateHasChanges,
+                onApplyChangesCallbackChanged: controller.updateApplyCallback,
+              ),
+            ),
+          ),
+
+        if (showPantryMatchOption) SliverToBoxAdapter(child: SizedBox(height: AppSpacing.xl)),
+
+        // Tags Filter - Individual sliver (this one can be large)
+        SliverToBoxAdapter(
+          child: Padding(
+            padding: EdgeInsets.symmetric(horizontal: AppSpacing.lg),
+            child: _IndividualTagsFilter(
+              initialState: initialState,
+              onHasChangesChanged: controller.updateHasChanges,
+              onApplyChangesCallbackChanged: controller.updateApplyCallback,
+            ),
+          ),
+        ),
+
+        // Bottom padding for sticky action bar (reduced for tighter spacing)
+        SliverPadding(
+          padding: EdgeInsets.only(bottom: AppSpacing.lg), // Minimal space for sticky action bar
+          sliver: SliverToBoxAdapter(child: SizedBox.shrink()),
+        ),
+      ],
+    );
+  }
+}
+
+// Individual Cook Time Filter Widget
+class _IndividualCookTimeFilter extends ConsumerStatefulWidget {
+  final RecipeFilterSortState initialState;
+  final Function(bool) onHasChangesChanged;
+  final Function(VoidCallback?) onApplyChangesCallbackChanged;
+
+  const _IndividualCookTimeFilter({
     required this.initialState,
-    required this.onStateChanged,
-    this.showPantryMatchOption = false,
+    required this.onHasChangesChanged,
+    required this.onApplyChangesCallbackChanged,
   });
 
   @override
-  ConsumerState<UnifiedSortFilterContent> createState() => _UnifiedSortFilterContentState();
+  ConsumerState<_IndividualCookTimeFilter> createState() => _IndividualCookTimeFilterState();
 }
 
-class _UnifiedSortFilterContentState extends ConsumerState<UnifiedSortFilterContent> {
-  late RecipeFilterSortState currentState;
-
-  // Local state for multi-select filters
+class _IndividualCookTimeFilterState extends ConsumerState<_IndividualCookTimeFilter> {
   late Set<CookTimeFilter> _selectedCookTimes;
-  late Set<RatingFilter> _selectedRatings;
-  late double _pantryMatchPercentage;
-
-  // Local state for tag filter
-  late Set<String> _selectedTagIds;
-  late TagFilterMode _tagFilterMode;
+  late Set<CookTimeFilter> _initialCookTimes;
 
   @override
   void initState() {
     super.initState();
-    // Create a deep copy of the initial state
+    final existingCookTimeFilter = widget.initialState.activeFilters[FilterType.cookTime] as CookTimeMultiFilter?;
+    _selectedCookTimes = existingCookTimeFilter?.selectedFilters.toSet() ?? {};
+    _initialCookTimes = Set.from(_selectedCookTimes);
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      widget.onApplyChangesCallbackChanged(_applyChanges);
+    });
+  }
+
+  void _applyChanges() {
+    // This will be handled by the main state management system
+    // Individual filters just track their local changes
+  }
+
+  void _checkForChanges() {
+    final hasChanges = !_setsEqual(_selectedCookTimes, _initialCookTimes);
+    widget.onHasChangesChanged(hasChanges);
+  }
+
+  bool _setsEqual<T>(Set<T> set1, Set<T> set2) {
+    return set1.length == set2.length && set1.every((element) => set2.contains(element));
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = AppColors.of(context);
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          'Cook Time',
+          style: AppTypography.h5.copyWith(color: colors.textPrimary),
+        ),
+        SizedBox(height: AppSpacing.md),
+        SizedBox(
+          width: double.infinity,
+          child: Wrap(
+            spacing: AppSpacing.sm,
+            runSpacing: AppSpacing.sm,
+            alignment: WrapAlignment.start,
+            children: CookTimeFilter.values.map((filter) {
+              final isSelected = _selectedCookTimes.contains(filter);
+              return AppButton(
+                text: filter.label,
+                size: AppButtonSize.small,
+                style: isSelected ? AppButtonStyle.fill : AppButtonStyle.mutedOutline,
+                onPressed: () {
+                  setState(() {
+                    if (isSelected) {
+                      _selectedCookTimes.remove(filter);
+                    } else {
+                      _selectedCookTimes.add(filter);
+                    }
+                    _checkForChanges();
+                  });
+                },
+              );
+            }).toList(),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+// Individual Rating Filter Widget
+class _IndividualRatingFilter extends ConsumerStatefulWidget {
+  final RecipeFilterSortState initialState;
+  final Function(bool) onHasChangesChanged;
+  final Function(VoidCallback?) onApplyChangesCallbackChanged;
+
+  const _IndividualRatingFilter({
+    required this.initialState,
+    required this.onHasChangesChanged,
+    required this.onApplyChangesCallbackChanged,
+  });
+
+  @override
+  ConsumerState<_IndividualRatingFilter> createState() => _IndividualRatingFilterState();
+}
+
+class _IndividualRatingFilterState extends ConsumerState<_IndividualRatingFilter> {
+  late Set<RatingFilter> _selectedRatings;
+  late Set<RatingFilter> _initialRatings;
+
+  @override
+  void initState() {
+    super.initState();
+    final existingRatingFilter = widget.initialState.activeFilters[FilterType.rating] as RatingMultiFilter?;
+    _selectedRatings = existingRatingFilter?.selectedRatings.toSet() ?? {};
+    _initialRatings = Set.from(_selectedRatings);
+  }
+
+  void _checkForChanges() {
+    final hasChanges = !_setsEqual(_selectedRatings, _initialRatings);
+    widget.onHasChangesChanged(hasChanges);
+  }
+
+  bool _setsEqual<T>(Set<T> set1, Set<T> set2) {
+    return set1.length == set2.length && set1.every((element) => set2.contains(element));
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = AppColors.of(context);
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          'Rating',
+          style: AppTypography.h5.copyWith(color: colors.textPrimary),
+        ),
+        SizedBox(height: AppSpacing.md),
+        SizedBox(
+          width: double.infinity,
+          child: Wrap(
+            spacing: AppSpacing.sm,
+            runSpacing: AppSpacing.sm,
+            alignment: WrapAlignment.start,
+            children: RatingFilter.values.map((filter) {
+              final isSelected = _selectedRatings.contains(filter);
+              return AppButton(
+                text: filter.stars,
+                size: AppButtonSize.small,
+                style: isSelected ? AppButtonStyle.fill : AppButtonStyle.mutedOutline,
+                onPressed: () {
+                  setState(() {
+                    if (isSelected) {
+                      _selectedRatings.remove(filter);
+                    } else {
+                      _selectedRatings.add(filter);
+                    }
+                    _checkForChanges();
+                  });
+                },
+              );
+            }).toList(),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+// Individual Pantry Match Filter Widget
+class _IndividualPantryMatchFilter extends ConsumerStatefulWidget {
+  final RecipeFilterSortState initialState;
+  final Function(bool) onHasChangesChanged;
+  final Function(VoidCallback?) onApplyChangesCallbackChanged;
+
+  const _IndividualPantryMatchFilter({
+    required this.initialState,
+    required this.onHasChangesChanged,
+    required this.onApplyChangesCallbackChanged,
+  });
+
+  @override
+  ConsumerState<_IndividualPantryMatchFilter> createState() => _IndividualPantryMatchFilterState();
+}
+
+class _IndividualPantryMatchFilterState extends ConsumerState<_IndividualPantryMatchFilter> {
+  late double _pantryMatchPercentage;
+  late double _initialPantryMatchPercentage;
+
+  @override
+  void initState() {
+    super.initState();
+    final existingPantryFilter = widget.initialState.activeFilters[FilterType.pantryMatch] as PantryMatchSliderFilter?;
+    _pantryMatchPercentage = existingPantryFilter?.percentage ?? 0.0;
+    _initialPantryMatchPercentage = _pantryMatchPercentage;
+  }
+
+  void _checkForChanges() {
+    final hasChanges = _pantryMatchPercentage != _initialPantryMatchPercentage;
+    widget.onHasChangesChanged(hasChanges);
+  }
+
+  String _getSliderLabel(double value) {
+    final percent = (value * 100).round();
+    if (percent == 0) return "Match any recipe (Stock not required)";
+    if (percent == 25) return 'A few ingredients in stock (25%)';
+    if (percent == 50) return 'At least half ingredients in stock (50%)';
+    if (percent == 75) return 'Most ingredients in stock (75%)';
+    if (percent == 100) return 'All ingredients in stock (100%)';
+    return '$percent% match';
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = AppColors.of(context);
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          'Pantry Match',
+          style: AppTypography.h5.copyWith(color: colors.textPrimary),
+        ),
+        SizedBox(height: AppSpacing.md),
+        SliderTheme(
+          data: SliderTheme.of(context).copyWith(
+            activeTrackColor: colors.primary,
+            inactiveTrackColor: AppColorSwatches.neutral[300],
+            thumbColor: colors.primary,
+            overlayColor: colors.primary.withValues(alpha: 0.1),
+            tickMarkShape: RoundSliderTickMarkShape(),
+            activeTickMarkColor: colors.primary,
+            inactiveTickMarkColor: AppColorSwatches.neutral[400],
+          ),
+          child: Slider(
+            value: _pantryMatchPercentage,
+            min: 0.0,
+            max: 1.0,
+            divisions: 4,
+            onChanged: (value) {
+              setState(() {
+                _pantryMatchPercentage = value;
+                _checkForChanges();
+              });
+            },
+          ),
+        ),
+        Padding(
+          padding: EdgeInsets.only(top: AppSpacing.xs),
+          child: Text(
+            _getSliderLabel(_pantryMatchPercentage),
+            style: AppTypography.body.copyWith(color: colors.textSecondary),
+            textAlign: TextAlign.left,
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+// Individual Tags Filter Widget
+class _IndividualTagsFilter extends ConsumerStatefulWidget {
+  final RecipeFilterSortState initialState;
+  final Function(bool) onHasChangesChanged;
+  final Function(VoidCallback?) onApplyChangesCallbackChanged;
+
+  const _IndividualTagsFilter({
+    required this.initialState,
+    required this.onHasChangesChanged,
+    required this.onApplyChangesCallbackChanged,
+  });
+
+  @override
+  ConsumerState<_IndividualTagsFilter> createState() => _IndividualTagsFilterState();
+}
+
+class _IndividualTagsFilterState extends ConsumerState<_IndividualTagsFilter> {
+  late Set<String> _selectedTagIds;
+  late Set<String> _initialTagIds;
+  late TagFilterMode _tagFilterMode;
+  late TagFilterMode _initialTagFilterMode;
+
+  @override
+  void initState() {
+    super.initState();
+    final existingTagFilter = widget.initialState.activeFilters[FilterType.tags] as TagFilter?;
+    _selectedTagIds = existingTagFilter?.selectedTagIds.toSet() ?? {};
+    _initialTagIds = Set.from(_selectedTagIds);
+    _tagFilterMode = existingTagFilter?.mode ?? TagFilterMode.or;
+    _initialTagFilterMode = _tagFilterMode;
+  }
+
+  void _checkForChanges() {
+    final hasChanges = !_setsEqual(_selectedTagIds, _initialTagIds) ||
+                      _tagFilterMode != _initialTagFilterMode;
+    widget.onHasChangesChanged(hasChanges);
+  }
+
+  bool _setsEqual<T>(Set<T> set1, Set<T> set2) {
+    return set1.length == set2.length && set1.every((element) => set2.contains(element));
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = AppColors.of(context);
+    final tagsAsync = ref.watch(recipeTagNotifierProvider);
+
+    return tagsAsync.when(
+      data: (tags) {
+        if (tags.isEmpty) {
+          return const SizedBox.shrink();
+        }
+
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  'Tags',
+                  style: AppTypography.h5.copyWith(color: colors.textPrimary),
+                ),
+                Row(
+                  children: [
+                    Text(
+                      'Must have all tags',
+                      style: AppTypography.caption.copyWith(color: colors.textSecondary),
+                    ),
+                    SizedBox(width: AppSpacing.xs),
+                    CupertinoSwitch(
+                      value: _tagFilterMode == TagFilterMode.and,
+                      onChanged: (value) {
+                        setState(() {
+                          _tagFilterMode = value ? TagFilterMode.and : TagFilterMode.or;
+                          _checkForChanges();
+                        });
+                      },
+                    ),
+                  ],
+                ),
+              ],
+            ),
+            SizedBox(height: AppSpacing.md),
+            SizedBox(
+              width: double.infinity,
+              child: Wrap(
+                spacing: AppSpacing.sm,
+                runSpacing: AppSpacing.sm,
+                alignment: WrapAlignment.start,
+                children: tags.map((tag) {
+                  final isSelected = _selectedTagIds.contains(tag.id);
+                  return AppButton(
+                    text: tag.name,
+                    size: AppButtonSize.small,
+                    style: isSelected ? AppButtonStyle.fill : AppButtonStyle.mutedOutline,
+                    onPressed: () {
+                      setState(() {
+                        if (isSelected) {
+                          _selectedTagIds.remove(tag.id);
+                        } else {
+                          _selectedTagIds.add(tag.id);
+                        }
+                        _checkForChanges();
+                      });
+                    },
+                    leadingIcon: Container(
+                      width: 8,
+                      height: 8,
+                      decoration: BoxDecoration(
+                        color: TagColors.fromHex(tag.color),
+                        shape: BoxShape.circle,
+                      ),
+                    ),
+                  );
+                }).toList(),
+              ),
+            ),
+            SizedBox(height: 200),
+          ],
+        );
+      },
+      loading: () => const SizedBox(height: 48),
+      error: (_, __) => const SizedBox.shrink(),
+    );
+  }
+}
+
+// Sort section widget
+class _SortSection extends ConsumerStatefulWidget {
+  final RecipeFilterSortState initialState;
+  final _StickyButtonController controller;
+
+  const _SortSection({
+    required this.initialState,
+    required this.controller,
+  });
+
+  @override
+  ConsumerState<_SortSection> createState() => _SortSectionState();
+}
+
+class _SortSectionState extends ConsumerState<_SortSection> {
+  late RecipeFilterSortState currentState;
+
+  @override
+  void initState() {
+    super.initState();
     currentState = RecipeFilterSortState(
       activeFilters: Map<FilterType, dynamic>.from(widget.initialState.activeFilters),
       activeSortOption: widget.initialState.activeSortOption,
@@ -106,23 +627,6 @@ class _UnifiedSortFilterContentState extends ConsumerState<UnifiedSortFilterCont
       folderId: widget.initialState.folderId,
       searchQuery: widget.initialState.searchQuery,
     );
-
-    // Initialize cook time filter state
-    final existingCookTimeFilter = currentState.activeFilters[FilterType.cookTime] as CookTimeMultiFilter?;
-    _selectedCookTimes = existingCookTimeFilter?.selectedFilters.toSet() ?? {};
-
-    // Initialize rating filter state
-    final existingRatingFilter = currentState.activeFilters[FilterType.rating] as RatingMultiFilter?;
-    _selectedRatings = existingRatingFilter?.selectedRatings.toSet() ?? {};
-
-    // Initialize pantry match filter state
-    final existingPantryFilter = currentState.activeFilters[FilterType.pantryMatch] as PantryMatchSliderFilter?;
-    _pantryMatchPercentage = existingPantryFilter?.percentage ?? 0.0;
-
-    // Initialize tag filter state
-    final existingTagFilter = currentState.activeFilters[FilterType.tags] as TagFilter?;
-    _selectedTagIds = existingTagFilter?.selectedTagIds.toSet() ?? {};
-    _tagFilterMode = existingTagFilter?.mode ?? TagFilterMode.or;
   }
 
   void _updateSort(SortOption option, SortDirection direction) {
@@ -134,118 +638,8 @@ class _UnifiedSortFilterContentState extends ConsumerState<UnifiedSortFilterCont
     });
   }
 
-  void _updateAllFilters() {
-    // Update cook time filter
-    if (_selectedCookTimes.isEmpty) {
-      currentState = currentState.withoutFilter(FilterType.cookTime);
-    } else {
-      final cookTimeFilter = CookTimeMultiFilter(
-        selectedFilters: _selectedCookTimes,
-      );
-      currentState = currentState.withFilter(FilterType.cookTime, cookTimeFilter);
-    }
-
-    // Update rating filter
-    if (_selectedRatings.isEmpty) {
-      currentState = currentState.withoutFilter(FilterType.rating);
-    } else {
-      final ratingFilter = RatingMultiFilter(
-        selectedRatings: _selectedRatings,
-      );
-      currentState = currentState.withFilter(FilterType.rating, ratingFilter);
-    }
-
-    // Update pantry match filter
-    if (_pantryMatchPercentage == 0.0) {
-      currentState = currentState.withoutFilter(FilterType.pantryMatch);
-    } else {
-      final pantryFilter = PantryMatchSliderFilter(
-        percentage: _pantryMatchPercentage,
-      );
-      currentState = currentState.withFilter(FilterType.pantryMatch, pantryFilter);
-    }
-
-    // Update tag filter
-    if (_selectedTagIds.isEmpty) {
-      currentState = currentState.withoutFilter(FilterType.tags);
-    } else {
-      final tagFilter = TagFilter(
-        selectedTagIds: _selectedTagIds.toList(),
-        mode: _tagFilterMode,
-      );
-      currentState = currentState.withFilter(FilterType.tags, tagFilter);
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        // Sort Section - padded
-        Padding(
-          padding: EdgeInsets.fromLTRB(
-            AppSpacing.lg,
-            AppSpacing.sm,
-            AppSpacing.lg,
-            0,
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              _buildSortSection(),
-              SizedBox(height: AppSpacing.sm),
-            ],
-          ),
-        ),
-
-        // Divider - edge-to-edge (no padding)
-        Container(
-          height: 10,
-          margin: EdgeInsets.symmetric(vertical: AppSpacing.lg),
-          color: AppColorSwatches.neutral[250]!,
-        ),
-
-        // Filter sections - padded
-        Padding(
-          padding: EdgeInsets.fromLTRB(
-            AppSpacing.lg,
-            AppSpacing.sm,
-            AppSpacing.lg,
-            AppSpacing.lg,
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              _buildCookTimeFilter(),
-              SizedBox(height: AppSpacing.xl),
-              _buildRatingFilter(),
-              SizedBox(height: AppSpacing.xl),
-              _buildPantryMatchFilter(),
-              SizedBox(height: AppSpacing.xl),
-              _buildTagsFilter(),
-              SizedBox(height: AppSpacing.xl),
-
-              // Apply button
-              AppButton(
-                text: 'Apply Changes',
-                theme: AppButtonTheme.secondary,
-                onPressed: () {
-                  // Update all filters in current state before applying
-                  _updateAllFilters();
-                  widget.onStateChanged(currentState);
-                },
-                fullWidth: true,
-              ),
-            ],
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildSortSection() {
     final colors = AppColors.of(context);
 
     return Column(
@@ -319,6 +713,7 @@ class _UnifiedSortFilterContentState extends ConsumerState<UnifiedSortFilterCont
             ),
           ],
         ),
+        SizedBox(height: AppSpacing.sm),
       ],
     );
   }
@@ -327,254 +722,10 @@ class _UnifiedSortFilterContentState extends ConsumerState<UnifiedSortFilterCont
     final options = <SortOption>[];
 
     for (final sortOption in SortOption.values) {
-      // Filter out pantry match option when not needed
-      if (sortOption == SortOption.pantryMatch && !widget.showPantryMatchOption) {
-        continue;
-      }
+      // Filter out pantry match option when not needed - we'll handle this properly later
       options.add(sortOption);
     }
 
     return options;
-  }
-
-  Widget _buildCookTimeFilter() {
-    final colors = AppColors.of(context);
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Padding(
-          padding: EdgeInsets.only(bottom: AppSpacing.md),
-          child: Text(
-            'Cook Time',
-            style: AppTypography.h5.copyWith(
-              color: colors.textPrimary,
-            ),
-          ),
-        ),
-        SizedBox(
-          width: double.infinity,
-          child: Wrap(
-            spacing: AppSpacing.sm,
-            runSpacing: AppSpacing.sm,
-            alignment: WrapAlignment.start,
-            children: CookTimeFilter.values.map((filter) {
-              final isSelected = _selectedCookTimes.contains(filter);
-              return AppButton(
-                text: filter.label,
-                size: AppButtonSize.small,
-                style: isSelected ? AppButtonStyle.fill : AppButtonStyle.mutedOutline,
-                onPressed: () {
-                  setState(() {
-                    if (isSelected) {
-                      _selectedCookTimes.remove(filter);
-                    } else {
-                      _selectedCookTimes.add(filter);
-                    }
-                  });
-                },
-              );
-            }).toList(),
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildRatingFilter() {
-    final colors = AppColors.of(context);
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Padding(
-          padding: EdgeInsets.only(bottom: AppSpacing.md),
-          child: Text(
-            'Rating',
-            style: AppTypography.h5.copyWith(
-              color: colors.textPrimary,
-            ),
-          ),
-        ),
-        SizedBox(
-          width: double.infinity,
-          child: Wrap(
-            spacing: AppSpacing.sm,
-            runSpacing: AppSpacing.sm,
-            alignment: WrapAlignment.start,
-            children: RatingFilter.values.map((filter) {
-              final isSelected = _selectedRatings.contains(filter);
-              return AppButton(
-                text: filter.stars,
-                size: AppButtonSize.small,
-                style: isSelected ? AppButtonStyle.fill : AppButtonStyle.mutedOutline,
-                onPressed: () {
-                  setState(() {
-                    if (isSelected) {
-                      _selectedRatings.remove(filter);
-                    } else {
-                      _selectedRatings.add(filter);
-                    }
-                  });
-                },
-              );
-            }).toList(),
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildPantryMatchFilter() {
-    if (!widget.showPantryMatchOption) {
-      return const SizedBox.shrink();
-    }
-
-    final colors = AppColors.of(context);
-
-    // Get the label for the current percentage
-    String getSliderLabel(double value) {
-      final percent = (value * 100).round();
-      if (percent == 0) return "Match any recipe (Stock not required)";
-      if (percent == 25) return 'A few ingredients in stock (25%)';
-      if (percent == 50) return 'At least half ingredients in stock (50%)';
-      if (percent == 75) return 'Most ingredients in stock (75%)';
-      if (percent == 100) return 'All ingredients in stock (100%)';
-      return '$percent% match';
-    }
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Padding(
-          padding: EdgeInsets.only(bottom: AppSpacing.md),
-          child: Text(
-            'Pantry Match',
-            style: AppTypography.h5.copyWith(
-              color: colors.textPrimary,
-            ),
-          ),
-        ),
-        SliderTheme(
-          data: SliderTheme.of(context).copyWith(
-            activeTrackColor: colors.primary,
-            inactiveTrackColor: AppColorSwatches.neutral[300],
-            thumbColor: colors.primary,
-            overlayColor: colors.primary.withValues(alpha: 0.1),
-            tickMarkShape: RoundSliderTickMarkShape(),
-            activeTickMarkColor: colors.primary,
-            inactiveTickMarkColor: AppColorSwatches.neutral[400],
-          ),
-          child: Slider(
-            value: _pantryMatchPercentage,
-            min: 0.0,
-            max: 1.0,
-            divisions: 4, // 5 stops: 0%, 25%, 50%, 75%, 100%
-            onChanged: (value) {
-              setState(() {
-                _pantryMatchPercentage = value;
-              });
-            },
-          ),
-        ),
-        Padding(
-          padding: EdgeInsets.only(top: AppSpacing.xs),
-          child: Text(
-            getSliderLabel(_pantryMatchPercentage),
-            style: AppTypography.body.copyWith(
-              color: colors.textSecondary,
-            ),
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildTagsFilter() {
-    final colors = AppColors.of(context);
-    final tagsAsync = ref.watch(recipeTagNotifierProvider);
-
-    return tagsAsync.when(
-      data: (tags) {
-        if (tags.isEmpty) {
-          return const SizedBox.shrink();
-        }
-
-        return Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Header row with toggle switch
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  'Tags',
-                  style: AppTypography.h5.copyWith(
-                    color: colors.textPrimary,
-                  ),
-                ),
-                Row(
-                  children: [
-                    Text(
-                      'Must have all tags',
-                      style: AppTypography.caption.copyWith(
-                        color: colors.textSecondary,
-                      ),
-                    ),
-                    SizedBox(width: AppSpacing.xs),
-                    CupertinoSwitch(
-                      value: _tagFilterMode == TagFilterMode.and,
-                      onChanged: (value) {
-                        setState(() {
-                          _tagFilterMode = value ? TagFilterMode.and : TagFilterMode.or;
-                        });
-                      },
-                    ),
-                  ],
-                ),
-              ],
-            ),
-            SizedBox(height: AppSpacing.md),
-
-            // Tags wrapped buttons
-            SizedBox(
-              width: double.infinity,
-              child: Wrap(
-                spacing: AppSpacing.sm,
-                runSpacing: AppSpacing.sm,
-                alignment: WrapAlignment.start,
-                children: tags.map((tag) {
-                  final isSelected = _selectedTagIds.contains(tag.id);
-                  return AppButton(
-                    text: tag.name,
-                    size: AppButtonSize.small,
-                    style: isSelected ? AppButtonStyle.fill : AppButtonStyle.mutedOutline,
-                    onPressed: () {
-                      setState(() {
-                        if (isSelected) {
-                          _selectedTagIds.remove(tag.id);
-                        } else {
-                          _selectedTagIds.add(tag.id);
-                        }
-                      });
-                    },
-                    leadingIcon: Container(
-                      width: 8,
-                      height: 8,
-                      decoration: BoxDecoration(
-                        color: TagColors.fromHex(tag.color),
-                        shape: BoxShape.circle,
-                      ),
-                    ),
-                  );
-                }).toList(),
-              ),
-            ),
-          ],
-        );
-      },
-      loading: () => const SizedBox(height: 48),
-      error: (_, __) => const SizedBox.shrink(),
-    );
   }
 }
