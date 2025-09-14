@@ -332,7 +332,7 @@ class AppColors {
       : AppColorSwatches.primary[900]!.withOpacity(0.15);
 
   Color get chipText => brightness == Brightness.light
-      ? AppColorSwatches.primary[700]!
+      ? AppColorSwatches.primary[800]!
       : AppColorSwatches.primary[300]!;
 
   // Button specific colors
