@@ -254,8 +254,8 @@ class _IngredientListItemState extends ConsumerState<IngredientListItem> with Si
   @override
   Widget build(BuildContext context) {
     final colors = AppColors.of(context);
-    final backgroundColor = colors.surface;
-    final backgroundColorSection = colors.surfaceVariant;
+    final backgroundColor = colors.input;
+    final backgroundColorSection = colors.input;
 
     return AnimatedBuilder(
       animation: _animationController,
@@ -612,6 +612,8 @@ class _RecipeSelectorContentState extends ConsumerState<RecipeSelectorContent> {
               decoration: InputDecoration(
                 hintText: 'Search recipes...',
                 prefixIcon: const Icon(Icons.search),
+                fillColor: AppColors.of(context).input,
+                filled: true,
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(8.0),
                 ),

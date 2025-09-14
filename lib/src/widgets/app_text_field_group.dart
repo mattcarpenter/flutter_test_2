@@ -67,7 +67,7 @@ class _AppTextFieldGroupState extends State<AppTextFieldGroup> {
     final borderColor = widget.errorText != null ? colors.error : colors.border;
     final backgroundColor = widget.variant == AppTextFieldVariant.filled
         ? (widget.enabled ? colors.inputBackgroundFilled : colors.inputBackgroundFilled.withOpacity(0.5))
-        : colors.surface;
+        : colors.input;
 
     // Build the list of children with dividers between them
     final List<Widget> childrenWithDividers = [];

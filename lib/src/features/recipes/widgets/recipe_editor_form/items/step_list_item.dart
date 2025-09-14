@@ -210,8 +210,8 @@ class _StepListItemState extends State<StepListItem> with SingleTickerProviderSt
   @override
   Widget build(BuildContext context) {
     final colors = AppColors.of(context);
-    final backgroundColor = colors.surface;
-    final backgroundColorSection = colors.surfaceVariant;
+    final backgroundColor = colors.input;
+    final backgroundColorSection = colors.input;
 
     return AnimatedBuilder(
       animation: _animationController,

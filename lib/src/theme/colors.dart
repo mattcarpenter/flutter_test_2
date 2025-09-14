@@ -196,15 +196,19 @@ class AppColors {
 
   // Background colors
   Color get background => brightness == Brightness.light
-      ? Colors.white  // #FFFFFF - better hierarchy, was neutral[50]
+      ? AppColorSwatches.surface[75]!  // #FFFFFF - better hierarchy, was neutral[50]
       : const Color(0xFF121212);  // True Material Design dark, was neutral[900]
 
   Color get scaffoldBackground => brightness == Brightness.light
       ? AppColorSwatches.surface[75]!  // #F9F4F3 - matches Cupertino theme
       : const Color(0xFF121212);  // Matches dark theme scaffold
 
-  Color get input => brightness == Brightness.light
+  /*Color get input => brightness == Brightness.light
       ? AppColorSwatches.neutral[250]!
+      : AppColorSwatches.neutral[800]!;*/
+
+  Color get input => brightness == Brightness.light
+      ? AppColorSwatches.neutral[0]!
       : AppColorSwatches.neutral[800]!;
 
   Color get surface => brightness == Brightness.light
