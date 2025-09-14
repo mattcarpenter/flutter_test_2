@@ -203,10 +203,6 @@ class AppColors {
       ? AppColorSwatches.surface[75]!  // #F9F4F3 - matches Cupertino theme
       : const Color(0xFF121212);  // Matches dark theme scaffold
 
-  /*Color get input => brightness == Brightness.light
-      ? AppColorSwatches.neutral[250]!
-      : AppColorSwatches.neutral[800]!;*/
-
   Color get input => brightness == Brightness.light
       ? AppColorSwatches.neutral[0]!
       : AppColorSwatches.neutral[800]!;

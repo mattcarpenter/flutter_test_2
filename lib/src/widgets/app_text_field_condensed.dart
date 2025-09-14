@@ -272,7 +272,7 @@ class _AppTextFieldCondensedState extends State<AppTextFieldCondensed>
                     color: _effectiveErrorText != null
                         ? colors.error
                         : widget.enabled
-                            ? colors.inputLabel
+                            ? colors.textPrimary
                             : colors.textDisabled,
                   ),
                 ),
@@ -387,7 +387,7 @@ class _AppTextFieldCondensedState extends State<AppTextFieldCondensed>
                         color: _effectiveErrorText != null
                             ? colors.error
                             : widget.enabled
-                                ? colors.inputLabel
+                                ? colors.textPrimary
                                 : colors.textDisabled,
                       ),
                     ),

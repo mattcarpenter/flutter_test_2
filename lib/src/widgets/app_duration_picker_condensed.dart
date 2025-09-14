@@ -377,7 +377,7 @@ class _AppDurationPickerCondensedState extends State<AppDurationPickerCondensed>
                     style: TextStyle(
                       color: widget.errorText != null 
                           ? colors.error 
-                          : colors.inputLabel,
+                          : colors.textPrimary,
                       fontSize: 16,
                       fontWeight: FontWeight.w400,
                     ),
@@ -442,7 +442,7 @@ class _AppDurationPickerCondensedState extends State<AppDurationPickerCondensed>
                   style: TextStyle(
                     color: widget.errorText != null 
                         ? colors.error 
-                        : colors.inputLabel,
+                        : colors.textPrimary,
                     fontSize: 16,
                     fontWeight: FontWeight.w400,
                   ),

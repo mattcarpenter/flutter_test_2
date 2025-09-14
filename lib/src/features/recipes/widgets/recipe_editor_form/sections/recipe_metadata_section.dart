@@ -35,7 +35,7 @@ class RecipeMetadataSection extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         const SizedBox(height: AppSpacing.lg),
-        
+
         // Title and Description grouped together
         AppTextFieldGroup(
           variant: AppTextFieldVariant.outline,
@@ -54,7 +54,7 @@ class RecipeMetadataSection extends StatelessWidget {
             ),
           ],
         ),
-        
+
         const SizedBox(height: AppSpacing.md),
 
         // Timing group: Prep Time + Cook Time + Servings + Folders
