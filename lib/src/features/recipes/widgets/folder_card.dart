@@ -237,7 +237,7 @@ class _FolderCardContent extends ConsumerWidget {
                   ),
                   const SizedBox(height: 1.0), // Reduced spacing
                   Text(
-                    '$recipeCount recipes',
+                    _formatRecipeCount(recipeCount),
                     style: CupertinoTheme.of(context)
                         .textTheme
                         .textStyle
@@ -265,6 +265,16 @@ class _FolderCardContent extends ConsumerWidget {
         color: CupertinoColors.systemGrey2,
       ),
     );
+  }
+
+  String _formatRecipeCount(int count) {
+    if (count == 0) {
+      return 'no recipes';
+    } else if (count == 1) {
+      return '1 recipe';
+    } else {
+      return '$count recipes';
+    }
   }
 }
 
