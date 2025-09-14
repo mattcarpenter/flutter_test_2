@@ -32,8 +32,8 @@ class AppCheckboxSquare extends StatelessWidget {
         border: Border.all(
           color: checked 
             ? colors.textSecondary 
-            : colors.border,
-          width: 1.5,
+            : AppColorSwatches.neutral[400]!,
+          width: checked ? 1.5 : 1.0,
         ),
         borderRadius: BorderRadius.circular(_borderRadius),
       ),

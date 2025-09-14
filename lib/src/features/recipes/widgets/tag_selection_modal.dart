@@ -46,6 +46,7 @@ class TagSelectionModalPage {
   }) {
     return WoltModalSheetPage(
       backgroundColor: AppColors.of(context).background,
+      surfaceTintColor: Colors.transparent,
       hasTopBarLayer: false,
       isTopBarLayerAlwaysVisible: false,
       leadingNavBarWidget: TextButton(
