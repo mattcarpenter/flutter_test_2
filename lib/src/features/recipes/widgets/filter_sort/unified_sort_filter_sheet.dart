@@ -675,7 +675,7 @@ class _SortSectionState extends ConsumerState<_SortSection> {
                     items: _buildSortOptions().map((option) {
                   final isSelected = widget.controller.sortOption == option;
                   return AdaptiveMenuItem(
-                    title: isSelected ? '${option.label} ✓' : option.label,
+                    title: option.label,
                     icon: Icon(
                       isSelected ? Icons.check_circle : Icons.sort,
                       size: 16,

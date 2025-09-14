@@ -213,8 +213,10 @@ class FilterUtils {
     required UnifiedFilterSortState filterState,
     required WidgetRef ref,
   }) {
-    if (filterState.activeFilters.containsKey(FilterType.pantryMatch)) {
-      // Always reload data when filter is active to ensure we have latest matches
+    // Load pantry matches if filtering OR sorting by pantry match
+    if (filterState.activeFilters.containsKey(FilterType.pantryMatch) ||
+        filterState.activeSortOption == SortOption.pantryMatch) {
+      // Always reload data when filter is active or sorting by pantry match to ensure we have latest matches
       ref.read(pantryRecipeMatchProvider.notifier).findMatchingRecipes();
     }
   }

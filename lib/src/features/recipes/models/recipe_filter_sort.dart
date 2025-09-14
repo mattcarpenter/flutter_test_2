@@ -176,9 +176,9 @@ enum SortOption {
   pantryMatch('Pantry Match %'),
   alphabetical('Alphabetical'),
   rating('Rating'),
-  time('Time (Fastest First)'),
-  recentlyAdded('Recently Added'),
-  recentlyUpdated('Recently Updated');
+  time('Time'),
+  recentlyAdded('Added Date'),
+  recentlyUpdated('Updated Date');
 
   const SortOption(this.label);
   final String label;
