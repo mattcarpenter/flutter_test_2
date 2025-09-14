@@ -8,6 +8,7 @@ import '../../../../theme/colors.dart';
 import '../../../../theme/typography.dart';
 import '../../../../theme/spacing.dart';
 import '../../../../widgets/app_button.dart';
+import '../../../../widgets/app_circle_button.dart';
 import '../../../../widgets/adaptive_pull_down/adaptive_pull_down.dart';
 import '../../../../widgets/adaptive_pull_down/adaptive_menu_item.dart';
 import '../../models/recipe_filter_sort.dart';
@@ -26,7 +27,10 @@ void showUnifiedSortFilterSheet(
     pageListBuilder: (modalContext) {
       return [
         WoltModalSheetPage(
+          navBarHeight: 55,
           backgroundColor: AppColors.of(modalContext).background,
+          surfaceTintColor: Colors.transparent,
+          hasTopBarLayer: false,
           leadingNavBarWidget: TextButton(
             onPressed: () {
               // Clear all filters and reset sort
@@ -39,11 +43,15 @@ void showUnifiedSortFilterSheet(
             },
             child: const Text('Reset All'),
           ),
-          trailingNavBarWidget: IconButton(
-            icon: const Icon(Icons.close),
-            onPressed: () {
-              Navigator.of(modalContext).pop();
-            },
+          trailingNavBarWidget: Padding(
+            padding: EdgeInsets.only(right: AppSpacing.lg),
+            child: AppCircleButton(
+              icon: AppCircleButtonIcon.close,
+              variant: AppCircleButtonVariant.neutral,
+              onPressed: () {
+                Navigator.of(modalContext).pop();
+              },
+            ),
           ),
           child: UnifiedSortFilterContent(
             initialState: initialState,
@@ -77,7 +85,7 @@ class UnifiedSortFilterContent extends ConsumerStatefulWidget {
 
 class _UnifiedSortFilterContentState extends ConsumerState<UnifiedSortFilterContent> {
   late RecipeFilterSortState currentState;
-  
+
   // Local state for tag filter
   late Set<String> _selectedTagIds;
   late TagFilterMode _tagFilterMode;
@@ -93,7 +101,7 @@ class _UnifiedSortFilterContentState extends ConsumerState<UnifiedSortFilterCont
       folderId: widget.initialState.folderId,
       searchQuery: widget.initialState.searchQuery,
     );
-    
+
     // Initialize tag filter state
     final existingTagFilter = currentState.activeFilters[FilterType.tags] as TagFilter?;
     _selectedTagIds = existingTagFilter?.selectedTagIds.toSet() ?? {};
@@ -118,7 +126,7 @@ class _UnifiedSortFilterContentState extends ConsumerState<UnifiedSortFilterCont
       );
     });
   }
-  
+
   void _updateTagFilter() {
     if (_selectedTagIds.isEmpty) {
       currentState = currentState.withoutFilter(FilterType.tags);
@@ -134,59 +142,76 @@ class _UnifiedSortFilterContentState extends ConsumerState<UnifiedSortFilterCont
   @override
   Widget build(BuildContext context) {
     final colors = AppColors.of(context);
-    
-    return Padding(
-      padding: EdgeInsets.fromLTRB(
-        AppSpacing.lg,
-        AppSpacing.sm,
-        AppSpacing.lg,
-        AppSpacing.lg,
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          // Sort Section
-          _buildSortSection(),
-          
-          SizedBox(height: AppSpacing.xl),
-          
-          // Divider
-          Container(
-            height: 1,
-            color: colors.border,
-            margin: EdgeInsets.symmetric(vertical: AppSpacing.md),
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        // Sort Section - padded
+        Padding(
+          padding: EdgeInsets.fromLTRB(
+            AppSpacing.lg,
+            AppSpacing.sm,
+            AppSpacing.lg,
+            0,
           ),
-          
-          // Filter Sections
-          _buildCookTimeFilter(),
-          SizedBox(height: AppSpacing.xl),
-          _buildRatingFilter(),
-          SizedBox(height: AppSpacing.xl),
-          _buildPantryMatchFilter(),
-          SizedBox(height: AppSpacing.xl),
-          _buildTagsFilter(),
-          SizedBox(height: AppSpacing.xl),
-          
-          // Apply button
-          AppButton(
-            text: 'Apply Changes',
-            theme: AppButtonTheme.secondary,
-            onPressed: () {
-              // Update tag filter in current state before applying
-              _updateTagFilter();
-              widget.onStateChanged(currentState);
-            },
-            fullWidth: true,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              _buildSortSection(),
+              SizedBox(height: AppSpacing.sm),
+            ],
           ),
-        ],
-      ),
+        ),
+
+        // Divider - edge-to-edge (no padding)
+        Container(
+          height: 10,
+          margin: EdgeInsets.symmetric(vertical: AppSpacing.lg),
+          color: AppColorSwatches.neutral[250]!,
+        ),
+
+        // Filter sections - padded
+        Padding(
+          padding: EdgeInsets.fromLTRB(
+            AppSpacing.lg,
+            AppSpacing.sm,
+            AppSpacing.lg,
+            AppSpacing.lg,
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              _buildCookTimeFilter(),
+              SizedBox(height: AppSpacing.xl),
+              _buildRatingFilter(),
+              SizedBox(height: AppSpacing.xl),
+              _buildPantryMatchFilter(),
+              SizedBox(height: AppSpacing.xl),
+              _buildTagsFilter(),
+              SizedBox(height: AppSpacing.xl),
+
+              // Apply button
+              AppButton(
+                text: 'Apply Changes',
+                theme: AppButtonTheme.secondary,
+                onPressed: () {
+                  // Update tag filter in current state before applying
+                  _updateTagFilter();
+                  widget.onStateChanged(currentState);
+                },
+                fullWidth: true,
+              ),
+            ],
+          ),
+        ),
+      ],
     );
   }
 
   Widget _buildSortSection() {
     final colors = AppColors.of(context);
-    
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -197,7 +222,7 @@ class _UnifiedSortFilterContentState extends ConsumerState<UnifiedSortFilterCont
           ),
         ),
         SizedBox(height: AppSpacing.md),
-        
+
         Row(
           children: [
             // Sort dropdown button using AdaptivePullDownButton with AppButton
@@ -233,9 +258,9 @@ class _UnifiedSortFilterContentState extends ConsumerState<UnifiedSortFilterCont
                 ),
               ),
             ),
-            
+
             SizedBox(width: AppSpacing.md),
-            
+
             // Direction toggle button
             AppButton(
               text: currentState.sortDirection == SortDirection.ascending ? 'A-Z' : 'Z-A',
@@ -264,7 +289,7 @@ class _UnifiedSortFilterContentState extends ConsumerState<UnifiedSortFilterCont
 
   List<SortOption> _buildSortOptions() {
     final options = <SortOption>[];
-    
+
     for (final sortOption in SortOption.values) {
       // Filter out pantry match option when not needed
       if (sortOption == SortOption.pantryMatch && !widget.showPantryMatchOption) {
@@ -272,14 +297,14 @@ class _UnifiedSortFilterContentState extends ConsumerState<UnifiedSortFilterCont
       }
       options.add(sortOption);
     }
-    
+
     return options;
   }
 
   Widget _buildCookTimeFilter() {
     final colors = AppColors.of(context);
     final selectedValue = currentState.activeFilters[FilterType.cookTime] as CookTimeFilter?;
-    
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -306,7 +331,7 @@ class _UnifiedSortFilterContentState extends ConsumerState<UnifiedSortFilterCont
                 style: isSelected ? AppButtonStyle.fill : AppButtonStyle.mutedOutline,
                 onPressed: () {
                   _updateFilter(
-                    FilterType.cookTime, 
+                    FilterType.cookTime,
                     isSelected ? null : filter
                   );
                 },
@@ -348,7 +373,7 @@ class _UnifiedSortFilterContentState extends ConsumerState<UnifiedSortFilterCont
                 style: isSelected ? AppButtonStyle.fill : AppButtonStyle.mutedOutline,
                 onPressed: () {
                   _updateFilter(
-                    FilterType.rating, 
+                    FilterType.rating,
                     isSelected ? null : filter
                   );
                 },
@@ -390,7 +415,7 @@ class _UnifiedSortFilterContentState extends ConsumerState<UnifiedSortFilterCont
                 style: isSelected ? AppButtonStyle.fill : AppButtonStyle.mutedOutline,
                 onPressed: () {
                   _updateFilter(
-                    FilterType.pantryMatch, 
+                    FilterType.pantryMatch,
                     isSelected ? null : filter
                   );
                 },
@@ -401,17 +426,17 @@ class _UnifiedSortFilterContentState extends ConsumerState<UnifiedSortFilterCont
       ],
     );
   }
-  
+
   Widget _buildTagsFilter() {
     final colors = AppColors.of(context);
     final tagsAsync = ref.watch(recipeTagNotifierProvider);
-    
+
     return tagsAsync.when(
       data: (tags) {
         if (tags.isEmpty) {
           return const SizedBox.shrink();
         }
-        
+
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -447,7 +472,7 @@ class _UnifiedSortFilterContentState extends ConsumerState<UnifiedSortFilterCont
               ],
             ),
             SizedBox(height: AppSpacing.md),
-            
+
             // Tags wrapped buttons
             SizedBox(
               width: double.infinity,
