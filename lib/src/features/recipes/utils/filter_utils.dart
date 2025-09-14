@@ -227,8 +227,8 @@ class FilterUtils {
       final totalTime = recipe.totalTime ??
                        (recipe.prepTime ?? 0) + (recipe.cookTime ?? 0);
 
-      // Skip if we don't have time information
-      if (totalTime == 0) return true;
+      // Exclude recipes without time information when filter is active
+      if (totalTime == 0) return false;
 
       // Check if recipe matches ANY of the selected time ranges
       return filter.selectedFilters.any((cookTimeFilter) {
@@ -250,8 +250,8 @@ class FilterUtils {
     return (recipe) {
       if (filter.selectedRatings.isEmpty) return true;
       
-      // Skip if recipe has no rating
-      if (recipe.rating == null) return true;
+      // Exclude recipes without ratings when filter is active
+      if (recipe.rating == null) return false;
       
       // Check if recipe rating exactly matches ANY of the selected ratings
       return filter.selectedRatings.any((ratingFilter) => 
