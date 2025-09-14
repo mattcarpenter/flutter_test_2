@@ -84,7 +84,12 @@ class _AppDurationPickerCondensedState extends State<AppDurationPickerCondensed>
 
   void _updateDisplayValue() {
     final duration = _parseDuration();
-    _displayController.text = _formatDuration(duration);
+    final newDisplayText = _formatDuration(duration);
+    if (_displayController.text != newDisplayText) {
+      setState(() {
+        _displayController.text = newDisplayText;
+      });
+    }
   }
 
   String _formatDuration(Duration duration) {
@@ -293,7 +298,7 @@ class _AppDurationPickerCondensedState extends State<AppDurationPickerCondensed>
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       decoration: BoxDecoration(
         color: colors.chipBackground,
-        borderRadius: BorderRadius.circular(2),
+        borderRadius: BorderRadius.circular(6),
       ),
       child: Text(
         text,
