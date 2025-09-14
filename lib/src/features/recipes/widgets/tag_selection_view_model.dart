@@ -86,10 +86,8 @@ class TagSelectionViewModel extends ChangeNotifier {
     // Clear any previous error
     _errorMessage = null;
     
-    // Validate tag name
+    // Validate tag name - empty names are now handled by disabled button
     if (name.trim().isEmpty) {
-      _errorMessage = 'Tag name cannot be empty';
-      notifyListeners();
       return '';
     }
     

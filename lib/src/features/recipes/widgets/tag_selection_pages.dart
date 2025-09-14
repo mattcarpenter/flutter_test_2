@@ -265,33 +265,6 @@ class _CreateTagPageContentState extends State<CreateTagPageContent> {
             ),
             SizedBox(height: AppSpacing.lg),
             
-            // Error message if any
-            if (viewModel.errorMessage != null) ...[
-              Container(
-                padding: EdgeInsets.all(AppSpacing.sm),
-                decoration: BoxDecoration(
-                  color: colors.error.withValues(alpha: 0.1),
-                  border: Border.all(color: colors.error.withValues(alpha: 0.3)),
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: Row(
-                  children: [
-                    Icon(Icons.error_outline, color: colors.error, size: 20),
-                    SizedBox(width: AppSpacing.sm),
-                    Expanded(
-                      child: Text(
-                        viewModel.errorMessage!,
-                        style: AppTypography.bodySmall.copyWith(
-                          color: colors.error,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              SizedBox(height: AppSpacing.lg),
-            ],
-            
             // Tag name input
             Text(
               'Tag Name',
@@ -304,6 +277,7 @@ class _CreateTagPageContentState extends State<CreateTagPageContent> {
               controller: _nameController,
               placeholder: 'Enter tag name',
               onChanged: (_) {
+                setState(() {}); // Rebuild to update button state
                 viewModel.clearError();
               },
               autofocus: true,
@@ -360,14 +334,13 @@ class _CreateTagPageContentState extends State<CreateTagPageContent> {
             
             // Create button
             AppButton(
-              text: 'Create & Return',
-              onPressed: _createTagAndReturn,
+              text: 'Create',
+              onPressed: _nameController.text.trim().isEmpty ? null : _createTagAndReturn,
               theme: AppButtonTheme.primary,
               style: AppButtonStyle.fill,
               shape: AppButtonShape.square,
               size: AppButtonSize.large,
               fullWidth: true,
-              leadingIcon: const Icon(Icons.add),
             ),
           ],
         );
