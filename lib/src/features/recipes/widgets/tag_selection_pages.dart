@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:provider/provider.dart' as provider;
@@ -24,7 +25,8 @@ class TagSelectionPage {
       surfaceTintColor: Colors.transparent,
       hasTopBarLayer: false,
       isTopBarLayerAlwaysVisible: false,
-      leadingNavBarWidget: TextButton(
+      leadingNavBarWidget: CupertinoButton(
+        padding: const EdgeInsets.symmetric(horizontal: 16.0),
         onPressed: () {
           // Cancel - clean up temporary tags
           final viewModel = provider.Provider.of<TagSelectionViewModel>(context, listen: false);
@@ -33,7 +35,8 @@ class TagSelectionPage {
         },
         child: const Text('Cancel'),
       ),
-      trailingNavBarWidget: TextButton(
+      trailingNavBarWidget: CupertinoButton(
+        padding: const EdgeInsets.symmetric(horizontal: 16.0),
         onPressed: () async {
           // Save - convert temporary tags to real tags
           final viewModel = provider.Provider.of<TagSelectionViewModel>(context, listen: false);
