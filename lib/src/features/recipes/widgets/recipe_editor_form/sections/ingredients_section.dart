@@ -187,13 +187,6 @@ class _IngredientsSectionState extends State<IngredientsSection> {
               AppOverflowButton(
                 items: [
                   AdaptiveMenuItem(
-                    title: 'Copy All Ingredients',
-                    icon: const Icon(Icons.copy),
-                    onTap: () {
-                      // TODO: Implement copy functionality
-                    },
-                  ),
-                  AdaptiveMenuItem(
                     title: 'Clear All Ingredients', 
                     icon: const Icon(Icons.clear_all),
                     onTap: () {
