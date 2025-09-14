@@ -1,4 +1,3 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart' as supabase_flutter;
@@ -19,18 +18,20 @@ Future<String?> showAddFolderModal(BuildContext context) {
     pageListBuilder: (bottomSheetContext) => [
       AddFolderModalPage.build(
         context: bottomSheetContext,
-        onFolderAdded: (String folderName) {
+        onFolderAdded: (String folderName) async {
           // Get the provider container from the modal context.
           final container = ProviderScope.containerOf(bottomSheetContext);
           // Construct a RecipeFolder using the folderName.
           final userId = supabase_flutter.Supabase.instance.client.auth.currentUser?.id;
 
           // Use the notifier to add the folder.
-          container
+          await container
               .read(recipeFolderNotifierProvider.notifier)
               .addFolder(name: folderName, userId: userId);
           // Close the modal, optionally returning the folder name.
-          Navigator.of(bottomSheetContext).pop(folderName);
+          if (bottomSheetContext.mounted) {
+            Navigator.of(bottomSheetContext).pop(folderName);
+          }
         },
       ),
     ],

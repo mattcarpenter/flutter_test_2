@@ -1,11 +1,9 @@
 import 'package:drift/drift.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:powersync/powersync.dart';
 import 'package:recipe_app/src/repositories/recipe_repository.dart';
+import 'package:uuid/uuid.dart';
 import '../../database/database.dart';
 import '../../database/powersync.dart';
-import '../../database/models/recipe_folders.dart';
-import '../../main.dart';
 
 class RecipeFolderRepository {
   final AppDatabase _db;
@@ -19,9 +17,24 @@ class RecipeFolderRepository {
     ).watch();
   }
 
-  // Insert a new folder. We use a companion so that the auto-generated fields work properly.
-  Future<int> addFolder(RecipeFoldersCompanion folder) {
-    return _db.into(_db.recipeFolders).insert(folder);
+  /// Add a new folder and return the created folder entry
+  Future<RecipeFolderEntry> addFolder({
+    required String name,
+    String? userId,
+    String? householdId,
+  }) async {
+    final folderId = const Uuid().v4();
+    final entry = RecipeFoldersCompanion(
+      id: Value(folderId),
+      name: Value(name),
+      userId: Value(userId),
+      householdId: Value(householdId),
+    );
+
+    await _db.into(_db.recipeFolders).insert(entry);
+    return await (_db.select(_db.recipeFolders)
+          ..where((tbl) => tbl.id.equals(folderId)))
+        .getSingle();
   }
 
   // Soft delete a folder by updating its deletedAt column.

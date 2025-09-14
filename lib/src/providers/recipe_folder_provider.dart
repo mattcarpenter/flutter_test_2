@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'package:drift/drift.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../database/database.dart';
 import '../repositories/recipe_folder_repository.dart';
@@ -29,22 +28,22 @@ class RecipeFolderNotifier extends StateNotifier<AsyncValue<List<RecipeFolderEnt
     super.dispose();
   }
 
-  // Add a new folder.
-  Future<void> addFolder({
+  /// Add a new folder and return its ID
+  Future<String?> addFolder({
     required String name,
     String? householdId,
     String? userId,
   }) async {
     try {
-      // Create a companion for insertion.
-      final companion = RecipeFoldersCompanion.insert(
+      final newFolder = await _repository.addFolder(
         name: name,
-        userId: Value(userId),
-        householdId: Value(householdId),
+        userId: userId,
+        householdId: householdId,
       );
-      await _repository.addFolder(companion);
+      return newFolder.id;
     } catch (e, stack) {
       state = AsyncValue.error(e, stack);
+      return null;
     }
   }
 

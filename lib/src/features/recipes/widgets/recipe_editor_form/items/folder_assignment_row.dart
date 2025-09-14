@@ -39,6 +39,7 @@ class FolderAssignmentRow extends ConsumerWidget {
           context,
           currentFolderIds: currentFolderIds,
           onFolderIdsChanged: onFolderIdsChanged,
+          ref: ref,
         );
       },
       child: Container(
