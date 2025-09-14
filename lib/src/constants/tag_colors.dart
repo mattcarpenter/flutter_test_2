@@ -50,4 +50,15 @@ class TagColors {
   static String toHex(Color color) {
     return '#${color.value.toRadixString(16).substring(2).toUpperCase()}';
   }
+  
+  /// Get the appropriate contrast color (black or white) for a given background color
+  static Color getContrastColor(Color backgroundColor) {
+    // Calculate luminance using the standard formula
+    double luminance = (0.299 * backgroundColor.red + 
+                       0.587 * backgroundColor.green + 
+                       0.114 * backgroundColor.blue) / 255;
+    
+    // Use white text on dark backgrounds, black text on light backgrounds
+    return luminance > 0.5 ? Colors.black : Colors.white;
+  }
 }

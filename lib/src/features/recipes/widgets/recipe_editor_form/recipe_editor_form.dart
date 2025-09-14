@@ -443,6 +443,7 @@ class RecipeEditorFormState extends ConsumerState<RecipeEditorForm> {
                   context,
                   currentTagIds: _recipe.tagIds ?? [],
                   onTagIdsChanged: _updateTagIds,
+                  ref: ref,
                 );
               },
             ),
