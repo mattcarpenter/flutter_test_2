@@ -30,6 +30,13 @@ enum AppButtonSize {
   large,
 }
 
+/// Alignment options for button content
+enum AppButtonContentAlignment {
+  center,
+  left,
+  right,
+}
+
 /// A button widget that follows the app's design system
 class AppButton extends StatefulWidget {
   final String text;
@@ -47,6 +54,7 @@ class AppButton extends StatefulWidget {
   final bool visuallyEnabled;
   final Offset leadingIconOffset;
   final Offset trailingIconOffset;
+  final AppButtonContentAlignment contentAlignment;
 
   const AppButton({
     Key? key,
@@ -65,6 +73,7 @@ class AppButton extends StatefulWidget {
     this.visuallyEnabled = false,
     this.leadingIconOffset = Offset.zero,
     this.trailingIconOffset = Offset.zero,
+    this.contentAlignment = AppButtonContentAlignment.center,
   }) : super(key: key);
 
   @override
@@ -378,7 +387,11 @@ class _AppButtonState extends State<AppButton> {
                   mainAxisSize: widget.fullWidth ? MainAxisSize.max : MainAxisSize.min,
                   mainAxisAlignment: widget.trailingIcon != null 
                       ? MainAxisAlignment.spaceBetween 
-                      : MainAxisAlignment.center,
+                      : widget.contentAlignment == AppButtonContentAlignment.left
+                          ? MainAxisAlignment.start
+                          : widget.contentAlignment == AppButtonContentAlignment.right
+                              ? MainAxisAlignment.end
+                              : MainAxisAlignment.center,
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
                     // Leading content (icon + text) - grouped together when trailing icon exists
@@ -496,6 +509,7 @@ extension AppButtonVariants on AppButton {
     bool fullWidth = false,
     Offset leadingIconOffset = Offset.zero,
     Offset trailingIconOffset = Offset.zero,
+    AppButtonContentAlignment contentAlignment = AppButtonContentAlignment.center,
   }) {
     return AppButton(
       text: text,
@@ -510,6 +524,7 @@ extension AppButtonVariants on AppButton {
       fullWidth: fullWidth,
       leadingIconOffset: leadingIconOffset,
       trailingIconOffset: trailingIconOffset,
+      contentAlignment: contentAlignment,
     );
   }
 
@@ -525,6 +540,7 @@ extension AppButtonVariants on AppButton {
     bool fullWidth = false,
     Offset leadingIconOffset = Offset.zero,
     Offset trailingIconOffset = Offset.zero,
+    AppButtonContentAlignment contentAlignment = AppButtonContentAlignment.center,
   }) {
     return AppButton(
       text: text,
@@ -539,6 +555,7 @@ extension AppButtonVariants on AppButton {
       fullWidth: fullWidth,
       leadingIconOffset: leadingIconOffset,
       trailingIconOffset: trailingIconOffset,
+      contentAlignment: contentAlignment,
     );
   }
 
@@ -554,6 +571,7 @@ extension AppButtonVariants on AppButton {
     bool fullWidth = false,
     Offset leadingIconOffset = Offset.zero,
     Offset trailingIconOffset = Offset.zero,
+    AppButtonContentAlignment contentAlignment = AppButtonContentAlignment.center,
   }) {
     return AppButton(
       text: text,
@@ -568,6 +586,7 @@ extension AppButtonVariants on AppButton {
       fullWidth: fullWidth,
       leadingIconOffset: leadingIconOffset,
       trailingIconOffset: trailingIconOffset,
+      contentAlignment: contentAlignment,
     );
   }
 
@@ -583,6 +602,7 @@ extension AppButtonVariants on AppButton {
     bool fullWidth = false,
     Offset leadingIconOffset = Offset.zero,
     Offset trailingIconOffset = Offset.zero,
+    AppButtonContentAlignment contentAlignment = AppButtonContentAlignment.center,
   }) {
     return AppButton(
       text: text,
@@ -597,6 +617,7 @@ extension AppButtonVariants on AppButton {
       fullWidth: fullWidth,
       leadingIconOffset: leadingIconOffset,
       trailingIconOffset: trailingIconOffset,
+      contentAlignment: contentAlignment,
     );
   }
 
@@ -613,6 +634,7 @@ extension AppButtonVariants on AppButton {
     bool fullWidth = false,
     Offset leadingIconOffset = Offset.zero,
     Offset trailingIconOffset = Offset.zero,
+    AppButtonContentAlignment contentAlignment = AppButtonContentAlignment.center,
   }) {
     return AppButton(
       text: text,
@@ -627,6 +649,7 @@ extension AppButtonVariants on AppButton {
       fullWidth: fullWidth,
       leadingIconOffset: leadingIconOffset,
       trailingIconOffset: trailingIconOffset,
+      contentAlignment: contentAlignment,
     );
   }
 

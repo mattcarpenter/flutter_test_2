@@ -240,44 +240,48 @@ class _UnifiedHeaderDelegate extends SliverPersistentHeaderDelegate {
         constraints: const BoxConstraints(maxWidth: 800), // Max width for wider screens
         child: Row(
           children: [
-            // Tune icon button for Sort/Filter (left aligned)
-            Stack(
-              clipBehavior: Clip.none,
-              children: [
-                AppButton(
-                  text: 'Filter and Sort',
-                  leadingIcon: const Icon(Icons.tune),
-                  style: AppButtonStyle.mutedOutline,
-                  shape: AppButtonShape.square,
-                  size: AppButtonSize.medium,
-                  theme: AppButtonTheme.primary,
-                  onPressed: () {
-                    showUnifiedSortFilterSheet(
-                      context,
-                      initialState: filterSortState,
-                      onStateChanged: onStateChanged,
-                      showPantryMatchOption: true,
-                    );
-                  },
-                ),
-                // Active filters indicator
-                if (filterSortState.hasFilters)
-                  Positioned(
-                    top: -2,
-                    right: -2,
-                    child: Container(
-                      width: 8,
-                      height: 8,
-                      decoration: const BoxDecoration(
-                        color: Colors.red,
-                        shape: BoxShape.circle,
+            // Tune icon button for Sort/Filter (takes all available space)
+            Expanded(
+              child: Stack(
+                clipBehavior: Clip.none,
+                children: [
+                  AppButton(
+                    text: 'Filter and Sort',
+                    leadingIcon: const Icon(Icons.tune),
+                    style: AppButtonStyle.mutedOutline,
+                    shape: AppButtonShape.square,
+                    size: AppButtonSize.medium,
+                    theme: AppButtonTheme.primary,
+                    fullWidth: true,
+                    contentAlignment: AppButtonContentAlignment.left,
+                    onPressed: () {
+                      showUnifiedSortFilterSheet(
+                        context,
+                        initialState: filterSortState,
+                        onStateChanged: onStateChanged,
+                        showPantryMatchOption: true,
+                      );
+                    },
+                  ),
+                  // Active filters indicator
+                  if (filterSortState.hasFilters)
+                    Positioned(
+                      top: -2,
+                      right: -2,
+                      child: Container(
+                        width: 8,
+                        height: 8,
+                        decoration: const BoxDecoration(
+                          color: Colors.red,
+                          shape: BoxShape.circle,
+                        ),
                       ),
                     ),
-                  ),
-              ],
+                ],
+              ),
             ),
 
-            const Spacer(), // Push Add Recipe button to the right
+            const SizedBox(width: 12), // Spacing between buttons
 
             // Add Recipe button (fixed width)
             AppButton(
