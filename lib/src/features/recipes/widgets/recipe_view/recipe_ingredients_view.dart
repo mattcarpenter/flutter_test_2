@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../../database/models/ingredients.dart';
+import '../../../../../database/models/pantry_items.dart';
 import '../../../../models/ingredient_pantry_match.dart';
 import '../../../../providers/recipe_provider.dart';
 import '../../../../providers/pantry_provider.dart';
@@ -83,20 +84,14 @@ class _RecipeIngredientsViewState extends ConsumerState<RecipeIngredientsView> {
             // Section header
             if (ingredient.type == 'section') {
               return Padding(
-                padding: EdgeInsets.only(top: index == 0 ? 0 : 8.0, bottom: 8.0),
-                child: Container(
-                  width: double.infinity,
-                  padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
-                  decoration: BoxDecoration(
-                    color: Colors.grey.shade200,
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: Text(
-                    ingredient.name,
-                    style: const TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                    ),
+                padding: EdgeInsets.only(
+                  top: index == 0 ? 0 : AppSpacing.xl, // More spacing on top
+                  bottom: AppSpacing.sm, // Less spacing on bottom
+                ),
+                child: Text(
+                  ingredient.name,
+                  style: AppTypography.h4.copyWith(
+                    color: AppColors.of(context).textPrimary,
                   ),
                 ),
               );
@@ -105,71 +100,55 @@ class _RecipeIngredientsViewState extends ConsumerState<RecipeIngredientsView> {
             // Regular ingredient with match indicator (if available)
             return Padding(
               padding: EdgeInsets.only(
-                top: index == 0 ? 0 : 4.0,
-                bottom: 4.0,
+                top: index == 0 ? 0 : 8.0,
+                bottom: 8.0,
               ),
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  // Match indicator or bullet point - use cached data to prevent flashing
-                  if (currentMatches != null) ...[
-                    () {
-                      // Find the matching IngredientPantryMatch for this ingredient
-                      final match = currentMatches!.matches.firstWhere(
-                        (m) => m.ingredient.id == ingredient.id,
-                        // If no match found, create a default one with no pantry match
-                        orElse: () => IngredientPantryMatch(ingredient: ingredient),
-                      );
-                      
-                      return IngredientMatchCircle(
-                        match: match, 
-                        onTap: () => _showMatchesBottomSheet(context, ref, currentMatches!),
-                        size: 10.0,
-                      );
-                    }(),
-                  ] else if (matchesAsync != null && matchesAsync.isLoading) ...[
-                    const Text(
+              child: GestureDetector(
+                onTap: ingredient.recipeId != null
+                    ? () => _navigateToLinkedRecipe(context, ingredient.recipeId!)
+                    : null,
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    // Simple bullet point
+                    Text(
                       '•',
                       style: TextStyle(
-                        fontSize: 20,
+                        fontSize: 16,
                         height: 1.0,
+                        color: AppColors.of(context).contentSecondary,
                       ),
                     ),
-                  ] else if (matchesAsync != null && matchesAsync.hasError) ...[
-                    const Text(
-                      '•',
-                      style: TextStyle(
-                        fontSize: 20,
-                        height: 1.0,
-                      ),
-                    ),
-                  ] else ...[
-                    // Default bullet point when no matches
-                    const Text(
-                      '•',
-                      style: TextStyle(
-                        fontSize: 20,
-                        height: 1.0,
-                      ),
-                    ),
-                  ],
-                  const SizedBox(width: 8),
-
-                  // Ingredient name
-                  Expanded(
-                    child: _buildParsedIngredientText(ingredient.name),
-                  ),
-
-                  // "See Recipe" chip for linked ingredients
-                  if (ingredient.recipeId != null) ...[
                     const SizedBox(width: 8),
-                    ActionChip(
-                      label: const Text('See Recipe'),
-                      avatar: const Icon(Icons.launch, size: 16),
-                      onPressed: () => _navigateToLinkedRecipe(context, ingredient.recipeId!),
-                      visualDensity: VisualDensity.compact,
+
+                    // Ingredient name
+                    Expanded(
+                      child: _buildParsedIngredientText(
+                        ingredient.name,
+                        isLinkedRecipe: ingredient.recipeId != null,
+                      ),
                     ),
-                  ],
+
+                    // Stock status chip (right-aligned)
+                    if (currentMatches != null) ...[
+                      () {
+                        // Find the matching IngredientPantryMatch for this ingredient
+                        final match = currentMatches!.matches.firstWhere(
+                          (m) => m.ingredient.id == ingredient.id,
+                          // If no match found, create a default one with no pantry match
+                          orElse: () => IngredientPantryMatch(ingredient: ingredient),
+                        );
+
+                        final chip = _buildStockChip(match);
+                        if (chip != null) {
+                          return GestureDetector(
+                            onTap: () => _showMatchesBottomSheet(context, ref, currentMatches!),
+                            child: chip,
+                          );
+                        }
+                        return const SizedBox.shrink();
+                      }(),
+                    ],
 
                   // Note (if available)
                   if (ingredient.note != null && ingredient.note!.isNotEmpty) ...[
@@ -186,7 +165,8 @@ class _RecipeIngredientsViewState extends ConsumerState<RecipeIngredientsView> {
                       ),
                     ),
                   ],
-                ],
+                  ],
+                ),
               ),
             );
           },
@@ -195,8 +175,60 @@ class _RecipeIngredientsViewState extends ConsumerState<RecipeIngredientsView> {
     );
   }
 
+  /// Builds a stock status chip based on ingredient match
+  Widget? _buildStockChip(IngredientPantryMatch match) {
+    if (!match.hasMatch) {
+      return null; // No chip for no match
+    }
+
+    Color backgroundColor;
+    String label;
+
+    if (match.hasPantryMatch) {
+      // Direct pantry match - use stock status colors
+      switch (match.pantryItem!.stockStatus) {
+        case StockStatus.outOfStock:
+          backgroundColor = AppColorSwatches.error[100]!; // Light red
+          label = 'Out';
+          break;
+        case StockStatus.lowStock:
+          backgroundColor = AppColorSwatches.warning[100]!; // Light yellow
+          label = 'Low';
+          break;
+        case StockStatus.inStock:
+          backgroundColor = AppColorSwatches.success[100]!; // Light green
+          label = 'In Stock';
+          break;
+        default:
+          return null;
+      }
+    } else if (match.hasRecipeMatch) {
+      // Recipe-based match
+      backgroundColor = AppColorSwatches.success[100]!; // Light green
+      label = 'Recipe';
+    } else {
+      return null;
+    }
+
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      decoration: BoxDecoration(
+        color: backgroundColor,
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Text(
+        label,
+        style: TextStyle(
+          fontSize: 12,
+          fontWeight: FontWeight.w500,
+          color: AppColors.of(context).textPrimary,
+        ),
+      ),
+    );
+  }
+
   /// Builds a RichText widget with bold quantities parsed from ingredient text
-  Widget _buildParsedIngredientText(String text) {
+  Widget _buildParsedIngredientText(String text, {bool isLinkedRecipe = false}) {
     final colors = AppColors.of(context);
 
     try {
@@ -240,15 +272,73 @@ class _RecipeIngredientsViewState extends ConsumerState<RecipeIngredientsView> {
         ));
       }
 
-      return RichText(
+      // Wrap in GestureDetector if it's a linked recipe
+      Widget richText = RichText(
         text: TextSpan(children: children),
       );
+
+      if (isLinkedRecipe) {
+        return Row(
+          children: [
+            Expanded(
+              child: Container(
+                decoration: BoxDecoration(
+                  border: Border(
+                    bottom: BorderSide(
+                      color: colors.contentPrimary,
+                      width: 1.0,
+                      style: BorderStyle.none, // This creates a dotted effect in some contexts
+                    ),
+                  ),
+                ),
+                child: richText,
+              ),
+            ),
+            const SizedBox(width: 4),
+            Icon(
+              Icons.open_in_new,
+              size: 14,
+              color: colors.contentSecondary,
+            ),
+          ],
+        );
+      }
+
+      return richText;
     } catch (e) {
       // Fallback to plain text if parsing fails
-      return Text(
+      Widget plainText = Text(
         text,
         style: TextStyle(fontSize: 16, color: colors.contentPrimary),
       );
+
+      if (isLinkedRecipe) {
+        return Row(
+          children: [
+            Expanded(
+              child: Container(
+                decoration: BoxDecoration(
+                  border: Border(
+                    bottom: BorderSide(
+                      color: colors.contentPrimary,
+                      width: 1.0,
+                    ),
+                  ),
+                ),
+                child: plainText,
+              ),
+            ),
+            const SizedBox(width: 4),
+            Icon(
+              Icons.open_in_new,
+              size: 14,
+              color: colors.contentSecondary,
+            ),
+          ],
+        );
+      }
+
+      return plainText;
     }
   }
 

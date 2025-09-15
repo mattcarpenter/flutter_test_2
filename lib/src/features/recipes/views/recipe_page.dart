@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../theme/colors.dart';
 import '../../../widgets/app_circle_button.dart';
-import '../../../providers/recipe_provider.dart';
+import '../../../providers/recipe_provider.dart' as recipe_provider;
 import '../widgets/recipe_view/recipe_view.dart';
 import '../widgets/recipe_view/recipe_hero_image.dart';
 
@@ -144,7 +144,7 @@ class _RecipePageState extends ConsumerState<RecipePage> with TickerProviderStat
 
   @override
   Widget build(BuildContext context) {
-    final recipeAsync = ref.watch(recipeByIdStreamProvider(widget.recipeId));
+    final recipeAsync = ref.watch(recipe_provider.recipeByIdStreamProvider(widget.recipeId));
 
     return Scaffold(
       extendBodyBehindAppBar: true,

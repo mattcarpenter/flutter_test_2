@@ -4,7 +4,7 @@ import 'package:recipe_app/src/features/recipes/widgets/recipe_view/recipe_image
 import 'package:recipe_app/src/features/recipes/widgets/recipe_view/recipe_ingredients_view.dart';
 import 'package:recipe_app/src/features/recipes/widgets/recipe_view/recipe_steps_view.dart';
 import 'package:recipe_app/src/providers/pantry_provider.dart';
-import 'package:recipe_app/src/providers/recipe_provider.dart';
+import '../../../../providers/recipe_provider.dart' as recipe_provider;
 import '../../../../providers/recently_viewed_provider.dart';
 import '../../../../providers/cook_provider.dart';
 import '../../../../theme/typography.dart';
@@ -37,8 +37,8 @@ class _RecipeViewState extends ConsumerState<RecipeView> {
       ref.refresh(pantryItemsProvider);
 
       // Then invalidate and read the ingredient matches
-      ref.invalidate(recipeIngredientMatchesProvider(widget.recipeId));
-      ref.read(recipeIngredientMatchesProvider(widget.recipeId).future);
+      ref.invalidate(recipe_provider.recipeIngredientMatchesProvider(widget.recipeId));
+      ref.read(recipe_provider.recipeIngredientMatchesProvider(widget.recipeId).future);
 
       // Track this recipe as recently viewed
       ref.read(recentlyViewedProvider.notifier).addRecentlyViewed(widget.recipeId);
@@ -53,8 +53,8 @@ class _RecipeViewState extends ConsumerState<RecipeView> {
     // If the recipe ID changes, refresh the data
     if (oldWidget.recipeId != widget.recipeId) {
       Future.microtask(() {
-        ref.invalidate(recipeIngredientMatchesProvider(widget.recipeId));
-        ref.read(recipeIngredientMatchesProvider(widget.recipeId).future);
+        ref.invalidate(recipe_provider.recipeIngredientMatchesProvider(widget.recipeId));
+        ref.read(recipe_provider.recipeIngredientMatchesProvider(widget.recipeId).future);
 
         // Track the new recipe as recently viewed
         ref.read(recentlyViewedProvider.notifier).addRecentlyViewed(widget.recipeId);
@@ -68,7 +68,7 @@ class _RecipeViewState extends ConsumerState<RecipeView> {
   Widget build(BuildContext context) {
     // Watch pantry items to detect changes
     ref.watch(pantryItemsProvider);
-    final recipeAsync = ref.watch(recipeByIdStreamProvider(widget.recipeId));
+    final recipeAsync = ref.watch(recipe_provider.recipeByIdStreamProvider(widget.recipeId));
 
     return recipeAsync.when(
       loading: () => const Center(child: CircularProgressIndicator()),
