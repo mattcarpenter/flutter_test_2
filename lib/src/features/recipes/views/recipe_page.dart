@@ -1,49 +1,185 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import '../../../mobile/utils/adaptive_sliver_page.dart';
-import '../../../widgets/adaptive_pull_down/adaptive_menu_item.dart';
-import '../../../widgets/adaptive_pull_down/adaptive_pull_down.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../../theme/colors.dart';
 import '../../../widgets/app_circle_button.dart';
 import '../widgets/recipe_view/recipe_view.dart';
+import '../widgets/recipe_view/recipe_hero_image.dart';
 
-class RecipePage extends StatelessWidget {
+class RecipePage extends ConsumerStatefulWidget {
   final String recipeId;
   final String previousPageTitle;
 
   const RecipePage({super.key, required this.recipeId, required this.previousPageTitle});
 
   @override
+  ConsumerState<RecipePage> createState() => _RecipePageState();
+}
+
+class _RecipePageState extends ConsumerState<RecipePage> {
+  late ScrollController _scrollController;
+  static const double _heroHeight = 300.0;
+
+  @override
+  void initState() {
+    super.initState();
+    _scrollController = ScrollController();
+  }
+
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
-    return AdaptiveSliverPage(
-      title: 'Recipe',
-      // Instead of a body, we pass in slivers.
-      slivers: [
-        SliverToBoxAdapter(
-          child: Padding(
-            padding: EdgeInsets.symmetric(horizontal: 16),
-            child: RecipeView(
-              recipeId: recipeId,
-              // Force rebuild by using a unique key that includes timestamp
-              key: ValueKey('RecipeView-$recipeId-${DateTime.now().millisecondsSinceEpoch}'),
+    final recipeAsync = ref.watch(recipeByIdStreamProvider(widget.recipeId));
+
+    return Scaffold(
+      extendBodyBehindAppBar: true,
+      backgroundColor: AppColors.of(context).background,
+      body: recipeAsync.when(
+        loading: () => const Center(child: CircularProgressIndicator()),
+        error: (error, stack) => Center(child: Text('Error loading recipe: $error')),
+        data: (recipe) {
+          if (recipe == null) {
+            return const Center(child: Text('Recipe not found'));
+          }
+
+          return Stack(
+            children: [
+              // Main scrollable content
+              CustomScrollView(
+                controller: _scrollController,
+                slivers: [
+                  // Hero image header
+                  SliverAppBar(
+                    expandedHeight: _heroHeight,
+                    pinned: false,
+                    automaticallyImplyLeading: false,
+                    backgroundColor: Colors.transparent,
+                    flexibleSpace: Stack(
+                      children: [
+                        // Hero image
+                        Positioned.fill(
+                          child: recipe.images != null && recipe.images!.isNotEmpty
+                              ? RecipeHeroImage(
+                                  images: recipe.images!,
+                                  recipeId: recipe.id,
+                                )
+                              : Container(
+                                  color: AppColors.of(context).surfaceVariant,
+                                  child: Center(
+                                    child: Icon(
+                                      Icons.restaurant,
+                                      size: 80,
+                                      color: AppColors.of(context).textSecondary,
+                                    ),
+                                  ),
+                                ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  // Recipe content
+                  SliverToBoxAdapter(
+                    child: _buildRecipeContent(context, recipe),
+                  ),
+                ],
+              ),
+              // Sticky navigation overlay (outside the scroll view)
+              _buildStickyNavigationOverlay(context),
+              // Sticky navigation buttons (outside the scroll view)
+              _buildStickyNavigationButtons(context),
+            ],
+          );
+        },
+      ),
+    );
+  }
+
+  Widget _buildStickyNavigationOverlay(BuildContext context) {
+    return AnimatedBuilder(
+      animation: _scrollController,
+      builder: (context, child) {
+        final offset = _scrollController.hasClients ? _scrollController.offset : 0;
+
+        // Calculate fade timing based on SliverAppBar collapse behavior
+        final headerHeight = MediaQuery.of(context).padding.top + 60;
+        final fadeStartOffset = _heroHeight * 0.5;                    // Start at 50% (150px)
+        final fadeEndOffset = _heroHeight - (headerHeight/2);             // End when image bottom touches header bottom
+        final fadeDuration = fadeEndOffset - fadeStartOffset;         // Fade duration
+
+        final opacity = ((offset - fadeStartOffset) / fadeDuration).clamp(0.0, 1.0);
+
+        return Positioned(
+          top: 0,
+          left: 0,
+          right: 0,
+          height: headerHeight,
+          child: Container(
+            decoration: BoxDecoration(
+              color: AppColors.of(context).background.withOpacity(opacity),
+              border: Border(
+                bottom: BorderSide(
+                  color: AppColors.of(context).border.withOpacity(opacity),
+                  width: 0.5,
+                ),
+              ),
             ),
           ),
-        ),
-      ],
-      trailing: AdaptivePullDownButton(
-        items: [
-          AdaptiveMenuItem(
-              title: 'Edit Recipe', icon: const Icon(CupertinoIcons.folder), onTap: () {
-                // Todo
-          }
+        );
+      },
+    );
+  }
+
+  Widget _buildStickyNavigationButtons(BuildContext context) {
+    return Positioned(
+      top: MediaQuery.of(context).padding.top + 8,
+      left: 16,
+      right: 16,
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          // Back button
+          AppCircleButton(
+            icon: AppCircleButtonIcon.close,
+            variant: AppCircleButtonVariant.neutral,
+            size: 40,
+            onPressed: () => Navigator.of(context).pop(),
+          ),
+          // Edit button
+          AppCircleButton(
+            icon: AppCircleButtonIcon.pencil,
+            variant: AppCircleButtonVariant.neutral,
+            size: 40,
+            onPressed: () {
+              // TODO: Implement edit functionality
+            },
           ),
         ],
-        child: const AppCircleButton(
-          icon: AppCircleButtonIcon.pencil,
+      ),
+    );
+  }
+
+  Widget _buildRecipeContent(BuildContext context, recipe) {
+    return Container(
+      decoration: BoxDecoration(
+        color: AppColors.of(context).background,
+        borderRadius: const BorderRadius.only(
+          topLeft: Radius.circular(16),
+          topRight: Radius.circular(16),
         ),
       ),
-      automaticallyImplyLeading: true,
-      previousPageTitle: previousPageTitle,
-      searchEnabled: false,
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: RecipeView(
+          recipeId: widget.recipeId,
+          showHeroImage: false, // Tell RecipeView not to show image gallery
+          key: ValueKey('RecipeView-${widget.recipeId}-${DateTime.now().millisecondsSinceEpoch}'),
+        ),
+      ),
     );
   }
 }

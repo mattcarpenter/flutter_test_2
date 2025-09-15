@@ -22,8 +22,9 @@ final recipeByIdStreamProvider = StreamProvider.family<RecipeEntry?, String>(
 
 class RecipeView extends ConsumerStatefulWidget {
   final String recipeId;
+  final bool showHeroImage;
 
-  const RecipeView({Key? key, required this.recipeId}) : super(key: key);
+  const RecipeView({Key? key, required this.recipeId, this.showHeroImage = true}) : super(key: key);
 
   @override
   ConsumerState<RecipeView> createState() => _RecipeViewState();
@@ -90,11 +91,11 @@ class _RecipeViewState extends ConsumerState<RecipeView> {
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Image Gallery
-            if (recipe.images != null && recipe.images!.isNotEmpty)
+            // Image Gallery (only show if showHeroImage is true)
+            if (widget.showHeroImage && recipe.images != null && recipe.images!.isNotEmpty) ...[
               RecipeImageGallery(images: recipe.images!, recipeId: recipe.id),
-
-            const SizedBox(height: 16),
+              const SizedBox(height: 16),
+            ],
 
             // Title
             Text(
