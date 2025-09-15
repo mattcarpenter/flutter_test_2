@@ -16,19 +16,128 @@ class RecipePage extends ConsumerStatefulWidget {
   ConsumerState<RecipePage> createState() => _RecipePageState();
 }
 
-class _RecipePageState extends ConsumerState<RecipePage> {
+class _RecipePageState extends ConsumerState<RecipePage> with TickerProviderStateMixin {
   late ScrollController _scrollController;
+  late AnimationController _snapAnimationController;
+  Animation<double>? _snapAnimation;
   static const double _heroHeight = 300.0;
 
   @override
   void initState() {
     super.initState();
     _scrollController = ScrollController();
+    _snapAnimationController = AnimationController(
+      duration: const Duration(milliseconds: 300),
+      vsync: this,
+    );
+  }
+
+  bool _isSnapping = false;
+
+  bool _onScrollNotification(ScrollNotification notification) {
+    if (_isSnapping) return false;
+
+    // Detect when scrolling ends
+    if (notification is ScrollEndNotification) {
+      final offset = _scrollController.offset;
+      final headerHeight = MediaQuery.of(context).padding.top + 60;
+      final headerFadeStartOffset = _heroHeight * 0.5;
+      final headerFadeEndOffset = _heroHeight - (headerHeight/2);
+      final headerFadeDuration = headerFadeEndOffset - headerFadeStartOffset;
+      final headerOpacity = ((offset - headerFadeStartOffset) / headerFadeDuration).clamp(0.0, 1.0);
+
+      // If we're in the fade zone, snap based on opacity
+      if (offset > headerFadeStartOffset && offset < headerFadeEndOffset) {
+        if (headerOpacity > 0.5) {
+          _snapToComplete(headerFadeEndOffset + 2.0); // Add 2px buffer to ensure complete hiding
+        } else {
+          _snapToStart(headerFadeStartOffset);
+        }
+      }
+    }
+    return false;
+  }
+
+  void _snapToComplete(double targetOffset) async {
+    _isSnapping = true;
+
+    try {
+      if (_scrollController.hasClients) {
+        // Try animateTo first - it may get partway there
+        await _scrollController.animateTo(
+          targetOffset,
+          duration: const Duration(milliseconds: 250),
+          curve: Curves.easeOutCubic,
+        );
+
+        // If we're not close enough to the target, finish with custom animation
+        if ((_scrollController.offset - targetOffset).abs() > 2) {
+          await _smoothScrollTo(targetOffset);
+        }
+      }
+    } catch (e) {
+      // Fallback to custom animation if animateTo fails completely
+      await _smoothScrollTo(targetOffset);
+    }
+
+    _isSnapping = false;
+  }
+
+  void _snapToStart(double targetOffset) async {
+    _isSnapping = true;
+
+    try {
+      if (_scrollController.hasClients) {
+        // For snapping back, animateTo usually works better
+        await _scrollController.animateTo(
+          targetOffset,
+          duration: const Duration(milliseconds: 250),
+          curve: Curves.easeOutCubic,
+        );
+
+        // Custom animation fallback if needed
+        if ((_scrollController.offset - targetOffset).abs() > 2) {
+          await _smoothScrollTo(targetOffset);
+        }
+      }
+    } catch (e) {
+      await _smoothScrollTo(targetOffset);
+    }
+
+    _isSnapping = false;
+  }
+
+  Future<void> _smoothScrollTo(double targetOffset) async {
+    final startOffset = _scrollController.offset;
+
+    _snapAnimation = Tween<double>(
+      begin: startOffset,
+      end: targetOffset,
+    ).animate(CurvedAnimation(
+      parent: _snapAnimationController,
+      curve: Curves.easeOutCubic,
+    ));
+
+    void animationListener() {
+      if (_scrollController.hasClients) {
+        _scrollController.jumpTo(_snapAnimation!.value);
+      }
+    }
+
+    _snapAnimation!.addListener(animationListener);
+    _snapAnimationController.reset();
+
+    try {
+      await _snapAnimationController.forward();
+    } finally {
+      _snapAnimation!.removeListener(animationListener);
+    }
   }
 
   @override
   void dispose() {
     _scrollController.dispose();
+    _snapAnimationController.dispose();
     super.dispose();
   }
 
@@ -49,9 +158,11 @@ class _RecipePageState extends ConsumerState<RecipePage> {
 
           return Stack(
             children: [
-              // Main scrollable content
-              CustomScrollView(
-                controller: _scrollController,
+              // Main scrollable content with scroll notification listener
+              NotificationListener<ScrollNotification>(
+                onNotification: _onScrollNotification,
+                child: CustomScrollView(
+                  controller: _scrollController,
                 slivers: [
                   // Hero image header
                   SliverAppBar(
@@ -108,6 +219,7 @@ class _RecipePageState extends ConsumerState<RecipePage> {
                     child: _buildRecipeContent(context, recipe),
                   ),
                 ],
+                ),
               ),
               // Sticky navigation overlay (outside the scroll view)
               _buildStickyNavigationOverlay(context),
