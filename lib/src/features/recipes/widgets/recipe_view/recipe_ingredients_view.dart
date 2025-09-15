@@ -18,8 +18,8 @@ class RecipeIngredientsView extends ConsumerStatefulWidget {
   final String? recipeId;
 
   const RecipeIngredientsView({
-    Key? key, 
-    required this.ingredients, 
+    Key? key,
+    required this.ingredients,
     this.recipeId,
   }) : super(key: key);
 
@@ -37,7 +37,7 @@ class _RecipeIngredientsViewState extends ConsumerState<RecipeIngredientsView> {
   @override
   Widget build(BuildContext context) {
     // Only fetch matches if recipeId is provided
-    final matchesAsync = widget.recipeId != null 
+    final matchesAsync = widget.recipeId != null
       ? ref.watch(recipeIngredientMatchesProvider(widget.recipeId!))
       : null;
 
@@ -48,7 +48,7 @@ class _RecipeIngredientsViewState extends ConsumerState<RecipeIngredientsView> {
         _previousMatches = matches; // Store successful data
         currentMatches = matches;
       });
-      
+
       // Use previous data if we're in loading state and have previous data
       if (matchesAsync.isLoading && _previousMatches != null) {
         currentMatches = _previousMatches;
@@ -181,6 +181,7 @@ class _RecipeIngredientsViewState extends ConsumerState<RecipeIngredientsView> {
       return null; // No chip for no match
     }
 
+    final colors = AppColors.of(context);
     Color backgroundColor;
     String label;
 
@@ -188,15 +189,15 @@ class _RecipeIngredientsViewState extends ConsumerState<RecipeIngredientsView> {
       // Direct pantry match - use stock status colors
       switch (match.pantryItem!.stockStatus) {
         case StockStatus.outOfStock:
-          backgroundColor = AppColorSwatches.error[100]!; // Light red
+          backgroundColor = colors.errorBackground;
           label = 'Out';
           break;
         case StockStatus.lowStock:
-          backgroundColor = AppColorSwatches.warning[100]!; // Light yellow
+          backgroundColor = colors.warningBackground;
           label = 'Low';
           break;
         case StockStatus.inStock:
-          backgroundColor = AppColorSwatches.success[100]!; // Light green
+          backgroundColor = colors.successBackground;
           label = 'In Stock';
           break;
         default:
@@ -204,7 +205,7 @@ class _RecipeIngredientsViewState extends ConsumerState<RecipeIngredientsView> {
       }
     } else if (match.hasRecipeMatch) {
       // Recipe-based match
-      backgroundColor = AppColorSwatches.success[100]!; // Light green
+      backgroundColor = colors.successBackground;
       label = 'Recipe';
     } else {
       return null;
@@ -242,7 +243,7 @@ class _RecipeIngredientsViewState extends ConsumerState<RecipeIngredientsView> {
         );
       }
 
-      final children = <TextSpan>[];
+      final children = <InlineSpan>[];
       int currentIndex = 0;
 
       // Build TextSpan with bold quantities, normal ingredient names
@@ -272,73 +273,64 @@ class _RecipeIngredientsViewState extends ConsumerState<RecipeIngredientsView> {
         ));
       }
 
-      // Wrap in GestureDetector if it's a linked recipe
-      Widget richText = RichText(
-        text: TextSpan(children: children),
-      );
-
+      // Add external link icon inline for linked recipes
       if (isLinkedRecipe) {
-        return Row(
-          children: [
-            Expanded(
-              child: Container(
-                decoration: BoxDecoration(
-                  border: Border(
-                    bottom: BorderSide(
-                      color: colors.contentPrimary,
-                      width: 1.0,
-                      style: BorderStyle.none, // This creates a dotted effect in some contexts
-                    ),
-                  ),
-                ),
-                child: richText,
-              ),
-            ),
-            const SizedBox(width: 4),
-            Icon(
-              Icons.open_in_new,
-              size: 14,
-              color: colors.contentSecondary,
-            ),
-          ],
-        );
+        children.add(const TextSpan(text: ' ')); // Small space
+        children.add(WidgetSpan(
+          child: Icon(
+            Icons.open_in_new,
+            size: 14,
+            color: colors.contentSecondary,
+          ),
+          alignment: PlaceholderAlignment.middle,
+        ));
       }
+
+      // Create RichText with underline decoration for linked recipes
+      Widget richText = RichText(
+        text: TextSpan(
+          children: children,
+          style: isLinkedRecipe ? TextStyle(
+            decoration: TextDecoration.underline,
+            decorationStyle: TextDecorationStyle.dotted,
+            decorationColor: colors.contentPrimary,
+          ) : null,
+        ),
+      );
 
       return richText;
     } catch (e) {
-      // Fallback to plain text if parsing fails
-      Widget plainText = Text(
-        text,
-        style: TextStyle(fontSize: 16, color: colors.contentPrimary),
-      );
+      // Fallback to plain text if parsing fails - use RichText for consistency
+      final fallbackChildren = <InlineSpan>[
+        TextSpan(
+          text: text,
+          style: TextStyle(fontSize: 16, color: colors.contentPrimary),
+        ),
+      ];
 
+      // Add external link icon inline for linked recipes
       if (isLinkedRecipe) {
-        return Row(
-          children: [
-            Expanded(
-              child: Container(
-                decoration: BoxDecoration(
-                  border: Border(
-                    bottom: BorderSide(
-                      color: colors.contentPrimary,
-                      width: 1.0,
-                    ),
-                  ),
-                ),
-                child: plainText,
-              ),
-            ),
-            const SizedBox(width: 4),
-            Icon(
-              Icons.open_in_new,
-              size: 14,
-              color: colors.contentSecondary,
-            ),
-          ],
-        );
+        fallbackChildren.add(const TextSpan(text: ' ')); // Small space
+        fallbackChildren.add(WidgetSpan(
+          child: Icon(
+            Icons.open_in_new,
+            size: 14,
+            color: colors.contentSecondary,
+          ),
+          alignment: PlaceholderAlignment.middle,
+        ));
       }
 
-      return plainText;
+      return RichText(
+        text: TextSpan(
+          children: fallbackChildren,
+          style: isLinkedRecipe ? TextStyle(
+            decoration: TextDecoration.underline,
+            decorationStyle: TextDecorationStyle.dotted,
+            decorationColor: colors.contentPrimary,
+          ) : null,
+        ),
+      );
     }
   }
 
@@ -348,24 +340,24 @@ class _RecipeIngredientsViewState extends ConsumerState<RecipeIngredientsView> {
       'previousPageTitle': 'Recipe'
     });
   }
-  
+
   /// Shows the bottom sheet with ingredient match details
   void _showMatchesBottomSheet(BuildContext context, WidgetRef ref, RecipeIngredientMatches matches) {
     print("Opening ingredient matches bottom sheet for recipe ${matches.recipeId}");
     print("Current matches: ${matches.matches.length}");
     print("Matched ingredients: ${matches.matches.where((m) => m.hasMatch).length}");
-    
+
     // Refresh the recipe ingredient match data before showing the sheet
     // This ensures we have the latest data including newly added ingredients
     ref.invalidate(recipeIngredientMatchesProvider(matches.recipeId));
-    
+
     // Show the bottom sheet after refreshing the data
     Future.microtask(() {
       // Wait for the provider to refresh its data before showing the sheet
       ref.read(recipeIngredientMatchesProvider(matches.recipeId).future).then((refreshedMatches) {
         print("Refreshed matches: ${refreshedMatches.matches.length}");
         print("Refreshed matched ingredients: ${refreshedMatches.matches.where((m) => m.hasMatch).length}");
-        
+
         showIngredientMatchesBottomSheet(
           context,
           matches: refreshedMatches,

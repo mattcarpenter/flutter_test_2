@@ -137,18 +137,20 @@ class AppColorSwatches {
 
 
   /// Success/Green color palette
-  static const MaterialColor success = MaterialColor(0xFF10B981, {
-    50: Color(0xFFECFDF5),   // Lightest
-    100: Color(0xFFD1FAE5),  // Very light
-    200: Color(0xFFA7F3D0),  // Light
-    300: Color(0xFF6EE7B7),  // Light medium
-    400: Color(0xFF34D399),  // Medium light
-    500: Color(0xFF10B981),  // Base green
-    600: Color(0xFF059669),  // Medium dark
-    700: Color(0xFF047857),  // Dark
-    800: Color(0xFF065F46),  // Darker
-    900: Color(0xFF064E3B),  // Darkest
+  static const MaterialColor success = MaterialColor(0xFF708B5C, {
+    50:  Color(0xFFDAE2D4),
+    100: Color(0xFFC2D0B8),
+    200: Color(0xFFAABD9C),
+    300: Color(0xFF92AB80),
+    400: Color(0xFF819D6B),
+    500: Color(0xFF708B5C), // Base
+    600: Color(0xFF5F764E),
+    700: Color(0xFF4E6140),
+    800: Color(0xFF3D4C32),
+    900: Color(0xFF2C3724),
+    950: Color(0xFF161B12),
   });
+
 
   /// Warning/Yellow color palette
   static const MaterialColor warning = MaterialColor(0xFFF59E0B, {
