@@ -826,7 +826,7 @@ class RecipeRepository {
       ON LOWER(itwm.effective_term) = LOWER(pit.term)
     INNER JOIN pantry_items pi ON pit.pantry_item_id = pi.id
     WHERE pi.deleted_at IS NULL
-      AND pi.stock_status = 2  -- Only in-stock items (StockStatus.inStock = 2)
+      -- Removed stock_status filter to show all pantry matches regardless of stock level
     GROUP BY itwm.ingredient_id, pit.pantry_item_id
   )
   SELECT
