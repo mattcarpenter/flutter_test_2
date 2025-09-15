@@ -3,6 +3,7 @@ import 'package:flutter/material.dart' hide Step;
 import '../../../../../database/models/steps.dart';
 import '../../../../theme/typography.dart';
 import '../../../../theme/colors.dart';
+import '../../../../theme/spacing.dart';
 
 class RecipeStepsView extends StatelessWidget {
   final List<Step> steps;
@@ -14,18 +15,14 @@ class RecipeStepsView extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Row(
-          children: [
-            Icon(Icons.format_list_numbered, color: Theme.of(context).primaryColor),
-            const SizedBox(width: 8),
-            Text(
-              'Instructions',
-              style: AppTypography.h2Serif.copyWith(
-                color: AppColors.of(context).headingSecondary,
-              ),
-            ),
-          ],
+        Text(
+          'Instructions',
+          style: AppTypography.h2Serif.copyWith(
+            color: AppColors.of(context).headingSecondary,
+          ),
         ),
+
+        SizedBox(height: AppSpacing.md),
 
         if (steps.isEmpty)
           const Text('No instructions listed.'),
@@ -33,6 +30,7 @@ class RecipeStepsView extends StatelessWidget {
         ListView.builder(
           shrinkWrap: true,
           physics: const NeverScrollableScrollPhysics(),
+          padding: EdgeInsets.zero,
           itemCount: steps.length,
           itemBuilder: (context, index) {
             final step = steps[index];
@@ -40,7 +38,7 @@ class RecipeStepsView extends StatelessWidget {
             // Section header
             if (step.type == 'section') {
               return Padding(
-                padding: const EdgeInsets.only(top: 8.0, bottom: 8.0),
+                padding: EdgeInsets.only(top: index == 0 ? 0 : 8.0, bottom: 8.0),
                 child: Container(
                   width: double.infinity,
                   padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
@@ -61,7 +59,10 @@ class RecipeStepsView extends StatelessWidget {
 
             // Regular step
             return Padding(
-              padding: const EdgeInsets.symmetric(vertical: 12.0),
+              padding: EdgeInsets.only(
+                top: index == 0 ? 0 : 12.0,
+                bottom: 12.0,
+              ),
               child: Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -97,7 +98,7 @@ class RecipeStepsView extends StatelessWidget {
 
                         // Note (if available)
                         if (step.note != null && step.note!.isNotEmpty) ...[
-                          const SizedBox(height: 8),
+                          SizedBox(height: AppSpacing.md),
                           Container(
                             width: double.infinity,
                             padding: const EdgeInsets.all(8),
@@ -118,7 +119,7 @@ class RecipeStepsView extends StatelessWidget {
 
                         // Timer (if available)
                         if (step.timerDurationSeconds != null && step.timerDurationSeconds! > 0) ...[
-                          const SizedBox(height: 8),
+                          SizedBox(height: AppSpacing.md),
                           Container(
                             padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
                             decoration: BoxDecoration(

@@ -1,18 +1,20 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:recipe_app/src/features/recipes/widgets/recipe_view/cook_action_button.dart';
 import 'package:recipe_app/src/features/recipes/widgets/recipe_view/recipe_image_gallery.dart';
 import 'package:recipe_app/src/features/recipes/widgets/recipe_view/recipe_ingredients_view.dart';
 import 'package:recipe_app/src/features/recipes/widgets/recipe_view/recipe_steps_view.dart';
 import 'package:recipe_app/src/providers/pantry_provider.dart';
 import 'package:recipe_app/src/providers/recipe_provider.dart';
 import '../../../../providers/recently_viewed_provider.dart';
+import '../../../../providers/cook_provider.dart';
 import '../../../../theme/typography.dart';
 import '../../../../theme/colors.dart';
 import '../../../../utils/duration_formatter.dart';
+import '../../../../widgets/app_button.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
+import '../cook_modal/cook_modal.dart';
 
 import '../../../../../database/database.dart';
-import '../../../../repositories/recipe_repository.dart';
 
 
 class RecipeView extends ConsumerStatefulWidget {
@@ -33,18 +35,18 @@ class _RecipeViewState extends ConsumerState<RecipeView> {
     Future.microtask(() {
       // First make sure the pantry data is fresh
       ref.refresh(pantryItemsProvider);
-      
+
       // Then invalidate and read the ingredient matches
       ref.invalidate(recipeIngredientMatchesProvider(widget.recipeId));
       ref.read(recipeIngredientMatchesProvider(widget.recipeId).future);
-      
+
       // Track this recipe as recently viewed
       ref.read(recentlyViewedProvider.notifier).addRecentlyViewed(widget.recipeId);
-      
+
       print("Initialized recipe view for ${widget.recipeId}, refreshed providers");
     });
   }
-  
+
   @override
   void didUpdateWidget(RecipeView oldWidget) {
     super.didUpdateWidget(oldWidget);
@@ -53,15 +55,15 @@ class _RecipeViewState extends ConsumerState<RecipeView> {
       Future.microtask(() {
         ref.invalidate(recipeIngredientMatchesProvider(widget.recipeId));
         ref.read(recipeIngredientMatchesProvider(widget.recipeId).future);
-        
+
         // Track the new recipe as recently viewed
         ref.read(recentlyViewedProvider.notifier).addRecentlyViewed(widget.recipeId);
-        
+
         print("Recipe ID changed, refreshed providers");
       });
     }
   }
-  
+
   @override
   Widget build(BuildContext context) {
     // Watch pantry items to detect changes
@@ -92,12 +94,23 @@ class _RecipeViewState extends ConsumerState<RecipeView> {
               const SizedBox(height: 16),
             ],
 
-            // Title
-            Text(
-              recipe.title,
-              style: AppTypography.h1Serif.copyWith(
-                color: AppColors.of(context).textPrimary,
-              ),
+            // Title and Cooking Button Row
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Title (takes remaining space after button)
+                Expanded(
+                  child: Text(
+                    recipe.title,
+                    style: AppTypography.h1Serif.copyWith(
+                      color: AppColors.of(context).textPrimary,
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 16), // Space between title and button
+                // Cooking Button (intrinsic width, right-aligned)
+                _buildCookingButton(context, ref, recipe),
+              ],
             ),
 
             // Description (if available)
@@ -108,10 +121,6 @@ class _RecipeViewState extends ConsumerState<RecipeView> {
                 style: Theme.of(context).textTheme.bodyLarge,
               ),
             ],
-
-            const SizedBox(height: 16),
-
-            CookActionButton(recipeId: recipe.id, recipeName: recipe.title),
 
             const SizedBox(height: 16),
 
@@ -166,7 +175,7 @@ class _RecipeViewState extends ConsumerState<RecipeView> {
               ),
             ],
 
-            const SizedBox(height: 16),
+            const SizedBox(height: 32),
 
             // Ingredients with pantry match indicators
             RecipeIngredientsView(
@@ -176,7 +185,7 @@ class _RecipeViewState extends ConsumerState<RecipeView> {
               key: ValueKey('IngredientsView-${recipe.id}'),
             ),
 
-            const SizedBox(height: 8),
+            const SizedBox(height: 24),
 
             // Steps
             RecipeStepsView(steps: recipe.steps ?? []),
@@ -232,6 +241,47 @@ class _RecipeViewState extends ConsumerState<RecipeView> {
           ),
         ),
       ],
+    );
+  }
+
+  Widget _buildCookingButton(BuildContext context, WidgetRef ref, RecipeEntry recipe) {
+    final activeCook = ref.watch(activeCookForRecipeProvider(recipe.id));
+    final cookNotifier = ref.read(cookNotifierProvider.notifier);
+    final userId = Supabase.instance.client.auth.currentUser?.id;
+
+    final isActive = activeCook != null;
+    final buttonText = isActive ? 'Resume Cooking' : 'Start Cooking';
+
+    return AppButton(
+      text: buttonText,
+      style: AppButtonStyle.outline,
+      size: AppButtonSize.small,
+      leadingIcon: const Icon(Icons.play_arrow, size: 18),
+      onPressed: () async {
+        String cookId;
+        if (isActive) {
+          cookId = activeCook.id;
+        } else {
+          if (userId != null) {
+            cookId = await cookNotifier.startCook(
+              recipeId: recipe.id,
+              userId: userId,
+              recipeName: recipe.title,
+              householdId: null,
+            );
+          } else {
+            return; // No user ID, can't start cooking
+          }
+        }
+
+        if (context.mounted) {
+          showCookModal(
+            context,
+            cookId: cookId,
+            recipeId: recipe.id,
+          );
+        }
+      },
     );
   }
 }

@@ -24,7 +24,7 @@ class CookActionButton extends ConsumerWidget {
     final userId = Supabase.instance.client.auth.currentUser?.id;
 
     final isActive = activeCook != null;
-    final buttonText = isActive ? 'Resume Cooking' : 'Start Cooking';
+    final buttonText = isActive ? 'Resume Cooking' : 'Start Cook';
 
     return ElevatedButton(
       onPressed: () async {

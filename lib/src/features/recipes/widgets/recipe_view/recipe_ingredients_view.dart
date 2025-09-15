@@ -7,6 +7,8 @@ import '../../../../providers/recipe_provider.dart';
 import '../../../../providers/pantry_provider.dart';
 import '../../../../theme/typography.dart';
 import '../../../../theme/colors.dart';
+import '../../../../theme/spacing.dart';
+import '../../../../services/ingredient_parser_service.dart';
 import 'ingredient_match_circle.dart';
 import 'ingredient_matches_bottom_sheet.dart';
 
@@ -27,6 +29,9 @@ class RecipeIngredientsView extends ConsumerStatefulWidget {
 class _RecipeIngredientsViewState extends ConsumerState<RecipeIngredientsView> {
   // Keep previous match data to prevent flashing
   RecipeIngredientMatches? _previousMatches;
+
+  // Parser for ingredient text formatting
+  final _parser = IngredientParserService();
 
   @override
   Widget build(BuildContext context) {
@@ -54,27 +59,14 @@ class _RecipeIngredientsViewState extends ConsumerState<RecipeIngredientsView> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Row(
-          children: [
-            Icon(Icons.shopping_basket, color: Theme.of(context).primaryColor),
-            const SizedBox(width: 8),
-            Text(
-              'Ingredients',
-              style: AppTypography.h2Serif.copyWith(
-                color: AppColors.of(context).headingSecondary,
-              ),
-            ),
-            
-            // Display match ratio if available using current matches (including cached)
-            if (currentMatches != null) ...[
-              const SizedBox(width: 8),
-              Text(
-                '(${currentMatches!.matches.where((m) => m.hasMatch).length}/${currentMatches!.matches.length})',
-                style: Theme.of(context).textTheme.bodySmall,
-              ),
-            ],
-          ],
+        Text(
+          'Ingredients',
+          style: AppTypography.h2Serif.copyWith(
+            color: AppColors.of(context).headingSecondary,
+          ),
         ),
+
+        SizedBox(height: AppSpacing.md),
 
         if (widget.ingredients.isEmpty)
           const Text('No ingredients listed.'),
@@ -83,6 +75,7 @@ class _RecipeIngredientsViewState extends ConsumerState<RecipeIngredientsView> {
         ListView.builder(
           shrinkWrap: true,
           physics: const NeverScrollableScrollPhysics(),
+          padding: EdgeInsets.zero,
           itemCount: widget.ingredients.length,
           itemBuilder: (context, index) {
             final ingredient = widget.ingredients[index];
@@ -90,7 +83,7 @@ class _RecipeIngredientsViewState extends ConsumerState<RecipeIngredientsView> {
             // Section header
             if (ingredient.type == 'section') {
               return Padding(
-                padding: const EdgeInsets.only(top: 8.0, bottom: 8.0),
+                padding: EdgeInsets.only(top: index == 0 ? 0 : 8.0, bottom: 8.0),
                 child: Container(
                   width: double.infinity,
                   padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
@@ -111,9 +104,12 @@ class _RecipeIngredientsViewState extends ConsumerState<RecipeIngredientsView> {
 
             // Regular ingredient with match indicator (if available)
             return Padding(
-              padding: const EdgeInsets.symmetric(vertical: 4.0),
+              padding: EdgeInsets.only(
+                top: index == 0 ? 0 : 4.0,
+                bottom: 4.0,
+              ),
               child: Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
+                crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
                   // Match indicator or bullet point - use cached data to prevent flashing
                   if (currentMatches != null) ...[
@@ -159,24 +155,9 @@ class _RecipeIngredientsViewState extends ConsumerState<RecipeIngredientsView> {
                   ],
                   const SizedBox(width: 8),
 
-                  // Amount
-                  if (ingredient.primaryAmount1Value != null &&
-                      ingredient.primaryAmount1Value!.isNotEmpty) ...[
-                    SizedBox(
-                      width: 80,
-                      child: Text(
-                        '${ingredient.primaryAmount1Value} ${ingredient.primaryAmount1Unit ?? ''}',
-                        style: const TextStyle(fontWeight: FontWeight.w500),
-                      ),
-                    ),
-                  ],
-
                   // Ingredient name
                   Expanded(
-                    child: Text(
-                      ingredient.name,
-                      style: const TextStyle(fontSize: 16),
-                    ),
+                    child: _buildParsedIngredientText(ingredient.name),
                   ),
 
                   // "See Recipe" chip for linked ingredients
@@ -212,6 +193,63 @@ class _RecipeIngredientsViewState extends ConsumerState<RecipeIngredientsView> {
         ),
       ],
     );
+  }
+
+  /// Builds a RichText widget with bold quantities parsed from ingredient text
+  Widget _buildParsedIngredientText(String text) {
+    final colors = AppColors.of(context);
+
+    try {
+      final parseResult = _parser.parse(text);
+
+      if (parseResult.quantities.isEmpty) {
+        // No quantities found, return plain text
+        return Text(
+          text,
+          style: TextStyle(fontSize: 16, color: colors.contentPrimary),
+        );
+      }
+
+      final children = <TextSpan>[];
+      int currentIndex = 0;
+
+      // Build TextSpan with bold quantities, normal ingredient names
+      for (final quantity in parseResult.quantities) {
+        // Text before quantity (ingredient name)
+        if (quantity.start > currentIndex) {
+          children.add(TextSpan(
+            text: text.substring(currentIndex, quantity.start),
+            style: TextStyle(fontSize: 16, color: colors.contentPrimary),
+          ));
+        }
+
+        // Quantity with bold formatting
+        children.add(TextSpan(
+          text: text.substring(quantity.start, quantity.end),
+          style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: colors.contentPrimary),
+        ));
+
+        currentIndex = quantity.end;
+      }
+
+      // Remaining text after last quantity
+      if (currentIndex < text.length) {
+        children.add(TextSpan(
+          text: text.substring(currentIndex),
+          style: TextStyle(fontSize: 16, color: colors.contentPrimary),
+        ));
+      }
+
+      return RichText(
+        text: TextSpan(children: children),
+      );
+    } catch (e) {
+      // Fallback to plain text if parsing fails
+      return Text(
+        text,
+        style: TextStyle(fontSize: 16, color: colors.contentPrimary),
+      );
+    }
   }
 
   /// Navigates to the linked recipe
