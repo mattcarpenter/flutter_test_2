@@ -76,7 +76,7 @@ class RecentlyViewedPage extends ConsumerWidget {
           return RecipeListItem(
             recipe: recipe,
             onTap: () {
-              context.push('/recipes/recipe/${recipe.id}', extra: {
+              context.push('/recipe/${recipe.id}', extra: {
                 'previousPageTitle': 'Recently Viewed',
               });
             },
@@ -100,7 +100,7 @@ class RecentlyViewedPage extends ConsumerWidget {
               return RecipeListItem(
                 recipe: recipe,
                 onTap: () {
-                  context.push('/recipes/recipe/${recipe.id}', extra: {
+                  context.push('/recipe/${recipe.id}', extra: {
                     'previousPageTitle': 'Recently Viewed',
                   });
                 },

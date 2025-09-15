@@ -216,7 +216,7 @@ class _RecipeIngredientsViewState extends ConsumerState<RecipeIngredientsView> {
 
   /// Navigates to the linked recipe
   void _navigateToLinkedRecipe(BuildContext context, String recipeId) {
-    context.push('/recipes/recipe/$recipeId', extra: {
+    context.push('/recipe/$recipeId', extra: {
       'previousPageTitle': 'Recipe'
     });
   }

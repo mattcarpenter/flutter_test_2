@@ -57,7 +57,7 @@ class RecipesList extends ConsumerWidget {
               key: ValueKey(recipe.id),
               recipe: recipe,
               onTap: () {
-                context.push('/recipes/recipe/${recipe.id}', extra: {
+                context.push('/recipe/${recipe.id}', extra: {
                   'previousPageTitle': currentPageTitle,
                 });
               },

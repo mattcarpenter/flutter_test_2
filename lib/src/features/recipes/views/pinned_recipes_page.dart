@@ -89,7 +89,7 @@ class _PinnedRecipesPageState extends ConsumerState<PinnedRecipesPage> {
                 return RecipeListItem(
                   recipe: recipe,
                   onTap: () {
-                    context.push('/recipes/recipe/${recipe.id}', extra: {
+                    context.push('/recipe/${recipe.id}', extra: {
                       'previousPageTitle': 'Pinned Recipes',
                     });
                   },

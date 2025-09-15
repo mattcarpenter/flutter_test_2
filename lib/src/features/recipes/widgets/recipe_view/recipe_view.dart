@@ -14,14 +14,6 @@ import '../../../../utils/duration_formatter.dart';
 import '../../../../../database/database.dart';
 import '../../../../repositories/recipe_repository.dart';
 
-// Provider to fetch a single recipe by ID
-final recipeByIdStreamProvider = StreamProvider.family<RecipeEntry?, String>(
-      (ref, recipeId) {
-    final repository = ref.watch(recipeRepositoryProvider);
-    // First, we need to add a new method to watch a single recipe in the repository
-    return repository.watchRecipeById(recipeId);
-  },
-);
 
 class RecipeView extends ConsumerStatefulWidget {
   final String recipeId;

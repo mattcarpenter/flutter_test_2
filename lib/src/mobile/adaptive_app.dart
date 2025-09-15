@@ -303,6 +303,19 @@ class _AdaptiveApp2State extends State<AdaptiveApp2> {
               state: state
             )
         ),
+        // Full-screen recipe detail route (outside shell, no bottom nav)
+        GoRoute(
+          path: '/recipe/:recipeId',
+          pageBuilder: (context, state) {
+            final recipeId = state.pathParameters['recipeId'];
+            final extraData = state.extra as Map<String, String>?;
+            final previousPageTitle = extraData?['previousPageTitle'] ?? 'Recipes';
+            return _platformPage(
+              state: state,
+              child: RecipePage(recipeId: recipeId!, previousPageTitle: previousPageTitle),
+            );
+          },
+        ),
         ShellRoute(
           pageBuilder: (context, state, child) {
             if (Platform.isIOS) {
@@ -341,18 +354,6 @@ class _AdaptiveApp2State extends State<AdaptiveApp2> {
                 GoRoute(
                   path: '/recipes',
                   routes: [
-                    GoRoute(
-                      path: 'recipe/:recipeId',
-                      pageBuilder: (context, state) {
-                        final recipeId = state.pathParameters['recipeId'];
-                        final extraData = state.extra as Map<String, String>?;
-                        final previousPageTitle = extraData?['previousPageTitle'] ?? 'Recipes';
-                        return _platformPage(
-                          state: state,
-                          child: RecipePage(recipeId: recipeId!, previousPageTitle: previousPageTitle),
-                        );
-                      },
-                    ),
                     GoRoute(
                       path: 'folder/:folderId',
                       pageBuilder: (context, state) {
