@@ -7,6 +7,9 @@ import 'package:recipe_app/src/features/recipes/widgets/recipe_view/recipe_steps
 import 'package:recipe_app/src/providers/pantry_provider.dart';
 import 'package:recipe_app/src/providers/recipe_provider.dart';
 import '../../../../providers/recently_viewed_provider.dart';
+import '../../../../theme/typography.dart';
+import '../../../../theme/colors.dart';
+import '../../../../utils/duration_formatter.dart';
 
 import '../../../../../database/database.dart';
 import '../../../../repositories/recipe_repository.dart';
@@ -85,7 +88,7 @@ class _RecipeViewState extends ConsumerState<RecipeView> {
         String totalTime = '';
         if (recipe.prepTime != null && recipe.cookTime != null) {
           final total = recipe.prepTime! + recipe.cookTime!;
-          totalTime = '$total mins';
+          totalTime = DurationFormatter.formatMinutes(total);
         }
 
         return Column(
@@ -100,7 +103,9 @@ class _RecipeViewState extends ConsumerState<RecipeView> {
             // Title
             Text(
               recipe.title,
-              style: Theme.of(context).textTheme.headlineMedium,
+              style: AppTypography.h1Serif.copyWith(
+                color: AppColors.of(context).textPrimary,
+              ),
             ),
 
             // Description (if available)
@@ -119,45 +124,43 @@ class _RecipeViewState extends ConsumerState<RecipeView> {
             const SizedBox(height: 16),
 
             // Recipe Info
-            Container(
-              padding: const EdgeInsets.all(12),
-              decoration: BoxDecoration(
-                color: Colors.grey.shade100,
-                borderRadius: BorderRadius.circular(8),
-              ),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceAround,
-                children: [
-                  if (recipe.servings != null)
-                    _buildInfoItem(
+            Row(
+              mainAxisAlignment: MainAxisAlignment.start,
+              children: [
+                if (recipe.servings != null)
+                  Padding(
+                    padding: const EdgeInsets.only(right: 32),
+                    child: _buildInfoItem(
                       context,
-                      icon: Icons.people,
                       label: 'Servings',
                       value: '${recipe.servings}',
                     ),
-                  if (recipe.prepTime != null)
-                    _buildInfoItem(
+                  ),
+                if (recipe.prepTime != null)
+                  Padding(
+                    padding: const EdgeInsets.only(right: 32),
+                    child: _buildInfoItem(
                       context,
-                      icon: Icons.timer,
-                      label: 'Prep',
-                      value: '${recipe.prepTime} min',
+                      label: 'Prep Time',
+                      value: DurationFormatter.formatMinutes(recipe.prepTime!),
                     ),
-                  if (recipe.cookTime != null)
-                    _buildInfoItem(
+                  ),
+                if (recipe.cookTime != null)
+                  Padding(
+                    padding: const EdgeInsets.only(right: 32),
+                    child: _buildInfoItem(
                       context,
-                      icon: Icons.microwave,
-                      label: 'Cook',
-                      value: '${recipe.cookTime} min',
+                      label: 'Cook Time',
+                      value: DurationFormatter.formatMinutes(recipe.cookTime!),
                     ),
-                  if (totalTime.isNotEmpty)
-                    _buildInfoItem(
-                      context,
-                      icon: Icons.hourglass_bottom,
-                      label: 'Total',
-                      value: totalTime,
-                    ),
-                ],
-              ),
+                  ),
+                if (totalTime.isNotEmpty)
+                  _buildInfoItem(
+                    context,
+                    label: 'Total',
+                    value: totalTime,
+                  ),
+              ],
             ),
 
             // Source (if available)
@@ -191,7 +194,9 @@ class _RecipeViewState extends ConsumerState<RecipeView> {
               const SizedBox(height: 24),
               Text(
                 'Notes',
-                style: Theme.of(context).textTheme.titleLarge,
+                style: AppTypography.h2Serif.copyWith(
+                  color: AppColors.of(context).headingSecondary,
+                ),
               ),
               const SizedBox(height: 8),
               Container(
@@ -214,18 +219,25 @@ class _RecipeViewState extends ConsumerState<RecipeView> {
 
   Widget _buildInfoItem(
       BuildContext context, {
-        required IconData icon,
         required String label,
         required String value,
       }) {
     return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Icon(icon, size: 24, color: Theme.of(context).primaryColor),
-        const SizedBox(height: 4),
-        Text(label, style: const TextStyle(fontSize: 12, color: Colors.grey)),
+        Text(
+          label,
+          style: TextStyle(
+            fontSize: 12,
+            color: AppColors.of(context).textSecondary,
+          ),
+        ),
         Text(
           value,
-          style: const TextStyle(fontWeight: FontWeight.bold),
+          style: const TextStyle(
+            fontWeight: FontWeight.w500,
+            fontSize: 15,
+          ),
         ),
       ],
     );

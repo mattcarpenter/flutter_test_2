@@ -5,6 +5,8 @@ import '../../../../../database/models/ingredients.dart';
 import '../../../../models/ingredient_pantry_match.dart';
 import '../../../../providers/recipe_provider.dart';
 import '../../../../providers/pantry_provider.dart';
+import '../../../../theme/typography.dart';
+import '../../../../theme/colors.dart';
 import 'ingredient_match_circle.dart';
 import 'ingredient_matches_bottom_sheet.dart';
 
@@ -58,7 +60,9 @@ class _RecipeIngredientsViewState extends ConsumerState<RecipeIngredientsView> {
             const SizedBox(width: 8),
             Text(
               'Ingredients',
-              style: Theme.of(context).textTheme.titleLarge,
+              style: AppTypography.h2Serif.copyWith(
+                color: AppColors.of(context).headingSecondary,
+              ),
             ),
             
             // Display match ratio if available using current matches (including cached)

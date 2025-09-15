@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart' hide Step;
 
 import '../../../../../database/models/steps.dart';
+import '../../../../theme/typography.dart';
+import '../../../../theme/colors.dart';
 
 class RecipeStepsView extends StatelessWidget {
   final List<Step> steps;
@@ -18,7 +20,9 @@ class RecipeStepsView extends StatelessWidget {
             const SizedBox(width: 8),
             Text(
               'Instructions',
-              style: Theme.of(context).textTheme.titleLarge,
+              style: AppTypography.h2Serif.copyWith(
+                color: AppColors.of(context).headingSecondary,
+              ),
             ),
           ],
         ),
