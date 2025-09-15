@@ -6,11 +6,13 @@ import '../pin_button.dart';
 class RecipeHeroImage extends StatefulWidget {
   final List<RecipeImage> images;
   final String recipeId;
+  final double pinButtonOpacity;
 
   const RecipeHeroImage({
     Key? key,
     required this.images,
     required this.recipeId,
+    this.pinButtonOpacity = 1.0,
   }) : super(key: key);
 
   @override
@@ -52,11 +54,14 @@ class _RecipeHeroImageState extends State<RecipeHeroImage> {
           child: _buildMainImage(),
         ),
 
-        // Pin button at bottom-right
+        // Pin button at bottom-right with fade animation
         Positioned(
           bottom: 16,
           right: 16,
-          child: PinButton(recipeId: widget.recipeId),
+          child: Opacity(
+            opacity: widget.pinButtonOpacity,
+            child: PinButton(recipeId: widget.recipeId),
+          ),
         ),
 
         // Image indicator dots if multiple images

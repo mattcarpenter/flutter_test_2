@@ -64,9 +64,30 @@ class _RecipePageState extends ConsumerState<RecipePage> {
                         // Hero image
                         Positioned.fill(
                           child: recipe.images != null && recipe.images!.isNotEmpty
-                              ? RecipeHeroImage(
-                                  images: recipe.images!,
-                                  recipeId: recipe.id,
+                              ? AnimatedBuilder(
+                                  animation: _scrollController,
+                                  builder: (context, child) {
+                                    final offset = _scrollController.hasClients ? _scrollController.offset : 0;
+                                    final headerHeight = MediaQuery.of(context).padding.top + 60;
+
+                                    // Header fade timing (unchanged)
+                                    final headerFadeStartOffset = _heroHeight * 0.5;
+                                    final headerFadeEndOffset = _heroHeight - (headerHeight/2);
+                                    final headerFadeDuration = headerFadeEndOffset - headerFadeStartOffset;
+                                    final headerOpacity = ((offset - headerFadeStartOffset) / headerFadeDuration).clamp(0.0, 1.0);
+
+                                    // Pin button fade timing (earlier)
+                                    final pinButtonFadeStartOffset = _heroHeight * 0.3;  // Start earlier (90px)
+                                    final pinButtonFadeEndOffset = _heroHeight * 0.6;    // End earlier (180px)
+                                    final pinButtonFadeDuration = pinButtonFadeEndOffset - pinButtonFadeStartOffset;
+                                    final pinButtonOpacity = 1.0 - ((offset - pinButtonFadeStartOffset) / pinButtonFadeDuration).clamp(0.0, 1.0);
+
+                                    return RecipeHeroImage(
+                                      images: recipe.images!,
+                                      recipeId: recipe.id,
+                                      pinButtonOpacity: pinButtonOpacity,
+                                    );
+                                  },
                                 )
                               : Container(
                                   color: AppColors.of(context).surfaceVariant,
@@ -120,10 +141,10 @@ class _RecipePageState extends ConsumerState<RecipePage> {
           height: headerHeight,
           child: Container(
             decoration: BoxDecoration(
-              color: AppColors.of(context).background.withOpacity(opacity),
+              color: AppColors.of(context).background.withValues(alpha: opacity),
               border: Border(
                 bottom: BorderSide(
-                  color: AppColors.of(context).border.withOpacity(opacity),
+                  color: AppColors.of(context).border.withValues(alpha: opacity),
                   width: 0.5,
                 ),
               ),
