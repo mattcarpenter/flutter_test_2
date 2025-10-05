@@ -2,15 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../../database/models/ingredients.dart';
-import '../../../../../database/models/pantry_items.dart';
 import '../../../../models/ingredient_pantry_match.dart';
 import '../../../../providers/recipe_provider.dart';
-import '../../../../providers/pantry_provider.dart';
 import '../../../../theme/typography.dart';
 import '../../../../theme/colors.dart';
 import '../../../../theme/spacing.dart';
 import '../../../../services/ingredient_parser_service.dart';
-import 'ingredient_match_circle.dart';
+import '../../../../widgets/ingredient_stock_chip.dart';
 import 'ingredient_matches_bottom_sheet.dart';
 
 class RecipeIngredientsView extends ConsumerStatefulWidget {
@@ -139,14 +137,10 @@ class _RecipeIngredientsViewState extends ConsumerState<RecipeIngredientsView> {
                           orElse: () => IngredientPantryMatch(ingredient: ingredient),
                         );
 
-                        final chip = _buildStockChip(match);
-                        if (chip != null) {
-                          return GestureDetector(
-                            onTap: () => _showMatchesBottomSheet(context, ref, currentMatches!),
-                            child: chip,
-                          );
-                        }
-                        return const SizedBox.shrink();
+                        return GestureDetector(
+                          onTap: () => _showMatchesBottomSheet(context, ref, currentMatches!),
+                          child: IngredientStockChip(match: match),
+                        );
                       }(),
                     ],
 
@@ -172,59 +166,6 @@ class _RecipeIngredientsViewState extends ConsumerState<RecipeIngredientsView> {
           },
         ),
       ],
-    );
-  }
-
-  /// Builds a stock status chip based on ingredient match
-  Widget? _buildStockChip(IngredientPantryMatch match) {
-    if (!match.hasMatch) {
-      return null; // No chip for no match
-    }
-
-    final colors = AppColors.of(context);
-    Color backgroundColor;
-    String label;
-
-    if (match.hasPantryMatch) {
-      // Direct pantry match - use stock status colors
-      switch (match.pantryItem!.stockStatus) {
-        case StockStatus.outOfStock:
-          backgroundColor = colors.errorBackground;
-          label = 'Out';
-          break;
-        case StockStatus.lowStock:
-          backgroundColor = colors.warningBackground;
-          label = 'Low Stock';
-          break;
-        case StockStatus.inStock:
-          backgroundColor = colors.successBackground;
-          label = 'In Stock';
-          break;
-        default:
-          return null;
-      }
-    } else if (match.hasRecipeMatch) {
-      // Recipe-based match
-      backgroundColor = colors.successBackground;
-      label = 'Recipe';
-    } else {
-      return null;
-    }
-
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-      decoration: BoxDecoration(
-        color: backgroundColor,
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: Text(
-        label,
-        style: TextStyle(
-          fontSize: 12,
-          fontWeight: FontWeight.w500,
-          color: AppColors.of(context).textPrimary,
-        ),
-      ),
     );
   }
 
