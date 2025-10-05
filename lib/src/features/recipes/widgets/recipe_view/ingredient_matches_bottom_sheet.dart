@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/gestures.dart';
 import 'dart:io' show Platform;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:wolt_modal_sheet/wolt_modal_sheet.dart';
@@ -488,16 +489,94 @@ class _IngredientMatchesBottomSheetContentState extends ConsumerState<Ingredient
               SizedBox(width: AppSpacing.sm),
 
               // Menu button (horizontal 3-dot)
-              GestureDetector(
-                onTap: () {
-                  // Context menu will handle the tap
-                },
-                child: Icon(
-                  Icons.more_horiz,
-                  color: colors.uiSecondary,
-                  size: 24,
-                ),
-              ),
+              // Use platform-appropriate menu system
+              Platform.isIOS || Platform.isMacOS
+                  ? CupertinoButton(
+                      padding: EdgeInsets.zero,
+                      minSize: 24,
+                      onPressed: () {
+                        showCupertinoModalPopup(
+                          context: context,
+                          builder: (context) => CupertinoActionSheet(
+                            actions: [
+                              CupertinoActionSheetAction(
+                                isDestructiveAction: true,
+                                onPressed: () async {
+                                  Navigator.pop(context);
+                                  // Get the current terms
+                                  final terms = List<IngredientTerm>.from(_ingredientTermsMap[ingredientId] ?? []);
+
+                                  // Remove the term
+                                  terms.removeWhere((t) => t.value == term.value && t.source == term.source);
+
+                                  // Update the maps
+                                  setState(() {
+                                    _ingredientTermsMap[ingredientId] = terms;
+                                  });
+
+                                  // Ensure the accordion stays expanded
+                                  _expandedIngredientIds.add(ingredientId);
+
+                                  // Save changes immediately
+                                  await _saveIngredientChanges(ingredientId);
+                                },
+                                child: const Text('Delete'),
+                              ),
+                            ],
+                            cancelButton: CupertinoActionSheetAction(
+                              onPressed: () => Navigator.pop(context),
+                              child: const Text('Cancel'),
+                            ),
+                          ),
+                        );
+                      },
+                      child: Icon(
+                        Icons.more_horiz,
+                        color: colors.uiSecondary,
+                        size: 24,
+                      ),
+                    )
+                  : PopupMenuButton<String>(
+                      icon: Icon(
+                        Icons.more_horiz,
+                        color: colors.uiSecondary,
+                        size: 24,
+                      ),
+                      padding: EdgeInsets.zero,
+                      splashRadius: 20,
+                      onSelected: (value) async {
+                        if (value == 'delete') {
+                          // Get the current terms
+                          final terms = List<IngredientTerm>.from(_ingredientTermsMap[ingredientId] ?? []);
+
+                          // Remove the term
+                          terms.removeWhere((t) => t.value == term.value && t.source == term.source);
+
+                          // Update the maps
+                          setState(() {
+                            _ingredientTermsMap[ingredientId] = terms;
+                          });
+
+                          // Ensure the accordion stays expanded
+                          _expandedIngredientIds.add(ingredientId);
+
+                          // Save changes immediately
+                          await _saveIngredientChanges(ingredientId);
+                        }
+                      },
+                      itemBuilder: (context) => [
+                        const PopupMenuItem<String>(
+                          value: 'delete',
+                          child: Row(
+                            children: [
+                              Icon(Icons.delete),
+                              SizedBox(width: 8),
+                              Text('Delete'),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
             ],
           ),
         ),
