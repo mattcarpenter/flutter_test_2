@@ -194,7 +194,7 @@ class _RecipeIngredientsViewState extends ConsumerState<RecipeIngredientsView> {
           break;
         case StockStatus.lowStock:
           backgroundColor = colors.warningBackground;
-          label = 'Low';
+          label = 'Low Stock';
           break;
         case StockStatus.inStock:
           backgroundColor = colors.successBackground;

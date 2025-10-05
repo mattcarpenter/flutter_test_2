@@ -153,17 +153,18 @@ class AppColorSwatches {
 
 
   /// Warning/Yellow color palette
-  static const MaterialColor warning = MaterialColor(0xFFF59E0B, {
-    50: Color(0xFFFFFBEB),   // Lightest
-    100: Color(0xFFFEF3C7),  // Very light
-    200: Color(0xFFFDE68A),  // Light
-    300: Color(0xFFFCD34D),  // Light medium
-    400: Color(0xFFFBBF24),  // Medium light
-    500: Color(0xFFF59E0B),  // Base yellow
-    600: Color(0xFFD97706),  // Medium dark
-    700: Color(0xFFB45309),  // Dark
-    800: Color(0xFF92400E),  // Darker
-    900: Color(0xFF78350F),  // Darkest
+  static const MaterialColor warning = MaterialColor(0xFFF27405, {
+    50:  Color(0xFFFFF4E8), // Very pale cream
+    100: Color(0xFFFFE6CC), // Soft apricot
+    150: Color(0xFFFFD7B3), // Light peach (extra step)
+    200: Color(0xFFFFBF80), // Muted orange
+    300: Color(0xFFFF9F40), // Bright pumpkin
+    400: Color(0xFFFF861A), // Vivid orange
+    500: Color(0xFFF27405), // Base (bold orange)
+    600: Color(0xFFD36204), // Burnt orange
+    700: Color(0xFFAA4E03), // Deep amber
+    800: Color(0xFF803B02), // Dark umber
+    900: Color(0xFF552801), // Almost black brown-orange
   });
 
   /// Error/Red color palette
@@ -301,7 +302,7 @@ class AppColors {
       : AppColorSwatches.error[400]!;
 
   Color get errorBackground => brightness == Brightness.light
-      ? AppColorSwatches.error[50]!
+      ? AppColorSwatches.error[100]!
       : AppColorSwatches.error[900]!.withOpacity(0.15);
 
   Color get success => brightness == Brightness.light
@@ -317,7 +318,7 @@ class AppColors {
       : AppColorSwatches.warning[400]!;
 
   Color get warningBackground => brightness == Brightness.light
-      ? AppColorSwatches.warning[50]!
+      ? AppColorSwatches.warning[100]!
       : AppColorSwatches.warning[900]!.withOpacity(0.15);
 
   Color get info => brightness == Brightness.light
