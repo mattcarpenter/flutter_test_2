@@ -1,17 +1,24 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import '../../../../database/database.dart';
+import '../../../theme/colors.dart';
+import '../../../theme/spacing.dart';
+import '../../../widgets/utils/grouped_list_styling.dart';
 
 class ShoppingListItemTile extends StatelessWidget {
   final ShoppingListItemEntry item;
   final Function(bool) onBoughtToggle;
   final VoidCallback onDelete;
+  final bool isFirst;
+  final bool isLast;
 
   const ShoppingListItemTile({
     super.key,
     required this.item,
     required this.onBoughtToggle,
     required this.onDelete,
+    required this.isFirst,
+    required this.isLast,
   });
 
   String get _quantityText {
@@ -36,13 +43,29 @@ class ShoppingListItemTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final borderRadius = GroupedListStyling.getBorderRadius(
+      isGrouped: true,
+      isFirstInGroup: isFirst,
+      isLastInGroup: isLast,
+    );
+    final border = GroupedListStyling.getBorder(
+      context: context,
+      isGrouped: true,
+      isFirstInGroup: isFirst,
+      isLastInGroup: isLast,
+      isDragging: false,
+    );
+
     return Dismissible(
       key: ValueKey(item.id),
       direction: DismissDirection.endToStart,
       background: Container(
         alignment: Alignment.centerRight,
-        padding: const EdgeInsets.only(right: 16),
-        color: CupertinoColors.destructiveRed,
+        padding: EdgeInsets.only(right: AppSpacing.lg),
+        decoration: BoxDecoration(
+          color: CupertinoColors.destructiveRed,
+          borderRadius: borderRadius,
+        ),
         child: const Icon(
           CupertinoIcons.trash,
           color: CupertinoColors.white,
@@ -72,16 +95,13 @@ class ShoppingListItemTile extends StatelessWidget {
       onDismissed: (_) => onDelete(),
       child: Container(
         decoration: BoxDecoration(
-          color: CupertinoColors.systemBackground,
-          border: Border(
-            bottom: BorderSide(
-              color: CupertinoColors.separator.resolveFrom(context),
-              width: 0.5,
-            ),
-          ),
+          color: AppColors.of(context).input,
+          border: border,
+          borderRadius: borderRadius,
         ),
         child: ListTile(
-          contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+          contentPadding: EdgeInsets.symmetric(horizontal: AppSpacing.lg, vertical: 0),
+          minVerticalPadding: 8,
           leading: GestureDetector(
             onTap: () => onBoughtToggle(!item.bought),
             child: Container(
@@ -90,14 +110,14 @@ class ShoppingListItemTile extends StatelessWidget {
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
                 border: Border.all(
-                  color: item.bought 
-                    ? CupertinoColors.activeGreen 
+                  color: item.bought
+                    ? CupertinoColors.activeGreen
                     : CupertinoColors.systemGrey3,
                   width: 2,
                 ),
-                color: item.bought 
-                  ? CupertinoColors.activeGreen 
-                  : CupertinoColors.systemBackground,
+                color: item.bought
+                  ? CupertinoColors.activeGreen
+                  : AppColors.of(context).input,
               ),
               child: item.bought
                 ? const Icon(
@@ -114,7 +134,7 @@ class ShoppingListItemTile extends StatelessWidget {
               fontSize: 16,
               fontWeight: FontWeight.w500,
               decoration: item.bought ? TextDecoration.lineThrough : null,
-              color: item.bought 
+              color: item.bought
                 ? CupertinoColors.secondaryLabel
                 : CupertinoColors.label,
             ),
@@ -124,7 +144,7 @@ class ShoppingListItemTile extends StatelessWidget {
                 _quantityText,
                 style: TextStyle(
                   fontSize: 14,
-                  color: item.bought 
+                  color: item.bought
                     ? CupertinoColors.tertiaryLabel
                     : CupertinoColors.secondaryLabel,
                 ),
