@@ -22,6 +22,7 @@ import 'sections/recipe_metadata_section.dart';
 import 'sections/steps_section.dart';
 import 'items/tag_chips_row.dart';
 import '../tag_selection_modal.dart';
+import '../../../../services/ingredient_parser_service.dart';
 
 class RecipeEditorForm extends ConsumerStatefulWidget {
   final RecipeEntry? initialRecipe; // null for new recipe, non-null for editing
@@ -64,6 +65,9 @@ class RecipeEditorFormState extends ConsumerState<RecipeEditorForm> {
 
   // Scroll controller for the main form
   final ScrollController _scrollController = ScrollController();
+
+  // Parser for detecting ingredient name changes
+  final _parser = IngredientParserService();
 
   @override
   void initState() {
@@ -228,8 +232,31 @@ class RecipeEditorFormState extends ConsumerState<RecipeEditorForm> {
   void _updateIngredient(String id, Ingredient updatedIngredient) {
     final index = _ingredients.indexWhere((ingredient) => ingredient.id == id);
     if (index == -1) return;
+
+    final oldIngredient = _ingredients[index];
+    Ingredient finalIngredient = updatedIngredient;
+
+    // Only check name changes for regular ingredients (not sections)
+    if (updatedIngredient.type == 'ingredient') {
+      // Parse names to extract just the ingredient name (without quantities/units)
+      final oldParsed = _parser.parse(oldIngredient.name);
+      final newParsed = _parser.parse(updatedIngredient.name);
+
+      final oldCleanName = oldParsed.cleanName.toLowerCase().trim();
+      final newCleanName = newParsed.cleanName.toLowerCase().trim();
+
+      // If ingredient name changed (not just quantity/unit), clear terms and re-canonicalize
+      if (oldCleanName != newCleanName && newCleanName.isNotEmpty) {
+        finalIngredient = updatedIngredient.copyWith(
+          terms: [],                    // Clear ALL terms (API + user-added)
+          isCanonicalised: false,       // Mark for re-canonicalization
+          category: null,                // Clear category
+        );
+      }
+    }
+
     setState(() {
-      _ingredients[index] = updatedIngredient;
+      _ingredients[index] = finalIngredient;
     });
   }
 
