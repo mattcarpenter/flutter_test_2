@@ -295,7 +295,7 @@ class _IngredientDetailPageState extends ConsumerState<IngredientDetailPage> {
 
             // Linked recipe section - show if ingredient has linked recipe
             if (hasLinkedRecipe) ...[
-              if (match.hasPantryMatch) SizedBox(height: AppSpacing.md),
+              SizedBox(height: match.hasPantryMatch ? AppSpacing.md : AppSpacing.lg),
               _buildLinkedRecipeSection(context, ingredient, match),
             ],
 
@@ -352,58 +352,46 @@ class _IngredientDetailPageState extends ConsumerState<IngredientDetailPage> {
             : linkedRecipe.title;
 
         return Container(
-          padding: EdgeInsets.all(AppSpacing.md),
+          width: double.infinity,
+          padding: EdgeInsets.all(AppSpacing.lg),
           decoration: BoxDecoration(
             color: match.hasRecipeMatch
                 ? colors.successBackground
                 : colors.warningBackground,
             borderRadius: BorderRadius.circular(8),
-            border: Border.all(
-              color: match.hasRecipeMatch
-                  ? colors.success.withValues(alpha: 0.3)
-                  : colors.warning.withValues(alpha: 0.3),
-            ),
           ),
           child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+            crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              Row(
-                children: [
-                  Icon(
-                    match.hasRecipeMatch ? Icons.check_circle : Icons.info,
-                    size: 16,
-                    color: match.hasRecipeMatch ? colors.success : colors.warning,
-                  ),
-                  SizedBox(width: AppSpacing.sm),
-                  Expanded(
-                    child: Text(
-                      match.hasRecipeMatch
-                          ? 'Can be made from recipe'
-                          : 'Linked to recipe (ingredients not available)',
-                      style: TextStyle(
-                        fontSize: 14,
-                        fontWeight: FontWeight.w600,
-                        color: match.hasRecipeMatch ? colors.success : colors.warning,
-                      ),
-                    ),
-                  ),
-                ],
+              Icon(
+                match.hasRecipeMatch ? Icons.check_circle : Icons.info,
+                size: 32,
+                color: match.hasRecipeMatch ? colors.success : colors.warning,
               ),
               SizedBox(height: AppSpacing.sm),
-              // Link to recipe with dotted underline (matching recipe_ingredients_view.dart style)
+              // Combined message with recipe name
               GestureDetector(
                 onTap: () => _navigateToLinkedRecipe(context, linkedRecipeId),
                 child: RichText(
+                  textAlign: TextAlign.center,
                   text: TextSpan(
+                    style: TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w600,
+                      color: match.hasRecipeMatch ? colors.success : colors.warning,
+                    ),
                     children: [
+                      TextSpan(
+                        text: match.hasRecipeMatch
+                            ? 'You have everything to make '
+                            : 'Missing ingredients for ',
+                      ),
                       TextSpan(
                         text: recipeName,
                         style: TextStyle(
-                          fontSize: 14,
-                          color: colors.contentPrimary,
                           decoration: TextDecoration.underline,
                           decorationStyle: TextDecorationStyle.dotted,
-                          decorationColor: colors.contentPrimary,
+                          decorationColor: match.hasRecipeMatch ? colors.success : colors.warning,
                         ),
                       ),
                       const TextSpan(text: ' '),
@@ -411,7 +399,7 @@ class _IngredientDetailPageState extends ConsumerState<IngredientDetailPage> {
                         child: Icon(
                           Icons.open_in_new,
                           size: 14,
-                          color: colors.contentSecondary,
+                          color: match.hasRecipeMatch ? colors.success : colors.warning,
                         ),
                         alignment: PlaceholderAlignment.middle,
                       ),
