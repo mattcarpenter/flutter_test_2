@@ -291,7 +291,7 @@ class _UpdatePantryContentSlivers extends ConsumerWidget {
 
             // Bottom padding for sticky action bar and gradient
             // Extra padding ensures last item is fully visible above the gradient
-            widgets.add(SizedBox(height: 150));
+            widgets.add(SizedBox(height: 130));
 
             return widgets;
           },
@@ -313,7 +313,7 @@ class UpdatePantryButton extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final checkedItems = ref.watch(_updatePantryCheckedItemsProvider);
     final updateResult = ref.watch(_updatePantryResultProvider);
-    
+
     if (updateResult == null) {
       return const SizedBox.shrink();
     }
@@ -424,12 +424,12 @@ class UpdatePantryButton extends ConsumerWidget {
       }
     } catch (e) {
       debugPrint('Error updating pantry: $e');
-      
+
       // Close loading dialog
       if (context.mounted) {
         Navigator.of(context).pop();
       }
-      
+
       if (context.mounted) {
         showCupertinoDialog(
           context: context,

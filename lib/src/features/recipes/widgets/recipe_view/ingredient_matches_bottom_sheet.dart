@@ -137,16 +137,16 @@ class IngredientMatchesListPage extends ConsumerWidget {
 
               // Ingredient list
               Expanded(
-                child: ListView.separated(
+                child: ListView.builder(
                   itemCount: currentMatches.matches.length,
-                  separatorBuilder: (context, index) => Divider(
-                    height: 1,
-                    thickness: 1,
-                    color: AppColorSwatches.neutral[350]!,
-                  ),
                   itemBuilder: (context, index) {
                     final match = currentMatches.matches[index];
-                    return _buildIngredientRow(context, match);
+                    return _buildIngredientRow(
+                      context,
+                      match,
+                      index,
+                      currentMatches.matches.length,
+                    );
                   },
                 ),
               ),
@@ -157,7 +157,12 @@ class IngredientMatchesListPage extends ConsumerWidget {
     );
   }
 
-  Widget _buildIngredientRow(BuildContext context, IngredientPantryMatch match) {
+  Widget _buildIngredientRow(
+    BuildContext context,
+    IngredientPantryMatch match,
+    int index,
+    int totalCount,
+  ) {
     final colors = AppColors.of(context);
     final ingredient = match.ingredient;
 
@@ -167,51 +172,73 @@ class IngredientMatchesListPage extends ConsumerWidget {
         ? parseResult.cleanName
         : ingredient.name;
 
-    return InkWell(
-      onTap: () {
-        // Store selected ingredient in a global accessible way
-        IngredientDetailPage.selectedMatch = match;
-        pageIndexNotifier.value = 1;
-      },
-      child: Padding(
-        padding: EdgeInsets.symmetric(
-          horizontal: AppSpacing.lg,
-          vertical: AppSpacing.md,
-        ),
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            // Ingredient name (parsed to remove quantities/units)
-            Expanded(
-              child: Text(
-                displayName,
-                style: AppTypography.body.copyWith(
-                  fontWeight: FontWeight.w600,
-                  color: colors.textPrimary,
+    // Calculate position in group
+    final isFirst = index == 0;
+    final isLast = index == totalCount - 1;
+
+    // Get grouped styling
+    final borderRadius = GroupedListStyling.getBorderRadius(
+      isGrouped: true,
+      isFirstInGroup: isFirst,
+      isLastInGroup: isLast,
+    );
+    final border = GroupedListStyling.getBorder(
+      context: context,
+      isGrouped: true,
+      isFirstInGroup: isFirst,
+      isLastInGroup: isLast,
+      isDragging: false,
+    );
+
+    return Container(
+      decoration: BoxDecoration(
+        color: colors.input,
+        border: border,
+        borderRadius: borderRadius,
+      ),
+      child: InkWell(
+        onTap: () {
+          // Store selected ingredient in a global accessible way
+          IngredientDetailPage.selectedMatch = match;
+          pageIndexNotifier.value = 1;
+        },
+        child: Padding(
+          padding: const EdgeInsets.all(12),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              // Ingredient name (parsed to remove quantities/units)
+              Expanded(
+                child: Text(
+                  displayName,
+                  style: AppTypography.body.copyWith(
+                    fontWeight: FontWeight.w600,
+                    color: colors.textPrimary,
+                  ),
                 ),
               ),
-            ),
 
-            SizedBox(width: AppSpacing.md),
+              SizedBox(width: AppSpacing.md),
 
-            // Stock status chip
-            SizedBox(
-              width: 80,
-              child: Align(
-                alignment: Alignment.centerRight,
-                child: IngredientStockChip(match: match),
+              // Stock status chip
+              SizedBox(
+                width: 80,
+                child: Align(
+                  alignment: Alignment.centerRight,
+                  child: IngredientStockChip(match: match),
+                ),
               ),
-            ),
 
-            SizedBox(width: AppSpacing.md),
+              SizedBox(width: AppSpacing.md),
 
-            // Right chevron
-            Icon(
-              Icons.chevron_right,
-              color: colors.contentSecondary,
-              size: 20,
-            ),
-          ],
+              // Right chevron
+              Icon(
+                Icons.chevron_right,
+                color: colors.contentSecondary,
+                size: 20,
+              ),
+            ],
+          ),
         ),
       ),
     );
