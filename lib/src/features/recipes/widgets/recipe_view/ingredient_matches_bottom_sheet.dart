@@ -13,6 +13,7 @@ import 'package:recipe_app/src/repositories/recipe_repository.dart' show recipeR
 import 'package:recipe_app/src/theme/colors.dart';
 import 'package:recipe_app/src/theme/spacing.dart';
 import 'package:recipe_app/src/theme/typography.dart';
+import 'package:recipe_app/src/widgets/app_button.dart';
 import 'package:recipe_app/src/widgets/app_circle_button.dart';
 import 'package:recipe_app/src/widgets/ingredient_stock_chip.dart';
 import 'package:recipe_app/src/widgets/utils/grouped_list_styling.dart';
@@ -450,11 +451,14 @@ class _IngredientDetailPageState extends ConsumerState<IngredientDetailPage> {
             const Spacer(),
 
             // Add term button
-            AppCircleButton(
-              icon: AppCircleButtonIcon.plus,
-              variant: AppCircleButtonVariant.primary,
-              size: 28,
+            AppButton(
+              text: 'Add Term',
               onPressed: () => _addNewTerm(ingredient.id),
+              theme: AppButtonTheme.secondary,
+              style: AppButtonStyle.outline,
+              shape: AppButtonShape.square,
+              size: AppButtonSize.small,
+              leadingIcon: const Icon(Icons.add),
             ),
           ],
         ),
