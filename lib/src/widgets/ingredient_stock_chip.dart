@@ -6,18 +6,17 @@ import '../theme/colors.dart';
 /// A chip widget that displays the stock status of an ingredient based on its pantry match.
 ///
 /// Shows different states:
-/// - "In Stock" (green) - pantry item is in stock
+/// - "In Stock" (green) - pantry item is in stock OR ingredient can be made via sub-recipe
 /// - "Low Stock" (orange) - pantry item is low stock
 /// - "Out" (red) - pantry item is out of stock
-/// - "Recipe" (green) - ingredient can be made via sub-recipe
 /// - null (no chip) - ingredient has no match
 class IngredientStockChip extends StatelessWidget {
   final IngredientPantryMatch match;
 
   const IngredientStockChip({
-    Key? key,
+    super.key,
     required this.match,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -43,9 +42,9 @@ class IngredientStockChip extends StatelessWidget {
           label = 'In Stock';
       }
     } else if (match.hasRecipeMatch) {
-      // Recipe-based match
+      // Recipe-based match - show as "In Stock" (makeable via sub-recipe)
       backgroundColor = colors.successBackground;
-      label = 'Recipe';
+      label = 'In Stock';
     } else {
       return const SizedBox.shrink();
     }
