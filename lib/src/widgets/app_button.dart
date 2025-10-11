@@ -219,30 +219,37 @@ class _AppButtonState extends State<AppButton> {
       }
     }
 
-    // Reduce horizontal padding when leading icon is present for better balance
+    // Use asymmetric padding when leading icon is present
     final hasLeadingIcon = widget.leadingIcon != null && !widget.loading;
-    final horizontalPadding = hasLeadingIcon ? 0.7 : 1.0; // 30% less padding with icon
 
     switch (widget.size) {
       case AppButtonSize.extraSmall:
-        return EdgeInsets.symmetric(
-          horizontal: (14 * horizontalPadding).round().toDouble(),
-          vertical: 6
+        return EdgeInsets.only(
+          left: hasLeadingIcon ? 10 : 14,
+          right: 14,
+          top: 6,
+          bottom: 6,
         );
       case AppButtonSize.small:
-        return EdgeInsets.symmetric(
-          horizontal: (14 * horizontalPadding).round().toDouble(),
-          vertical: 6
+        return EdgeInsets.only(
+          left: hasLeadingIcon ? 10 : 14,
+          right: 14,
+          top: 6,
+          bottom: 6,
         );
       case AppButtonSize.medium:
-        return EdgeInsets.symmetric(
-          horizontal: (22 * horizontalPadding).round().toDouble(),
-          vertical: 10
+        return EdgeInsets.only(
+          left: hasLeadingIcon ? 16 : 22,
+          right: 22,
+          top: 10,
+          bottom: 10,
         );
       case AppButtonSize.large:
-        return EdgeInsets.symmetric(
-          horizontal: (26 * horizontalPadding).round().toDouble(),
-          vertical: 14
+        return EdgeInsets.only(
+          left: hasLeadingIcon ? 18 : 26,
+          right: 26,
+          top: 14,
+          bottom: 14,
         );
     }
   }
