@@ -22,6 +22,11 @@ void showUpdatePantryModal(
   BuildContext context,
   List<ShoppingListItemEntry> boughtItems,
 ) {
+  // Reset providers when modal opens
+  final container = ProviderScope.containerOf(context);
+  container.invalidate(_updatePantryCheckedItemsProvider);
+  container.invalidate(_updatePantryResultProvider);
+
   WoltModalSheet.show(
     useRootNavigator: true,
     context: context,
@@ -37,15 +42,17 @@ void showUpdatePantryModal(
 class UpdatePantryModalPage {
   UpdatePantryModalPage._();
 
-  static WoltModalSheetPage build({
+  static SliverWoltModalSheetPage build({
     required BuildContext context,
     required List<ShoppingListItemEntry> boughtItems,
   }) {
-    return WoltModalSheetPage(
+    return SliverWoltModalSheetPage(
       navBarHeight: 55,
       backgroundColor: AppColors.of(context).background,
       surfaceTintColor: CupertinoColors.transparent,
-      hasTopBarLayer: false,
+      hasTopBarLayer: true,
+      isTopBarLayerAlwaysVisible: true,
+      hasSabGradient: true,
       trailingNavBarWidget: Padding(
         padding: EdgeInsets.only(right: AppSpacing.lg),
         child: AppCircleButton(
@@ -54,7 +61,23 @@ class UpdatePantryModalPage {
           onPressed: () => Navigator.of(context).pop(),
         ),
       ),
-      child: UpdatePantryContent(boughtItems: boughtItems),
+      mainContentSliversBuilder: (BuildContext builderContext) {
+        return [
+          // Use Consumer to reactively watch providers
+          Consumer(
+            builder: (context, ref, child) {
+              final pantryItemsAsync = ref.watch(pantryItemsProvider);
+              final checkedItems = ref.watch(_updatePantryCheckedItemsProvider);
+
+              return _UpdatePantryContentSlivers(
+                pantryItemsAsync: pantryItemsAsync,
+                checkedItems: checkedItems,
+                boughtItems: boughtItems,
+              );
+            },
+          ),
+        ];
+      },
       stickyActionBar: Container(
         decoration: BoxDecoration(
           color: AppColors.of(context).background,
@@ -73,163 +96,8 @@ class UpdatePantryModalPage {
       ),
     );
   }
-}
 
-class UpdatePantryContent extends ConsumerStatefulWidget {
-  final List<ShoppingListItemEntry> boughtItems;
-
-  const UpdatePantryContent({
-    super.key,
-    required this.boughtItems,
-  });
-
-  @override
-  ConsumerState<UpdatePantryContent> createState() => _UpdatePantryContentState();
-}
-
-class _UpdatePantryContentState extends ConsumerState<UpdatePantryContent> {
-  @override
-  void initState() {
-    super.initState();
-    // Reset providers when modal opens
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      ref.invalidate(_updatePantryCheckedItemsProvider);
-      ref.invalidate(_updatePantryResultProvider);
-    });
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final pantryItemsAsync = ref.watch(pantryItemsProvider);
-    final checkedItems = ref.watch(_updatePantryCheckedItemsProvider);
-
-    return Padding(
-      padding: EdgeInsets.fromLTRB(AppSpacing.lg, 0, AppSpacing.lg, 0),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Text(
-            'Update Pantry',
-            style: AppTypography.h4.copyWith(
-              color: AppColors.of(context).textPrimary,
-            ),
-          ),
-          SizedBox(height: AppSpacing.lg),
-          pantryItemsAsync.when(
-            loading: () => const Center(
-              child: CupertinoActivityIndicator(),
-            ),
-            error: (error, stack) => Center(
-              child: Text('Error loading pantry: $error'),
-            ),
-            data: (pantryItems) {
-        // Analyze updates
-        final updateResult = PantryUpdateService.analyzeUpdates(
-          shoppingListItems: widget.boughtItems,
-          pantryItems: pantryItems,
-        );
-        
-        // Store result in provider
-        WidgetsBinding.instance.addPostFrameCallback((_) {
-          ref.read(_updatePantryResultProvider.notifier).state = updateResult;
-        });
-
-        if (!updateResult.hasChanges) {
-          return const Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Icon(
-                  CupertinoIcons.check_mark_circled_solid,
-                  color: CupertinoColors.activeGreen,
-                  size: 64,
-                ),
-                SizedBox(height: 16),
-                Text(
-                  'Nothing to update',
-                  style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-                SizedBox(height: 8),
-                Text(
-                  'All items are already in your pantry\nand marked as in stock.',
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                    fontSize: 16,
-                    color: CupertinoColors.secondaryLabel,
-                  ),
-                ),
-              ],
-            ),
-          );
-        }
-
-        return ConstrainedBox(
-          constraints: BoxConstraints(
-            minHeight: MediaQuery.of(context).size.height * 0.4,
-          ),
-          child: SingleChildScrollView(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // Items to add section
-                if (updateResult.itemsToAdd.isNotEmpty) ...[
-                _buildSectionHeader(
-                  'Items to add',
-                  updateResult.itemsToAdd.length,
-                ),
-                const SizedBox(height: 8),
-                ...updateResult.itemsToAdd.map((item) {
-                  final itemId = 'add_${item.shoppingListItem.id}';
-                  return PantryUpdateItemTile(
-                    item: item,
-                    isChecked: checkedItems[itemId] ?? true,
-                    onCheckedChanged: (value) {
-                      final newCheckedItems = {...checkedItems};
-                      newCheckedItems[itemId] = value;
-                      ref.read(_updatePantryCheckedItemsProvider.notifier).state = newCheckedItems;
-                    },
-                  );
-                }),
-                const SizedBox(height: 24),
-              ],
-
-              // Items to update section
-              if (updateResult.itemsToUpdate.isNotEmpty) ...[
-                _buildSectionHeader(
-                  'Items to update',
-                  updateResult.itemsToUpdate.length,
-                ),
-                const SizedBox(height: 8),
-                ...updateResult.itemsToUpdate.map((item) {
-                  final itemId = 'update_${item.shoppingListItem.id}';
-                  return PantryUpdateItemTile(
-                    item: item,
-                    isChecked: checkedItems[itemId] ?? true,
-                    onCheckedChanged: (value) {
-                      final newCheckedItems = {...checkedItems};
-                      newCheckedItems[itemId] = value;
-                      ref.read(_updatePantryCheckedItemsProvider.notifier).state = newCheckedItems;
-                    },
-                  );
-                }),
-              ],
-              // Add bottom padding to ensure content isn't hidden behind sticky action bar
-              const SizedBox(height: 80),
-            ],
-          ),
-        ));
-            },
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildSectionHeader(String title, int count) {
+  static Widget _buildSectionHeader(BuildContext context, String title, int count) {
     return Row(
       children: [
         Text(
@@ -246,6 +114,185 @@ class _UpdatePantryContentState extends ConsumerState<UpdatePantryContent> {
           ),
         ),
       ],
+    );
+  }
+}
+
+class _UpdatePantryContentSlivers extends ConsumerWidget {
+  final AsyncValue<List<PantryItemEntry>> pantryItemsAsync;
+  final Map<String, bool> checkedItems;
+  final List<ShoppingListItemEntry> boughtItems;
+
+  const _UpdatePantryContentSlivers({
+    required this.pantryItemsAsync,
+    required this.checkedItems,
+    required this.boughtItems,
+  });
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    return SliverList(
+      delegate: SliverChildListDelegate([
+        // Title
+        Padding(
+          padding: EdgeInsets.fromLTRB(AppSpacing.lg, 0, AppSpacing.lg, 0),
+          child: Text(
+            'Update Pantry',
+            style: AppTypography.h4.copyWith(
+              color: AppColors.of(context).textPrimary,
+            ),
+          ),
+        ),
+        SizedBox(height: AppSpacing.lg),
+
+        // Content based on async state
+        ...pantryItemsAsync.when(
+          loading: () => [
+            SizedBox(
+              height: 300,
+              child: Center(
+                child: CupertinoActivityIndicator(),
+              ),
+            ),
+          ],
+          error: (error, stack) => [
+            SizedBox(
+              height: 300,
+              child: Center(
+                child: Text('Error loading pantry: $error'),
+              ),
+            ),
+          ],
+          data: (pantryItems) {
+            // Analyze updates
+            final updateResult = PantryUpdateService.analyzeUpdates(
+              shoppingListItems: boughtItems,
+              pantryItems: pantryItems,
+            );
+
+            // Store result in provider
+            WidgetsBinding.instance.addPostFrameCallback((_) {
+              ref.read(_updatePantryResultProvider.notifier).state = updateResult;
+            });
+
+            // No changes state
+            if (!updateResult.hasChanges) {
+              return [
+                SizedBox(
+                  height: 300,
+                  child: Center(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(
+                          CupertinoIcons.check_mark_circled_solid,
+                          color: CupertinoColors.activeGreen,
+                          size: 64,
+                        ),
+                        SizedBox(height: 16),
+                        Text(
+                          'Nothing to update',
+                          style: TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                        SizedBox(height: 8),
+                        Text(
+                          'All items are already in your pantry\nand marked as in stock.',
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                            fontSize: 16,
+                            color: CupertinoColors.secondaryLabel,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ];
+            }
+
+            // Build widgets for items
+            final List<Widget> widgets = [];
+
+            // Items to add section
+            if (updateResult.itemsToAdd.isNotEmpty) {
+              widgets.add(
+                Padding(
+                  padding: EdgeInsets.symmetric(horizontal: AppSpacing.lg),
+                  child: UpdatePantryModalPage._buildSectionHeader(
+                    context,
+                    'Items to add',
+                    updateResult.itemsToAdd.length,
+                  ),
+                ),
+              );
+              widgets.add(SizedBox(height: AppSpacing.sm));
+
+              // Add each item
+              for (final item in updateResult.itemsToAdd) {
+                final itemId = 'add_${item.shoppingListItem.id}';
+                widgets.add(
+                  Padding(
+                    padding: EdgeInsets.symmetric(horizontal: AppSpacing.lg),
+                    child: PantryUpdateItemTile(
+                      item: item,
+                      isChecked: checkedItems[itemId] ?? true,
+                      onCheckedChanged: (value) {
+                        final newCheckedItems = {...checkedItems};
+                        newCheckedItems[itemId] = value;
+                        ref.read(_updatePantryCheckedItemsProvider.notifier).state = newCheckedItems;
+                      },
+                    ),
+                  ),
+                );
+              }
+
+              widgets.add(SizedBox(height: AppSpacing.xl));
+            }
+
+            // Items to update section
+            if (updateResult.itemsToUpdate.isNotEmpty) {
+              widgets.add(
+                Padding(
+                  padding: EdgeInsets.symmetric(horizontal: AppSpacing.lg),
+                  child: UpdatePantryModalPage._buildSectionHeader(
+                    context,
+                    'Items to update',
+                    updateResult.itemsToUpdate.length,
+                  ),
+                ),
+              );
+              widgets.add(SizedBox(height: AppSpacing.sm));
+
+              // Add each item
+              for (final item in updateResult.itemsToUpdate) {
+                final itemId = 'update_${item.shoppingListItem.id}';
+                widgets.add(
+                  Padding(
+                    padding: EdgeInsets.symmetric(horizontal: AppSpacing.lg),
+                    child: PantryUpdateItemTile(
+                      item: item,
+                      isChecked: checkedItems[itemId] ?? true,
+                      onCheckedChanged: (value) {
+                        final newCheckedItems = {...checkedItems};
+                        newCheckedItems[itemId] = value;
+                        ref.read(_updatePantryCheckedItemsProvider.notifier).state = newCheckedItems;
+                      },
+                    ),
+                  ),
+                );
+              }
+            }
+
+            // Bottom padding for sticky action bar
+            widgets.add(SizedBox(height: 100));
+
+            return widgets;
+          },
+        ),
+      ]),
     );
   }
 }
