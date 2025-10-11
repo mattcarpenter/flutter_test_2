@@ -6,7 +6,10 @@ import '../../../../database/models/pantry_items.dart';
 import '../../../providers/pantry_provider.dart';
 import '../../../providers/shopping_list_provider.dart';
 import '../../../theme/colors.dart';
-import '../../../widgets/wolt/text/modal_sheet_title.dart';
+import '../../../theme/spacing.dart';
+import '../../../theme/typography.dart';
+import '../../../widgets/app_button.dart';
+import '../../../widgets/app_circle_button.dart';
 import '../models/pantry_update_models.dart';
 import '../services/pantry_update_service.dart';
 import '../widgets/pantry_update_item_tile.dart';
@@ -39,19 +42,19 @@ class UpdatePantryModalPage {
     required List<ShoppingListItemEntry> boughtItems,
   }) {
     return WoltModalSheetPage(
+      navBarHeight: 55,
       backgroundColor: AppColors.of(context).background,
-      leadingNavBarWidget: CupertinoButton(
-        padding: const EdgeInsets.symmetric(horizontal: 16.0),
-        onPressed: () {
-          Navigator.of(context).pop();
-        },
-        child: const Text('Cancel'),
+      surfaceTintColor: CupertinoColors.transparent,
+      hasTopBarLayer: false,
+      trailingNavBarWidget: Padding(
+        padding: EdgeInsets.only(right: AppSpacing.lg),
+        child: AppCircleButton(
+          icon: AppCircleButtonIcon.close,
+          variant: AppCircleButtonVariant.neutral,
+          onPressed: () => Navigator.of(context).pop(),
+        ),
       ),
-      pageTitle: const ModalSheetTitle('Update Pantry'),
-      child: Padding(
-        padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
-        child: UpdatePantryContent(boughtItems: boughtItems),
-      ),
+      child: UpdatePantryContent(boughtItems: boughtItems),
       stickyActionBar: Container(
         decoration: BoxDecoration(
           color: AppColors.of(context).background,
@@ -100,14 +103,27 @@ class _UpdatePantryContentState extends ConsumerState<UpdatePantryContent> {
     final pantryItemsAsync = ref.watch(pantryItemsProvider);
     final checkedItems = ref.watch(_updatePantryCheckedItemsProvider);
 
-    return pantryItemsAsync.when(
-      loading: () => const Center(
-        child: CupertinoActivityIndicator(),
-      ),
-      error: (error, stack) => Center(
-        child: Text('Error loading pantry: $error'),
-      ),
-      data: (pantryItems) {
+    return Padding(
+      padding: EdgeInsets.fromLTRB(AppSpacing.lg, 0, AppSpacing.lg, 0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text(
+            'Update Pantry',
+            style: AppTypography.h4.copyWith(
+              color: AppColors.of(context).textPrimary,
+            ),
+          ),
+          SizedBox(height: AppSpacing.lg),
+          pantryItemsAsync.when(
+            loading: () => const Center(
+              child: CupertinoActivityIndicator(),
+            ),
+            error: (error, stack) => Center(
+              child: Text('Error loading pantry: $error'),
+            ),
+            data: (pantryItems) {
         // Analyze updates
         final updateResult = PantryUpdateService.analyzeUpdates(
           shoppingListItems: widget.boughtItems,
@@ -164,7 +180,6 @@ class _UpdatePantryContentState extends ConsumerState<UpdatePantryContent> {
                 _buildSectionHeader(
                   'Items to add',
                   updateResult.itemsToAdd.length,
-                  CupertinoColors.activeGreen,
                 ),
                 const SizedBox(height: 8),
                 ...updateResult.itemsToAdd.map((item) {
@@ -187,7 +202,6 @@ class _UpdatePantryContentState extends ConsumerState<UpdatePantryContent> {
                 _buildSectionHeader(
                   'Items to update',
                   updateResult.itemsToUpdate.length,
-                  CupertinoColors.activeBlue,
                 ),
                 const SizedBox(height: 8),
                 ...updateResult.itemsToUpdate.map((item) {
@@ -208,35 +222,27 @@ class _UpdatePantryContentState extends ConsumerState<UpdatePantryContent> {
             ],
           ),
         ));
-      },
+            },
+          ),
+        ],
+      ),
     );
   }
 
-  Widget _buildSectionHeader(String title, int count, Color color) {
+  Widget _buildSectionHeader(String title, int count) {
     return Row(
       children: [
-        Container(
-          width: 4,
-          height: 24,
-          decoration: BoxDecoration(
-            color: color,
-            borderRadius: BorderRadius.circular(2),
-          ),
-        ),
-        const SizedBox(width: 12),
         Text(
           title,
-          style: const TextStyle(
-            fontSize: 18,
-            fontWeight: FontWeight.w600,
+          style: AppTypography.h5.copyWith(
+            color: AppColors.of(context).textPrimary,
           ),
         ),
-        const SizedBox(width: 8),
+        SizedBox(width: AppSpacing.sm),
         Text(
           '($count)',
-          style: TextStyle(
-            fontSize: 16,
-            color: CupertinoColors.secondaryLabel.resolveFrom(context),
+          style: AppTypography.body.copyWith(
+            color: AppColors.of(context).textSecondary,
           ),
         ),
       ],
@@ -274,20 +280,18 @@ class UpdatePantryButton extends ConsumerWidget {
 
     final isEnabled = checkedCount > 0;
 
-    return SizedBox(
-      width: double.infinity,
-      child: CupertinoButton.filled(
-        onPressed: isEnabled
-            ? () async {
-                await _performUpdate(context, ref, updateResult, checkedItems);
-              }
-            : null,
-        child: Text(
-          checkedCount > 0
-              ? 'Update Pantry ($checkedCount)'
-              : 'Update Pantry',
-        ),
-      ),
+    return AppButtonVariants.primaryFilled(
+      text: checkedCount > 0
+          ? 'Update Pantry ($checkedCount)'
+          : 'Update Pantry',
+      size: AppButtonSize.large,
+      shape: AppButtonShape.square,
+      fullWidth: true,
+      onPressed: isEnabled
+          ? () async {
+              await _performUpdate(context, ref, updateResult, checkedItems);
+            }
+          : null,
     );
   }
 

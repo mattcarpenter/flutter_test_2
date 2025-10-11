@@ -1,5 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import '../../../../database/models/pantry_items.dart';
+import '../../../theme/colors.dart';
+import '../../../widgets/stock_status_chip.dart';
 import '../models/pantry_update_models.dart';
 
 class PantryUpdateItemTile extends StatelessWidget {
@@ -21,7 +23,7 @@ class PantryUpdateItemTile extends StatelessWidget {
     return Container(
       margin: const EdgeInsets.only(bottom: 8),
       decoration: BoxDecoration(
-        color: CupertinoColors.systemGrey6.resolveFrom(context),
+        color: AppColors.of(context).input,
         borderRadius: BorderRadius.circular(12),
       ),
       child: GestureDetector(
@@ -35,15 +37,15 @@ class PantryUpdateItemTile extends StatelessWidget {
                 width: 24,
                 height: 24,
                 decoration: BoxDecoration(
-                  shape: BoxShape.circle,
+                  borderRadius: BorderRadius.circular(8),
                   border: Border.all(
                     color: isChecked
-                        ? CupertinoColors.activeBlue
+                        ? AppColors.of(context).primary
                         : CupertinoColors.systemGrey3,
                     width: 2,
                   ),
                   color: isChecked
-                      ? CupertinoColors.activeBlue
+                      ? AppColors.of(context).primary
                       : CupertinoColors.transparent,
                 ),
                 child: isChecked
@@ -72,17 +74,9 @@ class PantryUpdateItemTile extends StatelessWidget {
                     Row(
                       children: [
                         if (isNew) ...[
-                          _buildTag(
-                            'New item',
-                            CupertinoColors.activeGreen,
-                            context,
-                          ),
+                          StockStatusChip(isNewItem: true),
                         ] else ...[
-                          _buildTag(
-                            _getStockStatusText(item.matchingPantryItem!.stockStatus),
-                            _getStockStatusColor(item.matchingPantryItem!.stockStatus),
-                            context,
-                          ),
+                          StockStatusChip(status: item.matchingPantryItem!.stockStatus),
                           const SizedBox(width: 8),
                           const Icon(
                             CupertinoIcons.arrow_right,
@@ -90,87 +84,17 @@ class PantryUpdateItemTile extends StatelessWidget {
                             color: CupertinoColors.secondaryLabel,
                           ),
                           const SizedBox(width: 8),
-                          _buildTag(
-                            'In stock',
-                            CupertinoColors.activeGreen,
-                            context,
-                          ),
+                          StockStatusChip(status: StockStatus.inStock),
                         ],
                       ],
                     ),
                   ],
                 ),
               ),
-              
-              // Quantity if available
-              if (item.shoppingListItem.amount != null) ...[
-                const SizedBox(width: 8),
-                Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                  decoration: BoxDecoration(
-                    color: CupertinoColors.systemGrey5.resolveFrom(context),
-                    borderRadius: BorderRadius.circular(16),
-                  ),
-                  child: Text(
-                    _formatQuantity(item.shoppingListItem.amount!),
-                    style: const TextStyle(
-                      fontSize: 14,
-                      fontWeight: FontWeight.w500,
-                    ),
-                  ),
-                ),
-              ],
             ],
           ),
         ),
       ),
     );
-  }
-
-  Widget _buildTag(String text, Color color, BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-      decoration: BoxDecoration(
-        color: color.withValues(alpha: 0.2),
-        borderRadius: BorderRadius.circular(4),
-      ),
-      child: Text(
-        text,
-        style: TextStyle(
-          fontSize: 12,
-          fontWeight: FontWeight.w500,
-          color: color,
-        ),
-      ),
-    );
-  }
-
-  String _getStockStatusText(StockStatus status) {
-    switch (status) {
-      case StockStatus.outOfStock:
-        return 'Out of stock';
-      case StockStatus.lowStock:
-        return 'Low stock';
-      case StockStatus.inStock:
-        return 'In stock';
-    }
-  }
-
-  Color _getStockStatusColor(StockStatus status) {
-    switch (status) {
-      case StockStatus.outOfStock:
-        return CupertinoColors.destructiveRed;
-      case StockStatus.lowStock:
-        return CupertinoColors.systemYellow;
-      case StockStatus.inStock:
-        return CupertinoColors.activeGreen;
-    }
-  }
-
-  String _formatQuantity(double amount) {
-    if (amount == amount.floor()) {
-      return amount.floor().toString();
-    }
-    return amount.toString();
   }
 }
