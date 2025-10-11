@@ -60,9 +60,10 @@ class ShoppingListRepository {
 
   Stream<List<ShoppingListItemEntry>> watchItems(String? listId) {
     return (_db.select(_db.shoppingListItems)
-      ..where((t) => listId != null 
+      ..where((t) => listId != null
           ? t.shoppingListId.equals(listId) & t.deletedAt.isNull()
-          : t.shoppingListId.isNull() & t.deletedAt.isNull()))
+          : t.shoppingListId.isNull() & t.deletedAt.isNull())
+      ..orderBy([(t) => OrderingTerm.asc(t.createdAt)]))
         .watch();
   }
 

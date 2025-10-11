@@ -111,12 +111,12 @@ class ShoppingListItemTile extends StatelessWidget {
                 shape: BoxShape.circle,
                 border: Border.all(
                   color: item.bought
-                    ? CupertinoColors.activeGreen
+                    ? AppColors.of(context).primary
                     : CupertinoColors.systemGrey3,
                   width: 2,
                 ),
                 color: item.bought
-                  ? CupertinoColors.activeGreen
+                  ? AppColors.of(context).primary
                   : AppColors.of(context).input,
               ),
               child: item.bought
