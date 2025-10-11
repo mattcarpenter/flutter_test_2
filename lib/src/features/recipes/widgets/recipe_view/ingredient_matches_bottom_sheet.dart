@@ -1,14 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
-import 'package:flutter/gestures.dart';
 import 'dart:io' show Platform;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:wolt_modal_sheet/wolt_modal_sheet.dart';
 import 'package:super_context_menu/super_context_menu.dart';
 import 'package:recipe_app/src/models/ingredient_pantry_match.dart';
 import 'package:recipe_app/database/models/ingredients.dart';
 import 'package:recipe_app/database/models/ingredient_terms.dart';
-import 'package:recipe_app/src/providers/recipe_provider.dart' show recipeIngredientMatchesProvider;
+import 'package:recipe_app/src/providers/recipe_provider.dart' show recipeIngredientMatchesProvider, recipeByIdStreamProvider;
 import 'package:recipe_app/src/repositories/recipe_repository.dart' show recipeRepositoryProvider;
 import 'package:recipe_app/src/theme/colors.dart';
 import 'package:recipe_app/src/theme/spacing.dart';
@@ -16,6 +16,8 @@ import 'package:recipe_app/src/theme/typography.dart';
 import 'package:recipe_app/src/widgets/app_circle_button.dart';
 import 'package:recipe_app/src/widgets/ingredient_stock_chip.dart';
 import 'package:recipe_app/src/widgets/utils/grouped_list_styling.dart';
+import 'package:recipe_app/src/widgets/wolt/button/wolt_modal_sheet_back_button.dart';
+import 'package:recipe_app/src/services/ingredient_parser_service.dart';
 import 'pantry_item_selector_bottom_sheet.dart';
 
 /// Shows a bottom sheet displaying ingredient-pantry match details
@@ -29,24 +31,50 @@ void showIngredientMatchesBottomSheet(
     debugPrint("Warning: No matches found for recipe ${matches.recipeId}");
   }
 
+  // Page navigation state
+  final pageIndexNotifier = ValueNotifier<int>(0);
+
   WoltModalSheet.show(
     useRootNavigator: true,
     context: context,
     modalTypeBuilder: (_) => WoltModalType.bottomSheet(),
+    pageIndexNotifier: pageIndexNotifier,
     pageListBuilder: (modalContext) {
       return [
+        // Page 1: Ingredient list
         WoltModalSheetPage(
           backgroundColor: AppColors.of(modalContext).background,
+          surfaceTintColor: Colors.transparent,
           hasTopBarLayer: true,
           isTopBarLayerAlwaysVisible: true,
           topBarTitle: Text('Pantry Matches (${matches.matches.where((m) => m.hasMatch).length}/${matches.matches.length})'),
-          leadingNavBarWidget: IconButton(
-            icon: const Icon(Icons.close),
-            onPressed: () {
-              Navigator.of(modalContext).pop();
+          trailingNavBarWidget: Padding(
+            padding: EdgeInsets.only(right: AppSpacing.lg),
+            child: AppCircleButton(
+              icon: AppCircleButtonIcon.close,
+              variant: AppCircleButtonVariant.neutral,
+              onPressed: () {
+                Navigator.of(modalContext).pop();
+              },
+            ),
+          ),
+          child: IngredientMatchesListPage(
+            matches: matches,
+            pageIndexNotifier: pageIndexNotifier,
+          ),
+        ),
+        // Page 2: Individual ingredient detail
+        WoltModalSheetPage(
+          backgroundColor: AppColors.of(modalContext).background,
+          surfaceTintColor: Colors.transparent,
+          hasTopBarLayer: true,
+          isTopBarLayerAlwaysVisible: true,
+          leadingNavBarWidget: WoltModalSheetBackButton(
+            onBackPressed: () {
+              pageIndexNotifier.value = 0;
             },
           ),
-          child: IngredientMatchesBottomSheetContent(
+          child: IngredientDetailPage(
             matches: matches,
           ),
         ),
@@ -58,56 +86,27 @@ void showIngredientMatchesBottomSheet(
   );
 }
 
-class IngredientMatchesBottomSheetContent extends ConsumerStatefulWidget {
+// ============================================================================
+// Page 1: Ingredient List
+// ============================================================================
+
+class IngredientMatchesListPage extends ConsumerWidget {
   final RecipeIngredientMatches matches;
+  final ValueNotifier<int> pageIndexNotifier;
 
-  const IngredientMatchesBottomSheetContent({
-    Key? key,
+  // Parser for ingredient text formatting
+  final _parser = IngredientParserService();
+
+  IngredientMatchesListPage({
+    super.key,
     required this.matches,
-  }) : super(key: key);
+    required this.pageIndexNotifier,
+  });
 
   @override
-  ConsumerState<IngredientMatchesBottomSheetContent> createState() => _IngredientMatchesBottomSheetContentState();
-}
-
-class _IngredientMatchesBottomSheetContentState extends ConsumerState<IngredientMatchesBottomSheetContent>
-    with TickerProviderStateMixin {
-  // Track expanded state for each ingredient
-  final Set<String> _expandedIngredientIds = {};
-  // Map to store working copies of ingredient terms
-  final Map<String, List<IngredientTerm>> _ingredientTermsMap = {};
-  // Animation controllers for each ingredient
-  final Map<String, AnimationController> _animationControllers = {};
-
-  @override
-  void initState() {
-    super.initState();
-    // Initialize working copies of terms for each ingredient
-    for (final match in widget.matches.matches) {
-      final ingredient = match.ingredient;
-      _ingredientTermsMap[ingredient.id] = List<IngredientTerm>.from(ingredient.terms ?? []);
-
-      // Create animation controller for each ingredient
-      _animationControllers[ingredient.id] = AnimationController(
-        duration: const Duration(milliseconds: 250),
-        vsync: this,
-      );
-    }
-  }
-
-  @override
-  void dispose() {
-    // Dispose all animation controllers
-    for (final controller in _animationControllers.values) {
-      controller.dispose();
-    }
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     // Watch the live matches provider to get real-time updates
-    final matchesAsync = ref.watch(recipeIngredientMatchesProvider(widget.matches.recipeId));
+    final matchesAsync = ref.watch(recipeIngredientMatchesProvider(matches.recipeId));
 
     return matchesAsync.when(
       loading: () => SizedBox(
@@ -125,7 +124,7 @@ class _IngredientMatchesBottomSheetContentState extends ConsumerState<Ingredient
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Summary text with live data
+              // Summary text
               Text(
                 'Pantry matches: ${currentMatches.matches.where((m) => m.hasMatch).length} of ${currentMatches.matches.length} ingredients',
                 style: AppTypography.body.copyWith(
@@ -135,20 +134,18 @@ class _IngredientMatchesBottomSheetContentState extends ConsumerState<Ingredient
 
               SizedBox(height: AppSpacing.lg),
 
-              // Match details list with custom expandable sections
+              // Ingredient list
               Expanded(
                 child: ListView.separated(
                   itemCount: currentMatches.matches.length,
                   separatorBuilder: (context, index) => Divider(
                     height: 1,
                     thickness: 1,
-                    color: AppColors.of(context).border,
-                    indent: AppSpacing.lg,
-                    endIndent: AppSpacing.lg,
+                    color: AppColorSwatches.neutral[350]!,
                   ),
                   itemBuilder: (context, index) {
                     final match = currentMatches.matches[index];
-                    return _buildIngredientItem(context, match);
+                    return _buildIngredientRow(context, match);
                   },
                 ),
               ),
@@ -159,136 +156,283 @@ class _IngredientMatchesBottomSheetContentState extends ConsumerState<Ingredient
     );
   }
 
-  Widget _buildIngredientItem(BuildContext context, IngredientPantryMatch match) {
+  Widget _buildIngredientRow(BuildContext context, IngredientPantryMatch match) {
+    final colors = AppColors.of(context);
     final ingredient = match.ingredient;
-    final isExpanded = _expandedIngredientIds.contains(ingredient.id);
-    final controller = _animationControllers[ingredient.id]!;
+
+    // Parse ingredient name to get clean name without quantities/units
+    final parseResult = _parser.parse(ingredient.name);
+    final displayName = parseResult.cleanName.isNotEmpty
+        ? parseResult.cleanName
+        : ingredient.name;
+
+    return InkWell(
+      onTap: () {
+        // Store selected ingredient in a global accessible way
+        IngredientDetailPage.selectedMatch = match;
+        pageIndexNotifier.value = 1;
+      },
+      child: Padding(
+        padding: EdgeInsets.symmetric(
+          horizontal: AppSpacing.lg,
+          vertical: AppSpacing.md,
+        ),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            // Ingredient name (parsed to remove quantities/units)
+            Expanded(
+              child: Text(
+                displayName,
+                style: AppTypography.body.copyWith(
+                  fontWeight: FontWeight.w600,
+                  color: colors.textPrimary,
+                ),
+              ),
+            ),
+
+            SizedBox(width: AppSpacing.md),
+
+            // Stock status chip
+            SizedBox(
+              width: 80,
+              child: Align(
+                alignment: Alignment.centerRight,
+                child: IngredientStockChip(match: match),
+              ),
+            ),
+
+            SizedBox(width: AppSpacing.md),
+
+            // Right chevron
+            Icon(
+              Icons.chevron_right,
+              color: colors.contentSecondary,
+              size: 20,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+// ============================================================================
+// Page 2: Ingredient Detail
+// ============================================================================
+
+class IngredientDetailPage extends ConsumerStatefulWidget {
+  final RecipeIngredientMatches matches;
+
+  // Static variable to share selected match between pages
+  static IngredientPantryMatch? selectedMatch;
+
+  const IngredientDetailPage({
+    super.key,
+    required this.matches,
+  });
+
+  @override
+  ConsumerState<IngredientDetailPage> createState() => _IngredientDetailPageState();
+}
+
+class _IngredientDetailPageState extends ConsumerState<IngredientDetailPage> {
+  // Map to store working copies of ingredient terms
+  final Map<String, List<IngredientTerm>> _ingredientTermsMap = {};
+
+  // Parser for ingredient text formatting
+  final _parser = IngredientParserService();
+
+  @override
+  void initState() {
+    super.initState();
+    // Initialize working copy of terms for the selected ingredient
+    if (IngredientDetailPage.selectedMatch != null) {
+      final ingredient = IngredientDetailPage.selectedMatch!.ingredient;
+      _ingredientTermsMap[ingredient.id] = List<IngredientTerm>.from(ingredient.terms ?? []);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = AppColors.of(context);
+    final match = IngredientDetailPage.selectedMatch;
+
+    if (match == null) {
+      return const Center(child: Text('No ingredient selected'));
+    }
+
+    final ingredient = match.ingredient;
     final terms = _ingredientTermsMap[ingredient.id] ?? [];
+    final hasLinkedRecipe = ingredient.recipeId != null;
 
-    return Column(
-      children: [
-        // Header - always visible
-        InkWell(
-          onTap: () {
-            setState(() {
-              if (isExpanded) {
-                _expandedIngredientIds.remove(ingredient.id);
-                controller.reverse();
-              } else {
-                _expandedIngredientIds.add(ingredient.id);
-                controller.forward();
-              }
-            });
-          },
-          child: Padding(
-            padding: EdgeInsets.symmetric(
-              horizontal: AppSpacing.lg,
-              vertical: AppSpacing.md,
+    // Parse ingredient name to get clean name without quantities/units
+    final parseResult = _parser.parse(ingredient.name);
+    final displayName = parseResult.cleanName.isNotEmpty
+        ? parseResult.cleanName
+        : ingredient.name;
+
+    return SizedBox(
+      height: MediaQuery.of(context).size.height * 0.7,
+      child: SingleChildScrollView(
+        padding: EdgeInsets.all(AppSpacing.lg),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Ingredient name heading (parsed to remove quantities/units)
+            Text(
+              displayName,
+              style: AppTypography.h4.copyWith(
+                color: colors.textPrimary,
+              ),
             ),
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                // Ingredient information
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        ingredient.name,
-                        style: AppTypography.body.copyWith(
-                          fontWeight: FontWeight.w600,
-                          color: AppColors.of(context).textPrimary,
-                        ),
-                      ),
 
-                      if (match.hasMatch) ...[
-                        SizedBox(height: 4),
-                        _buildMatchedText(context, match),
-                      ],
-                    ],
-                  ),
-                ),
+            SizedBox(height: AppSpacing.sm),
 
-                SizedBox(width: AppSpacing.md),
+            // Match status text - only show if has direct pantry match
+            if (match.hasPantryMatch) _buildMatchedText(context, match),
 
-                // Stock status chip with fixed-width container
-                SizedBox(
-                  width: 80, // Fixed width to keep chips aligned
-                  child: Align(
-                    alignment: Alignment.centerRight,
-                    child: IngredientStockChip(match: match),
-                  ),
-                ),
+            // Linked recipe section - show if ingredient has linked recipe
+            if (hasLinkedRecipe) ...[
+              if (match.hasPantryMatch) SizedBox(height: AppSpacing.md),
+              _buildLinkedRecipeSection(context, ingredient, match),
+            ],
 
-                SizedBox(width: AppSpacing.md),
+            SizedBox(height: AppSpacing.xl),
 
-                // Rotating arrow
-                AnimatedRotation(
-                  turns: isExpanded ? 0.5 : 0.0, // 0.5 turns = 180 degrees
-                  duration: const Duration(milliseconds: 250),
-                  curve: Curves.easeInOutCubic,
-                  child: Icon(
-                    Icons.keyboard_arrow_down,
-                    color: AppColors.of(context).textPrimary,
-                  ),
-                ),
-              ],
-            ),
-          ),
+            // Terms editor section
+            _buildTermsEditor(context, ingredient, terms, hasLinkedRecipe: hasLinkedRecipe),
+          ],
         ),
-
-        // Expandable content
-        AnimatedSize(
-          duration: const Duration(milliseconds: 250),
-          curve: Curves.easeInOutCubic,
-          child: isExpanded
-              ? Padding(
-                  padding: EdgeInsets.only(
-                    left: AppSpacing.lg,
-                    right: AppSpacing.lg,
-                    bottom: AppSpacing.md,
-                  ),
-                  child: _buildTermsEditor(context, ingredient, terms),
-                )
-              : const SizedBox.shrink(),
-        ),
-      ],
+      ),
     );
   }
 
   Widget _buildMatchedText(BuildContext context, IngredientPantryMatch match) {
     final colors = AppColors.of(context);
 
-    if (match.hasPantryMatch) {
-      // "Matches with pantry item {name}"
-      return RichText(
-        text: TextSpan(
-          style: TextStyle(
-            fontSize: 14,
-            color: colors.textTertiary,
-          ),
-          children: [
-            const TextSpan(text: 'Matches with pantry item '),
-            TextSpan(
-              text: match.pantryItem!.name,
-              style: const TextStyle(fontWeight: FontWeight.bold),
-            ),
-          ],
-        ),
-      );
-    } else {
-      // Recipe match
-      return Text(
-        'Can be made via sub-recipe',
+    // "Matches with pantry item {name}"
+    return RichText(
+      text: TextSpan(
         style: TextStyle(
           fontSize: 14,
           color: colors.textTertiary,
         ),
-      );
-    }
+        children: [
+          const TextSpan(text: 'Matches with pantry item '),
+          TextSpan(
+            text: match.pantryItem!.name,
+            style: const TextStyle(fontWeight: FontWeight.bold),
+          ),
+        ],
+      ),
+    );
   }
 
-  Widget _buildTermsEditor(BuildContext context, Ingredient ingredient, List<IngredientTerm> terms) {
+  Widget _buildLinkedRecipeSection(BuildContext context, Ingredient ingredient, IngredientPantryMatch match) {
+    final colors = AppColors.of(context);
+    final linkedRecipeId = ingredient.recipeId!;
+
+    // Watch the linked recipe to get its name
+    final linkedRecipeAsync = ref.watch(recipeByIdStreamProvider(linkedRecipeId));
+
+    return linkedRecipeAsync.when(
+      loading: () => const SizedBox.shrink(),
+      error: (error, stack) => const SizedBox.shrink(),
+      data: (linkedRecipe) {
+        if (linkedRecipe == null) {
+          return const SizedBox.shrink();
+        }
+
+        // Parse the linked recipe title
+        final parseResult = _parser.parse(linkedRecipe.title);
+        final recipeName = parseResult.cleanName.isNotEmpty
+            ? parseResult.cleanName
+            : linkedRecipe.title;
+
+        return Container(
+          padding: EdgeInsets.all(AppSpacing.md),
+          decoration: BoxDecoration(
+            color: match.hasRecipeMatch
+                ? colors.successBackground
+                : colors.warningBackground,
+            borderRadius: BorderRadius.circular(8),
+            border: Border.all(
+              color: match.hasRecipeMatch
+                  ? colors.success.withValues(alpha: 0.3)
+                  : colors.warning.withValues(alpha: 0.3),
+            ),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  Icon(
+                    match.hasRecipeMatch ? Icons.check_circle : Icons.info,
+                    size: 16,
+                    color: match.hasRecipeMatch ? colors.success : colors.warning,
+                  ),
+                  SizedBox(width: AppSpacing.sm),
+                  Expanded(
+                    child: Text(
+                      match.hasRecipeMatch
+                          ? 'Can be made from recipe'
+                          : 'Linked to recipe (ingredients not available)',
+                      style: TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w600,
+                        color: match.hasRecipeMatch ? colors.success : colors.warning,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              SizedBox(height: AppSpacing.sm),
+              // Link to recipe with dotted underline (matching recipe_ingredients_view.dart style)
+              GestureDetector(
+                onTap: () => _navigateToLinkedRecipe(context, linkedRecipeId),
+                child: RichText(
+                  text: TextSpan(
+                    children: [
+                      TextSpan(
+                        text: recipeName,
+                        style: TextStyle(
+                          fontSize: 14,
+                          color: colors.contentPrimary,
+                          decoration: TextDecoration.underline,
+                          decorationStyle: TextDecorationStyle.dotted,
+                          decorationColor: colors.contentPrimary,
+                        ),
+                      ),
+                      const TextSpan(text: ' '),
+                      WidgetSpan(
+                        child: Icon(
+                          Icons.open_in_new,
+                          size: 14,
+                          color: colors.contentSecondary,
+                        ),
+                        alignment: PlaceholderAlignment.middle,
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  void _navigateToLinkedRecipe(BuildContext context, String recipeId) {
+    // Use go_router to navigate
+    context.push('/recipe/$recipeId', extra: {
+      'previousPageTitle': 'Recipe'
+    });
+  }
+
+  Widget _buildTermsEditor(BuildContext context, Ingredient ingredient, List<IngredientTerm> terms, {bool hasLinkedRecipe = false}) {
     final colors = AppColors.of(context);
 
     return Column(
@@ -316,6 +460,19 @@ class _IngredientMatchesBottomSheetContentState extends ConsumerState<Ingredient
         ),
 
         SizedBox(height: AppSpacing.sm),
+
+        // Explainer text for linked recipe ingredients
+        if (hasLinkedRecipe) ...[
+          Text(
+            'This ingredient is linked to a recipe. However, if any of the terms below match items in your pantry, those will be used instead of making the recipe.',
+            style: TextStyle(
+              fontSize: 13,
+              color: colors.textTertiary,
+              fontStyle: FontStyle.italic,
+            ),
+          ),
+          SizedBox(height: AppSpacing.md),
+        ],
 
         // No terms placeholder
         if (terms.isEmpty)
@@ -354,10 +511,9 @@ class _IngredientMatchesBottomSheetContentState extends ConsumerState<Ingredient
               }
 
               // Update terms list in our map
-              _ingredientTermsMap[ingredient.id] = updatedTerms;
-
-              // Ensure this ingredient's accordion stays expanded
-              _expandedIngredientIds.add(ingredient.id);
+              setState(() {
+                _ingredientTermsMap[ingredient.id] = updatedTerms;
+              });
 
               // Save changes immediately
               await _saveIngredientChanges(ingredient.id);
@@ -431,10 +587,9 @@ class _IngredientMatchesBottomSheetContentState extends ConsumerState<Ingredient
                   terms.removeWhere((t) => t.value == term.value && t.source == term.source);
 
                   // Update the maps
-                  _ingredientTermsMap[ingredientId] = terms;
-
-                  // Ensure the accordion stays expanded
-                  _expandedIngredientIds.add(ingredientId);
+                  setState(() {
+                    _ingredientTermsMap[ingredientId] = terms;
+                  });
 
                   // Save changes immediately
                   await _saveIngredientChanges(ingredientId);
@@ -493,7 +648,6 @@ class _IngredientMatchesBottomSheetContentState extends ConsumerState<Ingredient
               Platform.isIOS || Platform.isMacOS
                   ? CupertinoButton(
                       padding: EdgeInsets.zero,
-                      minSize: 24,
                       onPressed: () {
                         showCupertinoModalPopup(
                           context: context,
@@ -513,9 +667,6 @@ class _IngredientMatchesBottomSheetContentState extends ConsumerState<Ingredient
                                   setState(() {
                                     _ingredientTermsMap[ingredientId] = terms;
                                   });
-
-                                  // Ensure the accordion stays expanded
-                                  _expandedIngredientIds.add(ingredientId);
 
                                   // Save changes immediately
                                   await _saveIngredientChanges(ingredientId);
@@ -556,9 +707,6 @@ class _IngredientMatchesBottomSheetContentState extends ConsumerState<Ingredient
                           setState(() {
                             _ingredientTermsMap[ingredientId] = terms;
                           });
-
-                          // Ensure the accordion stays expanded
-                          _expandedIngredientIds.add(ingredientId);
 
                           // Save changes immediately
                           await _saveIngredientChanges(ingredientId);
@@ -643,38 +791,26 @@ class _IngredientMatchesBottomSheetContentState extends ConsumerState<Ingredient
         ),
         items: [
           PopupMenuItem(
-            child: ListTile(
-              leading: const Icon(Icons.edit),
-              title: const Text('Enter Custom Term'),
-              subtitle: const Text('Enter a new term for matching'),
+            child: const ListTile(
+              leading: Icon(Icons.edit),
+              title: Text('Enter Custom Term'),
+              subtitle: Text('Enter a new term for matching'),
             ),
-            onTap: () {
-              // Add delay to avoid "Looking up a deactivated widget's ancestor" errors
-              Future.delayed(Duration.zero, () {
-                _showAddTermDialog(ingredientId, ingredient);
-              });
-            },
+            onTap: () => _showAddTermDialog(ingredientId, ingredient),
           ),
           PopupMenuItem(
-            child: ListTile(
-              leading: const Icon(Icons.kitchen),
-              title: const Text('Select from Pantry'),
-              subtitle: const Text('Use an existing pantry item name'),
+            child: const ListTile(
+              leading: Icon(Icons.kitchen),
+              title: Text('Select from Pantry'),
+              subtitle: Text('Use an existing pantry item name'),
             ),
-            onTap: () {
-              // Add delay to avoid "Looking up a deactivated widget's ancestor" errors
-              Future.delayed(Duration.zero, () {
-                if (context.mounted) {
-                  showPantryItemSelectorBottomSheet(
-                    context: context,
-                    recipeId: widget.matches.recipeId,
-                    onItemSelected: (itemName) async {
-                      await _addTermFromPantryItem(ingredientId, ingredient, itemName);
-                    },
-                  );
-                }
-              });
-            },
+            onTap: () => showPantryItemSelectorBottomSheet(
+              context: context,
+              recipeId: widget.matches.recipeId,
+              onItemSelected: (itemName) async {
+                await _addTermFromPantryItem(ingredientId, ingredient, itemName);
+              },
+            ),
           ),
         ],
       );
@@ -688,6 +824,8 @@ class _IngredientMatchesBottomSheetContentState extends ConsumerState<Ingredient
     // Handle saving the term
     Future<void> saveTerm() async {
       final value = controller.text.trim();
+      final navigator = Navigator.of(context);
+
       if (value.isNotEmpty) {
         // Get existing terms from our working copy
         final terms = List<IngredientTerm>.from(_ingredientTermsMap[ingredientId] ?? []);
@@ -700,17 +838,14 @@ class _IngredientMatchesBottomSheetContentState extends ConsumerState<Ingredient
         ));
 
         // Update the maps
-        _ingredientTermsMap[ingredientId] = terms;
-
-        // Ensure the accordion stays expanded
-        _expandedIngredientIds.add(ingredientId);
+        setState(() {
+          _ingredientTermsMap[ingredientId] = terms;
+        });
 
         // Save changes immediately
         await _saveIngredientChanges(ingredientId);
       }
-      if (context.mounted) {
-        Navigator.of(context).pop();
-      }
+      navigator.pop();
     }
 
     if (Platform.isIOS) {
@@ -786,10 +921,9 @@ class _IngredientMatchesBottomSheetContentState extends ConsumerState<Ingredient
     ));
 
     // Update the maps
-    _ingredientTermsMap[ingredientId] = terms;
-
-    // Ensure the accordion stays expanded
-    _expandedIngredientIds.add(ingredientId);
+    setState(() {
+      _ingredientTermsMap[ingredientId] = terms;
+    });
 
     // Save changes immediately
     await _saveIngredientChanges(ingredientId);

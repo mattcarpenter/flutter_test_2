@@ -32,6 +32,7 @@ class AppColorSwatches {
     200: Color(0xFFFBFBFB),
     250: Color(0xFFF2F2F2),
     300: Color(0xFFE8E8E8),
+    350: Color(0xFFDADADA),
     400: Color(0xFFB6B6B6),
     500: Color(0xFF7A7A7A),
     600: Color(0xFF646464),
