@@ -21,7 +21,7 @@ class QuantityControl extends StatelessWidget {
 
     return Container(
       decoration: BoxDecoration(
-        color: CupertinoColors.systemGrey6,
+        color: CupertinoColors.transparent,
         borderRadius: BorderRadius.circular(20),
         border: Border.all(
           color: CupertinoColors.systemGrey4,
