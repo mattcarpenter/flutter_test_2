@@ -17,21 +17,20 @@ class ShoppingListItemTile extends StatelessWidget {
   String get _quantityText {
     final amount = item.amount;
     final unit = item.unit;
-    
+
     if (amount == null) return '';
-    
+
     String amountStr;
     if (amount == amount.floor()) {
       amountStr = amount.floor().toString();
     } else {
       amountStr = amount.toString();
     }
-    
+
     if (unit != null && unit.isNotEmpty) {
-      return '$amountStr $unit';
+      return 'Quantity: $amountStr $unit';
     } else {
-      // Just show the quantity number
-      return amountStr;
+      return 'Quantity: $amountStr';
     }
   }
 
