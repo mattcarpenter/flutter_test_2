@@ -200,7 +200,7 @@ class _AppButtonState extends State<AppButton> {
       case AppButtonSize.medium:
         return 40;
       case AppButtonSize.large:
-        return 52;
+        return 56;
     }
   }
 

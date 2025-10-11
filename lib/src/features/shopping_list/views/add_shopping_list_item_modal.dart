@@ -81,14 +81,17 @@ class AddShoppingListItemForm extends ConsumerStatefulWidget {
 
 class _AddShoppingListItemFormState extends ConsumerState<AddShoppingListItemForm> {
   late final TextEditingController _nameController;
+  late final FocusNode _focusNode;
   int _quantity = 1;
   bool _isLoading = false;
   bool _hasInput = false;
+  Map<String, dynamic>? _lastAddedItem;
 
   @override
   void initState() {
     super.initState();
     _nameController = TextEditingController();
+    _focusNode = FocusNode();
     _hasInput = _nameController.text.trim().isNotEmpty;
     _nameController.addListener(_updateHasInput);
   }
@@ -97,6 +100,7 @@ class _AddShoppingListItemFormState extends ConsumerState<AddShoppingListItemFor
   void dispose() {
     _nameController.removeListener(_updateHasInput);
     _nameController.dispose();
+    _focusNode.dispose();
     super.dispose();
   }
 
@@ -119,31 +123,41 @@ class _AddShoppingListItemFormState extends ConsumerState<AddShoppingListItemFor
 
     try {
       final userId = Supabase.instance.client.auth.currentUser?.id;
+      final currentQuantity = _quantity;
 
-      await ref.read(shoppingListItemsProvider(widget.listId).notifier).addItem(
+      final itemId = await ref.read(shoppingListItemsProvider(widget.listId).notifier).addItem(
         name: name,
         userId: userId,
-        amount: _quantity.toDouble(),
+        amount: currentQuantity.toDouble(),
         unit: null, // No unit as requested
       );
 
-      // Clear form
-      _nameController.clear();
+      // Store the last added item and reset form state
       setState(() {
-        _quantity = 1; // Reset quantity to default
+        _lastAddedItem = {
+          'id': itemId,
+          'name': name,
+          'amount': currentQuantity,
+        };
         _isLoading = false;
+        _quantity = 1; // Reset quantity to default
       });
 
-      // Close modal
-      if (mounted) {
-        Navigator.of(context).pop();
-      }
+      // Clear form
+      _nameController.clear();
+
+      // Request focus after the frame is complete to ensure widget is rebuilt
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) {
+          _focusNode.requestFocus();
+        }
+      });
     } catch (e) {
       setState(() {
         _isLoading = false;
       });
       debugPrint('Error adding shopping list item: $e');
-      
+
       if (mounted) {
         showCupertinoDialog(
           context: context,
@@ -162,20 +176,47 @@ class _AddShoppingListItemFormState extends ConsumerState<AddShoppingListItemFor
     }
   }
 
+  Future<void> _undoLastItem() async {
+    if (_lastAddedItem == null) return;
+
+    try {
+      await ref.read(shoppingListItemsProvider(widget.listId).notifier).deleteItem(_lastAddedItem!['id']);
+      setState(() {
+        _lastAddedItem = null;
+      });
+    } catch (e) {
+      debugPrint('Error deleting last item: $e');
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Column(
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        // Item name field
-        AppTextFieldSimple(
-          controller: _nameController,
-          placeholder: 'Item name',
-          autofocus: true,
-          enabled: !_isLoading,
-          onSubmitted: (_) => _addItem(),
-          textInputAction: TextInputAction.done,
+        // Item name field and Add button in same row
+        Row(
+          children: [
+            Expanded(
+              child: AppTextFieldSimple(
+                controller: _nameController,
+                focusNode: _focusNode,
+                placeholder: 'Item name',
+                autofocus: true,
+                enabled: !_isLoading,
+                onSubmitted: (_) => _addItem(),
+                textInputAction: TextInputAction.done,
+              ),
+            ),
+            SizedBox(width: AppSpacing.md),
+            AppButtonVariants.primaryFilled(
+              text: 'Add',
+              size: AppButtonSize.large,
+              shape: AppButtonShape.square,
+              onPressed: (_isLoading || !_hasInput) ? null : _addItem,
+            ),
+          ],
         ),
 
         SizedBox(height: AppSpacing.lg),
@@ -201,17 +242,48 @@ class _AddShoppingListItemFormState extends ConsumerState<AddShoppingListItemFor
           ],
         ),
 
-        SizedBox(height: AppSpacing.xl),
-
-        // Add button
-        AppButtonVariants.primaryFilled(
-          text: 'Add Item',
-          size: AppButtonSize.large,
-          shape: AppButtonShape.square,
-          onPressed: (_isLoading || !_hasInput) ? null : _addItem,
-          loading: _isLoading,
-          fullWidth: true,
-        ),
+        // Previously added section
+        if (_lastAddedItem != null) ...[
+          SizedBox(height: AppSpacing.xl),
+          Text(
+            'Previously Added',
+            style: AppTypography.h5.copyWith(
+              color: AppColors.of(context).textPrimary,
+            ),
+          ),
+          SizedBox(height: AppSpacing.sm),
+          Container(
+            padding: EdgeInsets.all(AppSpacing.md),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: Row(
+              children: [
+                Expanded(
+                  child: Text(
+                    '${_lastAddedItem!['name']} - Quantity: ${_lastAddedItem!['amount']}',
+                    style: AppTypography.body.copyWith(
+                      color: AppColors.of(context).textPrimary,
+                    ),
+                  ),
+                ),
+                CupertinoButton(
+                  onPressed: _undoLastItem,
+                  padding: EdgeInsets.all(4),
+                  minSize: 0,
+                  child: Text(
+                    'Undo',
+                    style: TextStyle(
+                      color: AppColors.of(context).error,
+                      fontSize: 14,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
       ],
     );
   }
