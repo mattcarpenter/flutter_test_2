@@ -293,9 +293,10 @@ class _IngredientDetailPageState extends ConsumerState<IngredientDetailPage> {
             // Match status text - only show if has direct pantry match
             if (match.hasPantryMatch) _buildMatchedText(context, match),
 
-            // Linked recipe section - show if ingredient has linked recipe
-            if (hasLinkedRecipe) ...[
-              SizedBox(height: match.hasPantryMatch ? AppSpacing.md : AppSpacing.lg),
+            // Linked recipe section - only show if ingredient has linked recipe AND no direct pantry match
+            // (direct pantry match takes precedence, so linked recipe info becomes irrelevant)
+            if (hasLinkedRecipe && !match.hasPantryMatch) ...[
+              SizedBox(height: AppSpacing.lg),
               _buildLinkedRecipeSection(context, ingredient, match),
             ],
 
