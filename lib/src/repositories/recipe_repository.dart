@@ -856,17 +856,22 @@ class RecipeRepository {
     ${allIngredientIds.length > 1 ? 'UNION ALL ' + allIngredientIds.skip(1).map((_) => 'SELECT ?').join(' UNION ALL ') : ''}
   ) i
   LEFT JOIN (
-    SELECT 
-      mpi.ingredient_id,
-      mpi.pantry_item_id,
-      pi.*
-    FROM matching_pantry_items mpi
-    INNER JOIN pantry_items pi ON mpi.pantry_item_id = pi.id
-    WHERE (mpi.ingredient_id, mpi.term_priority) IN (
-        SELECT ingredient_id, MIN(term_priority)
-        FROM matching_pantry_items
-        GROUP BY ingredient_id
-      )
+    SELECT * FROM (
+      SELECT
+        mpi.ingredient_id,
+        mpi.pantry_item_id,
+        pi.*,
+        ROW_NUMBER() OVER (
+          PARTITION BY mpi.ingredient_id
+          ORDER BY
+            mpi.term_priority ASC,      -- prefer higher priority terms (lower sort value)
+            pi.stock_status DESC,        -- prefer better stock: inStock(2) > lowStock(1) > outOfStock(0)
+            mpi.pantry_item_id ASC       -- deterministic tiebreaker
+        ) as rn
+      FROM matching_pantry_items mpi
+      INNER JOIN pantry_items pi ON mpi.pantry_item_id = pi.id
+    )
+    WHERE rn = 1
   ) p ON i.ingredient_id = p.ingredient_id
 ''',
           variables: [
