@@ -11,7 +11,7 @@ import '../widgets/shopping_list_dropdown.dart';
 import '../widgets/shopping_list_items_list.dart';
 import '../widgets/shopping_list_selection_fab.dart';
 import 'add_shopping_list_item_modal.dart';
-import 'manage_shopping_lists_modal.dart';
+import 'shopping_list_selection_modal.dart';
 
 class ShoppingListTab extends ConsumerWidget {
   const ShoppingListTab({super.key});
@@ -40,7 +40,7 @@ class ShoppingListTab extends ConsumerWidget {
                   ref.read(currentShoppingListProvider.notifier).setCurrentList(listId);
                 },
                 onManageLists: () {
-                  showManageShoppingListsModal(context);
+                  showShoppingListSelectionModal(context, ref);
                 },
               ),
             ),
@@ -84,7 +84,7 @@ class ShoppingListTab extends ConsumerWidget {
                 title: 'Manage Lists',
                 icon: const Icon(CupertinoIcons.list_bullet),
                 onTap: () {
-                  showManageShoppingListsModal(context);
+                  showShoppingListSelectionModal(context, ref);
                 },
               ),
               AdaptiveMenuItem(
