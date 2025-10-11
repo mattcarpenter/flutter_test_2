@@ -133,6 +133,9 @@ class _UpdatePantryContentSlivers extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     return SliverList(
       delegate: SliverChildListDelegate([
+        // Spacing above title
+        SizedBox(height: AppSpacing.md),
+
         // Title
         Padding(
           padding: EdgeInsets.fromLTRB(AppSpacing.lg, 0, AppSpacing.lg, 0),
@@ -286,8 +289,9 @@ class _UpdatePantryContentSlivers extends ConsumerWidget {
               }
             }
 
-            // Bottom padding for sticky action bar
-            widgets.add(SizedBox(height: 100));
+            // Bottom padding for sticky action bar and gradient
+            // Extra padding ensures last item is fully visible above the gradient
+            widgets.add(SizedBox(height: 150));
 
             return widgets;
           },
