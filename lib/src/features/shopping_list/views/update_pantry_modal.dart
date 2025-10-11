@@ -17,6 +17,7 @@ import '../widgets/pantry_update_item_tile.dart';
 // State management for checked items
 final _updatePantryCheckedItemsProvider = StateProvider<Map<String, bool>>((ref) => {});
 final _updatePantryResultProvider = StateProvider<PantryUpdateResult?>((ref) => null);
+final _isPerformingUpdateProvider = StateProvider<bool>((ref) => false);
 
 void showUpdatePantryModal(
   BuildContext context,
@@ -26,6 +27,7 @@ void showUpdatePantryModal(
   final container = ProviderScope.containerOf(context);
   container.invalidate(_updatePantryCheckedItemsProvider);
   container.invalidate(_updatePantryResultProvider);
+  container.invalidate(_isPerformingUpdateProvider);
 
   WoltModalSheet.show(
     useRootNavigator: true,
@@ -66,6 +68,7 @@ class UpdatePantryModalPage {
           // Use Consumer to reactively watch providers
           Consumer(
             builder: (context, ref, child) {
+              final isPerformingUpdate = ref.watch(_isPerformingUpdateProvider);
               final pantryItemsAsync = ref.watch(pantryItemsProvider);
               final checkedItems = ref.watch(_updatePantryCheckedItemsProvider);
 
@@ -73,6 +76,7 @@ class UpdatePantryModalPage {
                 pantryItemsAsync: pantryItemsAsync,
                 checkedItems: checkedItems,
                 boughtItems: boughtItems,
+                isPerformingUpdate: isPerformingUpdate,
               );
             },
           ),
@@ -118,19 +122,29 @@ class UpdatePantryModalPage {
   }
 }
 
-class _UpdatePantryContentSlivers extends ConsumerWidget {
+class _UpdatePantryContentSlivers extends ConsumerStatefulWidget {
   final AsyncValue<List<PantryItemEntry>> pantryItemsAsync;
   final Map<String, bool> checkedItems;
   final List<ShoppingListItemEntry> boughtItems;
+  final bool isPerformingUpdate;
 
   const _UpdatePantryContentSlivers({
     required this.pantryItemsAsync,
     required this.checkedItems,
     required this.boughtItems,
+    required this.isPerformingUpdate,
   });
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<_UpdatePantryContentSlivers> createState() => _UpdatePantryContentSliversState();
+}
+
+class _UpdatePantryContentSliversState extends ConsumerState<_UpdatePantryContentSlivers> {
+  // Cache the last valid content to prevent rebuilding during close
+  List<Widget>? _cachedContent;
+
+  @override
+  Widget build(BuildContext context) {
     return SliverList(
       delegate: SliverChildListDelegate([
         // Spacing above title
@@ -148,8 +162,12 @@ class _UpdatePantryContentSlivers extends ConsumerWidget {
         ),
         SizedBox(height: AppSpacing.lg),
 
-        // Content based on async state
-        ...pantryItemsAsync.when(
+        // If performing update, show cached content to prevent "Nothing to update" flash
+        if (widget.isPerformingUpdate && _cachedContent != null)
+          ..._cachedContent!
+        else
+          // Content based on async state
+          ...widget.pantryItemsAsync.when(
           loading: () => [
             SizedBox(
               height: 300,
@@ -169,7 +187,7 @@ class _UpdatePantryContentSlivers extends ConsumerWidget {
           data: (pantryItems) {
             // Analyze updates
             final updateResult = PantryUpdateService.analyzeUpdates(
-              shoppingListItems: boughtItems,
+              shoppingListItems: widget.boughtItems,
               pantryItems: pantryItems,
             );
 
@@ -241,9 +259,9 @@ class _UpdatePantryContentSlivers extends ConsumerWidget {
                     padding: EdgeInsets.symmetric(horizontal: AppSpacing.lg),
                     child: PantryUpdateItemTile(
                       item: item,
-                      isChecked: checkedItems[itemId] ?? true,
+                      isChecked: widget.checkedItems[itemId] ?? true,
                       onCheckedChanged: (value) {
-                        final newCheckedItems = {...checkedItems};
+                        final newCheckedItems = {...widget.checkedItems};
                         newCheckedItems[itemId] = value;
                         ref.read(_updatePantryCheckedItemsProvider.notifier).state = newCheckedItems;
                       },
@@ -277,9 +295,9 @@ class _UpdatePantryContentSlivers extends ConsumerWidget {
                     padding: EdgeInsets.symmetric(horizontal: AppSpacing.lg),
                     child: PantryUpdateItemTile(
                       item: item,
-                      isChecked: checkedItems[itemId] ?? true,
+                      isChecked: widget.checkedItems[itemId] ?? true,
                       onCheckedChanged: (value) {
-                        final newCheckedItems = {...checkedItems};
+                        final newCheckedItems = {...widget.checkedItems};
                         newCheckedItems[itemId] = value;
                         ref.read(_updatePantryCheckedItemsProvider.notifier).state = newCheckedItems;
                       },
@@ -292,6 +310,9 @@ class _UpdatePantryContentSlivers extends ConsumerWidget {
             // Bottom padding for sticky action bar and gradient
             // Extra padding ensures last item is fully visible above the gradient
             widgets.add(SizedBox(height: 130));
+
+            // Cache this content to prevent rebuilding during close
+            _cachedContent = widgets;
 
             return widgets;
           },
@@ -352,20 +373,18 @@ class UpdatePantryButton extends ConsumerWidget {
     PantryUpdateResult updateResult,
     Map<String, bool> checkedItems,
   ) async {
+    // Set flag to prevent content rebuilding during close
+    ref.read(_isPerformingUpdateProvider.notifier).state = true;
+
+    // Close the modal immediately
+    if (context.mounted) {
+      Navigator.of(context).pop();
+    }
+
+    // Perform updates in the background
     final pantryNotifier = ref.read(pantryItemsProvider.notifier);
     final currentListId = ref.read(currentShoppingListProvider);
     final shoppingListNotifier = ref.read(shoppingListItemsProvider(currentListId).notifier);
-
-    // Show loading indicator
-    showCupertinoDialog(
-      context: context,
-      barrierDismissible: false,
-      builder: (context) => const Center(
-        child: CupertinoActivityIndicator(
-          radius: 16,
-        ),
-      ),
-    );
 
     try {
       // Process items to add
@@ -412,39 +431,9 @@ class UpdatePantryButton extends ConsumerWidget {
       if (processedItemIds.isNotEmpty) {
         await shoppingListNotifier.deleteMultipleItems(processedItemIds);
       }
-
-      // Close loading dialog
-      if (context.mounted) {
-        Navigator.of(context).pop();
-      }
-
-      // Close the modal
-      if (context.mounted) {
-        Navigator.of(context).pop();
-      }
     } catch (e) {
       debugPrint('Error updating pantry: $e');
-
-      // Close loading dialog
-      if (context.mounted) {
-        Navigator.of(context).pop();
-      }
-
-      if (context.mounted) {
-        showCupertinoDialog(
-          context: context,
-          builder: (context) => CupertinoAlertDialog(
-            title: const Text('Error'),
-            content: Text('Failed to update pantry: $e'),
-            actions: [
-              CupertinoDialogAction(
-                child: const Text('OK'),
-                onPressed: () => Navigator.of(context).pop(),
-              ),
-            ],
-          ),
-        );
-      }
+      // Errors are logged but not shown to user since modal is already closed
     }
   }
 }
