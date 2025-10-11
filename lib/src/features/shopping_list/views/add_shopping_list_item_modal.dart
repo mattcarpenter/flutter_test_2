@@ -82,6 +82,7 @@ class AddShoppingListItemForm extends ConsumerStatefulWidget {
 class _AddShoppingListItemFormState extends ConsumerState<AddShoppingListItemForm> {
   late final TextEditingController _nameController;
   late final FocusNode _focusNode;
+  final _textFieldKey = GlobalKey();
   int _quantity = 1;
   bool _isLoading = false;
   bool _hasInput = false;
@@ -111,6 +112,15 @@ class _AddShoppingListItemFormState extends ConsumerState<AddShoppingListItemFor
         _hasInput = hasInput;
       });
     }
+  }
+
+  void _handleSubmitFromKeyboard() {
+    if (_isLoading) return;
+    // Make sure we keep focus locked on the field
+    if (!_focusNode.hasFocus) {
+      _focusNode.requestFocus();
+    }
+    _addItem();
   }
 
   Future<void> _addItem() async {
@@ -200,13 +210,14 @@ class _AddShoppingListItemFormState extends ConsumerState<AddShoppingListItemFor
           children: [
             Expanded(
               child: AppTextFieldSimple(
+                key: _textFieldKey,
                 controller: _nameController,
                 focusNode: _focusNode,
                 placeholder: 'Item name',
                 autofocus: true,
-                enabled: !_isLoading,
-                onSubmitted: (_) => _addItem(),
-                textInputAction: TextInputAction.done,
+                textInputAction: TextInputAction.send,
+                onEditingComplete: () {}, // Prevent default focus traversal
+                onSubmitted: (_) => _handleSubmitFromKeyboard(),
               ),
             ),
             SizedBox(width: AppSpacing.md),
@@ -214,7 +225,13 @@ class _AddShoppingListItemFormState extends ConsumerState<AddShoppingListItemFor
               text: 'Add',
               size: AppButtonSize.large,
               shape: AppButtonShape.square,
-              onPressed: (_isLoading || !_hasInput) ? null : _addItem,
+              onPressed: (_isLoading || !_hasInput) ? null : () {
+                // Re-assert focus so keyboard stays up even after button tap
+                if (!_focusNode.hasFocus) {
+                  _focusNode.requestFocus();
+                }
+                _addItem();
+              },
             ),
           ],
         ),
