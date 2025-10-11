@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../database/database.dart';
 import '../../../providers/shopping_list_provider.dart';
+import '../../../theme/colors.dart';
 import '../views/update_pantry_modal.dart';
 
 class ShoppingListSelectionFAB extends ConsumerWidget {
@@ -30,7 +31,7 @@ class ShoppingListSelectionFAB extends ConsumerWidget {
             // - Delete
             _showBulkActionSheet(context, ref, boughtItems);
           },
-          backgroundColor: CupertinoColors.activeBlue,
+          backgroundColor: AppColors.of(context).primary,
           foregroundColor: CupertinoColors.white,
           label: const Text('With marked…'),
           icon: const Icon(CupertinoIcons.ellipsis),
