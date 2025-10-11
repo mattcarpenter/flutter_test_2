@@ -8,7 +8,11 @@ import '../../../../database/database.dart';
 import '../../../../database/models/pantry_items.dart';
 import '../../../providers/pantry_provider.dart';
 import '../../../theme/colors.dart';
-import '../../../widgets/wolt/text/modal_sheet_title.dart';
+import '../../../theme/spacing.dart';
+import '../../../theme/typography.dart';
+import '../../../widgets/app_button.dart';
+import '../../../widgets/app_circle_button.dart';
+import '../../../widgets/app_text_field_simple.dart';
 import '../widgets/stock_status_segmented_control.dart';
 
 void showAddPantryItemModal(BuildContext context) {
@@ -30,18 +34,35 @@ class AddPantryItemModalPage {
     required BuildContext context,
   }) {
     return WoltModalSheetPage(
+      navBarHeight: 55,
       backgroundColor: AppColors.of(context).background,
-      leadingNavBarWidget: CupertinoButton(
-        padding: const EdgeInsets.symmetric(horizontal: 16.0),
-        onPressed: () {
-          Navigator.of(context).pop();
-        },
-        child: const Text('Close'),
+      surfaceTintColor: Colors.transparent,
+      hasTopBarLayer: false,
+      trailingNavBarWidget: Padding(
+        padding: EdgeInsets.only(right: AppSpacing.lg),
+        child: AppCircleButton(
+          icon: AppCircleButtonIcon.close,
+          variant: AppCircleButtonVariant.neutral,
+          onPressed: () => Navigator.of(context).pop(),
+        ),
       ),
-      pageTitle: const ModalSheetTitle('Add Pantry Items'),
-      child: const Padding(
-        padding: EdgeInsets.fromLTRB(16, 16, 16, 16),
-        child: AddPantryItemForm(),
+      child: Padding(
+        padding: EdgeInsets.fromLTRB(AppSpacing.lg, 0, AppSpacing.lg, AppSpacing.lg),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(
+              'Add Pantry Items',
+              style: AppTypography.h4.copyWith(
+                color: AppColors.of(context).textPrimary,
+              ),
+            ),
+            SizedBox(height: AppSpacing.lg),
+            const AddPantryItemForm(),
+            SizedBox(height: AppSpacing.sm),
+          ],
+        ),
       ),
     );
   }
@@ -56,19 +77,45 @@ class AddPantryItemForm extends ConsumerStatefulWidget {
 
 class _AddPantryItemFormState extends ConsumerState<AddPantryItemForm> {
   late final TextEditingController _nameController;
+  late final FocusNode _focusNode;
+  final _textFieldKey = GlobalKey();
   PantryItemEntry? _lastAddedItem;
   bool _isLoading = false;
+  bool _hasInput = false;
 
   @override
   void initState() {
     super.initState();
     _nameController = TextEditingController();
+    _focusNode = FocusNode();
+    _hasInput = _nameController.text.trim().isNotEmpty;
+    _nameController.addListener(_updateHasInput);
   }
 
   @override
   void dispose() {
+    _nameController.removeListener(_updateHasInput);
     _nameController.dispose();
+    _focusNode.dispose();
     super.dispose();
+  }
+
+  void _updateHasInput() {
+    final hasInput = _nameController.text.trim().isNotEmpty;
+    if (hasInput != _hasInput) {
+      setState(() {
+        _hasInput = hasInput;
+      });
+    }
+  }
+
+  void _handleSubmitFromKeyboard() {
+    if (_isLoading) return;
+    // Make sure we keep focus locked on the field
+    if (!_focusNode.hasFocus) {
+      _focusNode.requestFocus();
+    }
+    _addItem();
   }
 
   Future<void> _addItem() async {
@@ -81,7 +128,7 @@ class _AddPantryItemFormState extends ConsumerState<AddPantryItemForm> {
 
     try {
       final userId = Supabase.instance.client.auth.currentUser?.id;
-      
+
       final itemId = await ref.read(pantryNotifierProvider.notifier).addItem(
         name: name,
         stockStatus: StockStatus.inStock,
@@ -96,13 +143,22 @@ class _AddPantryItemFormState extends ConsumerState<AddPantryItemForm> {
         loading: () => null,
         error: (_, __) => null,
       );
-      
+
+      // Store the last added item and reset form state
       setState(() {
         _lastAddedItem = newItem;
         _isLoading = false;
       });
 
+      // Clear form
       _nameController.clear();
+
+      // Request focus after the frame is complete to ensure widget is rebuilt
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) {
+          _focusNode.requestFocus();
+        }
+      });
     } catch (e) {
       setState(() {
         _isLoading = false;
@@ -151,50 +207,49 @@ class _AddPantryItemFormState extends ConsumerState<AddPantryItemForm> {
         Row(
           children: [
             Expanded(
-              child: CupertinoTextField(
+              child: AppTextFieldSimple(
+                key: _textFieldKey,
                 controller: _nameController,
-                placeholder: 'Enter item name',
-                padding: const EdgeInsets.all(12),
-                decoration: BoxDecoration(
-                  border: Border.all(color: Colors.grey.shade400),
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                keyboardType: TextInputType.text,
+                focusNode: _focusNode,
+                placeholder: 'Item name',
+                autofocus: true,
+                textInputAction: TextInputAction.send,
+                onEditingComplete: () {}, // Prevent default focus traversal
+                onSubmitted: (_) => _handleSubmitFromKeyboard(),
                 textCapitalization: TextCapitalization.words,
-                onSubmitted: (_) => _addItem(),
-                enabled: !_isLoading,
               ),
             ),
-            const SizedBox(width: 12),
-            CupertinoButton(
-              onPressed: _isLoading ? null : _addItem,
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-              color: CupertinoColors.activeBlue,
-              borderRadius: BorderRadius.circular(8),
-              child: _isLoading 
-                  ? const CupertinoActivityIndicator(color: Colors.white)
-                  : const Text('Add', style: TextStyle(color: Colors.white)),
+            SizedBox(width: AppSpacing.md),
+            AppButtonVariants.primaryFilled(
+              text: 'Add',
+              size: AppButtonSize.large,
+              shape: AppButtonShape.square,
+              onPressed: (_isLoading || !_hasInput) ? null : () {
+                // Re-assert focus so keyboard stays up even after button tap
+                if (!_focusNode.hasFocus) {
+                  _focusNode.requestFocus();
+                }
+                _addItem();
+              },
             ),
           ],
         ),
 
-        // Recently added item section
+        // Previously added item section
         if (_lastAddedItem != null) ...[
-          const SizedBox(height: 24),
-          const Text(
-            'Recently Added',
-            style: TextStyle(
-              fontSize: 16,
-              fontWeight: FontWeight.w600,
+          SizedBox(height: AppSpacing.xl),
+          Text(
+            'Previously Added',
+            style: AppTypography.h5.copyWith(
+              color: AppColors.of(context).textPrimary,
             ),
           ),
-          const SizedBox(height: 8),
+          SizedBox(height: AppSpacing.sm),
           Container(
-            padding: const EdgeInsets.all(12),
+            padding: EdgeInsets.all(AppSpacing.md),
             decoration: BoxDecoration(
-              color: Colors.grey.shade100,
+              color: Colors.white,
               borderRadius: BorderRadius.circular(8),
-              border: Border.all(color: Colors.grey.shade300),
             ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -205,46 +260,36 @@ class _AddPantryItemFormState extends ConsumerState<AddPantryItemForm> {
                     Expanded(
                       child: Text(
                         _lastAddedItem!.name,
-                        style: const TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.w500,
+                        style: AppTypography.body.copyWith(
+                          color: AppColors.of(context).textPrimary,
                         ),
                       ),
                     ),
                     CupertinoButton(
                       onPressed: _undoLastItem,
-                      padding: const EdgeInsets.all(4),
+                      padding: EdgeInsets.all(4),
                       minSize: 0,
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Icon(
-                            CupertinoIcons.delete,
-                            size: 16,
-                            color: Colors.red.shade600,
-                          ),
-                          const SizedBox(width: 4),
-                          Text(
-                            'Undo',
-                            style: TextStyle(
-                              color: Colors.red.shade600,
-                              fontSize: 14,
-                            ),
-                          ),
-                        ],
+                      child: Text(
+                        'Undo',
+                        style: TextStyle(
+                          color: AppColors.of(context).error,
+                          fontSize: 14,
+                        ),
                       ),
                     ),
                   ],
                 ),
-                const SizedBox(height: 8),
+                SizedBox(height: AppSpacing.sm),
                 // Stock status control
                 Row(
                   children: [
-                    const Text(
+                    Text(
                       'Status:',
-                      style: TextStyle(fontSize: 14),
+                      style: AppTypography.body.copyWith(
+                        color: AppColors.of(context).textPrimary,
+                      ),
                     ),
-                    const SizedBox(width: 12),
+                    SizedBox(width: AppSpacing.md),
                     StockStatusSegmentedControl(
                       value: _lastAddedItem!.stockStatus,
                       onChanged: _updateLastItemStatus,
@@ -256,12 +301,11 @@ class _AddPantryItemFormState extends ConsumerState<AddPantryItemForm> {
           ),
         ],
 
-        const SizedBox(height: 16),
-        const Text(
+        SizedBox(height: AppSpacing.lg),
+        Text(
           'Items are added with "In Stock" status by default. You can change the status above or edit items later for more details.',
-          style: TextStyle(
-            fontSize: 12,
-            color: Colors.grey,
+          style: AppTypography.caption.copyWith(
+            color: AppColors.of(context).textTertiary,
           ),
         ),
       ],
