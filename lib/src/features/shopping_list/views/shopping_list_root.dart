@@ -7,7 +7,7 @@ import '../../../providers/shopping_list_provider.dart';
 import '../../../widgets/adaptive_pull_down/adaptive_menu_item.dart';
 import '../../../widgets/adaptive_pull_down/adaptive_pull_down.dart';
 import '../../../widgets/app_circle_button.dart';
-import '../widgets/shopping_list_dropdown.dart';
+import '../../../widgets/app_button.dart';
 import '../widgets/shopping_list_items_list.dart';
 import '../widgets/shopping_list_selection_fab.dart';
 import 'add_shopping_list_item_modal.dart';
@@ -41,6 +41,10 @@ class ShoppingListTab extends ConsumerWidget {
                 },
                 onManageLists: () {
                   showShoppingListSelectionModal(context, ref);
+                },
+                ref: ref,
+                onAddItem: () {
+                  showAddShoppingListItemModal(context, currentListId);
                 },
               ),
             ),
@@ -117,27 +121,66 @@ class _ShoppingListDropdownDelegate extends SliverPersistentHeaderDelegate {
   final List<ShoppingListEntry> lists;
   final Function(String?) onListSelected;
   final VoidCallback onManageLists;
+  final WidgetRef ref;
+  final VoidCallback onAddItem;
 
   _ShoppingListDropdownDelegate({
     required this.currentListId,
     required this.lists,
     required this.onListSelected,
     required this.onManageLists,
+    required this.ref,
+    required this.onAddItem,
   });
+
+  String _getCurrentListName() {
+    if (currentListId == null) {
+      return 'My Shopping List'; // Default list name
+    }
+
+    final list = lists.where((l) => l.id == currentListId).firstOrNull;
+    return list?.name ?? 'My Shopping List';
+  }
 
   @override
   Widget build(BuildContext context, double shrinkOffset, bool overlapsContent) {
     return Material(
       elevation: overlapsContent ? 1.0 : 0.0,
-      color: Colors.white.withValues(alpha: 0.95),
+      color: Colors.transparent,
       child: Container(
         height: minExtent,
-        padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
-        child: ShoppingListDropdown(
-          currentListId: currentListId,
-          lists: lists,
-          onListSelected: onListSelected,
-          onManageLists: onManageLists,
+        padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
+        constraints: const BoxConstraints(maxWidth: 800),
+        child: Row(
+          children: [
+            // List selector button (takes all available space)
+            Expanded(
+              child: AppButton(
+                text: _getCurrentListName(),
+                leadingIcon: const Icon(Icons.keyboard_arrow_down),
+                style: AppButtonStyle.mutedOutline,
+                shape: AppButtonShape.square,
+                size: AppButtonSize.medium,
+                theme: AppButtonTheme.primary,
+                fullWidth: true,
+                contentAlignment: AppButtonContentAlignment.left,
+                onPressed: onManageLists,
+              ),
+            ),
+
+            const SizedBox(width: 12), // Spacing between buttons
+
+            // Add Item button (fixed width)
+            AppButton(
+              text: 'Add Item',
+              leadingIcon: const Icon(Icons.add),
+              style: AppButtonStyle.outline,
+              shape: AppButtonShape.square,
+              size: AppButtonSize.medium,
+              theme: AppButtonTheme.secondary,
+              onPressed: onAddItem,
+            ),
+          ],
         ),
       ),
     );
