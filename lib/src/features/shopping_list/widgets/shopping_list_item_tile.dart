@@ -35,9 +35,9 @@ class ShoppingListItemTile extends StatelessWidget {
     }
 
     if (unit != null && unit.isNotEmpty) {
-      return 'Quantity: $amountStr $unit';
+      return 'Qty. $amountStr $unit';
     } else {
-      return 'Quantity: $amountStr';
+      return 'Qty. $amountStr';
     }
   }
 
@@ -99,57 +99,74 @@ class ShoppingListItemTile extends StatelessWidget {
           border: border,
           borderRadius: borderRadius,
         ),
-        child: ListTile(
-          contentPadding: EdgeInsets.symmetric(horizontal: AppSpacing.lg, vertical: 0),
-          minVerticalPadding: 8,
-          leading: GestureDetector(
-            onTap: () => onBoughtToggle(!item.bought),
-            child: Container(
-              width: 24,
-              height: 24,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                border: Border.all(
-                  color: item.bought
-                    ? AppColors.of(context).primary
-                    : CupertinoColors.systemGrey3,
-                  width: 2,
+        child: GestureDetector(
+          onTap: () => onBoughtToggle(!item.bought),
+          behavior: HitTestBehavior.opaque,
+          child: Padding(
+            padding: EdgeInsets.symmetric(
+              horizontal: AppSpacing.lg,
+              vertical: AppSpacing.md,
+            ),
+            child: Row(
+              children: [
+                // Checkbox
+                Container(
+                  width: 24,
+                  height: 24,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    border: Border.all(
+                      color: item.bought
+                        ? AppColors.of(context).primary
+                        : CupertinoColors.systemGrey3,
+                      width: 2,
+                    ),
+                    color: item.bought
+                      ? AppColors.of(context).primary
+                      : AppColors.of(context).input,
+                  ),
+                  child: item.bought
+                    ? const Icon(
+                        CupertinoIcons.check_mark,
+                        size: 16,
+                        color: CupertinoColors.white,
+                      )
+                    : null,
                 ),
-                color: item.bought
-                  ? AppColors.of(context).primary
-                  : AppColors.of(context).input,
-              ),
-              child: item.bought
-                ? const Icon(
-                    CupertinoIcons.check_mark,
-                    size: 16,
-                    color: CupertinoColors.white,
-                  )
-                : null,
+
+                SizedBox(width: AppSpacing.md),
+
+                // Item name
+                Expanded(
+                  child: Text(
+                    item.name,
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w500,
+                      decoration: item.bought ? TextDecoration.lineThrough : null,
+                      color: item.bought
+                        ? CupertinoColors.secondaryLabel
+                        : CupertinoColors.label,
+                    ),
+                  ),
+                ),
+
+                // Quantity (right-aligned)
+                if (_quantityText.isNotEmpty) ...[
+                  SizedBox(width: AppSpacing.md),
+                  Text(
+                    _quantityText,
+                    style: TextStyle(
+                      fontSize: 14,
+                      color: item.bought
+                        ? CupertinoColors.tertiaryLabel
+                        : CupertinoColors.secondaryLabel,
+                    ),
+                  ),
+                ],
+              ],
             ),
           ),
-          title: Text(
-            item.name,
-            style: TextStyle(
-              fontSize: 16,
-              fontWeight: FontWeight.w500,
-              decoration: item.bought ? TextDecoration.lineThrough : null,
-              color: item.bought
-                ? CupertinoColors.secondaryLabel
-                : CupertinoColors.label,
-            ),
-          ),
-          subtitle: _quantityText.isNotEmpty
-            ? Text(
-                _quantityText,
-                style: TextStyle(
-                  fontSize: 14,
-                  color: item.bought
-                    ? CupertinoColors.tertiaryLabel
-                    : CupertinoColors.secondaryLabel,
-                ),
-              )
-            : null,
         ),
       ),
     );
