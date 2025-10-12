@@ -1,6 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
+import '../../../widgets/app_circle_button.dart';
 import 'meal_plan_context_menu.dart';
 
 class MealPlanDateHeader extends StatelessWidget {
@@ -69,21 +70,19 @@ class MealPlanDateHeader extends StatelessWidget {
               ],
             ),
           ),
-          
+
           // Add button
-          CupertinoButton(
-            padding: const EdgeInsets.all(8),
+          AppCircleButton(
+            icon: AppCircleButtonIcon.plus,
             onPressed: () => _showAddMenu(context, ref),
-            child: const Icon(CupertinoIcons.add_circled, size: 24),
           ),
-          
+
           const SizedBox(width: 8),
-          
+
           // More actions button
-          CupertinoButton(
-            padding: const EdgeInsets.all(8),
+          AppCircleButton(
+            icon: AppCircleButtonIcon.ellipsis,
             onPressed: () => _showMoreMenu(context, ref),
-            child: const Icon(CupertinoIcons.ellipsis_circle, size: 24),
           ),
         ],
       ),
