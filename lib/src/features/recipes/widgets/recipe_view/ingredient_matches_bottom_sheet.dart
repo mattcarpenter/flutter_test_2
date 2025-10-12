@@ -70,8 +70,6 @@ void showIngredientMatchesBottomSheet(
         WoltModalSheetPage(
           backgroundColor: AppColors.of(modalContext).background,
           surfaceTintColor: Colors.transparent,
-          hasTopBarLayer: false,
-          isTopBarLayerAlwaysVisible: false,
           leadingNavBarWidget: Padding(
             padding: EdgeInsets.only(left: AppSpacing.lg),
             child: AppCircleButton(
@@ -83,8 +81,11 @@ void showIngredientMatchesBottomSheet(
               },
             ),
           ),
-          child: IngredientDetailPage(
-            matches: matches,
+          child: Padding(
+            padding: EdgeInsets.fromLTRB(AppSpacing.lg, AppSpacing.lg, AppSpacing.lg, AppSpacing.lg),
+            child: IngredientDetailPage(
+              matches: matches,
+            ),
           ),
         ),
       ];
@@ -280,13 +281,10 @@ class _IngredientDetailPageState extends ConsumerState<IngredientDetailPage> {
         ? parseResult.cleanName
         : ingredient.name;
 
-    return SizedBox(
-      height: MediaQuery.of(context).size.height * 0.7,
-      child: SingleChildScrollView(
-        padding: EdgeInsets.all(AppSpacing.lg),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      mainAxisSize: MainAxisSize.min,
+      children: [
             // Ingredient name heading (parsed to remove quantities/units)
             Text(
               displayName,
@@ -312,9 +310,7 @@ class _IngredientDetailPageState extends ConsumerState<IngredientDetailPage> {
             // Terms editor section
             _buildTermsEditor(context, ingredient, terms, hasLinkedRecipe: hasLinkedRecipe),
           ],
-        ),
-      ),
-    );
+        );
   }
 
   Widget _buildMatchedText(BuildContext context, IngredientPantryMatch match) {
