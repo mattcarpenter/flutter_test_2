@@ -17,7 +17,6 @@ import 'package:recipe_app/src/widgets/app_button.dart';
 import 'package:recipe_app/src/widgets/app_circle_button.dart';
 import 'package:recipe_app/src/widgets/ingredient_stock_chip.dart';
 import 'package:recipe_app/src/widgets/utils/grouped_list_styling.dart';
-import 'package:recipe_app/src/widgets/wolt/button/wolt_modal_sheet_back_button.dart';
 import 'package:recipe_app/src/services/ingredient_parser_service.dart';
 import 'pantry_item_selector_bottom_sheet.dart';
 
@@ -54,6 +53,7 @@ void showIngredientMatchesBottomSheet(
             child: AppCircleButton(
               icon: AppCircleButtonIcon.close,
               variant: AppCircleButtonVariant.neutral,
+              size: 32,
               onPressed: () {
                 Navigator.of(modalContext).pop();
               },
@@ -70,10 +70,16 @@ void showIngredientMatchesBottomSheet(
           surfaceTintColor: Colors.transparent,
           hasTopBarLayer: true,
           isTopBarLayerAlwaysVisible: true,
-          leadingNavBarWidget: WoltModalSheetBackButton(
-            onBackPressed: () {
-              pageIndexNotifier.value = 0;
-            },
+          leadingNavBarWidget: Padding(
+            padding: EdgeInsets.only(left: AppSpacing.lg),
+            child: AppCircleButton(
+              icon: AppCircleButtonIcon.back,
+              variant: AppCircleButtonVariant.neutral,
+              size: 32,
+              onPressed: () {
+                pageIndexNotifier.value = 0;
+              },
+            ),
           ),
           child: IngredientDetailPage(
             matches: matches,

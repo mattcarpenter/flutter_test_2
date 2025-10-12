@@ -9,10 +9,10 @@ import '../../../theme/colors.dart';
 import '../../../theme/spacing.dart';
 import '../../../theme/typography.dart';
 import '../../../widgets/app_button.dart';
+import '../../../widgets/app_circle_button.dart';
 import '../../../widgets/app_text_field_simple.dart';
 import '../../../providers/recipe_tag_provider.dart';
 import '../../../widgets/tag_selection_row.dart';
-import '../../../widgets/wolt/button/wolt_modal_sheet_back_button.dart';
 import 'tag_selection_view_model.dart';
 
 /// Page 1: Select existing tags with option to create new ones
@@ -205,10 +205,16 @@ class CreateTagPage {
       surfaceTintColor: Colors.transparent,
       hasTopBarLayer: false,
       isTopBarLayerAlwaysVisible: false,
-      leadingNavBarWidget: WoltModalSheetBackButton(
-        onBackPressed: () {
-          WoltModalSheet.of(context).showPrevious();
-        },
+      leadingNavBarWidget: Padding(
+        padding: EdgeInsets.only(left: AppSpacing.lg),
+        child: AppCircleButton(
+          icon: AppCircleButtonIcon.back,
+          variant: AppCircleButtonVariant.neutral,
+          size: 32,
+          onPressed: () {
+            WoltModalSheet.of(context).showPrevious();
+          },
+        ),
       ),
       child: Padding(
         padding: EdgeInsets.fromLTRB(

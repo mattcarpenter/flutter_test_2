@@ -8,9 +8,9 @@ import '../../../theme/colors.dart';
 import '../../../theme/spacing.dart';
 import '../../../theme/typography.dart';
 import '../../../widgets/app_button.dart';
+import '../../../widgets/app_circle_button.dart';
 import '../../../widgets/app_text_field_simple.dart';
 import '../../../widgets/folder_selection_row.dart';
-import '../../../widgets/wolt/button/wolt_modal_sheet_back_button.dart';
 import 'folder_selection_view_model.dart';
 
 /// Page 1: Select existing folders with option to create new ones
@@ -198,10 +198,16 @@ class CreateFolderPage {
       surfaceTintColor: Colors.transparent,
       hasTopBarLayer: false,
       isTopBarLayerAlwaysVisible: false,
-      leadingNavBarWidget: WoltModalSheetBackButton(
-        onBackPressed: () {
-          WoltModalSheet.of(context).showPrevious();
-        },
+      leadingNavBarWidget: Padding(
+        padding: EdgeInsets.only(left: AppSpacing.lg),
+        child: AppCircleButton(
+          icon: AppCircleButtonIcon.back,
+          variant: AppCircleButtonVariant.neutral,
+          size: 32,
+          onPressed: () {
+            WoltModalSheet.of(context).showPrevious();
+          },
+        ),
       ),
       child: Padding(
         padding: EdgeInsets.fromLTRB(
