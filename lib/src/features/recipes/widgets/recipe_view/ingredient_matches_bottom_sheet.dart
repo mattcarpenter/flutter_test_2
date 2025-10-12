@@ -17,6 +17,7 @@ import 'package:recipe_app/src/widgets/app_button.dart';
 import 'package:recipe_app/src/widgets/app_circle_button.dart';
 import 'package:recipe_app/src/widgets/ingredient_stock_chip.dart';
 import 'package:recipe_app/src/widgets/utils/grouped_list_styling.dart';
+import 'package:recipe_app/src/widgets/wolt/text/modal_sheet_title.dart';
 import 'package:recipe_app/src/services/ingredient_parser_service.dart';
 import 'pantry_item_selector_bottom_sheet.dart';
 
@@ -45,8 +46,7 @@ void showIngredientMatchesBottomSheet(
         WoltModalSheetPage(
           backgroundColor: AppColors.of(modalContext).background,
           surfaceTintColor: Colors.transparent,
-          hasTopBarLayer: false,
-          isTopBarLayerAlwaysVisible: false,
+          pageTitle: ModalSheetTitle('Pantry Matches (${matches.matches.where((m) => m.hasMatch).length}/${matches.matches.length})'),
           trailingNavBarWidget: Padding(
             padding: EdgeInsets.only(right: AppSpacing.lg),
             child: AppCircleButton(
@@ -59,25 +59,10 @@ void showIngredientMatchesBottomSheet(
             ),
           ),
           child: Padding(
-            padding: EdgeInsets.fromLTRB(AppSpacing.lg, 0, AppSpacing.lg, AppSpacing.lg),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Text(
-                  'Pantry Matches (${matches.matches.where((m) => m.hasMatch).length}/${matches.matches.length})',
-                  style: AppTypography.h4.copyWith(
-                    color: AppColors.of(modalContext).textPrimary,
-                  ),
-                ),
-                SizedBox(height: AppSpacing.lg),
-                Flexible(
-                  child: IngredientMatchesListPage(
-                    matches: matches,
-                    pageIndexNotifier: pageIndexNotifier,
-                  ),
-                ),
-              ],
+            padding: EdgeInsets.fromLTRB(AppSpacing.lg, AppSpacing.lg, AppSpacing.lg, AppSpacing.lg),
+            child: IngredientMatchesListPage(
+              matches: matches,
+              pageIndexNotifier: pageIndexNotifier,
             ),
           ),
         ),
@@ -133,49 +118,21 @@ class IngredientMatchesListPage extends ConsumerWidget {
     final matchesAsync = ref.watch(recipeIngredientMatchesProvider(matches.recipeId));
 
     return matchesAsync.when(
-      loading: () => SizedBox(
-        height: MediaQuery.of(context).size.height * 0.7,
-        child: const Center(child: CircularProgressIndicator()),
-      ),
-      error: (error, stack) => SizedBox(
-        height: MediaQuery.of(context).size.height * 0.7,
-        child: Center(child: Text('Error: $error')),
-      ),
-      data: (currentMatches) => SizedBox(
-        height: MediaQuery.of(context).size.height * 0.7,
-        child: Padding(
-          padding: EdgeInsets.all(AppSpacing.lg),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // Summary text
-              Text(
-                'Pantry matches: ${currentMatches.matches.where((m) => m.hasMatch).length} of ${currentMatches.matches.length} ingredients',
-                style: AppTypography.body.copyWith(
-                  color: AppColors.of(context).textSecondary,
-                ),
-              ),
-
-              SizedBox(height: AppSpacing.lg),
-
-              // Ingredient list
-              Expanded(
-                child: ListView.builder(
-                  itemCount: currentMatches.matches.length,
-                  itemBuilder: (context, index) {
-                    final match = currentMatches.matches[index];
-                    return _buildIngredientRow(
-                      context,
-                      match,
-                      index,
-                      currentMatches.matches.length,
-                    );
-                  },
-                ),
-              ),
-            ],
-          ),
-        ),
+      loading: () => const Center(child: CircularProgressIndicator()),
+      error: (error, stack) => Center(child: Text('Error: $error')),
+      data: (currentMatches) => ListView.builder(
+        shrinkWrap: true,
+        physics: const NeverScrollableScrollPhysics(),
+        itemCount: currentMatches.matches.length,
+        itemBuilder: (context, index) {
+          final match = currentMatches.matches[index];
+          return _buildIngredientRow(
+            context,
+            match,
+            index,
+            currentMatches.matches.length,
+          );
+        },
       ),
     );
   }

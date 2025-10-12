@@ -109,50 +109,23 @@ flutter format .
 
 ## Bottom Sheet (Wolt Modal) Design Guidelines
 
-Follow the pattern in `lib/src/features/recipes/views/add_folder_modal.dart` for all new modals:
+We use two types of Wolt modal sheets depending on content requirements:
 
-### Header Setup
-- Set `navBarHeight: 55`
-- No `pageTitle` property - include title in child content
-- Background: `AppColors.of(context).background`
-- Surface tint: `Colors.transparent`
-- Has top bar layer: `false`
-- Close button: `AppCircleButton` with `neutral` variant in `trailingNavBarWidget`
-- Close button padding: `EdgeInsets.only(right: AppSpacing.lg)`
+### 1. WoltModalSheetPage (Simple/Short Content)
 
-### Content Layout
-- Content padding: `EdgeInsets.fromLTRB(AppSpacing.lg, 0, AppSpacing.lg, AppSpacing.lg)`
-- Title: Text widget with `AppTypography.h4` and `AppColors.of(context).textPrimary`
-- Title is first element in content (not in nav bar)
+**When to use:**
+- Simple forms with minimal scrolling
+- Short content that fits on screen
+- Single-page modals without complex scrolling behavior
 
-### Form Spacing
-- Title to form: `AppSpacing.lg` (16px)
-- Between form elements: `AppSpacing.xl` (24px) or `AppSpacing.lg` (16px)
-- Bottom padding: `AppSpacing.sm` after form if needed
-
-### Form Elements
-- Input fields: `AppTextFieldSimple` with 8px border radius
-- Primary button: `AppButtonVariants.primaryFilled` with:
-  - `size: AppButtonSize.large` (52px height)
-  - `shape: AppButtonShape.square` (8px radius to match inputs)
-  - `fullWidth: true`
-- Button state: Disabled when input is empty (shows 50% opacity)
-- Track input state to enable/disable button dynamically
-
-### Visual Consistency
-- Border radius: 8px for both inputs and buttons (matching radius)
-- Button uses primary color with white text
-- Close button uses neutral gray colors (not primary)
-- Disable submit buttons until form has valid input
-
-### Example Implementation
+**Configuration:**
 ```dart
-// See lib/src/features/recipes/views/add_folder_modal.dart for reference
 WoltModalSheetPage(
   navBarHeight: 55,
   backgroundColor: AppColors.of(context).background,
   surfaceTintColor: Colors.transparent,
   hasTopBarLayer: false,
+  isTopBarLayerAlwaysVisible: false,
   trailingNavBarWidget: Padding(
     padding: EdgeInsets.only(right: AppSpacing.lg),
     child: AppCircleButton(
@@ -164,8 +137,12 @@ WoltModalSheetPage(
   child: Padding(
     padding: EdgeInsets.fromLTRB(AppSpacing.lg, 0, AppSpacing.lg, AppSpacing.lg),
     child: Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      mainAxisSize: MainAxisSize.min,
       children: [
-        Text('Modal Title', style: AppTypography.h4),
+        Text('Modal Title', style: AppTypography.h4.copyWith(
+          color: AppColors.of(context).textPrimary,
+        )),
         SizedBox(height: AppSpacing.lg),
         // Form content here
       ],
@@ -174,7 +151,88 @@ WoltModalSheetPage(
 )
 ```
 
-**Note**: Older modals may use different patterns (CupertinoButton navigation, ModalSheetTitle). These should be updated to match the new pattern when refactored.
+**Key points:**
+- Title is placed in the content area (not using `pageTitle`)
+- `hasTopBarLayer: false` - no built-in header border
+- Use `AppCircleButton` with `neutral` variant for close button
+
+**Example:** `lib/src/features/recipes/views/add_folder_modal.dart`
+
+### 2. SliverWoltModalSheetPage (Scrollable Content)
+
+**When to use:**
+- Long scrollable content with multiple sections
+- Complex layouts requiring Sliver widgets
+- Modals with sticky action bars at bottom
+- Content that needs scroll-aware header behavior
+
+**Configuration:**
+```dart
+SliverWoltModalSheetPage(
+  navBarHeight: 55,
+  backgroundColor: AppColors.of(context).background,
+  surfaceTintColor: Colors.transparent,
+  hasTopBarLayer: true,
+  isTopBarLayerAlwaysVisible: false,  // Border appears only when scrolling
+  topBarTitle: ModalSheetTitle('Modal Title'),
+  hasSabGradient: true,  // Gradient above sticky action bar
+  trailingNavBarWidget: Padding(
+    padding: EdgeInsets.only(right: AppSpacing.lg),
+    child: AppCircleButton(
+      icon: AppCircleButtonIcon.close,
+      variant: AppCircleButtonVariant.neutral,
+      onPressed: () => Navigator.of(context).pop(),
+    ),
+  ),
+  mainContentSliversBuilder: (context) => [
+    // Sliver widgets here
+    SliverToBoxAdapter(
+      child: Padding(
+        padding: EdgeInsets.all(AppSpacing.lg),
+        child: Text('Content'),
+      ),
+    ),
+  ],
+  stickyActionBar: Container(
+    // Optional sticky button at bottom
+    padding: EdgeInsets.all(AppSpacing.lg),
+    child: AppButton(text: 'Submit', onPressed: () {}),
+  ),
+)
+```
+
+**Key points:**
+- Title uses `topBarTitle: ModalSheetTitle('Title')` - **NOT** in content area
+- `hasTopBarLayer: true` - enables Wolt's scroll-aware header
+- **`isTopBarLayerAlwaysVisible: false`** - Border only appears when content scrolls under header (preferred for better UX)
+- Uses `mainContentSliversBuilder` instead of `child`
+- `hasSabGradient: true` shows gradient above sticky action bar
+
+**Examples:**
+- `lib/src/features/recipes/widgets/filter_sort/unified_sort_filter_sheet.dart`
+- `lib/src/features/shopping_list/views/update_pantry_modal.dart`
+
+### Important: isTopBarLayerAlwaysVisible Setting
+
+**Always use `isTopBarLayerAlwaysVisible: false` for SliverWoltModalSheetPage:**
+
+- `false` (preferred): Border appears only when scrolling - provides visual feedback that content is scrolling under header
+- `true` (avoid): Border is always visible, even without scrolling - looks cluttered
+
+### Shared Design Rules
+
+**Form Elements:**
+- Input fields: `AppTextFieldSimple` with 8px border radius
+- Primary button: `AppButtonVariants.primaryFilled` with:
+  - `size: AppButtonSize.large` (52px height)
+  - `shape: AppButtonShape.square` (8px radius to match inputs)
+  - `fullWidth: true`
+- Button state: Disabled when input is empty (shows 50% opacity)
+
+**Visual Consistency:**
+- Border radius: 8px for both inputs and buttons (matching radius)
+- Close button uses neutral gray colors (not primary)
+- Always use `AppSpacing` constants for padding/margins
 
 ## Architecture Overview
 
