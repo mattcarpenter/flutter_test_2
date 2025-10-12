@@ -10,6 +10,7 @@ import '../../../theme/typography.dart';
 import '../../../widgets/app_button.dart';
 import '../../../widgets/app_circle_button.dart';
 import '../../../widgets/app_text_field_simple.dart';
+import '../../../widgets/utils/grouped_list_styling.dart';
 import '../../../widgets/wolt/button/wolt_modal_sheet_back_button.dart';
 import '../widgets/shopping_list_selection_row.dart';
 
@@ -167,22 +168,25 @@ class ShoppingListSelectionPageContent extends ConsumerWidget {
 
                     // Add dismissible for non-default lists
                     if (!listItem.isDefault) {
+                      final borderRadius = GroupedListStyling.getBorderRadius(
+                        isGrouped: true,
+                        isFirstInGroup: isFirst,
+                        isLastInGroup: isLast,
+                      );
+
                       row = Dismissible(
                         key: ValueKey(listItem.id),
                         direction: DismissDirection.endToStart,
                         background: Container(
                           alignment: Alignment.centerRight,
-                          padding: const EdgeInsets.only(right: 16),
+                          padding: EdgeInsets.only(right: AppSpacing.lg),
                           decoration: BoxDecoration(
-                            color: colors.error,
-                            borderRadius: BorderRadius.vertical(
-                              top: isFirst ? const Radius.circular(8) : Radius.zero,
-                              bottom: isLast ? const Radius.circular(8) : Radius.zero,
-                            ),
+                            color: CupertinoColors.destructiveRed,
+                            borderRadius: borderRadius,
                           ),
-                          child: Icon(
-                            Icons.delete,
-                            color: colors.onPrimary,
+                          child: const Icon(
+                            CupertinoIcons.trash,
+                            color: CupertinoColors.white,
                             size: 20,
                           ),
                         ),
@@ -211,6 +215,13 @@ class ShoppingListSelectionPageContent extends ConsumerWidget {
                               false;
                         },
                         onDismissed: (_) async {
+                          // If deleting the currently selected list, switch to default
+                          if (listItem.id == currentListId) {
+                            ref
+                                .read(currentShoppingListProvider.notifier)
+                                .setCurrentList(null);
+                          }
+
                           await ref
                               .read(shoppingListsProvider.notifier)
                               .deleteList(listItem.id!);
