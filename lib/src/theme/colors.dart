@@ -284,6 +284,10 @@ class AppColors {
       ? AppColorSwatches.neutral[300]!
       : AppColorSwatches.neutral[600]!;
 
+  Color get borderRadio => brightness == Brightness.light
+      ? AppColorSwatches.neutral[400]!
+      : AppColorSwatches.neutral[600]!;
+
   // Focus and interaction states
   Color get focus => brightness == Brightness.light
       ? AppColorSwatches.accent[500]!

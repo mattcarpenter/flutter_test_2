@@ -195,8 +195,8 @@ class ShoppingListItemTile extends StatelessWidget {
                     border: Border.all(
                       color: item.bought
                         ? AppColors.of(context).primary
-                        : CupertinoColors.systemGrey3,
-                      width: 2,
+                        : AppColors.of(context).borderRadio,
+                      width: 1,
                     ),
                     color: item.bought
                       ? AppColors.of(context).primary

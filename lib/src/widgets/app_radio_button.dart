@@ -5,10 +5,10 @@ import '../theme/colors.dart';
 class AppRadioButton extends StatefulWidget {
   /// Whether this radio button is selected
   final bool selected;
-  
+
   /// Callback when the radio button is tapped
   final VoidCallback? onTap;
-  
+
   /// Size of the radio button (defaults to 20px)
   final double size;
 
@@ -77,7 +77,7 @@ class _AppRadioButtonState extends State<AppRadioButton>
   @override
   Widget build(BuildContext context) {
     final colors = AppColors.of(context);
-    
+
     return GestureDetector(
       onTapDown: _handleTapDown,
       onTapUp: _handleTapUp,
@@ -94,8 +94,8 @@ class _AppRadioButtonState extends State<AppRadioButton>
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
                 color: widget.selected ? colors.primary : Colors.transparent,
-                border: widget.selected 
-                    ? null 
+                border: widget.selected
+                    ? null
                     : Border.all(
                         color: colors.border.withOpacity(0.7),
                         width: 1.5,
