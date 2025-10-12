@@ -144,45 +144,41 @@ class _ShoppingListDropdownDelegate extends SliverPersistentHeaderDelegate {
 
   @override
   Widget build(BuildContext context, double shrinkOffset, bool overlapsContent) {
-    return Material(
-      elevation: overlapsContent ? 1.0 : 0.0,
-      color: Colors.transparent,
-      child: Container(
-        height: minExtent,
-        padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
-        constraints: const BoxConstraints(maxWidth: 800),
-        child: Row(
-          children: [
-            // List selector button (takes all available space)
-            Expanded(
-              child: AppButton(
-                text: _getCurrentListName(),
-                trailingIcon: const Icon(Icons.keyboard_arrow_down, size: 24),
-                trailingIconOffset: const Offset(8, -2),
-                style: AppButtonStyle.mutedOutline,
-                shape: AppButtonShape.square,
-                size: AppButtonSize.medium,
-                theme: AppButtonTheme.primary,
-                fullWidth: true,
-                contentAlignment: AppButtonContentAlignment.left,
-                onPressed: onManageLists,
-              ),
-            ),
-
-            const SizedBox(width: 12), // Spacing between buttons
-
-            // Add Item button (fixed width)
-            AppButton(
-              text: 'Add Item',
-              leadingIcon: const Icon(Icons.add),
-              style: AppButtonStyle.outline,
+    return Container(
+      height: minExtent,
+      padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
+      constraints: const BoxConstraints(maxWidth: 800),
+      child: Row(
+        children: [
+          // List selector button (takes all available space)
+          Expanded(
+            child: AppButton(
+              text: _getCurrentListName(),
+              trailingIcon: const Icon(Icons.keyboard_arrow_down, size: 24),
+              trailingIconOffset: const Offset(8, -2),
+              style: AppButtonStyle.mutedOutline,
               shape: AppButtonShape.square,
               size: AppButtonSize.medium,
-              theme: AppButtonTheme.secondary,
-              onPressed: onAddItem,
+              theme: AppButtonTheme.primary,
+              fullWidth: true,
+              contentAlignment: AppButtonContentAlignment.left,
+              onPressed: onManageLists,
             ),
-          ],
-        ),
+          ),
+
+          const SizedBox(width: 12), // Spacing between buttons
+
+          // Add Item button (fixed width)
+          AppButton(
+            text: 'Add Item',
+            leadingIcon: const Icon(Icons.add),
+            style: AppButtonStyle.outline,
+            shape: AppButtonShape.square,
+            size: AppButtonSize.medium,
+            theme: AppButtonTheme.secondary,
+            onPressed: onAddItem,
+          ),
+        ],
       ),
     );
   }
