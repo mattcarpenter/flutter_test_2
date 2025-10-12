@@ -403,10 +403,11 @@ class _AppButtonState extends State<AppButton> {
                   children: [
                     // Leading content (icon + text) - grouped together when trailing icon exists
                     if (widget.trailingIcon != null && !widget.loading)
-                      Row(
-                        mainAxisSize: MainAxisSize.min,
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        children: [
+                      Expanded(
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          children: [
                           if (widget.loading) ...[
                             SizedBox(
                               width: _fontSize,
@@ -430,18 +431,21 @@ class _AppButtonState extends State<AppButton> {
                             ),
                             const SizedBox(width: 6),
                           ],
-                          Text(
-                            widget.text,
-                            style: AppTypography.button.copyWith(
-                              color: _textColor,
-                              fontSize: _fontSize,
-                              letterSpacing: _letterSpacing,
+                          Flexible(
+                            child: Text(
+                              widget.text,
+                              style: AppTypography.button.copyWith(
+                                color: _textColor,
+                                fontSize: _fontSize,
+                                letterSpacing: _letterSpacing,
+                              ),
+                              overflow: TextOverflow.ellipsis,
+                              maxLines: 1,
                             ),
-                            overflow: TextOverflow.ellipsis,
-                            maxLines: 1,
                           ),
                         ],
-                      )
+                      ),
+                    )
                     else ...[
                       // Original behavior when no trailing icon
                       if (widget.loading) ...[
