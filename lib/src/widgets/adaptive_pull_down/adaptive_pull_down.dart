@@ -20,6 +20,14 @@ class AdaptivePullDownButton extends StatelessWidget {
       // iOS: Use pull_down_button for a Cupertino-style menu.
       return PullDownButton(
         itemBuilder: (context) => items.map((item) {
+          if (item.isDestructive) {
+            return PullDownMenuItem(
+              title: item.title,
+              icon: item.icon.icon,
+              onTap: item.onTap,
+              isDestructive: true,
+            );
+          }
           return PullDownMenuItem(
             title: item.title,
             icon: item.icon.icon,
@@ -47,15 +55,25 @@ class AdaptivePullDownButton extends StatelessWidget {
       return PopupMenuButton<AdaptiveMenuItem>(
         itemBuilder: (context) {
           return items.map((item) {
+            final textStyle = item.isDestructive
+                ? const TextStyle(color: Colors.red)
+                : null;
+            final iconColor = item.isDestructive
+                ? Colors.red
+                : item.icon.color;
+
             return PopupMenuItem<AdaptiveMenuItem>(
               value: item,
               child: Row(
                 children: [
                   Padding(
                     padding: const EdgeInsets.only(right: 8.0),
-                    child: item.icon,
+                    child: Icon(
+                      item.icon.icon,
+                      color: iconColor,
+                    ),
                   ),
-                  Text(item.title),
+                  Text(item.title, style: textStyle),
                 ],
               ),
             );

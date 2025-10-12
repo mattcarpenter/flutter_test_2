@@ -98,6 +98,69 @@ class ShoppingListTab extends ConsumerWidget {
                   showAddShoppingListItemModal(context, currentListId);
                 },
               ),
+              AdaptiveMenuItem(
+                title: 'Delete List',
+                icon: const Icon(CupertinoIcons.trash),
+                isDestructive: true,
+                onTap: () async {
+                  // Check if trying to delete the default list
+                  if (currentListId == null) {
+                    await showCupertinoDialog(
+                      context: context,
+                      builder: (context) => CupertinoAlertDialog(
+                        title: const Text('Cannot Delete'),
+                        content: const Text('The default shopping list cannot be deleted.'),
+                        actions: [
+                          CupertinoDialogAction(
+                            child: const Text('OK'),
+                            onPressed: () => Navigator.of(context).pop(),
+                          ),
+                        ],
+                      ),
+                    );
+                    return;
+                  }
+
+                  // Get current list name for confirmation dialog
+                  final listName = listsAsyncValue.value
+                      ?.where((l) => l.id == currentListId)
+                      .firstOrNull
+                      ?.name ?? 'this list';
+
+                  final shouldDelete = await showCupertinoDialog<bool>(
+                    context: context,
+                    builder: (context) => CupertinoAlertDialog(
+                      title: const Text('Delete List'),
+                      content: Text(
+                        'Are you sure you want to delete "$listName"? All items in this list will also be deleted.',
+                      ),
+                      actions: [
+                        CupertinoDialogAction(
+                          child: const Text('Cancel'),
+                          onPressed: () => Navigator.of(context).pop(false),
+                        ),
+                        CupertinoDialogAction(
+                          isDestructiveAction: true,
+                          child: const Text('Delete'),
+                          onPressed: () => Navigator.of(context).pop(true),
+                        ),
+                      ],
+                    ),
+                  );
+
+                  if (shouldDelete == true) {
+                    // Switch to default list first
+                    ref
+                        .read(currentShoppingListProvider.notifier)
+                        .setCurrentList(null);
+
+                    // Then delete the list
+                    await ref
+                        .read(shoppingListsProvider.notifier)
+                        .deleteList(currentListId);
+                  }
+                },
+              ),
             ],
             child: const AppCircleButton(
               icon: AppCircleButtonIcon.ellipsis,

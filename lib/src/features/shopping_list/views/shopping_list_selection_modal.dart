@@ -11,7 +11,6 @@ import '../../../widgets/app_button.dart';
 import '../../../widgets/app_circle_button.dart';
 import '../../../widgets/app_text_field_simple.dart';
 import '../../../widgets/utils/grouped_list_styling.dart';
-import '../../../widgets/wolt/button/wolt_modal_sheet_back_button.dart';
 import '../widgets/shopping_list_selection_row.dart';
 
 void showShoppingListSelectionModal(BuildContext context, WidgetRef ref) {
@@ -41,6 +40,7 @@ class ShoppingListSelectionPage {
         child: AppCircleButton(
           icon: AppCircleButtonIcon.close,
           variant: AppCircleButtonVariant.neutral,
+          size: 32,
           onPressed: () {
             Navigator.of(context).pop();
           },
@@ -250,10 +250,16 @@ class CreateShoppingListPage {
       backgroundColor: AppColors.of(context).background,
       surfaceTintColor: Colors.transparent,
       hasTopBarLayer: false,
-      leadingNavBarWidget: WoltModalSheetBackButton(
-        onBackPressed: () {
-          WoltModalSheet.of(context).showPrevious();
-        },
+      leadingNavBarWidget: Padding(
+        padding: EdgeInsets.only(left: AppSpacing.lg),
+        child: AppCircleButton(
+          icon: AppCircleButtonIcon.back,
+          variant: AppCircleButtonVariant.neutral,
+          size: 32,
+          onPressed: () {
+            WoltModalSheet.of(context).showPrevious();
+          },
+        ),
       ),
       child: Padding(
         padding: EdgeInsets.fromLTRB(
