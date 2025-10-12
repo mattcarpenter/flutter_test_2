@@ -33,6 +33,9 @@ class MealPlanDateHeader extends StatelessWidget {
       padding: const EdgeInsets.all(16.0),
       decoration: BoxDecoration(
         color: CupertinoColors.systemBackground.resolveFrom(context),
+        borderRadius: const BorderRadius.vertical(
+          top: Radius.circular(12),
+        ),
         border: Border(
           bottom: BorderSide(
             color: CupertinoColors.separator.resolveFrom(context),
