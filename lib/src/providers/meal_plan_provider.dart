@@ -162,26 +162,32 @@ class MealPlanNotifier extends Notifier<void> {
     // Get both meal plans
     final sourceMealPlan = await _repository.getMealPlanByDate(sourceDate, userId, householdId);
     final targetMealPlan = await _repository.getMealPlanByDate(targetDate, userId, householdId);
-    
+
     // Extract items from source
-    final sourceItems = sourceMealPlan?.items != null 
+    final sourceItems = sourceMealPlan?.items != null
         ? List<MealPlanItem>.from(sourceMealPlan!.items as List)
         : <MealPlanItem>[];
-    
+
     // Extract items from target
-    final targetItems = targetMealPlan?.items != null 
+    final targetItems = targetMealPlan?.items != null
         ? List<MealPlanItem>.from(targetMealPlan!.items as List)
         : <MealPlanItem>[];
-    
-    // Remove from source if index is valid
-    if (sourceIndex < sourceItems.length) {
-      sourceItems.removeAt(sourceIndex);
-      // Update positions in source
-      for (int i = 0; i < sourceItems.length; i++) {
-        sourceItems[i] = sourceItems[i].copyWith(position: i);
-      }
+
+    // Remove from source by ID (not by index) for reliability
+    sourceItems.removeWhere((sourceItem) => sourceItem.id == item.id);
+
+    // Update positions in source
+    for (int i = 0; i < sourceItems.length; i++) {
+      sourceItems[i] = sourceItems[i].copyWith(position: i);
     }
-    
+
+    // Check if item already exists in target (prevent duplicates)
+    final existsInTarget = targetItems.any((targetItem) => targetItem.id == item.id);
+    if (existsInTarget) {
+      // Remove existing instance before adding new one
+      targetItems.removeWhere((targetItem) => targetItem.id == item.id);
+    }
+
     // Add to target at specified index
     final newItem = item.copyWith(position: targetIndex);
     if (targetIndex >= targetItems.length) {
@@ -189,37 +195,38 @@ class MealPlanNotifier extends Notifier<void> {
     } else {
       targetItems.insert(targetIndex, newItem);
     }
-    
+
     // Update positions in target
     for (int i = 0; i < targetItems.length; i++) {
       targetItems[i] = targetItems[i].copyWith(position: i);
     }
-    
-    // Save both meal plans
-    if (sourceItems.isEmpty) {
-      // If source is now empty, clear it
-      await _repository.clearItems(
-        date: sourceDate,
+
+    // Batch database operations to minimize race condition window
+    await Future.wait([
+      // Update source
+      sourceItems.isEmpty
+          ? _repository.clearItems(
+              date: sourceDate,
+              userId: userId,
+              householdId: householdId,
+            )
+          : _repository.createOrUpdateMealPlan(
+              date: sourceDate,
+              items: sourceItems,
+              userId: userId,
+              householdId: householdId,
+            ),
+
+      // Update target
+      _repository.createOrUpdateMealPlan(
+        date: targetDate,
+        items: targetItems,
         userId: userId,
         householdId: householdId,
-      );
-    } else {
-      await _repository.createOrUpdateMealPlan(
-        date: sourceDate,
-        items: sourceItems,
-        userId: userId,
-        householdId: householdId,
-      );
-    }
-    
-    await _repository.createOrUpdateMealPlan(
-      date: targetDate,
-      items: targetItems,
-      userId: userId,
-      householdId: householdId,
-    );
-    
-    // Invalidate both date providers
+      ),
+    ]);
+
+    // Invalidate both date providers after both operations complete
     ref.invalidate(mealPlanByDateStreamProvider(sourceDate));
     ref.invalidate(mealPlanByDateStreamProvider(targetDate));
   }

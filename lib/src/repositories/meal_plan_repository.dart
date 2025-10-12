@@ -9,21 +9,21 @@ class MealPlanRepository {
 
   // Get meal plan for a specific date
   Future<MealPlanEntry?> getMealPlanByDate(String date, String? userId, String? householdId) async {
-    var query = _db.select(_db.mealPlans)..where((tbl) => tbl.date.equals(date));
-    query = query..where((tbl) => tbl.deletedAt.isNull());
-    
+    var query = _db.select(_db.mealPlans)
+      ..where((tbl) => tbl.date.equals(date))
+      ..where((tbl) => tbl.deletedAt.isNull());
+
+    // Only filter by userId if explicitly provided (for household vs personal distinction)
+    // PowerSync already ensures local DB only contains current user's data
     if (userId != null) {
       query = query..where((tbl) => tbl.userId.equals(userId));
-    } else {
-      query = query..where((tbl) => tbl.userId.isNull());
     }
-    
+
+    // Only filter by householdId if explicitly provided
     if (householdId != null) {
       query = query..where((tbl) => tbl.householdId.equals(householdId));
-    } else {
-      query = query..where((tbl) => tbl.householdId.isNull());
     }
-    
+
     final results = await query.get();
     return results.isNotEmpty ? results.first : null;
   }
@@ -226,21 +226,21 @@ class MealPlanRepository {
     String? userId,
     String? householdId,
   }) async {
-    var query = _db.select(_db.mealPlans)..where((tbl) => tbl.date.isBetweenValues(startDate, endDate));
-    query = query..where((tbl) => tbl.deletedAt.isNull());
-    
+    var query = _db.select(_db.mealPlans)
+      ..where((tbl) => tbl.date.isBetweenValues(startDate, endDate))
+      ..where((tbl) => tbl.deletedAt.isNull());
+
+    // Only filter by userId if explicitly provided (for household vs personal distinction)
+    // PowerSync already ensures local DB only contains current user's data
     if (userId != null) {
       query = query..where((tbl) => tbl.userId.equals(userId));
-    } else {
-      query = query..where((tbl) => tbl.userId.isNull());
     }
-    
+
+    // Only filter by householdId if explicitly provided
     if (householdId != null) {
       query = query..where((tbl) => tbl.householdId.equals(householdId));
-    } else {
-      query = query..where((tbl) => tbl.householdId.isNull());
     }
-    
+
     return await query.get();
   }
 

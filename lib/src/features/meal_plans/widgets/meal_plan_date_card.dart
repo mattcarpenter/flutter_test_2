@@ -1,6 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../database/models/meal_plan_items.dart';
+import '../../../providers/auth_provider.dart';
 import '../../../providers/meal_plan_provider.dart';
 import '../models/meal_plan_drag_data.dart';
 import 'meal_plan_date_header.dart';
@@ -59,7 +60,6 @@ class _MealPlanDateCardState extends ConsumerState<MealPlanDateCard>
   }
 
   void _onDragEnter() {
-    print('Drag enter on date: ${widget.dateString}');
     if (!_isHovering) {
       setState(() => _isHovering = true);
       _animationController.forward();
@@ -76,7 +76,7 @@ class _MealPlanDateCardState extends ConsumerState<MealPlanDateCard>
   Future<void> _onDragAccept(MealPlanDragData dragData) async {
     // Reset visual state
     _onDragLeave();
-    
+
     // Don't accept drops from the same date
     if (dragData.sourceDate == widget.dateString) {
       return;
@@ -84,9 +84,12 @@ class _MealPlanDateCardState extends ConsumerState<MealPlanDateCard>
 
     // Get current items to determine target index
     final mealPlan = ref.read(mealPlanByDateStreamProvider(widget.dateString)).value;
-    final currentItems = mealPlan?.items != null 
+    final currentItems = mealPlan?.items != null
         ? (mealPlan!.items as List).cast<MealPlanItem>()
         : <MealPlanItem>[];
+
+    // Get current user ID for proper database query
+    final userId = ref.read(currentUserProvider)?.id;
 
     // Move item to this date at the end of the list
     await ref.read(mealPlanNotifierProvider.notifier).moveItemBetweenDates(
@@ -95,16 +98,14 @@ class _MealPlanDateCardState extends ConsumerState<MealPlanDateCard>
       item: dragData.item,
       sourceIndex: dragData.sourceIndex,
       targetIndex: currentItems.length, // Add at end
-      userId: null,
-      householdId: null,
+      userId: userId,
+      householdId: null, // TODO: Add household support if needed
     );
   }
 
   bool _willAcceptDrag(MealPlanDragData? dragData) {
     // Only accept drops from different dates
-    final willAccept = dragData != null && dragData.sourceDate != widget.dateString;
-    print('Will accept drag on ${widget.dateString}: $willAccept (source: ${dragData?.sourceDate})');
-    return willAccept;
+    return dragData != null && dragData.sourceDate != widget.dateString;
   }
 
   @override
@@ -114,10 +115,7 @@ class _MealPlanDateCardState extends ConsumerState<MealPlanDateCard>
     return DragTarget<MealPlanDragData>(
       onWillAcceptWithDetails: (details) => _willAcceptDrag(details.data),
       onAcceptWithDetails: (details) => _onDragAccept(details.data),
-      onMove: (details) {
-        print('onMove called for ${widget.dateString}');
-        _onDragEnter();
-      },
+      onMove: (details) => _onDragEnter(),
       onLeave: (_) => _onDragLeave(),
       builder: (context, candidateData, rejectedData) {
         return AnimatedBuilder(
