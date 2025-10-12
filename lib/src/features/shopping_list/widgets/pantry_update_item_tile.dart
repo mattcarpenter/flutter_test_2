@@ -2,12 +2,15 @@ import 'package:flutter/cupertino.dart';
 import '../../../../database/models/pantry_items.dart';
 import '../../../theme/colors.dart';
 import '../../../widgets/stock_status_chip.dart';
+import '../../../services/ingredient_parser_service.dart';
 import '../models/pantry_update_models.dart';
 
 class PantryUpdateItemTile extends StatelessWidget {
   final PantryUpdateItem item;
   final bool isChecked;
   final ValueChanged<bool> onCheckedChanged;
+
+  static final _parser = IngredientParserService();
 
   const PantryUpdateItemTile({
     super.key,
@@ -19,7 +22,13 @@ class PantryUpdateItemTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isNew = item.isNewItem;
-    
+
+    // Parse name to extract clean ingredient name (without quantities)
+    final parseResult = _parser.parse(item.shoppingListItem.name);
+    final displayName = parseResult.cleanName.isNotEmpty
+        ? parseResult.cleanName
+        : item.shoppingListItem.name;
+
     return Container(
       margin: const EdgeInsets.only(bottom: 8),
       decoration: BoxDecoration(
@@ -57,39 +66,40 @@ class PantryUpdateItemTile extends StatelessWidget {
                     : null,
               ),
               const SizedBox(width: 12),
-              
-              // Item details
+
+              // Item name (truncates with ellipsis if too long)
               Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      item.shoppingListItem.name,
-                      style: const TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w500,
-                      ),
-                    ),
-                    const SizedBox(height: 4),
-                    Row(
-                      children: [
-                        if (isNew) ...[
-                          StockStatusChip(isNewItem: true),
-                        ] else ...[
-                          StockStatusChip(status: item.matchingPantryItem!.stockStatus),
-                          const SizedBox(width: 8),
-                          const Icon(
-                            CupertinoIcons.arrow_right,
-                            size: 16,
-                            color: CupertinoColors.secondaryLabel,
-                          ),
-                          const SizedBox(width: 8),
-                          StockStatusChip(status: StockStatus.inStock),
-                        ],
-                      ],
-                    ),
-                  ],
+                child: Text(
+                  displayName,
+                  style: const TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w500,
+                  ),
+                  overflow: TextOverflow.ellipsis,
+                  maxLines: 1,
                 ),
+              ),
+
+              const SizedBox(width: 12),
+
+              // Stock status chips (right-aligned)
+              Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  if (isNew) ...[
+                    StockStatusChip(isNewItem: true),
+                  ] else ...[
+                    StockStatusChip(status: item.matchingPantryItem!.stockStatus),
+                    const SizedBox(width: 8),
+                    const Icon(
+                      CupertinoIcons.arrow_right,
+                      size: 16,
+                      color: CupertinoColors.secondaryLabel,
+                    ),
+                    const SizedBox(width: 8),
+                    StockStatusChip(status: StockStatus.inStock),
+                  ],
+                ],
               ),
             ],
           ),

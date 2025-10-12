@@ -32,7 +32,7 @@ class StockStatusChip extends StatelessWidget {
       switch (status!) {
         case StockStatus.outOfStock:
           backgroundColor = colors.errorBackground;
-          label = 'Out of Stock';
+          label = 'Out';
         case StockStatus.lowStock:
           backgroundColor = colors.warningBackground;
           label = 'Low Stock';
