@@ -31,17 +31,11 @@ class MealPlanDateHeader extends StatelessWidget {
     }
     
     return Container(
-      padding: const EdgeInsets.all(16.0),
+      padding: const EdgeInsets.fromLTRB(16.0, 16.0, 16.0, 20.0),
       decoration: BoxDecoration(
         color: CupertinoColors.systemBackground.resolveFrom(context),
         borderRadius: const BorderRadius.vertical(
           top: Radius.circular(12),
-        ),
-        border: Border(
-          bottom: BorderSide(
-            color: CupertinoColors.separator.resolveFrom(context),
-            width: 0.5,
-          ),
         ),
       ),
       child: Row(

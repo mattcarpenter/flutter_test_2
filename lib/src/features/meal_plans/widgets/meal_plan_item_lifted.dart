@@ -32,18 +32,8 @@ class _MealPlanItemLiftedState extends ConsumerState<MealPlanItemLifted>
   bool _isDragging = false;
   
   bool _contextMenuIsAllowed(Offset location) {
-    // The drag handle is the rightmost 48px of the widget
-    // If we can't determine the widget size, allow context menu everywhere
-    final renderObject = context.findRenderObject();
-    if (renderObject is RenderBox) {
-      final size = renderObject.size;
-      final dragHandleWidth = 48.0;
-      // Check if the touch is in the rightmost area (drag handle)
-      if (location.dx > size.width - dragHandleWidth) {
-        return false; // Don't allow context menu in drag handle area
-      }
-    }
-    return true; // Allow context menu everywhere else
+    // Context menu allowed everywhere since drag handle is now isolated
+    return true;
   }
 
   @override
@@ -92,7 +82,7 @@ class _MealPlanItemLiftedState extends ConsumerState<MealPlanItemLifted>
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 4.0),
+      padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 6.0),
       child: AnimatedBuilder(
         animation: _liftController,
         builder: (context, child) {
@@ -109,20 +99,7 @@ class _MealPlanItemLiftedState extends ConsumerState<MealPlanItemLifted>
                   ),
                 ] : null,
               ),
-              child: Draggable<MealPlanDragData>(
-                data: MealPlanDragData(
-                  item: widget.item,
-                  sourceDate: widget.dateString,
-                  sourceIndex: widget.index,
-                ),
-                dragAnchorStrategy: childDragAnchorStrategy,
-                onDragStarted: _onDragStart,
-                onDragEnd: (_) => _onDragEnd(),
-                onDraggableCanceled: (_, __) => _onDragEnd(),
-                feedback: _buildLiftedTile(context),
-                childWhenDragging: _buildGhostTile(context),
-                child: _buildNormalTile(context),
-              ),
+              child: _isDragging ? _buildGhostTile(context) : _buildNormalTile(context),
             ),
           );
         },
@@ -142,12 +119,8 @@ class _MealPlanItemLiftedState extends ConsumerState<MealPlanItemLifted>
           decoration: BoxDecoration(
             color: CupertinoColors.secondarySystemGroupedBackground.resolveFrom(context),
             borderRadius: BorderRadius.circular(8),
-            border: Border.all(
-              color: CupertinoColors.separator.resolveFrom(context),
-              width: 0.5,
-            ),
           ),
-          child: _buildTileContent(context, 1.0),
+          child: _buildTileContent(context, 1.0, isDraggableHandle: true),
         ),
       ),
     );
@@ -195,10 +168,6 @@ class _MealPlanItemLiftedState extends ConsumerState<MealPlanItemLifted>
           decoration: BoxDecoration(
             color: CupertinoColors.secondarySystemGroupedBackground.resolveFrom(context),
             borderRadius: BorderRadius.circular(8),
-            border: Border.all(
-              color: CupertinoColors.separator.resolveFrom(context),
-              width: 0.5,
-            ),
           ),
           child: _buildTileContent(context, 0.5),
         ),
@@ -207,7 +176,7 @@ class _MealPlanItemLiftedState extends ConsumerState<MealPlanItemLifted>
   }
 
   // Shared tile content
-  Widget _buildTileContent(BuildContext context, double opacity) {
+  Widget _buildTileContent(BuildContext context, double opacity, {bool isDraggableHandle = false}) {
     return Opacity(
       opacity: opacity,
       child: Row(
@@ -226,9 +195,9 @@ class _MealPlanItemLiftedState extends ConsumerState<MealPlanItemLifted>
               color: CupertinoColors.white,
             ),
           ),
-          
+
           const SizedBox(width: 12),
-          
+
           // Content
           Expanded(
             child: Column(
@@ -258,15 +227,42 @@ class _MealPlanItemLiftedState extends ConsumerState<MealPlanItemLifted>
               ],
             ),
           ),
-          
-          // Drag handle
-          Icon(
-            CupertinoIcons.line_horizontal_3,
-            size: 16,
-            color: CupertinoColors.tertiaryLabel.resolveFrom(context),
-          ),
-          
-          const SizedBox(width: 8),
+
+          // Drag handle - only make it draggable when requested
+          isDraggableHandle
+              ? Draggable<MealPlanDragData>(
+                  data: MealPlanDragData(
+                    item: widget.item,
+                    sourceDate: widget.dateString,
+                    sourceIndex: widget.index,
+                  ),
+                  dragAnchorStrategy: (draggable, context, position) {
+                    // Get the render box to calculate proper offset
+                    final RenderBox renderBox = context.findRenderObject() as RenderBox;
+                    final itemWidth = MediaQuery.of(context).size.width - 32; // Account for horizontal padding
+                    // Position feedback so item appears under finger, accounting for handle being on right
+                    return Offset(itemWidth - 40, renderBox.size.height / 2);
+                  },
+                  onDragStarted: _onDragStart,
+                  onDragEnd: (_) => _onDragEnd(),
+                  onDraggableCanceled: (_, __) => _onDragEnd(),
+                  feedback: _buildLiftedTile(context),
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
+                    child: Icon(
+                      CupertinoIcons.line_horizontal_3,
+                      size: 16,
+                      color: CupertinoColors.tertiaryLabel.resolveFrom(context),
+                    ),
+                  ),
+                )
+              : Icon(
+                  CupertinoIcons.line_horizontal_3,
+                  size: 16,
+                  color: CupertinoColors.tertiaryLabel.resolveFrom(context),
+                ),
+
+          if (!isDraggableHandle) const SizedBox(width: 8),
         ],
       ),
     );

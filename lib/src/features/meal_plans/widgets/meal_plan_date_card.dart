@@ -128,12 +128,15 @@ class _MealPlanDateCardState extends ConsumerState<MealPlanDateCard>
                 decoration: BoxDecoration(
                   color: CupertinoColors.systemBackground.resolveFrom(context),
                   borderRadius: BorderRadius.circular(12),
-                  border: Border.all(
-                    color: (_borderColorAnimation.value != null 
-                        ? CupertinoDynamicColor.resolve(_borderColorAnimation.value!, context)
-                        : CupertinoColors.separator.resolveFrom(context)),
-                    width: _isHovering ? 2.0 : 0.5,
-                  ),
+                  border: _isHovering
+                      ? Border.all(
+                          color: CupertinoDynamicColor.resolve(_borderColorAnimation.value!, context),
+                          width: 2.0,
+                        )
+                      : Border.all(
+                          color: CupertinoColors.separator.resolveFrom(context).withOpacity(0.3),
+                          width: 0.5,
+                        ),
                   boxShadow: _isHovering
                       ? [
                           BoxShadow(
