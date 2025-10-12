@@ -227,20 +227,37 @@ class _IngredientListItemState extends ConsumerState<IngredientListItem> with Si
         return [
           WoltModalSheetPage(
             backgroundColor: AppColors.of(modalContext).background,
-            hasTopBarLayer: true,
-            isTopBarLayerAlwaysVisible: true,
-            topBarTitle: const Text('Link to Recipe'),
+            hasTopBarLayer: false,
+            isTopBarLayerAlwaysVisible: false,
             leadingNavBarWidget: IconButton(
               icon: const Icon(Icons.close),
               onPressed: () {
                 Navigator.of(modalContext).pop();
               },
             ),
-            child: RecipeSelectorContent(
-              onRecipeSelected: (recipe) {
-                widget.onUpdate(widget.ingredient.copyWith(recipeId: recipe.id));
-                Navigator.of(modalContext).pop();
-              },
+            child: Padding(
+              padding: EdgeInsets.fromLTRB(AppSpacing.lg, 0, AppSpacing.lg, AppSpacing.lg),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    'Link to Recipe',
+                    style: AppTypography.h4.copyWith(
+                      color: AppColors.of(modalContext).textPrimary,
+                    ),
+                  ),
+                  SizedBox(height: AppSpacing.lg),
+                  Flexible(
+                    child: RecipeSelectorContent(
+                      onRecipeSelected: (recipe) {
+                        widget.onUpdate(widget.ingredient.copyWith(recipeId: recipe.id));
+                        Navigator.of(modalContext).pop();
+                      },
+                    ),
+                  ),
+                ],
+              ),
             ),
           ),
         ];

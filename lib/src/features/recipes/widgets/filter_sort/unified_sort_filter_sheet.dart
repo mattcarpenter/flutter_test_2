@@ -11,6 +11,7 @@ import '../../../../widgets/app_button.dart';
 import '../../../../widgets/app_circle_button.dart';
 import '../../../../widgets/adaptive_pull_down/adaptive_pull_down.dart';
 import '../../../../widgets/adaptive_pull_down/adaptive_menu_item.dart';
+import '../../../../widgets/wolt/text/modal_sheet_title.dart';
 import '../../models/recipe_filter_sort.dart';
 
 /// Shows a unified bottom sheet with both sort and filter options
@@ -18,7 +19,7 @@ import '../../models/recipe_filter_sort.dart';
 class _FilterStateController extends ChangeNotifier {
   final RecipeFilterSortState initialState;
   final Function(RecipeFilterSortState) onStateChanged;
-  
+
   // Individual filter states
   Set<CookTimeFilter> cookTimeFilters = {};
   Set<RatingFilter> ratingFilters = {};
@@ -27,7 +28,7 @@ class _FilterStateController extends ChangeNotifier {
   TagFilterMode tagFilterMode = TagFilterMode.or;
   SortOption sortOption = SortOption.alphabetical;
   SortDirection sortDirection = SortDirection.ascending;
-  
+
   // Initial states for comparison
   late Set<CookTimeFilter> _initialCookTimeFilters;
   late Set<RatingFilter> _initialRatingFilters;
@@ -206,9 +207,9 @@ class _UnifiedSortFilterModalPage {
       navBarHeight: 55,
       backgroundColor: AppColors.of(modalContext).background,
       surfaceTintColor: Colors.transparent,
-      hasTopBarLayer: true, // Enable top bar layer to prevent overlap
-      isTopBarLayerAlwaysVisible: true, // Keep nav bar always visible
-      hasSabGradient: true, // Re-enable gradient for sticky content indication
+      hasTopBarLayer: true,
+      isTopBarLayerAlwaysVisible: false,
+      hasSabGradient: true,
       leadingNavBarWidget: TextButton(
         onPressed: () {
           // Clear all filters and reset sort

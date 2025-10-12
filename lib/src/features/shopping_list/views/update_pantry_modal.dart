@@ -10,6 +10,7 @@ import '../../../theme/spacing.dart';
 import '../../../theme/typography.dart';
 import '../../../widgets/app_button.dart';
 import '../../../widgets/app_circle_button.dart';
+import '../../../widgets/wolt/text/modal_sheet_title.dart';
 import '../../../services/ingredient_parser_service.dart';
 import '../models/pantry_update_models.dart';
 import '../services/pantry_update_service.dart';
@@ -54,7 +55,7 @@ class UpdatePantryModalPage {
       backgroundColor: AppColors.of(context).background,
       surfaceTintColor: CupertinoColors.transparent,
       hasTopBarLayer: true,
-      isTopBarLayerAlwaysVisible: true,
+      isTopBarLayerAlwaysVisible: false,
       hasSabGradient: true,
       trailingNavBarWidget: Padding(
         padding: EdgeInsets.only(right: AppSpacing.lg),
@@ -148,21 +149,6 @@ class _UpdatePantryContentSliversState extends ConsumerState<_UpdatePantryConten
   Widget build(BuildContext context) {
     return SliverList(
       delegate: SliverChildListDelegate([
-        // Spacing above title
-        SizedBox(height: AppSpacing.md),
-
-        // Title
-        Padding(
-          padding: EdgeInsets.fromLTRB(AppSpacing.lg, 0, AppSpacing.lg, 0),
-          child: Text(
-            'Update Pantry',
-            style: AppTypography.h4.copyWith(
-              color: AppColors.of(context).textPrimary,
-            ),
-          ),
-        ),
-        SizedBox(height: AppSpacing.lg),
-
         // If performing update, show cached content to prevent "Nothing to update" flash
         if (widget.isPerformingUpdate && _cachedContent != null)
           ..._cachedContent!

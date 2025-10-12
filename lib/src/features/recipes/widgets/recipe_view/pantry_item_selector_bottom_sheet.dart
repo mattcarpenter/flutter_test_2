@@ -6,6 +6,8 @@ import 'package:recipe_app/database/models/pantry_items.dart'; // For StockStatu
 import 'package:recipe_app/src/providers/pantry_provider.dart';
 import 'package:recipe_app/src/providers/recipe_provider.dart';
 import 'package:recipe_app/src/theme/colors.dart';
+import 'package:recipe_app/src/theme/spacing.dart';
+import 'package:recipe_app/src/theme/typography.dart';
 
 /// Shows a bottom sheet with a list of pantry items that can be selected
 void showPantryItemSelectorBottomSheet({
@@ -21,16 +23,29 @@ void showPantryItemSelectorBottomSheet({
       return [
         WoltModalSheetPage(
           backgroundColor: AppColors.of(modalContext).background,
-          hasTopBarLayer: true,
-          isTopBarLayerAlwaysVisible: true,
-          topBarTitle: const Text('Select Pantry Item'),
+          hasTopBarLayer: false,
+          isTopBarLayerAlwaysVisible: false,
           leadingNavBarWidget: IconButton(
             icon: const Icon(Icons.close),
             onPressed: () {
               Navigator.of(modalContext).pop();
             },
           ),
-          child: PantryItemSelectorContent(
+          child: Padding(
+            padding: EdgeInsets.fromLTRB(AppSpacing.lg, 0, AppSpacing.lg, AppSpacing.lg),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  'Select Pantry Item',
+                  style: AppTypography.h4.copyWith(
+                    color: AppColors.of(modalContext).textPrimary,
+                  ),
+                ),
+                SizedBox(height: AppSpacing.lg),
+                Flexible(
+                  child: PantryItemSelectorContent(
             onItemSelected: (itemName) {
               // Do the callback first
               onItemSelected(itemName);
@@ -61,6 +76,10 @@ void showPantryItemSelectorBottomSheet({
                 });
               }
             },
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
       ];

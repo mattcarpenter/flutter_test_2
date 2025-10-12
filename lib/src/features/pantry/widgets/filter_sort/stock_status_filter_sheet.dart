@@ -3,6 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:wolt_modal_sheet/wolt_modal_sheet.dart';
 import '../../../../../database/models/pantry_items.dart';
 import '../../../../theme/colors.dart';
+import '../../../../theme/spacing.dart';
+import '../../../../theme/typography.dart';
 import '../../models/pantry_filter_sort.dart';
 
 /// Shows a bottom sheet for selecting stock status filters
@@ -19,9 +21,8 @@ void showStockStatusFilterSheet(
       return [
         WoltModalSheetPage(
           backgroundColor: AppColors.of(modalContext).background,
-          hasTopBarLayer: true,
-          isTopBarLayerAlwaysVisible: true,
-          topBarTitle: const Text('Filter by Stock Status'),
+          hasTopBarLayer: false,
+          isTopBarLayerAlwaysVisible: false,
           leadingNavBarWidget: IconButton(
             icon: const Icon(Icons.close),
             onPressed: () {
@@ -36,12 +37,30 @@ void showStockStatusFilterSheet(
             },
             child: const Text('Clear All'),
           ),
-          child: StockStatusFilterContent(
-            selectedStatuses: selectedStatuses,
-            onStatusesChanged: (statuses) {
-              onStatusesChanged(statuses);
-              Navigator.of(modalContext).pop();
-            },
+          child: Padding(
+            padding: EdgeInsets.fromLTRB(AppSpacing.lg, 0, AppSpacing.lg, AppSpacing.lg),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  'Filter by Stock Status',
+                  style: AppTypography.h4.copyWith(
+                    color: AppColors.of(modalContext).textPrimary,
+                  ),
+                ),
+                SizedBox(height: AppSpacing.lg),
+                Flexible(
+                  child: StockStatusFilterContent(
+                    selectedStatuses: selectedStatuses,
+                    onStatusesChanged: (statuses) {
+                      onStatusesChanged(statuses);
+                      Navigator.of(modalContext).pop();
+                    },
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
       ];

@@ -23,8 +23,8 @@ void showCookModal(BuildContext context, {
       return [
         WoltModalSheetPage(
           backgroundColor: AppColors.of(modalContext).background,
-          hasTopBarLayer: true,
-          isTopBarLayerAlwaysVisible: true,
+          hasTopBarLayer: false,
+          isTopBarLayerAlwaysVisible: false,
           leadingNavBarWidget: IconButton(
             icon: const Icon(Icons.close),
             onPressed: () {

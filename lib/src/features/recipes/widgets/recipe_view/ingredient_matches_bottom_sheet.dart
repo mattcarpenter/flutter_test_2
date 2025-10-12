@@ -45,9 +45,8 @@ void showIngredientMatchesBottomSheet(
         WoltModalSheetPage(
           backgroundColor: AppColors.of(modalContext).background,
           surfaceTintColor: Colors.transparent,
-          hasTopBarLayer: true,
-          isTopBarLayerAlwaysVisible: true,
-          topBarTitle: Text('Pantry Matches (${matches.matches.where((m) => m.hasMatch).length}/${matches.matches.length})'),
+          hasTopBarLayer: false,
+          isTopBarLayerAlwaysVisible: false,
           trailingNavBarWidget: Padding(
             padding: EdgeInsets.only(right: AppSpacing.lg),
             child: AppCircleButton(
@@ -59,17 +58,35 @@ void showIngredientMatchesBottomSheet(
               },
             ),
           ),
-          child: IngredientMatchesListPage(
-            matches: matches,
-            pageIndexNotifier: pageIndexNotifier,
+          child: Padding(
+            padding: EdgeInsets.fromLTRB(AppSpacing.lg, 0, AppSpacing.lg, AppSpacing.lg),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  'Pantry Matches (${matches.matches.where((m) => m.hasMatch).length}/${matches.matches.length})',
+                  style: AppTypography.h4.copyWith(
+                    color: AppColors.of(modalContext).textPrimary,
+                  ),
+                ),
+                SizedBox(height: AppSpacing.lg),
+                Flexible(
+                  child: IngredientMatchesListPage(
+                    matches: matches,
+                    pageIndexNotifier: pageIndexNotifier,
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
         // Page 2: Individual ingredient detail
         WoltModalSheetPage(
           backgroundColor: AppColors.of(modalContext).background,
           surfaceTintColor: Colors.transparent,
-          hasTopBarLayer: true,
-          isTopBarLayerAlwaysVisible: true,
+          hasTopBarLayer: false,
+          isTopBarLayerAlwaysVisible: false,
           leadingNavBarWidget: Padding(
             padding: EdgeInsets.only(left: AppSpacing.lg),
             child: AppCircleButton(

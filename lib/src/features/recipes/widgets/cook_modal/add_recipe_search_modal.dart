@@ -5,6 +5,8 @@ import 'package:recipe_app/src/providers/cook_provider.dart';
 import 'package:wolt_modal_sheet/wolt_modal_sheet.dart';
 import '../../../../../database/database.dart';
 import '../../../../theme/colors.dart';
+import '../../../../theme/spacing.dart';
+import '../../../../theme/typography.dart';
 import 'cook_modal_search_results.dart';
 
 void showAddRecipeSearchModal(BuildContext context, {required String cookId}) {
@@ -16,18 +18,35 @@ void showAddRecipeSearchModal(BuildContext context, {required String cookId}) {
       return [
         WoltModalSheetPage(
           backgroundColor: AppColors.of(modalContext).background,
-          hasTopBarLayer: true,
-          isTopBarLayerAlwaysVisible: true,
-          topBarTitle: const Text('Add Recipe to Cook'),
+          hasTopBarLayer: false,
+          isTopBarLayerAlwaysVisible: false,
           leadingNavBarWidget: IconButton(
             icon: const Icon(Icons.close),
             onPressed: () {
               Navigator.of(modalContext).pop();
             },
           ),
-          child: AddRecipeSearchContent(
-            cookId: cookId,
-            modalContext: modalContext,
+          child: Padding(
+            padding: EdgeInsets.fromLTRB(AppSpacing.lg, 0, AppSpacing.lg, AppSpacing.lg),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  'Add Recipe to Cook',
+                  style: AppTypography.h4.copyWith(
+                    color: AppColors.of(modalContext).textPrimary,
+                  ),
+                ),
+                SizedBox(height: AppSpacing.lg),
+                Flexible(
+                  child: AddRecipeSearchContent(
+                    cookId: cookId,
+                    modalContext: modalContext,
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
       ];

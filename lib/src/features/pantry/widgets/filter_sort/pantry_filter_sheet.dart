@@ -5,6 +5,8 @@ import '../../../../../database/database.dart';
 import '../../../../../database/models/pantry_items.dart';
 import '../../../../providers/pantry_provider.dart';
 import '../../../../theme/colors.dart';
+import '../../../../theme/spacing.dart';
+import '../../../../theme/typography.dart';
 import '../../models/pantry_filter_sort.dart';
 
 /// Shows a bottom sheet with pantry filtering options
@@ -21,9 +23,8 @@ void showPantryFilterSheet(
       return [
         WoltModalSheetPage(
           backgroundColor: AppColors.of(modalContext).background,
-          hasTopBarLayer: true,
-          isTopBarLayerAlwaysVisible: true,
-          topBarTitle: const Text('Filter Pantry Items'),
+          hasTopBarLayer: false,
+          isTopBarLayerAlwaysVisible: false,
           leadingNavBarWidget: IconButton(
             icon: const Icon(Icons.close),
             onPressed: () {
@@ -38,12 +39,30 @@ void showPantryFilterSheet(
             },
             child: const Text('Clear All'),
           ),
-          child: PantryFilterContent(
+          child: Padding(
+            padding: EdgeInsets.fromLTRB(AppSpacing.lg, 0, AppSpacing.lg, AppSpacing.lg),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  'Filter Pantry Items',
+                  style: AppTypography.h4.copyWith(
+                    color: AppColors.of(modalContext).textPrimary,
+                  ),
+                ),
+                SizedBox(height: AppSpacing.lg),
+                Flexible(
+                  child: PantryFilterContent(
             initialState: initialState,
             onFilterChanged: (newState) {
               onFilterChanged(newState);
               Navigator.of(modalContext).pop();
             },
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
       ];
