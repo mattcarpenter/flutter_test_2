@@ -6,25 +6,44 @@ class ModalSheetTitle extends StatelessWidget {
   const ModalSheetTitle(
     this.text, {
     this.textAlign = TextAlign.start,
+    this.trailing,
     super.key,
   });
 
   final String text;
   final TextAlign textAlign;
+  final Widget? trailing;
 
   @override
   Widget build(BuildContext context) {
     final colors = AppColors.of(context);
-    
+
     return Padding(
       padding: const EdgeInsets.only(top: 16, left: 16, right: 16),
-      child: Text(
-        text,
-        textAlign: textAlign,
-        style: AppTypography.h4.copyWith(
-          color: colors.textPrimary,
-        ),
-      ),
+      child: trailing != null
+          ? Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                Expanded(
+                  child: Text(
+                    text,
+                    textAlign: textAlign,
+                    style: AppTypography.h4.copyWith(
+                      color: colors.textPrimary,
+                    ),
+                  ),
+                ),
+                trailing!,
+              ],
+            )
+          : Text(
+              text,
+              textAlign: textAlign,
+              style: AppTypography.h4.copyWith(
+                color: colors.textPrimary,
+              ),
+            ),
     );
   }
 }

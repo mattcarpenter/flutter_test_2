@@ -35,7 +35,20 @@ class ShoppingListSelectionPage {
       navBarHeight: 55,
       backgroundColor: AppColors.of(context).background,
       surfaceTintColor: Colors.transparent,
-      pageTitle: ModalSheetTitle('Select Shopping List'),
+      pageTitle: ModalSheetTitle(
+        'Select Shopping List',
+        trailing: AppButton(
+          text: 'Create New List',
+          onPressed: () {
+            WoltModalSheet.of(context).showNext();
+          },
+          theme: AppButtonTheme.secondary,
+          style: AppButtonStyle.outline,
+          shape: AppButtonShape.square,
+          size: AppButtonSize.small,
+          leadingIcon: const Icon(Icons.add),
+        ),
+      ),
       trailingNavBarWidget: Padding(
         padding: EdgeInsets.only(right: AppSpacing.lg),
         child: AppCircleButton(
@@ -104,23 +117,6 @@ class ShoppingListSelectionPageContent extends ConsumerWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           mainAxisSize: MainAxisSize.min,
           children: [
-            // Create button (title now in pageTitle)
-            Align(
-              alignment: Alignment.centerRight,
-              child: AppButton(
-                text: 'Create New List',
-                onPressed: () {
-                  WoltModalSheet.of(context).showNext();
-                },
-                theme: AppButtonTheme.secondary,
-                style: AppButtonStyle.outline,
-                shape: AppButtonShape.square,
-                size: AppButtonSize.small,
-                leadingIcon: const Icon(Icons.add),
-              ),
-            ),
-            SizedBox(height: AppSpacing.lg),
-
             // List
             if (allLists.isEmpty)
               Center(
