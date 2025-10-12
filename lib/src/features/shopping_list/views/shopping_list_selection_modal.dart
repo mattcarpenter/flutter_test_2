@@ -11,6 +11,7 @@ import '../../../widgets/app_button.dart';
 import '../../../widgets/app_circle_button.dart';
 import '../../../widgets/app_text_field_simple.dart';
 import '../../../widgets/utils/grouped_list_styling.dart';
+import '../../../widgets/wolt/text/modal_sheet_title.dart';
 import '../widgets/shopping_list_selection_row.dart';
 
 void showShoppingListSelectionModal(BuildContext context, WidgetRef ref) {
@@ -34,7 +35,7 @@ class ShoppingListSelectionPage {
       navBarHeight: 55,
       backgroundColor: AppColors.of(context).background,
       surfaceTintColor: Colors.transparent,
-      hasTopBarLayer: false,
+      pageTitle: ModalSheetTitle('Select Shopping List'),
       trailingNavBarWidget: Padding(
         padding: EdgeInsets.only(right: AppSpacing.lg),
         child: AppCircleButton(
@@ -49,7 +50,7 @@ class ShoppingListSelectionPage {
       child: Padding(
         padding: EdgeInsets.fromLTRB(
           AppSpacing.lg,
-          0,
+          AppSpacing.lg,
           AppSpacing.lg,
           AppSpacing.lg,
         ),
@@ -103,28 +104,20 @@ class ShoppingListSelectionPageContent extends ConsumerWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           mainAxisSize: MainAxisSize.min,
           children: [
-            // Title and Create button
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  'Select Shopping List',
-                  style: AppTypography.h4.copyWith(
-                    color: colors.textPrimary,
-                  ),
-                ),
-                AppButton(
-                  text: 'Create New List',
-                  onPressed: () {
-                    WoltModalSheet.of(context).showNext();
-                  },
-                  theme: AppButtonTheme.secondary,
-                  style: AppButtonStyle.outline,
-                  shape: AppButtonShape.square,
-                  size: AppButtonSize.small,
-                  leadingIcon: const Icon(Icons.add),
-                ),
-              ],
+            // Create button (title now in pageTitle)
+            Align(
+              alignment: Alignment.centerRight,
+              child: AppButton(
+                text: 'Create New List',
+                onPressed: () {
+                  WoltModalSheet.of(context).showNext();
+                },
+                theme: AppButtonTheme.secondary,
+                style: AppButtonStyle.outline,
+                shape: AppButtonShape.square,
+                size: AppButtonSize.small,
+                leadingIcon: const Icon(Icons.add),
+              ),
             ),
             SizedBox(height: AppSpacing.lg),
 
@@ -249,7 +242,7 @@ class CreateShoppingListPage {
       navBarHeight: 55,
       backgroundColor: AppColors.of(context).background,
       surfaceTintColor: Colors.transparent,
-      hasTopBarLayer: false,
+      pageTitle: ModalSheetTitle('Create New List'),
       leadingNavBarWidget: Padding(
         padding: EdgeInsets.only(left: AppSpacing.lg),
         child: AppCircleButton(
@@ -264,7 +257,7 @@ class CreateShoppingListPage {
       child: Padding(
         padding: EdgeInsets.fromLTRB(
           AppSpacing.lg,
-          0,
+          AppSpacing.lg,
           AppSpacing.lg,
           AppSpacing.lg,
         ),
@@ -336,15 +329,6 @@ class _CreateShoppingListPageContentState
       crossAxisAlignment: CrossAxisAlignment.start,
       mainAxisSize: MainAxisSize.min,
       children: [
-        // Title
-        Text(
-          'Create New List',
-          style: AppTypography.h4.copyWith(
-            color: colors.textPrimary,
-          ),
-        ),
-        SizedBox(height: AppSpacing.lg),
-
         // List name input label
         Text(
           'List Name',
