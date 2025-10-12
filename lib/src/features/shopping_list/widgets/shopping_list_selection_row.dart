@@ -1,12 +1,12 @@
-import 'package:flutter/material.dart';
+import 'package:flutter/cupertino.dart';
 
 import '../../../theme/colors.dart';
 import '../../../theme/spacing.dart';
-import '../../../theme/typography.dart';
 import '../../../widgets/app_radio_button.dart';
+import '../../../widgets/utils/grouped_list_styling.dart';
 
-/// A row for selecting shopping lists with radio button on the left and label on the right
-/// Single-select version of FolderSelectionRow
+/// A row for selecting shopping lists with label on left and radio button on right
+/// Matches the styling of ShoppingListItemTile for visual consistency
 class ShoppingListSelectionRow extends StatelessWidget {
   final String? listId; // null for default list
   final String label;
@@ -27,47 +27,56 @@ class ShoppingListSelectionRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colors = AppColors.of(context);
+    final borderRadius = GroupedListStyling.getBorderRadius(
+      isGrouped: true,
+      isFirstInGroup: first,
+      isLastInGroup: last,
+    );
+    final border = GroupedListStyling.getBorder(
+      context: context,
+      isGrouped: true,
+      isFirstInGroup: first,
+      isLastInGroup: last,
+      isDragging: false,
+    );
 
     return Container(
-      constraints: const BoxConstraints(minHeight: 48),
       decoration: BoxDecoration(
-        color: colors.surface,
-        borderRadius: BorderRadius.vertical(
-          top: first ? const Radius.circular(8) : Radius.zero,
-          bottom: last ? const Radius.circular(8) : Radius.zero,
-        ),
+        color: AppColors.of(context).input,
+        border: border,
+        borderRadius: borderRadius,
       ),
-      child: Material(
-        color: Colors.transparent,
-        child: InkWell(
-          onTap: onTap,
-          borderRadius: BorderRadius.vertical(
-            top: first ? const Radius.circular(8) : Radius.zero,
-            bottom: last ? const Radius.circular(8) : Radius.zero,
+      child: GestureDetector(
+        onTap: onTap,
+        behavior: HitTestBehavior.opaque,
+        child: Padding(
+          padding: EdgeInsets.symmetric(
+            horizontal: AppSpacing.lg,
+            vertical: AppSpacing.md,
           ),
-          child: Padding(
-            padding: EdgeInsets.symmetric(
-              horizontal: AppSpacing.lg,
-              vertical: AppSpacing.sm,
-            ),
-            child: Row(
-              children: [
-                AppRadioButton(
-                  selected: selected,
-                  onTap: onTap,
-                ),
-                SizedBox(width: AppSpacing.md),
-                Expanded(
-                  child: Text(
-                    label,
-                    style: AppTypography.body.copyWith(
-                      color: colors.textPrimary,
-                    ),
+          child: Row(
+            children: [
+              // Label on the left
+              Expanded(
+                child: Text(
+                  label,
+                  style: const TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w500,
+                    color: CupertinoColors.label,
                   ),
                 ),
-              ],
-            ),
+              ),
+
+              const SizedBox(width: 12),
+
+              // Radio button on the right (24x24 to match checkbox size)
+              AppRadioButton(
+                selected: selected,
+                onTap: null, // Tap is handled by the row
+                size: 24.0,
+              ),
+            ],
           ),
         ),
       ),

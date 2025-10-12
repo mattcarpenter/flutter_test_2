@@ -141,14 +141,9 @@ class ShoppingListSelectionPageContent extends ConsumerWidget {
                 ),
               )
             else
-              Container(
-                decoration: BoxDecoration(
-                  border: Border.all(color: colors.border),
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: allLists.asMap().entries.map((entry) {
+              Column(
+                mainAxisSize: MainAxisSize.min,
+                children: allLists.asMap().entries.map((entry) {
                     final index = entry.key;
                     final listItem = entry.value;
                     final isFirst = index == 0;
@@ -226,7 +221,6 @@ class ShoppingListSelectionPageContent extends ConsumerWidget {
 
                     return row;
                   }).toList(),
-                ),
               ),
           ],
         );
