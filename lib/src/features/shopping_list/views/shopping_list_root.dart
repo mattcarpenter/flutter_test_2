@@ -157,7 +157,8 @@ class _ShoppingListDropdownDelegate extends SliverPersistentHeaderDelegate {
             Expanded(
               child: AppButton(
                 text: _getCurrentListName(),
-                leadingIcon: const Icon(Icons.keyboard_arrow_down),
+                trailingIcon: const Icon(Icons.keyboard_arrow_down, size: 24),
+                trailingIconOffset: const Offset(8, -2),
                 style: AppButtonStyle.mutedOutline,
                 shape: AppButtonShape.square,
                 size: AppButtonSize.medium,
