@@ -10,6 +10,7 @@ import '../../../theme/spacing.dart';
 import '../../../theme/typography.dart';
 import '../../../widgets/app_button.dart';
 import '../../../widgets/app_circle_button.dart';
+import '../../../services/ingredient_parser_service.dart';
 import '../models/pantry_update_models.dart';
 import '../services/pantry_update_service.dart';
 import '../widgets/pantry_update_item_tile.dart';
@@ -385,14 +386,21 @@ class UpdatePantryButton extends ConsumerWidget {
     final pantryNotifier = ref.read(pantryItemsProvider.notifier);
     final currentListId = ref.read(currentShoppingListProvider);
     final shoppingListNotifier = ref.read(shoppingListItemsProvider(currentListId).notifier);
+    final parser = IngredientParserService();
 
     try {
       // Process items to add
       for (final item in updateResult.itemsToAdd) {
         final itemId = 'add_${item.shoppingListItem.id}';
         if (checkedItems[itemId] ?? true) {
+          // Parse the name to extract clean ingredient name (without quantities)
+          final parseResult = parser.parse(item.shoppingListItem.name);
+          final cleanName = parseResult.cleanName.isNotEmpty
+              ? parseResult.cleanName
+              : item.shoppingListItem.name;
+
           await pantryNotifier.addItem(
-            name: item.shoppingListItem.name,
+            name: cleanName,
             stockStatus: StockStatus.inStock,
             category: item.shoppingListItem.category,
             userId: item.shoppingListItem.userId,

@@ -2,13 +2,15 @@ import 'package:drift/drift.dart';
 import 'package:uuid/uuid.dart';
 import '../../database/database.dart';
 import '../managers/shopping_list_item_term_queue_manager.dart';
+import '../services/ingredient_parser_service.dart';
 
 class ShoppingListRepository {
   final AppDatabase _db;
   ShoppingListItemTermQueueManager? _termQueueManager;
-  
+  final _parser = IngredientParserService();
+
   ShoppingListRepository(this._db);
-  
+
   set termQueueManager(ShoppingListItemTermQueueManager? manager) {
     _termQueueManager = manager;
   }
@@ -97,18 +99,25 @@ class ShoppingListRepository {
       updatedAt: Value(now),
     );
     await _db.into(_db.shoppingListItems).insert(companion);
-    
+
     // Queue for term canonicalization if terms are not already provided
     if (terms == null || terms.isEmpty) {
+      // Parse the name to extract clean ingredient name (without quantities)
+      // for term generation
+      final parseResult = _parser.parse(name);
+      final cleanName = parseResult.cleanName.isNotEmpty
+          ? parseResult.cleanName
+          : name;
+
       await _termQueueManager?.queueShoppingListItem(
         shoppingListItemId: newId,
-        name: name,
+        name: cleanName,
         userId: userId,
         amount: amount,
         unit: unit,
       );
     }
-    
+
     return newId;
   }
 
@@ -152,11 +161,18 @@ class ShoppingListRepository {
       final item = await (_db.select(_db.shoppingListItems)
         ..where((t) => t.id.equals(itemId)))
         .getSingleOrNull();
-        
+
       if (item != null) {
+        // Parse the name to extract clean ingredient name (without quantities)
+        // for term generation
+        final parseResult = _parser.parse(name);
+        final cleanName = parseResult.cleanName.isNotEmpty
+            ? parseResult.cleanName
+            : name;
+
         await _termQueueManager?.queueShoppingListItem(
           shoppingListItemId: itemId,
-          name: name,
+          name: cleanName,
           userId: item.userId,
           amount: amount ?? item.amount,
           unit: unit ?? item.unit,

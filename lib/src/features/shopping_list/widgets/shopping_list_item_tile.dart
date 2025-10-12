@@ -1,9 +1,9 @@
 import 'package:flutter/cupertino.dart';
-import 'package:flutter/material.dart';
 import '../../../../database/database.dart';
 import '../../../theme/colors.dart';
 import '../../../theme/spacing.dart';
 import '../../../widgets/utils/grouped_list_styling.dart';
+import '../../../services/ingredient_parser_service.dart';
 
 class ShoppingListItemTile extends StatelessWidget {
   final ShoppingListItemEntry item;
@@ -11,6 +11,8 @@ class ShoppingListItemTile extends StatelessWidget {
   final VoidCallback onDelete;
   final bool isFirst;
   final bool isLast;
+
+  static final _parser = IngredientParserService();
 
   const ShoppingListItemTile({
     super.key,
@@ -21,23 +23,98 @@ class ShoppingListItemTile extends StatelessWidget {
     required this.isLast,
   });
 
-  String get _quantityText {
-    final amount = item.amount;
-    final unit = item.unit;
+  /// Builds a RichText widget with bold quantities parsed from item name
+  Widget _buildParsedItemText(BuildContext context) {
+    final text = item.name;
+    final isBought = item.bought;
 
-    if (amount == null) return '';
+    try {
+      final parseResult = _parser.parse(text);
 
-    String amountStr;
-    if (amount == amount.floor()) {
-      amountStr = amount.floor().toString();
-    } else {
-      amountStr = amount.toString();
-    }
+      if (parseResult.quantities.isEmpty) {
+        // No quantities found, return plain text
+        return Text(
+          text,
+          style: TextStyle(
+            fontSize: 16,
+            fontWeight: FontWeight.w500,
+            decoration: isBought ? TextDecoration.lineThrough : null,
+            color: isBought
+                ? CupertinoColors.secondaryLabel
+                : CupertinoColors.label,
+          ),
+        );
+      }
 
-    if (unit != null && unit.isNotEmpty) {
-      return 'Qty. $amountStr $unit';
-    } else {
-      return 'Qty. $amountStr';
+      final children = <InlineSpan>[];
+      int currentIndex = 0;
+
+      // Build TextSpan with bold quantities, normal ingredient names
+      for (final quantity in parseResult.quantities) {
+        // Text before quantity (ingredient name)
+        if (quantity.start > currentIndex) {
+          children.add(TextSpan(
+            text: text.substring(currentIndex, quantity.start),
+            style: TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.w500,
+              color: isBought
+                  ? CupertinoColors.secondaryLabel
+                  : CupertinoColors.label,
+            ),
+          ));
+        }
+
+        // Quantity with bold formatting
+        children.add(TextSpan(
+          text: text.substring(quantity.start, quantity.end),
+          style: TextStyle(
+            fontSize: 16,
+            fontWeight: FontWeight.bold,
+            color: isBought
+                ? CupertinoColors.secondaryLabel
+                : CupertinoColors.label,
+          ),
+        ));
+
+        currentIndex = quantity.end;
+      }
+
+      // Remaining text after last quantity
+      if (currentIndex < text.length) {
+        children.add(TextSpan(
+          text: text.substring(currentIndex),
+          style: TextStyle(
+            fontSize: 16,
+            fontWeight: FontWeight.w500,
+            color: isBought
+                ? CupertinoColors.secondaryLabel
+                : CupertinoColors.label,
+          ),
+        ));
+      }
+
+      return RichText(
+        text: TextSpan(
+          children: children,
+          style: isBought ? const TextStyle(
+            decoration: TextDecoration.lineThrough,
+          ) : null,
+        ),
+      );
+    } catch (e) {
+      // Fallback to plain text if parsing fails
+      return Text(
+        text,
+        style: TextStyle(
+          fontSize: 16,
+          fontWeight: FontWeight.w500,
+          decoration: isBought ? TextDecoration.lineThrough : null,
+          color: isBought
+              ? CupertinoColors.secondaryLabel
+              : CupertinoColors.label,
+        ),
+      );
     }
   }
 
@@ -136,34 +213,10 @@ class ShoppingListItemTile extends StatelessWidget {
 
                 SizedBox(width: AppSpacing.md),
 
-                // Item name
+                // Item name with parsed quantities in bold
                 Expanded(
-                  child: Text(
-                    item.name,
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w500,
-                      decoration: item.bought ? TextDecoration.lineThrough : null,
-                      color: item.bought
-                        ? CupertinoColors.secondaryLabel
-                        : CupertinoColors.label,
-                    ),
-                  ),
+                  child: _buildParsedItemText(context),
                 ),
-
-                // Quantity (right-aligned)
-                if (_quantityText.isNotEmpty) ...[
-                  SizedBox(width: AppSpacing.md),
-                  Text(
-                    _quantityText,
-                    style: TextStyle(
-                      fontSize: 14,
-                      color: item.bought
-                        ? CupertinoColors.tertiaryLabel
-                        : CupertinoColors.secondaryLabel,
-                    ),
-                  ),
-                ],
               ],
             ),
           ),

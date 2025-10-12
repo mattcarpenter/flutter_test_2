@@ -10,7 +10,6 @@ import '../../../theme/typography.dart';
 import '../../../widgets/app_button.dart';
 import '../../../widgets/app_circle_button.dart';
 import '../../../widgets/app_text_field_simple.dart';
-import '../widgets/quantity_control.dart';
 
 void showAddShoppingListItemModal(BuildContext context, String? listId) {
   WoltModalSheet.show(
@@ -83,7 +82,6 @@ class _AddShoppingListItemFormState extends ConsumerState<AddShoppingListItemFor
   late final TextEditingController _nameController;
   late final FocusNode _focusNode;
   final _textFieldKey = GlobalKey();
-  int _quantity = 1;
   bool _isLoading = false;
   bool _hasInput = false;
   Map<String, dynamic>? _lastAddedItem;
@@ -133,13 +131,13 @@ class _AddShoppingListItemFormState extends ConsumerState<AddShoppingListItemFor
 
     try {
       final userId = Supabase.instance.client.auth.currentUser?.id;
-      final currentQuantity = _quantity;
 
+      // Save the full name as typed by the user
       final itemId = await ref.read(shoppingListItemsProvider(widget.listId).notifier).addItem(
         name: name,
         userId: userId,
-        amount: currentQuantity.toDouble(),
-        unit: null, // No unit as requested
+        amount: null,
+        unit: null,
       );
 
       // Store the last added item and reset form state
@@ -147,10 +145,8 @@ class _AddShoppingListItemFormState extends ConsumerState<AddShoppingListItemFor
         _lastAddedItem = {
           'id': itemId,
           'name': name,
-          'amount': currentQuantity,
         };
         _isLoading = false;
-        _quantity = 1; // Reset quantity to default
       });
 
       // Clear form
@@ -236,29 +232,6 @@ class _AddShoppingListItemFormState extends ConsumerState<AddShoppingListItemFor
           ],
         ),
 
-        SizedBox(height: AppSpacing.lg),
-
-        // Quantity control
-        Row(
-          children: [
-            Text(
-              'Quantity:',
-              style: AppTypography.body.copyWith(
-                color: AppColors.of(context).textPrimary,
-              ),
-            ),
-            SizedBox(width: AppSpacing.lg),
-            QuantityControl(
-              value: _quantity,
-              onChanged: _isLoading ? (_) {} : (value) {
-                setState(() {
-                  _quantity = value;
-                });
-              },
-            ),
-          ],
-        ),
-
         // Previously added section
         if (_lastAddedItem != null) ...[
           SizedBox(height: AppSpacing.xl),
@@ -279,7 +252,7 @@ class _AddShoppingListItemFormState extends ConsumerState<AddShoppingListItemFor
               children: [
                 Expanded(
                   child: Text(
-                    '${_lastAddedItem!['name']} - Quantity: ${_lastAddedItem!['amount']}',
+                    _lastAddedItem!['name'],
                     style: AppTypography.body.copyWith(
                       color: AppColors.of(context).textPrimary,
                     ),
