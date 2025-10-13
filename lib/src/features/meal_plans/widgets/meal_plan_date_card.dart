@@ -29,6 +29,7 @@ class _MealPlanDateCardState extends ConsumerState<MealPlanDateCard>
   late AnimationController _animationController;
   late Animation<double> _scaleAnimation;
   late Animation<Color?> _borderColorAnimation;
+  final Set<String> _deletingItemIds = {}; // Track items being deleted
 
   @override
   void initState() {
@@ -108,6 +109,35 @@ class _MealPlanDateCardState extends ConsumerState<MealPlanDateCard>
   bool _willAcceptDrag(MealPlanDragData? dragData) {
     // Only accept drops from different dates
     return dragData != null && dragData.sourceDate != widget.dateString;
+  }
+
+  // Handle item deletion with animation
+  void _handleItemDeletion(String itemId) {
+    // Mark item as deleting (triggers fade out)
+    setState(() {
+      _deletingItemIds.add(itemId);
+    });
+
+    // Wait for fade animation to complete, then actually remove
+    Future.delayed(const Duration(milliseconds: 300), () {
+      if (mounted && _deletingItemIds.contains(itemId)) {
+        // Get current user ID
+        final userId = ref.read(currentUserProvider)?.id;
+
+        // Actually remove the item from database
+        ref.read(mealPlanNotifierProvider.notifier).removeItem(
+          date: widget.dateString,
+          itemId: itemId,
+          userId: userId,
+          householdId: null,
+        );
+
+        // Clear from deleting set after removal
+        setState(() {
+          _deletingItemIds.remove(itemId);
+        });
+      }
+    });
   }
 
   @override
@@ -204,11 +234,25 @@ class _MealPlanDateCardState extends ConsumerState<MealPlanDateCard>
         children: items.asMap().entries.map((entry) {
           final index = entry.key;
           final item = entry.value;
-          return MealPlanItemLifted(
-            key: ValueKey(item.id),
-            item: item,
-            dateString: widget.dateString,
-            index: index,
+          final isDeleting = _deletingItemIds.contains(item.id);
+
+          return AnimatedSize(
+            key: ValueKey('${item.id}_size'),
+            duration: const Duration(milliseconds: 300),
+            curve: Curves.easeInOut,
+            child: AnimatedOpacity(
+              key: ValueKey('${item.id}_opacity'),
+              opacity: isDeleting ? 0.0 : 1.0,
+              duration: const Duration(milliseconds: 300),
+              curve: Curves.easeInOut,
+              child: MealPlanItemLifted(
+                key: ValueKey(item.id),
+                item: item,
+                dateString: widget.dateString,
+                index: index,
+                onDelete: () => _handleItemDeletion(item.id),
+              ),
+            ),
           );
         }).toList(),
       ),

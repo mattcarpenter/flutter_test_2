@@ -16,12 +16,14 @@ class MealPlanItemLifted extends ConsumerStatefulWidget {
   final MealPlanItem item;
   final String dateString;
   final int index;
+  final VoidCallback? onDelete;
 
   const MealPlanItemLifted({
     super.key,
     required this.item,
     required this.dateString,
     required this.index,
+    this.onDelete,
   });
 
   @override
@@ -333,12 +335,18 @@ class _MealPlanItemLiftedState extends ConsumerState<MealPlanItemLifted>
   }
 
   void _removeItem(WidgetRef ref) {
-    ref.read(mealPlanNotifierProvider.notifier).removeItem(
-      date: widget.dateString,
-      itemId: widget.item.id,
-      userId: null,
-      householdId: null,
-    );
+    // Use the onDelete callback if provided (allows parent to coordinate animation)
+    if (widget.onDelete != null) {
+      widget.onDelete!();
+    } else {
+      // Fallback to direct removal if no callback provided
+      ref.read(mealPlanNotifierProvider.notifier).removeItem(
+        date: widget.dateString,
+        itemId: widget.item.id,
+        userId: null,
+        householdId: null,
+      );
+    }
   }
 
   Widget _buildRecipeThumbnail(BuildContext context) {
