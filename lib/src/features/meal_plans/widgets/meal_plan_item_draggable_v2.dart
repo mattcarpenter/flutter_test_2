@@ -139,7 +139,7 @@ class MealPlanItemDraggableV2 extends ConsumerWidget {
             image: MenuImage.icon(CupertinoIcons.book),
             callback: () {
               if (item.recipeId != null) {
-                context.push('/recipes/${item.recipeId}');
+                context.push('/recipe/${item.recipeId}');
               }
             },
           ),
@@ -216,7 +216,7 @@ class MealPlanItemDraggableV2 extends ConsumerWidget {
 
   void _handleTap(BuildContext context, WidgetRef ref) {
     if (item.isRecipe && item.recipeId != null) {
-      context.push('/recipes/${item.recipeId}');
+      context.push('/recipe/${item.recipeId}');
     } else if (item.isNote) {
       _editNote(context, ref);
     }

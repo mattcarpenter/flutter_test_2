@@ -284,7 +284,7 @@ class _MealPlanItemLiftedState extends ConsumerState<MealPlanItemLifted>
             image: MenuImage.icon(CupertinoIcons.book),
             callback: () {
               if (widget.item.recipeId != null) {
-                context.push('/recipes/${widget.item.recipeId}');
+                context.push('/recipe/${widget.item.recipeId}');
               }
             },
           ),
@@ -312,7 +312,7 @@ class _MealPlanItemLiftedState extends ConsumerState<MealPlanItemLifted>
 
   void _handleTap(BuildContext context, WidgetRef ref) {
     if (widget.item.isRecipe && widget.item.recipeId != null) {
-      context.push('/recipes/${widget.item.recipeId}');
+      context.push('/recipe/${widget.item.recipeId}');
     } else if (widget.item.isNote) {
       _editNote(context, ref);
     }

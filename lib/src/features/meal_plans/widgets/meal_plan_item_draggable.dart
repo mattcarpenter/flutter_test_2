@@ -132,7 +132,7 @@ class _MealPlanItemDraggableState extends ConsumerState<MealPlanItemDraggable> {
             image: MenuImage.icon(CupertinoIcons.book),
             callback: () {
               if (widget.item.recipeId != null) {
-                context.push('/recipes/${widget.item.recipeId}');
+                context.push('/recipe/${widget.item.recipeId}');
               }
             },
           ),
@@ -251,7 +251,7 @@ class _MealPlanItemDraggableState extends ConsumerState<MealPlanItemDraggable> {
   void _handleTap(BuildContext context, WidgetRef ref) {
     if (widget.item.isRecipe && widget.item.recipeId != null) {
       // Navigate to recipe detail
-      context.push('/recipes/${widget.item.recipeId}');
+      context.push('/recipe/${widget.item.recipeId}');
     } else if (widget.item.isNote) {
       // Show edit note modal
       _editNote(context, ref);
