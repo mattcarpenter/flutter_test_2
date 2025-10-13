@@ -5,7 +5,11 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:super_context_menu/super_context_menu.dart';
 import '../../../../database/models/meal_plan_items.dart';
+import '../../../../database/models/recipe_images.dart';
 import '../../../providers/meal_plan_provider.dart';
+import '../../../providers/recipe_provider.dart';
+import '../../../theme/colors.dart';
+import '../../../widgets/local_or_network_image.dart';
 import '../models/meal_plan_drag_data.dart';
 
 class MealPlanItemLifted extends ConsumerStatefulWidget {
@@ -82,7 +86,7 @@ class _MealPlanItemLiftedState extends ConsumerState<MealPlanItemLifted>
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 6.0),
+      padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 3.0),
       child: AnimatedBuilder(
         animation: _liftController,
         builder: (context, child) {
@@ -115,7 +119,7 @@ class _MealPlanItemLiftedState extends ConsumerState<MealPlanItemLifted>
       child: GestureDetector(
         onTap: () => _handleTap(context, ref),
         child: Container(
-          padding: const EdgeInsets.all(12),
+          padding: const EdgeInsets.all(8),
           decoration: BoxDecoration(
             color: CupertinoColors.systemBackground.resolveFrom(context),
             borderRadius: BorderRadius.circular(8),
@@ -142,7 +146,7 @@ class _MealPlanItemLiftedState extends ConsumerState<MealPlanItemLifted>
           borderRadius: BorderRadius.circular(8),
           shadowColor: Colors.black.withOpacity(0.3),
           child: Container(
-            padding: const EdgeInsets.all(12),
+            padding: const EdgeInsets.all(8),
             decoration: BoxDecoration(
               color: CupertinoColors.systemBackground.resolveFrom(context),
               borderRadius: BorderRadius.circular(8),
@@ -159,7 +163,7 @@ class _MealPlanItemLiftedState extends ConsumerState<MealPlanItemLifted>
     return Opacity(
       opacity: 0.0, // Completely invisible - only shadow will be visible from parent
       child: Container(
-        padding: const EdgeInsets.all(12),
+        padding: const EdgeInsets.all(8),
         decoration: BoxDecoration(
           color: CupertinoColors.systemBackground.resolveFrom(context),
           borderRadius: BorderRadius.circular(8),
@@ -179,22 +183,24 @@ class _MealPlanItemLiftedState extends ConsumerState<MealPlanItemLifted>
       opacity: opacity,
       child: Row(
         children: [
-          // Icon based on type
-          Container(
-            width: 32,
-            height: 32,
-            decoration: BoxDecoration(
-              color: _getItemColor(context),
-              borderRadius: BorderRadius.circular(6),
-            ),
-            child: Icon(
-              _getItemIcon(),
-              size: 16,
-              color: CupertinoColors.white,
-            ),
-          ),
+          // Thumbnail for recipes, icon for notes
+          widget.item.isRecipe && widget.item.recipeId != null
+              ? _buildRecipeThumbnail(context)
+              : Container(
+                  width: 36,
+                  height: 36,
+                  decoration: BoxDecoration(
+                    color: _getItemColor(context),
+                    borderRadius: BorderRadius.circular(6),
+                  ),
+                  child: Icon(
+                    _getItemIcon(),
+                    size: 16,
+                    color: CupertinoColors.white,
+                  ),
+                ),
 
-          const SizedBox(width: 12),
+          const SizedBox(width: 8),
 
           // Content
           Expanded(
@@ -332,6 +338,64 @@ class _MealPlanItemLiftedState extends ConsumerState<MealPlanItemLifted>
       itemId: widget.item.id,
       userId: null,
       householdId: null,
+    );
+  }
+
+  Widget _buildRecipeThumbnail(BuildContext context) {
+    final recipeAsync = ref.watch(recipeByIdStreamProvider(widget.item.recipeId!));
+
+    return recipeAsync.when(
+      data: (recipe) {
+        if (recipe == null) {
+          return _buildFallbackThumbnail(context);
+        }
+
+        final coverImage = RecipeImage.getCoverImage(recipe.images);
+        final coverImageUrl = coverImage?.getPublicUrlForSize(RecipeImageSize.small) ?? '';
+
+        return SizedBox(
+          width: 36,
+          height: 36,
+          child: FutureBuilder<String>(
+            future: coverImage?.getFullPath() ?? Future.value(''),
+            builder: (context, snapshot) {
+              final coverImageFilePath = snapshot.data ?? '';
+              final hasImage = coverImageFilePath.isNotEmpty || coverImageUrl.isNotEmpty;
+
+              return ClipRRect(
+                borderRadius: BorderRadius.circular(6),
+                child: hasImage
+                    ? LocalOrNetworkImage(
+                        filePath: coverImageFilePath,
+                        url: coverImageUrl,
+                        width: 36,
+                        height: 36,
+                        fit: BoxFit.cover,
+                      )
+                    : _buildFallbackThumbnail(context),
+              );
+            },
+          ),
+        );
+      },
+      loading: () => _buildFallbackThumbnail(context),
+      error: (_, __) => _buildFallbackThumbnail(context),
+    );
+  }
+
+  Widget _buildFallbackThumbnail(BuildContext context) {
+    return Container(
+      width: 36,
+      height: 36,
+      decoration: BoxDecoration(
+        color: AppColorSwatches.neutral[100],
+        borderRadius: BorderRadius.circular(6),
+      ),
+      child: Icon(
+        Icons.restaurant_menu,
+        size: 16,
+        color: AppColorSwatches.neutral[400],
+      ),
     );
   }
 
