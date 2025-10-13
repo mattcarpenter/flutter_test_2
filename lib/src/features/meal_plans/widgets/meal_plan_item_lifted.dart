@@ -146,10 +146,6 @@ class _MealPlanItemLiftedState extends ConsumerState<MealPlanItemLifted>
             decoration: BoxDecoration(
               color: CupertinoColors.systemBackground.resolveFrom(context),
               borderRadius: BorderRadius.circular(8),
-              border: Border.all(
-                color: CupertinoColors.activeBlue.resolveFrom(context),
-                width: 2,
-              ),
             ),
             child: _buildTileContent(context, 1.0),
           ),

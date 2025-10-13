@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../database/models/meal_plan_items.dart';
 import '../../../providers/auth_provider.dart';
 import '../../../providers/meal_plan_provider.dart';
+import '../../../theme/colors.dart';
 import '../models/meal_plan_drag_data.dart';
 import 'meal_plan_date_header.dart';
 import 'meal_plan_item_lifted.dart';
@@ -36,7 +37,7 @@ class _MealPlanDateCardState extends ConsumerState<MealPlanDateCard>
       duration: const Duration(milliseconds: 200),
       vsync: this,
     );
-    
+
     _scaleAnimation = Tween<double>(
       begin: 1.0,
       end: 1.02,
@@ -44,10 +45,10 @@ class _MealPlanDateCardState extends ConsumerState<MealPlanDateCard>
       parent: _animationController,
       curve: Curves.easeOut,
     ));
-    
+
     _borderColorAnimation = ColorTween(
       begin: CupertinoColors.separator,
-      end: CupertinoColors.activeBlue,
+      end: AppColorSwatches.primary[300],
     ).animate(CurvedAnimation(
       parent: _animationController,
       curve: Curves.easeOut,
@@ -112,7 +113,7 @@ class _MealPlanDateCardState extends ConsumerState<MealPlanDateCard>
   @override
   Widget build(BuildContext context) {
     final mealPlanAsync = ref.watch(mealPlanByDateStreamProvider(widget.dateString));
-    
+
     return DragTarget<MealPlanDragData>(
       onWillAcceptWithDetails: (details) => _willAcceptDrag(details.data),
       onAcceptWithDetails: (details) => _onDragAccept(details.data),
@@ -127,20 +128,21 @@ class _MealPlanDateCardState extends ConsumerState<MealPlanDateCard>
               child: Container(
                 margin: const EdgeInsets.only(bottom: 16.0),
                 decoration: BoxDecoration(
-                  color: CupertinoColors.white.withOpacity(0.5),
+                  color: _isHovering
+                      ? AppColorSwatches.primary[25]!
+                      : CupertinoColors.white.withOpacity(0.5),
                   borderRadius: BorderRadius.circular(12),
                   border: _isHovering
                       ? Border.all(
-                          color: CupertinoDynamicColor.resolve(_borderColorAnimation.value!, context),
-                          width: 2.0,
+                          color: _borderColorAnimation.value!,
+                          width: 1.0,
                         )
                       : null,
                   boxShadow: _isHovering
                       ? [
                           BoxShadow(
-                            color: CupertinoColors.activeBlue
-                                .resolveFrom(context)
-                                .withOpacity(0.1),
+                            color: AppColorSwatches.primary[500]!
+                                .withOpacity(0.15),
                             blurRadius: 8,
                             offset: const Offset(0, 2),
                           ),
@@ -156,7 +158,7 @@ class _MealPlanDateCardState extends ConsumerState<MealPlanDateCard>
                       dateString: widget.dateString,
                       ref: ref,
                     ),
-                    
+
                     // Content area
                     mealPlanAsync.when(
                       data: (mealPlan) => _buildContent(mealPlan),
@@ -186,12 +188,12 @@ class _MealPlanDateCardState extends ConsumerState<MealPlanDateCard>
 
   Widget _buildContent(dynamic mealPlan) {
     List<MealPlanItem> items = [];
-    
+
     if (mealPlan?.items != null && (mealPlan!.items as List).isNotEmpty) {
       items = (mealPlan.items as List).cast<MealPlanItem>();
       items.sort((a, b) => a.position.compareTo(b.position));
     }
-    
+
     if (items.isEmpty) {
       return _buildEmptyState();
     }

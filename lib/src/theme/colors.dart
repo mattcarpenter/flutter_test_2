@@ -57,6 +57,7 @@ class AppColorSwatches {
   });*/
 
   static const MaterialColor primary = MaterialColor(0xFFF27405, {
+    25: Color(0xFFFFFBF8), // New very light step
     50:  Color(0xFFFFF4E8), // Very pale cream
     100: Color(0xFFFFE6CC), // Soft apricot
     150: Color(0xFFFFD7B3), // Light peach (extra step)
