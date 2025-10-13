@@ -4,8 +4,10 @@ import 'package:wolt_modal_sheet/wolt_modal_sheet.dart';
 import '../../../../database/database.dart';
 import '../../../providers/recipe_provider.dart' as recipe_provider;
 import '../../../providers/meal_plan_provider.dart';
+import '../../../providers/recently_viewed_provider.dart';
 import '../../../theme/colors.dart';
 import '../../../theme/spacing.dart';
+import '../../../theme/typography.dart';
 import '../../../widgets/app_button.dart';
 import '../../../widgets/app_circle_button.dart';
 import '../../../widgets/recipe_list_item.dart';
@@ -135,6 +137,8 @@ class _AddRecipeToMealPlanContentState extends ConsumerState<AddRecipeToMealPlan
   @override
   Widget build(BuildContext context) {
     final searchState = ref.watch(recipe_provider.cookModalRecipeSearchProvider);
+    final recentlyViewedAsync = ref.watch(recentlyViewedLimitedProvider(5));
+    final hasSearchQuery = _searchController.text.isNotEmpty;
 
     return Column(
       mainAxisSize: MainAxisSize.min,
@@ -151,55 +155,170 @@ class _AddRecipeToMealPlanContentState extends ConsumerState<AddRecipeToMealPlan
           ),
         ),
 
-        // Search results
+        // Scrollable content area with fixed height
         SizedBox(
           height: MediaQuery.of(context).size.height * 0.6,
-          child: searchState.results.isEmpty && !searchState.isLoading
-              ? _buildEmptyState(context)
-              : CustomScrollView(
-                  slivers: [
-                    SliverList.builder(
-                      itemCount: searchState.results.length,
-                      itemBuilder: (context, index) {
-                        final recipe = searchState.results[index];
-                        return RecipeListItem(
-                          recipe: recipe,
-                          onTap: null,
-                          trailing: AppButton(
-                            text: 'Add',
-                            onPressed: () => _onRecipeSelected(recipe),
-                            size: AppButtonSize.small,
-                            style: AppButtonStyle.outline,
-                            shape: AppButtonShape.square,
-                          ),
-                        );
-                      },
-                    ),
-                  ],
-                ),
+          child: CustomScrollView(
+            slivers: [
+              // Main content area (search results or empty states)
+              if (!hasSearchQuery)
+                _buildInitialState(context)
+              else if (searchState.results.isEmpty && !searchState.isLoading)
+                _buildNoResultsState(context)
+              else if (searchState.isLoading)
+                _buildLoadingState()
+              else
+                _buildSearchResults(searchState.results),
+
+              // Recently viewed section (always at bottom if exists)
+              ...recentlyViewedAsync.when(
+                data: (recentlyViewedRecipes) {
+                  if (recentlyViewedRecipes.isEmpty) {
+                    return [const SliverToBoxAdapter(child: SizedBox.shrink())];
+                  }
+                  return [
+                    _buildRecentlyViewedSection(context, recentlyViewedRecipes),
+                  ];
+                },
+                loading: () => [const SliverToBoxAdapter(child: SizedBox.shrink())],
+                error: (_, __) => [const SliverToBoxAdapter(child: SizedBox.shrink())],
+              ),
+            ],
+          ),
         ),
       ],
     );
   }
 
-  Widget _buildEmptyState(BuildContext context) {
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(
-            CupertinoIcons.search,
-            size: 48,
-            color: CupertinoColors.tertiaryLabel.resolveFrom(context),
+  // Initial state - no search query entered
+  Widget _buildInitialState(BuildContext context) {
+    return SliverToBoxAdapter(
+      child: SizedBox(
+        height: 200,
+        child: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(
+                CupertinoIcons.search,
+                size: 48,
+                color: CupertinoColors.tertiaryLabel.resolveFrom(context),
+              ),
+              SizedBox(height: AppSpacing.lg),
+              Text(
+                'Search for recipes to add',
+                style: CupertinoTheme.of(context).textTheme.textStyle.copyWith(
+                  fontSize: 16,
+                  color: CupertinoColors.secondaryLabel.resolveFrom(context),
+                ),
+              ),
+            ],
           ),
-          SizedBox(height: AppSpacing.lg),
-          Text(
-            'Search for recipes to add',
-            style: CupertinoTheme.of(context).textTheme.textStyle.copyWith(
-              fontSize: 16,
-              color: CupertinoColors.secondaryLabel.resolveFrom(context),
+        ),
+      ),
+    );
+  }
+
+  // No results state - search query entered but no matches
+  Widget _buildNoResultsState(BuildContext context) {
+    return SliverToBoxAdapter(
+      child: SizedBox(
+        height: 200,
+        child: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(
+                CupertinoIcons.doc_text_search,
+                size: 48,
+                color: CupertinoColors.tertiaryLabel.resolveFrom(context),
+              ),
+              SizedBox(height: AppSpacing.lg),
+              Text(
+                'No recipes found',
+                style: CupertinoTheme.of(context).textTheme.textStyle.copyWith(
+                  fontSize: 16,
+                  color: CupertinoColors.secondaryLabel.resolveFrom(context),
+                ),
+              ),
+              SizedBox(height: AppSpacing.xs),
+              Text(
+                'Try a different search term',
+                style: CupertinoTheme.of(context).textTheme.textStyle.copyWith(
+                  fontSize: 14,
+                  color: CupertinoColors.tertiaryLabel.resolveFrom(context),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  // Loading state
+  Widget _buildLoadingState() {
+    return const SliverToBoxAdapter(
+      child: SizedBox(
+        height: 200,
+        child: Center(
+          child: CupertinoActivityIndicator(),
+        ),
+      ),
+    );
+  }
+
+  // Search results list
+  Widget _buildSearchResults(List<RecipeEntry> results) {
+    return SliverList.builder(
+      itemCount: results.length,
+      itemBuilder: (context, index) {
+        final recipe = results[index];
+        return RecipeListItem(
+          recipe: recipe,
+          onTap: null,
+          trailing: AppButton(
+            text: 'Add',
+            onPressed: () => _onRecipeSelected(recipe),
+            size: AppButtonSize.small,
+            style: AppButtonStyle.outline,
+            shape: AppButtonShape.square,
+          ),
+        );
+      },
+    );
+  }
+
+  // Recently viewed section
+  Widget _buildRecentlyViewedSection(BuildContext context, List<RecipeEntry> recentlyViewedRecipes) {
+    return SliverToBoxAdapter(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Section header
+          Padding(
+            padding: EdgeInsets.fromLTRB(AppSpacing.lg, AppSpacing.lg, AppSpacing.lg, AppSpacing.sm),
+            child: Text(
+              'Recently Viewed',
+              style: AppTypography.h2Serif.copyWith(
+                color: AppColors.of(context).headingSecondary,
+              ),
             ),
           ),
+          // Recipe list
+          ...recentlyViewedRecipes.map((recipe) {
+            return RecipeListItem(
+              recipe: recipe,
+              onTap: null,
+              trailing: AppButton(
+                text: 'Add',
+                onPressed: () => _onRecipeSelected(recipe),
+                size: AppButtonSize.small,
+                style: AppButtonStyle.outline,
+                shape: AppButtonShape.square,
+              ),
+            );
+          }),
         ],
       ),
     );
