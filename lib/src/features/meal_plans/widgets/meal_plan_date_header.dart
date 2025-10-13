@@ -1,4 +1,5 @@
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import '../../../widgets/app_circle_button.dart';
@@ -33,7 +34,7 @@ class MealPlanDateHeader extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.fromLTRB(16.0, 16.0, 16.0, 20.0),
       decoration: BoxDecoration(
-        color: CupertinoColors.systemBackground.resolveFrom(context),
+        color: Colors.transparent,
         borderRadius: const BorderRadius.vertical(
           top: Radius.circular(12),
         ),

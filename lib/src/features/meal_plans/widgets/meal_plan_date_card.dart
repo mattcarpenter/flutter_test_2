@@ -1,4 +1,5 @@
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../database/models/meal_plan_items.dart';
 import '../../../providers/auth_provider.dart';
@@ -126,17 +127,14 @@ class _MealPlanDateCardState extends ConsumerState<MealPlanDateCard>
               child: Container(
                 margin: const EdgeInsets.only(bottom: 16.0),
                 decoration: BoxDecoration(
-                  color: CupertinoColors.systemBackground.resolveFrom(context),
+                  color: CupertinoColors.white.withOpacity(0.5),
                   borderRadius: BorderRadius.circular(12),
                   border: _isHovering
                       ? Border.all(
                           color: CupertinoDynamicColor.resolve(_borderColorAnimation.value!, context),
                           width: 2.0,
                         )
-                      : Border.all(
-                          color: CupertinoColors.separator.resolveFrom(context).withOpacity(0.3),
-                          width: 0.5,
-                        ),
+                      : null,
                   boxShadow: _isHovering
                       ? [
                           BoxShadow(
@@ -198,17 +196,20 @@ class _MealPlanDateCardState extends ConsumerState<MealPlanDateCard>
       return _buildEmptyState();
     }
 
-    return Column(
-      children: items.asMap().entries.map((entry) {
-        final index = entry.key;
-        final item = entry.value;
-        return MealPlanItemLifted(
-          key: ValueKey(item.id),
-          item: item,
-          dateString: widget.dateString,
-          index: index,
-        );
-      }).toList(),
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 10.0),
+      child: Column(
+        children: items.asMap().entries.map((entry) {
+          final index = entry.key;
+          final item = entry.value;
+          return MealPlanItemLifted(
+            key: ValueKey(item.id),
+            item: item,
+            dateString: widget.dateString,
+            index: index,
+          );
+        }).toList(),
+      ),
     );
   }
 

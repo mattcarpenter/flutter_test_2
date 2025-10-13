@@ -117,8 +117,12 @@ class _MealPlanItemLiftedState extends ConsumerState<MealPlanItemLifted>
         child: Container(
           padding: const EdgeInsets.all(12),
           decoration: BoxDecoration(
-            color: CupertinoColors.secondarySystemGroupedBackground.resolveFrom(context),
+            color: CupertinoColors.systemBackground.resolveFrom(context),
             borderRadius: BorderRadius.circular(8),
+            border: Border.all(
+              color: CupertinoColors.separator.resolveFrom(context),
+              width: 0.5,
+            ),
           ),
           child: _buildTileContent(context, 1.0, isDraggableHandle: true),
         ),
@@ -142,7 +146,7 @@ class _MealPlanItemLiftedState extends ConsumerState<MealPlanItemLifted>
             child: Container(
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
-                color: CupertinoColors.secondarySystemGroupedBackground.resolveFrom(context),
+                color: CupertinoColors.systemBackground.resolveFrom(context),
                 borderRadius: BorderRadius.circular(8),
                 border: Border.all(
                   color: CupertinoColors.activeBlue.resolveFrom(context),
@@ -166,8 +170,12 @@ class _MealPlanItemLiftedState extends ConsumerState<MealPlanItemLifted>
         child: Container(
           padding: const EdgeInsets.all(12),
           decoration: BoxDecoration(
-            color: CupertinoColors.secondarySystemGroupedBackground.resolveFrom(context),
+            color: CupertinoColors.systemBackground.resolveFrom(context),
             borderRadius: BorderRadius.circular(8),
+            border: Border.all(
+              color: CupertinoColors.separator.resolveFrom(context),
+              width: 0.5,
+            ),
           ),
           child: _buildTileContent(context, 0.5),
         ),
