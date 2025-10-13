@@ -3,7 +3,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import '../../../widgets/app_circle_button.dart';
-import 'meal_plan_context_menu.dart';
+import '../../../widgets/adaptive_pull_down/adaptive_menu_item.dart';
+import '../../../widgets/adaptive_pull_down/adaptive_pull_down.dart';
+import '../../../providers/meal_plan_provider.dart';
+import '../views/add_recipe_to_meal_plan_modal.dart';
+import '../views/add_note_to_meal_plan_modal.dart';
+import '../views/check_pantry_modal.dart';
+import '../views/add_to_shopping_list_modal.dart';
 
 class MealPlanDateHeader extends StatelessWidget {
   final DateTime date;
@@ -21,7 +27,7 @@ class MealPlanDateHeader extends StatelessWidget {
   Widget build(BuildContext context) {
     final isToday = _isToday(date);
     final isTomorrow = _isTomorrow(date);
-    
+
     String displayText;
     if (isToday) {
       displayText = 'Today, ${DateFormat('MMM d').format(date)}';
@@ -30,7 +36,7 @@ class MealPlanDateHeader extends StatelessWidget {
     } else {
       displayText = DateFormat('EEEE, MMM d').format(date);
     }
-    
+
     return Container(
       padding: const EdgeInsets.fromLTRB(16.0, 16.0, 16.0, 20.0),
       decoration: BoxDecoration(
@@ -67,52 +73,113 @@ class MealPlanDateHeader extends StatelessWidget {
           ),
 
           // Add button
-          AppCircleButton(
-            icon: AppCircleButtonIcon.plus,
-            variant: AppCircleButtonVariant.neutral,
-            onPressed: () => _showAddMenu(context, ref),
+          AdaptivePullDownButton(
+            items: [
+              AdaptiveMenuItem(
+                title: 'Add Recipe',
+                icon: const Icon(CupertinoIcons.book),
+                onTap: () => _showAddRecipeModal(context, dateString, ref),
+              ),
+              AdaptiveMenuItem(
+                title: 'Add Note',
+                icon: const Icon(CupertinoIcons.doc_text),
+                onTap: () => _showAddNoteModal(context, dateString, ref),
+              ),
+            ],
+            child: const AppCircleButton(
+              icon: AppCircleButtonIcon.plus,
+              variant: AppCircleButtonVariant.neutral,
+            ),
           ),
 
           const SizedBox(width: 8),
 
           // More actions button
-          AppCircleButton(
-            icon: AppCircleButtonIcon.ellipsis,
-            variant: AppCircleButtonVariant.neutral,
-            onPressed: () => _showMoreMenu(context, ref),
+          AdaptivePullDownButton(
+            items: [
+              AdaptiveMenuItem(
+                title: 'Check Pantry',
+                icon: const Icon(CupertinoIcons.checkmark_seal),
+                onTap: () => _showCheckPantryModal(context, dateString, ref),
+              ),
+              AdaptiveMenuItem(
+                title: 'Add to Shopping List',
+                icon: const Icon(CupertinoIcons.cart_badge_plus),
+                onTap: () => _showAddToShoppingListModal(context, dateString, ref),
+              ),
+              AdaptiveMenuItem(
+                title: 'Clear Items',
+                icon: const Icon(CupertinoIcons.clear),
+                onTap: () => _confirmClearItems(context, dateString, ref),
+                isDestructive: true,
+              ),
+            ],
+            child: const AppCircleButton(
+              icon: AppCircleButtonIcon.ellipsis,
+              variant: AppCircleButtonVariant.neutral,
+            ),
           ),
         ],
       ),
     );
   }
 
-  void _showAddMenu(BuildContext context, WidgetRef ref) {
-    MealPlanContextMenu.showAddMenu(
-      context: context,
-      date: dateString,
-      ref: ref,
-    );
+  // Helper methods for menu actions
+  void _showAddRecipeModal(BuildContext context, String date, WidgetRef ref) {
+    showAddRecipeToMealPlanModal(context, date);
   }
 
-  void _showMoreMenu(BuildContext context, WidgetRef ref) {
-    MealPlanContextMenu.showMoreMenu(
+  void _showAddNoteModal(BuildContext context, String date, WidgetRef ref) {
+    showAddNoteToMealPlanModal(context, date);
+  }
+
+  void _showCheckPantryModal(BuildContext context, String date, WidgetRef ref) {
+    showCheckPantryModal(context, date);
+  }
+
+  void _showAddToShoppingListModal(BuildContext context, String date, WidgetRef ref) {
+    showAddToShoppingListModal(context, date);
+  }
+
+  void _confirmClearItems(BuildContext context, String date, WidgetRef ref) {
+    showCupertinoDialog<void>(
       context: context,
-      date: dateString,
-      ref: ref,
+      builder: (BuildContext context) => CupertinoAlertDialog(
+        title: const Text('Clear Items'),
+        content: const Text('Are you sure you want to remove all recipes and notes from this day?'),
+        actions: [
+          CupertinoDialogAction(
+            child: const Text('Cancel'),
+            onPressed: () => Navigator.pop(context),
+          ),
+          CupertinoDialogAction(
+            isDestructiveAction: true,
+            onPressed: () {
+              Navigator.pop(context);
+              ref.read(mealPlanNotifierProvider.notifier).clearItems(
+                date: date,
+                userId: null,
+                householdId: null,
+              );
+            },
+            child: const Text('Clear'),
+          ),
+        ],
+      ),
     );
   }
 
   bool _isToday(DateTime date) {
     final now = DateTime.now();
-    return date.year == now.year && 
-           date.month == now.month && 
+    return date.year == now.year &&
+           date.month == now.month &&
            date.day == now.day;
   }
 
   bool _isTomorrow(DateTime date) {
     final tomorrow = DateTime.now().add(const Duration(days: 1));
-    return date.year == tomorrow.year && 
-           date.month == tomorrow.month && 
+    return date.year == tomorrow.year &&
+           date.month == tomorrow.month &&
            date.day == tomorrow.day;
   }
 }
