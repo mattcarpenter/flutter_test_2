@@ -158,24 +158,21 @@ class _MealPlanItemLiftedState extends ConsumerState<MealPlanItemLifted>
     );
   }
 
-  // The ghost left behind
+  // The ghost left behind - invisible but maintains space for shadow
   Widget _buildGhostTile(BuildContext context) {
-    return Transform.scale(
-      scale: 0.95,
-      child: Opacity(
-        opacity: 0.15,
-        child: Container(
-          padding: const EdgeInsets.all(12),
-          decoration: BoxDecoration(
-            color: CupertinoColors.systemBackground.resolveFrom(context),
-            borderRadius: BorderRadius.circular(8),
-            border: Border.all(
-              color: CupertinoColors.separator.resolveFrom(context),
-              width: 0.5,
-            ),
+    return Opacity(
+      opacity: 0.0, // Completely invisible - only shadow will be visible from parent
+      child: Container(
+        padding: const EdgeInsets.all(12),
+        decoration: BoxDecoration(
+          color: CupertinoColors.systemBackground.resolveFrom(context),
+          borderRadius: BorderRadius.circular(8),
+          border: Border.all(
+            color: CupertinoColors.separator.resolveFrom(context),
+            width: 0.5,
           ),
-          child: _buildTileContent(context, 0.5),
         ),
+        child: _buildTileContent(context, 1.0),
       ),
     );
   }
