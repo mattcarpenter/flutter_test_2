@@ -69,6 +69,7 @@ class MealPlanDateHeader extends StatelessWidget {
           // Add button
           AppCircleButton(
             icon: AppCircleButtonIcon.plus,
+            variant: AppCircleButtonVariant.neutral,
             onPressed: () => _showAddMenu(context, ref),
           ),
 
@@ -77,6 +78,7 @@ class MealPlanDateHeader extends StatelessWidget {
           // More actions button
           AppCircleButton(
             icon: AppCircleButtonIcon.ellipsis,
+            variant: AppCircleButtonVariant.neutral,
             onPressed: () => _showMoreMenu(context, ref),
           ),
         ],
