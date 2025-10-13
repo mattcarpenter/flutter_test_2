@@ -425,15 +425,13 @@ class _MealPlanItemLiftedState extends ConsumerState<MealPlanItemLifted>
     if (widget.item.isRecipe) {
       return widget.item.recipeTitle ?? 'Unknown Recipe';
     } else if (widget.item.isNote) {
-      return widget.item.noteTitle ?? widget.item.noteText ?? 'Note';
+      return widget.item.noteText ?? 'Note';
     }
     return 'Unknown Item';
   }
 
   String? _getDisplaySubtitle() {
-    if (widget.item.isNote && widget.item.noteTitle != null && widget.item.noteText != null) {
-      return widget.item.noteText;
-    }
+    // Notes no longer have subtitles - noteText is displayed as title
     return null;
   }
 }

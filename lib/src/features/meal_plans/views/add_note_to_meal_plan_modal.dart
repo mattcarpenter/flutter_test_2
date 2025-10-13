@@ -3,7 +3,11 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:wolt_modal_sheet/wolt_modal_sheet.dart';
 import '../../../providers/meal_plan_provider.dart';
 import '../../../theme/colors.dart';
-import '../../../widgets/wolt/text/modal_sheet_title.dart';
+import '../../../theme/spacing.dart';
+import '../../../theme/typography.dart';
+import '../../../widgets/app_button.dart';
+import '../../../widgets/app_circle_button.dart';
+import '../../../widgets/app_text_field_simple.dart';
 
 void showAddNoteToMealPlanModal(BuildContext context, String date) {
   WoltModalSheet.show(
@@ -26,13 +30,19 @@ class AddNoteToMealPlanModalPage {
     required String date,
   }) {
     return WoltModalSheetPage(
+      navBarHeight: 55,
       backgroundColor: AppColors.of(context).background,
-      leadingNavBarWidget: CupertinoButton(
-        padding: const EdgeInsets.symmetric(horizontal: 16.0),
-        onPressed: () => Navigator.of(context).pop(),
-        child: const Text('Cancel'),
+      surfaceTintColor: CupertinoColors.transparent,
+      hasTopBarLayer: false,
+      isTopBarLayerAlwaysVisible: false,
+      trailingNavBarWidget: Padding(
+        padding: EdgeInsets.only(right: AppSpacing.lg),
+        child: AppCircleButton(
+          icon: AppCircleButtonIcon.close,
+          variant: AppCircleButtonVariant.neutral,
+          onPressed: () => Navigator.of(context).pop(),
+        ),
       ),
-      pageTitle: const ModalSheetTitle('Add Note'),
       child: AddNoteToMealPlanContent(
         date: date,
         modalContext: context,
@@ -56,26 +66,22 @@ class AddNoteToMealPlanContent extends ConsumerStatefulWidget {
 }
 
 class _AddNoteToMealPlanContentState extends ConsumerState<AddNoteToMealPlanContent> {
-  final TextEditingController _titleController = TextEditingController();
   final TextEditingController _textController = TextEditingController();
-  final FocusNode _titleFocusNode = FocusNode();
   final FocusNode _textFocusNode = FocusNode();
   bool _isSubmitting = false;
 
   @override
   void initState() {
     super.initState();
-    // Auto-focus the title field
+    // Auto-focus the note field
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      _titleFocusNode.requestFocus();
+      _textFocusNode.requestFocus();
     });
   }
 
   @override
   void dispose() {
-    _titleController.dispose();
     _textController.dispose();
-    _titleFocusNode.dispose();
     _textFocusNode.dispose();
     super.dispose();
   }
@@ -90,13 +96,12 @@ class _AddNoteToMealPlanContentState extends ConsumerState<AddNoteToMealPlanCont
     });
 
     try {
-      final noteTitle = _titleController.text.trim();
       final noteText = _textController.text.trim();
 
       await ref.read(mealPlanNotifierProvider.notifier).addNote(
         date: widget.date,
         noteText: noteText,
-        noteTitle: noteTitle.isEmpty ? null : noteTitle,
+        noteTitle: null,
         userId: null, // TODO: Pass actual user info
         householdId: null, // TODO: Pass actual household info
       );
@@ -132,105 +137,48 @@ class _AddNoteToMealPlanContentState extends ConsumerState<AddNoteToMealPlanCont
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.all(16.0),
+      padding: EdgeInsets.fromLTRB(AppSpacing.lg, 0, AppSpacing.lg, AppSpacing.lg),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisSize: MainAxisSize.min,
         children: [
-          // Instructions
+          // Modal title
           Text(
-            'Add a note to your meal plan. This could be cooking tips, reminders, or special instructions.',
-            style: CupertinoTheme.of(context).textTheme.textStyle.copyWith(
-              fontSize: 16,
-              color: CupertinoColors.secondaryLabel.resolveFrom(context),
+            'Add Note',
+            style: AppTypography.h4.copyWith(
+              color: AppColors.of(context).textPrimary,
             ),
           ),
+          SizedBox(height: AppSpacing.lg),
 
-          const SizedBox(height: 24),
-
-          // Title field (optional)
-          Text(
-            'Title (optional)',
-            style: CupertinoTheme.of(context).textTheme.textStyle.copyWith(
-              fontSize: 14,
-              fontWeight: FontWeight.w500,
-              color: CupertinoColors.label.resolveFrom(context),
-            ),
-          ),
-          const SizedBox(height: 8),
-          CupertinoTextField(
-            controller: _titleController,
-            focusNode: _titleFocusNode,
-            placeholder: 'e.g., Prep ahead, Cooking notes...',
-            style: CupertinoTheme.of(context).textTheme.textStyle,
-            decoration: BoxDecoration(
-              color: CupertinoColors.tertiarySystemGroupedBackground.resolveFrom(context),
-              borderRadius: BorderRadius.circular(8),
-              border: Border.all(
-                color: CupertinoColors.separator.resolveFrom(context),
-                width: 0.5,
-              ),
-            ),
-            padding: const EdgeInsets.all(12),
-            onSubmitted: (_) => _textFocusNode.requestFocus(),
-          ),
-
-          const SizedBox(height: 20),
-
-          // Note text field (required)
-          Text(
-            'Note *',
-            style: CupertinoTheme.of(context).textTheme.textStyle.copyWith(
-              fontSize: 14,
-              fontWeight: FontWeight.w500,
-              color: CupertinoColors.label.resolveFrom(context),
-            ),
-          ),
-          const SizedBox(height: 8),
-          CupertinoTextField(
+          // Note text field
+          AppTextFieldSimple(
             controller: _textController,
             focusNode: _textFocusNode,
-            placeholder: 'Enter your note here...',
-            style: CupertinoTheme.of(context).textTheme.textStyle,
-            decoration: BoxDecoration(
-              color: CupertinoColors.tertiarySystemGroupedBackground.resolveFrom(context),
-              borderRadius: BorderRadius.circular(8),
-              border: Border.all(
-                color: CupertinoColors.separator.resolveFrom(context),
-                width: 0.5,
-              ),
-            ),
-            padding: const EdgeInsets.all(12),
+            placeholder: 'Enter your note...',
+            autofocus: true,
+            enabled: !_isSubmitting,
+            multiline: true,
+            keyboardType: TextInputType.multiline,
             maxLines: 8,
             minLines: 4,
             textInputAction: TextInputAction.newline,
             onChanged: (_) => setState(() {}), // Update button state
           ),
 
-          const SizedBox(height: 24),
+          SizedBox(height: AppSpacing.lg),
 
           // Add button
-          SizedBox(
-            width: double.infinity,
-            child: CupertinoButton.filled(
-              onPressed: _canSubmit ? _handleSubmit : null,
-              child: _isSubmitting
-                  ? const CupertinoActivityIndicator(color: CupertinoColors.white)
-                  : const Text('Add Note'),
-            ),
+          AppButtonVariants.primaryFilled(
+            text: 'Add Note',
+            size: AppButtonSize.large,
+            shape: AppButtonShape.square,
+            onPressed: _canSubmit ? _handleSubmit : null,
+            loading: _isSubmitting,
+            fullWidth: true,
           ),
 
-          const SizedBox(height: 16),
-
-          // Character count helper
-          Center(
-            child: Text(
-              '${_textController.text.length} characters',
-              style: CupertinoTheme.of(context).textTheme.textStyle.copyWith(
-                fontSize: 12,
-                color: CupertinoColors.tertiaryLabel.resolveFrom(context),
-              ),
-            ),
-          ),
+          SizedBox(height: AppSpacing.sm),
         ],
       ),
     );

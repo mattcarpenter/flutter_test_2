@@ -273,15 +273,13 @@ class MealPlanItemDraggableV2 extends ConsumerWidget {
     if (item.isRecipe) {
       return item.recipeTitle ?? 'Unknown Recipe';
     } else if (item.isNote) {
-      return item.noteTitle ?? item.noteText ?? 'Note';
+      return item.noteText ?? 'Note';
     }
     return 'Unknown Item';
   }
 
   String? _getDisplaySubtitle() {
-    if (item.isNote && item.noteTitle != null && item.noteText != null) {
-      return item.noteText;
-    }
+    // Notes no longer have subtitles - noteText is displayed as title
     return null;
   }
 }
