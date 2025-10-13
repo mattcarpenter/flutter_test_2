@@ -5,8 +5,11 @@ import '../../../../database/database.dart';
 import '../../../providers/recipe_provider.dart' as recipe_provider;
 import '../../../providers/meal_plan_provider.dart';
 import '../../../theme/colors.dart';
+import '../../../theme/spacing.dart';
+import '../../../widgets/app_button.dart';
+import '../../../widgets/app_circle_button.dart';
+import '../../../widgets/recipe_list_item.dart';
 import '../../../widgets/wolt/text/modal_sheet_title.dart';
-import '../widgets/meal_plan_recipe_search_results.dart';
 
 void showAddRecipeToMealPlanModal(BuildContext context, String date) {
   WoltModalSheet.show(
@@ -24,25 +27,33 @@ void showAddRecipeToMealPlanModal(BuildContext context, String date) {
 class AddRecipeToMealPlanModalPage {
   AddRecipeToMealPlanModalPage._();
 
-  static WoltModalSheetPage build({
+  static SliverWoltModalSheetPage build({
     required BuildContext context,
     required String date,
   }) {
-    return WoltModalSheetPage(
+    return SliverWoltModalSheetPage(
+      navBarHeight: 55,
       backgroundColor: AppColors.of(context).background,
-      leadingNavBarWidget: CupertinoButton(
-        padding: const EdgeInsets.symmetric(horizontal: 16.0),
-        onPressed: () => Navigator.of(context).pop(),
-        child: const Text('Cancel'),
-      ),
-      pageTitle: const ModalSheetTitle('Add Recipe'),
-      child: SizedBox(
-        height: MediaQuery.of(context).size.height * 0.7,
-        child: AddRecipeToMealPlanContent(
-          date: date,
-          modalContext: context,
+      surfaceTintColor: CupertinoColors.transparent,
+      hasTopBarLayer: true,
+      isTopBarLayerAlwaysVisible: false,
+      topBarTitle: const ModalSheetTitle('Add Recipe'),
+      trailingNavBarWidget: Padding(
+        padding: EdgeInsets.only(right: AppSpacing.lg),
+        child: AppCircleButton(
+          icon: AppCircleButtonIcon.close,
+          variant: AppCircleButtonVariant.neutral,
+          onPressed: () => Navigator.of(context).pop(),
         ),
       ),
+      mainContentSliversBuilder: (context) => [
+        SliverToBoxAdapter(
+          child: AddRecipeToMealPlanContent(
+            date: date,
+            modalContext: context,
+          ),
+        ),
+      ],
     );
   }
 }
@@ -94,8 +105,8 @@ class _AddRecipeToMealPlanContentState extends ConsumerState<AddRecipeToMealPlan
       date: widget.date,
       recipeId: recipe.id,
       recipeTitle: recipe.title,
-      userId: null, // TODO: Pass actual user info
-      householdId: null, // TODO: Pass actual household info
+      userId: null,
+      householdId: null,
     ).then((_) {
       // Close the modal once added
       Navigator.of(widget.modalContext).pop();
@@ -125,59 +136,69 @@ class _AddRecipeToMealPlanContentState extends ConsumerState<AddRecipeToMealPlan
   Widget build(BuildContext context) {
     final searchState = ref.watch(recipe_provider.cookModalRecipeSearchProvider);
 
-    return Padding(
-      padding: const EdgeInsets.all(16.0),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // Instructions
-          Text(
-            'Search for a recipe to add to your meal plan.',
-            style: CupertinoTheme.of(context).textTheme.textStyle.copyWith(
-              fontSize: 16,
-              color: CupertinoColors.secondaryLabel.resolveFrom(context),
-            ),
-          ),
-
-          const SizedBox(height: 16),
-
-          // Search box
-          CupertinoSearchTextField(
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        // Pinned search box
+        Padding(
+          padding: EdgeInsets.fromLTRB(AppSpacing.lg, AppSpacing.lg, AppSpacing.lg, AppSpacing.md),
+          child: CupertinoSearchTextField(
             controller: _searchController,
             focusNode: _searchFocusNode,
             placeholder: 'Search recipes...',
             onChanged: _onSearchChanged,
             style: CupertinoTheme.of(context).textTheme.textStyle,
           ),
+        ),
 
-          const SizedBox(height: 20),
-
-          // Search results
-          Expanded(
-            child: searchState.results.isEmpty && !searchState.isLoading
-                ? Center(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Icon(
-                          CupertinoIcons.search,
-                          size: 48,
-                          color: CupertinoColors.tertiaryLabel.resolveFrom(context),
-                        ),
-                        const SizedBox(height: 16),
-                        Text(
-                          'Search for recipes to add',
-                          style: CupertinoTheme.of(context).textTheme.textStyle.copyWith(
-                            fontSize: 16,
-                            color: CupertinoColors.secondaryLabel.resolveFrom(context),
+        // Search results
+        SizedBox(
+          height: MediaQuery.of(context).size.height * 0.6,
+          child: searchState.results.isEmpty && !searchState.isLoading
+              ? _buildEmptyState(context)
+              : CustomScrollView(
+                  slivers: [
+                    SliverList.builder(
+                      itemCount: searchState.results.length,
+                      itemBuilder: (context, index) {
+                        final recipe = searchState.results[index];
+                        return RecipeListItem(
+                          recipe: recipe,
+                          onTap: null,
+                          trailing: AppButton(
+                            text: 'Add',
+                            onPressed: () => _onRecipeSelected(recipe),
+                            size: AppButtonSize.small,
+                            style: AppButtonStyle.outline,
+                            shape: AppButtonShape.square,
                           ),
-                        ),
-                      ],
+                        );
+                      },
                     ),
-                  )
-                : MealPlanRecipeSearchResults(
-                    onResultSelected: _onRecipeSelected,
-                  ),
+                  ],
+                ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildEmptyState(BuildContext context) {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(
+            CupertinoIcons.search,
+            size: 48,
+            color: CupertinoColors.tertiaryLabel.resolveFrom(context),
+          ),
+          SizedBox(height: AppSpacing.lg),
+          Text(
+            'Search for recipes to add',
+            style: CupertinoTheme.of(context).textTheme.textStyle.copyWith(
+              fontSize: 16,
+              color: CupertinoColors.secondaryLabel.resolveFrom(context),
+            ),
           ),
         ],
       ),
