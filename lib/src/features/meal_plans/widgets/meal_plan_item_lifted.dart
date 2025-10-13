@@ -134,27 +134,24 @@ class _MealPlanItemLiftedState extends ConsumerState<MealPlanItemLifted>
   Widget _buildLiftedTile(BuildContext context) {
     return Transform.scale(
       scale: 1.05,
-      child: Transform.rotate(
-        angle: 0.02, // Slight tilt for depth
-        child: Container(
-          width: MediaQuery.of(context).size.width - 32,
-          child: Material(
-            color: Colors.transparent,
-            elevation: 12,
-            borderRadius: BorderRadius.circular(8),
-            shadowColor: Colors.black.withOpacity(0.3),
-            child: Container(
-              padding: const EdgeInsets.all(12),
-              decoration: BoxDecoration(
-                color: CupertinoColors.systemBackground.resolveFrom(context),
-                borderRadius: BorderRadius.circular(8),
-                border: Border.all(
-                  color: CupertinoColors.activeBlue.resolveFrom(context),
-                  width: 2,
-                ),
+      child: Container(
+        width: MediaQuery.of(context).size.width - 32,
+        child: Material(
+          color: Colors.transparent,
+          elevation: 12,
+          borderRadius: BorderRadius.circular(8),
+          shadowColor: Colors.black.withOpacity(0.3),
+          child: Container(
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              color: CupertinoColors.systemBackground.resolveFrom(context),
+              borderRadius: BorderRadius.circular(8),
+              border: Border.all(
+                color: CupertinoColors.activeBlue.resolveFrom(context),
+                width: 2,
               ),
-              child: _buildTileContent(context, 1.0),
             ),
+            child: _buildTileContent(context, 1.0),
           ),
         ),
       ),
