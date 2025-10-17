@@ -90,20 +90,22 @@ class MealPlanShoppingListService {
       // Check pantry for matching items
       final pantryMatches = await pantryRepository.findItemsByTerms(aggregation.terms.toList());
       final matchingPantryItem = pantryMatches.isNotEmpty ? pantryMatches.first : null;
-      
+
       // Check shopping lists for existing items
       final shoppingListMatches = await shoppingListRepository.findItemsByTerms(aggregation.terms.toList());
       final existsInShoppingList = shoppingListMatches.isNotEmpty;
-      
+
       // Skip if already in shopping list
-      if (existsInShoppingList) continue;
-      
+      if (existsInShoppingList) {
+        continue;
+      }
+
       // Determine if should be checked by default
       final isChecked = AggregatedIngredient.shouldBeCheckedByDefault(
         pantryItem: matchingPantryItem,
         existsInShoppingList: false, // We already filtered these out
       );
-      
+
       aggregatedIngredients.add(AggregatedIngredient(
         id: const Uuid().v4(),
         name: aggregation.name,
