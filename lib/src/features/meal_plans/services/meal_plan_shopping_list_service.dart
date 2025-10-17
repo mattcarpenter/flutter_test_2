@@ -5,6 +5,7 @@ import '../../../repositories/recipe_repository.dart';
 import '../../../repositories/pantry_repository.dart';
 import '../../../repositories/shopping_list_repository.dart';
 import '../../../repositories/meal_plan_repository.dart';
+import '../../../services/ingredient_parser_service.dart';
 import '../models/aggregated_ingredient.dart';
 
 class MealPlanShoppingListService {
@@ -12,6 +13,7 @@ class MealPlanShoppingListService {
   final PantryRepository pantryRepository;
   final ShoppingListRepository shoppingListRepository;
   final MealPlanRepository mealPlanRepository;
+  final IngredientParserService _parser = IngredientParserService();
 
   MealPlanShoppingListService({
     required this.recipeRepository,
@@ -47,38 +49,44 @@ class MealPlanShoppingListService {
     // Fetch all recipes
     final recipes = await recipeRepository.getRecipesByIds(recipeIds);
 
-    // Aggregate ingredients by terms
-    final aggregationMap = <String, _IngredientAggregation>{};
-    
+    // Aggregate ingredients by overlapping terms
+    // Use a list instead of map to allow overlap-based matching
+    final aggregations = <_IngredientAggregation>[];
+
     for (final recipe in recipes) {
       if (recipe.ingredients == null) continue;
-      
+
       for (final ingredient in recipe.ingredients!) {
-        // Get terms for this ingredient
+        // Get canonicalized terms for this ingredient
         final terms = _extractIngredientTerms(ingredient);
         if (terms.isEmpty) continue;
-        
-        // Create a key from sorted terms for consistent aggregation
-        final termKey = terms.toList()..sort();
-        final key = termKey.join('|');
-        
-        if (aggregationMap.containsKey(key)) {
+
+        // Find existing aggregation with at least 1 overlapping term
+        _IngredientAggregation? matchingAggregation;
+        for (final agg in aggregations) {
+          if (agg.hasOverlap(terms)) {
+            matchingAggregation = agg;
+            break;
+          }
+        }
+
+        if (matchingAggregation != null) {
           // Add to existing aggregation
-          aggregationMap[key]!.addIngredient(ingredient, recipe);
+          matchingAggregation.addIngredient(ingredient, recipe, terms, this);
         } else {
           // Create new aggregation
-          aggregationMap[key] = _IngredientAggregation(
+          aggregations.add(_IngredientAggregation(
             name: ingredient.name,
-            terms: terms,
-          )..addIngredient(ingredient, recipe);
+            terms: Set.from(terms),  // Create mutable copy
+          )..addIngredient(ingredient, recipe, terms, this));
         }
       }
     }
 
     // Convert aggregations to AggregatedIngredient objects
     final aggregatedIngredients = <AggregatedIngredient>[];
-    
-    for (final aggregation in aggregationMap.values) {
+
+    for (final aggregation in aggregations) {
       // Check pantry for matching items
       final pantryMatches = await pantryRepository.findItemsByTerms(aggregation.terms.toList());
       final matchingPantryItem = pantryMatches.isNotEmpty ? pantryMatches.first : null;
@@ -119,27 +127,41 @@ class MealPlanShoppingListService {
     return aggregatedIngredients;
   }
 
-  /// Extract terms from an ingredient
+  /// Extract terms from an ingredient for matching purposes
+  /// Primary: Cleaned ingredient name (stripped of quantities/units via parser)
+  /// Secondary: All canonical terms (both user and API sources)
   Set<String> _extractIngredientTerms(Ingredient ingredient) {
     final terms = <String>{};
-    
-    // Add the ingredient name as a term
-    terms.add(ingredient.name.toLowerCase().trim());
-    
-    // Add any additional terms from the ingredient
+
+    // PRIMARY: Use parser to get cleaned ingredient name (strips quantities/units)
+    final parseResult = _parser.parse(ingredient.name);
+    final cleanedName = parseResult.cleanName.toLowerCase().trim();
+    if (cleanedName.isNotEmpty) {
+      terms.add(cleanedName);
+    }
+
+    // SECONDARY: Add ALL canonical terms (user + API) for additional matching
     if (ingredient.terms != null) {
       for (final term in ingredient.terms!) {
-        terms.add(term.value.toLowerCase().trim());
+        final termValue = term.value.toLowerCase().trim();
+        if (termValue.isNotEmpty) {
+          terms.add(termValue);
+        }
       }
     }
-    
+
+    // Fallback: if we still have no terms, use the raw ingredient name
+    if (terms.isEmpty) {
+      terms.add(ingredient.name.toLowerCase().trim());
+    }
+
     return terms;
   }
 }
 
 /// Helper class for aggregating ingredients
 class _IngredientAggregation {
-  final String name;
+  String name;  // Mutable to allow updating to better display name
   final Set<String> terms;
   final Set<String> sourceRecipeIds = {};
   final Set<String> sourceRecipeTitles = {};
@@ -149,9 +171,33 @@ class _IngredientAggregation {
     required this.terms,
   });
 
-  void addIngredient(Ingredient ingredient, RecipeEntry recipe) {
+  /// Check if this aggregation has at least 1 overlapping term with the given terms
+  bool hasOverlap(Set<String> otherTerms) {
+    return terms.any((term) => otherTerms.contains(term));
+  }
+
+  void addIngredient(Ingredient ingredient, RecipeEntry recipe, Set<String> ingredientTerms, MealPlanShoppingListService service) {
     // Add recipe info
     sourceRecipeIds.add(recipe.id);
     sourceRecipeTitles.add(recipe.title);
+
+    // Merge the new terms into our term set for future matching
+    terms.addAll(ingredientTerms);
+
+    // Update display name if this one is better (more specific)
+    if (_isBetterDisplayName(ingredient.name, name, service)) {
+      name = ingredient.name;
+    }
+  }
+
+  /// Determine if candidate is a better display name than current
+  /// Prefers longer, more specific names after removing quantities
+  bool _isBetterDisplayName(String candidate, String current, MealPlanShoppingListService service) {
+    final candidateClean = service._parser.parse(candidate).cleanName;
+    final currentClean = service._parser.parse(current).cleanName;
+
+    // Prefer longer cleaned names (more specific)
+    // e.g., "all-purpose flour" > "flour"
+    return candidateClean.length > currentClean.length;
   }
 }
