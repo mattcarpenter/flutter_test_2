@@ -3,7 +3,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../providers/meal_plan_provider.dart';
 import '../views/add_recipe_to_meal_plan_modal.dart';
 import '../views/add_note_to_meal_plan_modal.dart';
-import '../views/check_pantry_modal.dart';
 import '../views/add_to_shopping_list_modal.dart';
 
 class MealPlanContextMenu {
@@ -69,20 +68,6 @@ class MealPlanContextMenu {
           CupertinoActionSheetAction(
             onPressed: () {
               Navigator.pop(context);
-              _showCheckPantryModal(context, date, ref);
-            },
-            child: const Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Icon(CupertinoIcons.checkmark_seal, size: 18),
-                SizedBox(width: 8),
-                Text('Check Pantry'),
-              ],
-            ),
-          ),
-          CupertinoActionSheetAction(
-            onPressed: () {
-              Navigator.pop(context);
               _showAddToShoppingListModal(context, date, ref);
             },
             child: const Row(
@@ -124,10 +109,6 @@ class MealPlanContextMenu {
 
   static void _showAddNoteModal(BuildContext context, String date, WidgetRef ref) {
     showAddNoteToMealPlanModal(context, date);
-  }
-
-  static void _showCheckPantryModal(BuildContext context, String date, WidgetRef ref) {
-    showCheckPantryModal(context, date);
   }
 
   static void _showAddToShoppingListModal(BuildContext context, String date, WidgetRef ref) {

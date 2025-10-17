@@ -8,7 +8,6 @@ import '../../../widgets/adaptive_pull_down/adaptive_pull_down.dart';
 import '../../../providers/meal_plan_provider.dart';
 import '../views/add_recipe_to_meal_plan_modal.dart';
 import '../views/add_note_to_meal_plan_modal.dart';
-import '../views/check_pantry_modal.dart';
 import '../views/add_to_shopping_list_modal.dart';
 
 class MealPlanDateHeader extends StatelessWidget {
@@ -98,11 +97,6 @@ class MealPlanDateHeader extends StatelessWidget {
           AdaptivePullDownButton(
             items: [
               AdaptiveMenuItem(
-                title: 'Check Pantry',
-                icon: const Icon(CupertinoIcons.checkmark_seal),
-                onTap: () => _showCheckPantryModal(context, dateString, ref),
-              ),
-              AdaptiveMenuItem(
                 title: 'Add to Shopping List',
                 icon: const Icon(CupertinoIcons.cart_badge_plus),
                 onTap: () => _showAddToShoppingListModal(context, dateString, ref),
@@ -131,10 +125,6 @@ class MealPlanDateHeader extends StatelessWidget {
 
   void _showAddNoteModal(BuildContext context, String date, WidgetRef ref) {
     showAddNoteToMealPlanModal(context, date);
-  }
-
-  void _showCheckPantryModal(BuildContext context, String date, WidgetRef ref) {
-    showCheckPantryModal(context, date);
   }
 
   void _showAddToShoppingListModal(BuildContext context, String date, WidgetRef ref) {
