@@ -150,33 +150,27 @@ class FolderSelectionPageContent extends ConsumerWidget {
                           ],
                         ),
                       )
-                    : Container(
-                        decoration: BoxDecoration(
-                          border: Border.all(color: colors.border),
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                        child: IntrinsicHeight(
-                          child: Column(
-                            mainAxisSize: MainAxisSize.min,
-                            children: allFolders.asMap().entries.map((entry) {
-                              final index = entry.key;
-                              final folder = entry.value;
-                              final isFirst = index == 0;
-                              final isLast = index == allFolders.length - 1;
-                              final isSelected = viewModel.isFolderSelected(folder.id);
+                    : IntrinsicHeight(
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: allFolders.asMap().entries.map((entry) {
+                            final index = entry.key;
+                            final folder = entry.value;
+                            final isFirst = index == 0;
+                            final isLast = index == allFolders.length - 1;
+                            final isSelected = viewModel.isFolderSelected(folder.id);
 
-                              return FolderSelectionRow(
-                                folderId: folder.id,
-                                label: folder.name,
-                                checked: isSelected,
-                                first: isFirst,
-                                last: isLast,
-                                onToggle: () {
-                                  viewModel.toggleFolderSelection(folder.id);
-                                },
-                              );
-                            }).toList(),
-                          ),
+                            return FolderSelectionRow(
+                              folderId: folder.id,
+                              label: folder.name,
+                              checked: isSelected,
+                              first: isFirst,
+                              last: isLast,
+                              onToggle: () {
+                                viewModel.toggleFolderSelection(folder.id);
+                              },
+                            );
+                          }).toList(),
                         ),
                       ),
               ),

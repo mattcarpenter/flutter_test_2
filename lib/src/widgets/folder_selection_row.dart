@@ -3,10 +3,11 @@ import 'package:flutter/material.dart';
 import '../theme/colors.dart';
 import '../theme/spacing.dart';
 import '../theme/typography.dart';
-import '../widgets/app_checkbox_square.dart';
+import '../widgets/app_radio_button.dart';
+import '../widgets/utils/grouped_list_styling.dart';
 
 /// A row for selecting folders with checkbox on the left and label on the right
-/// Matches the style of TagSelectionRow but simplified for folders
+/// Uses grouped list styling for consistent appearance across the app
 class FolderSelectionRow extends StatelessWidget {
   final String folderId;
   final String label;
@@ -29,45 +30,47 @@ class FolderSelectionRow extends StatelessWidget {
   Widget build(BuildContext context) {
     final colors = AppColors.of(context);
 
+    // Get grouped styling
+    final borderRadius = GroupedListStyling.getBorderRadius(
+      isGrouped: true,
+      isFirstInGroup: first,
+      isLastInGroup: last,
+    );
+    final border = GroupedListStyling.getBorder(
+      context: context,
+      isGrouped: true,
+      isFirstInGroup: first,
+      isLastInGroup: last,
+      isDragging: false,
+    );
+
     return Container(
-      constraints: const BoxConstraints(minHeight: 48),
       decoration: BoxDecoration(
-        color: colors.surface,
-        borderRadius: BorderRadius.vertical(
-          top: first ? const Radius.circular(8) : Radius.zero,
-          bottom: last ? const Radius.circular(8) : Radius.zero,
-        ),
+        color: colors.input,
+        border: border,
+        borderRadius: borderRadius,
       ),
-      child: Material(
-        color: Colors.transparent,
-        child: InkWell(
-          onTap: onToggle,
-          borderRadius: BorderRadius.vertical(
-            top: first ? const Radius.circular(8) : Radius.zero,
-            bottom: last ? const Radius.circular(8) : Radius.zero,
-          ),
-          child: Padding(
-            padding: EdgeInsets.symmetric(
-              horizontal: AppSpacing.lg,
-              vertical: AppSpacing.sm,
-            ),
-            child: Row(
-              children: [
-                AppCheckboxSquare(
-                  checked: checked,
-                  onTap: onToggle,
-                ),
-                SizedBox(width: AppSpacing.md),
-                Expanded(
-                  child: Text(
-                    label,
-                    style: AppTypography.body.copyWith(
-                      color: colors.textPrimary,
-                    ),
+      child: InkWell(
+        onTap: onToggle,
+        child: Padding(
+          padding: const EdgeInsets.all(12),
+          child: Row(
+            children: [
+              AppRadioButton(
+                selected: checked,
+                onTap: onToggle,
+              ),
+              SizedBox(width: AppSpacing.md),
+              Expanded(
+                child: Text(
+                  label,
+                  style: AppTypography.body.copyWith(
+                    fontWeight: FontWeight.w600,
+                    color: colors.textPrimary,
                   ),
                 ),
-              ],
-            ),
+              ),
+            ],
           ),
         ),
       ),
