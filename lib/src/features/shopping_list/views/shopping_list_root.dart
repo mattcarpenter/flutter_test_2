@@ -99,6 +99,60 @@ class ShoppingListTab extends ConsumerWidget {
                 },
               ),
               AdaptiveMenuItem(
+                title: 'Clear All Items',
+                icon: const Icon(CupertinoIcons.clear),
+                isDestructive: true,
+                onTap: () async {
+                  final items = itemsAsyncValue.valueOrNull ?? [];
+
+                  // Don't show dialog if there are no items
+                  if (items.isEmpty) {
+                    await showCupertinoDialog(
+                      context: context,
+                      builder: (context) => CupertinoAlertDialog(
+                        title: const Text('No Items'),
+                        content: const Text('There are no items to clear.'),
+                        actions: [
+                          CupertinoDialogAction(
+                            child: const Text('OK'),
+                            onPressed: () => Navigator.of(context).pop(),
+                          ),
+                        ],
+                      ),
+                    );
+                    return;
+                  }
+
+                  final shouldClear = await showCupertinoDialog<bool>(
+                    context: context,
+                    builder: (context) => CupertinoAlertDialog(
+                      title: const Text('Clear All Items'),
+                      content: Text(
+                        'Are you sure you want to remove all ${items.length} item${items.length == 1 ? '' : 's'} from this list?',
+                      ),
+                      actions: [
+                        CupertinoDialogAction(
+                          child: const Text('Cancel'),
+                          onPressed: () => Navigator.of(context).pop(false),
+                        ),
+                        CupertinoDialogAction(
+                          isDestructiveAction: true,
+                          child: const Text('Clear All'),
+                          onPressed: () => Navigator.of(context).pop(true),
+                        ),
+                      ],
+                    ),
+                  );
+
+                  if (shouldClear == true) {
+                    final itemIds = items.map((item) => item.id).toList();
+                    await ref
+                        .read(shoppingListItemsProvider(currentListId).notifier)
+                        .deleteMultipleItems(itemIds);
+                  }
+                },
+              ),
+              AdaptiveMenuItem(
                 title: 'Delete List',
                 icon: const Icon(CupertinoIcons.trash),
                 isDestructive: true,
