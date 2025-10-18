@@ -290,7 +290,7 @@ class _RecipePageState extends ConsumerState<RecipePage> with TickerProviderStat
           AdaptivePullDownButton(
             items: [
               AdaptiveMenuItem(
-                title: 'View Pantry Matches',
+                title: 'Check Pantry Stock',
                 icon: const Icon(CupertinoIcons.checkmark_alt_circle),
                 onTap: () {
                   // Read the matches when the menu item is tapped (not during build)
