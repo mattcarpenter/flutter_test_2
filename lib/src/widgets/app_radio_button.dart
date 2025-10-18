@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:flutter/cupertino.dart';
 import '../theme/colors.dart';
 
 /// A custom radio button widget that follows the app's design system
@@ -9,14 +9,14 @@ class AppRadioButton extends StatefulWidget {
   /// Callback when the radio button is tapped
   final VoidCallback? onTap;
 
-  /// Size of the radio button (defaults to 20px)
+  /// Size of the radio button (defaults to 24px to match shopping list)
   final double size;
 
   const AppRadioButton({
     super.key,
     required this.selected,
     this.onTap,
-    this.size = 20.0,
+    this.size = 24.0,
   });
 
   @override
@@ -27,7 +27,6 @@ class _AppRadioButtonState extends State<AppRadioButton>
     with SingleTickerProviderStateMixin {
   late AnimationController _animationController;
   late Animation<double> _scaleAnimation;
-  bool _isPressed = false;
 
   @override
   void initState() {
@@ -53,24 +52,15 @@ class _AppRadioButtonState extends State<AppRadioButton>
 
   void _handleTapDown(TapDownDetails details) {
     if (widget.onTap != null) {
-      setState(() {
-        _isPressed = true;
-      });
       _animationController.forward();
     }
   }
 
   void _handleTapUp(TapUpDetails details) {
-    setState(() {
-      _isPressed = false;
-    });
     _animationController.reverse();
   }
 
   void _handleTapCancel() {
-    setState(() {
-      _isPressed = false;
-    });
     _animationController.reverse();
   }
 
@@ -93,19 +83,17 @@ class _AppRadioButtonState extends State<AppRadioButton>
               height: widget.size,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                color: widget.selected ? colors.primary : Colors.transparent,
-                border: widget.selected
-                    ? null
-                    : Border.all(
-                        color: colors.border.withOpacity(0.7),
-                        width: 1.5,
-                      ),
+                color: widget.selected ? colors.primary : colors.input,
+                border: Border.all(
+                  color: widget.selected ? colors.primary : colors.borderRadio,
+                  width: 1,
+                ),
               ),
               child: widget.selected
                   ? Icon(
-                      Icons.check,
-                      size: widget.size * 0.7, // 14px for 20px container
-                      color: colors.onPrimary,
+                      CupertinoIcons.check_mark,
+                      size: widget.size * 0.67, // 16px for 24px container
+                      color: CupertinoColors.white,
                     )
                   : null,
             ),

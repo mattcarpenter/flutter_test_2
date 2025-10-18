@@ -2,6 +2,7 @@ import 'package:flutter/cupertino.dart';
 import '../../../../database/database.dart';
 import '../../../theme/colors.dart';
 import '../../../theme/spacing.dart';
+import '../../../widgets/app_radio_button.dart';
 import '../../../widgets/utils/grouped_list_styling.dart';
 import '../../../services/ingredient_parser_service.dart';
 
@@ -176,49 +177,26 @@ class ShoppingListItemTile extends StatelessWidget {
           border: border,
           borderRadius: borderRadius,
         ),
-        child: GestureDetector(
-          onTap: () => onBoughtToggle(!item.bought),
-          behavior: HitTestBehavior.opaque,
-          child: Padding(
-            padding: EdgeInsets.symmetric(
-              horizontal: AppSpacing.lg,
-              vertical: AppSpacing.md,
-            ),
-            child: Row(
-              children: [
-                // Checkbox
-                Container(
-                  width: 24,
-                  height: 24,
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    border: Border.all(
-                      color: item.bought
-                        ? AppColors.of(context).primary
-                        : AppColors.of(context).borderRadio,
-                      width: 1,
-                    ),
-                    color: item.bought
-                      ? AppColors.of(context).primary
-                      : AppColors.of(context).input,
-                  ),
-                  child: item.bought
-                    ? const Icon(
-                        CupertinoIcons.check_mark,
-                        size: 16,
-                        color: CupertinoColors.white,
-                      )
-                    : null,
-                ),
+        child: Padding(
+          padding: EdgeInsets.symmetric(
+            horizontal: AppSpacing.lg,
+            vertical: AppSpacing.md,
+          ),
+          child: Row(
+            children: [
+              // Checkbox
+              AppRadioButton(
+                selected: item.bought,
+                onTap: () => onBoughtToggle(!item.bought),
+              ),
 
-                SizedBox(width: AppSpacing.md),
+              SizedBox(width: AppSpacing.md),
 
-                // Item name with parsed quantities in bold
-                Expanded(
-                  child: _buildParsedItemText(context),
-                ),
-              ],
-            ),
+              // Item name with parsed quantities in bold
+              Expanded(
+                child: _buildParsedItemText(context),
+              ),
+            ],
           ),
         ),
       ),

@@ -10,6 +10,7 @@ import '../../../theme/spacing.dart';
 import '../../../theme/typography.dart';
 import '../../../widgets/app_button.dart';
 import '../../../widgets/app_circle_button.dart';
+import '../../../widgets/app_radio_button.dart';
 import '../../../widgets/utils/grouped_list_styling.dart';
 import '../../../widgets/wolt/text/modal_sheet_title.dart';
 import '../providers/meal_plan_shopping_list_provider.dart';
@@ -36,6 +37,19 @@ class _AddToShoppingListController extends ChangeNotifier {
   void updateCheckedState(String id, bool value) {
     checkedState[id] = value;
     notifyListeners();
+  }
+
+  void initializeCheckedState(List<AggregatedIngredient> ingredients) {
+    bool stateChanged = false;
+    for (final ingredient in ingredients) {
+      if (!checkedState.containsKey(ingredient.id)) {
+        checkedState[ingredient.id] = ingredient.isChecked;
+        stateChanged = true;
+      }
+    }
+    if (stateChanged) {
+      notifyListeners();
+    }
   }
 
   void setLoading(bool value) {
@@ -339,10 +353,10 @@ class _AddToShoppingListContentSlivers extends ConsumerWidget {
         ),
       ),
       data: (aggregatedIngredients) {
-        // Initialize checked state for ingredients
-        for (final ingredient in aggregatedIngredients) {
-          controller.checkedState.putIfAbsent(ingredient.id, () => ingredient.isChecked);
-        }
+        // Initialize checked state for ingredients (notifies listeners if state changed)
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          controller.initializeCheckedState(aggregatedIngredients);
+        });
 
         if (aggregatedIngredients.isEmpty) {
           return SliverFillRemaining(
@@ -350,41 +364,47 @@ class _AddToShoppingListContentSlivers extends ConsumerWidget {
           );
         }
 
-        // Build widgets for the list
-        final List<Widget> widgets = [];
+        // Wrap in ListenableBuilder so content rebuilds when controller state changes
+        return ListenableBuilder(
+          listenable: controller,
+          builder: (context, child) {
+            // Build widgets for the list
+            final List<Widget> widgets = [];
 
-        // Shopping list selector
-        widgets.add(AddToShoppingListModalPage._buildShoppingListSelector(context, ref));
-        widgets.add(SizedBox(height: AppSpacing.lg));
+            // Shopping list selector
+            widgets.add(AddToShoppingListModalPage._buildShoppingListSelector(context, ref));
+            widgets.add(SizedBox(height: AppSpacing.lg));
 
-        // Ingredient list items
-        for (int index = 0; index < aggregatedIngredients.length; index++) {
-          final ingredient = aggregatedIngredients[index];
-          final isChecked = controller.checkedState[ingredient.id] ?? ingredient.isChecked;
-          final isFirst = index == 0;
-          final isLast = index == aggregatedIngredients.length - 1;
+            // Ingredient list items
+            for (int index = 0; index < aggregatedIngredients.length; index++) {
+              final ingredient = aggregatedIngredients[index];
+              final isChecked = controller.checkedState[ingredient.id] ?? ingredient.isChecked;
+              final isFirst = index == 0;
+              final isLast = index == aggregatedIngredients.length - 1;
 
-          widgets.add(
-            Padding(
-              padding: EdgeInsets.symmetric(horizontal: AppSpacing.lg),
-              child: _IngredientTile(
-                ingredient: ingredient,
-                isChecked: isChecked,
-                isFirst: isFirst,
-                isLast: isLast,
-                onChanged: (value) {
-                  controller.updateCheckedState(ingredient.id, value);
-                },
-              ),
-            ),
-          );
-        }
+              widgets.add(
+                Padding(
+                  padding: EdgeInsets.symmetric(horizontal: AppSpacing.lg),
+                  child: _IngredientTile(
+                    ingredient: ingredient,
+                    isChecked: isChecked,
+                    isFirst: isFirst,
+                    isLast: isLast,
+                    onChanged: (value) {
+                      controller.updateCheckedState(ingredient.id, value);
+                    },
+                  ),
+                ),
+              );
+            }
 
-        // Bottom padding for sticky action bar
-        widgets.add(SizedBox(height: 130));
+            // Bottom padding for sticky action bar
+            widgets.add(SizedBox(height: 130));
 
-        return SliverList(
-          delegate: SliverChildListDelegate(widgets),
+            return SliverList(
+              delegate: SliverChildListDelegate(widgets),
+            );
+          },
         );
       },
     );
@@ -436,17 +456,9 @@ class _IngredientTile extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           // Circle checkbox (24px)
-          GestureDetector(
+          AppRadioButton(
+            selected: isChecked,
             onTap: () => onChanged(!isChecked),
-            child: Icon(
-              isChecked
-                  ? CupertinoIcons.checkmark_circle_fill
-                  : CupertinoIcons.circle,
-              color: isChecked
-                  ? CupertinoColors.activeBlue.resolveFrom(context)
-                  : CupertinoColors.tertiaryLabel.resolveFrom(context),
-              size: 24,
-            ),
           ),
 
           SizedBox(width: AppSpacing.md),
