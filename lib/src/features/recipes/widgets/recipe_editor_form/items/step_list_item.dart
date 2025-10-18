@@ -206,6 +206,16 @@ class _StepListItemState extends State<StepListItem> with SingleTickerProviderSt
     return isLocationOutsideKey(location, _dragHandleKey);
   }
 
+  Future<void> _handleDelete() async {
+    // Animate removal: reverse from fully visible (1.0) to collapsed (0.0)
+    // This keeps the space reserved (heightFactor) while fading out (opacity)
+    await _animationController.reverse();
+
+    // After animation completes, remove from parent list
+    if (mounted) {
+      widget.onRemove();
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -247,7 +257,7 @@ class _StepListItemState extends State<StepListItem> with SingleTickerProviderSt
               Expanded(
                 child: Center(
                   child: GestureDetector(
-                    onTap: widget.onRemove,
+                    onTap: _handleDelete,
                     child: Icon(
                       Icons.delete,
                       color: colors.surface,
@@ -273,6 +283,11 @@ class _StepListItemState extends State<StepListItem> with SingleTickerProviderSt
                         text: widget.step.text.isEmpty ? '' : widget.step.text,
                       ));
                     },
+                  ),
+                  MenuAction(
+                    title: 'Delete',
+                    image: MenuImage.icon(Icons.delete_outline),
+                    callback: _handleDelete,
                   ),
                 ],
               );
@@ -351,7 +366,7 @@ class _StepListItemState extends State<StepListItem> with SingleTickerProviderSt
             Expanded(
               child: Center(
                 child: GestureDetector(
-                  onTap: widget.onRemove,
+                  onTap: _handleDelete,
                   child: Icon(
                     Icons.delete,
                     color: colors.surface,
@@ -377,6 +392,11 @@ class _StepListItemState extends State<StepListItem> with SingleTickerProviderSt
                         text: widget.step.text.isEmpty ? 'New Section' : widget.step.text
                     ));
                   },
+                ),
+                MenuAction(
+                  title: 'Delete',
+                  image: MenuImage.icon(Icons.delete_outline),
+                  callback: _handleDelete,
                 ),
               ],
             );

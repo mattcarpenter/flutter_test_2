@@ -217,6 +217,16 @@ class _IngredientListItemState extends ConsumerState<IngredientListItem> with Si
     return isLocationOutsideKey(location, _dragHandleKey);
   }
 
+  Future<void> _handleDelete() async {
+    // Animate removal: reverse from fully visible (1.0) to collapsed (0.0)
+    // This keeps the space reserved (heightFactor) while fading out (opacity)
+    await _animationController.reverse();
+
+    // After animation completes, remove from parent list
+    if (mounted) {
+      widget.onRemove();
+    }
+  }
 
   void _showRecipeSelector(BuildContext context) {
     WoltModalSheet.show(
@@ -308,7 +318,7 @@ class _IngredientListItemState extends ConsumerState<IngredientListItem> with Si
               Expanded(
                 child: Center(
                   child: GestureDetector(
-                    onTap: widget.onRemove,
+                    onTap: _handleDelete,
                     child: Icon(
                       Icons.delete,
                       color: colors.surface,
@@ -337,6 +347,11 @@ class _IngredientListItemState extends ConsumerState<IngredientListItem> with Si
                         primaryAmount1Type: 'weight',
                       ));
                     },
+                  ),
+                  MenuAction(
+                    title: 'Delete',
+                    image: MenuImage.icon(Icons.delete_outline),
+                    callback: _handleDelete,
                   ),
                 ],
               );
@@ -422,7 +437,7 @@ class _IngredientListItemState extends ConsumerState<IngredientListItem> with Si
             Expanded(
               child: Center(
                 child: GestureDetector(
-                  onTap: widget.onRemove,
+                  onTap: _handleDelete,
                   child: Icon(
                     Icons.delete,
                     color: colors.surface,
@@ -469,6 +484,11 @@ class _IngredientListItemState extends ConsumerState<IngredientListItem> with Si
                     widget.onUpdate(widget.ingredient.copyWith(recipeId: ''));
                   },
                 ),
+              MenuAction(
+                title: 'Delete',
+                image: MenuImage.icon(Icons.delete_outline),
+                callback: _handleDelete,
+              ),
             ],
           );
         },
