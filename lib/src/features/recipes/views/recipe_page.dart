@@ -2,10 +2,13 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../theme/colors.dart';
+import '../../../widgets/adaptive_pull_down/adaptive_menu_item.dart';
+import '../../../widgets/adaptive_pull_down/adaptive_pull_down.dart';
 import '../../../widgets/app_circle_button.dart';
 import '../../../providers/recipe_provider.dart' as recipe_provider;
 import '../widgets/recipe_view/recipe_view.dart';
 import '../widgets/recipe_view/recipe_hero_image.dart';
+import '../widgets/recipe_view/ingredient_matches_bottom_sheet.dart';
 
 class RecipePage extends ConsumerStatefulWidget {
   final String recipeId;
@@ -283,14 +286,38 @@ class _RecipePageState extends ConsumerState<RecipePage> with TickerProviderStat
             size: 40,
             onPressed: () => Navigator.of(context).pop(),
           ),
-          // Edit button
-          AppCircleButton(
-            icon: AppCircleButtonIcon.pencil,
-            variant: AppCircleButtonVariant.neutral,
-            size: 40,
-            onPressed: () {
-              // TODO: Implement edit functionality
-            },
+          // Menu button
+          AdaptivePullDownButton(
+            items: [
+              AdaptiveMenuItem(
+                title: 'View Pantry Matches',
+                icon: const Icon(CupertinoIcons.checkmark_alt_circle),
+                onTap: () {
+                  // Read the matches when the menu item is tapped (not during build)
+                  final matchesAsync = ref.read(recipe_provider.recipeIngredientMatchesProvider(widget.recipeId));
+                  matchesAsync.whenOrNull(
+                    data: (matches) {
+                      showIngredientMatchesBottomSheet(
+                        context,
+                        matches: matches,
+                      );
+                    },
+                  );
+                },
+              ),
+              AdaptiveMenuItem(
+                title: 'Edit Recipe',
+                icon: const Icon(CupertinoIcons.pencil),
+                onTap: () {
+                  // TODO: Implement edit functionality
+                },
+              ),
+            ],
+            child: const AppCircleButton(
+              icon: AppCircleButtonIcon.ellipsis,
+              variant: AppCircleButtonVariant.neutral,
+              size: 40,
+            ),
           ),
         ],
       ),
