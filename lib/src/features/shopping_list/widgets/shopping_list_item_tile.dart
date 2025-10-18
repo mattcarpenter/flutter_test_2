@@ -177,26 +177,30 @@ class ShoppingListItemTile extends StatelessWidget {
           border: border,
           borderRadius: borderRadius,
         ),
-        child: Padding(
-          padding: EdgeInsets.symmetric(
-            horizontal: AppSpacing.lg,
-            vertical: AppSpacing.md,
-          ),
-          child: Row(
-            children: [
-              // Checkbox
-              AppRadioButton(
-                selected: item.bought,
-                onTap: () => onBoughtToggle(!item.bought),
-              ),
+        child: GestureDetector(
+          onTap: () => onBoughtToggle(!item.bought),
+          behavior: HitTestBehavior.opaque,
+          child: Padding(
+            padding: EdgeInsets.symmetric(
+              horizontal: AppSpacing.lg,
+              vertical: AppSpacing.md,
+            ),
+            child: Row(
+              children: [
+                // Checkbox
+                AppRadioButton(
+                  selected: item.bought,
+                  onTap: () => onBoughtToggle(!item.bought),
+                ),
 
-              SizedBox(width: AppSpacing.md),
+                SizedBox(width: AppSpacing.md),
 
-              // Item name with parsed quantities in bold
-              Expanded(
-                child: _buildParsedItemText(context),
-              ),
-            ],
+                // Item name with parsed quantities in bold
+                Expanded(
+                  child: _buildParsedItemText(context),
+                ),
+              ],
+            ),
           ),
         ),
       ),

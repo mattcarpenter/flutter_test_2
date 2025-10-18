@@ -107,9 +107,11 @@ class AddToShoppingListModalPage {
                   final aggregatedIngredientsAsync = ref.watch(aggregatedIngredientsProvider(date));
                   final ingredients = aggregatedIngredientsAsync.valueOrNull ?? [];
 
-                  return AppButton(
+                  return AppButtonVariants.primaryFilled(
                     text: controller.isLoading ? 'Adding...' : 'Add to Shopping List',
-                    theme: AppButtonTheme.secondary,
+                    size: AppButtonSize.large,
+                    shape: AppButtonShape.square,
+                    fullWidth: true,
                     onPressed: controller.isButtonEnabled
                         ? () async {
                             await _addToShoppingList(
@@ -120,7 +122,6 @@ class AddToShoppingListModalPage {
                             );
                           }
                         : null,
-                    fullWidth: true,
                   );
                 },
               ),
@@ -451,52 +452,58 @@ class _IngredientTile extends StatelessWidget {
         border: border,
         borderRadius: borderRadius,
       ),
-      padding: EdgeInsets.all(AppSpacing.md),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: [
-          // Circle checkbox (24px)
-          AppRadioButton(
-            selected: isChecked,
-            onTap: () => onChanged(!isChecked),
-          ),
+      child: GestureDetector(
+        onTap: () => onChanged(!isChecked),
+        behavior: HitTestBehavior.opaque,
+        child: Padding(
+          padding: EdgeInsets.all(AppSpacing.md),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              // Circle checkbox (24px)
+              AppRadioButton(
+                selected: isChecked,
+                onTap: () => onChanged(!isChecked),
+              ),
 
-          SizedBox(width: AppSpacing.md),
+              SizedBox(width: AppSpacing.md),
 
-          // Ingredient info (Expanded)
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  ingredient.name,
-                  style: AppTypography.body.copyWith(
-                    fontWeight: FontWeight.w600,
-                    color: colors.textPrimary,
-                  ),
+              // Ingredient info (Expanded)
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      ingredient.name,
+                      style: AppTypography.body.copyWith(
+                        fontWeight: FontWeight.w600,
+                        color: colors.textPrimary,
+                      ),
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      'From ${ingredient.sourcesDisplay}',
+                      style: AppTypography.caption.copyWith(
+                        color: colors.textTertiary,
+                      ),
+                    ),
+                  ],
                 ),
-                const SizedBox(height: 2),
-                Text(
-                  'From ${ingredient.sourcesDisplay}',
-                  style: AppTypography.caption.copyWith(
-                    color: colors.textTertiary,
-                  ),
+              ),
+
+              SizedBox(width: AppSpacing.md),
+
+              // Stock status chip (80px width, right-aligned)
+              SizedBox(
+                width: 80,
+                child: Align(
+                  alignment: Alignment.centerRight,
+                  child: _StockStatusChip(pantryItem: ingredient.matchingPantryItem),
                 ),
-              ],
-            ),
+              ),
+            ],
           ),
-
-          SizedBox(width: AppSpacing.md),
-
-          // Stock status chip (80px width, right-aligned)
-          SizedBox(
-            width: 80,
-            child: Align(
-              alignment: Alignment.centerRight,
-              child: _StockStatusChip(pantryItem: ingredient.matchingPantryItem),
-            ),
-          ),
-        ],
+        ),
       ),
     );
   }
