@@ -119,72 +119,10 @@ class AddToShoppingListModalPage {
           builder: (consumerContext, ref, child) {
             final aggregatedIngredientsAsync = ref.watch(aggregatedIngredientsProvider(date));
 
-            return aggregatedIngredientsAsync.when(
-              loading: () => const SliverFillRemaining(
-                child: Center(child: CupertinoActivityIndicator()),
-              ),
-              error: (error, stack) => SliverFillRemaining(
-                child: Center(
-                  child: Text(
-                    'Error loading ingredients: $error',
-                    style: TextStyle(
-                      color: CupertinoColors.destructiveRed.resolveFrom(context),
-                    ),
-                  ),
-                ),
-              ),
-              data: (aggregatedIngredients) {
-                // Initialize checked state for ingredients
-                for (final ingredient in aggregatedIngredients) {
-                  controller.checkedState.putIfAbsent(ingredient.id, () => ingredient.isChecked);
-                }
-
-                if (aggregatedIngredients.isEmpty) {
-                  return SliverFillRemaining(
-                    child: _buildEmptyState(context),
-                  );
-                }
-
-                return SliverMainAxisGroup(
-                  slivers: [
-                    // Shopping list selector
-                    SliverToBoxAdapter(
-                      child: _buildShoppingListSelector(context, ref),
-                    ),
-
-                    SliverPadding(padding: EdgeInsets.only(top: AppSpacing.lg)),
-
-                    // Ingredient list
-                    SliverPadding(
-                      padding: EdgeInsets.symmetric(horizontal: AppSpacing.lg),
-                      sliver: SliverList(
-                        delegate: SliverChildBuilderDelegate(
-                          (context, index) {
-                            final ingredient = aggregatedIngredients[index];
-                            final isChecked = controller.checkedState[ingredient.id] ?? ingredient.isChecked;
-                            final isFirst = index == 0;
-                            final isLast = index == aggregatedIngredients.length - 1;
-
-                            return _IngredientTile(
-                              ingredient: ingredient,
-                              isChecked: isChecked,
-                              isFirst: isFirst,
-                              isLast: isLast,
-                              onChanged: (value) {
-                                controller.updateCheckedState(ingredient.id, value);
-                              },
-                            );
-                          },
-                          childCount: aggregatedIngredients.length,
-                        ),
-                      ),
-                    ),
-
-                    // Bottom padding for sticky action bar
-                    SliverPadding(padding: EdgeInsets.only(bottom: AppSpacing.lg)),
-                  ],
-                );
-              },
+            return _AddToShoppingListContentSlivers(
+              aggregatedIngredientsAsync: aggregatedIngredientsAsync,
+              controller: controller,
+              date: date,
             );
           },
         ),
@@ -369,6 +307,87 @@ class AddToShoppingListModalPage {
       // Handle error
       controller.setLoading(false);
     }
+  }
+}
+
+// Content slivers widget - matches pattern from update_pantry_modal.dart
+class _AddToShoppingListContentSlivers extends ConsumerWidget {
+  final AsyncValue<List<AggregatedIngredient>> aggregatedIngredientsAsync;
+  final _AddToShoppingListController controller;
+  final String date;
+
+  const _AddToShoppingListContentSlivers({
+    required this.aggregatedIngredientsAsync,
+    required this.controller,
+    required this.date,
+  });
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    return aggregatedIngredientsAsync.when(
+      loading: () => const SliverFillRemaining(
+        child: Center(child: CupertinoActivityIndicator()),
+      ),
+      error: (error, stack) => SliverFillRemaining(
+        child: Center(
+          child: Text(
+            'Error loading ingredients: $error',
+            style: TextStyle(
+              color: CupertinoColors.destructiveRed.resolveFrom(context),
+            ),
+          ),
+        ),
+      ),
+      data: (aggregatedIngredients) {
+        // Initialize checked state for ingredients
+        for (final ingredient in aggregatedIngredients) {
+          controller.checkedState.putIfAbsent(ingredient.id, () => ingredient.isChecked);
+        }
+
+        if (aggregatedIngredients.isEmpty) {
+          return SliverFillRemaining(
+            child: AddToShoppingListModalPage._buildEmptyState(context),
+          );
+        }
+
+        // Build widgets for the list
+        final List<Widget> widgets = [];
+
+        // Shopping list selector
+        widgets.add(AddToShoppingListModalPage._buildShoppingListSelector(context, ref));
+        widgets.add(SizedBox(height: AppSpacing.lg));
+
+        // Ingredient list items
+        for (int index = 0; index < aggregatedIngredients.length; index++) {
+          final ingredient = aggregatedIngredients[index];
+          final isChecked = controller.checkedState[ingredient.id] ?? ingredient.isChecked;
+          final isFirst = index == 0;
+          final isLast = index == aggregatedIngredients.length - 1;
+
+          widgets.add(
+            Padding(
+              padding: EdgeInsets.symmetric(horizontal: AppSpacing.lg),
+              child: _IngredientTile(
+                ingredient: ingredient,
+                isChecked: isChecked,
+                isFirst: isFirst,
+                isLast: isLast,
+                onChanged: (value) {
+                  controller.updateCheckedState(ingredient.id, value);
+                },
+              ),
+            ),
+          );
+        }
+
+        // Bottom padding for sticky action bar
+        widgets.add(SizedBox(height: 130));
+
+        return SliverList(
+          delegate: SliverChildListDelegate(widgets),
+        );
+      },
+    );
   }
 }
 
