@@ -5,6 +5,7 @@ import 'package:wolt_modal_sheet/wolt_modal_sheet.dart';
 import '../../../../database/database.dart';
 import '../../../../database/models/pantry_items.dart';
 import '../../../providers/shopping_list_provider.dart';
+import '../../../services/ingredient_parser_service.dart';
 import '../../../theme/colors.dart';
 import '../../../theme/spacing.dart';
 import '../../../theme/typography.dart';
@@ -233,13 +234,20 @@ class AddToShoppingListModalPage {
     try {
       final shoppingListRepository = ref.read(shoppingListRepositoryProvider);
       final currentListId = ref.read(currentShoppingListProvider);
+      final parser = IngredientParserService();
 
       // Add checked ingredients to shopping list
       for (final ingredient in ingredients) {
         if (controller.checkedState[ingredient.id] ?? false) {
+          // Parse ingredient name to strip quantities and units
+          final parseResult = parser.parse(ingredient.name);
+          final cleanName = parseResult.cleanName.isNotEmpty
+              ? parseResult.cleanName
+              : ingredient.name;
+
           await shoppingListRepository.addItem(
             shoppingListId: currentListId,
-            name: ingredient.name,
+            name: cleanName,
             terms: ingredient.terms,
             category: ingredient.matchingPantryItem?.category,
             userId: null,
@@ -354,6 +362,8 @@ class _IngredientTile extends StatelessWidget {
   final bool isLast;
   final ValueChanged<bool> onChanged;
 
+  static final _parser = IngredientParserService();
+
   const _IngredientTile({
     required this.ingredient,
     required this.isChecked,
@@ -365,6 +375,12 @@ class _IngredientTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colors = AppColors.of(context);
+
+    // Parse ingredient name to strip quantities and units
+    final parseResult = _parser.parse(ingredient.name);
+    final displayName = parseResult.cleanName.isNotEmpty
+        ? parseResult.cleanName
+        : ingredient.name;
 
     // Get grouped styling
     final borderRadius = GroupedListStyling.getBorderRadius(
@@ -408,7 +424,7 @@ class _IngredientTile extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      ingredient.name,
+                      displayName,
                       style: AppTypography.body.copyWith(
                         fontWeight: FontWeight.w600,
                         color: colors.textPrimary,
