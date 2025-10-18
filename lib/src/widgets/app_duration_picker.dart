@@ -142,6 +142,7 @@ class _DurationPickerModalPage {
 
     return WoltModalSheetPage(
       backgroundColor: AppColors.of(context).background,
+      surfaceTintColor: Colors.transparent,
       leadingNavBarWidget: CupertinoButton(
         padding: const EdgeInsets.symmetric(horizontal: 16.0),
         onPressed: () => Navigator.of(context).pop(),

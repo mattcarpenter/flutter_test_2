@@ -112,6 +112,7 @@ class _AppDurationPickerCondensedState extends State<AppDurationPickerCondensed>
       pageListBuilder: (context) => [
         WoltModalSheetPage(
           backgroundColor: AppColors.of(context).background,
+          surfaceTintColor: Colors.transparent,
           hasSabGradient: false,
           leadingNavBarWidget: CupertinoButton(
             padding: const EdgeInsets.symmetric(horizontal: 16.0),
