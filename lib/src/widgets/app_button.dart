@@ -219,35 +219,36 @@ class _AppButtonState extends State<AppButton> {
       }
     }
 
-    // Use asymmetric padding when leading icon is present
+    // Use asymmetric padding when leading or trailing icons are present
     final hasLeadingIcon = widget.leadingIcon != null && !widget.loading;
+    final hasTrailingIcon = widget.trailingIcon != null && !widget.loading;
 
     switch (widget.size) {
       case AppButtonSize.extraSmall:
         return EdgeInsets.only(
           left: hasLeadingIcon ? 10 : 14,
-          right: 14,
+          right: hasTrailingIcon ? 10 : 14,
           top: 6,
           bottom: 6,
         );
       case AppButtonSize.small:
         return EdgeInsets.only(
           left: hasLeadingIcon ? 10 : 14,
-          right: 14,
+          right: hasTrailingIcon ? 10 : 14,
           top: 6,
           bottom: 6,
         );
       case AppButtonSize.medium:
         return EdgeInsets.only(
-          left: hasLeadingIcon ? 16 : 22,
-          right: 22,
+          left: hasLeadingIcon ? 14 : 16,
+          right: hasTrailingIcon ? 14 : 16,
           top: 10,
           bottom: 10,
         );
       case AppButtonSize.large:
         return EdgeInsets.only(
           left: hasLeadingIcon ? 18 : 26,
-          right: 26,
+          right: hasTrailingIcon ? 18 : 26,
           top: 14,
           bottom: 14,
         );
