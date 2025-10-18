@@ -158,9 +158,22 @@ class _MealPlanDateCardState extends ConsumerState<MealPlanDateCard>
               child: Container(
                 margin: const EdgeInsets.only(bottom: 16.0),
                 decoration: BoxDecoration(
+                  gradient: _isHovering
+                      ? null
+                      : LinearGradient(
+                          begin: Alignment.topCenter,
+                          end: Alignment.bottomCenter,
+                          colors: [
+                            CupertinoColors.white.withOpacity(0.5),
+                            CupertinoColors.white.withOpacity(0.5),
+                            CupertinoColors.white.withOpacity(0.0),
+                            CupertinoColors.white.withOpacity(0.0),
+                          ],
+                          stops: const [0.0, 0.15, 0.45, 1.0],
+                        ),
                   color: _isHovering
                       ? AppColorSwatches.primary[25]!
-                      : CupertinoColors.white.withOpacity(0.5),
+                      : null,
                   borderRadius: BorderRadius.circular(12),
                   border: _isHovering
                       ? Border.all(
