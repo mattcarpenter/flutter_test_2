@@ -8,18 +8,20 @@ import 'package:super_context_menu/super_context_menu.dart';
 import 'package:recipe_app/src/models/ingredient_pantry_match.dart';
 import 'package:recipe_app/database/models/ingredients.dart';
 import 'package:recipe_app/database/models/ingredient_terms.dart';
+import 'package:recipe_app/database/database.dart';
 import 'package:recipe_app/src/providers/recipe_provider.dart' show recipeIngredientMatchesProvider, recipeByIdStreamProvider;
+import 'package:recipe_app/src/providers/pantry_provider.dart';
 import 'package:recipe_app/src/repositories/recipe_repository.dart' show recipeRepositoryProvider;
 import 'package:recipe_app/src/theme/colors.dart';
 import 'package:recipe_app/src/theme/spacing.dart';
 import 'package:recipe_app/src/theme/typography.dart';
 import 'package:recipe_app/src/widgets/app_button.dart';
 import 'package:recipe_app/src/widgets/app_circle_button.dart';
+import 'package:recipe_app/src/widgets/app_text_field_simple.dart';
 import 'package:recipe_app/src/widgets/ingredient_stock_chip.dart';
 import 'package:recipe_app/src/widgets/utils/grouped_list_styling.dart';
 import 'package:recipe_app/src/widgets/wolt/text/modal_sheet_title.dart';
 import 'package:recipe_app/src/services/ingredient_parser_service.dart';
-import 'pantry_item_selector_bottom_sheet.dart';
 
 /// Shows a bottom sheet displaying ingredient-pantry match details
 /// with ability to edit the ingredient terms for better matching
@@ -85,8 +87,73 @@ void showIngredientMatchesBottomSheet(
             padding: EdgeInsets.fromLTRB(AppSpacing.lg, AppSpacing.lg, AppSpacing.lg, AppSpacing.lg),
             child: IngredientDetailPage(
               matches: matches,
+              pageIndexNotifier: pageIndexNotifier,
             ),
           ),
+        ),
+        // Page 3: Add custom term
+        WoltModalSheetPage(
+          navBarHeight: 55,
+          backgroundColor: AppColors.of(modalContext).background,
+          surfaceTintColor: Colors.transparent,
+          hasTopBarLayer: false,
+          leadingNavBarWidget: Padding(
+            padding: EdgeInsets.only(left: AppSpacing.lg),
+            child: AppCircleButton(
+              icon: AppCircleButtonIcon.back,
+              variant: AppCircleButtonVariant.neutral,
+              onPressed: () {
+                pageIndexNotifier.value = 1;
+              },
+            ),
+          ),
+          trailingNavBarWidget: Padding(
+            padding: EdgeInsets.only(right: AppSpacing.lg),
+            child: AppCircleButton(
+              icon: AppCircleButtonIcon.close,
+              variant: AppCircleButtonVariant.neutral,
+              onPressed: () => Navigator.of(modalContext).pop(),
+            ),
+          ),
+          child: AddCustomTermPage(
+            matches: matches,
+            pageIndexNotifier: pageIndexNotifier,
+          ),
+        ),
+        // Page 4: Select from pantry
+        SliverWoltModalSheetPage(
+          navBarHeight: 55,
+          backgroundColor: AppColors.of(modalContext).background,
+          surfaceTintColor: Colors.transparent,
+          hasTopBarLayer: true,
+          isTopBarLayerAlwaysVisible: false,
+          topBarTitle: _DynamicPantrySelectionTitle(),
+          leadingNavBarWidget: Padding(
+            padding: EdgeInsets.only(left: AppSpacing.lg),
+            child: AppCircleButton(
+              icon: AppCircleButtonIcon.back,
+              variant: AppCircleButtonVariant.neutral,
+              onPressed: () {
+                pageIndexNotifier.value = 1;
+              },
+            ),
+          ),
+          trailingNavBarWidget: Padding(
+            padding: EdgeInsets.only(right: AppSpacing.lg),
+            child: AppCircleButton(
+              icon: AppCircleButtonIcon.close,
+              variant: AppCircleButtonVariant.neutral,
+              onPressed: () => Navigator.of(modalContext).pop(),
+            ),
+          ),
+          mainContentSliversBuilder: (context) => [
+            SliverToBoxAdapter(
+              child: SelectFromPantryPage(
+                matches: matches,
+                pageIndexNotifier: pageIndexNotifier,
+              ),
+            ),
+          ],
         ),
       ];
     },
@@ -232,6 +299,7 @@ class IngredientMatchesListPage extends ConsumerWidget {
 
 class IngredientDetailPage extends ConsumerStatefulWidget {
   final RecipeIngredientMatches matches;
+  final ValueNotifier<int> pageIndexNotifier;
 
   // Static variable to share selected match between pages
   static IngredientPantryMatch? selectedMatch;
@@ -239,6 +307,7 @@ class IngredientDetailPage extends ConsumerStatefulWidget {
   const IngredientDetailPage({
     super.key,
     required this.matches,
+    required this.pageIndexNotifier,
   });
 
   @override
@@ -729,10 +798,9 @@ class _IngredientDetailPageState extends ConsumerState<IngredientDetailPage> {
   }
 
   void _addNewTerm(String ingredientId) {
-    // Find the original ingredient
-    final ingredient = widget.matches.matches
-        .firstWhere((match) => match.ingredient.id == ingredientId)
-        .ingredient;
+    // Store the selected ingredient for the next pages
+    IngredientDetailPage.selectedMatch = widget.matches.matches
+        .firstWhere((match) => match.ingredient.id == ingredientId);
 
     // Show platform-specific menu with options
     if (Platform.isIOS || Platform.isMacOS) {
@@ -746,20 +814,16 @@ class _IngredientDetailPageState extends ConsumerState<IngredientDetailPage> {
               child: const Text('Enter Custom Term'),
               onPressed: () {
                 Navigator.pop(context);
-                _showAddTermDialog(ingredientId, ingredient);
+                // Navigate to page 2 (Add Custom Term)
+                widget.pageIndexNotifier.value = 2;
               },
             ),
             CupertinoActionSheetAction(
               child: const Text('Select from Pantry'),
               onPressed: () {
                 Navigator.pop(context);
-                showPantryItemSelectorBottomSheet(
-                  context: context,
-                  recipeId: widget.matches.recipeId,
-                  onItemSelected: (itemName) async {
-                    await _addTermFromPantryItem(ingredientId, ingredient, itemName);
-                  },
-                );
+                // Navigate to page 3 (Select from Pantry)
+                widget.pageIndexNotifier.value = 3;
               },
             ),
           ],
@@ -792,7 +856,10 @@ class _IngredientDetailPageState extends ConsumerState<IngredientDetailPage> {
               title: Text('Enter Custom Term'),
               subtitle: Text('Enter a new term for matching'),
             ),
-            onTap: () => _showAddTermDialog(ingredientId, ingredient),
+            onTap: () {
+              // Navigate to page 2 (Add Custom Term)
+              widget.pageIndexNotifier.value = 2;
+            },
           ),
           PopupMenuItem(
             child: const ListTile(
@@ -800,130 +867,16 @@ class _IngredientDetailPageState extends ConsumerState<IngredientDetailPage> {
               title: Text('Select from Pantry'),
               subtitle: Text('Use an existing pantry item name'),
             ),
-            onTap: () => showPantryItemSelectorBottomSheet(
-              context: context,
-              recipeId: widget.matches.recipeId,
-              onItemSelected: (itemName) async {
-                await _addTermFromPantryItem(ingredientId, ingredient, itemName);
-              },
-            ),
+            onTap: () {
+              // Navigate to page 3 (Select from Pantry)
+              widget.pageIndexNotifier.value = 3;
+            },
           ),
         ],
       );
     }
   }
 
-  // Show the platform-specific dialog
-  void _showAddTermDialog(String ingredientId, Ingredient ingredient) {
-    final controller = TextEditingController();
-
-    // Handle saving the term
-    Future<void> saveTerm() async {
-      final value = controller.text.trim();
-      final navigator = Navigator.of(context);
-
-      if (value.isNotEmpty) {
-        // Get existing terms from our working copy
-        final terms = List<IngredientTerm>.from(_ingredientTermsMap[ingredientId] ?? []);
-
-        // Add new term with the next sort value
-        terms.add(IngredientTerm(
-          value: value,
-          source: 'user', // Marked as user-added
-          sort: terms.length, // Next position
-        ));
-
-        // Update the maps
-        setState(() {
-          _ingredientTermsMap[ingredientId] = terms;
-        });
-
-        // Save changes immediately
-        await _saveIngredientChanges(ingredientId);
-      }
-      navigator.pop();
-    }
-
-    if (Platform.isIOS) {
-      // Show Cupertino dialog on iOS
-      showCupertinoDialog(
-        context: context,
-        builder: (context) => CupertinoAlertDialog(
-          title: const Text('Add Matching Term'),
-          content: Padding(
-            padding: const EdgeInsets.only(top: 16.0),
-            child: CupertinoTextField(
-              controller: controller,
-              placeholder: 'Enter a matching term',
-              autofocus: true,
-              textCapitalization: TextCapitalization.words,
-              onSubmitted: (_) => saveTerm(),
-            ),
-          ),
-          actions: [
-            CupertinoDialogAction(
-              onPressed: () => Navigator.of(context).pop(),
-              isDestructiveAction: true,
-              child: const Text('Cancel'),
-            ),
-            CupertinoDialogAction(
-              onPressed: () async => await saveTerm(),
-              child: const Text('Add'),
-            ),
-          ],
-        ),
-      );
-    } else {
-      // Show Material dialog on Android and other platforms
-      showDialog(
-        context: context,
-        builder: (context) => AlertDialog(
-          title: const Text('Add Matching Term'),
-          content: TextField(
-            controller: controller,
-            decoration: const InputDecoration(
-              labelText: 'Term',
-              hintText: 'Enter a matching term (e.g., pantry item name)',
-            ),
-            autofocus: true,
-            textCapitalization: TextCapitalization.words,
-            onSubmitted: (_) => saveTerm(),
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.of(context).pop(),
-              child: const Text('Cancel'),
-            ),
-            TextButton(
-              onPressed: () async => await saveTerm(),
-              child: const Text('Add'),
-            ),
-          ],
-        ),
-      );
-    }
-  }
-
-  // Add a term from a selected pantry item
-  Future<void> _addTermFromPantryItem(String ingredientId, Ingredient ingredient, String itemName) async {
-    // Get existing terms from our working copy
-    final terms = List<IngredientTerm>.from(_ingredientTermsMap[ingredientId] ?? []);
-
-    // Add new term with the next sort value
-    terms.add(IngredientTerm(
-      value: itemName,
-      source: 'pantry', // Marked as coming from pantry item
-      sort: terms.length, // Next position
-    ));
-
-    // Update the maps
-    setState(() {
-      _ingredientTermsMap[ingredientId] = terms;
-    });
-
-    // Save changes immediately
-    await _saveIngredientChanges(ingredientId);
-  }
 
   // Save changes for a specific ingredient immediately
   Future<void> _saveIngredientChanges(String ingredientId) async {
@@ -962,5 +915,491 @@ class _IngredientDetailPageState extends ConsumerState<IngredientDetailPage> {
       // Invalidate the matches provider to refresh the UI with new match data
       ref.invalidate(recipeIngredientMatchesProvider(recipeId));
     }
+  }
+}
+
+// ============================================================================
+// Page 3: Add Custom Term
+// ============================================================================
+
+class AddCustomTermPage extends ConsumerStatefulWidget {
+  final RecipeIngredientMatches matches;
+  final ValueNotifier<int> pageIndexNotifier;
+
+  const AddCustomTermPage({
+    super.key,
+    required this.matches,
+    required this.pageIndexNotifier,
+  });
+
+  @override
+  ConsumerState<AddCustomTermPage> createState() => _AddCustomTermPageState();
+}
+
+class _AddCustomTermPageState extends ConsumerState<AddCustomTermPage> {
+  late final TextEditingController _termController;
+  late final FocusNode _focusNode;
+  bool _hasInput = false;
+  bool _isLoading = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _termController = TextEditingController();
+    _focusNode = FocusNode();
+    _termController.addListener(_updateHasInput);
+
+    // Auto-focus the text field
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _focusNode.requestFocus();
+    });
+  }
+
+  @override
+  void dispose() {
+    _termController.removeListener(_updateHasInput);
+    _termController.dispose();
+    _focusNode.dispose();
+    super.dispose();
+  }
+
+  void _updateHasInput() {
+    final hasInput = _termController.text.trim().isNotEmpty;
+    if (hasInput != _hasInput) {
+      setState(() {
+        _hasInput = hasInput;
+      });
+    }
+  }
+
+  Future<void> _addTerm() async {
+    final value = _termController.text.trim();
+    if (value.isEmpty) return;
+
+    setState(() {
+      _isLoading = true;
+    });
+
+    try {
+      final match = IngredientDetailPage.selectedMatch;
+      if (match == null) return;
+
+      final ingredientId = match.ingredient.id;
+      final repository = ref.read(recipeRepositoryProvider);
+      final recipeId = widget.matches.recipeId;
+      final recipeAsync = await repository.getRecipeById(recipeId);
+
+      if (recipeAsync == null) return;
+
+      // Get existing terms
+      final currentTerms = List<IngredientTerm>.from(match.ingredient.terms ?? []);
+
+      // Add new term
+      currentTerms.add(IngredientTerm(
+        value: value,
+        source: 'user',
+        sort: currentTerms.length,
+      ));
+
+      // Update ingredient with new terms
+      final updatedIngredient = match.ingredient.copyWith(terms: currentTerms);
+      final ingredients = List<Ingredient>.from(recipeAsync.ingredients ?? []);
+      final index = ingredients.indexWhere((ing) => ing.id == ingredientId);
+
+      if (index >= 0) {
+        ingredients[index] = updatedIngredient;
+        await repository.updateIngredients(recipeId, ingredients);
+        ref.invalidate(recipeIngredientMatchesProvider(recipeId));
+      }
+
+      // Navigate back to ingredient detail page
+      widget.pageIndexNotifier.value = 1;
+    } catch (e) {
+      debugPrint('Error adding term: $e');
+    } finally {
+      setState(() {
+        _isLoading = false;
+      });
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = AppColors.of(context);
+    final match = IngredientDetailPage.selectedMatch;
+
+    // Parse ingredient name to get clean name without quantities/units
+    final parser = IngredientParserService();
+    String displayName = 'Custom Term';
+    if (match != null) {
+      final parseResult = parser.parse(match.ingredient.name);
+      displayName = parseResult.cleanName.isNotEmpty
+          ? parseResult.cleanName
+          : match.ingredient.name;
+    }
+
+    return Padding(
+      padding: EdgeInsets.all(AppSpacing.lg),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text(
+            'Add Term for "$displayName"',
+            style: AppTypography.h4.copyWith(
+              color: colors.textPrimary,
+            ),
+          ),
+          SizedBox(height: AppSpacing.lg),
+          Row(
+            children: [
+              Expanded(
+                child: AppTextFieldSimple(
+                  controller: _termController,
+                  focusNode: _focusNode,
+                  placeholder: 'Enter matching term',
+                  textInputAction: TextInputAction.done,
+                  onSubmitted: (_) => _addTerm(),
+                ),
+              ),
+              SizedBox(width: AppSpacing.md),
+              AppButtonVariants.primaryFilled(
+                text: 'Add',
+                size: AppButtonSize.large,
+                shape: AppButtonShape.square,
+                onPressed: (_isLoading || !_hasInput) ? null : _addTerm,
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+// ============================================================================
+// Page 4: Select from Pantry
+// ============================================================================
+
+class SelectFromPantryPage extends ConsumerStatefulWidget {
+  final RecipeIngredientMatches matches;
+  final ValueNotifier<int> pageIndexNotifier;
+
+  const SelectFromPantryPage({
+    super.key,
+    required this.matches,
+    required this.pageIndexNotifier,
+  });
+
+  @override
+  ConsumerState<SelectFromPantryPage> createState() => _SelectFromPantryPageState();
+}
+
+class _SelectFromPantryPageState extends ConsumerState<SelectFromPantryPage> {
+  final TextEditingController _searchController = TextEditingController();
+  final FocusNode _searchFocusNode = FocusNode();
+  String _searchQuery = '';
+
+  @override
+  void initState() {
+    super.initState();
+    _searchController.addListener(() {
+      setState(() {
+        _searchQuery = _searchController.text.toLowerCase();
+      });
+    });
+
+    // Auto-focus search field
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _searchFocusNode.requestFocus();
+    });
+  }
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    _searchFocusNode.dispose();
+    super.dispose();
+  }
+
+  Future<void> _onItemSelected(String itemName) async {
+    final match = IngredientDetailPage.selectedMatch;
+    if (match == null) return;
+
+    try {
+      final ingredientId = match.ingredient.id;
+      final repository = ref.read(recipeRepositoryProvider);
+      final recipeId = widget.matches.recipeId;
+      final recipeAsync = await repository.getRecipeById(recipeId);
+
+      if (recipeAsync == null) return;
+
+      // Get existing terms
+      final currentTerms = List<IngredientTerm>.from(match.ingredient.terms ?? []);
+
+      // Add new term from pantry item
+      currentTerms.add(IngredientTerm(
+        value: itemName,
+        source: 'pantry',
+        sort: currentTerms.length,
+      ));
+
+      // Update ingredient with new terms
+      final updatedIngredient = match.ingredient.copyWith(terms: currentTerms);
+      final ingredients = List<Ingredient>.from(recipeAsync.ingredients ?? []);
+      final index = ingredients.indexWhere((ing) => ing.id == ingredientId);
+
+      if (index >= 0) {
+        ingredients[index] = updatedIngredient;
+        await repository.updateIngredients(recipeId, ingredients);
+        ref.invalidate(recipeIngredientMatchesProvider(recipeId));
+      }
+
+      // Navigate back to ingredient detail page
+      widget.pageIndexNotifier.value = 1;
+    } catch (e) {
+      debugPrint('Error adding pantry item term: $e');
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final pantryItemsAsync = ref.watch(pantryItemsProvider);
+    final colors = AppColors.of(context);
+
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        // Pinned search box
+        Padding(
+          padding: EdgeInsets.fromLTRB(AppSpacing.lg, AppSpacing.lg, AppSpacing.lg, AppSpacing.md),
+          child: CupertinoSearchTextField(
+            controller: _searchController,
+            focusNode: _searchFocusNode,
+            placeholder: 'Search pantry items...',
+            style: CupertinoTheme.of(context).textTheme.textStyle,
+          ),
+        ),
+
+        // Scrollable content area with fixed height
+        SizedBox(
+          height: MediaQuery.of(context).size.height * 0.6,
+          child: pantryItemsAsync.when(
+            loading: () => const Center(child: CupertinoActivityIndicator()),
+            error: (error, stack) => Center(
+              child: Text('Error loading pantry items: $error'),
+            ),
+            data: (pantryItems) {
+              if (pantryItems.isEmpty) {
+                return _buildEmptyState(context);
+              }
+
+              // Filter items based on search
+              final filteredItems = _searchQuery.isEmpty
+                  ? pantryItems
+                  : pantryItems.where((item) =>
+                      item.name.toLowerCase().contains(_searchQuery)).toList();
+
+              if (filteredItems.isEmpty) {
+                return _buildNoResultsState(context);
+              }
+
+              // Group items by category
+              final groupedItems = <String, List<PantryItemEntry>>{};
+              for (final item in filteredItems) {
+                final category = item.category ?? 'Uncategorized';
+                groupedItems.putIfAbsent(category, () => []).add(item);
+              }
+
+              // Sort categories alphabetically
+              final sortedCategories = groupedItems.keys.toList()..sort();
+
+              return CustomScrollView(
+                slivers: sortedCategories.map((category) {
+                  final items = groupedItems[category]!;
+
+                  return SliverToBoxAdapter(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        // Category header
+                        Padding(
+                          padding: EdgeInsets.fromLTRB(AppSpacing.lg, AppSpacing.lg, AppSpacing.lg, AppSpacing.sm),
+                          child: Text(
+                            category,
+                            style: AppTypography.h5.copyWith(
+                              color: colors.textPrimary,
+                            ),
+                          ),
+                        ),
+                        // Items in this category
+                        Padding(
+                          padding: EdgeInsets.symmetric(horizontal: AppSpacing.lg),
+                          child: _buildGroupedItemsList(context, items),
+                        ),
+                      ],
+                    ),
+                  );
+                }).toList(),
+              );
+            },
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildGroupedItemsList(BuildContext context, List<PantryItemEntry> items) {
+    final colors = AppColors.of(context);
+
+    return ListView.builder(
+      shrinkWrap: true,
+      physics: const NeverScrollableScrollPhysics(),
+      itemCount: items.length,
+      itemBuilder: (context, index) {
+        final item = items[index];
+        final isFirst = index == 0;
+        final isLast = index == items.length - 1;
+
+        final borderRadius = GroupedListStyling.getBorderRadius(
+          isGrouped: true,
+          isFirstInGroup: isFirst,
+          isLastInGroup: isLast,
+        );
+        final border = GroupedListStyling.getBorder(
+          context: context,
+          isGrouped: true,
+          isFirstInGroup: isFirst,
+          isLastInGroup: isLast,
+          isDragging: false,
+        );
+
+        return Container(
+          decoration: BoxDecoration(
+            color: colors.input,
+            border: border,
+            borderRadius: borderRadius,
+          ),
+          child: InkWell(
+            onTap: () => _onItemSelected(item.name),
+            child: Padding(
+              padding: const EdgeInsets.all(12),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: Text(
+                      item.name,
+                      style: AppTypography.body.copyWith(
+                        fontWeight: FontWeight.w600,
+                        color: colors.textPrimary,
+                      ),
+                    ),
+                  ),
+                  Icon(
+                    Icons.chevron_right,
+                    color: colors.contentSecondary,
+                    size: 20,
+                  ),
+                ],
+              ),
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildEmptyState(BuildContext context) {
+    final colors = AppColors.of(context);
+
+    return SizedBox(
+      height: 200,
+      child: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              CupertinoIcons.cube_box,
+              size: 48,
+              color: colors.textTertiary,
+            ),
+            SizedBox(height: AppSpacing.lg),
+            Text(
+              'No pantry items found',
+              style: AppTypography.body.copyWith(
+                color: colors.textSecondary,
+              ),
+            ),
+            SizedBox(height: AppSpacing.xs),
+            Text(
+              'Add items in the Pantry tab',
+              style: AppTypography.bodySmall.copyWith(
+                color: colors.textTertiary,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildNoResultsState(BuildContext context) {
+    final colors = AppColors.of(context);
+
+    return SizedBox(
+      height: 200,
+      child: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              CupertinoIcons.search,
+              size: 48,
+              color: colors.textTertiary,
+            ),
+            SizedBox(height: AppSpacing.lg),
+            Text(
+              'No items found',
+              style: AppTypography.body.copyWith(
+                color: colors.textSecondary,
+              ),
+            ),
+            SizedBox(height: AppSpacing.xs),
+            Text(
+              'Try a different search term',
+              style: AppTypography.bodySmall.copyWith(
+                color: colors.textTertiary,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+// ============================================================================
+// Dynamic Title Widget for Pantry Selection Page
+// ============================================================================
+
+class _DynamicPantrySelectionTitle extends StatelessWidget {
+  const _DynamicPantrySelectionTitle();
+
+  @override
+  Widget build(BuildContext context) {
+    final match = IngredientDetailPage.selectedMatch;
+
+    if (match == null) {
+      return ModalSheetTitle('Select Pantry Item');
+    }
+
+    // Parse ingredient name to get clean name without quantities/units
+    final parser = IngredientParserService();
+    final parseResult = parser.parse(match.ingredient.name);
+    final displayName = parseResult.cleanName.isNotEmpty
+        ? parseResult.cleanName
+        : match.ingredient.name;
+
+    return ModalSheetTitle('Select Item for "$displayName"');
   }
 }
