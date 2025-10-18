@@ -125,9 +125,7 @@ void showIngredientMatchesBottomSheet(
           navBarHeight: 55,
           backgroundColor: AppColors.of(modalContext).background,
           surfaceTintColor: Colors.transparent,
-          hasTopBarLayer: true,
-          isTopBarLayerAlwaysVisible: false,
-          topBarTitle: _DynamicPantrySelectionTitle(),
+          hasTopBarLayer: false,
           leadingNavBarWidget: Padding(
             padding: EdgeInsets.only(left: AppSpacing.lg),
             child: AppCircleButton(
@@ -1166,13 +1164,38 @@ class _SelectFromPantryPageState extends ConsumerState<SelectFromPantryPage> {
   Widget build(BuildContext context) {
     final pantryItemsAsync = ref.watch(pantryItemsProvider);
     final colors = AppColors.of(context);
+    final match = IngredientDetailPage.selectedMatch;
+
+    // Parse ingredient name to get clean name without quantities/units
+    final parser = IngredientParserService();
+    String displayName = 'ingredient';
+    if (match != null) {
+      final parseResult = parser.parse(match.ingredient.name);
+      displayName = parseResult.cleanName.isNotEmpty
+          ? parseResult.cleanName
+          : match.ingredient.name;
+    }
 
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
-        // Pinned search box
+        // Title
         Padding(
           padding: EdgeInsets.fromLTRB(AppSpacing.lg, AppSpacing.lg, AppSpacing.lg, AppSpacing.md),
+          child: Align(
+            alignment: Alignment.centerLeft,
+            child: Text(
+              'Select Item for "$displayName"',
+              style: AppTypography.h4.copyWith(
+                color: colors.textPrimary,
+              ),
+            ),
+          ),
+        ),
+
+        // Search box
+        Padding(
+          padding: EdgeInsets.symmetric(horizontal: AppSpacing.lg),
           child: CupertinoSearchTextField(
             controller: _searchController,
             focusNode: _searchFocusNode,
@@ -1180,6 +1203,8 @@ class _SelectFromPantryPageState extends ConsumerState<SelectFromPantryPage> {
             style: CupertinoTheme.of(context).textTheme.textStyle,
           ),
         ),
+
+        SizedBox(height: AppSpacing.md),
 
         // Scrollable content area with fixed height
         SizedBox(
@@ -1375,31 +1400,5 @@ class _SelectFromPantryPageState extends ConsumerState<SelectFromPantryPage> {
         ),
       ),
     );
-  }
-}
-
-// ============================================================================
-// Dynamic Title Widget for Pantry Selection Page
-// ============================================================================
-
-class _DynamicPantrySelectionTitle extends StatelessWidget {
-  const _DynamicPantrySelectionTitle();
-
-  @override
-  Widget build(BuildContext context) {
-    final match = IngredientDetailPage.selectedMatch;
-
-    if (match == null) {
-      return ModalSheetTitle('Select Pantry Item');
-    }
-
-    // Parse ingredient name to get clean name without quantities/units
-    final parser = IngredientParserService();
-    final parseResult = parser.parse(match.ingredient.name);
-    final displayName = parseResult.cleanName.isNotEmpty
-        ? parseResult.cleanName
-        : match.ingredient.name;
-
-    return ModalSheetTitle('Select Item for "$displayName"');
   }
 }
