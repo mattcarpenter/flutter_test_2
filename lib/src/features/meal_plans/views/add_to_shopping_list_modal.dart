@@ -1,6 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:wolt_modal_sheet/wolt_modal_sheet.dart';
 import '../../../../database/database.dart';
 import '../../../../database/models/pantry_items.dart';
@@ -235,6 +236,7 @@ class AddToShoppingListModalPage {
       final shoppingListRepository = ref.read(shoppingListRepositoryProvider);
       final currentListId = ref.read(currentShoppingListProvider);
       final parser = IngredientParserService();
+      final userId = Supabase.instance.client.auth.currentUser?.id;
 
       // Add checked ingredients to shopping list
       for (final ingredient in ingredients) {
@@ -248,10 +250,12 @@ class AddToShoppingListModalPage {
           await shoppingListRepository.addItem(
             shoppingListId: currentListId,
             name: cleanName,
-            terms: ingredient.terms,
-            category: ingredient.matchingPantryItem?.category,
-            userId: null,
+            userId: userId,
             householdId: null,
+            // Don't pass terms or category - let the canonicalization queue
+            // handle it so we get both terms AND category from the API.
+            // This ensures items are properly categorized instead of ending
+            // up in "Other" category.
           );
         }
       }
