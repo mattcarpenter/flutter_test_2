@@ -6,7 +6,8 @@ import '../theme/spacing.dart';
 import '../theme/typography.dart';
 import '../widgets/adaptive_pull_down/adaptive_menu_item.dart';
 import '../widgets/adaptive_pull_down/adaptive_pull_down.dart';
-import '../widgets/app_checkbox_square.dart';
+import '../widgets/app_radio_button.dart';
+import '../widgets/utils/grouped_list_styling.dart';
 
 /// A row for selecting tags with checkbox, label, and color picker
 class TagSelectionRow extends StatelessWidget {
@@ -52,61 +53,64 @@ class TagSelectionRow extends StatelessWidget {
     final colors = AppColors.of(context);
     final tagColor = TagColors.fromHex(color);
 
+    // Get grouped styling
+    final borderRadius = GroupedListStyling.getBorderRadius(
+      isGrouped: true,
+      isFirstInGroup: first,
+      isLastInGroup: last,
+    );
+    final border = GroupedListStyling.getBorder(
+      context: context,
+      isGrouped: true,
+      isFirstInGroup: first,
+      isLastInGroup: last,
+      isDragging: false,
+    );
+
     return Container(
-      constraints: const BoxConstraints(minHeight: 48),
       decoration: BoxDecoration(
-        color: colors.surface,
-        borderRadius: BorderRadius.vertical(
-          top: first ? const Radius.circular(8) : Radius.zero,
-          bottom: last ? const Radius.circular(8) : Radius.zero,
-        ),
+        color: colors.input,
+        border: border,
+        borderRadius: borderRadius,
       ),
-      child: Material(
-        color: Colors.transparent,
-        child: InkWell(
-          onTap: onToggle,
-          borderRadius: BorderRadius.vertical(
-            top: first ? const Radius.circular(8) : Radius.zero,
-            bottom: last ? const Radius.circular(8) : Radius.zero,
-          ),
-          child: Padding(
-            padding: EdgeInsets.symmetric(
-              horizontal: AppSpacing.lg,
-              vertical: AppSpacing.sm,
-            ),
-            child: Row(
-              children: [
-                AppCheckboxSquare(
-                  checked: checked,
-                  onTap: onToggle,
+      child: InkWell(
+        onTap: onToggle,
+        borderRadius: borderRadius,
+        child: Padding(
+          padding: const EdgeInsets.all(12),
+          child: Row(
+            children: [
+              AppRadioButton(
+                selected: checked,
+                onTap: onToggle,
+              ),
+              SizedBox(width: AppSpacing.md),
+              Expanded(
+                child: Text(
+                  label,
+                  style: AppTypography.body.copyWith(
+                    fontWeight: FontWeight.w600,
+                    color: colors.textPrimary,
+                  ),
                 ),
-                SizedBox(width: AppSpacing.md),
-                Expanded(
-                  child: Text(
-                    label,
-                    style: AppTypography.body.copyWith(
-                      color: colors.textPrimary,
+              ),
+              // Color indicator with overflow menu for color selection
+              AdaptivePullDownButton(
+                items: _buildColorMenuItems(context),
+                child: Container(
+                  width: 24,
+                  height: 24,
+                  decoration: BoxDecoration(
+                    color: tagColor,
+                    shape: BoxShape.circle,
+                    border: Border.all(
+                      color: colors.border,
+                      width: 1,
                     ),
                   ),
                 ),
-                // Color indicator with overflow menu for color selection
-                AdaptivePullDownButton(
-                  items: _buildColorMenuItems(context),
-                  child: Container(
-                    width: 24,
-                    height: 24,
-                    decoration: BoxDecoration(
-                      color: tagColor,
-                      shape: BoxShape.circle,
-                      border: Border.all(
-                        color: colors.border,
-                        width: 1,
-                      ),
-                    ),
-                  ),
-                ),
-              ],
-            ),
+              ),
+            ],
           ),
         ),
       ),

@@ -11,6 +11,7 @@ import '../../../theme/typography.dart';
 import '../../../widgets/app_button.dart';
 import '../../../widgets/app_circle_button.dart';
 import '../../../widgets/app_text_field_simple.dart';
+import '../../../widgets/wolt/text/modal_sheet_title.dart';
 import '../../../providers/recipe_tag_provider.dart';
 import '../../../widgets/tag_selection_row.dart';
 import 'tag_selection_view_model.dart';
@@ -19,12 +20,13 @@ import 'tag_selection_view_model.dart';
 class TagSelectionPage {
   TagSelectionPage._();
 
-  static WoltModalSheetPage build(BuildContext context) {
-    return WoltModalSheetPage(
+  static SliverWoltModalSheetPage build(BuildContext context) {
+    return SliverWoltModalSheetPage(
       backgroundColor: AppColors.of(context).background,
       surfaceTintColor: Colors.transparent,
-      hasTopBarLayer: false,
+      hasTopBarLayer: true,
       isTopBarLayerAlwaysVisible: false,
+      topBarTitle: ModalSheetTitle('Select Tags'),
       leadingNavBarWidget: CupertinoButton(
         padding: const EdgeInsets.symmetric(horizontal: 16.0),
         onPressed: () {
@@ -48,11 +50,11 @@ class TagSelectionPage {
         },
         child: const Text('Save'),
       ),
-      child: Padding(
-        padding: EdgeInsets.fromLTRB(
-          AppSpacing.lg, AppSpacing.xl, AppSpacing.lg, AppSpacing.lg),
-        child: const TagSelectionPageContent(),
-      ),
+      mainContentSliversBuilder: (context) => [
+        SliverToBoxAdapter(
+          child: const TagSelectionPageContent(),
+        ),
+      ],
     );
   }
 }
@@ -63,26 +65,21 @@ class TagSelectionPageContent extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final colors = AppColors.of(context);
-    
+
     return provider.Consumer<TagSelectionViewModel>(
       builder: (context, viewModel, child) {
         final allTags = viewModel.getAllDisplayTags();
-        
-        return Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            // Title and Create button
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  'Select Tags',
-                  style: AppTypography.h4.copyWith(
-                    color: colors.textPrimary,
-                  ),
-                ),
-                AppButton(
+
+        return Padding(
+          padding: EdgeInsets.all(AppSpacing.lg),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              // Create button (aligned right)
+              Align(
+                alignment: Alignment.centerRight,
+                child: AppButton(
                   text: 'Create New Tag',
                   onPressed: () {
                     WoltModalSheet.of(context).showNext();
@@ -93,102 +90,95 @@ class TagSelectionPageContent extends ConsumerWidget {
                   size: AppButtonSize.small,
                   leadingIcon: const Icon(Icons.add),
                 ),
-              ],
-            ),
-            SizedBox(height: AppSpacing.lg),
-            
-            // Error message if any
-            if (viewModel.errorMessage != null) ...[
-              Container(
-                padding: EdgeInsets.all(AppSpacing.sm),
-                decoration: BoxDecoration(
-                  color: colors.error.withValues(alpha: 0.1),
-                  border: Border.all(color: colors.error.withValues(alpha: 0.3)),
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: Row(
-                  children: [
-                    Icon(Icons.error_outline, color: colors.error, size: 20),
-                    SizedBox(width: AppSpacing.sm),
-                    Expanded(
-                      child: Text(
-                        viewModel.errorMessage!,
-                        style: AppTypography.bodySmall.copyWith(
-                          color: colors.error,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
               ),
               SizedBox(height: AppSpacing.lg),
-            ],
-            
-            // Tag list
-            Flexible(
-              child: Container(
-                constraints: BoxConstraints(
-                  maxHeight: MediaQuery.of(context).size.height * 0.5,
-                ),
-                child: allTags.isEmpty
-                    ? Center(
-                        child: Column(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Text(
-                              'No tags yet',
-                              style: AppTypography.body.copyWith(
-                                color: colors.textSecondary,
-                              ),
-                            ),
-                            SizedBox(height: AppSpacing.md),
-                            Text(
-                              'Create your first tag using the button above',
-                              style: AppTypography.bodySmall.copyWith(
-                                color: colors.textSecondary,
-                              ),
-                              textAlign: TextAlign.center,
-                            ),
-                          ],
-                        ),
-                      )
-                    : SingleChildScrollView(
-                        child: Column(
-                          children: allTags.asMap().entries.map((entry) {
-                            final index = entry.key;
-                            final tag = entry.value;
-                            final isFirst = index == 0;
-                            final isLast = index == allTags.length - 1;
-                            final isSelected = viewModel.isTagSelected(tag.id);
 
-                            return TagSelectionRow(
-                              tagId: tag.id,
-                              label: tag.name,
-                              color: tag.color,
-                              checked: isSelected,
-                              first: isFirst,
-                              last: isLast,
-                              onToggle: () {
-                                viewModel.toggleTagSelection(tag.id);
-                              },
-                              onColorChanged: (newColor) {
-                                // Handle color changes for existing tags
-                                if (!tag.id.startsWith('temp_')) {
-                                  ref.read(recipeTagNotifierProvider.notifier).updateTag(
-                                    tagId: tag.id,
-                                    color: newColor,
-                                  );
-                                }
-                                // For temporary tags, we could update the temp tag color
-                                // but for now, let's keep it simple
-                              },
-                            );
-                          }).toList(),
+              // Error message if any
+              if (viewModel.errorMessage != null) ...[
+                Container(
+                  padding: EdgeInsets.all(AppSpacing.sm),
+                  decoration: BoxDecoration(
+                    color: colors.error.withValues(alpha: 0.1),
+                    border: Border.all(color: colors.error.withValues(alpha: 0.3)),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Row(
+                    children: [
+                      Icon(Icons.error_outline, color: colors.error, size: 20),
+                      SizedBox(width: AppSpacing.sm),
+                      Expanded(
+                        child: Text(
+                          viewModel.errorMessage!,
+                          style: AppTypography.bodySmall.copyWith(
+                            color: colors.error,
+                          ),
                         ),
                       ),
-              ),
-            ),
-          ],
+                    ],
+                  ),
+                ),
+                SizedBox(height: AppSpacing.lg),
+              ],
+
+              // Tag list or empty state
+              if (allTags.isEmpty)
+                Center(
+                  child: Padding(
+                    padding: EdgeInsets.symmetric(vertical: AppSpacing.xl),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text(
+                          'No tags yet',
+                          style: AppTypography.body.copyWith(
+                            color: colors.textSecondary,
+                          ),
+                        ),
+                        SizedBox(height: AppSpacing.md),
+                        Text(
+                          'Create your first tag using the button above',
+                          style: AppTypography.bodySmall.copyWith(
+                            color: colors.textSecondary,
+                          ),
+                          textAlign: TextAlign.center,
+                        ),
+                      ],
+                    ),
+                  ),
+                )
+              else
+                ...allTags.asMap().entries.map((entry) {
+                  final index = entry.key;
+                  final tag = entry.value;
+                  final isFirst = index == 0;
+                  final isLast = index == allTags.length - 1;
+                  final isSelected = viewModel.isTagSelected(tag.id);
+
+                  return TagSelectionRow(
+                    tagId: tag.id,
+                    label: tag.name,
+                    color: tag.color,
+                    checked: isSelected,
+                    first: isFirst,
+                    last: isLast,
+                    onToggle: () {
+                      viewModel.toggleTagSelection(tag.id);
+                    },
+                    onColorChanged: (newColor) {
+                      // Handle color changes for existing tags
+                      if (!tag.id.startsWith('temp_')) {
+                        ref.read(recipeTagNotifierProvider.notifier).updateTag(
+                          tagId: tag.id,
+                          color: newColor,
+                        );
+                      }
+                      // For temporary tags, we could update the temp tag color
+                      // but for now, let's keep it simple
+                    },
+                  );
+                }),
+            ],
+          ),
         );
       },
     );
