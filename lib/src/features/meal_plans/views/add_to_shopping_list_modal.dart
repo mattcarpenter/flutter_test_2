@@ -13,6 +13,7 @@ import '../../../widgets/app_circle_button.dart';
 import '../../../widgets/app_radio_button.dart';
 import '../../../widgets/utils/grouped_list_styling.dart';
 import '../../../widgets/wolt/text/modal_sheet_title.dart';
+import '../../shopping_list/views/shopping_list_selection_modal.dart';
 import '../providers/meal_plan_shopping_list_provider.dart';
 import '../models/aggregated_ingredient.dart';
 
@@ -150,6 +151,13 @@ class AddToShoppingListModalPage {
     final shoppingListsAsync = ref.watch(shoppingListsProvider);
     final shoppingLists = shoppingListsAsync.valueOrNull ?? [];
 
+    // Get current list name
+    String listName = 'My Shopping List';
+    if (currentListId != null) {
+      final list = shoppingLists.where((l) => l.id == currentListId).firstOrNull;
+      listName = list?.name ?? 'My Shopping List';
+    }
+
     return Container(
       padding: EdgeInsets.fromLTRB(AppSpacing.lg, AppSpacing.sm, AppSpacing.lg, 0),
       child: Row(
@@ -162,29 +170,17 @@ class AddToShoppingListModalPage {
           ),
           const SizedBox(width: 12),
           Expanded(
-            child: CupertinoButton(
-              padding: EdgeInsets.zero,
-              onPressed: () => _showListPicker(context, ref, shoppingLists),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.end,
-                children: [
-                  Flexible(
-                    child: Text(
-                      _getListName(currentListId, shoppingLists),
-                      style: TextStyle(
-                        color: CupertinoColors.activeBlue.resolveFrom(context),
-                      ),
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                  ),
-                  const SizedBox(width: 4),
-                  Icon(
-                    CupertinoIcons.chevron_down,
-                    size: 16,
-                    color: CupertinoColors.activeBlue.resolveFrom(context),
-                  ),
-                ],
-              ),
+            child: AppButton(
+              text: listName,
+              trailingIcon: const Icon(Icons.keyboard_arrow_down, size: 24),
+              trailingIconOffset: const Offset(8, -2),
+              style: AppButtonStyle.mutedOutline,
+              shape: AppButtonShape.square,
+              size: AppButtonSize.medium,
+              theme: AppButtonTheme.primary,
+              fullWidth: true,
+              contentAlignment: AppButtonContentAlignment.left,
+              onPressed: () => showShoppingListSelectionModal(context, ref),
             ),
           ),
         ],
@@ -224,68 +220,6 @@ class AddToShoppingListModalPage {
         ],
       ),
     );
-  }
-
-  static void _showListPicker(BuildContext context, WidgetRef ref, List<ShoppingListEntry> shoppingLists) {
-    final currentListId = ref.read(currentShoppingListProvider);
-
-    showCupertinoModalPopup(
-      context: context,
-      builder: (BuildContext context) => CupertinoActionSheet(
-        title: const Text('Select Shopping List'),
-        actions: [
-          // Default list option
-          CupertinoActionSheetAction(
-            onPressed: () {
-              ref.read(currentShoppingListProvider.notifier).setCurrentList(null);
-              Navigator.pop(context);
-            },
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                if (currentListId == null) ...[
-                  const Icon(CupertinoIcons.checkmark_alt, size: 20),
-                  const SizedBox(width: 8),
-                ],
-                const Text('My Shopping List'),
-              ],
-            ),
-          ),
-          // Other lists
-          ...shoppingLists.map((list) => CupertinoActionSheetAction(
-            onPressed: () {
-              ref.read(currentShoppingListProvider.notifier).setCurrentList(list.id);
-              Navigator.pop(context);
-            },
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                if (currentListId == list.id) ...[
-                  const Icon(CupertinoIcons.checkmark_alt, size: 20),
-                  const SizedBox(width: 8),
-                ],
-                Text(list.name ?? 'Unnamed List'),
-              ],
-            ),
-          )),
-        ],
-        cancelButton: CupertinoActionSheetAction(
-          isDefaultAction: true,
-          onPressed: () => Navigator.pop(context),
-          child: const Text('Cancel'),
-        ),
-      ),
-    );
-  }
-
-  static String _getListName(String? listId, List<ShoppingListEntry> shoppingLists) {
-    if (listId == null) return 'My Shopping List';
-    try {
-      final list = shoppingLists.firstWhere((l) => l.id == listId);
-      return list.name ?? 'My Shopping List';
-    } catch (e) {
-      return 'My Shopping List';
-    }
   }
 
   static Future<void> _addToShoppingList({
