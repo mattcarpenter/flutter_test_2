@@ -155,9 +155,6 @@ void showIngredientMatchesBottomSheet(
         ),
       ];
     },
-    onModalDismissedWithBarrierTap: () {
-      Navigator.of(context).pop();
-    },
   );
 }
 
@@ -244,8 +241,8 @@ class IngredientMatchesListPage extends ConsumerWidget {
       ),
       child: InkWell(
         onTap: () {
-          // Store selected ingredient in a global accessible way
-          IngredientDetailPage.selectedMatch = match;
+          // Store selected ingredient ID for page 2
+          IngredientDetailPage.selectedIngredientId = match.ingredient.id;
           pageIndexNotifier.value = 1;
         },
         child: Padding(
@@ -299,8 +296,8 @@ class IngredientDetailPage extends ConsumerStatefulWidget {
   final RecipeIngredientMatches matches;
   final ValueNotifier<int> pageIndexNotifier;
 
-  // Static variable to share selected match between pages
-  static IngredientPantryMatch? selectedMatch;
+  // Static variable to share selected ingredient ID between pages
+  static String? selectedIngredientId;
 
   const IngredientDetailPage({
     super.key,
@@ -322,25 +319,40 @@ class _IngredientDetailPageState extends ConsumerState<IngredientDetailPage> {
   @override
   void initState() {
     super.initState();
-    // Initialize working copy of terms for the selected ingredient
-    if (IngredientDetailPage.selectedMatch != null) {
-      final ingredient = IngredientDetailPage.selectedMatch!.ingredient;
-      _ingredientTermsMap[ingredient.id] = List<IngredientTerm>.from(ingredient.terms ?? []);
-    }
   }
 
   @override
   Widget build(BuildContext context) {
     final colors = AppColors.of(context);
-    final match = IngredientDetailPage.selectedMatch;
+    final selectedId = IngredientDetailPage.selectedIngredientId;
 
-    if (match == null) {
+    if (selectedId == null) {
       return const Center(child: Text('No ingredient selected'));
     }
 
-    final ingredient = match.ingredient;
-    final terms = _ingredientTermsMap[ingredient.id] ?? [];
-    final hasLinkedRecipe = ingredient.recipeId != null;
+    // Watch the live matches to get fresh data
+    final matchesAsync = ref.watch(recipeIngredientMatchesProvider(widget.matches.recipeId));
+
+    return matchesAsync.when(
+      loading: () => const Center(child: CircularProgressIndicator()),
+      error: (error, stack) => Center(child: Text('Error: $error')),
+      data: (currentMatches) {
+        // Find the current match for the selected ingredient
+        final match = currentMatches.matches.firstWhere(
+          (m) => m.ingredient.id == selectedId,
+          orElse: () => widget.matches.matches.first,
+        );
+
+        final ingredient = match.ingredient;
+
+        // Update working copy of terms if needed
+        if (!_ingredientTermsMap.containsKey(ingredient.id) ||
+            _ingredientTermsMap[ingredient.id]!.length != (ingredient.terms?.length ?? 0)) {
+          _ingredientTermsMap[ingredient.id] = List<IngredientTerm>.from(ingredient.terms ?? []);
+        }
+
+        final terms = _ingredientTermsMap[ingredient.id] ?? [];
+        final hasLinkedRecipe = ingredient.recipeId != null;
 
     // Parse ingredient name to get clean name without quantities/units
     final parseResult = _parser.parse(ingredient.name);
@@ -378,6 +390,8 @@ class _IngredientDetailPageState extends ConsumerState<IngredientDetailPage> {
             _buildTermsEditor(context, ingredient, terms, hasLinkedRecipe: hasLinkedRecipe),
           ],
         );
+      },
+    );
   }
 
   Widget _buildMatchedText(BuildContext context, IngredientPantryMatch match) {
@@ -796,9 +810,8 @@ class _IngredientDetailPageState extends ConsumerState<IngredientDetailPage> {
   }
 
   void _addNewTerm(String ingredientId) {
-    // Store the selected ingredient for the next pages
-    IngredientDetailPage.selectedMatch = widget.matches.matches
-        .firstWhere((match) => match.ingredient.id == ingredientId);
+    // Store the selected ingredient ID for the next pages
+    IngredientDetailPage.selectedIngredientId = ingredientId;
 
     // Show platform-specific menu with options
     if (Platform.isIOS || Platform.isMacOS) {
@@ -979,18 +992,23 @@ class _AddCustomTermPageState extends ConsumerState<AddCustomTermPage> {
     });
 
     try {
-      final match = IngredientDetailPage.selectedMatch;
-      if (match == null) return;
-
-      final ingredientId = match.ingredient.id;
+      final ingredientId = IngredientDetailPage.selectedIngredientId;
+      if (ingredientId == null) return;
       final repository = ref.read(recipeRepositoryProvider);
       final recipeId = widget.matches.recipeId;
       final recipeAsync = await repository.getRecipeById(recipeId);
 
       if (recipeAsync == null) return;
 
+      // Find the current ingredient
+      final currentIngredient = recipeAsync.ingredients?.firstWhere(
+        (ing) => ing.id == ingredientId,
+        orElse: () => recipeAsync.ingredients!.first,
+      );
+      if (currentIngredient == null) return;
+
       // Get existing terms
-      final currentTerms = List<IngredientTerm>.from(match.ingredient.terms ?? []);
+      final currentTerms = List<IngredientTerm>.from(currentIngredient.terms ?? []);
 
       // Add new term
       currentTerms.add(IngredientTerm(
@@ -1000,7 +1018,7 @@ class _AddCustomTermPageState extends ConsumerState<AddCustomTermPage> {
       ));
 
       // Update ingredient with new terms
-      final updatedIngredient = match.ingredient.copyWith(terms: currentTerms);
+      final updatedIngredient = currentIngredient.copyWith(terms: currentTerms);
       final ingredients = List<Ingredient>.from(recipeAsync.ingredients ?? []);
       final index = ingredients.indexWhere((ing) => ing.id == ingredientId);
 
@@ -1024,17 +1042,20 @@ class _AddCustomTermPageState extends ConsumerState<AddCustomTermPage> {
   @override
   Widget build(BuildContext context) {
     final colors = AppColors.of(context);
-    final match = IngredientDetailPage.selectedMatch;
+    final ingredientId = IngredientDetailPage.selectedIngredientId;
+
+    // Find the ingredient from matches
+    final match = widget.matches.matches.firstWhere(
+      (m) => m.ingredient.id == ingredientId,
+      orElse: () => widget.matches.matches.first,
+    );
 
     // Parse ingredient name to get clean name without quantities/units
     final parser = IngredientParserService();
-    String displayName = 'Custom Term';
-    if (match != null) {
-      final parseResult = parser.parse(match.ingredient.name);
-      displayName = parseResult.cleanName.isNotEmpty
-          ? parseResult.cleanName
-          : match.ingredient.name;
-    }
+    final parseResult = parser.parse(match.ingredient.name);
+    final displayName = parseResult.cleanName.isNotEmpty
+        ? parseResult.cleanName
+        : match.ingredient.name;
 
     return Padding(
       padding: EdgeInsets.all(AppSpacing.lg),
@@ -1121,19 +1142,25 @@ class _SelectFromPantryPageState extends ConsumerState<SelectFromPantryPage> {
   }
 
   Future<void> _onItemSelected(String itemName) async {
-    final match = IngredientDetailPage.selectedMatch;
-    if (match == null) return;
+    final ingredientId = IngredientDetailPage.selectedIngredientId;
+    if (ingredientId == null) return;
 
     try {
-      final ingredientId = match.ingredient.id;
       final repository = ref.read(recipeRepositoryProvider);
       final recipeId = widget.matches.recipeId;
       final recipeAsync = await repository.getRecipeById(recipeId);
 
       if (recipeAsync == null) return;
 
+      // Find the current ingredient
+      final currentIngredient = recipeAsync.ingredients?.firstWhere(
+        (ing) => ing.id == ingredientId,
+        orElse: () => recipeAsync.ingredients!.first,
+      );
+      if (currentIngredient == null) return;
+
       // Get existing terms
-      final currentTerms = List<IngredientTerm>.from(match.ingredient.terms ?? []);
+      final currentTerms = List<IngredientTerm>.from(currentIngredient.terms ?? []);
 
       // Add new term from pantry item
       currentTerms.add(IngredientTerm(
@@ -1143,7 +1170,7 @@ class _SelectFromPantryPageState extends ConsumerState<SelectFromPantryPage> {
       ));
 
       // Update ingredient with new terms
-      final updatedIngredient = match.ingredient.copyWith(terms: currentTerms);
+      final updatedIngredient = currentIngredient.copyWith(terms: currentTerms);
       final ingredients = List<Ingredient>.from(recipeAsync.ingredients ?? []);
       final index = ingredients.indexWhere((ing) => ing.id == ingredientId);
 
@@ -1164,17 +1191,20 @@ class _SelectFromPantryPageState extends ConsumerState<SelectFromPantryPage> {
   Widget build(BuildContext context) {
     final pantryItemsAsync = ref.watch(pantryItemsProvider);
     final colors = AppColors.of(context);
-    final match = IngredientDetailPage.selectedMatch;
+    final ingredientId = IngredientDetailPage.selectedIngredientId;
+
+    // Find the ingredient from matches
+    final match = widget.matches.matches.firstWhere(
+      (m) => m.ingredient.id == ingredientId,
+      orElse: () => widget.matches.matches.first,
+    );
 
     // Parse ingredient name to get clean name without quantities/units
     final parser = IngredientParserService();
-    String displayName = 'ingredient';
-    if (match != null) {
-      final parseResult = parser.parse(match.ingredient.name);
-      displayName = parseResult.cleanName.isNotEmpty
-          ? parseResult.cleanName
-          : match.ingredient.name;
-    }
+    final parseResult = parser.parse(match.ingredient.name);
+    final displayName = parseResult.cleanName.isNotEmpty
+        ? parseResult.cleanName
+        : match.ingredient.name;
 
     return Column(
       mainAxisSize: MainAxisSize.min,
