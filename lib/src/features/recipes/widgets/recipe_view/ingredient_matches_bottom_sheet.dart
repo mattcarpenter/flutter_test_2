@@ -313,6 +313,9 @@ class _IngredientDetailPageState extends ConsumerState<IngredientDetailPage> {
   // Map to store working copies of ingredient terms
   final Map<String, List<IngredientTerm>> _ingredientTermsMap = {};
 
+  // Track terms being deleted for fade-out animation
+  final Set<String> _deletingTermKeys = {};
+
   // Parser for ingredient text formatting
   final _parser = IngredientParserService();
 
@@ -658,31 +661,25 @@ class _IngredientDetailPageState extends ConsumerState<IngredientDetailPage> {
       isDragging: false,
     );
 
-    return Padding(
+    // Create unique key for tracking deletion
+    final termKey = '${ingredientId}_${term.value}_${term.source}';
+    final isDeleting = _deletingTermKeys.contains(termKey);
+
+    return AnimatedOpacity(
       key: key,
-      padding: EdgeInsets.zero,
-      child: ContextMenuWidget(
+      opacity: isDeleting ? 0.0 : 1.0,
+      duration: const Duration(milliseconds: 300),
+      curve: Curves.easeInOut,
+      child: Padding(
+        padding: EdgeInsets.zero,
+        child: ContextMenuWidget(
         menuProvider: (_) {
           return Menu(
             children: [
               MenuAction(
                 title: 'Delete',
                 image: MenuImage.icon(Icons.delete),
-                callback: () async {
-                  // Get the current terms
-                  final terms = List<IngredientTerm>.from(_ingredientTermsMap[ingredientId] ?? []);
-
-                  // Remove the term
-                  terms.removeWhere((t) => t.value == term.value && t.source == term.source);
-
-                  // Update the maps
-                  setState(() {
-                    _ingredientTermsMap[ingredientId] = terms;
-                  });
-
-                  // Save changes immediately
-                  await _saveIngredientChanges(ingredientId);
-                },
+                callback: () => _handleTermDeletion(ingredientId, term),
               ),
             ],
           );
@@ -744,21 +741,9 @@ class _IngredientDetailPageState extends ConsumerState<IngredientDetailPage> {
                             actions: [
                               CupertinoActionSheetAction(
                                 isDestructiveAction: true,
-                                onPressed: () async {
+                                onPressed: () {
                                   Navigator.pop(context);
-                                  // Get the current terms
-                                  final terms = List<IngredientTerm>.from(_ingredientTermsMap[ingredientId] ?? []);
-
-                                  // Remove the term
-                                  terms.removeWhere((t) => t.value == term.value && t.source == term.source);
-
-                                  // Update the maps
-                                  setState(() {
-                                    _ingredientTermsMap[ingredientId] = terms;
-                                  });
-
-                                  // Save changes immediately
-                                  await _saveIngredientChanges(ingredientId);
+                                  _handleTermDeletion(ingredientId, term);
                                 },
                                 child: const Text('Delete'),
                               ),
@@ -784,21 +769,9 @@ class _IngredientDetailPageState extends ConsumerState<IngredientDetailPage> {
                       ),
                       padding: EdgeInsets.zero,
                       splashRadius: 20,
-                      onSelected: (value) async {
+                      onSelected: (value) {
                         if (value == 'delete') {
-                          // Get the current terms
-                          final terms = List<IngredientTerm>.from(_ingredientTermsMap[ingredientId] ?? []);
-
-                          // Remove the term
-                          terms.removeWhere((t) => t.value == term.value && t.source == term.source);
-
-                          // Update the maps
-                          setState(() {
-                            _ingredientTermsMap[ingredientId] = terms;
-                          });
-
-                          // Save changes immediately
-                          await _saveIngredientChanges(ingredientId);
+                          _handleTermDeletion(ingredientId, term);
                         }
                       },
                       itemBuilder: (context) => [
@@ -818,7 +791,84 @@ class _IngredientDetailPageState extends ConsumerState<IngredientDetailPage> {
           ),
         ),
       ),
+      ),
     );
+  }
+
+  // Handle term deletion with fade-out animation
+  Future<void> _handleTermDeletion(String ingredientId, IngredientTerm term) async {
+    // Create unique key for tracking deletion
+    final termKey = '${ingredientId}_${term.value}_${term.source}';
+
+    // Mark term as deleting (triggers fade out)
+    setState(() {
+      _deletingTermKeys.add(termKey);
+    });
+
+    // Wait for fade animation to complete
+    await Future.delayed(const Duration(milliseconds: 300));
+
+    if (!mounted) return;
+
+    // Get the current terms and remove the deleted one
+    final terms = List<IngredientTerm>.from(_ingredientTermsMap[ingredientId] ?? []);
+    terms.removeWhere((t) => t.value == term.value && t.source == term.source);
+
+    // Update working copy
+    setState(() {
+      _ingredientTermsMap[ingredientId] = terms;
+    });
+
+    // Save changes (this will invalidate provider and trigger rebuild)
+    await _saveIngredientChanges(ingredientId);
+
+    // Wait a bit for provider to refresh and rebuild to complete
+    await Future.delayed(const Duration(milliseconds: 100));
+
+    if (!mounted) return;
+
+    // Now safe to remove from deletion tracking
+    setState(() {
+      _deletingTermKeys.remove(termKey);
+    });
+  }
+
+  Future<void> _saveIngredientChanges(String ingredientId) async {
+    final repository = ref.read(recipeRepositoryProvider);
+
+    // Get the original recipe to modify
+    final recipeId = widget.matches.recipeId;
+    final recipeAsync = await repository.getRecipeById(recipeId);
+
+    if (recipeAsync == null) {
+      return;
+    }
+
+    // Get the updated terms for this ingredient from working copy
+    final updatedTerms = _ingredientTermsMap[ingredientId] ?? [];
+
+    // Find the original ingredient
+    final originalIngredient = widget.matches.matches
+        .firstWhere((match) => match.ingredient.id == ingredientId)
+        .ingredient;
+
+    // Create updated ingredient with new terms
+    final updatedIngredient = originalIngredient.copyWith(terms: updatedTerms);
+
+    // Important: Create a deep copy of the ingredients list to avoid modifying the original
+    final ingredients = List<Ingredient>.from(recipeAsync.ingredients ?? []);
+
+    // Find the matching ingredient by ID and replace it
+    final index = ingredients.indexWhere((ing) => ing.id == ingredientId);
+    if (index >= 0) {
+      ingredients[index] = updatedIngredient;
+
+      // Save the updated recipe ingredients
+      await repository.updateIngredients(recipeId, ingredients);
+
+      // Invalidate the matches provider to refresh the UI with new match data
+      ref.invalidate(recipeIngredientMatchesProvider(recipeId));
+    }
   }
 
   void _addNewTerm(String ingredientId) {
@@ -897,46 +947,6 @@ class _IngredientDetailPageState extends ConsumerState<IngredientDetailPage> {
           ),
         ],
       );
-    }
-  }
-
-
-  // Save changes for a specific ingredient immediately
-  Future<void> _saveIngredientChanges(String ingredientId) async {
-    final repository = ref.read(recipeRepositoryProvider);
-
-    // Get the original recipe to modify
-    final recipeId = widget.matches.recipeId;
-    final recipeAsync = await repository.getRecipeById(recipeId);
-
-    if (recipeAsync == null) {
-      return;
-    }
-
-    // Get the updated terms for this ingredient
-    final updatedTerms = _ingredientTermsMap[ingredientId] ?? [];
-
-    // Find the original ingredient
-    final originalIngredient = widget.matches.matches
-        .firstWhere((match) => match.ingredient.id == ingredientId)
-        .ingredient;
-
-    // Create updated ingredient with new terms
-    final updatedIngredient = originalIngredient.copyWith(terms: updatedTerms);
-
-    // Important: Create a deep copy of the ingredients list to avoid modifying the original
-    final ingredients = List<Ingredient>.from(recipeAsync.ingredients ?? []);
-
-    // Find the matching ingredient by ID and replace it
-    final index = ingredients.indexWhere((ing) => ing.id == ingredientId);
-    if (index >= 0) {
-      ingredients[index] = updatedIngredient;
-
-      // Save the updated recipe ingredients
-      await repository.updateIngredients(recipeId, ingredients);
-
-      // Invalidate the matches provider to refresh the UI with new match data
-      ref.invalidate(recipeIngredientMatchesProvider(recipeId));
     }
   }
 }
