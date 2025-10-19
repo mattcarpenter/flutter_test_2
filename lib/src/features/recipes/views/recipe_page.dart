@@ -20,129 +20,53 @@ class RecipePage extends ConsumerStatefulWidget {
   ConsumerState<RecipePage> createState() => _RecipePageState();
 }
 
-class _RecipePageState extends ConsumerState<RecipePage> with TickerProviderStateMixin {
+class _RecipePageState extends ConsumerState<RecipePage> {
   late ScrollController _scrollController;
-  late AnimationController _snapAnimationController;
-  Animation<double>? _snapAnimation;
   static const double _heroHeight = 300.0;
+  bool _isSnapping = false;
 
   @override
   void initState() {
     super.initState();
     _scrollController = ScrollController();
-    _snapAnimationController = AnimationController(
-      duration: const Duration(milliseconds: 300),
-      vsync: this,
-    );
-  }
-
-  bool _isSnapping = false;
-
-  bool _onScrollNotification(ScrollNotification notification) {
-    if (_isSnapping) return false;
-
-    // Detect when scrolling ends
-    if (notification is ScrollEndNotification) {
-      final offset = _scrollController.offset;
-      final headerHeight = MediaQuery.of(context).padding.top + 60;
-      final headerFadeStartOffset = _heroHeight * 0.5;
-      final headerFadeEndOffset = _heroHeight - (headerHeight/2);
-      final headerFadeDuration = headerFadeEndOffset - headerFadeStartOffset;
-      final headerOpacity = ((offset - headerFadeStartOffset) / headerFadeDuration).clamp(0.0, 1.0);
-
-      // If we're in the fade zone, snap based on opacity
-      if (offset > headerFadeStartOffset && offset < headerFadeEndOffset) {
-        if (headerOpacity > 0.5) {
-          _snapToComplete(headerFadeEndOffset + 2.0); // Add 2px buffer to ensure complete hiding
-        } else {
-          _snapToStart(headerFadeStartOffset);
-        }
-      }
-    }
-    return false;
-  }
-
-  void _snapToComplete(double targetOffset) async {
-    _isSnapping = true;
-
-    try {
-      if (_scrollController.hasClients) {
-        // Try animateTo first - it may get partway there
-        await _scrollController.animateTo(
-          targetOffset,
-          duration: const Duration(milliseconds: 250),
-          curve: Curves.easeOutCubic,
-        );
-
-        // If we're not close enough to the target, finish with custom animation
-        if ((_scrollController.offset - targetOffset).abs() > 2) {
-          await _smoothScrollTo(targetOffset);
-        }
-      }
-    } catch (e) {
-      // Fallback to custom animation if animateTo fails completely
-      await _smoothScrollTo(targetOffset);
-    }
-
-    _isSnapping = false;
-  }
-
-  void _snapToStart(double targetOffset) async {
-    _isSnapping = true;
-
-    try {
-      if (_scrollController.hasClients) {
-        // For snapping back, animateTo usually works better
-        await _scrollController.animateTo(
-          targetOffset,
-          duration: const Duration(milliseconds: 250),
-          curve: Curves.easeOutCubic,
-        );
-
-        // Custom animation fallback if needed
-        if ((_scrollController.offset - targetOffset).abs() > 2) {
-          await _smoothScrollTo(targetOffset);
-        }
-      }
-    } catch (e) {
-      await _smoothScrollTo(targetOffset);
-    }
-
-    _isSnapping = false;
-  }
-
-  Future<void> _smoothScrollTo(double targetOffset) async {
-    final startOffset = _scrollController.offset;
-
-    _snapAnimation = Tween<double>(
-      begin: startOffset,
-      end: targetOffset,
-    ).animate(CurvedAnimation(
-      parent: _snapAnimationController,
-      curve: Curves.easeOutCubic,
-    ));
-
-    void animationListener() {
-      if (_scrollController.hasClients) {
-        _scrollController.jumpTo(_snapAnimation!.value);
-      }
-    }
-
-    _snapAnimation!.addListener(animationListener);
-    _snapAnimationController.reset();
-
-    try {
-      await _snapAnimationController.forward();
-    } finally {
-      _snapAnimation!.removeListener(animationListener);
-    }
   }
 
   @override
   void dispose() {
     _scrollController.dispose();
-    _snapAnimationController.dispose();
     super.dispose();
+  }
+
+  void _handleScrollEnd(ScrollMetrics metrics, BuildContext context) {
+    if (_isSnapping) return;
+
+    final headerHeight = MediaQuery.of(context).padding.top + 60;
+    final snapStart = _heroHeight * 0.5;
+    final snapEnd = _heroHeight - (headerHeight / 2);
+    final currentOffset = metrics.pixels;
+
+    // Only snap if we're in the snap zone
+    if (currentOffset > snapStart && currentOffset < snapEnd) {
+      final fadeDuration = snapEnd - snapStart;
+      final progress = ((currentOffset - snapStart) / fadeDuration).clamp(0.0, 1.0);
+
+      // Add small buffer to snapEnd to ensure image is fully hidden
+      final target = progress > 0.5 ? snapEnd + 2.0 : snapStart;
+
+      // Only animate if we're not already at target
+      if ((currentOffset - target).abs() > 1.0) {
+        _isSnapping = true;
+        _scrollController
+            .animateTo(
+          target,
+          duration: const Duration(milliseconds: 200),
+          curve: Curves.easeOut,
+        )
+            .then((_) {
+          _isSnapping = false;
+        });
+      }
+    }
   }
 
   @override
@@ -160,14 +84,32 @@ class _RecipePageState extends ConsumerState<RecipePage> with TickerProviderStat
             return const Center(child: Text('Recipe not found'));
           }
 
+          // Calculate snap offsets based on fade zone
+          final headerHeight = MediaQuery.of(context).padding.top + 60;
+          final snapStart = _heroHeight * 0.5;
+          final snapEnd = _heroHeight - (headerHeight / 2);
+
           return Stack(
             children: [
-              // Main scrollable content with scroll notification listener
+              // Main scrollable content with notification listener for snap
               NotificationListener<ScrollNotification>(
-                onNotification: _onScrollNotification,
+                onNotification: (notification) {
+                  // Listen for when user stops scrolling (includes momentum)
+                  if (notification is ScrollEndNotification &&
+                      notification.metrics.axis == Axis.vertical) {
+                    // Use a small delay to ensure scroll has truly settled
+                    Future.delayed(const Duration(milliseconds: 50), () {
+                      if (mounted && !_isSnapping) {
+                        _handleScrollEnd(notification.metrics, context);
+                      }
+                    });
+                  }
+                  return false;
+                },
                 child: CustomScrollView(
                   controller: _scrollController,
-                slivers: [
+                  physics: const AlwaysScrollableScrollPhysics(),
+                  slivers: [
                   // Hero image header
                   SliverAppBar(
                     expandedHeight: _heroHeight,
