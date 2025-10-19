@@ -334,25 +334,39 @@ class _IngredientDetailPageState extends ConsumerState<IngredientDetailPage> {
     final matchesAsync = ref.watch(recipeIngredientMatchesProvider(widget.matches.recipeId));
 
     return matchesAsync.when(
-      loading: () => const Center(child: CircularProgressIndicator()),
+      loading: () {
+        // On initial load, show spinner
+        // On refresh (after adding term), show previous data to prevent flash
+        return matchesAsync.hasValue
+            ? matchesAsync.requireValue.matches.isEmpty
+                ? const Center(child: CircularProgressIndicator())
+                : _buildContent(context, matchesAsync.requireValue, selectedId)
+            : const Center(child: CircularProgressIndicator());
+      },
       error: (error, stack) => Center(child: Text('Error: $error')),
-      data: (currentMatches) {
-        // Find the current match for the selected ingredient
-        final match = currentMatches.matches.firstWhere(
-          (m) => m.ingredient.id == selectedId,
-          orElse: () => widget.matches.matches.first,
-        );
+      data: (currentMatches) => _buildContent(context, currentMatches, selectedId),
+    );
+  }
 
-        final ingredient = match.ingredient;
+  Widget _buildContent(BuildContext context, RecipeIngredientMatches currentMatches, String selectedId) {
+    final colors = AppColors.of(context);
 
-        // Update working copy of terms if needed
-        if (!_ingredientTermsMap.containsKey(ingredient.id) ||
-            _ingredientTermsMap[ingredient.id]!.length != (ingredient.terms?.length ?? 0)) {
-          _ingredientTermsMap[ingredient.id] = List<IngredientTerm>.from(ingredient.terms ?? []);
-        }
+    // Find the current match for the selected ingredient
+    final match = currentMatches.matches.firstWhere(
+      (m) => m.ingredient.id == selectedId,
+      orElse: () => widget.matches.matches.first,
+    );
 
-        final terms = _ingredientTermsMap[ingredient.id] ?? [];
-        final hasLinkedRecipe = ingredient.recipeId != null;
+    final ingredient = match.ingredient;
+
+    // Update working copy of terms if needed
+    if (!_ingredientTermsMap.containsKey(ingredient.id) ||
+        _ingredientTermsMap[ingredient.id]!.length != (ingredient.terms?.length ?? 0)) {
+      _ingredientTermsMap[ingredient.id] = List<IngredientTerm>.from(ingredient.terms ?? []);
+    }
+
+    final terms = _ingredientTermsMap[ingredient.id] ?? [];
+    final hasLinkedRecipe = ingredient.recipeId != null;
 
     // Parse ingredient name to get clean name without quantities/units
     final parseResult = _parser.parse(ingredient.name);
@@ -364,33 +378,31 @@ class _IngredientDetailPageState extends ConsumerState<IngredientDetailPage> {
       crossAxisAlignment: CrossAxisAlignment.start,
       mainAxisSize: MainAxisSize.min,
       children: [
-            // Ingredient name heading (parsed to remove quantities/units)
-            Text(
-              displayName,
-              style: AppTypography.h4.copyWith(
-                color: colors.textPrimary,
-              ),
-            ),
+        // Ingredient name heading (parsed to remove quantities/units)
+        Text(
+          displayName,
+          style: AppTypography.h4.copyWith(
+            color: colors.textPrimary,
+          ),
+        ),
 
-            SizedBox(height: AppSpacing.sm),
+        SizedBox(height: AppSpacing.sm),
 
-            // Match status text - only show if has direct pantry match
-            if (match.hasPantryMatch) _buildMatchedText(context, match),
+        // Match status text - only show if has direct pantry match
+        if (match.hasPantryMatch) _buildMatchedText(context, match),
 
-            // Linked recipe section - only show if ingredient has linked recipe AND no direct pantry match
-            // (direct pantry match takes precedence, so linked recipe info becomes irrelevant)
-            if (hasLinkedRecipe && !match.hasPantryMatch) ...[
-              SizedBox(height: AppSpacing.lg),
-              _buildLinkedRecipeSection(context, ingredient, match),
-            ],
+        // Linked recipe section - only show if ingredient has linked recipe AND no direct pantry match
+        // (direct pantry match takes precedence, so linked recipe info becomes irrelevant)
+        if (hasLinkedRecipe && !match.hasPantryMatch) ...[
+          SizedBox(height: AppSpacing.lg),
+          _buildLinkedRecipeSection(context, ingredient, match),
+        ],
 
-            SizedBox(height: AppSpacing.xl),
+        SizedBox(height: AppSpacing.xl),
 
-            // Terms editor section
-            _buildTermsEditor(context, ingredient, terms, hasLinkedRecipe: hasLinkedRecipe),
-          ],
-        );
-      },
+        // Terms editor section
+        _buildTermsEditor(context, ingredient, terms, hasLinkedRecipe: hasLinkedRecipe),
+      ],
     );
   }
 
