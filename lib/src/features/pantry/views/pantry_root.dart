@@ -36,7 +36,7 @@ class PantryTab extends ConsumerWidget {
             ref.read(pantryFilterSortProvider.notifier).updateSearchQuery(query);
           },
           slivers: [
-        // Filter and Sort button
+        // Filter and Sort + Add Item buttons
         SliverToBoxAdapter(
           child: Padding(
             padding: EdgeInsets.fromLTRB(
@@ -45,48 +45,69 @@ class PantryTab extends ConsumerWidget {
               AppSpacing.lg,
               AppSpacing.md,
             ),
-            child: Stack(
-              clipBehavior: Clip.none,
+            child: Row(
               children: [
+                Expanded(
+                  child: Stack(
+                    clipBehavior: Clip.none,
+                    children: [
+                      AppButton(
+                        text: 'Filter and Sort',
+                        leadingIcon: const Icon(Icons.tune),
+                        style: AppButtonStyle.mutedOutline,
+                        shape: AppButtonShape.square,
+                        size: AppButtonSize.medium,
+                        theme: AppButtonTheme.primary,
+                        fullWidth: true,
+                        contentAlignment: AppButtonContentAlignment.left,
+                        onPressed: () {
+                          showUnifiedPantrySortFilterSheet(
+                            context,
+                            initialState: filterSortState,
+                            onStateChanged: (newState) {
+                              final notifier = ref.read(pantryFilterSortProvider.notifier);
+                              notifier.clearFilters();
+                              notifier.updateSortOption(newState.activeSortOption);
+                              notifier.updateSortDirection(newState.sortDirection);
+                              for (final entry in newState.activeFilters.entries) {
+                                notifier.updateFilter(entry.key, entry.value);
+                              }
+                            },
+                          );
+                        },
+                      ),
+                      // Active filters indicator
+                      if (filterSortState.hasFilters)
+                        Positioned(
+                          top: -2,
+                          right: -2,
+                          child: Container(
+                            width: 8,
+                            height: 8,
+                            decoration: const BoxDecoration(
+                              color: Colors.red,
+                              shape: BoxShape.circle,
+                            ),
+                          ),
+                        ),
+                    ],
+                  ),
+                ),
+
+                const SizedBox(width: 12), // Spacing between buttons
+
+                // Add Item button (fixed width)
                 AppButton(
-                  text: 'Filter and Sort',
-                  leadingIcon: const Icon(Icons.tune),
-                  style: AppButtonStyle.mutedOutline,
+                  text: 'Add Item',
+                  leadingIcon: const Icon(Icons.add),
+                  style: AppButtonStyle.outline,
                   shape: AppButtonShape.square,
                   size: AppButtonSize.medium,
-                  theme: AppButtonTheme.primary,
-                  fullWidth: true,
-                  contentAlignment: AppButtonContentAlignment.left,
+                  theme: AppButtonTheme.secondary,
                   onPressed: () {
-                    showUnifiedPantrySortFilterSheet(
-                      context,
-                      initialState: filterSortState,
-                      onStateChanged: (newState) {
-                        final notifier = ref.read(pantryFilterSortProvider.notifier);
-                        notifier.clearFilters();
-                        notifier.updateSortOption(newState.activeSortOption);
-                        notifier.updateSortDirection(newState.sortDirection);
-                        for (final entry in newState.activeFilters.entries) {
-                          notifier.updateFilter(entry.key, entry.value);
-                        }
-                      },
-                    );
+                    showAddPantryItemModal(context);
                   },
                 ),
-                // Active filters indicator
-                if (filterSortState.hasFilters)
-                  Positioned(
-                    top: -2,
-                    right: -2,
-                    child: Container(
-                      width: 8,
-                      height: 8,
-                      decoration: const BoxDecoration(
-                        color: Colors.red,
-                        shape: BoxShape.circle,
-                      ),
-                    ),
-                  ),
               ],
             ),
           ),
