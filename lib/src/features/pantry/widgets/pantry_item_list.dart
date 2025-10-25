@@ -2,12 +2,17 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../database/database.dart';
-import '../../../../database/models/pantry_items.dart'; // For StockStatus enum
+import '../../../../database/models/pantry_items.dart';
 import '../../../providers/pantry_provider.dart';
 import '../../../providers/pantry_selection_provider.dart';
+import '../../../theme/colors.dart';
+import '../../../theme/spacing.dart';
+import '../../../theme/typography.dart';
+import '../../../widgets/app_radio_button.dart';
+import '../../../widgets/utils/grouped_list_styling.dart';
 import '../views/add_pantry_item_modal.dart';
 import '../views/update_pantry_item_modal.dart';
-import 'stock_status_segmented_control.dart';
+import 'stock_status_dropdown.dart';
 
 class PantryItemList extends ConsumerWidget {
   final List<PantryItemEntry> pantryItems;
@@ -21,12 +26,10 @@ class PantryItemList extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final List<Widget> children = [];
-
     if (showCategoryHeaders) {
-      // Group items by category and show headers
+      // Group items by category
       final Map<String, List<PantryItemEntry>> groupedItems = {};
-      
+
       for (final item in pantryItems) {
         final category = item.category ?? 'Other';
         if (!groupedItems.containsKey(category)) {
@@ -48,187 +51,268 @@ class PantryItemList extends ConsumerWidget {
         groupedItems[category]!.sort((a, b) => a.name.compareTo(b.name));
       }
 
-      // Build list with category headers
-      for (final category in sortedCategories) {
-        final items = groupedItems[category]!;
-        
-        // Add category header
-        children.add(_buildCategoryHeader(context, category));
-        
-        // Add items in this category
-        for (final item in items) {
-          children.add(_buildPantryItemTile(context, ref, item));
-        }
+      // Calculate total child count
+      int childCount = 0;
+      for (final entry in groupedItems.entries) {
+        childCount += 1; // Category header
+        childCount += entry.value.length; // Items
       }
-    } else {
-      // Flat list without category headers - items are already sorted by the caller
-      for (final item in pantryItems) {
-        children.add(_buildPantryItemTile(context, ref, item));
-      }
-    }
+      // Add spacing elements between categories
+      childCount += sortedCategories.length - 1;
+      // Add "Add Item" button at the end
+      childCount += 1;
 
-    // Add the "Add Item" button at the end
-    children.add(_buildAddItemButton(context));
+      return SliverPadding(
+        padding: EdgeInsets.symmetric(horizontal: AppSpacing.lg),
+        sliver: SliverList(
+          delegate: SliverChildBuilderDelegate(
+            (context, index) {
+              int currentIndex = 0;
 
-    return SliverList(
-      delegate: SliverChildBuilderDelegate(
-        (context, index) => children[index],
-        childCount: children.length,
-      ),
-    );
-  }
+              for (int categoryIndex = 0; categoryIndex < sortedCategories.length; categoryIndex++) {
+                final category = sortedCategories[categoryIndex];
+                final categoryItems = groupedItems[category]!;
 
-  Widget _buildCategoryHeader(BuildContext context, String category) {
-    final isDarkMode = CupertinoTheme.of(context).brightness == Brightness.dark;
-    final textColor = CupertinoTheme.of(context).textTheme.textStyle.color ?? 
-        (isDarkMode ? Colors.white : Colors.black);
-    final backgroundColor = isDarkMode
-        ? Colors.grey.shade900
-        : Colors.grey.shade100;
+                // Category header
+                if (currentIndex == index) {
+                  return _buildCategoryHeader(context, category, categoryItems.length);
+                }
+                currentIndex++;
 
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
-      color: backgroundColor,
-      child: Text(
-        category,
-        style: TextStyle(
-          color: textColor,
-          fontSize: 16,
-          fontWeight: FontWeight.w600,
-        ),
-      ),
-    );
-  }
+                // Category items
+                for (int itemIndex = 0; itemIndex < categoryItems.length; itemIndex++) {
+                  final item = categoryItems[itemIndex];
+                  if (currentIndex == index) {
+                    final isFirst = itemIndex == 0;
+                    final isLast = itemIndex == categoryItems.length - 1;
 
-  Widget _buildPantryItemTile(BuildContext context, WidgetRef ref, PantryItemEntry item) {
-    final isDarkMode = CupertinoTheme.of(context).brightness == Brightness.dark;
-    final textColor = CupertinoTheme.of(context).textTheme.textStyle.color ?? 
-        (isDarkMode ? Colors.white : Colors.black);
-    final dividerColor = isDarkMode
-        ? Colors.grey.shade800
-        : Colors.grey.shade300;
+                    return _buildPantryItemTile(
+                      context,
+                      ref,
+                      item,
+                      isFirst: isFirst,
+                      isLast: isLast,
+                    );
+                  }
+                  currentIndex++;
+                }
 
-    final isSelected = ref.watch(pantrySelectionProvider.select((selection) => selection.contains(item.id)));
+                // Add spacing after each category group (except the last one)
+                if (categoryIndex < sortedCategories.length - 1) {
+                  if (currentIndex == index) {
+                    return SizedBox(height: AppSpacing.lg);
+                  }
+                  currentIndex++;
+                }
+              }
 
-    return Column(
-      children: [
-        GestureDetector(
-          onTap: () {
-            // Edit this pantry item
-            showUpdatePantryItemModal(
-              context,
-              pantryItem: item,
-            );
-          },
-          child: Container(
-            color: isSelected ? Theme.of(context).colorScheme.primary.withValues(alpha: 0.1) : null,
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
-              child: Row(
-                children: [
-                  // Checkbox for selection
-                  GestureDetector(
-                    onTap: () {
-                      ref.read(pantrySelectionProvider.notifier).toggleSelection(item.id);
-                    },
-                    child: Container(
-                      padding: const EdgeInsets.only(right: 12),
-                      child: Icon(
-                        isSelected 
-                            ? CupertinoIcons.checkmark_circle_fill 
-                            : CupertinoIcons.circle,
-                        color: isSelected 
-                            ? Theme.of(context).colorScheme.primary 
-                            : textColor.withValues(alpha: 0.3),
-                        size: 22,
-                      ),
-                    ),
-                  ),
-                  // Pantry item name with truncation
-                  Expanded(
-                    child: Text(
-                      item.name,
-                      style: TextStyle(
-                        color: textColor,
-                        fontWeight: FontWeight.w500,
-                        fontSize: 17,
-                      ),
-                      overflow: TextOverflow.ellipsis,
-                      maxLines: 1,
-                    ),
-                  ),
-                  const SizedBox(width: 12),
-                  // Stock status segmented controller
-                  StockStatusSegmentedControl(
-                    value: item.stockStatus,
-                    onChanged: (StockStatus value) {
-                      ref.read(pantryNotifierProvider.notifier).updateItem(
-                        id: item.id,
-                        stockStatus: value,
-                      );
-                    },
-                  ),
-                  const SizedBox(width: 12),
-                  // Edit icon
-                  Icon(
-                    CupertinoIcons.pencil,
-                    color: textColor.withValues(alpha: 0.5),
-                    size: 20,
-                  ),
-                ],
-              ),
-            ),
+              // Add Item button at the end
+              if (currentIndex == index) {
+                return Padding(
+                  padding: EdgeInsets.only(top: AppSpacing.lg),
+                  child: _buildAddItemButton(context),
+                );
+              }
+
+              return null;
+            },
+            childCount: childCount,
           ),
         ),
-        Divider(
-          height: 1,
-          thickness: 1,
-          color: dividerColor,
+      );
+    } else {
+      // Flat list without category headers
+      final sortedItems = List<PantryItemEntry>.from(pantryItems)
+        ..sort((a, b) => a.name.compareTo(b.name));
+
+      return SliverPadding(
+        padding: EdgeInsets.symmetric(horizontal: AppSpacing.lg),
+        sliver: SliverList(
+          delegate: SliverChildBuilderDelegate(
+            (context, index) {
+              if (index < sortedItems.length) {
+                final item = sortedItems[index];
+                final isFirst = index == 0;
+                final isLast = index == sortedItems.length - 1;
+
+                return _buildPantryItemTile(
+                  context,
+                  ref,
+                  item,
+                  isFirst: isFirst,
+                  isLast: isLast,
+                );
+              } else if (index == sortedItems.length) {
+                return Padding(
+                  padding: EdgeInsets.only(top: AppSpacing.lg),
+                  child: _buildAddItemButton(context),
+                );
+              }
+              return null;
+            },
+            childCount: sortedItems.length + 1,
+          ),
         ),
-      ],
+      );
+    }
+  }
+
+  Widget _buildCategoryHeader(BuildContext context, String category, int itemCount) {
+    return Padding(
+      padding: EdgeInsets.fromLTRB(0, AppSpacing.lg, 0, AppSpacing.sm),
+      child: Row(
+        children: [
+          Text(
+            category,
+            style: AppTypography.h5.copyWith(
+              color: AppColors.of(context).textPrimary,
+            ),
+          ),
+          SizedBox(width: AppSpacing.sm),
+          Text(
+            '($itemCount)',
+            style: AppTypography.body.copyWith(
+              color: AppColors.of(context).textSecondary,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildPantryItemTile(
+    BuildContext context,
+    WidgetRef ref,
+    PantryItemEntry item, {
+    required bool isFirst,
+    required bool isLast,
+  }) {
+    final isSelected = ref.watch(pantrySelectionProvider.select((selection) => selection.contains(item.id)));
+
+    final borderRadius = GroupedListStyling.getBorderRadius(
+      isGrouped: true,
+      isFirstInGroup: isFirst,
+      isLastInGroup: isLast,
+    );
+
+    final border = GroupedListStyling.getBorder(
+      context: context,
+      isGrouped: true,
+      isFirstInGroup: isFirst,
+      isLastInGroup: isLast,
+      isDragging: false,
+    );
+
+    return GestureDetector(
+      onTap: () {
+        // Edit this pantry item
+        showUpdatePantryItemModal(
+          context,
+          pantryItem: item,
+        );
+      },
+      child: Container(
+        decoration: BoxDecoration(
+          color: isSelected
+              ? AppColors.of(context).primary.withValues(alpha: 0.1)
+              : AppColors.of(context).input,
+          border: border,
+          borderRadius: borderRadius,
+        ),
+        child: Padding(
+          padding: EdgeInsets.symmetric(
+            horizontal: AppSpacing.lg,
+            vertical: AppSpacing.md,
+          ),
+          child: Row(
+            children: [
+              // Checkbox for selection - using AppRadioButton
+              AppRadioButton(
+                selected: isSelected,
+                onTap: () {
+                  ref.read(pantrySelectionProvider.notifier).toggleSelection(item.id);
+                },
+              ),
+
+              SizedBox(width: AppSpacing.md),
+
+              // Pantry item name with truncation
+              Expanded(
+                child: Text(
+                  item.name,
+                  style: TextStyle(
+                    color: AppColors.of(context).textPrimary,
+                    fontWeight: FontWeight.w500,
+                    fontSize: 17,
+                  ),
+                  overflow: TextOverflow.ellipsis,
+                  maxLines: 1,
+                ),
+              ),
+
+              SizedBox(width: AppSpacing.md),
+
+              // Stock status dropdown (NEW - replacing segmented control)
+              StockStatusDropdown(
+                value: item.stockStatus,
+                onChanged: (StockStatus value) {
+                  ref.read(pantryNotifierProvider.notifier).updateItem(
+                    id: item.id,
+                    stockStatus: value,
+                  );
+                },
+              ),
+
+              SizedBox(width: AppSpacing.sm),
+
+              // Edit icon
+              Icon(
+                CupertinoIcons.pencil,
+                color: AppColors.of(context).textSecondary,
+                size: 20,
+              ),
+            ],
+          ),
+        ),
+      ),
     );
   }
 
   Widget _buildAddItemButton(BuildContext context) {
     final isDarkMode = CupertinoTheme.of(context).brightness == Brightness.dark;
-    final textColor = CupertinoTheme.of(context).textTheme.textStyle.color ?? 
+    final textColor = CupertinoTheme.of(context).textTheme.textStyle.color ??
         (isDarkMode ? Colors.white : Colors.black);
     final borderColor = isDarkMode
         ? Colors.grey.shade600
         : Colors.grey.shade400;
 
-    return Padding(
-      padding: const EdgeInsets.all(16.0),
-      child: Center(
-        child: OutlinedButton.icon(
-          onPressed: () {
-            showAddPantryItemModal(context);
-          },
-          icon: Icon(
-            CupertinoIcons.add,
+    return Center(
+      child: OutlinedButton.icon(
+        onPressed: () {
+          showAddPantryItemModal(context);
+        },
+        icon: Icon(
+          CupertinoIcons.add,
+          color: textColor,
+          size: 18,
+        ),
+        label: Text(
+          'Add Item',
+          style: TextStyle(
             color: textColor,
-            size: 18,
+            fontSize: 16,
+            fontWeight: FontWeight.w500,
           ),
-          label: Text(
-            'Add Item',
-            style: TextStyle(
-              color: textColor,
-              fontSize: 16,
-              fontWeight: FontWeight.w500,
-            ),
+        ),
+        style: OutlinedButton.styleFrom(
+          backgroundColor: Colors.transparent,
+          side: BorderSide(color: borderColor, width: 1),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(8),
           ),
-          style: OutlinedButton.styleFrom(
-            backgroundColor: Colors.transparent,
-            side: BorderSide(color: borderColor, width: 1),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(8),
-            ),
-            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-          ),
+          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
         ),
       ),
     );
   }
-
 }
