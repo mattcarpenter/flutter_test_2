@@ -252,7 +252,7 @@ class PantryItemList extends ConsumerWidget {
 
               SizedBox(width: AppSpacing.md),
 
-              // Stock status dropdown (NEW - replacing segmented control)
+              // Stock status dropdown
               StockStatusDropdown(
                 value: item.stockStatus,
                 onChanged: (StockStatus value) {
