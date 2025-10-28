@@ -9,10 +9,13 @@ import '../../../theme/colors.dart';
 import '../../../theme/spacing.dart';
 import '../../../theme/typography.dart';
 import '../../../widgets/app_radio_button.dart';
+import '../../../widgets/app_circle_button.dart';
 import '../../../widgets/utils/grouped_list_styling.dart';
+import 'pantry_stock_status_chip.dart';
+import '../../../widgets/adaptive_pull_down/adaptive_menu_item.dart';
+import '../../../widgets/adaptive_pull_down/adaptive_pull_down.dart';
 import '../views/add_pantry_item_modal.dart';
 import '../views/update_pantry_item_modal.dart';
-import 'stock_status_dropdown.dart';
 
 class PantryItemList extends ConsumerWidget {
   final List<PantryItemEntry> pantryItems;
@@ -203,76 +206,112 @@ class PantryItemList extends ConsumerWidget {
       isDragging: false,
     );
 
-    return GestureDetector(
-      onTap: () {
-        // Edit this pantry item
-        showUpdatePantryItemModal(
-          context,
-          pantryItem: item,
-        );
-      },
-      child: Container(
-        decoration: BoxDecoration(
-          color: isSelected
-              ? AppColors.of(context).primary.withValues(alpha: 0.1)
-              : AppColors.of(context).input,
-          border: border,
-          borderRadius: borderRadius,
+    return Container(
+      decoration: BoxDecoration(
+        color: isSelected
+            ? AppColors.of(context).primary.withValues(alpha: 0.1)
+            : AppColors.of(context).input,
+        border: border,
+        borderRadius: borderRadius,
+      ),
+      child: Padding(
+        padding: EdgeInsets.symmetric(
+          horizontal: AppSpacing.lg,
+          vertical: AppSpacing.md,
         ),
-        child: Padding(
-          padding: EdgeInsets.symmetric(
-            horizontal: AppSpacing.lg,
-            vertical: AppSpacing.md,
-          ),
-          child: Row(
-            children: [
-              // Checkbox for selection - using AppRadioButton
-              AppRadioButton(
-                selected: isSelected,
-                onTap: () {
-                  ref.read(pantrySelectionProvider.notifier).toggleSelection(item.id);
-                },
-              ),
+        child: Row(
+          children: [
+            // Checkbox for selection - using AppRadioButton
+            AppRadioButton(
+              selected: isSelected,
+              onTap: () {
+                ref.read(pantrySelectionProvider.notifier).toggleSelection(item.id);
+              },
+            ),
 
-              SizedBox(width: AppSpacing.md),
+            SizedBox(width: AppSpacing.md),
 
-              // Pantry item name with truncation
-              Expanded(
-                child: Text(
-                  item.name,
-                  style: TextStyle(
-                    color: AppColors.of(context).textPrimary,
-                    fontWeight: FontWeight.w500,
-                    fontSize: 17,
-                  ),
-                  overflow: TextOverflow.ellipsis,
-                  maxLines: 1,
+            // Pantry item name with truncation
+            Expanded(
+              child: Text(
+                item.name,
+                style: TextStyle(
+                  color: AppColors.of(context).textPrimary,
+                  fontWeight: FontWeight.w500,
+                  fontSize: 17,
                 ),
+                overflow: TextOverflow.ellipsis,
+                maxLines: 1,
               ),
+            ),
 
-              SizedBox(width: AppSpacing.md),
+            SizedBox(width: AppSpacing.md),
 
-              // Stock status dropdown
-              StockStatusDropdown(
-                value: item.stockStatus,
-                onChanged: (StockStatus value) {
-                  ref.read(pantryNotifierProvider.notifier).updateItem(
-                    id: item.id,
-                    stockStatus: value,
-                  );
-                },
-              ),
+            // Stock status chip (non-interactive)
+            PantryStockStatusChip(status: item.stockStatus),
 
-              SizedBox(width: AppSpacing.sm),
+            SizedBox(width: AppSpacing.sm),
 
-              // Edit icon
-              Icon(
-                CupertinoIcons.pencil,
+            // Overflow menu button (no background)
+            AdaptivePullDownButton(
+              items: [
+                AdaptiveMenuItem(
+                  title: 'Edit',
+                  icon: const Icon(CupertinoIcons.pencil),
+                  onTap: () {
+                    showUpdatePantryItemModal(
+                      context,
+                      pantryItem: item,
+                    );
+                  },
+                ),
+                AdaptiveMenuItem(
+                  title: 'Set to Out of Stock',
+                  icon: const Icon(
+                    CupertinoIcons.circle_fill,
+                    color: Color(0xFFEF5350), // Red
+                  ),
+                  onTap: () {
+                    ref.read(pantryNotifierProvider.notifier).updateItem(
+                      id: item.id,
+                      stockStatus: StockStatus.outOfStock,
+                    );
+                  },
+                ),
+                AdaptiveMenuItem(
+                  title: 'Set to Low Stock',
+                  icon: const Icon(
+                    CupertinoIcons.circle_fill,
+                    color: Color(0xFFFFA726), // Orange
+                  ),
+                  onTap: () {
+                    ref.read(pantryNotifierProvider.notifier).updateItem(
+                      id: item.id,
+                      stockStatus: StockStatus.lowStock,
+                    );
+                  },
+                ),
+                AdaptiveMenuItem(
+                  title: 'Set to In Stock',
+                  icon: const Icon(
+                    CupertinoIcons.circle_fill,
+                    color: Color(0xFF66BB6A), // Green
+                  ),
+                  onTap: () {
+                    ref.read(pantryNotifierProvider.notifier).updateItem(
+                      id: item.id,
+                      stockStatus: StockStatus.inStock,
+                    );
+                  },
+                ),
+              ],
+              child: Icon(
+                Icons.more_horiz,
                 color: AppColors.of(context).textSecondary,
-                size: 20,
+                size: 24,
               ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );
