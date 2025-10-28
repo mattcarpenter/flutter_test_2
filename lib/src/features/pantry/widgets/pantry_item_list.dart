@@ -247,14 +247,17 @@ class PantryItemList extends ConsumerWidget {
 
             SizedBox(width: AppSpacing.md),
 
-            // Column 2: Stock status chip (fixed width, left-aligned)
-            SizedBox(
-              width: 85, // Wide enough for "Out of Stock"
-              child: Align(
-                alignment: Alignment.centerLeft,
-                child: PantryStockStatusChip(status: item.stockStatus),
-              ),
-            ),
+            // Column 2: Stock status chip (only show for Low/Out of Stock)
+            if (item.stockStatus != StockStatus.inStock)
+              SizedBox(
+                width: 85, // Wide enough for "Out of Stock"
+                child: Align(
+                  alignment: Alignment.centerLeft,
+                  child: PantryStockStatusChip(status: item.stockStatus),
+                ),
+              )
+            else
+              SizedBox(width: AppSpacing.md), // Gap when no chip
 
             // Column 3: Overflow menu button (shrinks to content)
             AdaptivePullDownButton(
@@ -271,9 +274,11 @@ class PantryItemList extends ConsumerWidget {
                 ),
                 AdaptiveMenuItem(
                   title: 'Set to Out of Stock',
-                  icon: const Icon(
-                    CupertinoIcons.circle_fill,
-                    color: Color(0xFFEF5350), // Red
+                  icon: Icon(
+                    item.stockStatus == StockStatus.outOfStock
+                        ? CupertinoIcons.checkmark_circle_fill
+                        : CupertinoIcons.circle,
+                    color: const Color(0xFFEF5350), // Red
                   ),
                   onTap: () {
                     ref.read(pantryNotifierProvider.notifier).updateItem(
@@ -284,9 +289,11 @@ class PantryItemList extends ConsumerWidget {
                 ),
                 AdaptiveMenuItem(
                   title: 'Set to Low Stock',
-                  icon: const Icon(
-                    CupertinoIcons.circle_fill,
-                    color: Color(0xFFFFA726), // Orange
+                  icon: Icon(
+                    item.stockStatus == StockStatus.lowStock
+                        ? CupertinoIcons.checkmark_circle_fill
+                        : CupertinoIcons.circle,
+                    color: const Color(0xFFFFA726), // Orange
                   ),
                   onTap: () {
                     ref.read(pantryNotifierProvider.notifier).updateItem(
@@ -297,9 +304,11 @@ class PantryItemList extends ConsumerWidget {
                 ),
                 AdaptiveMenuItem(
                   title: 'Set to In Stock',
-                  icon: const Icon(
-                    CupertinoIcons.circle_fill,
-                    color: Color(0xFF66BB6A), // Green
+                  icon: Icon(
+                    item.stockStatus == StockStatus.inStock
+                        ? CupertinoIcons.checkmark_circle_fill
+                        : CupertinoIcons.circle,
+                    color: const Color(0xFF66BB6A), // Green
                   ),
                   onTap: () {
                     ref.read(pantryNotifierProvider.notifier).updateItem(
