@@ -263,16 +263,6 @@ class PantryItemList extends ConsumerWidget {
             AdaptivePullDownButton(
               items: [
                 AdaptiveMenuItem(
-                  title: 'Edit',
-                  icon: const Icon(CupertinoIcons.pencil),
-                  onTap: () {
-                    showUpdatePantryItemModal(
-                      context,
-                      pantryItem: item,
-                    );
-                  },
-                ),
-                AdaptiveMenuItem(
                   title: 'Set to Out of Stock',
                   icon: Icon(
                     item.stockStatus == StockStatus.outOfStock
@@ -314,6 +304,17 @@ class PantryItemList extends ConsumerWidget {
                     ref.read(pantryNotifierProvider.notifier).updateItem(
                       id: item.id,
                       stockStatus: StockStatus.inStock,
+                    );
+                  },
+                ),
+                AdaptiveMenuItem.divider(),
+                AdaptiveMenuItem(
+                  title: 'Edit',
+                  icon: const Icon(CupertinoIcons.pencil),
+                  onTap: () {
+                    showUpdatePantryItemModal(
+                      context,
+                      pantryItem: item,
                     );
                   },
                 ),

@@ -19,22 +19,29 @@ class AdaptivePullDownButton extends StatelessWidget {
     if (Platform.isIOS) {
       // iOS: Use pull_down_button for a Cupertino-style menu.
       return PullDownButton(
-        itemBuilder: (context) => items.map((item) {
-          if (item.isDestructive) {
-            return PullDownMenuItem(
-              title: item.title,
-              icon: item.icon.icon,
-              onTap: item.onTap,
-              isDestructive: true,
-            );
+        itemBuilder: (context) {
+          final List<PullDownMenuEntry> menuItems = [];
+          for (final item in items) {
+            if (item.isDivider) {
+              menuItems.add(const PullDownMenuDivider.large());
+            } else if (item.isDestructive) {
+              menuItems.add(PullDownMenuItem(
+                title: item.title,
+                icon: item.icon.icon,
+                onTap: item.onTap,
+                isDestructive: true,
+              ));
+            } else {
+              menuItems.add(PullDownMenuItem(
+                title: item.title,
+                icon: item.icon.icon,
+                iconColor: item.icon.color,
+                onTap: item.onTap,
+              ));
+            }
           }
-          return PullDownMenuItem(
-            title: item.title,
-            icon: item.icon.icon,
-            iconColor: item.icon.color,
-            onTap: item.onTap,
-          );
-        }).toList(),
+          return menuItems;
+        },
         buttonBuilder: (context, showMenu) {
           return GestureDetector(
             onTap: showMenu,
@@ -54,30 +61,36 @@ class AdaptivePullDownButton extends StatelessWidget {
       // Android (or other platforms): Use a Material PopupMenuButton.
       return PopupMenuButton<AdaptiveMenuItem>(
         itemBuilder: (context) {
-          return items.map((item) {
-            final textStyle = item.isDestructive
-                ? const TextStyle(color: Colors.red)
-                : null;
-            final iconColor = item.isDestructive
-                ? Colors.red
-                : item.icon.color;
+          final List<PopupMenuEntry<AdaptiveMenuItem>> menuItems = [];
+          for (final item in items) {
+            if (item.isDivider) {
+              menuItems.add(const PopupMenuDivider());
+            } else {
+              final textStyle = item.isDestructive
+                  ? const TextStyle(color: Colors.red)
+                  : null;
+              final iconColor = item.isDestructive
+                  ? Colors.red
+                  : item.icon.color;
 
-            return PopupMenuItem<AdaptiveMenuItem>(
-              value: item,
-              child: Row(
-                children: [
-                  Padding(
-                    padding: const EdgeInsets.only(right: 8.0),
-                    child: Icon(
-                      item.icon.icon,
-                      color: iconColor,
+              menuItems.add(PopupMenuItem<AdaptiveMenuItem>(
+                value: item,
+                child: Row(
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.only(right: 8.0),
+                      child: Icon(
+                        item.icon.icon,
+                        color: iconColor,
+                      ),
                     ),
-                  ),
-                  Text(item.title, style: textStyle),
-                ],
-              ),
-            );
-          }).toList();
+                    Text(item.title, style: textStyle),
+                  ],
+                ),
+              ));
+            }
+          }
+          return menuItems;
         },
         onSelected: (item) {
           if (item.onTap != null) {
