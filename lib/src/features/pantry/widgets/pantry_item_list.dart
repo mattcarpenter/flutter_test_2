@@ -318,6 +318,15 @@ class PantryItemList extends ConsumerWidget {
                     );
                   },
                 ),
+                AdaptiveMenuItem.divider(),
+                AdaptiveMenuItem(
+                  title: 'Delete',
+                  icon: const Icon(CupertinoIcons.trash),
+                  isDestructive: true,
+                  onTap: () {
+                    _showDeleteConfirmation(context, ref, item);
+                  },
+                ),
               ],
               child: Icon(
                 Icons.more_horiz,
@@ -327,6 +336,54 @@ class PantryItemList extends ConsumerWidget {
             ),
           ],
         ),
+      ),
+    );
+  }
+
+  void _showDeleteConfirmation(BuildContext context, WidgetRef ref, PantryItemEntry item) {
+    showCupertinoDialog<void>(
+      context: context,
+      builder: (BuildContext context) => CupertinoAlertDialog(
+        title: const Text('Delete Item'),
+        content: Text(
+          'Are you sure you want to delete "${item.name}"? This action cannot be undone.',
+        ),
+        actions: <CupertinoDialogAction>[
+          CupertinoDialogAction(
+            child: const Text('Cancel'),
+            onPressed: () {
+              Navigator.pop(context);
+            },
+          ),
+          CupertinoDialogAction(
+            isDestructiveAction: true,
+            onPressed: () async {
+              Navigator.pop(context);
+              try {
+                await ref.read(pantryNotifierProvider.notifier).deleteItem(item.id);
+              } catch (e) {
+                if (context.mounted) {
+                  showCupertinoDialog<void>(
+                    context: context,
+                    builder: (BuildContext context) => CupertinoAlertDialog(
+                      title: const Text('Error'),
+                      content: Text('Failed to delete item: $e'),
+                      actions: <CupertinoDialogAction>[
+                        CupertinoDialogAction(
+                          child: const Text('OK'),
+                          onPressed: () {
+                            Navigator.pop(context);
+                          },
+                        ),
+                      ],
+                    ),
+                  );
+                }
+              }
+            },
+            child: const Text('Delete'),
+          ),
+        ],
       ),
     );
   }
