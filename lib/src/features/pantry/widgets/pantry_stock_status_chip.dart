@@ -26,11 +26,11 @@ class PantryStockStatusChip extends StatelessWidget {
   Color get _backgroundColor {
     switch (status) {
       case StockStatus.outOfStock:
-        return AppColorSwatches.error[50]!; // Very light red
+        return AppColorSwatches.error[50]!.withOpacity(0.5); // Even lighter red
       case StockStatus.lowStock:
-        return AppColorSwatches.warning[50]!; // Very light orange
+        return AppColorSwatches.warning[50]!.withOpacity(0.5); // Even lighter orange
       case StockStatus.inStock:
-        return AppColorSwatches.success[50]!; // Very light green
+        return AppColorSwatches.success[50]!.withOpacity(0.5); // Even lighter green
     }
   }
 

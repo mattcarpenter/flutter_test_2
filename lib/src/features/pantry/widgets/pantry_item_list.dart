@@ -231,7 +231,7 @@ class PantryItemList extends ConsumerWidget {
 
             SizedBox(width: AppSpacing.md),
 
-            // Pantry item name with truncation
+            // Column 1: Pantry item name (grows to fill space)
             Expanded(
               child: Text(
                 item.name,
@@ -247,12 +247,16 @@ class PantryItemList extends ConsumerWidget {
 
             SizedBox(width: AppSpacing.md),
 
-            // Stock status chip (non-interactive)
-            PantryStockStatusChip(status: item.stockStatus),
+            // Column 2: Stock status chip (fixed width, left-aligned)
+            SizedBox(
+              width: 85, // Wide enough for "Out of Stock"
+              child: Align(
+                alignment: Alignment.centerLeft,
+                child: PantryStockStatusChip(status: item.stockStatus),
+              ),
+            ),
 
-            SizedBox(width: AppSpacing.sm),
-
-            // Overflow menu button (no background)
+            // Column 3: Overflow menu button (shrinks to content)
             AdaptivePullDownButton(
               items: [
                 AdaptiveMenuItem(
