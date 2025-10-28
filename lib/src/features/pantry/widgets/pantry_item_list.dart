@@ -1,6 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:disclosure/disclosure.dart';
 import '../../../../database/database.dart';
 import '../../../../database/models/pantry_items.dart';
 import '../../../providers/pantry_provider.dart';
@@ -17,7 +18,7 @@ import '../../../widgets/adaptive_pull_down/adaptive_pull_down.dart';
 import '../views/add_pantry_item_modal.dart';
 import '../views/update_pantry_item_modal.dart';
 
-class PantryItemList extends ConsumerWidget {
+class PantryItemList extends ConsumerStatefulWidget {
   final List<PantryItemEntry> pantryItems;
   final bool showCategoryHeaders;
 
@@ -28,12 +29,30 @@ class PantryItemList extends ConsumerWidget {
   });
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    if (showCategoryHeaders) {
+  ConsumerState<PantryItemList> createState() => _PantryItemListState();
+}
+
+class _PantryItemListState extends ConsumerState<PantryItemList> {
+  // Track which categories are expanded (all expanded by default)
+  final Set<String> _expandedCategories = {};
+
+  @override
+  void initState() {
+    super.initState();
+    // Initialize all categories as expanded
+    for (final item in widget.pantryItems) {
+      final category = item.category ?? 'Other';
+      _expandedCategories.add(category);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (widget.showCategoryHeaders) {
       // Group items by category
       final Map<String, List<PantryItemEntry>> groupedItems = {};
 
-      for (final item in pantryItems) {
+      for (final item in widget.pantryItems) {
         final category = item.category ?? 'Other';
         if (!groupedItems.containsKey(category)) {
           groupedItems[category] = [];
@@ -54,78 +73,73 @@ class PantryItemList extends ConsumerWidget {
         groupedItems[category]!.sort((a, b) => a.name.compareTo(b.name));
       }
 
-      // Calculate total child count
-      int childCount = 0;
-      for (final entry in groupedItems.entries) {
-        childCount += 1; // Category header
-        childCount += entry.value.length; // Items
+      // Build list of widgets using Disclosure for each category
+      final List<Widget> categoryWidgets = [];
+
+      for (int categoryIndex = 0; categoryIndex < sortedCategories.length; categoryIndex++) {
+        final category = sortedCategories[categoryIndex];
+        final categoryItems = groupedItems[category]!;
+        final isExpanded = _expandedCategories.contains(category);
+
+        // Add spacing before category (except first)
+        if (categoryIndex > 0) {
+          categoryWidgets.add(SizedBox(height: AppSpacing.lg));
+        }
+
+        // Add Disclosure widget for category
+        categoryWidgets.add(
+          Disclosure(
+            closed: !isExpanded,
+            onOpen: () {
+              setState(() {
+                _expandedCategories.add(category);
+              });
+            },
+            onClose: () {
+              setState(() {
+                _expandedCategories.remove(category);
+              });
+            },
+            header: DisclosureButton(
+              child: _buildCategoryHeader(context, category, categoryItems.length),
+            ),
+            child: DisclosureView(
+              padding: EdgeInsets.zero,
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  for (int itemIndex = 0; itemIndex < categoryItems.length; itemIndex++)
+                    _buildPantryItemTile(
+                      context,
+                      ref,
+                      categoryItems[itemIndex],
+                      isFirst: itemIndex == 0,
+                      isLast: itemIndex == categoryItems.length - 1,
+                    ),
+                ],
+              ),
+            ),
+          ),
+        );
       }
-      // Add spacing elements between categories
-      childCount += sortedCategories.length - 1;
+
       // Add "Add Item" button at the end
-      childCount += 1;
+      categoryWidgets.add(
+        Padding(
+          padding: EdgeInsets.only(top: AppSpacing.lg),
+          child: _buildAddItemButton(context),
+        ),
+      );
 
       return SliverPadding(
         padding: EdgeInsets.symmetric(horizontal: AppSpacing.lg),
         sliver: SliverList(
-          delegate: SliverChildBuilderDelegate(
-            (context, index) {
-              int currentIndex = 0;
-
-              for (int categoryIndex = 0; categoryIndex < sortedCategories.length; categoryIndex++) {
-                final category = sortedCategories[categoryIndex];
-                final categoryItems = groupedItems[category]!;
-
-                // Category header
-                if (currentIndex == index) {
-                  return _buildCategoryHeader(context, category, categoryItems.length);
-                }
-                currentIndex++;
-
-                // Category items
-                for (int itemIndex = 0; itemIndex < categoryItems.length; itemIndex++) {
-                  final item = categoryItems[itemIndex];
-                  if (currentIndex == index) {
-                    final isFirst = itemIndex == 0;
-                    final isLast = itemIndex == categoryItems.length - 1;
-
-                    return _buildPantryItemTile(
-                      context,
-                      ref,
-                      item,
-                      isFirst: isFirst,
-                      isLast: isLast,
-                    );
-                  }
-                  currentIndex++;
-                }
-
-                // Add spacing after each category group (except the last one)
-                if (categoryIndex < sortedCategories.length - 1) {
-                  if (currentIndex == index) {
-                    return SizedBox(height: AppSpacing.lg);
-                  }
-                  currentIndex++;
-                }
-              }
-
-              // Add Item button at the end
-              if (currentIndex == index) {
-                return Padding(
-                  padding: EdgeInsets.only(top: AppSpacing.lg),
-                  child: _buildAddItemButton(context),
-                );
-              }
-
-              return null;
-            },
-            childCount: childCount,
-          ),
+          delegate: SliverChildListDelegate(categoryWidgets),
         ),
       );
     } else {
       // Flat list without category headers
-      final sortedItems = List<PantryItemEntry>.from(pantryItems)
+      final sortedItems = List<PantryItemEntry>.from(widget.pantryItems)
         ..sort((a, b) => a.name.compareTo(b.name));
 
       return SliverPadding(
@@ -177,6 +191,11 @@ class PantryItemList extends ConsumerWidget {
             style: AppTypography.body.copyWith(
               color: AppColors.of(context).textSecondary,
             ),
+          ),
+          const Spacer(),
+          // Animated chevron icon
+          DisclosureIcon(
+            color: AppColors.of(context).textSecondary,
           ),
         ],
       ),
