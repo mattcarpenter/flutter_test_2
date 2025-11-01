@@ -43,9 +43,9 @@ class StockChip extends StatelessWidget {
     } else if (status != null) {
       switch (status!) {
         case StockStatus.outOfStock:
-          return AppColorSwatches.error[50]!.withOpacity(0.5);
+          return AppColorSwatches.error[100]!.withOpacity(0.5);
         case StockStatus.lowStock:
-          return AppColorSwatches.warning[50]!.withOpacity(0.5);
+          return AppColorSwatches.warning[100]!.withOpacity(0.5);
         case StockStatus.inStock:
           return AppColorSwatches.success[50]!.withOpacity(0.5);
       }
@@ -55,15 +55,15 @@ class StockChip extends StatelessWidget {
 
   Color get _textColor {
     if (isNewItem) {
-      return AppColorSwatches.success[700]!;
+      return AppColorSwatches.success[500]!;
     } else if (status != null) {
       switch (status!) {
         case StockStatus.outOfStock:
-          return AppColorSwatches.error[600]!;
+          return AppColorSwatches.error[500]!;
         case StockStatus.lowStock:
-          return AppColorSwatches.warning[600]!;
+          return AppColorSwatches.warning[500]!;
         case StockStatus.inStock:
-          return AppColorSwatches.success[700]!;
+          return AppColorSwatches.success[600]!;
       }
     }
     return Colors.transparent;
@@ -77,10 +77,10 @@ class StockChip extends StatelessWidget {
     }
 
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 3),
+      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 4),
       decoration: BoxDecoration(
         color: _backgroundColor,
-        borderRadius: BorderRadius.circular(4),
+        borderRadius: BorderRadius.circular(7),
       ),
       child: Text(
         _label,
