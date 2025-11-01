@@ -98,10 +98,19 @@ class CookContentState extends ConsumerState<CookContent> {
     );
     
     // Get all in-progress cooks for the recipe list
+    // Sort by startedAt to maintain stable order (oldest first)
     final List<CookEntry> inProgressCooks = cooksAsyncValue.when(
       loading: () => [],
       error: (_, __) => [],
-      data: (cooks) => cooks.where((c) => c.status == CookStatus.inProgress).toList(),
+      data: (cooks) {
+        final filtered = cooks.where((c) => c.status == CookStatus.inProgress).toList();
+        filtered.sort((a, b) {
+          final aTime = a.startedAt ?? 0;
+          final bTime = b.startedAt ?? 0;
+          return aTime.compareTo(bTime);
+        });
+        return filtered;
+      },
     );
 
     // Get the active recipe details
