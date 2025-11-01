@@ -271,8 +271,11 @@ class _PantryItemListState extends ConsumerState<PantryItemList> {
               SizedBox(
                 width: 85, // Wide enough for "Out of Stock"
                 child: Align(
-                  alignment: Alignment.centerLeft,
-                  child: StockChip(status: item.stockStatus),
+                  alignment: Alignment.centerRight,
+                  child: Padding(
+                    padding: EdgeInsets.only(right: AppSpacing.sm),
+                    child: StockChip(status: item.stockStatus),
+                  ),
                 ),
               )
             else

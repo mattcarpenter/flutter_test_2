@@ -211,10 +211,13 @@ class StockChipTestPage extends StatelessWidget {
             SizedBox(
               width: 85,
               child: Align(
-                alignment: Alignment.centerLeft,
-                child: isNew
-                  ? StockChip(isNewItem: true)
-                  : StockChip(status: status),
+                alignment: Alignment.centerRight,
+                child: Padding(
+                  padding: EdgeInsets.only(right: AppSpacing.sm),
+                  child: isNew
+                    ? StockChip(isNewItem: true)
+                    : StockChip(status: status),
+                ),
               ),
             )
           else
