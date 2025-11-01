@@ -6,6 +6,7 @@ import 'package:go_router/go_router.dart';
 import 'package:super_context_menu/super_context_menu.dart';
 import '../../../../database/models/meal_plan_items.dart';
 import '../../../../database/models/recipe_images.dart';
+import '../../../providers/auth_provider.dart';
 import '../../../providers/meal_plan_provider.dart';
 import '../../../providers/recipe_provider.dart';
 import '../../../theme/colors.dart';
@@ -35,7 +36,6 @@ class _MealPlanItemLiftedState extends ConsumerState<MealPlanItemLifted>
   late AnimationController _liftController;
   late Animation<double> _scaleAnimation;
   late Animation<double> _shadowAnimation;
-  bool _isDragging = false;
   
   bool _contextMenuIsAllowed(Offset location) {
     // Context menu allowed everywhere since drag handle is now isolated
@@ -76,17 +76,23 @@ class _MealPlanItemLiftedState extends ConsumerState<MealPlanItemLifted>
 
   void _onDragStart() {
     HapticFeedback.mediumImpact();
-    setState(() => _isDragging = true);
+    // Set global drag state
+    ref.read(mealPlanDraggingItemProvider.notifier).state = widget.item.id;
     _liftController.forward();
   }
 
   void _onDragEnd() {
-    setState(() => _isDragging = false);
+    // Clear global drag state
+    ref.read(mealPlanDraggingItemProvider.notifier).state = null;
     _liftController.reverse();
   }
 
   @override
   Widget build(BuildContext context) {
+    // Check if THIS specific item is being dragged using global state
+    final draggingItemId = ref.watch(mealPlanDraggingItemProvider);
+    final isDragging = draggingItemId == widget.item.id;
+
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 3.0),
       child: AnimatedBuilder(
@@ -97,7 +103,7 @@ class _MealPlanItemLiftedState extends ConsumerState<MealPlanItemLifted>
             child: Container(
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(8),
-                boxShadow: _isDragging ? [
+                boxShadow: isDragging ? [
                   BoxShadow(
                     color: Colors.black.withOpacity(0.15),
                     blurRadius: _shadowAnimation.value,
@@ -105,7 +111,7 @@ class _MealPlanItemLiftedState extends ConsumerState<MealPlanItemLifted>
                   ),
                 ] : null,
               ),
-              child: _isDragging ? _buildGhostTile(context) : _buildNormalTile(context),
+              child: isDragging ? _buildGhostTile(context) : _buildNormalTile(context),
             ),
           );
         },
@@ -340,10 +346,13 @@ class _MealPlanItemLiftedState extends ConsumerState<MealPlanItemLifted>
       widget.onDelete!();
     } else {
       // Fallback to direct removal if no callback provided
+      // Get current user ID to satisfy RLS policies
+      final userId = ref.read(currentUserProvider)?.id;
+
       ref.read(mealPlanNotifierProvider.notifier).removeItem(
         date: widget.dateString,
         itemId: widget.item.id,
-        userId: null,
+        userId: userId,
         householdId: null,
       );
     }

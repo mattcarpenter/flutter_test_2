@@ -85,6 +85,11 @@ class _MealPlanDateCardState extends ConsumerState<MealPlanDateCard>
       return;
     }
 
+    // CRITICAL: Clear global drag state BEFORE database updates
+    // This prevents the race condition where the new widget builds
+    // while drag state is still set, causing it to show as a ghost (gray box)
+    ref.read(mealPlanDraggingItemProvider.notifier).state = null;
+
     // Get current items to determine target index
     final mealPlan = ref.read(mealPlanByDateStreamProvider(widget.dateString)).value;
     final currentItems = mealPlan?.items != null

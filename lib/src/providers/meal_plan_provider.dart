@@ -287,3 +287,6 @@ final extendedMealPlanDatesProvider = Provider<List<String>>((ref) {
 String _formatDate(DateTime date) {
   return '${date.year.toString().padLeft(4, '0')}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}';
 }
+
+// Global drag state provider - tracks which item is currently being dragged
+final mealPlanDraggingItemProvider = StateProvider<String?>((ref) => null);
