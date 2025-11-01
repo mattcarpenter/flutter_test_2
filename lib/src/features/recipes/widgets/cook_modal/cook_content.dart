@@ -37,8 +37,40 @@ class CookContentState extends ConsumerState<CookContent> {
     }
   }
 
-  void showFinishDialog() {
-    _showFinishDialog();
+  void showAddRecipeSheet() {
+    showAddRecipeSearchModal(context, cookId: widget.initialCookId);
+  }
+
+  Future<void> completeCook() async {
+    final activeCookId = ref.read(activeCookInModalProvider);
+    if (activeCookId == null) return;
+
+    // 1. Save cook to "my cooks" history (mark as completed)
+    await ref.read(cookNotifierProvider.notifier).finishCook(
+      cookId: activeCookId,
+    );
+
+    // 2. Get remaining active cooks
+    final inProgressCooks = ref.read(cookNotifierProvider)
+        .maybeWhen(
+          data: (cooks) => cooks.where((c) => c.status == CookStatus.inProgress).toList(),
+          orElse: () => [],
+        );
+
+    final remainingCooks = inProgressCooks
+        .where((cook) => cook.id != activeCookId)
+        .toList();
+
+    // 3. Navigate based on remaining cooks
+    if (remainingCooks.isEmpty) {
+      // No more active cooks - close modal
+      if (mounted && widget.modalContext.mounted) {
+        Navigator.of(widget.modalContext).pop();
+      }
+    } else {
+      // Switch to next active cook
+      ref.read(activeCookInModalProvider.notifier).state = remainingCooks.first.id;
+    }
   }
 
   @override
@@ -224,86 +256,65 @@ class CookContentState extends ConsumerState<CookContent> {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              // Recipe cards - horizontal scrollable list
-              SizedBox(
-                height: 70, // Reduced height
-                child: ListView(
-                  scrollDirection: Axis.horizontal,
-                  children: [
-                    // Active cooks as recipe cards
-                    ...inProgressCooks.map((cook) {
-                      final isActive = cook.id == activeCookId;
-                      return GestureDetector(
-                        onTap: () {
-                          // Switch to this cook
-                          ref.read(activeCookInModalProvider.notifier).state = cook.id;
-                        },
-                        child: Container(
-                          width: 180,
-                          margin: const EdgeInsets.only(right: 12),
-                          decoration: BoxDecoration(
-                            color: Colors.grey.shade200,
-                            borderRadius: BorderRadius.circular(12),
-                            border: Border.all(
-                              color: isActive ? Theme.of(context).primaryColor : Colors.grey.shade300,
-                              width: isActive ? 2 : 1,
+              // Recipe cards - only show if multiple cooks
+              if (inProgressCooks.length > 1) ...[
+                SizedBox(
+                  height: 70, // Reduced height
+                  child: ListView(
+                    scrollDirection: Axis.horizontal,
+                    children: [
+                      // Active cooks as recipe cards
+                      ...inProgressCooks.map((cook) {
+                        final isActive = cook.id == activeCookId;
+                        return GestureDetector(
+                          onTap: () {
+                            // Switch to this cook
+                            ref.read(activeCookInModalProvider.notifier).state = cook.id;
+                          },
+                          child: Container(
+                            width: 180,
+                            margin: const EdgeInsets.only(right: 12),
+                            decoration: BoxDecoration(
+                              color: Colors.grey.shade200,
+                              borderRadius: BorderRadius.circular(12),
+                              border: Border.all(
+                                color: isActive ? Theme.of(context).primaryColor : Colors.grey.shade300,
+                                width: isActive ? 2 : 1,
+                              ),
+                            ),
+                            padding: const EdgeInsets.all(10),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Expanded(
+                                  child: Text(
+                                    cook.recipeName,
+                                    style: TextStyle(
+                                      fontWeight: isActive ? FontWeight.bold : FontWeight.normal,
+                                      fontSize: 14,
+                                    ),
+                                    maxLines: 2,
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                ),
+                                Text(
+                                  isActive ? 'Now cooking' : 'Tap to switch',
+                                  style: TextStyle(
+                                    fontSize: 12,
+                                    color: isActive ? Theme.of(context).primaryColor : Colors.grey
+                                  ),
+                                ),
+                              ],
                             ),
                           ),
-                          padding: const EdgeInsets.all(10),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Expanded(
-                                child: Text(
-                                  cook.recipeName,
-                                  style: TextStyle(
-                                    fontWeight: isActive ? FontWeight.bold : FontWeight.normal,
-                                    fontSize: 14,
-                                  ),
-                                  maxLines: 2,
-                                  overflow: TextOverflow.ellipsis,
-                                ),
-                              ),
-                              Text(
-                                isActive ? 'Now cooking' : 'Tap to switch',
-                                style: TextStyle(
-                                  fontSize: 12, 
-                                  color: isActive ? Theme.of(context).primaryColor : Colors.grey
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      );
-                    }).toList(),
-
-                    // "Add another recipe" card
-                    GestureDetector(
-                      onTap: _showAddRecipeModal,
-                      child: Container(
-                        width: 80,
-                        decoration: BoxDecoration(
-                          border: Border.all(color: Colors.grey.shade300),
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Icon(Icons.add_circle_outline,
-                                size: 16, color: Colors.grey.shade600),
-                            const SizedBox(height: 4),
-                            Text('Add Recipe',
-                                style: TextStyle(fontSize: 11, color: Colors.grey.shade700)),
-                          ],
-                        ),
-                      ),
-                    ),
-                  ],
+                        );
+                      }),
+                    ],
+                  ),
                 ),
-              ),
-
-              const SizedBox(height: 16),
+                const SizedBox(height: 16),
+              ],
 
               // Navigation buttons - Always show 2 equal width buttons
               Row(
@@ -324,7 +335,7 @@ class CookContentState extends ConsumerState<CookContent> {
                     child: WoltElevatedButton(
                       onPressed: () {
                         if (isLastStep) {
-                          _showFinishDialog();
+                          completeCook();
                         } else {
                           _updateStep(currentStepIndex + 1);
                         }
@@ -349,83 +360,5 @@ class CookContentState extends ConsumerState<CookContent> {
         currentStepIndex: newIndex,
       );
     }
-  }
-
-  void _showFinishDialog() {
-    final activeCookId = ref.read(activeCookInModalProvider);
-    if (activeCookId == null) return;
-    
-    // Get all in-progress cooks for next cook selection
-    final List<CookEntry> inProgressCooks = ref.read(cookNotifierProvider)
-        .maybeWhen(
-          data: (cooks) => cooks.where((c) => c.status == CookStatus.inProgress).toList(),
-          orElse: () => [],
-        );
-    
-    showDialog(
-      context: context,
-      builder: (dialogContext) => AlertDialog(
-        title: const Text('Finish this cook?'),
-        content: const Text('What would you like to do with this cooking session?'),
-        actions: [
-          TextButton(
-            onPressed: () {
-              Navigator.of(dialogContext).pop(); // Close dialog
-
-              // Save the cook
-              ref.read(cookNotifierProvider.notifier).finishCook(
-                cookId: activeCookId,
-              );
-
-              // Find next cook to switch to
-              final remainingCooks = inProgressCooks
-                  .where((cook) => cook.id != activeCookId)
-                  .toList();
-                  
-              if (remainingCooks.isNotEmpty) {
-                // Switch to another cook if available
-                ref.read(activeCookInModalProvider.notifier).state = remainingCooks.first.id;
-              } else {
-                // No more cooks, close the modal
-                Navigator.of(widget.modalContext).pop();
-              }
-            },
-            child: const Text('Save to My Cooks'),
-          ),
-          TextButton(
-            style: TextButton.styleFrom(
-              foregroundColor: Colors.red,
-            ),
-            onPressed: () {
-              // Discard the cook
-              ref.read(cookNotifierProvider.notifier).updateCook(
-                cookId: activeCookId,
-                status: CookStatus.discarded,
-              );
-
-              // Find next cook to switch to
-              final remainingCooks = inProgressCooks
-                  .where((cook) => cook.id != activeCookId)
-                  .toList();
-                  
-              Navigator.of(dialogContext).pop(); // Close dialog
-              
-              if (remainingCooks.isNotEmpty) {
-                // Switch to another cook if available
-                ref.read(activeCookInModalProvider.notifier).state = remainingCooks.first.id;
-              } else {
-                // No more cooks, close the modal
-                Navigator.of(widget.modalContext).pop();
-              }
-            },
-            child: const Text('Discard'),
-          ),
-        ],
-      ),
-    );
-  }
-
-  void _showAddRecipeModal() {
-    showAddRecipeSearchModal(context, cookId: widget.initialCookId);
   }
 }

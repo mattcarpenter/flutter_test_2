@@ -1,8 +1,12 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:wolt_modal_sheet/wolt_modal_sheet.dart';
 import 'package:recipe_app/src/providers/cook_provider.dart';
 import '../../../../theme/colors.dart';
+import '../../../../widgets/app_circle_button.dart';
+import '../../../../widgets/adaptive_pull_down/adaptive_menu_item.dart';
+import '../../../../widgets/adaptive_pull_down/adaptive_pull_down.dart';
 import './cook_content.dart';
 
 void showCookModal(BuildContext context, {
@@ -35,7 +39,7 @@ void showCookModal(BuildContext context, {
           trailingNavBarWidget: Consumer(
             builder: (context, ref, _) {
               final activeCookId = ref.watch(activeCookInModalProvider);
-              
+
               return Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
@@ -47,14 +51,30 @@ void showCookModal(BuildContext context, {
                       contentKey.currentState?.showIngredientsSheet();
                     },
                   ),
-                  // Finish button (only finishes the current active cook)
-                  TextButton(
-                    onPressed: () {
-                      if (activeCookId != null) {
-                        contentKey.currentState?.showFinishDialog();
-                      }
-                    },
-                    child: const Text('Finish'),
+                  // Overflow menu with Add Recipe and Complete Cook options
+                  AdaptivePullDownButton(
+                    items: [
+                      AdaptiveMenuItem(
+                        title: 'Add Recipe',
+                        icon: const Icon(CupertinoIcons.add),
+                        onTap: () {
+                          contentKey.currentState?.showAddRecipeSheet();
+                        },
+                      ),
+                      AdaptiveMenuItem(
+                        title: 'Complete Cook',
+                        icon: const Icon(CupertinoIcons.checkmark_alt_circle),
+                        onTap: () {
+                          if (activeCookId != null) {
+                            contentKey.currentState?.completeCook();
+                          }
+                        },
+                      ),
+                    ],
+                    child: const AppCircleButton(
+                      icon: AppCircleButtonIcon.ellipsis,
+                      variant: AppCircleButtonVariant.neutral,
+                    ),
                   ),
                 ],
               );
