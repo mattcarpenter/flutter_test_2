@@ -1,7 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import '../../../../database/models/pantry_items.dart';
 import '../../../theme/colors.dart';
-import '../../../widgets/stock_status_chip.dart';
+import '../../../widgets/stock_chip.dart';
 import '../../../services/ingredient_parser_service.dart';
 import '../models/pantry_update_models.dart';
 
@@ -87,9 +87,9 @@ class PantryUpdateItemTile extends StatelessWidget {
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   if (isNew) ...[
-                    StockStatusChip(isNewItem: true),
+                    StockChip(isNewItem: true),
                   ] else ...[
-                    StockStatusChip(status: item.matchingPantryItem!.stockStatus),
+                    StockChip(status: item.matchingPantryItem!.stockStatus),
                     const SizedBox(width: 8),
                     const Icon(
                       CupertinoIcons.arrow_right,
@@ -97,7 +97,7 @@ class PantryUpdateItemTile extends StatelessWidget {
                       color: CupertinoColors.secondaryLabel,
                     ),
                     const SizedBox(width: 8),
-                    StockStatusChip(status: StockStatus.inStock),
+                    StockChip(status: StockStatus.inStock),
                   ],
                 ],
               ),

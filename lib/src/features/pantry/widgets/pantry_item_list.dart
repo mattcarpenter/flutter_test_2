@@ -12,7 +12,7 @@ import '../../../theme/typography.dart';
 import '../../../widgets/app_radio_button.dart';
 import '../../../widgets/app_circle_button.dart';
 import '../../../widgets/utils/grouped_list_styling.dart';
-import 'pantry_stock_status_chip.dart';
+import '../../../widgets/stock_chip.dart';
 import '../../../widgets/adaptive_pull_down/adaptive_menu_item.dart';
 import '../../../widgets/adaptive_pull_down/adaptive_pull_down.dart';
 import '../views/add_pantry_item_modal.dart';
@@ -272,7 +272,7 @@ class _PantryItemListState extends ConsumerState<PantryItemList> {
                 width: 85, // Wide enough for "Out of Stock"
                 child: Align(
                   alignment: Alignment.centerLeft,
-                  child: PantryStockStatusChip(status: item.stockStatus),
+                  child: StockChip(status: item.stockStatus),
                 ),
               )
             else

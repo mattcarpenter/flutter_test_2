@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../database/models/pantry_items.dart';
 import '../models/ingredient_pantry_match.dart';
-import '../theme/colors.dart';
+import 'stock_chip.dart';
 
 /// A chip widget that displays the stock status of an ingredient based on its pantry match.
 ///
@@ -24,45 +24,17 @@ class IngredientStockChip extends StatelessWidget {
       return const SizedBox.shrink(); // No chip for no match
     }
 
-    final colors = AppColors.of(context);
-    Color backgroundColor;
-    String label;
+    // Determine stock status to display
+    StockStatus? status;
 
     if (match.hasPantryMatch) {
-      // Direct pantry match - use stock status colors
-      switch (match.pantryItem!.stockStatus) {
-        case StockStatus.outOfStock:
-          backgroundColor = colors.errorBackground;
-          label = 'Out';
-        case StockStatus.lowStock:
-          backgroundColor = colors.warningBackground;
-          label = 'Low Stock';
-        case StockStatus.inStock:
-          backgroundColor = colors.successBackground;
-          label = 'In Stock';
-      }
+      // Direct pantry match - use actual stock status
+      status = match.pantryItem!.stockStatus;
     } else if (match.hasRecipeMatch) {
       // Recipe-based match - show as "In Stock" (makeable via sub-recipe)
-      backgroundColor = colors.successBackground;
-      label = 'In Stock';
-    } else {
-      return const SizedBox.shrink();
+      status = StockStatus.inStock;
     }
 
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-      decoration: BoxDecoration(
-        color: backgroundColor,
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: Text(
-        label,
-        style: TextStyle(
-          fontSize: 12,
-          fontWeight: FontWeight.w500,
-          color: AppColors.of(context).textPrimary,
-        ),
-      ),
-    );
+    return StockChip(status: status);
   }
 }

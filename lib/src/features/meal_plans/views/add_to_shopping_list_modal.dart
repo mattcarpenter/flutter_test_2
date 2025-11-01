@@ -3,8 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:wolt_modal_sheet/wolt_modal_sheet.dart';
-import '../../../../database/database.dart';
-import '../../../../database/models/pantry_items.dart';
 import '../../../providers/shopping_list_provider.dart';
 import '../../../services/ingredient_parser_service.dart';
 import '../../../theme/colors.dart';
@@ -13,6 +11,7 @@ import '../../../theme/typography.dart';
 import '../../../widgets/app_button.dart';
 import '../../../widgets/app_circle_button.dart';
 import '../../../widgets/app_radio_button.dart';
+import '../../../widgets/stock_chip.dart';
 import '../../../widgets/utils/grouped_list_styling.dart';
 import '../../../widgets/wolt/text/modal_sheet_title.dart';
 import '../../shopping_list/views/shopping_list_selection_modal.dart';
@@ -452,61 +451,11 @@ class _IngredientTile extends StatelessWidget {
                 width: 80,
                 child: Align(
                   alignment: Alignment.centerRight,
-                  child: _StockStatusChip(pantryItem: ingredient.matchingPantryItem),
+                  child: StockChip(status: ingredient.matchingPantryItem?.stockStatus),
                 ),
               ),
             ],
           ),
-        ),
-      ),
-    );
-  }
-}
-
-// Stock status chip widget
-class _StockStatusChip extends StatelessWidget {
-  final PantryItemEntry? pantryItem;
-
-  const _StockStatusChip({this.pantryItem});
-
-  @override
-  Widget build(BuildContext context) {
-    if (pantryItem == null) {
-      return const SizedBox.shrink();
-    }
-
-    final colors = AppColors.of(context);
-    Color backgroundColor;
-    Color textColor;
-    String label;
-
-    switch (pantryItem!.stockStatus) {
-      case StockStatus.outOfStock:
-        backgroundColor = colors.errorBackground;
-        textColor = colors.error;
-        label = 'Out';
-      case StockStatus.lowStock:
-        backgroundColor = colors.warningBackground;
-        textColor = colors.warning;
-        label = 'Low';
-      case StockStatus.inStock:
-        backgroundColor = colors.successBackground;
-        textColor = colors.success;
-        label = 'In Stock';
-    }
-
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-      decoration: BoxDecoration(
-        color: backgroundColor,
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: Text(
-        label,
-        style: TextStyle(
-          fontSize: 12,
-          fontWeight: FontWeight.w500,
-          color: textColor,
         ),
       ),
     );
