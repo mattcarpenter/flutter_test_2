@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:recipe_app/database/models/steps.dart' as recipe_steps;
@@ -259,7 +260,10 @@ class CookContentState extends ConsumerState<CookContent> {
                 currentStep.text,
                 style: TextStyle(
                   fontSize: 28,
-                  fontWeight: FontWeight.w600,
+                  fontWeight: Platform.isIOS ? FontWeight.w600 : FontWeight.bold,
+                  height: 1.3,
+                  fontFamily: Platform.isIOS ? null : 'Inter',
+                  letterSpacing: Platform.isIOS ? -0.2 : 0,
                   color: AppColors.of(context).textPrimary,
                 ),
                 textAlign: TextAlign.center,
