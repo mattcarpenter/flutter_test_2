@@ -248,27 +248,36 @@ class CookContentState extends ConsumerState<CookContent> {
 
         const SizedBox(height: 16),
 
-        // Middle section - Centered instruction text with transitions
+        // Middle section - Scrollable instruction text (centered when short, scrollable when long)
         Flexible(
           fit: FlexFit.tight,
-          child: Center(
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 24),
-              child: CookStepDisplay(
-                key: const ValueKey('cook-step-display'),
-                stepText: currentStep.text,
-                cookId: activeCookId ?? '',
-                stepIndex: currentStepIndex,
-                style: TextStyle(
-                  fontSize: 28,
-                  fontWeight: Platform.isIOS ? FontWeight.w600 : FontWeight.bold,
-                  height: 1.3,
-                  fontFamily: Platform.isIOS ? null : 'Inter',
-                  letterSpacing: Platform.isIOS ? -0.2 : 0,
-                  color: AppColors.of(context).textPrimary,
+          child: LayoutBuilder(
+            builder: (context, constraints) {
+              return SingleChildScrollView(
+                padding: const EdgeInsets.symmetric(horizontal: 24),
+                child: ConstrainedBox(
+                  constraints: BoxConstraints(
+                    minHeight: constraints.maxHeight,
+                  ),
+                  child: Center(
+                    child: CookStepDisplay(
+                      key: const ValueKey('cook-step-display'),
+                      stepText: currentStep.text,
+                      cookId: activeCookId ?? '',
+                      stepIndex: currentStepIndex,
+                      style: TextStyle(
+                        fontSize: 28,
+                        fontWeight: Platform.isIOS ? FontWeight.w600 : FontWeight.bold,
+                        height: 1.3,
+                        fontFamily: Platform.isIOS ? null : 'Inter',
+                        letterSpacing: Platform.isIOS ? -0.2 : 0,
+                        color: AppColors.of(context).textPrimary,
+                      ),
+                    ),
+                  ),
                 ),
-              ),
-            ),
+              );
+            },
           ),
         ),
 
