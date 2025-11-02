@@ -97,8 +97,5 @@ void showCookModal(BuildContext context, {
         ),
       ];
     },
-    onModalDismissedWithBarrierTap: () {
-      Navigator.of(context).pop();
-    },
   );
 }

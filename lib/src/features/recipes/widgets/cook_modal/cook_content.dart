@@ -222,18 +222,16 @@ class CookContentState extends ConsumerState<CookContent> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Section title if available
-              if (sectionTitle.isNotEmpty) ...[
-                Text(
-                  sectionTitle,
-                  style: TextStyle(
-                    fontSize: 17,
-                    fontWeight: FontWeight.normal,
-                    color: AppColors.of(context).textTertiary,
-                  ),
+              // Section title - always rendered to maintain consistent spacing
+              Text(
+                sectionTitle.isNotEmpty ? sectionTitle : ' ',
+                style: TextStyle(
+                  fontSize: 17,
+                  fontWeight: FontWeight.normal,
+                  color: AppColors.of(context).textTertiary,
                 ),
-                const SizedBox(height: 4),
-              ],
+              ),
+              const SizedBox(height: 4),
 
               // Step number and progress indicator
               Text(
