@@ -31,6 +31,8 @@ class CookContent extends ConsumerStatefulWidget {
 
 class CookContentState extends ConsumerState<CookContent> {
   List<Ingredient>? _ingredients;
+  final GlobalKey<_CookStepDisplayState> _cookStepDisplayKey = GlobalKey<_CookStepDisplayState>();
+  final ScrollController _scrollController = ScrollController();
 
   // Public methods that can be called from the parent
   void showIngredientsSheet() {
@@ -82,6 +84,12 @@ class CookContentState extends ConsumerState<CookContent> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       ref.read(activeCookInModalProvider.notifier).state = widget.initialCookId;
     });
+  }
+
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
   }
 
   @override
@@ -246,32 +254,47 @@ class CookContentState extends ConsumerState<CookContent> {
           ),
         ),
 
-        const SizedBox(height: 16),
-
-        // Middle section - Scrollable instruction text (centered when short, scrollable when long)
+        // Middle section - Scrollable instruction text with fade gradients at top/bottom
         Flexible(
           fit: FlexFit.tight,
           child: LayoutBuilder(
             builder: (context, constraints) {
-              return SingleChildScrollView(
-                padding: const EdgeInsets.symmetric(horizontal: 24),
-                child: ConstrainedBox(
-                  constraints: BoxConstraints(
-                    minHeight: constraints.maxHeight,
-                  ),
-                  child: Center(
-                    child: CookStepDisplay(
-                      key: const ValueKey('cook-step-display'),
-                      stepText: currentStep.text,
-                      cookId: activeCookId ?? '',
-                      stepIndex: currentStepIndex,
-                      style: TextStyle(
-                        fontSize: 28,
-                        fontWeight: Platform.isIOS ? FontWeight.w600 : FontWeight.bold,
-                        height: 1.3,
-                        fontFamily: Platform.isIOS ? null : 'Inter',
-                        letterSpacing: Platform.isIOS ? -0.2 : 0,
-                        color: AppColors.of(context).textPrimary,
+              return ShaderMask(
+                shaderCallback: (Rect bounds) {
+                  return LinearGradient(
+                    begin: Alignment.topCenter,
+                    end: Alignment.bottomCenter,
+                    colors: const [
+                      Colors.transparent,
+                      Colors.white,
+                      Colors.white,
+                      Colors.transparent,
+                    ],
+                    stops: const [0.0, 0.05, 0.95, 1.0], // Fade in first 5% and last 5%
+                  ).createShader(bounds);
+                },
+                blendMode: BlendMode.dstIn,
+                child: SingleChildScrollView(
+                  controller: _scrollController,
+                  child: SizedBox(
+                    height: constraints.maxHeight, // Fixed height - never changes
+                    child: Center(
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 24),
+                        child: CookStepDisplay(
+                          key: _cookStepDisplayKey,
+                          stepText: currentStep.text,
+                          cookId: activeCookId ?? '',
+                          stepIndex: currentStepIndex,
+                          style: TextStyle(
+                            fontSize: 28,
+                            fontWeight: Platform.isIOS ? FontWeight.w600 : FontWeight.bold,
+                            height: 1.3,
+                            fontFamily: Platform.isIOS ? null : 'Inter',
+                            letterSpacing: Platform.isIOS ? -0.2 : 0,
+                            color: AppColors.of(context).textPrimary,
+                          ),
+                        ),
                       ),
                     ),
                   ),
@@ -384,6 +407,15 @@ class CookContentState extends ConsumerState<CookContent> {
   }
 
   void _updateStep(int newIndex) {
+    // Reset scroll immediately if possible
+    if (_scrollController.hasClients && _scrollController.offset > 0) {
+      _scrollController.animateTo(
+        0,
+        duration: Duration.zero,
+        curve: Curves.linear,
+      );
+    }
+
     final activeCookId = ref.read(activeCookInModalProvider);
     if (activeCookId != null) {
       ref.read(cookNotifierProvider.notifier).updateCook(
@@ -505,8 +537,10 @@ class _CookStepDisplayState extends State<CookStepDisplay>
       );
     }
 
+    // Simple Stack with both texts during animation
     return Stack(
       alignment: Alignment.center,
+      clipBehavior: Clip.none,
       children: [
         // Exiting child (if transitioning)
         if (_previousStepText != null)
