@@ -248,14 +248,17 @@ class CookContentState extends ConsumerState<CookContent> {
 
         const SizedBox(height: 16),
 
-        // Middle section - Centered instruction text
+        // Middle section - Centered instruction text with transitions
         Flexible(
           fit: FlexFit.tight,
           child: Center(
             child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 24),
-              child: Text(
-                currentStep.text,
+              child: CookStepDisplay(
+                key: const ValueKey('cook-step-display'),
+                stepText: currentStep.text,
+                cookId: activeCookId ?? '',
+                stepIndex: currentStepIndex,
                 style: TextStyle(
                   fontSize: 28,
                   fontWeight: Platform.isIOS ? FontWeight.w600 : FontWeight.bold,
@@ -264,7 +267,6 @@ class CookContentState extends ConsumerState<CookContent> {
                   letterSpacing: Platform.isIOS ? -0.2 : 0,
                   color: AppColors.of(context).textPrimary,
                 ),
-                textAlign: TextAlign.center,
               ),
             ),
           ),
@@ -380,5 +382,274 @@ class CookContentState extends ConsumerState<CookContent> {
         currentStepIndex: newIndex,
       );
     }
+  }
+}
+
+// Transition types for step display animation
+enum _TransitionType { none, step, recipe }
+enum _TransitionDirection { forward, backward }
+
+/// Animated step display widget with smart transition detection
+///
+/// Automatically detects whether a step change or recipe change occurred
+/// and applies the appropriate transition:
+/// - Step changes: Slide + fade (parallel, direction-aware)
+/// - Recipe changes: Scale + fade (sequential)
+class CookStepDisplay extends StatefulWidget {
+  final String stepText;
+  final String cookId;
+  final int stepIndex;
+  final TextStyle style;
+
+  const CookStepDisplay({
+    super.key,
+    required this.stepText,
+    required this.cookId,
+    required this.stepIndex,
+    required this.style,
+  });
+
+  @override
+  State<CookStepDisplay> createState() => _CookStepDisplayState();
+}
+
+class _CookStepDisplayState extends State<CookStepDisplay>
+    with TickerProviderStateMixin {
+
+  AnimationController? _controller;
+
+  // Track previous child for exit animation
+  String? _previousStepText;
+  String? _previousKey;
+
+  // Transition state
+  _TransitionType _transitionType = _TransitionType.none;
+  _TransitionDirection _direction = _TransitionDirection.forward;
+
+  @override
+  void initState() {
+    super.initState();
+    // No animation on first render
+  }
+
+  @override
+  void didUpdateWidget(CookStepDisplay oldWidget) {
+    super.didUpdateWidget(oldWidget);
+
+    // Detect what changed
+    if (oldWidget.cookId != widget.cookId) {
+      _previousStepText = oldWidget.stepText;
+      _previousKey = '${oldWidget.cookId}-${oldWidget.stepIndex}';
+      _transitionType = _TransitionType.recipe;
+      _startTransition();
+    } else if (oldWidget.stepIndex != widget.stepIndex) {
+      _previousStepText = oldWidget.stepText;
+      _previousKey = '${oldWidget.cookId}-${oldWidget.stepIndex}';
+      _direction = widget.stepIndex > oldWidget.stepIndex
+          ? _TransitionDirection.forward
+          : _TransitionDirection.backward;
+      _transitionType = _TransitionType.step;
+      _startTransition();
+    }
+  }
+
+  void _startTransition() {
+    // Dispose old controller if exists
+    _controller?.dispose();
+
+    // Create new controller
+    _controller = AnimationController(
+      duration: const Duration(milliseconds: 400),
+      vsync: this,
+    );
+
+    // Clean up old child when animation completes
+    _controller!.addStatusListener(_onAnimationComplete);
+
+    // Start animation
+    _controller!.forward();
+  }
+
+  void _onAnimationComplete(AnimationStatus status) {
+    if (status == AnimationStatus.completed) {
+      setState(() {
+        _previousStepText = null;
+        _previousKey = null;
+      });
+    }
+  }
+
+  @override
+  void dispose() {
+    _controller?.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    // If no controller yet (initial render), just show current text
+    if (_controller == null) {
+      return Text(
+        widget.stepText,
+        style: widget.style,
+        textAlign: TextAlign.center,
+      );
+    }
+
+    return Stack(
+      alignment: Alignment.center,
+      children: [
+        // Exiting child (if transitioning)
+        if (_previousStepText != null)
+          _buildExitingChild(),
+
+        // Entering child
+        _buildEnteringChild(),
+      ],
+    );
+  }
+
+  Widget _buildExitingChild() {
+    if (_transitionType == _TransitionType.step) {
+      return _buildStepExit();
+    } else {
+      return _buildRecipeExit();
+    }
+  }
+
+  Widget _buildEnteringChild() {
+    if (_transitionType == _TransitionType.step) {
+      return _buildStepEnter();
+    } else if (_transitionType == _TransitionType.recipe) {
+      return _buildRecipeEnter();
+    } else {
+      // Initial render - no animation
+      return Text(
+        widget.stepText,
+        key: ValueKey('${widget.cookId}-${widget.stepIndex}'),
+        style: widget.style,
+        textAlign: TextAlign.center,
+      );
+    }
+  }
+
+  /// Step exit: Slide and fade out
+  Widget _buildStepExit() {
+    final animation = CurvedAnimation(
+      parent: _controller!,
+      curve: Curves.easeOutCubic,
+    );
+
+    // Exit direction: slide in SAME direction we're moving
+    final exitOffset = _direction == _TransitionDirection.forward
+        ? const Offset(-1.0, 0.0) // Forward: exit to LEFT
+        : const Offset(1.0, 0.0);  // Backward: exit to RIGHT
+
+    return SlideTransition(
+      position: Tween<Offset>(
+        begin: Offset.zero,  // Start at center
+        end: exitOffset,     // End off-screen
+      ).animate(animation),
+      child: FadeTransition(
+        opacity: Tween<double>(begin: 1.0, end: 0.0).animate(
+          CurvedAnimation(
+            parent: _controller!,
+            curve: const Interval(0.0, 0.6, curve: Curves.easeIn),
+          ),
+        ),
+        child: Text(
+          _previousStepText!,
+          key: ValueKey(_previousKey),
+          style: widget.style,
+          textAlign: TextAlign.center,
+        ),
+      ),
+    );
+  }
+
+  /// Step enter: Slide in and fade in
+  Widget _buildStepEnter() {
+    final animation = CurvedAnimation(
+      parent: _controller!,
+      curve: Curves.easeOutCubic,
+    );
+
+    // Enter direction: slide from OPPOSITE direction we're moving
+    final enterOffset = _direction == _TransitionDirection.forward
+        ? const Offset(1.0, 0.0)  // Forward: enter from RIGHT
+        : const Offset(-1.0, 0.0); // Backward: enter from LEFT
+
+    return SlideTransition(
+      position: Tween<Offset>(
+        begin: enterOffset,   // Start off-screen
+        end: Offset.zero,     // End at center
+      ).animate(animation),
+      child: FadeTransition(
+        opacity: Tween<double>(begin: 0.0, end: 1.0).animate(
+          CurvedAnimation(
+            parent: _controller!,
+            curve: const Interval(0.0, 0.6, curve: Curves.easeIn),
+          ),
+        ),
+        child: Text(
+          widget.stepText,
+          key: ValueKey('${widget.cookId}-${widget.stepIndex}'),
+          style: widget.style,
+          textAlign: TextAlign.center,
+        ),
+      ),
+    );
+  }
+
+  /// Recipe exit: Scale down and fade out
+  Widget _buildRecipeExit() {
+    return ScaleTransition(
+      scale: Tween<double>(begin: 1.0, end: 0.8).animate(
+        CurvedAnimation(
+          parent: _controller!,
+          curve: const Interval(0.0, 0.5, curve: Curves.easeInCubic),
+        ),
+      ),
+      child: FadeTransition(
+        opacity: Tween<double>(begin: 1.0, end: 0.0).animate(
+          CurvedAnimation(
+            parent: _controller!,
+            curve: const Interval(0.0, 0.5, curve: Curves.easeOut),
+          ),
+        ),
+        child: Text(
+          _previousStepText!,
+          key: ValueKey(_previousKey),
+          style: widget.style,
+          textAlign: TextAlign.center,
+        ),
+      ),
+    );
+  }
+
+  /// Recipe enter: Scale up and fade in
+  Widget _buildRecipeEnter() {
+    return ScaleTransition(
+      scale: Tween<double>(begin: 0.8, end: 1.0).animate(
+        CurvedAnimation(
+          parent: _controller!,
+          curve: const Interval(0.3, 1.0, curve: Curves.easeOutCubic),
+        ),
+      ),
+      child: FadeTransition(
+        opacity: Tween<double>(begin: 0.0, end: 1.0).animate(
+          CurvedAnimation(
+            parent: _controller!,
+            curve: const Interval(0.3, 1.0, curve: Curves.easeIn),
+          ),
+        ),
+        child: Text(
+          widget.stepText,
+          key: ValueKey('${widget.cookId}-${widget.stepIndex}'),
+          style: widget.style,
+          textAlign: TextAlign.center,
+        ),
+      ),
+    );
   }
 }
