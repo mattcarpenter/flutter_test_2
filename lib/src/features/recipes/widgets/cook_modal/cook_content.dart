@@ -457,9 +457,9 @@ class _CookStepDisplayState extends State<CookStepDisplay>
     // Dispose old controller if exists
     _controller?.dispose();
 
-    // Create new controller
+    // Create new controller - snappy duration for responsive carousel feel
     _controller = AnimationController(
-      duration: const Duration(milliseconds: 400),
+      duration: const Duration(milliseconds: 280),
       vsync: this,
     );
 
@@ -537,24 +537,26 @@ class _CookStepDisplayState extends State<CookStepDisplay>
   Widget _buildStepExit() {
     final animation = CurvedAnimation(
       parent: _controller!,
-      curve: Curves.easeOutCubic,
+      curve: Curves.easeInOutCubic,
     );
 
     // Exit direction: slide in SAME direction we're moving
+    // Very subtle movement - just 30% of screen width
     final exitOffset = _direction == _TransitionDirection.forward
-        ? const Offset(-1.0, 0.0) // Forward: exit to LEFT
-        : const Offset(1.0, 0.0);  // Backward: exit to RIGHT
+        ? const Offset(-0.3, 0.0) // Forward: exit to LEFT (30%)
+        : const Offset(0.3, 0.0);  // Backward: exit to RIGHT (30%)
 
     return SlideTransition(
       position: Tween<Offset>(
         begin: Offset.zero,  // Start at center
-        end: exitOffset,     // End off-screen
+        end: exitOffset,     // End halfway off-screen
       ).animate(animation),
       child: FadeTransition(
+        // Extended to 50% (175ms) to overlap more with entering text
         opacity: Tween<double>(begin: 1.0, end: 0.0).animate(
           CurvedAnimation(
             parent: _controller!,
-            curve: const Interval(0.0, 0.6, curve: Curves.easeIn),
+            curve: const Interval(0.0, 0.5, curve: Curves.easeInCubic),
           ),
         ),
         child: Text(
@@ -571,13 +573,14 @@ class _CookStepDisplayState extends State<CookStepDisplay>
   Widget _buildStepEnter() {
     final animation = CurvedAnimation(
       parent: _controller!,
-      curve: Curves.easeOutCubic,
+      curve: Curves.easeInOutCubic,
     );
 
     // Enter direction: slide from OPPOSITE direction we're moving
+    // Subtle movement - just 50% of screen width for gentle carousel effect
     final enterOffset = _direction == _TransitionDirection.forward
-        ? const Offset(1.0, 0.0)  // Forward: enter from RIGHT
-        : const Offset(-1.0, 0.0); // Backward: enter from LEFT
+        ? const Offset(0.5, 0.0)  // Forward: enter from RIGHT (50% of screen)
+        : const Offset(-0.5, 0.0); // Backward: enter from LEFT (50% of screen)
 
     return SlideTransition(
       position: Tween<Offset>(
@@ -585,10 +588,11 @@ class _CookStepDisplayState extends State<CookStepDisplay>
         end: Offset.zero,     // End at center
       ).animate(animation),
       child: FadeTransition(
+        // Start earlier (30% = 105ms) to create crossfade with exiting text
         opacity: Tween<double>(begin: 0.0, end: 1.0).animate(
           CurvedAnimation(
             parent: _controller!,
-            curve: const Interval(0.0, 0.6, curve: Curves.easeIn),
+            curve: const Interval(0.3, 1.0, curve: Curves.easeOut),
           ),
         ),
         child: Text(
