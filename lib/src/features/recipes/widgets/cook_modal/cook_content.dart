@@ -6,6 +6,7 @@ import 'package:recipe_app/src/providers/cook_provider.dart';
 import 'package:recipe_app/src/providers/recipe_provider.dart' as recipe_provider;
 import '../../../../../database/database.dart';
 import '../../../../../database/models/cooks.dart';
+import '../../../../theme/colors.dart';
 import '../../../../widgets/wolt/button/wolt_elevated_button.dart';
 import 'ingredients_sheet.dart';
 import 'add_recipe_search_modal.dart';
@@ -86,17 +87,17 @@ class CookContentState extends ConsumerState<CookContent> {
   Widget build(BuildContext context) {
     // Get the active cook ID from our state provider
     final activeCookId = ref.watch(activeCookInModalProvider);
-    
+
     // Get all in-progress cooks
     final cooksAsyncValue = ref.watch(cookNotifierProvider);
-    
+
     // Find the currently active cook
     final CookEntry? activeCook = cooksAsyncValue.when(
       loading: () => null,
       error: (_, __) => null,
       data: (cooks) => cooks.firstWhereOrNull((c) => c.id == activeCookId),
     );
-    
+
     // Get all in-progress cooks for the recipe list
     // Sort by startedAt to maintain stable order (oldest first)
     final List<CookEntry> inProgressCooks = cooksAsyncValue.when(
@@ -212,10 +213,11 @@ class CookContentState extends ConsumerState<CookContent> {
 
     return Column(
       mainAxisSize: MainAxisSize.max, // Take all available height
+      crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         // Top section - Step number and section
         Padding(
-          padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
+          padding: const EdgeInsets.fromLTRB(24, 12, 24, 8),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -223,36 +225,43 @@ class CookContentState extends ConsumerState<CookContent> {
               if (sectionTitle.isNotEmpty) ...[
                 Text(
                   sectionTitle,
-                  style: const TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.grey,
+                  style: TextStyle(
+                    fontSize: 17,
+                    fontWeight: FontWeight.normal,
+                    color: AppColors.of(context).textTertiary,
                   ),
                 ),
-                const SizedBox(height: 8),
+                const SizedBox(height: 4),
               ],
 
               // Step number and progress indicator
               Text(
                 'Step ${currentStepIndex + 1} of $totalSteps',
-                style: const TextStyle(
-                  fontSize: 16,
+                style: TextStyle(
+                  fontSize: 18,
                   fontWeight: FontWeight.w500,
+                  color: AppColors.of(context).textSecondary,
                 ),
               ),
             ],
           ),
         ),
 
-        // Middle section - Use Flexible instead of Expanded for better behavior
+        const SizedBox(height: 16),
+
+        // Middle section - Centered instruction text
         Flexible(
-          fit: FlexFit.tight, // This is important for proper sizing
+          fit: FlexFit.tight,
           child: Center(
             child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 20),
+              padding: const EdgeInsets.symmetric(horizontal: 24),
               child: Text(
                 currentStep.text,
-                style: const TextStyle(fontSize: 18),
+                style: TextStyle(
+                  fontSize: 28,
+                  fontWeight: FontWeight.w600,
+                  color: AppColors.of(context).textPrimary,
+                ),
                 textAlign: TextAlign.center,
               ),
             ),
