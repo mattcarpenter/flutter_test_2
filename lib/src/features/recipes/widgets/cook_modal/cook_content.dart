@@ -58,8 +58,9 @@ class CookContentState extends ConsumerState<CookContent> {
         );
       },
       validateRecipe: (recipe) async {
-        // Validate that recipe has steps before allowing it to be added to cook
-        if (recipe.steps == null || recipe.steps!.isEmpty) {
+        // Validate that recipe has non-section steps before allowing it to be added to cook
+        final nonSectionSteps = recipe.steps?.where((s) => s.type != 'section').toList() ?? [];
+        if (nonSectionSteps.isEmpty) {
           return "This recipe doesn't have any cooking steps yet. Please add steps to this recipe before starting a cook session.";
         }
         return null; // Valid
@@ -106,6 +107,54 @@ class CookContentState extends ConsumerState<CookContent> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       ref.read(activeCookInModalProvider.notifier).state = widget.initialCookId;
     });
+  }
+
+  // Helper functions for handling sections in step navigation
+
+  /// Get only non-section steps
+  List<recipe_steps.Step> _getNonSectionSteps(List<recipe_steps.Step> allSteps) {
+    return allSteps.where((s) => s.type != 'section').toList();
+  }
+
+  /// Get the display step number (1-based, excluding sections)
+  int _getDisplayStepNumber(List<recipe_steps.Step> allSteps, int currentIndex) {
+    int count = 0;
+    for (int i = 0; i <= currentIndex && i < allSteps.length; i++) {
+      if (allSteps[i].type != 'section') {
+        count++;
+      }
+    }
+    return count;
+  }
+
+  /// Find next non-section step index (returns null if no more steps)
+  int? _findNextStepIndex(List<recipe_steps.Step> allSteps, int currentIndex) {
+    for (int i = currentIndex + 1; i < allSteps.length; i++) {
+      if (allSteps[i].type != 'section') {
+        return i;
+      }
+    }
+    return null;
+  }
+
+  /// Find previous non-section step index (returns null if at start)
+  int? _findPreviousStepIndex(List<recipe_steps.Step> allSteps, int currentIndex) {
+    for (int i = currentIndex - 1; i >= 0; i--) {
+      if (allSteps[i].type != 'section') {
+        return i;
+      }
+    }
+    return null;
+  }
+
+  /// Find first non-section step index
+  int _findFirstNonSectionStepIndex(List<recipe_steps.Step> allSteps) {
+    for (int i = 0; i < allSteps.length; i++) {
+      if (allSteps[i].type != 'section') {
+        return i;
+      }
+    }
+    return 0; // Fallback (shouldn't happen if validation works)
   }
 
   @override
@@ -166,14 +215,22 @@ class CookContentState extends ConsumerState<CookContent> {
           final ingredients = recipe.ingredients ?? [];
           _ingredients = ingredients; // Store for action buttons
 
-          // Get the current step index from the activeCook or default to 0
-          final currentStepIndex = activeCook?.currentStepIndex ?? 0;
-
-          // Ensure we have a valid step index and handle empty steps list
-          if (steps.isEmpty) {
+          // Ensure we have at least one non-section step
+          final nonSectionSteps = _getNonSectionSteps(steps);
+          if (nonSectionSteps.isEmpty) {
             return _buildErrorContent("No steps found for this recipe");
           }
 
+          // Get the current step index - ensure it's on a non-section step
+          int currentStepIndex = activeCook?.currentStepIndex ?? 0;
+
+          // Safety: if current index points to a section, skip to next non-section
+          if (currentStepIndex < steps.length && steps[currentStepIndex].type == 'section') {
+            final nextStep = _findNextStepIndex(steps, currentStepIndex);
+            currentStepIndex = nextStep ?? _findFirstNonSectionStepIndex(steps);
+          }
+
+          // Clamp to valid range
           final validStepIndex = currentStepIndex.clamp(0, steps.length - 1);
 
           return _buildStepContent(
@@ -181,7 +238,8 @@ class CookContentState extends ConsumerState<CookContent> {
             steps: steps,
             ingredients: ingredients,
             currentStepIndex: validStepIndex.toInt(),
-            totalSteps: steps.length,
+            totalSteps: nonSectionSteps.length, // Only count non-sections
+            displayStepNumber: _getDisplayStepNumber(steps, validStepIndex.toInt()),
             inProgressCooks: inProgressCooks,
             activeCookId: activeCookId,
           );
@@ -225,12 +283,14 @@ class CookContentState extends ConsumerState<CookContent> {
     required List<Ingredient> ingredients,
     required int currentStepIndex,
     required int totalSteps,
+    required int displayStepNumber,
     required List<CookEntry> inProgressCooks,
     required String? activeCookId,
   }) {
-    // Find the current step
-    final isFirstStep = currentStepIndex == 0;
-    final isLastStep = currentStepIndex == totalSteps - 1;
+    // Find next and previous non-section indices
+    final prevStepIndex = _findPreviousStepIndex(steps, currentStepIndex);
+    final nextStepIndex = _findNextStepIndex(steps, currentStepIndex);
+    final isLastStep = nextStepIndex == null;
     final currentStep = steps[currentStepIndex];
 
     // Find the current section
@@ -265,7 +325,7 @@ class CookContentState extends ConsumerState<CookContent> {
 
               // Step number and progress indicator
               Text(
-                'Step ${currentStepIndex + 1} of $totalSteps',
+                'Step $displayStepNumber of $totalSteps',
                 style: TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.w500,
@@ -405,7 +465,7 @@ class CookContentState extends ConsumerState<CookContent> {
                       size: AppButtonSize.large,
                       shape: AppButtonShape.square,
                       fullWidth: true,
-                      onPressed: isFirstStep ? null : () => _updateStep(currentStepIndex - 1),
+                      onPressed: prevStepIndex != null ? () => _updateStep(prevStepIndex) : null,
                     ),
                   ),
                   const SizedBox(width: 16),
@@ -421,7 +481,7 @@ class CookContentState extends ConsumerState<CookContent> {
                         if (isLastStep) {
                           completeCook();
                         } else {
-                          _updateStep(currentStepIndex + 1);
+                          _updateStep(nextStepIndex);
                         }
                       },
                     ),

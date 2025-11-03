@@ -245,8 +245,9 @@ class _RecipeViewState extends ConsumerState<RecipeView> {
   }
 
   Widget _buildCookingButton(BuildContext context, WidgetRef ref, RecipeEntry recipe) {
-    // Don't show button if recipe has no steps
-    if (recipe.steps == null || recipe.steps!.isEmpty) {
+    // Don't show button if recipe has no non-section steps
+    final nonSectionSteps = recipe.steps?.where((s) => s.type != 'section').toList() ?? [];
+    if (nonSectionSteps.isEmpty) {
       return const SizedBox.shrink();
     }
 
