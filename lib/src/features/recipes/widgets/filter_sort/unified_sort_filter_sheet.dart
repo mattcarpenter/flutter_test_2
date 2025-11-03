@@ -227,6 +227,7 @@ class _UnifiedSortFilterModalPage {
         child: AppCircleButton(
           icon: AppCircleButtonIcon.close,
           variant: AppCircleButtonVariant.neutral,
+          size: 32,
           onPressed: () {
             Navigator.of(modalContext).pop();
           },

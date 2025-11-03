@@ -40,6 +40,7 @@ class AddNoteToMealPlanModalPage {
         child: AppCircleButton(
           icon: AppCircleButtonIcon.close,
           variant: AppCircleButtonVariant.neutral,
+          size: 32,
           onPressed: () => Navigator.of(context).pop(),
         ),
       ),

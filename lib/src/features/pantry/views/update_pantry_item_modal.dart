@@ -530,6 +530,7 @@ WoltModalSheetPage _buildAddTermPage(
       child: AppCircleButton(
         icon: AppCircleButtonIcon.back,
         variant: AppCircleButtonVariant.neutral,
+        size: 32,
         onPressed: () {
           pageIndexNotifier.value = 0;
         },
@@ -540,6 +541,7 @@ WoltModalSheetPage _buildAddTermPage(
       child: AppCircleButton(
         icon: AppCircleButtonIcon.close,
         variant: AppCircleButtonVariant.neutral,
+        size: 32,
         onPressed: () => Navigator.of(context).pop(),
       ),
     ),

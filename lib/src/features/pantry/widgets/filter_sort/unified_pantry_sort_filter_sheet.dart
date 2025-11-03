@@ -66,6 +66,7 @@ class _UnifiedPantrySortFilterModalPage {
         child: AppCircleButton(
           icon: AppCircleButtonIcon.close,
           variant: AppCircleButtonVariant.neutral,
+          size: 32,
           onPressed: () => Navigator.of(modalContext).pop(),
         ),
       ),

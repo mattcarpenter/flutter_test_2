@@ -102,6 +102,7 @@ void showIngredientMatchesBottomSheet(
             child: AppCircleButton(
               icon: AppCircleButtonIcon.back,
               variant: AppCircleButtonVariant.neutral,
+              size: 32,
               onPressed: () {
                 pageIndexNotifier.value = 1;
               },
@@ -112,6 +113,7 @@ void showIngredientMatchesBottomSheet(
             child: AppCircleButton(
               icon: AppCircleButtonIcon.close,
               variant: AppCircleButtonVariant.neutral,
+              size: 32,
               onPressed: () => Navigator.of(modalContext).pop(),
             ),
           ),
@@ -131,6 +133,7 @@ void showIngredientMatchesBottomSheet(
             child: AppCircleButton(
               icon: AppCircleButtonIcon.back,
               variant: AppCircleButtonVariant.neutral,
+              size: 32,
               onPressed: () {
                 pageIndexNotifier.value = 1;
               },
@@ -141,6 +144,7 @@ void showIngredientMatchesBottomSheet(
             child: AppCircleButton(
               icon: AppCircleButtonIcon.close,
               variant: AppCircleButtonVariant.neutral,
+              size: 32,
               onPressed: () => Navigator.of(modalContext).pop(),
             ),
           ),
