@@ -44,12 +44,7 @@ class RecipeStepsView extends StatelessWidget {
                 ),
                 child: Text(
                   step.text.toUpperCase(),
-                  style: TextStyle(
-                    fontSize: 13,
-                    fontWeight: FontWeight.w600,
-                    letterSpacing: 1.2, // More spacing between letters
-                    color: AppColorSwatches.neutral[500],
-                  ),
+                  style: AppTypography.sectionLabel,
                 ),
               );
             }

@@ -158,6 +158,15 @@ class AppTypography {
     letterSpacing: Platform.isIOS ? null : 0.5, // iOS handles spacing
   );
 
+  // Section label - for uppercase category labels with tracked letters
+  static TextStyle get sectionLabel => TextStyle(
+    fontSize: 13,
+    fontWeight: _semiBoldWeight,
+    letterSpacing: 0.9,
+    fontFamily: _fontFamily,
+    color: const Color(0xFF7A7A7A), // neutral[500]
+  );
+
   // Button text - for button labels and call-to-action text
   static TextStyle get button => TextStyle(
     fontSize: 16, // Will be overridden by AppButton's dynamic sizing

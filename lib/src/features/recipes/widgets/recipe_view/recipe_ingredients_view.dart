@@ -87,10 +87,8 @@ class _RecipeIngredientsViewState extends ConsumerState<RecipeIngredientsView> {
                   bottom: AppSpacing.sm, // Less spacing on bottom
                 ),
                 child: Text(
-                  ingredient.name,
-                  style: AppTypography.h4.copyWith(
-                    color: AppColors.of(context).textPrimary,
-                  ),
+                  ingredient.name.toUpperCase(),
+                  style: AppTypography.sectionLabel,
                 ),
               );
             }
