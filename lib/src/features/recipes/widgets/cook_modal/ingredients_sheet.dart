@@ -1,148 +1,184 @@
 import 'package:flutter/material.dart';
+import 'package:wolt_modal_sheet/wolt_modal_sheet.dart';
 import 'package:recipe_app/database/models/ingredients.dart';
+import '../../../../theme/colors.dart';
+import '../../../../theme/spacing.dart';
+import '../../../../theme/typography.dart';
+import '../../../../widgets/app_circle_button.dart';
+import '../../../../services/ingredient_parser_service.dart';
 
 void showIngredientsModal(BuildContext context, List<Ingredient> ingredients) {
-  showModalBottomSheet(
+  WoltModalSheet.show(
+    useRootNavigator: true,
     context: context,
-    isScrollControlled: true,
-    shape: const RoundedRectangleBorder(
-      borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
-    ),
-    builder: (context) => DraggableScrollableSheet(
-      initialChildSize: 0.6,
-      minChildSize: 0.3,
-      maxChildSize: 0.9,
-      expand: false,
-      builder: (context, scrollController) => IngredientsSheet(
-        ingredients: ingredients,
-        scrollController: scrollController,
-      ),
-    ),
+    modalTypeBuilder: (_) => WoltModalType.bottomSheet(),
+    pageListBuilder: (modalContext) {
+      return [
+        SliverWoltModalSheetPage(
+          navBarHeight: 55,
+          backgroundColor: AppColors.of(modalContext).background,
+          surfaceTintColor: Colors.transparent,
+          hasTopBarLayer: true,
+          isTopBarLayerAlwaysVisible: false,
+          trailingNavBarWidget: Padding(
+            padding: EdgeInsets.only(right: AppSpacing.lg),
+            child: AppCircleButton(
+              icon: AppCircleButtonIcon.close,
+              variant: AppCircleButtonVariant.neutral,
+              onPressed: () => Navigator.of(modalContext).pop(),
+            ),
+          ),
+          mainContentSliversBuilder: (context) => [
+            SliverToBoxAdapter(
+              child: IngredientsSheet(ingredients: ingredients),
+            ),
+          ],
+        ),
+      ];
+    },
   );
 }
 
 class IngredientsSheet extends StatelessWidget {
   final List<Ingredient> ingredients;
-  final ScrollController scrollController;
+  final _parser = IngredientParserService();
 
-  const IngredientsSheet({
-    Key? key,
+  IngredientsSheet({
+    super.key,
     required this.ingredients,
-    required this.scrollController,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        // Draggable handle
-        Center(
-          child: Container(
-            margin: const EdgeInsets.only(top: 8, bottom: 16),
-            width: 40,
-            height: 4,
-            decoration: BoxDecoration(
-              color: Colors.grey.shade300,
-              borderRadius: BorderRadius.circular(2),
+    return Padding(
+      padding: EdgeInsets.fromLTRB(AppSpacing.lg, 0, AppSpacing.lg, AppSpacing.lg),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          // Title
+          Text(
+            'Ingredients',
+            style: AppTypography.h4.copyWith(
+              color: AppColors.of(context).textPrimary,
             ),
           ),
-        ),
 
-        // Header
-        Padding(
-          padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              const Text(
-                'Ingredients',
-                style: TextStyle(
-                  fontSize: 20,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              IconButton(
-                icon: const Icon(Icons.close),
-                onPressed: () => Navigator.of(context).pop(),
-              ),
-            ],
-          ),
-        ),
+          SizedBox(height: AppSpacing.lg),
 
-        // Ingredients list
-        Expanded(
-          child: ListView.builder(
-            controller: scrollController,
+          // Ingredients list
+          ListView.builder(
+            shrinkWrap: true,
+            physics: const NeverScrollableScrollPhysics(),
+            padding: EdgeInsets.zero,
             itemCount: ingredients.length,
-            padding: const EdgeInsets.symmetric(horizontal: 16),
             itemBuilder: (context, index) {
               final ingredient = ingredients[index];
 
+              // Section header
               if (ingredient.type == 'section') {
-                return _buildSectionHeader(ingredient);
-              } else {
-                return _buildIngredientItem(ingredient);
+                return Padding(
+                  padding: EdgeInsets.only(
+                    top: index == 0 ? 0 : AppSpacing.xl,
+                    bottom: AppSpacing.sm,
+                  ),
+                  child: Text(
+                    ingredient.name,
+                    style: AppTypography.h4.copyWith(
+                      color: AppColors.of(context).textPrimary,
+                    ),
+                  ),
+                );
               }
+
+              // Regular ingredient
+              return Padding(
+                padding: EdgeInsets.only(
+                  top: index == 0 ? 0 : 8.0,
+                  bottom: 8.0,
+                ),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    // Bullet point
+                    Text(
+                      '•',
+                      style: TextStyle(
+                        fontSize: 16,
+                        height: 1.0,
+                        color: AppColors.of(context).contentSecondary,
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+
+                    // Ingredient name with parsed quantities
+                    Expanded(
+                      child: _buildParsedIngredientText(context, ingredient.name),
+                    ),
+                  ],
+                ),
+              );
             },
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildSectionHeader(Ingredient section) {
-    return Padding(
-      padding: const EdgeInsets.only(top: 16, bottom: 8),
-      child: Container(
-        width: double.infinity,
-        padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
-        decoration: BoxDecoration(
-          color: Colors.grey.shade200,
-          borderRadius: BorderRadius.circular(8),
-        ),
-        child: Text(
-          section.name,
-          style: const TextStyle(
-            fontWeight: FontWeight.bold,
-            fontSize: 16,
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildIngredientItem(Ingredient ingredient) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 4),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const Text('•', style: TextStyle(fontSize: 18)),
-          const SizedBox(width: 8),
-
-          // Amount (if available)
-          if (ingredient.primaryAmount1Value != null &&
-              ingredient.primaryAmount1Value!.isNotEmpty) ...[
-            SizedBox(
-              width: 70,
-              child: Text(
-                '${ingredient.primaryAmount1Value} ${ingredient.primaryAmount1Unit ?? ''}',
-                style: const TextStyle(fontWeight: FontWeight.w500),
-              ),
-            ),
-            const SizedBox(width: 8),
-          ],
-
-          // Ingredient name
-          Expanded(
-            child: Text(
-              ingredient.name,
-              style: const TextStyle(fontSize: 16),
-            ),
           ),
         ],
       ),
     );
+  }
+
+  /// Builds a RichText widget with bold quantities parsed from ingredient text
+  Widget _buildParsedIngredientText(BuildContext context, String text) {
+    final colors = AppColors.of(context);
+
+    try {
+      final parseResult = _parser.parse(text);
+
+      if (parseResult.quantities.isEmpty) {
+        // No quantities found, return plain text
+        return Text(
+          text,
+          style: TextStyle(fontSize: 16, color: colors.contentPrimary),
+        );
+      }
+
+      final children = <InlineSpan>[];
+      int currentIndex = 0;
+
+      // Build TextSpan with bold quantities, normal ingredient names
+      for (final quantity in parseResult.quantities) {
+        // Text before quantity (ingredient name)
+        if (quantity.start > currentIndex) {
+          children.add(TextSpan(
+            text: text.substring(currentIndex, quantity.start),
+            style: TextStyle(fontSize: 16, color: colors.contentPrimary),
+          ));
+        }
+
+        // Quantity with bold formatting
+        children.add(TextSpan(
+          text: text.substring(quantity.start, quantity.end),
+          style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: colors.contentPrimary),
+        ));
+
+        currentIndex = quantity.end;
+      }
+
+      // Remaining text after last quantity
+      if (currentIndex < text.length) {
+        children.add(TextSpan(
+          text: text.substring(currentIndex),
+          style: TextStyle(fontSize: 16, color: colors.contentPrimary),
+        ));
+      }
+
+      return RichText(
+        text: TextSpan(children: children),
+      );
+    } catch (e) {
+      // Fallback to plain text if parsing fails
+      return Text(
+        text,
+        style: TextStyle(fontSize: 16, color: colors.contentPrimary),
+      );
+    }
   }
 }
