@@ -25,6 +25,7 @@ void showIngredientsModal(BuildContext context, List<Ingredient> ingredients) {
             child: AppCircleButton(
               icon: AppCircleButtonIcon.close,
               variant: AppCircleButtonVariant.neutral,
+              size: 32,
               onPressed: () => Navigator.of(modalContext).pop(),
             ),
           ),

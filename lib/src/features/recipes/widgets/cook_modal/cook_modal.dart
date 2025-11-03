@@ -37,6 +37,7 @@ void showCookModal(BuildContext context, {
             child: AppCircleButton(
               icon: AppCircleButtonIcon.close,
               variant: AppCircleButtonVariant.neutral,
+              size: 32,
               onPressed: () => Navigator.of(modalContext).pop(),
             ),
           ),
@@ -54,6 +55,7 @@ void showCookModal(BuildContext context, {
                     AppCircleButton(
                       icon: AppCircleButtonIcon.list,
                       variant: AppCircleButtonVariant.neutral,
+                      size: 32,
                       onPressed: () {
                         contentKey.currentState?.showIngredientsSheet();
                       },
@@ -82,6 +84,7 @@ void showCookModal(BuildContext context, {
                       child: const AppCircleButton(
                         icon: AppCircleButtonIcon.ellipsis,
                         variant: AppCircleButtonVariant.neutral,
+                        size: 32,
                       ),
                     ),
                   ],
