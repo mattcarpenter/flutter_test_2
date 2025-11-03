@@ -16,19 +16,23 @@ import '../../../widgets/wolt/text/modal_sheet_title.dart';
 ///
 /// [title] - The title to show in the modal header
 /// [onRecipeSelected] - Callback when a recipe is selected. Should return a Future that completes when done.
+/// [validateRecipe] - Optional validation callback. Return null if valid, or error message if invalid.
 void showAddRecipeModal(
   BuildContext context, {
   required String title,
   required Future<void> Function(RecipeEntry recipe) onRecipeSelected,
+  Future<String?> Function(RecipeEntry recipe)? validateRecipe,
 }) {
   WoltModalSheet.show(
     useRootNavigator: true,
     context: context,
+    modalTypeBuilder: (_) => WoltModalType.bottomSheet(),
     pageListBuilder: (modalContext) => [
       _AddRecipeModalPage.build(
         context: modalContext,
         title: title,
         onRecipeSelected: onRecipeSelected,
+        validateRecipe: validateRecipe,
       ),
     ],
   );
@@ -41,6 +45,7 @@ class _AddRecipeModalPage {
     required BuildContext context,
     required String title,
     required Future<void> Function(RecipeEntry recipe) onRecipeSelected,
+    Future<String?> Function(RecipeEntry recipe)? validateRecipe,
   }) {
     return SliverWoltModalSheetPage(
       navBarHeight: 55,
@@ -63,6 +68,7 @@ class _AddRecipeModalPage {
           child: _AddRecipeContent(
             modalContext: context,
             onRecipeSelected: onRecipeSelected,
+            validateRecipe: validateRecipe,
           ),
         ),
       ],
@@ -73,10 +79,12 @@ class _AddRecipeModalPage {
 class _AddRecipeContent extends ConsumerStatefulWidget {
   final BuildContext modalContext;
   final Future<void> Function(RecipeEntry recipe) onRecipeSelected;
+  final Future<String?> Function(RecipeEntry recipe)? validateRecipe;
 
   const _AddRecipeContent({
     required this.modalContext,
     required this.onRecipeSelected,
+    this.validateRecipe,
   });
 
   @override
@@ -110,7 +118,17 @@ class _AddRecipeContentState extends ConsumerState<_AddRecipeContent> {
     ref.read(recipe_provider.cookModalRecipeSearchProvider.notifier).search(query);
   }
 
-  void _onRecipeSelected(RecipeEntry recipe) {
+  void _onRecipeSelected(RecipeEntry recipe) async {
+    // Run validation if provided
+    if (widget.validateRecipe != null) {
+      final validationError = await widget.validateRecipe!(recipe);
+      if (validationError != null) {
+        // Show validation error dialog
+        _showValidationError(validationError);
+        return;
+      }
+    }
+
     // Call the provided callback
     widget.onRecipeSelected(recipe).then((_) {
       // Close the modal once completed successfully
@@ -139,11 +157,38 @@ class _AddRecipeContentState extends ConsumerState<_AddRecipeContent> {
     );
   }
 
+  void _showValidationError(String message) {
+    showCupertinoDialog(
+      context: context,
+      builder: (context) => CupertinoAlertDialog(
+        title: const Text('Cannot Add Recipe'),
+        content: Text(message),
+        actions: [
+          CupertinoDialogAction(
+            child: const Text('OK'),
+            onPressed: () => Navigator.pop(context),
+          ),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final searchState = ref.watch(recipe_provider.cookModalRecipeSearchProvider);
     final recentlyViewedAsync = ref.watch(recentlyViewedLimitedProvider(5));
     final hasSearchQuery = _searchController.text.isNotEmpty;
+
+    // Calculate available height for content
+    // Start with 70% of screen, which gives room for the modal to expand
+    final screenHeight = MediaQuery.of(context).size.height;
+    final maxContentHeight = screenHeight * 0.7;
+
+    // Height for search field + padding (approximate)
+    const searchFieldHeight = 70.0;
+
+    // Available height for scrollable content
+    final scrollableHeight = maxContentHeight - searchFieldHeight;
 
     return Column(
       mainAxisSize: MainAxisSize.min,
@@ -160,9 +205,9 @@ class _AddRecipeContentState extends ConsumerState<_AddRecipeContent> {
           ),
         ),
 
-        // Scrollable content area with fixed height
+        // Scrollable content area with bounded height
         SizedBox(
-          height: MediaQuery.of(context).size.height * 0.6,
+          height: scrollableHeight,
           child: CustomScrollView(
             slivers: [
               // Main content area (search results or empty states)

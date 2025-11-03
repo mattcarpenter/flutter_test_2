@@ -57,6 +57,13 @@ class CookContentState extends ConsumerState<CookContent> {
           userId: userId,
         );
       },
+      validateRecipe: (recipe) async {
+        // Validate that recipe has steps before allowing it to be added to cook
+        if (recipe.steps == null || recipe.steps!.isEmpty) {
+          return "This recipe doesn't have any cooking steps yet. Please add steps to this recipe before starting a cook session.";
+        }
+        return null; // Valid
+      },
     );
   }
 

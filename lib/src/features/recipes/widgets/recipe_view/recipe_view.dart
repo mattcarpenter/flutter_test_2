@@ -245,6 +245,11 @@ class _RecipeViewState extends ConsumerState<RecipeView> {
   }
 
   Widget _buildCookingButton(BuildContext context, WidgetRef ref, RecipeEntry recipe) {
+    // Don't show button if recipe has no steps
+    if (recipe.steps == null || recipe.steps!.isEmpty) {
+      return const SizedBox.shrink();
+    }
+
     final activeCook = ref.watch(activeCookForRecipeProvider(recipe.id));
     final cookNotifier = ref.read(cookNotifierProvider.notifier);
     final userId = Supabase.instance.client.auth.currentUser?.id;
