@@ -12,6 +12,7 @@ import '../../../../widgets/app_button.dart';
 import 'ingredients_sheet.dart';
 import '../add_recipe_modal.dart';
 import 'package:collection/collection.dart';
+import '../../../../theme/spacing.dart';
 
 class CookContent extends ConsumerStatefulWidget {
   final String initialCookId;
@@ -157,6 +158,39 @@ class CookContentState extends ConsumerState<CookContent> {
     return 0; // Fallback (shouldn't happen if validation works)
   }
 
+  /// Calculate completion percentage for a cook session
+  int _calculateCookProgress(CookEntry cook) {
+    // Fetch recipe to get steps
+    final recipeAsync = ref.watch(recipe_provider.recipeByIdStreamProvider(cook.recipeId));
+
+    return recipeAsync.when(
+      data: (recipe) {
+        if (recipe == null || recipe.steps == null) return 0;
+
+        final steps = recipe.steps!;
+        final nonSectionSteps = _getNonSectionSteps(steps);
+
+        if (nonSectionSteps.isEmpty) return 0;
+
+        // Count how many non-section steps we've passed
+        int completedSteps = 0;
+        for (int i = 0; i < cook.currentStepIndex && i < steps.length; i++) {
+          if (steps[i].type != 'section') {
+            completedSteps++;
+          }
+        }
+
+        // If we're currently ON a non-section step, it counts as in-progress
+        // Only count it as completed if we've moved past it
+
+        final percentage = (completedSteps / nonSectionSteps.length * 100).round();
+        return percentage.clamp(0, 100);
+      },
+      loading: () => 0,
+      error: (_, __) => 0,
+    );
+  }
+
   @override
   void dispose() {
     _scrollController.dispose();
@@ -277,6 +311,52 @@ class CookContentState extends ConsumerState<CookContent> {
     );
   }
 
+  Widget _buildCookCard(CookEntry cook, bool isActive) {
+    final percentage = _calculateCookProgress(cook);
+
+    return GestureDetector(
+      onTap: () {
+        // Switch to this cook
+        ref.read(activeCookInModalProvider.notifier).state = cook.id;
+      },
+      child: Container(
+        width: 220,
+        decoration: BoxDecoration(
+          color: isActive
+              ? AppColorSwatches.primary[100] // Soft apricot - darker than before
+              : AppColorSwatches.neutral[300], // Darker gray for better visibility
+          borderRadius: BorderRadius.circular(12),
+          // No border - flat design
+        ),
+        padding: const EdgeInsets.all(12),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text(
+              cook.recipeName,
+              style: TextStyle(
+                fontWeight: isActive ? FontWeight.w600 : FontWeight.normal,
+                fontSize: 15,
+              ),
+              maxLines: 1, // Single line for clean truncation
+              overflow: TextOverflow.ellipsis,
+            ),
+            Text(
+              '$percentage% complete',
+              style: TextStyle(
+                fontSize: 12,
+                color: isActive
+                    ? AppColorSwatches.primary[500] // Primary orange
+                    : AppColorSwatches.neutral[500], // Medium gray
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
   Widget _buildStepContent({
     required dynamic recipe,
     required List<recipe_steps.Step> steps,
@@ -389,74 +469,41 @@ class CookContentState extends ConsumerState<CookContent> {
           ),
         ),
 
-        // Bottom section - Recipe cards and navigation buttons
-        Padding(
-          padding: const EdgeInsets.all(16),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              // Recipe cards - only show if multiple cooks
-              if (inProgressCooks.length > 1) ...[
-                SizedBox(
-                  height: 70, // Reduced height
-                  child: ListView(
-                    scrollDirection: Axis.horizontal,
-                    children: [
-                      // Active cooks as recipe cards
-                      ...inProgressCooks.map((cook) {
-                        final isActive = cook.id == activeCookId;
-                        return GestureDetector(
-                          onTap: () {
-                            // Switch to this cook
-                            ref.read(activeCookInModalProvider.notifier).state = cook.id;
-                          },
-                          child: Container(
-                            width: 180,
-                            margin: const EdgeInsets.only(right: 12),
-                            decoration: BoxDecoration(
-                              color: Colors.grey.shade200,
-                              borderRadius: BorderRadius.circular(12),
-                              border: Border.all(
-                                color: isActive ? Theme.of(context).primaryColor : Colors.grey.shade300,
-                                width: isActive ? 2 : 1,
-                              ),
-                            ),
-                            padding: const EdgeInsets.all(10),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                Expanded(
-                                  child: Text(
-                                    cook.recipeName,
-                                    style: TextStyle(
-                                      fontWeight: isActive ? FontWeight.bold : FontWeight.normal,
-                                      fontSize: 14,
-                                    ),
-                                    maxLines: 2,
-                                    overflow: TextOverflow.ellipsis,
-                                  ),
-                                ),
-                                Text(
-                                  isActive ? 'Now cooking' : 'Tap to switch',
-                                  style: TextStyle(
-                                    fontSize: 12,
-                                    color: isActive ? Theme.of(context).primaryColor : Colors.grey
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        );
-                      }),
-                    ],
-                  ),
-                ),
-                const SizedBox(height: 16),
-              ],
+        // Bottom section - Recipe cards (edge-to-edge) and navigation buttons
+        Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            // Recipe cards - edge-to-edge scrolling (only show if multiple cooks)
+            if (inProgressCooks.length > 1) ...[
+              SizedBox(
+                height: 64,
+                child: ListView.builder(
+                  scrollDirection: Axis.horizontal,
+                  padding: EdgeInsets.zero, // Critical for edge-to-edge
+                  itemCount: inProgressCooks.length,
+                  itemBuilder: (context, index) {
+                    final cook = inProgressCooks[index];
+                    final isFirst = index == 0;
+                    final isLast = index == inProgressCooks.length - 1;
+                    final isActive = cook.id == activeCookId;
 
-              // Navigation buttons - Always show 2 equal width buttons
-              Row(
+                    return Container(
+                      margin: EdgeInsets.only(
+                        left: isFirst ? AppSpacing.lg : 0.0,
+                        right: isLast ? AppSpacing.lg : AppSpacing.md,
+                      ),
+                      child: _buildCookCard(cook, isActive),
+                    );
+                  },
+                ),
+              ),
+              const SizedBox(height: AppSpacing.md),
+            ],
+
+            // Navigation buttons - contained with padding
+            Padding(
+              padding: const EdgeInsets.all(AppSpacing.lg),
+              child: Row(
                 children: [
                   // Previous button (disabled when on first step)
                   Expanded(
@@ -468,7 +515,7 @@ class CookContentState extends ConsumerState<CookContent> {
                       onPressed: prevStepIndex != null ? () => _updateStep(prevStepIndex) : null,
                     ),
                   ),
-                  const SizedBox(width: 16),
+                  const SizedBox(width: AppSpacing.lg),
 
                   // Next/Complete button
                   Expanded(
@@ -488,8 +535,8 @@ class CookContentState extends ConsumerState<CookContent> {
                   ),
                 ],
               ),
-            ],
-          ),
+            ),
+          ],
         ),
       ],
     );
