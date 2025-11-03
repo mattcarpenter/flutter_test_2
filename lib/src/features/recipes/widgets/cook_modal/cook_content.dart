@@ -10,7 +10,7 @@ import '../../../../../database/models/cooks.dart';
 import '../../../../theme/colors.dart';
 import '../../../../widgets/app_button.dart';
 import 'ingredients_sheet.dart';
-import 'add_recipe_search_modal.dart';
+import '../add_recipe_modal.dart';
 import 'package:collection/collection.dart';
 
 class CookContent extends ConsumerStatefulWidget {
@@ -42,7 +42,22 @@ class CookContentState extends ConsumerState<CookContent> {
   }
 
   void showAddRecipeSheet() {
-    showAddRecipeSearchModal(context, cookId: widget.initialCookId);
+    showAddRecipeModal(
+      context,
+      title: 'Add Recipe to Cook',
+      onRecipeSelected: (recipe) async {
+        // Add the selected recipe to cook session
+        final cookNotifier = ref.read(cookNotifierProvider.notifier);
+        final userId = ref.read(userIdProvider);
+
+        // Create a new cook for the selected recipe
+        await cookNotifier.startCook(
+          recipeId: recipe.id,
+          recipeName: recipe.title,
+          userId: userId,
+        );
+      },
+    );
   }
 
   Future<void> completeCook() async {
