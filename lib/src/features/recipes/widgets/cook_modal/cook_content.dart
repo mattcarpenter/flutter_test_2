@@ -276,13 +276,16 @@ class CookContentState extends ConsumerState<CookContent> {
                 blendMode: BlendMode.dstIn,
                 child: SingleChildScrollView(
                   controller: _scrollController,
-                  child: SizedBox(
-                    height: constraints.maxHeight, // Fixed height - never changes
+                  child: ConstrainedBox(
+                    constraints: BoxConstraints(
+                      minHeight: constraints.maxHeight,
+                    ),
                     child: Center(
                       child: Padding(
                         padding: const EdgeInsets.symmetric(horizontal: 24),
                         child: CookStepDisplay(
                           key: _cookStepDisplayKey,
+                          availableHeight: constraints.maxHeight,
                           stepText: currentStep.text,
                           cookId: activeCookId ?? '',
                           stepIndex: currentStepIndex,
@@ -437,6 +440,7 @@ enum _TransitionDirection { forward, backward }
 /// - Step changes: Slide + fade (parallel, direction-aware)
 /// - Recipe changes: Scale + fade (sequential)
 class CookStepDisplay extends StatefulWidget {
+  final double availableHeight;
   final String stepText;
   final String cookId;
   final int stepIndex;
@@ -444,6 +448,7 @@ class CookStepDisplay extends StatefulWidget {
 
   const CookStepDisplay({
     super.key,
+    required this.availableHeight,
     required this.stepText,
     required this.cookId,
     required this.stepIndex,
@@ -528,27 +533,31 @@ class _CookStepDisplayState extends State<CookStepDisplay>
 
   @override
   Widget build(BuildContext context) {
-    // If no controller yet (initial render), just show current text
-    if (_controller == null) {
-      return Text(
-        widget.stepText,
-        style: widget.style,
-        textAlign: TextAlign.center,
+    // If animating, use fixed-height container to prevent jumping
+    if (_previousStepText != null) {
+      return SizedBox(
+        height: widget.availableHeight,
+        child: Center(
+          child: Stack(
+            alignment: Alignment.center,
+            clipBehavior: Clip.none,
+            children: [
+              // Exiting child
+              _buildExitingChild(),
+
+              // Entering child
+              _buildEnteringChild(),
+            ],
+          ),
+        ),
       );
     }
 
-    // Simple Stack with both texts during animation
-    return Stack(
-      alignment: Alignment.center,
-      clipBehavior: Clip.none,
-      children: [
-        // Exiting child (if transitioning)
-        if (_previousStepText != null)
-          _buildExitingChild(),
-
-        // Entering child
-        _buildEnteringChild(),
-      ],
+    // Not animating - use natural sizing for scrollability
+    return Text(
+      widget.stepText,
+      style: widget.style,
+      textAlign: TextAlign.center,
     );
   }
 
