@@ -7,6 +7,7 @@ enum AppCircleButtonIcon {
   pencil,
   close,
   back,
+  list,
 }
 
 enum AppCircleButtonVariant {
@@ -40,6 +41,8 @@ class AppCircleButton extends StatelessWidget {
         return Icons.close;
       case AppCircleButtonIcon.back:
         return Icons.arrow_back_rounded;
+      case AppCircleButtonIcon.list:
+        return Icons.format_list_bulleted;
     }
   }
 

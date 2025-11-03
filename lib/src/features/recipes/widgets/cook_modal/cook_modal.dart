@@ -51,13 +51,14 @@ void showCookModal(BuildContext context, {
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     // Ingredients button
-                    IconButton(
-                      icon: const Icon(Icons.food_bank_outlined),
-                      tooltip: 'Ingredients',
+                    AppCircleButton(
+                      icon: AppCircleButtonIcon.list,
+                      variant: AppCircleButtonVariant.neutral,
                       onPressed: () {
                         contentKey.currentState?.showIngredientsSheet();
                       },
                     ),
+                    SizedBox(width: AppSpacing.sm),
                     // Overflow menu with Add Recipe and Complete Cook options
                     AdaptivePullDownButton(
                       items: [
