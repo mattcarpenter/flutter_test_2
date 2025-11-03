@@ -8,7 +8,7 @@ import 'package:recipe_app/src/providers/recipe_provider.dart' as recipe_provide
 import '../../../../../database/database.dart';
 import '../../../../../database/models/cooks.dart';
 import '../../../../theme/colors.dart';
-import '../../../../widgets/wolt/button/wolt_elevated_button.dart';
+import '../../../../widgets/app_button.dart';
 import 'ingredients_sheet.dart';
 import 'add_recipe_search_modal.dart';
 import 'package:collection/collection.dart';
@@ -378,18 +378,23 @@ class CookContentState extends ConsumerState<CookContent> {
                 children: [
                   // Previous button (disabled when on first step)
                   Expanded(
-                    child: WoltElevatedButton(
-                      theme: WoltElevatedButtonTheme.secondary,
-                      onPressed: isFirstStep ? () {} : () => _updateStep(currentStepIndex - 1),
-                      enabled: !isFirstStep,
-                      child: const Text('Previous'),
+                    child: AppButtonVariants.primaryOutline(
+                      text: 'Previous',
+                      size: AppButtonSize.large,
+                      shape: AppButtonShape.square,
+                      fullWidth: true,
+                      onPressed: isFirstStep ? null : () => _updateStep(currentStepIndex - 1),
                     ),
                   ),
                   const SizedBox(width: 16),
 
                   // Next/Complete button
                   Expanded(
-                    child: WoltElevatedButton(
+                    child: AppButtonVariants.primaryFilled(
+                      text: isLastStep ? 'Complete' : 'Next',
+                      size: AppButtonSize.large,
+                      shape: AppButtonShape.square,
+                      fullWidth: true,
                       onPressed: () {
                         if (isLastStep) {
                           completeCook();
@@ -397,7 +402,6 @@ class CookContentState extends ConsumerState<CookContent> {
                           _updateStep(currentStepIndex + 1);
                         }
                       },
-                      child: Text(isLastStep ? 'Complete' : 'Next'),
                     ),
                   ),
                 ],
