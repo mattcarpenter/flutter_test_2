@@ -38,20 +38,17 @@ class RecipeStepsView extends StatelessWidget {
             // Section header
             if (step.type == 'section') {
               return Padding(
-                padding: EdgeInsets.only(top: index == 0 ? 0 : 8.0, bottom: 8.0),
-                child: Container(
-                  width: double.infinity,
-                  padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
-                  decoration: BoxDecoration(
-                    color: Colors.grey.shade200,
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: Text(
-                    step.text,
-                    style: const TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                    ),
+                padding: EdgeInsets.only(
+                  top: index == 0 ? 0 : 20.0, // More space above for hierarchy
+                  bottom: 8.0, // Less space below
+                ),
+                child: Text(
+                  step.text.toUpperCase(),
+                  style: TextStyle(
+                    fontSize: 13,
+                    fontWeight: FontWeight.w600,
+                    letterSpacing: 1.2, // More spacing between letters
+                    color: AppColorSwatches.neutral[500],
                   ),
                 ),
               );
