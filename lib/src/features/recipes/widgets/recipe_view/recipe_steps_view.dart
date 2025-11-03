@@ -72,14 +72,15 @@ class RecipeStepsView extends StatelessWidget {
                     height: 28,
                     alignment: Alignment.center,
                     decoration: BoxDecoration(
-                      color: Theme.of(context).primaryColor,
+                      color: AppColorSwatches.surface[200], // Light sand - matches page's warm tint
                       shape: BoxShape.circle,
                     ),
                     child: Text(
                       '${_getStepNumber(steps, index)}',
-                      style: const TextStyle(
-                        color: Colors.white,
+                      style: TextStyle(
+                        color: AppColorSwatches.surface[800], // Dark taupe/mocha - matches warm tint
                         fontWeight: FontWeight.bold,
+                        fontSize: 14,
                       ),
                     ),
                   ),
