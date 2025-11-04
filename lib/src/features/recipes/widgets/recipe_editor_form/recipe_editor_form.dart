@@ -17,6 +17,7 @@ import '../../../../widgets/section_header.dart';
 import '../../../../widgets/app_text_field.dart';
 import '../../../../widgets/app_text_field_condensed.dart';
 import '../../../../widgets/app_text_field_group.dart';
+import '../../../../widgets/star_rating.dart';
 import 'sections/ingredients_section.dart';
 import 'sections/recipe_metadata_section.dart';
 import 'sections/steps_section.dart';
@@ -462,6 +463,21 @@ class RecipeEditorFormState extends ConsumerState<RecipeEditorForm> {
 
             const SizedBox(height: AppSpacing.xl),
 
+            // Rating Section Header
+            const SectionHeader(
+              "Rating",
+              topSpacing: 0,
+            ),
+
+            // Rating Widget
+            StarRating(
+              rating: _recipe.rating,
+              onRatingChanged: _updateRating,
+              size: StarRatingSize.large,
+            ),
+
+            const SizedBox(height: AppSpacing.xl),
+
             // Tags Section
             TagChipsRow(
               tagIds: _recipe.tagIds ?? [],
@@ -483,6 +499,12 @@ class RecipeEditorFormState extends ConsumerState<RecipeEditorForm> {
   void _updateTagIds(List<String> newTagIds) {
     setState(() {
       _recipe = _recipe.copyWith(tagIds: Value(newTagIds));
+    });
+  }
+
+  void _updateRating(int newRating) {
+    setState(() {
+      _recipe = _recipe.copyWith(rating: Value(newRating == 0 ? null : newRating));
     });
   }
 }
