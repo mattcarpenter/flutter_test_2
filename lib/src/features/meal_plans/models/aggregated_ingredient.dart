@@ -29,10 +29,10 @@ class AggregatedIngredient {
   }) {
     // Don't check if already in shopping list
     if (existsInShoppingList) return false;
-    
-    // Check if not in pantry or has low/out stock status
+
+    // Check if not in pantry or out of stock
     if (pantryItem == null) return true;
-    return pantryItem.stockStatus != StockStatus.inStock;
+    return pantryItem.stockStatus == StockStatus.outOfStock;
   }
 
   // Helper to get display text for sources

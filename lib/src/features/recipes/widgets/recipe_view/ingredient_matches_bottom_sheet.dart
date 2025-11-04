@@ -23,7 +23,11 @@ import 'package:recipe_app/src/widgets/ingredient_stock_chip.dart';
 import 'package:recipe_app/src/widgets/stock_chip.dart';
 import 'package:recipe_app/src/widgets/utils/grouped_list_styling.dart';
 import 'package:recipe_app/src/widgets/wolt/text/modal_sheet_title.dart';
+import 'package:recipe_app/src/widgets/adaptive_pull_down/adaptive_pull_down.dart';
+import 'package:recipe_app/src/widgets/adaptive_pull_down/adaptive_menu_item.dart';
 import 'package:recipe_app/src/services/ingredient_parser_service.dart';
+import 'package:recipe_app/src/features/meal_plans/models/aggregated_ingredient.dart';
+import 'add_recipe_ingredients_to_shopping_list_modal.dart';
 
 /// Shows a bottom sheet displaying ingredient-pantry match details
 /// with ability to edit the ingredient terms for better matching
@@ -51,8 +55,8 @@ void showIngredientMatchesBottomSheet(
           backgroundColor: AppColors.of(modalContext).background,
           surfaceTintColor: Colors.transparent,
           pageTitle: ModalSheetTitle('Recipe Ingredients'),
-          trailingNavBarWidget: Padding(
-            padding: EdgeInsets.only(right: AppSpacing.lg),
+          leadingNavBarWidget: Padding(
+            padding: EdgeInsets.only(left: AppSpacing.lg),
             child: AppCircleButton(
               icon: AppCircleButtonIcon.close,
               variant: AppCircleButtonVariant.neutral,
@@ -61,6 +65,59 @@ void showIngredientMatchesBottomSheet(
                 Navigator.of(modalContext).pop();
               },
             ),
+          ),
+          trailingNavBarWidget: Consumer(
+            builder: (context, ref, child) {
+              return Padding(
+                padding: EdgeInsets.only(right: AppSpacing.lg),
+                child: AdaptivePullDownButton(
+                  items: [
+                    AdaptiveMenuItem(
+                      title: 'Add to Shopping List',
+                      icon: const Icon(CupertinoIcons.cart),
+                      onTap: () {
+                        // Get recipe name
+                        final recipeAsync = ref.read(recipeByIdStreamProvider(matches.recipeId));
+                        final recipeName = recipeAsync.valueOrNull?.title ?? 'Recipe';
+
+                        // Convert matches to aggregated ingredients
+                        final parser = IngredientParserService();
+                        final parseResult = parser.parse(recipeName);
+                        final cleanRecipeName = parseResult.cleanName.isNotEmpty
+                            ? parseResult.cleanName
+                            : recipeName;
+
+                        final aggregatedIngredients = matches.matches.map((match) {
+                          final shouldCheck = AggregatedIngredient.shouldBeCheckedByDefault(
+                            pantryItem: match.pantryItem,
+                            existsInShoppingList: false,
+                          );
+
+                          return AggregatedIngredient(
+                            id: match.ingredient.id,
+                            name: match.ingredient.name,
+                            terms: match.ingredient.terms?.map((t) => t.value).toList() ?? [],
+                            sourceRecipeIds: [matches.recipeId],
+                            sourceRecipeTitles: [cleanRecipeName],
+                            matchingPantryItem: match.pantryItem,
+                            existsInShoppingList: false,
+                            isChecked: shouldCheck,
+                          );
+                        }).toList();
+
+                        // Show modal
+                        showAddRecipeIngredientsToShoppingListModal(context, aggregatedIngredients);
+                      },
+                    ),
+                  ],
+                  child: const AppCircleButton(
+                    icon: AppCircleButtonIcon.ellipsis,
+                    variant: AppCircleButtonVariant.neutral,
+                    size: 32,
+                  ),
+                ),
+              );
+            },
           ),
           child: Padding(
             padding: EdgeInsets.fromLTRB(AppSpacing.lg, AppSpacing.lg, AppSpacing.lg, AppSpacing.lg),
