@@ -11,6 +11,7 @@ import '../../../../theme/typography.dart';
 import '../../../../theme/colors.dart';
 import '../../../../utils/duration_formatter.dart';
 import '../../../../widgets/app_button.dart';
+import '../../../../widgets/star_rating.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../cook_modal/cook_modal.dart';
 
@@ -125,35 +126,27 @@ class _RecipeViewState extends ConsumerState<RecipeView> {
             const SizedBox(height: 16),
 
             // Recipe Info
-            Row(
-              mainAxisAlignment: MainAxisAlignment.start,
+            Wrap(
+              spacing: 32,
+              runSpacing: 12,
               children: [
                 if (recipe.servings != null)
-                  Padding(
-                    padding: const EdgeInsets.only(right: 32),
-                    child: _buildInfoItem(
-                      context,
-                      label: 'Servings',
-                      value: '${recipe.servings}',
-                    ),
+                  _buildInfoItem(
+                    context,
+                    label: 'Servings',
+                    value: '${recipe.servings}',
                   ),
                 if (recipe.prepTime != null)
-                  Padding(
-                    padding: const EdgeInsets.only(right: 32),
-                    child: _buildInfoItem(
-                      context,
-                      label: 'Prep Time',
-                      value: DurationFormatter.formatMinutes(recipe.prepTime!),
-                    ),
+                  _buildInfoItem(
+                    context,
+                    label: 'Prep Time',
+                    value: DurationFormatter.formatMinutes(recipe.prepTime!),
                   ),
                 if (recipe.cookTime != null)
-                  Padding(
-                    padding: const EdgeInsets.only(right: 32),
-                    child: _buildInfoItem(
-                      context,
-                      label: 'Cook Time',
-                      value: DurationFormatter.formatMinutes(recipe.cookTime!),
-                    ),
+                  _buildInfoItem(
+                    context,
+                    label: 'Cook Time',
+                    value: DurationFormatter.formatMinutes(recipe.cookTime!),
                   ),
                 if (totalTime.isNotEmpty)
                   _buildInfoItem(
@@ -161,6 +154,8 @@ class _RecipeViewState extends ConsumerState<RecipeView> {
                     label: 'Total',
                     value: totalTime,
                   ),
+                if (recipe.rating != null && recipe.rating! > 0)
+                  _buildRatingItem(context, recipe.rating!),
               ],
             ),
 
@@ -239,6 +234,27 @@ class _RecipeViewState extends ConsumerState<RecipeView> {
             fontWeight: FontWeight.w500,
             fontSize: 15,
           ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildRatingItem(BuildContext context, int rating) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          'Rating',
+          style: TextStyle(
+            fontSize: 12,
+            color: AppColors.of(context).textSecondary,
+          ),
+        ),
+        const SizedBox(height: 2),
+        StarRating(
+          rating: rating,
+          size: StarRatingSize.small,
+          onRatingChanged: null,
         ),
       ],
     );
