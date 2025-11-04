@@ -8,6 +8,7 @@ import 'package:super_context_menu/super_context_menu.dart';
 import 'package:recipe_app/src/models/ingredient_pantry_match.dart';
 import 'package:recipe_app/database/models/ingredients.dart';
 import 'package:recipe_app/database/models/ingredient_terms.dart';
+import 'package:recipe_app/database/models/pantry_items.dart';
 import 'package:recipe_app/database/database.dart';
 import 'package:recipe_app/src/providers/recipe_provider.dart' show recipeIngredientMatchesProvider, recipeByIdStreamProvider;
 import 'package:recipe_app/src/providers/pantry_provider.dart';
@@ -49,7 +50,7 @@ void showIngredientMatchesBottomSheet(
         WoltModalSheetPage(
           backgroundColor: AppColors.of(modalContext).background,
           surfaceTintColor: Colors.transparent,
-          pageTitle: ModalSheetTitle('Pantry Matches (${matches.matches.where((m) => m.hasMatch).length}/${matches.matches.length})'),
+          pageTitle: ModalSheetTitle('Recipe Ingredients'),
           trailingNavBarWidget: Padding(
             padding: EdgeInsets.only(right: AppSpacing.lg),
             child: AppCircleButton(
@@ -188,20 +189,91 @@ class IngredientMatchesListPage extends ConsumerWidget {
     return matchesAsync.when(
       loading: () => const Center(child: CircularProgressIndicator()),
       error: (error, stack) => Center(child: Text('Error: $error')),
-      data: (currentMatches) => ListView.builder(
-        shrinkWrap: true,
-        physics: const NeverScrollableScrollPhysics(),
-        itemCount: currentMatches.matches.length,
-        itemBuilder: (context, index) {
-          final match = currentMatches.matches[index];
-          return _buildIngredientRow(
-            context,
-            match,
-            index,
-            currentMatches.matches.length,
-          );
-        },
-      ),
+      data: (currentMatches) {
+        // Sort matches by stock status
+        final sortedMatches = List<IngredientPantryMatch>.from(currentMatches.matches)
+          ..sort((a, b) => _getSortPriority(a).compareTo(_getSortPriority(b)));
+
+        // Calculate metrics
+        final total = currentMatches.matches.length;
+
+        // In Stock: Items with direct pantry match (in/low stock) OR makeable via sub-recipe
+        final available = currentMatches.matches.where((m) {
+          if (m.hasPantryMatch) {
+            // Direct pantry match - check if in stock or low stock
+            return m.pantryItem!.stockStatus == StockStatus.inStock ||
+                   m.pantryItem!.stockStatus == StockStatus.lowStock;
+          } else if (m.hasRecipeMatch) {
+            // Can be made via sub-recipe (shown as "in stock" by the chip)
+            return true;
+          }
+          return false;
+        }).length;
+
+        // Out of Stock: Items with direct pantry match but marked as out of stock
+        final outOfStock = currentMatches.matches.where((m) =>
+          m.hasPantryMatch && m.pantryItem!.stockStatus == StockStatus.outOfStock
+        ).length;
+
+        // Not in Pantry: Items with NO match at all (no pantry match AND no recipe match)
+        final notInPantry = currentMatches.matches.where((m) => !m.hasMatch).length;
+
+        // Build status lines
+        final statusLines = _buildStatusLines(
+          total: total,
+          available: available,
+          outOfStock: outOfStock,
+          notInPantry: notInPantry,
+        );
+
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            // Status message
+            if (statusLines.isNotEmpty)
+              Padding(
+                padding: EdgeInsets.only(bottom: AppSpacing.lg),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: statusLines.map((line) => Padding(
+                    padding: EdgeInsets.only(bottom: 4),
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          '• ',
+                          style: AppTypography.body.copyWith(
+                            color: AppColors.of(context).textSecondary,
+                          ),
+                        ),
+                        Expanded(
+                          child: _buildLineWithBoldNumbers(context, line),
+                        ),
+                      ],
+                    ),
+                  )).toList(),
+                ),
+              ),
+
+            // Ingredient list
+            ListView.builder(
+              shrinkWrap: true,
+              physics: const NeverScrollableScrollPhysics(),
+              itemCount: sortedMatches.length,
+              itemBuilder: (context, index) {
+                final match = sortedMatches[index];
+                return _buildIngredientRow(
+                  context,
+                  match,
+                  index,
+                  sortedMatches.length,
+                );
+              },
+            ),
+          ],
+        );
+      },
     );
   }
 
@@ -298,6 +370,96 @@ class IngredientMatchesListPage extends ConsumerWidget {
     // Otherwise, use the standard IngredientStockChip
     return IngredientStockChip(match: match);
   }
+
+  int _getSortPriority(IngredientPantryMatch match) {
+    // Priority order: in stock (1) -> low stock (2) -> out of stock (3) -> not in pantry (4)
+    if (match.hasPantryMatch) {
+      final status = match.pantryItem!.stockStatus;
+      if (status == StockStatus.inStock) {
+        return 1;
+      } else if (status == StockStatus.lowStock) {
+        return 2;
+      } else if (status == StockStatus.outOfStock) {
+        return 3;
+      }
+    } else if (match.hasRecipeMatch) {
+      // Items makeable via sub-recipe are treated as "in stock"
+      return 1;
+    }
+    // No match at all
+    return 4;
+  }
+
+  List<String> _buildStatusLines({
+    required int total,
+    required int available,
+    required int outOfStock,
+    required int notInPantry,
+  }) {
+    // If all available, show positive message
+    if (available == total) {
+      return ['All $total ingredient${total == 1 ? '' : 's'} available'];
+    }
+
+    // Start with availability fraction
+    final lines = <String>['$available of $total items available'];
+
+    // Add problems
+    if (outOfStock > 0) {
+      lines.add('$outOfStock out of stock');
+    }
+    if (notInPantry > 0) {
+      lines.add('$notInPantry not in pantry');
+    }
+
+    return lines;
+  }
+
+  Widget _buildLineWithBoldNumbers(BuildContext context, String line) {
+    final colors = AppColors.of(context);
+    final baseStyle = AppTypography.body.copyWith(
+      color: colors.textSecondary,
+    );
+    final boldStyle = baseStyle.copyWith(
+      fontWeight: FontWeight.w600,
+    );
+
+    // Split the line by numbers and rebuild with bold numbers
+    final regex = RegExp(r'(\d+)');
+    final matches = regex.allMatches(line);
+
+    if (matches.isEmpty) {
+      return Text(line, style: baseStyle);
+    }
+
+    final spans = <TextSpan>[];
+    int lastEnd = 0;
+
+    for (final match in matches) {
+      // Add text before the number
+      if (match.start > lastEnd) {
+        spans.add(TextSpan(text: line.substring(lastEnd, match.start)));
+      }
+      // Add the number with bold style
+      spans.add(TextSpan(
+        text: match.group(0),
+        style: boldStyle,
+      ));
+      lastEnd = match.end;
+    }
+
+    // Add remaining text after the last number
+    if (lastEnd < line.length) {
+      spans.add(TextSpan(text: line.substring(lastEnd)));
+    }
+
+    return RichText(
+      text: TextSpan(
+        style: baseStyle,
+        children: spans,
+      ),
+    );
+  }
 }
 
 // ============================================================================
@@ -338,7 +500,6 @@ class _IngredientDetailPageState extends ConsumerState<IngredientDetailPage> {
 
   @override
   Widget build(BuildContext context) {
-    final colors = AppColors.of(context);
     final selectedId = IngredientDetailPage.selectedIngredientId;
 
     if (selectedId == null) {
