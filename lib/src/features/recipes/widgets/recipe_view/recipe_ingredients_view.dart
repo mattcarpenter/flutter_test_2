@@ -60,7 +60,7 @@ class _RecipeIngredientsViewState extends ConsumerState<RecipeIngredientsView> {
       children: [
         Text(
           'Ingredients',
-          style: AppTypography.h2Serif.copyWith(
+          style: AppTypography.h3Serif.copyWith(
             color: AppColors.of(context).headingSecondary,
           ),
         ),
@@ -149,10 +149,9 @@ class _RecipeIngredientsViewState extends ConsumerState<RecipeIngredientsView> {
                       flex: 1,
                       child: Text(
                         '(${ingredient.note})',
-                        style: TextStyle(
+                        style: AppTypography.caption.copyWith(
                           fontStyle: FontStyle.italic,
-                          color: Colors.grey[600],
-                          fontSize: 14,
+                          color: AppColors.of(context).textTertiary,
                         ),
                       ),
                     ),

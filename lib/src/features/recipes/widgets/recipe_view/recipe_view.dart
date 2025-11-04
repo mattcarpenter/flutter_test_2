@@ -190,7 +190,7 @@ class _RecipeViewState extends ConsumerState<RecipeView> {
               const SizedBox(height: 24),
               Text(
                 'Notes',
-                style: AppTypography.h2Serif.copyWith(
+                style: AppTypography.h3Serif.copyWith(
                   color: AppColors.of(context).headingSecondary,
                 ),
               ),
@@ -202,7 +202,10 @@ class _RecipeViewState extends ConsumerState<RecipeView> {
                   borderRadius: BorderRadius.circular(8),
                   border: Border.all(color: Colors.grey.shade200),
                 ),
-                child: Text(recipe.generalNotes!),
+                child: Text(
+                  recipe.generalNotes!,
+                  style: AppTypography.body,
+                ),
               ),
             ],
 
@@ -223,16 +226,14 @@ class _RecipeViewState extends ConsumerState<RecipeView> {
       children: [
         Text(
           label,
-          style: TextStyle(
-            fontSize: 12,
+          style: AppTypography.caption.copyWith(
             color: AppColors.of(context).textSecondary,
           ),
         ),
         Text(
           value,
-          style: const TextStyle(
+          style: AppTypography.body.copyWith(
             fontWeight: FontWeight.w500,
-            fontSize: 15,
           ),
         ),
       ],
@@ -245,8 +246,7 @@ class _RecipeViewState extends ConsumerState<RecipeView> {
       children: [
         Text(
           'Rating',
-          style: TextStyle(
-            fontSize: 12,
+          style: AppTypography.caption.copyWith(
             color: AppColors.of(context).textSecondary,
           ),
         ),

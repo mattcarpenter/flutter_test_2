@@ -17,7 +17,7 @@ class RecipeStepsView extends StatelessWidget {
       children: [
         Text(
           'Instructions',
-          style: AppTypography.h2Serif.copyWith(
+          style: AppTypography.h3Serif.copyWith(
             color: AppColors.of(context).headingSecondary,
           ),
         ),
@@ -69,10 +69,9 @@ class RecipeStepsView extends StatelessWidget {
                     ),
                     child: Text(
                       '${_getStepNumber(steps, index)}',
-                      style: TextStyle(
+                      style: AppTypography.caption.copyWith(
                         color: AppColorSwatches.surface[800], // Dark taupe/mocha - matches warm tint
                         fontWeight: FontWeight.bold,
-                        fontSize: 14,
                       ),
                     ),
                   ),
@@ -102,9 +101,9 @@ class RecipeStepsView extends StatelessWidget {
                             ),
                             child: Text(
                               step.note!,
-                              style: TextStyle(
+                              style: AppTypography.caption.copyWith(
                                 fontStyle: FontStyle.italic,
-                                color: Colors.grey[700],
+                                color: AppColors.of(context).textTertiary,
                               ),
                             ),
                           ),

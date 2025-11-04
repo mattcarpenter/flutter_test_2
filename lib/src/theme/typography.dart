@@ -143,7 +143,7 @@ class AppTypography {
   );
 
   static TextStyle get caption => TextStyle(
-    fontSize: 12,
+    fontSize: 13,
     fontWeight: FontWeight.normal,
     height: Platform.isIOS ? 1.4 : 1.3,
     fontFamily: _fontFamily,
