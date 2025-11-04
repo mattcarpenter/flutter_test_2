@@ -9,21 +9,26 @@ import '../theme/colors.dart';
 /// - "Low Stock" (warning colors)
 /// - "Out" (error colors)
 /// - "New item" (success colors)
+/// - "Not in Pantry" (neutral colors)
 ///
 /// Uses subtle tinted backgrounds and darker text for minimal visual competition
 class StockChip extends StatelessWidget {
   final StockStatus? status;
   final bool isNewItem;
+  final bool showNotInPantry;
 
   const StockChip({
     super.key,
     this.status,
     this.isNewItem = false,
+    this.showNotInPantry = false,
   });
 
   String get _label {
     if (isNewItem) {
       return 'New item';
+    } else if (showNotInPantry) {
+      return 'Not in Pantry';
     } else if (status != null) {
       switch (status!) {
         case StockStatus.outOfStock:
@@ -40,6 +45,8 @@ class StockChip extends StatelessWidget {
   Color get _backgroundColor {
     if (isNewItem) {
       return AppColorSwatches.success[50]!.withOpacity(0.5);
+    } else if (showNotInPantry) {
+      return AppColorSwatches.neutral[250]!;
     } else if (status != null) {
       switch (status!) {
         case StockStatus.outOfStock:
@@ -56,6 +63,8 @@ class StockChip extends StatelessWidget {
   Color get _textColor {
     if (isNewItem) {
       return AppColorSwatches.success[500]!;
+    } else if (showNotInPantry) {
+      return AppColorSwatches.neutral[600]!;
     } else if (status != null) {
       switch (status!) {
         case StockStatus.outOfStock:
@@ -71,8 +80,8 @@ class StockChip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Don't show anything if no status and not new item
-    if (!isNewItem && status == null) {
+    // Don't show anything if no status and not new item and not showing not in pantry
+    if (!isNewItem && !showNotInPantry && status == null) {
       return const SizedBox.shrink();
     }
 
@@ -90,6 +99,8 @@ class StockChip extends StatelessWidget {
           color: _textColor,
           height: 1.0,
         ),
+        maxLines: 1,
+        overflow: TextOverflow.visible,
       ),
     );
   }

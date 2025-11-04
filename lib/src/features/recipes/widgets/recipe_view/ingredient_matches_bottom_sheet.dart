@@ -19,6 +19,7 @@ import 'package:recipe_app/src/widgets/app_button.dart';
 import 'package:recipe_app/src/widgets/app_circle_button.dart';
 import 'package:recipe_app/src/widgets/app_text_field_simple.dart';
 import 'package:recipe_app/src/widgets/ingredient_stock_chip.dart';
+import 'package:recipe_app/src/widgets/stock_chip.dart';
 import 'package:recipe_app/src/widgets/utils/grouped_list_styling.dart';
 import 'package:recipe_app/src/widgets/wolt/text/modal_sheet_title.dart';
 import 'package:recipe_app/src/services/ingredient_parser_service.dart';
@@ -268,12 +269,9 @@ class IngredientMatchesListPage extends ConsumerWidget {
               SizedBox(width: AppSpacing.md),
 
               // Stock status chip
-              SizedBox(
-                width: 80,
-                child: Align(
-                  alignment: Alignment.centerRight,
-                  child: IngredientStockChip(match: match),
-                ),
+              Align(
+                alignment: Alignment.centerRight,
+                child: _buildStockChip(match),
               ),
 
               SizedBox(width: AppSpacing.md),
@@ -289,6 +287,16 @@ class IngredientMatchesListPage extends ConsumerWidget {
         ),
       ),
     );
+  }
+
+  Widget _buildStockChip(IngredientPantryMatch match) {
+    // If no match, show "Not in Pantry" chip
+    if (!match.hasMatch) {
+      return StockChip(showNotInPantry: true);
+    }
+
+    // Otherwise, use the standard IngredientStockChip
+    return IngredientStockChip(match: match);
   }
 }
 
