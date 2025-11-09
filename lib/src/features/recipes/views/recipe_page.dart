@@ -22,8 +22,12 @@ class RecipePage extends ConsumerStatefulWidget {
 
 class _RecipePageState extends ConsumerState<RecipePage> {
   late ScrollController _scrollController;
-  static const double _heroHeight = 300.0;
+  static const double _heroHeightWithImage = 300.0;
+  static const double _heroHeightWithoutImage = 150.0;
   bool _isSnapping = false;
+
+  double _getHeroHeight(bool hasImages) =>
+      hasImages ? _heroHeightWithImage : _heroHeightWithoutImage;
 
   @override
   void initState() {
@@ -37,12 +41,16 @@ class _RecipePageState extends ConsumerState<RecipePage> {
     super.dispose();
   }
 
-  void _handleScrollEnd(ScrollMetrics metrics, BuildContext context) {
+  void _handleScrollEnd(ScrollMetrics metrics, BuildContext context, bool hasImages) {
     if (_isSnapping) return;
 
+    // Disable snapping when no images
+    if (!hasImages) return;
+
+    final heroHeight = _getHeroHeight(hasImages);
     final headerHeight = MediaQuery.of(context).padding.top + 60;
-    final snapStart = _heroHeight * 0.5;
-    final snapEnd = _heroHeight - (headerHeight / 2);
+    final snapStart = heroHeight * 0.5;
+    final snapEnd = heroHeight - (headerHeight / 2);
     final currentOffset = metrics.pixels;
 
     // Only snap if we're in the snap zone
@@ -84,10 +92,14 @@ class _RecipePageState extends ConsumerState<RecipePage> {
             return const Center(child: Text('Recipe not found'));
           }
 
+          // Determine if recipe has images
+          final hasImages = recipe.images != null && recipe.images!.isNotEmpty;
+          final heroHeight = _getHeroHeight(hasImages);
+
           // Calculate snap offsets based on fade zone
           final headerHeight = MediaQuery.of(context).padding.top + 60;
-          final snapStart = _heroHeight * 0.5;
-          final snapEnd = _heroHeight - (headerHeight / 2);
+          final snapStart = heroHeight * 0.5;
+          final snapEnd = heroHeight - (headerHeight / 2);
 
           return Stack(
             children: [
@@ -100,7 +112,7 @@ class _RecipePageState extends ConsumerState<RecipePage> {
                     // Use a small delay to ensure scroll has truly settled
                     Future.delayed(const Duration(milliseconds: 50), () {
                       if (mounted && !_isSnapping) {
-                        _handleScrollEnd(notification.metrics, context);
+                        _handleScrollEnd(notification.metrics, context, hasImages);
                       }
                     });
                   }
@@ -112,7 +124,7 @@ class _RecipePageState extends ConsumerState<RecipePage> {
                   slivers: [
                   // Hero image header
                   SliverAppBar(
-                    expandedHeight: _heroHeight,
+                    expandedHeight: heroHeight,
                     pinned: false,
                     automaticallyImplyLeading: false,
                     backgroundColor: Colors.transparent,
@@ -127,14 +139,18 @@ class _RecipePageState extends ConsumerState<RecipePage> {
                               final headerHeight = MediaQuery.of(context).padding.top + 60;
 
                               // Header fade timing (unchanged)
-                              final headerFadeStartOffset = _heroHeight * 0.5;
-                              final headerFadeEndOffset = _heroHeight - (headerHeight/2);
+                              final headerFadeStartOffset = heroHeight * 0.5;
+                              final headerFadeEndOffset = heroHeight - (headerHeight/2);
                               final headerFadeDuration = headerFadeEndOffset - headerFadeStartOffset;
                               final headerOpacity = ((offset - headerFadeStartOffset) / headerFadeDuration).clamp(0.0, 1.0);
 
-                              // Pin button fade timing (earlier)
-                              final pinButtonFadeStartOffset = _heroHeight * 0.3;  // Start earlier (90px)
-                              final pinButtonFadeEndOffset = _heroHeight * 0.6;    // End earlier (180px)
+                              // Pin button fade timing (conditional based on images)
+                              final pinButtonFadeStartOffset = hasImages
+                                ? heroHeight * 0.3  // 90px for 300px hero
+                                : heroHeight * 0.1; // 15px for 150px hero
+                              final pinButtonFadeEndOffset = hasImages
+                                ? heroHeight * 0.6  // 180px for 300px hero
+                                : heroHeight * 0.4; // 60px for 150px hero
                               final pinButtonFadeDuration = pinButtonFadeEndOffset - pinButtonFadeStartOffset;
                               final pinButtonOpacity = 1.0 - ((offset - pinButtonFadeStartOffset) / pinButtonFadeDuration).clamp(0.0, 1.0);
 
@@ -157,7 +173,7 @@ class _RecipePageState extends ConsumerState<RecipePage> {
                 ),
               ),
               // Sticky navigation overlay (outside the scroll view)
-              _buildStickyNavigationOverlay(context),
+              _buildStickyNavigationOverlay(context, hasImages),
               // Sticky navigation buttons (outside the scroll view)
               _buildStickyNavigationButtons(context),
             ],
@@ -167,7 +183,9 @@ class _RecipePageState extends ConsumerState<RecipePage> {
     );
   }
 
-  Widget _buildStickyNavigationOverlay(BuildContext context) {
+  Widget _buildStickyNavigationOverlay(BuildContext context, bool hasImages) {
+    final heroHeight = _getHeroHeight(hasImages);
+
     return AnimatedBuilder(
       animation: _scrollController,
       builder: (context, child) {
@@ -175,9 +193,9 @@ class _RecipePageState extends ConsumerState<RecipePage> {
 
         // Calculate fade timing based on SliverAppBar collapse behavior
         final headerHeight = MediaQuery.of(context).padding.top + 60;
-        final fadeStartOffset = _heroHeight * 0.5;                    // Start at 50% (150px)
-        final fadeEndOffset = _heroHeight - (headerHeight/2);             // End when image bottom touches header bottom
-        final fadeDuration = fadeEndOffset - fadeStartOffset;         // Fade duration
+        final fadeStartOffset = heroHeight * 0.5;
+        final fadeEndOffset = heroHeight - (headerHeight/2);
+        final fadeDuration = fadeEndOffset - fadeStartOffset;
 
         final opacity = ((offset - fadeStartOffset) / fadeDuration).clamp(0.0, 1.0);
 
