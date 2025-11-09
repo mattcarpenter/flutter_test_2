@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../../../../database/models/recipe_images.dart';
+import '../../../../theme/colors.dart';
 import '../../../../widgets/local_or_network_image.dart';
 import '../pin_button.dart';
 
@@ -34,27 +35,14 @@ class _RecipeHeroImageState extends State<RecipeHeroImage> {
 
   @override
   Widget build(BuildContext context) {
-    if (widget.images.isEmpty) {
-      return Container(
-        color: Colors.grey[300],
-        child: const Center(
-          child: Icon(
-            Icons.restaurant,
-            size: 80,
-            color: Colors.grey,
-          ),
-        ),
-      );
-    }
-
     return Stack(
       children: [
-        // Main hero image - edge to edge
+        // Main hero image or placeholder - edge to edge
         Positioned.fill(
-          child: _buildMainImage(),
+          child: widget.images.isEmpty ? _buildPlaceholder() : _buildMainImage(),
         ),
 
-        // Pin button at bottom-right with fade animation
+        // Pin button at bottom-right with fade animation (always present)
         Positioned(
           bottom: 16,
           right: 16,
@@ -100,6 +88,19 @@ class _RecipeHeroImageState extends State<RecipeHeroImage> {
           ),
         );
       },
+    );
+  }
+
+  Widget _buildPlaceholder() {
+    return Container(
+      color: AppColors.of(context).surfaceVariant,
+      child: Center(
+        child: Icon(
+          Icons.restaurant,
+          size: 80,
+          color: AppColors.of(context).textSecondary,
+        ),
+      ),
     );
   }
 

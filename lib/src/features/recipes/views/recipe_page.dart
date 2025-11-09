@@ -118,44 +118,33 @@ class _RecipePageState extends ConsumerState<RecipePage> {
                     backgroundColor: Colors.transparent,
                     flexibleSpace: Stack(
                       children: [
-                        // Hero image
+                        // Hero image or placeholder
                         Positioned.fill(
-                          child: recipe.images != null && recipe.images!.isNotEmpty
-                              ? AnimatedBuilder(
-                                  animation: _scrollController,
-                                  builder: (context, child) {
-                                    final offset = _scrollController.hasClients ? _scrollController.offset : 0;
-                                    final headerHeight = MediaQuery.of(context).padding.top + 60;
+                          child: AnimatedBuilder(
+                            animation: _scrollController,
+                            builder: (context, child) {
+                              final offset = _scrollController.hasClients ? _scrollController.offset : 0;
+                              final headerHeight = MediaQuery.of(context).padding.top + 60;
 
-                                    // Header fade timing (unchanged)
-                                    final headerFadeStartOffset = _heroHeight * 0.5;
-                                    final headerFadeEndOffset = _heroHeight - (headerHeight/2);
-                                    final headerFadeDuration = headerFadeEndOffset - headerFadeStartOffset;
-                                    final headerOpacity = ((offset - headerFadeStartOffset) / headerFadeDuration).clamp(0.0, 1.0);
+                              // Header fade timing (unchanged)
+                              final headerFadeStartOffset = _heroHeight * 0.5;
+                              final headerFadeEndOffset = _heroHeight - (headerHeight/2);
+                              final headerFadeDuration = headerFadeEndOffset - headerFadeStartOffset;
+                              final headerOpacity = ((offset - headerFadeStartOffset) / headerFadeDuration).clamp(0.0, 1.0);
 
-                                    // Pin button fade timing (earlier)
-                                    final pinButtonFadeStartOffset = _heroHeight * 0.3;  // Start earlier (90px)
-                                    final pinButtonFadeEndOffset = _heroHeight * 0.6;    // End earlier (180px)
-                                    final pinButtonFadeDuration = pinButtonFadeEndOffset - pinButtonFadeStartOffset;
-                                    final pinButtonOpacity = 1.0 - ((offset - pinButtonFadeStartOffset) / pinButtonFadeDuration).clamp(0.0, 1.0);
+                              // Pin button fade timing (earlier)
+                              final pinButtonFadeStartOffset = _heroHeight * 0.3;  // Start earlier (90px)
+                              final pinButtonFadeEndOffset = _heroHeight * 0.6;    // End earlier (180px)
+                              final pinButtonFadeDuration = pinButtonFadeEndOffset - pinButtonFadeStartOffset;
+                              final pinButtonOpacity = 1.0 - ((offset - pinButtonFadeStartOffset) / pinButtonFadeDuration).clamp(0.0, 1.0);
 
-                                    return RecipeHeroImage(
-                                      images: recipe.images!,
-                                      recipeId: recipe.id,
-                                      pinButtonOpacity: pinButtonOpacity,
-                                    );
-                                  },
-                                )
-                              : Container(
-                                  color: AppColors.of(context).surfaceVariant,
-                                  child: Center(
-                                    child: Icon(
-                                      Icons.restaurant,
-                                      size: 80,
-                                      color: AppColors.of(context).textSecondary,
-                                    ),
-                                  ),
-                                ),
+                              return RecipeHeroImage(
+                                images: recipe.images ?? [],
+                                recipeId: recipe.id,
+                                pinButtonOpacity: pinButtonOpacity,
+                              );
+                            },
+                          ),
                         ),
                       ],
                     ),
