@@ -5,6 +5,7 @@ import '../theme/spacing.dart';
 import '../theme/colors.dart';
 import '../utils/duration_formatter.dart';
 import 'local_or_network_image.dart';
+import 'recipe_placeholder_image.dart';
 
 class RecipeListItem extends StatelessWidget {
   final RecipeEntry recipe;
@@ -81,17 +82,10 @@ class RecipeListItem extends StatelessWidget {
                             height: 60,
                             fit: BoxFit.cover,
                           )
-                        : Container(
+                        : RecipePlaceholderImage(
                             width: 60,
                             height: 60,
-                            color: AppColorSwatches.neutral[100],
-                            child: Center(
-                              child: Icon(
-                                Icons.restaurant_menu,
-                                size: 24,
-                                color: AppColorSwatches.neutral[400],
-                              ),
-                            ),
+                            fit: BoxFit.cover,
                           ),
                   );
                 },

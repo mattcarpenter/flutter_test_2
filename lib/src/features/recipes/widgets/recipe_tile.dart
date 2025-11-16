@@ -5,6 +5,7 @@ import 'package:super_context_menu/super_context_menu.dart';
 import '../../../../database/database.dart';
 import '../../../../database/models/recipe_images.dart';
 import '../../../widgets/local_or_network_image.dart';
+import '../../../widgets/recipe_placeholder_image.dart';
 import '../../../theme/colors.dart';
 import '../../../utils/duration_formatter.dart';
 import '../views/add_recipe_modal.dart';
@@ -198,17 +199,10 @@ class _RecipeTileState extends State<RecipeTile> with SingleTickerProviderStateM
                               width: double.infinity,
                               fit: BoxFit.cover,
                             )
-                          : Container(
-                              height: double.infinity,  // Fill container space
+                          : RecipePlaceholderImage(
+                              height: double.infinity,
                               width: double.infinity,
-                              color: Colors.grey[100],
-                              child: Center(
-                                child: Icon(
-                                  Icons.restaurant_menu,
-                                  size: 32,
-                                  color: Colors.grey[400],
-                                ),
-                              ),
+                              fit: BoxFit.cover,
                             ),
                     );
                   },

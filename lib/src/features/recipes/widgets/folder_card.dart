@@ -6,6 +6,7 @@ import '../../../providers/folder_thumbnail_provider.dart';
 import '../../../theme/colors.dart';
 import '../../../theme/spacing.dart';
 import '../../../widgets/local_or_network_image.dart';
+import '../../../widgets/recipe_placeholder_image.dart';
 import '../../../../database/models/recipe_images.dart';
 
 class FolderCard extends ConsumerStatefulWidget {
@@ -258,12 +259,8 @@ class _FolderCardContent extends ConsumerWidget {
   }
 
   Widget _buildFolderIcon() {
-    return const Center(
-      child: Icon(
-        CupertinoIcons.folder,
-        size: 20, // Smaller icon
-        color: CupertinoColors.systemGrey2,
-      ),
+    return const RecipePlaceholderImage(
+      fit: BoxFit.cover,
     );
   }
 
@@ -370,12 +367,8 @@ class _ThumbnailImageState extends State<_ThumbnailImage> {
   }
 
   Widget _buildFolderIcon() {
-    return const Center(
-      child: Icon(
-        CupertinoIcons.folder,
-        size: 20,
-        color: CupertinoColors.systemGrey2,
-      ),
+    return const RecipePlaceholderImage(
+      fit: BoxFit.cover,
     );
   }
 }

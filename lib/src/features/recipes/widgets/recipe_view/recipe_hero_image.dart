@@ -92,15 +92,9 @@ class _RecipeHeroImageState extends State<RecipeHeroImage> {
   }
 
   Widget _buildPlaceholder() {
-    return Container(
-      color: AppColors.of(context).surfaceVariant,
-      child: Center(
-        child: Icon(
-          Icons.restaurant,
-          size: 80,
-          color: AppColors.of(context).textSecondary,
-        ),
-      ),
+    return Image.asset(
+      'assets/images/no-image-hero.jpg',
+      fit: BoxFit.cover,
     );
   }
 

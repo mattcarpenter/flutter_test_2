@@ -3,6 +3,7 @@ import '../../../../database/database.dart';
 import '../../../../database/models/recipe_images.dart';
 import '../../../utils/duration_formatter.dart';
 import '../../../widgets/local_or_network_image.dart';
+import '../../../widgets/recipe_placeholder_image.dart';
 
 class PinnedRecipeCard extends StatelessWidget {
   final RecipeEntry recipe;
@@ -87,17 +88,10 @@ class PinnedRecipeCard extends StatelessWidget {
                             height: imageHeight,
                             fit: BoxFit.cover,
                           )
-                        : Container(
+                        : RecipePlaceholderImage(
                             width: cardWidth,
                             height: imageHeight,
-                            color: Colors.grey[100],
-                            child: Center(
-                              child: Icon(
-                                Icons.restaurant_menu,
-                                size: 40,
-                                color: Colors.grey[400],
-                              ),
-                            ),
+                            fit: BoxFit.cover,
                           ),
                   );
                 },

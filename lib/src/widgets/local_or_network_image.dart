@@ -2,6 +2,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:shimmer/shimmer.dart';
+import 'recipe_placeholder_image.dart';
 
 class LocalOrNetworkImage extends StatefulWidget {
   final String filePath;
@@ -113,21 +114,19 @@ class _LocalOrNetworkImageState extends State<LocalOrNetworkImage> {
             ),
           ),
         ),
-        errorWidget: (context, url, error) => SizedBox(
+        errorWidget: (context, url, error) => RecipePlaceholderImage(
           height: widget.height,
           width: widget.width,
-          child: const Center(child: Icon(Icons.error, color: Colors.red)),
+          fit: widget.fit,
         ),
       );
     }
 
     // Fallback when neither local file exists nor URL is provided
-    return SizedBox(
+    return RecipePlaceholderImage(
       height: widget.height,
       width: widget.width,
-      child: const Center(
-        child: Icon(Icons.no_photography, color: Colors.grey),
-      ),
+      fit: widget.fit,
     );
   }
 }

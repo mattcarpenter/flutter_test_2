@@ -11,6 +11,7 @@ import '../../../providers/meal_plan_provider.dart';
 import '../../../providers/recipe_provider.dart';
 import '../../../theme/colors.dart';
 import '../../../widgets/local_or_network_image.dart';
+import '../../../widgets/recipe_placeholder_image.dart';
 import '../models/meal_plan_drag_data.dart';
 
 class MealPlanItemLifted extends ConsumerStatefulWidget {
@@ -401,18 +402,11 @@ class _MealPlanItemLiftedState extends ConsumerState<MealPlanItemLifted>
   }
 
   Widget _buildFallbackThumbnail(BuildContext context) {
-    return Container(
+    return RecipePlaceholderImage(
       width: 36,
       height: 36,
-      decoration: BoxDecoration(
-        color: AppColorSwatches.neutral[100],
-        borderRadius: BorderRadius.circular(6),
-      ),
-      child: Icon(
-        Icons.restaurant_menu,
-        size: 16,
-        color: AppColorSwatches.neutral[400],
-      ),
+      borderRadius: BorderRadius.circular(6),
+      fit: BoxFit.cover,
     );
   }
 
