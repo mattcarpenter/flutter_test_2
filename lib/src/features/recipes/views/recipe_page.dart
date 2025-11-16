@@ -162,21 +162,56 @@ class _RecipePageState extends ConsumerState<RecipePage> {
                             },
                           ),
                         ),
-                        // Rounded white overlay at bottom of hero
-                        Positioned(
-                          bottom: 0,
-                          left: 0,
-                          right: 0,
-                          height: 16,
-                          child: Container(
-                            decoration: BoxDecoration(
-                              color: AppColors.of(context).background,
-                              borderRadius: const BorderRadius.only(
-                                topLeft: Radius.circular(16),
-                                topRight: Radius.circular(16),
+                        // Rounded white overlay at bottom of hero with animated radius
+                        AnimatedBuilder(
+                          animation: _scrollController,
+                          builder: (context, child) {
+                            final offset = _scrollController.hasClients ? _scrollController.offset : 0;
+                            final headerHeight = MediaQuery.of(context).padding.top + 60;
+
+                            // Using the fade end offset approach (which was close in attempt 3)
+                            // but adjusting for the 16px rounded overlay height
+                            // The fadeEndOffset = heroHeight - (headerHeight/2) was ending when
+                            // content meets header, so subtract 16px to end when rounded rect meets header
+                            final fadeEndOffset = heroHeight - (headerHeight / 2);
+                            final meetingPoint = fadeEndOffset - 16;
+
+                            // Start animation at 90% of the way to meeting point
+                            final animStart = meetingPoint * 0.90;
+                            // End animation when rounded rect top meets header bottom
+                            final animEnd = meetingPoint;
+
+                            // Calculate current radius
+                            double radius;
+                            if (offset < animStart) {
+                              radius = 16.0; // Full radius
+                            } else if (offset >= animEnd) {
+                              radius = 0.0; // Straight corners
+                            } else {
+                              // Tween from 16 to 0 as we approach meeting point
+                              final progress = (offset - animStart) / (animEnd - animStart);
+                              radius = 16.0 * (1.0 - progress);
+                            }
+
+                            // Clamp to ensure no negative values
+                            radius = radius.clamp(0.0, 16.0);
+
+                            return Positioned(
+                              bottom: 0,
+                              left: 0,
+                              right: 0,
+                              height: 16,
+                              child: Container(
+                                decoration: BoxDecoration(
+                                  color: AppColors.of(context).background,
+                                  borderRadius: BorderRadius.only(
+                                    topLeft: Radius.circular(radius),
+                                    topRight: Radius.circular(radius),
+                                  ),
+                                ),
                               ),
-                            ),
-                          ),
+                            );
+                          },
                         ),
                       ],
                     ),
