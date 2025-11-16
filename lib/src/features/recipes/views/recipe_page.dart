@@ -162,6 +162,22 @@ class _RecipePageState extends ConsumerState<RecipePage> {
                             },
                           ),
                         ),
+                        // Rounded white overlay at bottom of hero
+                        Positioned(
+                          bottom: 0,
+                          left: 0,
+                          right: 0,
+                          height: 16,
+                          child: Container(
+                            decoration: BoxDecoration(
+                              color: AppColors.of(context).background,
+                              borderRadius: const BorderRadius.only(
+                                topLeft: Radius.circular(16),
+                                topRight: Radius.circular(16),
+                              ),
+                            ),
+                          ),
+                        ),
                       ],
                     ),
                   ),
@@ -277,13 +293,9 @@ class _RecipePageState extends ConsumerState<RecipePage> {
     return Container(
       decoration: BoxDecoration(
         color: AppColors.of(context).background,
-        borderRadius: const BorderRadius.only(
-          topLeft: Radius.circular(16),
-          topRight: Radius.circular(16),
-        ),
       ),
       child: Padding(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.fromLTRB(16, 0, 16, 16), // No top padding
         child: RecipeView(
           recipeId: widget.recipeId,
           showHeroImage: false, // Tell RecipeView not to show image gallery

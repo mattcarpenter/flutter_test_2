@@ -44,7 +44,7 @@ class _RecipeHeroImageState extends State<RecipeHeroImage> {
 
         // Pin button at bottom-right with fade animation (always present)
         Positioned(
-          bottom: 16,
+          bottom: 24,
           right: 16,
           child: Opacity(
             opacity: widget.pinButtonOpacity,
