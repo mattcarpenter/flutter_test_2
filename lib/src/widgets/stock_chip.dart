@@ -42,37 +42,37 @@ class StockChip extends StatelessWidget {
     return '';
   }
 
-  Color get _backgroundColor {
+  Color _getBackgroundColor(AppColors colors) {
     if (isNewItem) {
-      return AppColorSwatches.success[50]!.withOpacity(0.5);
+      return colors.successBackground;
     } else if (showNotInPantry) {
-      return AppColorSwatches.neutral[250]!;
+      return colors.surfaceVariant;
     } else if (status != null) {
       switch (status!) {
         case StockStatus.outOfStock:
-          return AppColorSwatches.error[100]!.withOpacity(0.5);
+          return colors.errorBackground;
         case StockStatus.lowStock:
-          return AppColorSwatches.warning[100]!.withOpacity(0.5);
+          return colors.warningBackground;
         case StockStatus.inStock:
-          return AppColorSwatches.success[50]!.withOpacity(0.5);
+          return colors.successBackground;
       }
     }
     return Colors.transparent;
   }
 
-  Color get _textColor {
+  Color _getTextColor(AppColors colors) {
     if (isNewItem) {
-      return AppColorSwatches.success[500]!;
+      return colors.success;
     } else if (showNotInPantry) {
-      return AppColorSwatches.neutral[600]!;
+      return colors.textSecondary;
     } else if (status != null) {
       switch (status!) {
         case StockStatus.outOfStock:
-          return AppColorSwatches.error[500]!;
+          return colors.error;
         case StockStatus.lowStock:
-          return AppColorSwatches.warning[500]!;
+          return colors.warning;
         case StockStatus.inStock:
-          return AppColorSwatches.success[600]!;
+          return colors.success;
       }
     }
     return Colors.transparent;
@@ -85,10 +85,12 @@ class StockChip extends StatelessWidget {
       return const SizedBox.shrink();
     }
 
+    final colors = AppColors.of(context);
+
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 4),
       decoration: BoxDecoration(
-        color: _backgroundColor,
+        color: _getBackgroundColor(colors),
         borderRadius: BorderRadius.circular(7),
       ),
       child: Text(
@@ -96,7 +98,7 @@ class StockChip extends StatelessWidget {
         style: TextStyle(
           fontSize: 11,
           fontWeight: FontWeight.w500,
-          color: _textColor,
+          color: _getTextColor(colors),
           height: 1.0,
         ),
         maxLines: 1,

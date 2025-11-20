@@ -42,7 +42,7 @@ class ShoppingListSelectionRow extends StatelessWidget {
 
     return Container(
       decoration: BoxDecoration(
-        color: AppColors.of(context).input,
+        color: AppColors.of(context).groupedListBackground,
         border: border,
         borderRadius: borderRadius,
       ),
@@ -60,10 +60,10 @@ class ShoppingListSelectionRow extends StatelessWidget {
               Expanded(
                 child: Text(
                   label,
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.w500,
-                    color: CupertinoColors.label,
+                    color: AppColors.of(context).textPrimary,
                   ),
                 ),
               ),

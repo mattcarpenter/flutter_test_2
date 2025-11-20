@@ -369,7 +369,7 @@ class IngredientMatchesListPage extends ConsumerWidget {
 
     return Container(
       decoration: BoxDecoration(
-        color: colors.input,
+        color: colors.groupedListBackground,
         border: border,
         borderRadius: borderRadius,
       ),
@@ -916,7 +916,7 @@ class _IngredientDetailPageState extends ConsumerState<IngredientDetailPage> {
         },
         child: Container(
           decoration: BoxDecoration(
-            color: colors.input,
+            color: colors.groupedListBackground,
             border: border,
             borderRadius: borderRadius,
           ),
@@ -1583,7 +1583,7 @@ class _SelectFromPantryPageState extends ConsumerState<SelectFromPantryPage> {
 
         return Container(
           decoration: BoxDecoration(
-            color: colors.input,
+            color: colors.groupedListBackground,
             border: border,
             borderRadius: borderRadius,
           ),

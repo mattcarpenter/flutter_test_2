@@ -282,7 +282,7 @@ class _RecipePageState extends ConsumerState<RecipePage> {
           // Back button
           AppCircleButton(
             icon: AppCircleButtonIcon.close,
-            variant: AppCircleButtonVariant.neutral,
+            variant: AppCircleButtonVariant.overlay,
             size: 40,
             onPressed: () => Navigator.of(context).pop(),
           ),
@@ -315,7 +315,7 @@ class _RecipePageState extends ConsumerState<RecipePage> {
             ],
             child: const AppCircleButton(
               icon: AppCircleButtonIcon.ellipsis,
-              variant: AppCircleButtonVariant.neutral,
+              variant: AppCircleButtonVariant.overlay,
               size: 40,
             ),
           ),

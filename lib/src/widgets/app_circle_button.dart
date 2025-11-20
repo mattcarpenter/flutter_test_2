@@ -13,6 +13,7 @@ enum AppCircleButtonIcon {
 enum AppCircleButtonVariant {
   primary,
   neutral,
+  overlay,  // Always light, for use over images/photos
 }
 
 class AppCircleButton extends StatelessWidget {
@@ -78,6 +79,12 @@ class AppCircleButton extends StatelessWidget {
         pressedBackgroundColor = isLight
             ? AppColorSwatches.neutral[400]! // Darker on press
             : AppColorSwatches.neutral[800]!.withOpacity(0.4);
+        break;
+      case AppCircleButtonVariant.overlay:
+        // Always light, regardless of theme - for use over photos/images
+        backgroundColor = AppColorSwatches.neutral[300]!;
+        iconColor = AppColorSwatches.neutral[500]!;
+        pressedBackgroundColor = AppColorSwatches.neutral[400]!;
         break;
     }
 

@@ -143,7 +143,7 @@ class _AppTextFieldSimpleState extends State<AppTextFieldSimple> {
       decoration: InputDecoration(
         hintText: widget.placeholder,
         hintStyle: AppTypography.fieldLabel.copyWith(
-          color: colors.textSecondary,
+          color: colors.inputPlaceholder,
         ),
         contentPadding: EdgeInsets.symmetric(
           horizontal: _horizontalPadding,

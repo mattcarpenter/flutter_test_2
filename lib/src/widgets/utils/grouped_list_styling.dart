@@ -63,7 +63,7 @@ class GroupedListStyling {
     double borderWidth = 1.0,
   }) {
     final colors = AppColors.of(context);
-    final borderColor = colors.borderStrong;
+    final borderColor = colors.groupedListBorder;
 
     if (!isGrouped || isDragging) {
       // During drag, use full border to prevent animation glitches

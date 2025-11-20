@@ -39,6 +39,7 @@ class AppColorSwatches {
     700: Color(0xFF545454),
     800: Color(0xFF373737),
     900: Color(0xFF222222), // Pure neutral target
+    925: Color(0xFF202020),
     950: Color(0xFF0D0D0D),
   });
 
@@ -284,6 +285,15 @@ class AppColors {
   Color get borderStrong => brightness == Brightness.light
       ? AppColorSwatches.neutral[300]!
       : AppColorSwatches.neutral[600]!;
+
+  // Grouped list specific colors - optimized for dark mode contrast
+  Color get groupedListBackground => brightness == Brightness.light
+      ? const Color(0xFFFAFAFA)  // Same as surface in light mode
+      : AppColorSwatches.neutral[925]!;  // Slightly darker in dark mode
+
+  Color get groupedListBorder => brightness == Brightness.light
+      ? AppColorSwatches.neutral[300]!  // Visible border in light mode
+      : AppColorSwatches.neutral[800]!;  // Much darker in dark mode for less contrast
 
   Color get borderRadio => brightness == Brightness.light
       ? AppColorSwatches.neutral[400]!
