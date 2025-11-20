@@ -103,7 +103,9 @@ class RecipeListItem extends StatelessWidget {
                     recipe.title,
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
-                    style: Theme.of(context).textTheme.titleSmall,
+                    style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                      color: AppColors.of(context).textPrimary,
+                    ),
                   ),
                   if (subtitleText.isNotEmpty) ...[
                     const SizedBox(height: 2),

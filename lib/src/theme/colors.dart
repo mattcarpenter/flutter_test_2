@@ -260,7 +260,7 @@ class AppColors {
 
   Color get textSecondary => brightness == Brightness.light
       ? AppColorSwatches.neutral[600]!
-      : AppColorSwatches.neutral[300]!;
+      : AppColorSwatches.neutral[400]!;
 
   Color get textTertiary => brightness == Brightness.light
       ? AppColorSwatches.neutral[500]!

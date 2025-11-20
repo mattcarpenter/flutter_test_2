@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../../../database/database.dart';
 import '../../../../database/models/recipe_images.dart';
+import '../../../theme/colors.dart';
 import '../../../utils/duration_formatter.dart';
 import '../../../widgets/local_or_network_image.dart';
 import '../../../widgets/recipe_placeholder_image.dart';
@@ -107,12 +108,14 @@ class PinnedRecipeCard extends StatelessWidget {
                 recipe.title,
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
-                style: Theme.of(context).textTheme.titleSmall,
+                style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                  color: AppColors.of(context).textPrimary,
+                ),
               ),
             ),
-            
+
             const SizedBox(height: 4),
-            
+
             // Subtitle with time and servings
             if (subtitleText.isNotEmpty)
               SizedBox(
@@ -122,7 +125,7 @@ class PinnedRecipeCard extends StatelessWidget {
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                   style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: Colors.grey.shade600,
+                    color: AppColors.of(context).textSecondary,
                   ),
                 ),
               ),
