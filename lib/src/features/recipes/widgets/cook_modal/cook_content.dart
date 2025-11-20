@@ -313,6 +313,9 @@ class CookContentState extends ConsumerState<CookContent> {
 
   Widget _buildCookCard(CookEntry cook, bool isActive) {
     final percentage = _calculateCookProgress(cook);
+    final colors = AppColors.of(context);
+    final brightness = Theme.of(context).brightness;
+    final isLight = brightness == Brightness.light;
 
     return GestureDetector(
       onTap: () {
@@ -323,8 +326,12 @@ class CookContentState extends ConsumerState<CookContent> {
         width: 220,
         decoration: BoxDecoration(
           color: isActive
-              ? AppColorSwatches.primary[100] // Soft apricot - darker than before
-              : AppColorSwatches.neutral[300], // Darker gray for better visibility
+              ? (isLight
+                  ? AppColorSwatches.primary[100]  // Soft apricot in light mode (unchanged)
+                  : AppColorSwatches.neutral[800])  // Lighter gray in dark mode - stands out from inactive
+              : (isLight
+                  ? AppColorSwatches.neutral[300]  // Light gray in light mode (unchanged)
+                  : AppColorSwatches.neutral[900]),  // Very dark in dark mode - recedes
           borderRadius: BorderRadius.circular(12),
           // No border - flat design
         ),
@@ -338,6 +345,7 @@ class CookContentState extends ConsumerState<CookContent> {
               style: TextStyle(
                 fontWeight: isActive ? FontWeight.w600 : FontWeight.normal,
                 fontSize: 15,
+                color: colors.textPrimary,
               ),
               maxLines: 1, // Single line for clean truncation
               overflow: TextOverflow.ellipsis,
@@ -347,8 +355,10 @@ class CookContentState extends ConsumerState<CookContent> {
               style: TextStyle(
                 fontSize: 12,
                 color: isActive
-                    ? AppColorSwatches.primary[500] // Primary orange
-                    : AppColorSwatches.neutral[500], // Medium gray
+                    ? (isLight
+                        ? colors.primary  // Orange text in light mode
+                        : colors.textSecondary)  // Light gray text in dark mode - subtle, not too bright
+                    : colors.textSecondary,  // Theme-aware secondary text for inactive
               ),
             ),
           ],
