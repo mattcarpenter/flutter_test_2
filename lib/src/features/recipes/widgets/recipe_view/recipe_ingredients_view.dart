@@ -68,7 +68,12 @@ class _RecipeIngredientsViewState extends ConsumerState<RecipeIngredientsView> {
         SizedBox(height: AppSpacing.md),
 
         if (widget.ingredients.isEmpty)
-          const Text('No ingredients listed.'),
+          Text(
+            'No ingredients listed.',
+            style: TextStyle(
+              color: AppColors.of(context).textSecondary,
+            ),
+          ),
 
         // Ingredients list
         ListView.builder(

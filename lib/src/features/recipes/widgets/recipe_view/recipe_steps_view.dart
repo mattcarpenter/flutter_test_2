@@ -29,7 +29,12 @@ class RecipeStepsView extends StatelessWidget {
         SizedBox(height: AppSpacing.md),
 
         if (steps.isEmpty)
-          const Text('No instructions listed.'),
+          Text(
+            'No instructions listed.',
+            style: TextStyle(
+              color: colors.textSecondary,
+            ),
+          ),
 
         ListView.builder(
           shrinkWrap: true,

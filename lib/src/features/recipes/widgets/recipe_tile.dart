@@ -216,7 +216,9 @@ class _RecipeTileState extends State<RecipeTile> with SingleTickerProviderStateM
                   widget.recipe.title,
                   maxLines: 2,  // Allow wrapping to 2 lines
                   overflow: TextOverflow.ellipsis,  // Ellipsis at end of 2nd line
-                  style: Theme.of(context).textTheme.titleSmall,
+                  style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                    color: AppColors.of(context).textPrimary,
+                  ),
                 ),
               ),
               const SizedBox(height: spacingBetweenNameAndDetails),
@@ -229,7 +231,7 @@ class _RecipeTileState extends State<RecipeTile> with SingleTickerProviderStateM
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                     style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                      color: Colors.grey.shade600,
+                      color: AppColors.of(context).textSecondary,
                     ),
                   ),
                 ),
