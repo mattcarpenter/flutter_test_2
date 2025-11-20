@@ -224,7 +224,7 @@ class AppColors {
   // Elevated card surface - subtle elevation through color
   Color get surfaceElevated => brightness == Brightness.light
       ? AppColorSwatches.neutral[0]!  // Soft cream
-      : AppColorSwatches.neutral[800]!;  // Slightly elevated dark surface
+      : AppColorSwatches.neutral[900]!;  // Slightly elevated dark surface
 
   // Border for elevated surfaces - complements the surfaceElevated background
   Color get surfaceElevatedBorder => brightness == Brightness.light

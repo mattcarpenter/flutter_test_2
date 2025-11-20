@@ -176,12 +176,13 @@ class _FolderCardContent extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final thumbnailAsyncValue = ref.watch(folderThumbnailProvider(folderId));
+    final colors = AppColors.of(context);
 
     return Container(
       decoration: BoxDecoration(
-        color: AppColors.of(context).surfaceElevated,
+        color: colors.surfaceElevated,
         /*border: Border.all(
-          color: AppColors.of(context).surfaceElevatedBorder,
+          color: colors.surfaceElevatedBorder,
           width: 0.5,
         ),*/
         borderRadius: BorderRadius.circular(12.0),
@@ -231,7 +232,7 @@ class _FolderCardContent extends ConsumerWidget {
                         .copyWith(
                           fontSize: 13, // Reduced by 1px (was 14)
                           fontWeight: FontWeight.w600,
-                          color: CupertinoColors.label, // Explicit adaptive color
+                          color: colors.textPrimary, // Theme-aware white/black text
                         ),
                     maxLines: 1, // Only 1 line
                     overflow: TextOverflow.ellipsis,
@@ -244,7 +245,7 @@ class _FolderCardContent extends ConsumerWidget {
                         .textStyle
                         .copyWith(
                           fontSize: 12, // Smaller font
-                          color: CupertinoColors.secondaryLabel, // This is already adaptive
+                          color: colors.textSecondary, // Theme-aware secondary text
                         ),
                     maxLines: 1, // Only 1 line
                     overflow: TextOverflow.ellipsis,
