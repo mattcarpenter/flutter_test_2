@@ -12,13 +12,17 @@ class RecipeStepsView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = AppColors.of(context);
+    final brightness = Theme.of(context).brightness;
+    final isLight = brightness == Brightness.light;
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
           'Instructions',
           style: AppTypography.h3Serif.copyWith(
-            color: AppColors.of(context).headingSecondary,
+            color: colors.headingSecondary,
           ),
         ),
 
@@ -64,13 +68,17 @@ class RecipeStepsView extends StatelessWidget {
                     height: 28,
                     alignment: Alignment.center,
                     decoration: BoxDecoration(
-                      color: AppColorSwatches.surface[200], // Light sand - matches page's warm tint
+                      color: isLight
+                          ? AppColorSwatches.surface[200]  // Light sand in light mode
+                          : AppColorSwatches.neutral[800]!, // Dark gray in dark mode
                       shape: BoxShape.circle,
                     ),
                     child: Text(
                       '${_getStepNumber(steps, index)}',
                       style: AppTypography.caption.copyWith(
-                        color: AppColorSwatches.surface[800], // Dark taupe/mocha - matches warm tint
+                        color: isLight
+                            ? AppColorSwatches.surface[800]  // Dark taupe in light mode
+                            : AppColorSwatches.neutral[300]!, // Light gray in dark mode
                         fontWeight: FontWeight.bold,
                       ),
                     ),
@@ -85,7 +93,10 @@ class RecipeStepsView extends StatelessWidget {
                         // Step text
                         Text(
                           step.text,
-                          style: const TextStyle(fontSize: 16),
+                          style: TextStyle(
+                            fontSize: 16,
+                            color: colors.contentPrimary,
+                          ),
                         ),
 
                         // Note (if available)
@@ -95,15 +106,15 @@ class RecipeStepsView extends StatelessWidget {
                             width: double.infinity,
                             padding: const EdgeInsets.all(8),
                             decoration: BoxDecoration(
-                              color: Colors.grey.shade50,
+                              color: colors.surfaceVariant,
                               borderRadius: BorderRadius.circular(6),
-                              border: Border.all(color: Colors.grey.shade200),
+                              border: Border.all(color: colors.border),
                             ),
                             child: Text(
                               step.note!,
                               style: AppTypography.caption.copyWith(
                                 fontStyle: FontStyle.italic,
-                                color: AppColors.of(context).textTertiary,
+                                color: colors.textTertiary,
                               ),
                             ),
                           ),

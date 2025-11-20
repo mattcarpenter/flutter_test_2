@@ -781,7 +781,7 @@ class _IngredientDetailPageState extends ConsumerState<IngredientDetailPage> {
           ],
         ),
 
-        SizedBox(height: AppSpacing.sm),
+        SizedBox(height: AppSpacing.md),
 
         // Explainer text for linked recipe ingredients
         if (hasLinkedRecipe) ...[
