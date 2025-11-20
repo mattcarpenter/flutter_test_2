@@ -242,10 +242,12 @@ class _RecipePageState extends ConsumerState<RecipePage> {
       builder: (context, child) {
         final offset = _scrollController.hasClients ? _scrollController.offset : 0;
 
-        // Calculate fade timing based on SliverAppBar collapse behavior
+        // Calculate fade timing to complete when rounded rect TOP meets header
+        // This prevents the rounded rect from appearing under a translucent header
         final headerHeight = MediaQuery.of(context).padding.top + 60;
         final fadeStartOffset = heroHeight * 0.5;
-        final fadeEndOffset = heroHeight - (headerHeight/2);
+        // End fade when rounded rect top (16px above content) meets header bottom
+        final fadeEndOffset = heroHeight - (headerHeight/2) - 16;
         final fadeDuration = fadeEndOffset - fadeStartOffset;
 
         final opacity = ((offset - fadeStartOffset) / fadeDuration).clamp(0.0, 1.0);
@@ -280,9 +282,10 @@ class _RecipePageState extends ConsumerState<RecipePage> {
         final offset = _scrollController.hasClients ? _scrollController.offset : 0;
 
         // Calculate same fade timing as header overlay
+        // Complete transition when rounded rect top meets header bottom
         final headerHeight = MediaQuery.of(context).padding.top + 60;
         final fadeStartOffset = heroHeight * 0.5;
-        final fadeEndOffset = heroHeight - (headerHeight/2);
+        final fadeEndOffset = heroHeight - (headerHeight/2) - 16;
         final fadeDuration = fadeEndOffset - fadeStartOffset;
 
         final opacity = ((offset - fadeStartOffset) / fadeDuration).clamp(0.0, 1.0);
