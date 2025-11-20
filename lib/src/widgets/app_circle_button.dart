@@ -22,12 +22,18 @@ class AppCircleButton extends StatelessWidget {
   final double size;
   final AppCircleButtonVariant variant;
 
+  /// Optional transition progress (0.0 to 1.0) for animating between overlay and neutral variants.
+  /// When null, uses the variant directly without interpolation.
+  /// When 0.0, uses overlay colors (light). When 1.0, uses neutral colors (theme-aware).
+  final double? colorTransitionProgress;
+
   const AppCircleButton({
     Key? key,
     required this.icon,
     this.onPressed,
     this.size = 28.0,
     this.variant = AppCircleButtonVariant.primary,
+    this.colorTransitionProgress,
   }) : super(key: key);
 
   IconData get _iconData {
@@ -53,9 +59,9 @@ class AppCircleButton extends StatelessWidget {
     final isLight = brightness == Brightness.light;
 
     // Adaptive colors based on variant
-    final Color backgroundColor;
-    final Color iconColor;
-    final Color pressedBackgroundColor;
+    Color backgroundColor;
+    Color iconColor;
+    Color pressedBackgroundColor;
 
     switch (variant) {
       case AppCircleButtonVariant.primary:
@@ -86,6 +92,27 @@ class AppCircleButton extends StatelessWidget {
         iconColor = AppColorSwatches.neutral[500]!;
         pressedBackgroundColor = AppColorSwatches.neutral[400]!;
         break;
+    }
+
+    // Handle color interpolation if colorTransitionProgress is set
+    if (colorTransitionProgress != null) {
+      final progress = colorTransitionProgress!.clamp(0.0, 1.0);
+
+      // Define start colors (overlay variant - always light)
+      final startBgColor = AppColorSwatches.neutral[300]!;
+      final startIconColor = AppColorSwatches.neutral[500]!;
+
+      // Define end colors (neutral variant - theme-aware)
+      final endBgColor = isLight
+          ? AppColorSwatches.neutral[300]!
+          : AppColorSwatches.neutral[800]!.withOpacity(0.3);
+      final endIconColor = isLight
+          ? AppColorSwatches.neutral[500]!
+          : AppColorSwatches.neutral[400]!;
+
+      // Interpolate colors
+      backgroundColor = Color.lerp(startBgColor, endBgColor, progress)!;
+      iconColor = Color.lerp(startIconColor, endIconColor, progress)!;
     }
 
     return GestureDetector(

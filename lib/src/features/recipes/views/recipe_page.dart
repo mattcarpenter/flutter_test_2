@@ -226,7 +226,7 @@ class _RecipePageState extends ConsumerState<RecipePage> {
               // Sticky navigation overlay (outside the scroll view)
               _buildStickyNavigationOverlay(context, hasImages),
               // Sticky navigation buttons (outside the scroll view)
-              _buildStickyNavigationButtons(context),
+              _buildStickyNavigationButtons(context, hasImages),
             ],
           );
         },
@@ -271,56 +271,77 @@ class _RecipePageState extends ConsumerState<RecipePage> {
     );
   }
 
-  Widget _buildStickyNavigationButtons(BuildContext context) {
-    return Positioned(
-      top: MediaQuery.of(context).padding.top + 8,
-      left: 16,
-      right: 16,
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          // Back button
-          AppCircleButton(
-            icon: AppCircleButtonIcon.close,
-            variant: AppCircleButtonVariant.overlay,
-            size: 40,
-            onPressed: () => Navigator.of(context).pop(),
-          ),
-          // Menu button
-          AdaptivePullDownButton(
-            items: [
-              AdaptiveMenuItem(
-                title: 'Check Pantry Stock',
-                icon: const Icon(CupertinoIcons.checkmark_alt_circle),
-                onTap: () {
-                  // Read the matches when the menu item is tapped (not during build)
-                  final matchesAsync = ref.read(recipe_provider.recipeIngredientMatchesProvider(widget.recipeId));
-                  matchesAsync.whenOrNull(
-                    data: (matches) {
-                      showIngredientMatchesBottomSheet(
-                        context,
-                        matches: matches,
+  Widget _buildStickyNavigationButtons(BuildContext context, bool hasImages) {
+    final heroHeight = _getHeroHeight(hasImages);
+
+    return AnimatedBuilder(
+      animation: _scrollController,
+      builder: (context, child) {
+        final offset = _scrollController.hasClients ? _scrollController.offset : 0;
+
+        // Calculate same fade timing as header overlay
+        final headerHeight = MediaQuery.of(context).padding.top + 60;
+        final fadeStartOffset = heroHeight * 0.5;
+        final fadeEndOffset = heroHeight - (headerHeight/2);
+        final fadeDuration = fadeEndOffset - fadeStartOffset;
+
+        final opacity = ((offset - fadeStartOffset) / fadeDuration).clamp(0.0, 1.0);
+
+        // Smoothly transition button colors from overlay (light) to neutral (theme-aware)
+        // as header becomes opaque during scroll
+        return Positioned(
+          top: MediaQuery.of(context).padding.top + 8,
+          left: 16,
+          right: 16,
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              // Back button
+              AppCircleButton(
+                icon: AppCircleButtonIcon.close,
+                variant: AppCircleButtonVariant.overlay,
+                colorTransitionProgress: opacity,
+                size: 40,
+                onPressed: () => Navigator.of(context).pop(),
+              ),
+              // Menu button
+              AdaptivePullDownButton(
+                items: [
+                  AdaptiveMenuItem(
+                    title: 'Check Pantry Stock',
+                    icon: const Icon(CupertinoIcons.checkmark_alt_circle),
+                    onTap: () {
+                      // Read the matches when the menu item is tapped (not during build)
+                      final matchesAsync = ref.read(recipe_provider.recipeIngredientMatchesProvider(widget.recipeId));
+                      matchesAsync.whenOrNull(
+                        data: (matches) {
+                          showIngredientMatchesBottomSheet(
+                            context,
+                            matches: matches,
+                          );
+                        },
                       );
                     },
-                  );
-                },
-              ),
-              AdaptiveMenuItem(
-                title: 'Edit Recipe',
-                icon: const Icon(CupertinoIcons.pencil),
-                onTap: () {
-                  // TODO: Implement edit functionality
-                },
+                  ),
+                  AdaptiveMenuItem(
+                    title: 'Edit Recipe',
+                    icon: const Icon(CupertinoIcons.pencil),
+                    onTap: () {
+                      // TODO: Implement edit functionality
+                    },
+                  ),
+                ],
+                child: AppCircleButton(
+                  icon: AppCircleButtonIcon.ellipsis,
+                  variant: AppCircleButtonVariant.overlay,
+                  colorTransitionProgress: opacity,
+                  size: 40,
+                ),
               ),
             ],
-            child: const AppCircleButton(
-              icon: AppCircleButtonIcon.ellipsis,
-              variant: AppCircleButtonVariant.overlay,
-              size: 40,
-            ),
           ),
-        ],
-      ),
+        );
+      },
     );
   }
 
