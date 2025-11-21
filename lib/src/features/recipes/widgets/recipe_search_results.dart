@@ -4,6 +4,7 @@ import '../../../../database/database.dart';
 import '../../../constants/folder_constants.dart';
 import '../../../providers/recipe_filter_sort_provider.dart';
 import '../../../providers/recipe_provider.dart';
+import '../../../theme/colors.dart';
 import '../models/recipe_filter_sort.dart';
 import '../utils/filter_utils.dart';
 import 'filter_sort/unified_sort_filter_sheet.dart';
@@ -95,11 +96,21 @@ class RecipeSearchResults extends ConsumerWidget {
     }
 
     if (results.isEmpty) {
+      // Check if there's an actual search query
+      final hasSearchQuery = filterSortState.searchQuery?.isNotEmpty ?? false;
+
       return Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            const Text('No recipes match your search.'),
+            Text(
+              hasSearchQuery
+                ? 'No recipes match your search.'
+                : 'Start typing to search for recipes.',
+              style: TextStyle(
+                color: AppColors.of(context).textSecondary,
+              ),
+            ),
             if (filterSortState.hasFilters)
               TextButton(
                 onPressed: () {
