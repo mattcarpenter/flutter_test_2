@@ -67,6 +67,11 @@ class _MealPlanDateCardState extends ConsumerState<MealPlanDateCard>
     return isDarkMode ? AppColorSwatches.neutral[925]! : CupertinoColors.white;
   }
 
+  Color _getHoverColor(BuildContext context) {
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+    return isDarkMode ? AppColorSwatches.neutral[800]! : AppColorSwatches.primary[25]!;
+  }
+
   void _onDragEnter() {
     if (!_isHovering) {
       setState(() => _isHovering = true);
@@ -182,7 +187,7 @@ class _MealPlanDateCardState extends ConsumerState<MealPlanDateCard>
                           stops: const [0.0, 0.15, 0.45, 1.0],
                         ),
                   color: _isHovering
-                      ? AppColorSwatches.primary[25]!
+                      ? _getHoverColor(context)
                       : null,
                   borderRadius: BorderRadius.circular(12),
                   border: _isHovering
