@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../database/models/pantry_items.dart';
+import '../../../theme/colors.dart';
 
 /// A custom segmented control for selecting stock status with animated sliding background.
 /// Features floating button segments inside a container with a sliding colored background.
@@ -154,14 +155,8 @@ class _StockStatusSegmentedControlState extends State<StockStatusSegmentedContro
 
 
   Color _getBackgroundColor(StockStatus status) {
-    switch (status) {
-      case StockStatus.outOfStock:
-        return const Color(0xFFFFE6E6); // Light red
-      case StockStatus.lowStock:
-        return const Color(0xFFFFF7E6); // Light yellow
-      case StockStatus.inStock:
-        return Colors.white; // White
-    }
+    // Use white for all statuses - no color change when sliding
+    return Colors.white;
   }
 
   @override
@@ -170,7 +165,7 @@ class _StockStatusSegmentedControlState extends State<StockStatusSegmentedContro
 
     return Container(
       decoration: BoxDecoration(
-        color: isDarkMode ? const Color(0xFF2C2C2E) : const Color(0xFFF6F6F6),
+        color: isDarkMode ? const Color(0xFF2C2C2E) : const Color(0xFFE8E8E8),
         borderRadius: BorderRadius.circular(containerRadius),
       ),
       padding: const EdgeInsets.all(padding),
@@ -207,11 +202,20 @@ class _StockStatusSegmentedControlState extends State<StockStatusSegmentedContro
               mainAxisSize: MainAxisSize.min,
               children: StockStatus.values.map((status) {
                 final isLast = status == StockStatus.values.last;
+                final isSelected = status == widget.value;
+                // Active segments always have light backgrounds, so use dark text
+                // Inactive segments: use dark text in light mode, lighter text in dark mode
+                final textColor = isSelected
+                    ? Colors.black
+                    : (isDarkMode
+                        ? AppColors.of(context).textSecondary
+                        : Colors.black);
                 return Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     _SegmentButton(
                       label: _labels[status]!,
+                      textColor: textColor,
                       onTap: () => widget.onChanged(status),
                     ),
                     if (!isLast) const SizedBox(width: segmentSpacing),
@@ -235,10 +239,12 @@ class _StockStatusSegmentedControlState extends State<StockStatusSegmentedContro
 /// Individual segment button widget (now just handles text and tap)
 class _SegmentButton extends StatelessWidget {
   final String label;
+  final Color textColor;
   final VoidCallback onTap;
 
   const _SegmentButton({
     required this.label,
+    required this.textColor,
     required this.onTap,
   });
 
@@ -255,10 +261,10 @@ class _SegmentButton extends StatelessWidget {
         child: Center(
           child: Text(
             label,
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: 11,
               fontWeight: FontWeight.w600,
-              color: Colors.black, // Always black text
+              color: textColor,
             ),
             textAlign: TextAlign.center,
             maxLines: 1,

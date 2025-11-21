@@ -245,12 +245,16 @@ class _AddPantryItemFormState extends ConsumerState<AddPantryItemForm> {
               color: AppColors.of(context).textPrimary,
             ),
           ),
-          SizedBox(height: AppSpacing.sm),
+          SizedBox(height: AppSpacing.md),
           Container(
             padding: EdgeInsets.all(AppSpacing.md),
             decoration: BoxDecoration(
-              color: Colors.white,
+              color: AppColors.of(context).groupedListBackground,
               borderRadius: BorderRadius.circular(8),
+              border: Border.all(
+                color: AppColors.of(context).groupedListBorder,
+                width: 1,
+              ),
             ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
