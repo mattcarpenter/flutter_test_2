@@ -92,15 +92,7 @@ class AddToShoppingListModalPage {
       stickyActionBar: Consumer(
         builder: (consumerContext, ref, child) {
           return Container(
-            decoration: BoxDecoration(
-              color: AppColors.of(context).background,
-              border: Border(
-                top: BorderSide(
-                  color: AppColors.of(context).border,
-                  width: 0.5,
-                ),
-              ),
-            ),
+            color: AppColors.of(context).background,
             padding: EdgeInsets.symmetric(horizontal: AppSpacing.lg),
             child: SafeArea(
               top: false,

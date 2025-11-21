@@ -215,7 +215,10 @@ class RecipeSearchResults extends ConsumerWidget {
             alignment: Alignment.centerLeft,
             child: Text(
               '${results.length} results',
-              style: Theme.of(context).textTheme.bodySmall,
+              style: TextStyle(
+                color: AppColors.of(context).textSecondary,
+                fontSize: 14,
+              ),
             ),
           ),
         ),

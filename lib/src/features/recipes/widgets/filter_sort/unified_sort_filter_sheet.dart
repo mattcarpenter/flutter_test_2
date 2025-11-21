@@ -234,15 +234,7 @@ class _UnifiedSortFilterModalPage {
         ),
       ),
       stickyActionBar: Container(
-        decoration: BoxDecoration(
-          color: AppColors.of(modalContext).background,
-          border: Border(
-            top: BorderSide(
-              color: AppColors.of(modalContext).border,
-              width: 0.5,
-            ),
-          ),
-        ),
+        color: AppColors.of(modalContext).background,
         padding: EdgeInsets.symmetric(horizontal: AppSpacing.lg),
         child: SafeArea(
           top: false,

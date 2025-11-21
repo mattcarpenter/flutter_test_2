@@ -86,15 +86,7 @@ class UpdatePantryModalPage {
         ];
       },
       stickyActionBar: Container(
-        decoration: BoxDecoration(
-          color: AppColors.of(context).background,
-          border: Border(
-            top: BorderSide(
-              color: CupertinoColors.separator.resolveFrom(context),
-              width: 0.5,
-            ),
-          ),
-        ),
+        color: AppColors.of(context).background,
         padding: const EdgeInsets.all(16),
         child: SafeArea(
           top: false,
