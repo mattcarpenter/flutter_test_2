@@ -1,4 +1,5 @@
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:wolt_modal_sheet/wolt_modal_sheet.dart';
 import '../models/household_member.dart';
@@ -6,11 +7,11 @@ import '../../../theme/colors.dart';
 import '../../../theme/spacing.dart';
 import '../../../theme/typography.dart';
 import '../../../widgets/app_button.dart';
+import '../../../widgets/app_circle_button.dart';
 import '../../../widgets/app_radio_button.dart';
 import '../../../widgets/utils/grouped_list_styling.dart';
 import '../../../widgets/error_dialog.dart';
 import '../../../widgets/success_dialog.dart';
-import '../../../widgets/wolt/text/modal_sheet_title.dart';
 import '../utils/error_messages.dart';
 
 void showLeaveHouseholdModal(
@@ -82,20 +83,38 @@ class LeaveHouseholdModalPage {
     required Function(String? newOwnerId) onLeaveHousehold,
   }) {
     return WoltModalSheetPage(
+      navBarHeight: 55,
       backgroundColor: AppColors.of(context).background,
-      leadingNavBarWidget: CupertinoButton(
-        padding: EdgeInsets.symmetric(horizontal: AppSpacing.lg),
-        onPressed: () {
-          Navigator.of(context).pop();
-        },
-        child: const Text('Cancel'),
+      surfaceTintColor: Colors.transparent,
+      hasTopBarLayer: false,
+      isTopBarLayerAlwaysVisible: false,
+      trailingNavBarWidget: Padding(
+        padding: EdgeInsets.only(right: AppSpacing.lg),
+        child: AppCircleButton(
+          icon: AppCircleButtonIcon.close,
+          variant: AppCircleButtonVariant.neutral,
+          size: 32,
+          onPressed: () => Navigator.of(context).pop(),
+        ),
       ),
-      pageTitle: const ModalSheetTitle('Transfer Ownership'),
       child: Padding(
-        padding: EdgeInsets.all(AppSpacing.lg),
-        child: LeaveHouseholdForm(
-          otherMembers: otherMembers,
-          onLeaveHousehold: onLeaveHousehold,
+        padding: EdgeInsets.fromLTRB(AppSpacing.lg, 0, AppSpacing.lg, AppSpacing.lg),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(
+              'Transfer Ownership',
+              style: AppTypography.h4.copyWith(
+                color: AppColors.of(context).textPrimary,
+              ),
+            ),
+            SizedBox(height: AppSpacing.lg),
+            LeaveHouseholdForm(
+              otherMembers: otherMembers,
+              onLeaveHousehold: onLeaveHousehold,
+            ),
+          ],
         ),
       ),
     );
