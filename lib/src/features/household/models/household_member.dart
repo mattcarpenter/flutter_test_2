@@ -38,4 +38,26 @@ class HouseholdMember {
 
   bool get isOwner => role == HouseholdRole.owner;
   bool get canManageMembers => isOwner;
+
+  HouseholdMember copyWith({
+    String? id,
+    String? householdId,
+    String? userId,
+    HouseholdRole? role,
+    bool? isActive,
+    DateTime? joinedAt,
+    String? userName,
+    String? userEmail,
+  }) {
+    return HouseholdMember(
+      id: id ?? this.id,
+      householdId: householdId ?? this.householdId,
+      userId: userId ?? this.userId,
+      role: role ?? this.role,
+      isActive: isActive ?? this.isActive,
+      joinedAt: joinedAt ?? this.joinedAt,
+      userName: userName ?? this.userName,
+      userEmail: userEmail ?? this.userEmail,
+    );
+  }
 }

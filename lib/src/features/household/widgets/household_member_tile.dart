@@ -41,7 +41,7 @@ class HouseholdMemberTile extends StatelessWidget {
                   children: [
                     Expanded(
                       child: Text(
-                        member.userName ?? member.userId,
+                        member.userName ?? member.userEmail ?? member.userId,
                         style: const TextStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.w500,
@@ -103,7 +103,7 @@ class HouseholdMemberTile extends StatelessWidget {
       ),
       child: Center(
         child: Text(
-          (member.userName ?? member.userId).substring(0, 1).toUpperCase(),
+          (member.userName ?? member.userEmail ?? member.userId).substring(0, 1).toUpperCase(),
           style: TextStyle(
             fontSize: 18,
             fontWeight: FontWeight.w600,
@@ -165,7 +165,7 @@ class HouseholdMemberTile extends StatelessWidget {
       context: context,
       builder: (context) => CupertinoAlertDialog(
         title: const Text('Remove Member'),
-        content: Text('Are you sure you want to remove ${member.userName ?? member.userId} from the household?'),
+        content: Text('Are you sure you want to remove ${member.userName ?? member.userEmail ?? member.userId} from the household?'),
         actions: [
           CupertinoDialogAction(
             child: const Text('Cancel'),

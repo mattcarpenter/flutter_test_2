@@ -270,6 +270,36 @@ class HouseholdManagementService {
       throw HouseholdApiException.fromResponse(response);
     }
   }
+
+  /// Fetch email addresses for all members of a household.
+  /// Returns a map of userId -> email.
+  /// Only accessible by active members of the household.
+  Future<Map<String, String>> getMemberEmails(String householdId) async {
+    final response = await http.get(
+      Uri.parse('$apiBaseUrl/v1/household/$householdId/member-emails'),
+      headers: {
+        'Authorization': 'Bearer ${getAuthToken()}',
+      },
+    );
+
+    if (response.statusCode == 200) {
+      final data = json.decode(response.body);
+      final members = data['members'] as Map<String, dynamic>?;
+      if (members == null) {
+        return {};
+      }
+      // Convert { "userId": { "email": "..." } } to { "userId": "email" }
+      return members.map((userId, value) => MapEntry(
+        userId,
+        (value as Map<String, dynamic>)['email'] as String,
+      ));
+    } else if (response.statusCode == 403) {
+      // Not a member - return empty map instead of throwing
+      return {};
+    } else {
+      throw HouseholdApiException.fromResponse(response);
+    }
+  }
 }
 
 // Provider for the household management service

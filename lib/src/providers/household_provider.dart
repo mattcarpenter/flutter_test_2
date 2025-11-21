@@ -88,10 +88,14 @@ class HouseholdNotifier extends StateNotifier<HouseholdState> {
     // Watch household members
     _membersSubscription = _householdRepository
         .watchHouseholdMembers(householdId)
-        .listen((members) {
-      state = state.copyWith(
-        members: members.map((e) => HouseholdMember.fromDrift(e)).toList(),
-      );
+        .listen((members) async {
+      final membersList = members.map((e) => HouseholdMember.fromDrift(e)).toList();
+
+      // Update state with basic member data first
+      state = state.copyWith(members: membersList);
+
+      // Then fetch and enrich with email data
+      await _enrichMembersWithEmails(householdId, membersList);
     });
 
     // Watch outgoing invites (only if user is owner/admin)
@@ -113,6 +117,32 @@ class HouseholdNotifier extends StateNotifier<HouseholdState> {
       members: [],
       outgoingInvites: [],
     );
+  }
+
+  /// Fetch email addresses for members and update state with enriched data
+  Future<void> _enrichMembersWithEmails(String householdId, List<HouseholdMember> members) async {
+    try {
+      final emailMap = await _service.getMemberEmails(householdId);
+
+      if (emailMap.isEmpty) {
+        return; // No emails to enrich with
+      }
+
+      // Enrich members with email data
+      final enrichedMembers = members.map((member) {
+        final email = emailMap[member.userId];
+        if (email != null) {
+          return member.copyWith(userEmail: email);
+        }
+        return member;
+      }).toList();
+
+      // Update state with enriched members
+      state = state.copyWith(members: enrichedMembers);
+    } catch (e) {
+      // Silently fail - emails are optional enhancement
+      debugPrint('Failed to fetch member emails: $e');
+    }
   }
 
   // Household operations
