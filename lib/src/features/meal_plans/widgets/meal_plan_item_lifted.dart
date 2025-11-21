@@ -122,6 +122,7 @@ class _MealPlanItemLiftedState extends ConsumerState<MealPlanItemLifted>
 
   // The normal tile
   Widget _buildNormalTile(BuildContext context) {
+    final colors = AppColors.of(context);
     return ContextMenuWidget(
       contextMenuIsAllowed: _contextMenuIsAllowed,
       menuProvider: (_) => _buildContextMenu(),
@@ -130,10 +131,10 @@ class _MealPlanItemLiftedState extends ConsumerState<MealPlanItemLifted>
         child: Container(
           padding: const EdgeInsets.all(8),
           decoration: BoxDecoration(
-            color: CupertinoColors.systemBackground.resolveFrom(context),
+            color: colors.groupedListBackground,
             borderRadius: BorderRadius.circular(8),
             border: Border.all(
-              color: CupertinoColors.separator.resolveFrom(context),
+              color: colors.groupedListBorder,
               width: 0.5,
             ),
           ),
@@ -145,6 +146,7 @@ class _MealPlanItemLiftedState extends ConsumerState<MealPlanItemLifted>
 
   // The lifted feedback that follows the finger
   Widget _buildLiftedTile(BuildContext context) {
+    final colors = AppColors.of(context);
     return Transform.scale(
       scale: 1.05,
       child: Container(
@@ -157,7 +159,7 @@ class _MealPlanItemLiftedState extends ConsumerState<MealPlanItemLifted>
           child: Container(
             padding: const EdgeInsets.all(8),
             decoration: BoxDecoration(
-              color: CupertinoColors.systemBackground.resolveFrom(context),
+              color: colors.groupedListBackground,
               borderRadius: BorderRadius.circular(8),
             ),
             child: _buildTileContent(context, 1.0),
@@ -169,15 +171,16 @@ class _MealPlanItemLiftedState extends ConsumerState<MealPlanItemLifted>
 
   // The ghost left behind - invisible but maintains space for shadow
   Widget _buildGhostTile(BuildContext context) {
+    final colors = AppColors.of(context);
     return Opacity(
       opacity: 0.0, // Completely invisible - only shadow will be visible from parent
       child: Container(
         padding: const EdgeInsets.all(8),
         decoration: BoxDecoration(
-          color: CupertinoColors.systemBackground.resolveFrom(context),
+          color: colors.groupedListBackground,
           borderRadius: BorderRadius.circular(8),
           border: Border.all(
-            color: CupertinoColors.separator.resolveFrom(context),
+            color: colors.groupedListBorder,
             width: 0.5,
           ),
         ),
@@ -188,6 +191,7 @@ class _MealPlanItemLiftedState extends ConsumerState<MealPlanItemLifted>
 
   // Shared tile content
   Widget _buildTileContent(BuildContext context, double opacity, {bool isDraggableHandle = false}) {
+    final colors = AppColors.of(context);
     return Opacity(
       opacity: opacity,
       child: Row(
@@ -218,9 +222,10 @@ class _MealPlanItemLiftedState extends ConsumerState<MealPlanItemLifted>
               children: [
                 Text(
                   _getDisplayTitle(),
-                  style: CupertinoTheme.of(context).textTheme.textStyle.copyWith(
+                  style: TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.w500,
+                    color: colors.textPrimary,
                   ),
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
@@ -229,9 +234,9 @@ class _MealPlanItemLiftedState extends ConsumerState<MealPlanItemLifted>
                   const SizedBox(height: 4),
                   Text(
                     _getDisplaySubtitle()!,
-                    style: CupertinoTheme.of(context).textTheme.textStyle.copyWith(
+                    style: TextStyle(
                       fontSize: 14,
-                      color: CupertinoColors.secondaryLabel.resolveFrom(context),
+                      color: colors.textSecondary,
                     ),
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
@@ -265,14 +270,14 @@ class _MealPlanItemLiftedState extends ConsumerState<MealPlanItemLifted>
                     child: Icon(
                       CupertinoIcons.line_horizontal_3,
                       size: 16,
-                      color: CupertinoColors.tertiaryLabel.resolveFrom(context),
+                      color: colors.textTertiary,
                     ),
                   ),
                 )
               : Icon(
                   CupertinoIcons.line_horizontal_3,
                   size: 16,
-                  color: CupertinoColors.tertiaryLabel.resolveFrom(context),
+                  color: colors.textTertiary,
                 ),
 
           if (!isDraggableHandle) const SizedBox(width: 8),

@@ -62,6 +62,11 @@ class _MealPlanDateCardState extends ConsumerState<MealPlanDateCard>
     super.dispose();
   }
 
+  Color _getGradientColor(BuildContext context) {
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+    return isDarkMode ? AppColorSwatches.neutral[925]! : CupertinoColors.white;
+  }
+
   void _onDragEnter() {
     if (!_isHovering) {
       setState(() => _isHovering = true);
@@ -169,10 +174,10 @@ class _MealPlanDateCardState extends ConsumerState<MealPlanDateCard>
                           begin: Alignment.topCenter,
                           end: Alignment.bottomCenter,
                           colors: [
-                            CupertinoColors.white.withOpacity(0.5),
-                            CupertinoColors.white.withOpacity(0.5),
-                            CupertinoColors.white.withOpacity(0.0),
-                            CupertinoColors.white.withOpacity(0.0),
+                            _getGradientColor(context).withOpacity(0.5),
+                            _getGradientColor(context).withOpacity(0.5),
+                            _getGradientColor(context).withOpacity(0.0),
+                            _getGradientColor(context).withOpacity(0.0),
                           ],
                           stops: const [0.0, 0.15, 0.45, 1.0],
                         ),
@@ -278,6 +283,7 @@ class _MealPlanDateCardState extends ConsumerState<MealPlanDateCard>
   }
 
   Widget _buildEmptyState() {
+    final colors = AppColors.of(context);
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 32.0),
       child: Center(
@@ -287,22 +293,22 @@ class _MealPlanDateCardState extends ConsumerState<MealPlanDateCard>
             Icon(
               CupertinoIcons.calendar_badge_plus,
               size: 32,
-              color: CupertinoColors.tertiaryLabel.resolveFrom(context),
+              color: colors.textSecondary,
             ),
             const SizedBox(height: 12),
             Text(
               'No meals planned',
-              style: CupertinoTheme.of(context).textTheme.textStyle.copyWith(
+              style: TextStyle(
                 fontSize: 14,
-                color: CupertinoColors.tertiaryLabel.resolveFrom(context),
+                color: colors.textSecondary,
               ),
             ),
             const SizedBox(height: 4),
             Text(
               'Tap + to add recipes or notes',
-              style: CupertinoTheme.of(context).textTheme.textStyle.copyWith(
+              style: TextStyle(
                 fontSize: 12,
-                color: CupertinoColors.quaternaryLabel.resolveFrom(context),
+                color: colors.textTertiary,
               ),
             ),
           ],
