@@ -28,6 +28,8 @@ class ShoppingListItemTile extends StatelessWidget {
   Widget _buildParsedItemText(BuildContext context) {
     final text = item.name;
     final isBought = item.bought;
+    final colors = AppColors.of(context);
+    final textColor = isBought ? colors.textSecondary : colors.textPrimary;
 
     try {
       final parseResult = _parser.parse(text);
@@ -40,9 +42,7 @@ class ShoppingListItemTile extends StatelessWidget {
             fontSize: 16,
             fontWeight: FontWeight.w500,
             decoration: isBought ? TextDecoration.lineThrough : null,
-            color: isBought
-                ? CupertinoColors.secondaryLabel
-                : CupertinoColors.label,
+            color: textColor,
           ),
         );
       }
@@ -59,9 +59,7 @@ class ShoppingListItemTile extends StatelessWidget {
             style: TextStyle(
               fontSize: 16,
               fontWeight: FontWeight.w500,
-              color: isBought
-                  ? CupertinoColors.secondaryLabel
-                  : CupertinoColors.label,
+              color: textColor,
             ),
           ));
         }
@@ -72,9 +70,7 @@ class ShoppingListItemTile extends StatelessWidget {
           style: TextStyle(
             fontSize: 16,
             fontWeight: FontWeight.bold,
-            color: isBought
-                ? CupertinoColors.secondaryLabel
-                : CupertinoColors.label,
+            color: textColor,
           ),
         ));
 
@@ -88,9 +84,7 @@ class ShoppingListItemTile extends StatelessWidget {
           style: TextStyle(
             fontSize: 16,
             fontWeight: FontWeight.w500,
-            color: isBought
-                ? CupertinoColors.secondaryLabel
-                : CupertinoColors.label,
+            color: textColor,
           ),
         ));
       }
@@ -111,9 +105,7 @@ class ShoppingListItemTile extends StatelessWidget {
           fontSize: 16,
           fontWeight: FontWeight.w500,
           decoration: isBought ? TextDecoration.lineThrough : null,
-          color: isBought
-              ? CupertinoColors.secondaryLabel
-              : CupertinoColors.label,
+          color: textColor,
         ),
       );
     }
@@ -173,7 +165,7 @@ class ShoppingListItemTile extends StatelessWidget {
       onDismissed: (_) => onDelete(),
       child: Container(
         decoration: BoxDecoration(
-          color: AppColors.of(context).input,
+          color: AppColors.of(context).groupedListBackground,
           border: border,
           borderRadius: borderRadius,
         ),

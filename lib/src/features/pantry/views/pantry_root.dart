@@ -5,6 +5,7 @@ import '../../../../database/database.dart';
 import '../../../mobile/utils/adaptive_sliver_page.dart';
 import '../../../providers/pantry_provider.dart';
 import '../../../providers/pantry_filter_sort_provider.dart';
+import '../../../theme/colors.dart';
 import '../../../theme/spacing.dart';
 import '../../../widgets/adaptive_pull_down/adaptive_menu_item.dart';
 import '../../../widgets/adaptive_pull_down/adaptive_pull_down.dart';
@@ -140,9 +141,14 @@ class PantryTab extends ConsumerWidget {
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Text(filterSortState.hasFilters 
+                      Text(
+                        filterSortState.hasFilters
                           ? 'No pantry items match the current filters'
-                          : 'No pantry items yet. Tap the + button to add items.'),
+                          : 'No pantry items yet. Tap the + button to add items.',
+                        style: TextStyle(
+                          color: AppColors.of(context).textSecondary,
+                        ),
+                      ),
                       if (filterSortState.hasFilters)
                         TextButton(
                           onPressed: () {

@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../database/database.dart';
 import '../../../mobile/utils/adaptive_sliver_page.dart';
 import '../../../providers/shopping_list_provider.dart';
+import '../../../theme/colors.dart';
 import '../../../widgets/adaptive_pull_down/adaptive_menu_item.dart';
 import '../../../widgets/adaptive_pull_down/adaptive_pull_down.dart';
 import '../../../widgets/app_circle_button.dart';
@@ -64,7 +65,12 @@ class ShoppingListTab extends ConsumerWidget {
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          const Text('No items in this shopping list yet.'),
+                          Text(
+                            'No items in this shopping list yet.',
+                            style: TextStyle(
+                              color: AppColors.of(context).textSecondary,
+                            ),
+                          ),
                           const SizedBox(height: 8),
                           CupertinoButton(
                             onPressed: () {

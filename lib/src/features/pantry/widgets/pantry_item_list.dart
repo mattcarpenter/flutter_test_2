@@ -225,11 +225,13 @@ class _PantryItemListState extends ConsumerState<PantryItemList> {
       isDragging: false,
     );
 
+    final colors = AppColors.of(context);
+
     return Container(
       decoration: BoxDecoration(
         color: isSelected
-            ? AppColors.of(context).primary.withValues(alpha: 0.1)
-            : AppColors.of(context).input,
+            ? colors.primary.withValues(alpha: 0.1)
+            : colors.groupedListBackground,
         border: border,
         borderRadius: borderRadius,
       ),
@@ -255,7 +257,7 @@ class _PantryItemListState extends ConsumerState<PantryItemList> {
               child: Text(
                 item.name,
                 style: TextStyle(
-                  color: AppColors.of(context).textPrimary,
+                  color: colors.textPrimary,
                   fontWeight: FontWeight.w500,
                   fontSize: 17,
                 ),
@@ -352,7 +354,7 @@ class _PantryItemListState extends ConsumerState<PantryItemList> {
               ],
               child: Icon(
                 Icons.more_horiz,
-                color: AppColors.of(context).textSecondary,
+                color: colors.textSecondary,
                 size: 24,
               ),
             ),
@@ -411,12 +413,7 @@ class _PantryItemListState extends ConsumerState<PantryItemList> {
   }
 
   Widget _buildAddItemButton(BuildContext context) {
-    final isDarkMode = CupertinoTheme.of(context).brightness == Brightness.dark;
-    final textColor = CupertinoTheme.of(context).textTheme.textStyle.color ??
-        (isDarkMode ? Colors.white : Colors.black);
-    final borderColor = isDarkMode
-        ? Colors.grey.shade600
-        : Colors.grey.shade400;
+    final colors = AppColors.of(context);
 
     return Center(
       child: OutlinedButton.icon(
@@ -425,20 +422,20 @@ class _PantryItemListState extends ConsumerState<PantryItemList> {
         },
         icon: Icon(
           CupertinoIcons.add,
-          color: textColor,
+          color: colors.textSecondary,
           size: 18,
         ),
         label: Text(
           'Add Item',
           style: TextStyle(
-            color: textColor,
+            color: colors.textSecondary,
             fontSize: 16,
             fontWeight: FontWeight.w500,
           ),
         ),
         style: OutlinedButton.styleFrom(
           backgroundColor: Colors.transparent,
-          side: BorderSide(color: borderColor, width: 1),
+          side: BorderSide(color: colors.border, width: 1),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(8),
           ),
