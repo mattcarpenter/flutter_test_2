@@ -1,5 +1,9 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/services.dart';
+import '../../../theme/colors.dart';
+import '../../../theme/spacing.dart';
+import '../../../theme/typography.dart';
+import '../../../widgets/app_button.dart';
 import '../models/household_invite.dart';
 
 class HouseholdInviteTile extends StatelessWidget {
@@ -26,187 +30,225 @@ class HouseholdInviteTile extends StatelessWidget {
       opacity: invite.isAccepting || invite.isRevoking ? 0.7 : 1.0,
       duration: const Duration(milliseconds: 200),
       child: Container(
-        padding: const EdgeInsets.all(16),
+        padding: EdgeInsets.all(AppSpacing.lg),
         decoration: BoxDecoration(
-          color: CupertinoTheme.of(context).barBackgroundColor,
-          borderRadius: BorderRadius.circular(12),
+          color: AppColors.of(context).groupedListBackground,
+          borderRadius: BorderRadius.circular(8),
           border: Border.all(
-            color: CupertinoColors.separator,
+            color: AppColors.of(context).groupedListBorder,
             width: 0.5,
           ),
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            // Header row: icon, name, status badge
             Row(
               children: [
                 Icon(
                   invite.inviteType == HouseholdInviteType.email
                       ? CupertinoIcons.mail
                       : CupertinoIcons.qrcode,
-                  color: CupertinoTheme.of(context).primaryColor,
+                  color: AppColors.of(context).primary,
                   size: 20,
                 ),
-                const SizedBox(width: 8),
+                SizedBox(width: AppSpacing.sm),
                 Expanded(
                   child: Text(
                     invite.displayName,
-                    style: const TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w500,
+                    style: AppTypography.label.copyWith(
+                      color: AppColors.of(context).textPrimary,
                     ),
                   ),
                 ),
-                _buildStatusBadge(),
-            ],
-          ),
-          if (invite.email != null) ...[
-            const SizedBox(height: 4),
-            Text(
-              invite.email!,
-              style: const TextStyle(
-                color: CupertinoColors.secondaryLabel,
-                fontSize: 14,
+                _buildStatusBadge(context),
+              ],
+            ),
+            // Email (if present)
+            if (invite.email != null) ...[
+              SizedBox(height: AppSpacing.xs),
+              Text(
+                invite.email!,
+                style: AppTypography.caption.copyWith(
+                  color: AppColors.of(context).textSecondary,
+                ),
               ),
-            ),
+            ],
+            SizedBox(height: AppSpacing.sm),
+            // Info row: code (if code invite) + expiry
+            _buildInfoRow(context),
+            // Action buttons
+            if (showActions) ...[
+              SizedBox(height: AppSpacing.sm),
+              _buildActionButtons(context),
+            ],
           ],
-          const SizedBox(height: 8),
-          Text(
-            'Expires: ${_formatDate(invite.expiresAt)}',
-            style: const TextStyle(
-              color: CupertinoColors.secondaryLabel,
-              fontSize: 12,
-            ),
-          ),
-          if (invite.inviteType == HouseholdInviteType.code) ...[
-            const SizedBox(height: 12),
-            _buildCodeSection(context),
-          ],
-          if (showActions) ...[
-            const SizedBox(height: 12),
-            _buildActionButtons(),
-          ],
-        ],
         ),
       ),
     );
   }
 
-  Widget _buildStatusBadge() {
-    Color color;
+  Widget _buildInfoRow(BuildContext context) {
+    final hasCode = invite.inviteType == HouseholdInviteType.code;
+
+    return Row(
+      children: [
+        if (hasCode) ...[
+          _buildCodeChip(context),
+          SizedBox(width: AppSpacing.sm),
+          GestureDetector(
+            onTap: () => _copyToClipboard(context),
+            child: Icon(
+              CupertinoIcons.doc_on_clipboard,
+              size: 16,
+              color: AppColors.of(context).textTertiary,
+            ),
+          ),
+          SizedBox(width: AppSpacing.md),
+          Text(
+            '•',
+            style: AppTypography.caption.copyWith(
+              color: AppColors.of(context).textTertiary,
+            ),
+          ),
+          SizedBox(width: AppSpacing.md),
+        ],
+        Expanded(
+          child: Text(
+            'Expires: ${_formatDate(invite.expiresAt)}',
+            style: AppTypography.caption.copyWith(
+              color: AppColors.of(context).textTertiary,
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildCodeChip(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 3),
+      decoration: BoxDecoration(
+        color: AppColors.of(context).surfaceVariant,
+        borderRadius: BorderRadius.circular(4),
+      ),
+      child: Text(
+        invite.inviteCode,
+        style: TextStyle(
+          fontFamily: 'monospace',
+          fontSize: 12,
+          fontWeight: FontWeight.w500,
+          color: AppColors.of(context).textPrimary,
+          height: 1.0,
+        ),
+      ),
+    );
+  }
+
+  Widget _buildStatusBadge(BuildContext context) {
+    Color backgroundColor;
+    Color textColor;
     String text;
-    
+
     if (invite.isAccepting) {
-      color = CupertinoColors.systemOrange;
+      backgroundColor = AppColorSwatches.warning[100]!;
+      textColor = AppColorSwatches.warning[700]!;
       text = 'Accepting...';
     } else if (invite.isRevoking) {
-      color = CupertinoColors.systemRed;
+      backgroundColor = AppColorSwatches.error[100]!;
+      textColor = AppColorSwatches.error[700]!;
       text = 'Revoking...';
     } else {
       switch (invite.status) {
         case HouseholdInviteStatus.pending:
-          color = CupertinoColors.systemBlue;
+          backgroundColor = AppColorSwatches.info[50]!;
+          textColor = AppColorSwatches.info[800]!;
           text = 'Pending';
           break;
         case HouseholdInviteStatus.accepted:
-          color = CupertinoColors.systemGreen;
+          backgroundColor = AppColorSwatches.success[100]!;
+          textColor = AppColorSwatches.success[700]!;
           text = 'Accepted';
           break;
         case HouseholdInviteStatus.declined:
-          color = CupertinoColors.systemRed;
+          backgroundColor = AppColorSwatches.error[100]!;
+          textColor = AppColorSwatches.error[700]!;
           text = 'Declined';
           break;
         case HouseholdInviteStatus.revoked:
-          color = CupertinoColors.systemGrey;
+          backgroundColor = AppColorSwatches.neutral[200]!;
+          textColor = AppColorSwatches.neutral[600]!;
           text = 'Revoked';
           break;
       }
     }
 
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      padding: EdgeInsets.symmetric(horizontal: AppSpacing.sm, vertical: AppSpacing.xs),
       decoration: BoxDecoration(
-        color: color.withValues(alpha: 0.2),
-        borderRadius: BorderRadius.circular(8),
+        color: backgroundColor,
+        borderRadius: BorderRadius.circular(6),
       ),
       child: Text(
         text,
-        style: TextStyle(
-          color: color,
-          fontSize: 12,
+        style: AppTypography.caption.copyWith(
+          color: textColor,
           fontWeight: FontWeight.w500,
         ),
       ),
     );
   }
 
-  Widget _buildCodeSection(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        color: CupertinoColors.systemGrey6,
-        borderRadius: BorderRadius.circular(8),
-      ),
-      child: Row(
-        children: [
-          Expanded(
-            child: Text(
-              invite.inviteCode,
-              style: const TextStyle(
-                fontFamily: 'monospace',
-                fontSize: 14,
-              ),
-            ),
-          ),
-          CupertinoButton(
-            padding: EdgeInsets.zero,
-            minSize: 32,
-            onPressed: () => _copyToClipboard(context),
-            child: const Icon(
-              CupertinoIcons.doc_on_clipboard,
-              size: 20,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
+  Widget _buildActionButtons(BuildContext context) {
+    final isDisabled = invite.isAccepting || invite.isRevoking;
 
-  Widget _buildActionButtons() {
     return Row(
       children: [
         if (onAccept != null)
           Expanded(
-            child: CupertinoButton.filled(
-              padding: const EdgeInsets.symmetric(vertical: 8),
-              onPressed: invite.isAccepting || invite.isRevoking ? null : onAccept,
-              child: invite.isAccepting 
-                  ? const CupertinoActivityIndicator(color: CupertinoColors.white)
-                  : const Text('Accept'),
+            child: AppButtonVariants.primaryFilled(
+              text: invite.isAccepting ? 'Accepting...' : 'Accept',
+              size: AppButtonSize.small,
+              shape: AppButtonShape.square,
+              loading: invite.isAccepting,
+              onPressed: isDisabled ? null : onAccept,
             ),
           ),
-        if (onAccept != null && onDecline != null) const SizedBox(width: 8),
+        if (onAccept != null && onDecline != null) SizedBox(width: AppSpacing.sm),
         if (onDecline != null)
           Expanded(
-            child: CupertinoButton(
-              padding: const EdgeInsets.symmetric(vertical: 8),
-              onPressed: invite.isAccepting || invite.isRevoking ? null : onDecline,
-              child: const Text('Decline'),
+            child: AppButtonVariants.mutedOutline(
+              text: 'Decline',
+              size: AppButtonSize.small,
+              shape: AppButtonShape.square,
+              onPressed: isDisabled ? null : onDecline,
             ),
           ),
         if (onResend != null)
           CupertinoButton(
-            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-            onPressed: invite.isAccepting || invite.isRevoking ? null : onResend,
-            child: const Text('Resend'),
+            padding: EdgeInsets.symmetric(horizontal: AppSpacing.sm, vertical: AppSpacing.xs),
+            onPressed: isDisabled ? null : onResend,
+            child: Text(
+              'Resend',
+              style: AppTypography.caption.copyWith(
+                color: isDisabled
+                    ? AppColors.of(context).textDisabled
+                    : AppColors.of(context).primary,
+              ),
+            ),
           ),
         if (onRevoke != null)
           CupertinoButton(
-            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+            padding: EdgeInsets.symmetric(horizontal: AppSpacing.sm, vertical: AppSpacing.xs),
             onPressed: invite.isRevoking ? null : onRevoke,
             child: invite.isRevoking
-                ? const CupertinoActivityIndicator(color: CupertinoColors.destructiveRed)
-                : const Text('Revoke', style: TextStyle(color: CupertinoColors.destructiveRed)),
+                ? CupertinoActivityIndicator(color: AppColors.of(context).error)
+                : Text(
+                    'Revoke',
+                    style: AppTypography.caption.copyWith(
+                      color: AppColors.of(context).error,
+                    ),
+                  ),
           ),
       ],
     );
@@ -214,13 +256,13 @@ class HouseholdInviteTile extends StatelessWidget {
 
   void _copyToClipboard(BuildContext context) {
     Clipboard.setData(ClipboardData(text: invite.inviteCode));
-    // Show a toast or snackbar
+    // Could show a toast here
   }
 
   String _formatDate(DateTime date) {
     final now = DateTime.now();
     final difference = date.difference(now);
-    
+
     if (difference.inDays > 1) {
       return '${difference.inDays} days';
     } else if (difference.inHours > 1) {

@@ -1,4 +1,7 @@
 import 'package:flutter/cupertino.dart';
+import '../../../theme/colors.dart';
+import '../../../theme/spacing.dart';
+import '../../../theme/typography.dart';
 import '../models/household_invite.dart';
 import 'household_invite_tile.dart';
 
@@ -25,14 +28,13 @@ class PendingInvitesSection extends StatelessWidget {
       children: [
         Text(
           'Pending Invitations',
-          style: CupertinoTheme.of(context).textTheme.textStyle.copyWith(
-            fontSize: 20,
-            fontWeight: FontWeight.w600,
+          style: AppTypography.h5.copyWith(
+            color: AppColors.of(context).textPrimary,
           ),
         ),
-        const SizedBox(height: 12),
+        SizedBox(height: AppSpacing.md),
         ...invites.map((invite) => Padding(
-          padding: const EdgeInsets.only(bottom: 8),
+          padding: EdgeInsets.only(bottom: AppSpacing.sm),
           child: HouseholdInviteTile(
             invite: invite,
             showActions: true,

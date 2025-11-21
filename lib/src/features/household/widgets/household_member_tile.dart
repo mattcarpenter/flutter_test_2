@@ -1,161 +1,107 @@
 import 'package:flutter/cupertino.dart';
+import '../../../theme/colors.dart';
+import '../../../theme/spacing.dart';
+import '../../../theme/typography.dart';
+import '../../../widgets/utils/grouped_list_styling.dart';
 import '../models/household_member.dart';
 
 class HouseholdMemberTile extends StatelessWidget {
   final HouseholdMember member;
-  final bool isCurrentUser;
   final bool canRemove;
   final VoidCallback? onRemove;
+  final bool isFirst;
+  final bool isLast;
 
   const HouseholdMemberTile({
     super.key,
     required this.member,
-    required this.isCurrentUser,
     required this.canRemove,
     this.onRemove,
+    required this.isFirst,
+    required this.isLast,
   });
 
   @override
   Widget build(BuildContext context) {
+    final borderRadius = GroupedListStyling.getBorderRadius(
+      isGrouped: true,
+      isFirstInGroup: isFirst,
+      isLastInGroup: isLast,
+    );
+    final border = GroupedListStyling.getBorder(
+      context: context,
+      isGrouped: true,
+      isFirstInGroup: isFirst,
+      isLastInGroup: isLast,
+      isDragging: false,
+    );
+
     return Container(
-      padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: CupertinoTheme.of(context).barBackgroundColor,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(
-          color: isCurrentUser 
-              ? CupertinoTheme.of(context).primaryColor.withValues(alpha: 0.3)
-              : CupertinoColors.separator,
-          width: isCurrentUser ? 1.5 : 0.5,
-        ),
+        color: AppColors.of(context).groupedListBackground,
+        borderRadius: borderRadius,
+        border: border,
       ),
-      child: Row(
-        children: [
-          _buildAvatar(context),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  children: [
-                    Expanded(
-                      child: Text(
-                        member.userName ?? member.userEmail ?? member.userId,
-                        style: const TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.w500,
-                        ),
-                      ),
-                    ),
-                    if (isCurrentUser)
-                      const Text(
-                        '(You)',
-                        style: TextStyle(
-                          color: CupertinoColors.secondaryLabel,
-                          fontSize: 14,
-                        ),
-                      ),
-                  ],
+      child: Padding(
+        padding: EdgeInsets.symmetric(
+          horizontal: AppSpacing.lg,
+          vertical: AppSpacing.md,
+        ),
+        child: Row(
+          children: [
+            // Member name/email
+            Expanded(
+              child: Text(
+                member.userName ?? member.userEmail ?? member.userId,
+                style: AppTypography.body.copyWith(
+                  color: AppColors.of(context).textPrimary,
+                  fontWeight: FontWeight.w500,
                 ),
-                const SizedBox(height: 4),
-                Row(
-                  children: [
-                    _buildRoleBadge(),
-                    const Spacer(),
-                    Text(
-                      'Joined ${_formatDate(member.joinedAt)}',
-                      style: const TextStyle(
-                        color: CupertinoColors.secondaryLabel,
-                        fontSize: 12,
-                      ),
-                    ),
-                  ],
-                ),
-              ],
-            ),
-          ),
-          if (canRemove && onRemove != null) ...[
-            const SizedBox(width: 8),
-            CupertinoButton(
-              padding: EdgeInsets.zero,
-              minSize: 32,
-              onPressed: () => _showRemoveConfirmation(context),
-              child: const Icon(
-                CupertinoIcons.minus_circle,
-                color: CupertinoColors.destructiveRed,
-                size: 20,
               ),
             ),
+            // Owner chip (only for owners)
+            if (member.isOwner) ...[
+              SizedBox(width: AppSpacing.sm),
+              _buildOwnerChip(context),
+            ],
+            // Remove button
+            if (canRemove && onRemove != null) ...[
+              SizedBox(width: AppSpacing.sm),
+              CupertinoButton(
+                padding: EdgeInsets.zero,
+                minSize: 32,
+                onPressed: () => _showRemoveConfirmation(context),
+                child: Icon(
+                  CupertinoIcons.minus_circle,
+                  color: AppColors.of(context).error,
+                  size: 20,
+                ),
+              ),
+            ],
           ],
-        ],
-      ),
-    );
-  }
-
-  Widget _buildAvatar(BuildContext context) {
-    return Container(
-      width: 40,
-      height: 40,
-      decoration: BoxDecoration(
-        color: CupertinoTheme.of(context).primaryColor.withValues(alpha: 0.2),
-        borderRadius: BorderRadius.circular(20),
-      ),
-      child: Center(
-        child: Text(
-          (member.userName ?? member.userEmail ?? member.userId).substring(0, 1).toUpperCase(),
-          style: TextStyle(
-            fontSize: 18,
-            fontWeight: FontWeight.w600,
-            color: CupertinoTheme.of(context).primaryColor,
-          ),
         ),
       ),
     );
   }
 
-  Widget _buildRoleBadge() {
-    Color color;
-    IconData icon;
-    String text;
-    
-    switch (member.role) {
-      case HouseholdRole.owner:
-        color = CupertinoColors.systemYellow;
-        icon = CupertinoIcons.star_circle;
-        text = 'Owner';
-        break;
-      case HouseholdRole.member:
-        color = CupertinoColors.systemGreen;
-        icon = CupertinoIcons.person;
-        text = 'Member';
-        break;
-    }
-
+  Widget _buildOwnerChip(BuildContext context) {
+    final colors = AppColors.of(context);
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 4),
       decoration: BoxDecoration(
-        color: color.withValues(alpha: 0.2),
-        borderRadius: BorderRadius.circular(8),
+        color: colors.warningBackground,
+        borderRadius: BorderRadius.circular(7),
       ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(
-            icon,
-            color: color,
-            size: 14,
-          ),
-          const SizedBox(width: 4),
-          Text(
-            text,
-            style: TextStyle(
-              color: color,
-              fontSize: 12,
-              fontWeight: FontWeight.w500,
-            ),
-          ),
-        ],
+      child: Text(
+        'Owner',
+        style: TextStyle(
+          fontSize: 11,
+          fontWeight: FontWeight.w500,
+          color: colors.warning,
+          height: 1.0,
+        ),
+        maxLines: 1,
+        overflow: TextOverflow.visible,
       ),
     );
   }
@@ -182,20 +128,5 @@ class HouseholdMemberTile extends StatelessWidget {
         ],
       ),
     );
-  }
-
-  String _formatDate(DateTime date) {
-    final now = DateTime.now();
-    final difference = now.difference(date);
-    
-    if (difference.inDays > 30) {
-      return '${(difference.inDays / 30).floor()} month${(difference.inDays / 30).floor() == 1 ? '' : 's'} ago';
-    } else if (difference.inDays > 0) {
-      return '${difference.inDays} day${difference.inDays == 1 ? '' : 's'} ago';
-    } else if (difference.inHours > 0) {
-      return '${difference.inHours} hour${difference.inHours == 1 ? '' : 's'} ago';
-    } else {
-      return 'Just now';
-    }
   }
 }

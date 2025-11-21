@@ -2,6 +2,8 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:wolt_modal_sheet/wolt_modal_sheet.dart';
 import '../../../theme/colors.dart';
+import '../../../theme/spacing.dart';
+import '../../../theme/typography.dart';
 import '../../../widgets/error_dialog.dart';
 import '../../../widgets/success_dialog.dart';
 import '../../../widgets/wolt/text/modal_sheet_title.dart';
@@ -31,7 +33,7 @@ class JoinWithCodeModalPage {
     return WoltModalSheetPage(
       backgroundColor: AppColors.of(context).background,
       leadingNavBarWidget: CupertinoButton(
-        padding: const EdgeInsets.symmetric(horizontal: 16.0),
+        padding: EdgeInsets.symmetric(horizontal: AppSpacing.lg),
         onPressed: () {
           Navigator.of(context).pop();
         },
@@ -39,7 +41,7 @@ class JoinWithCodeModalPage {
       ),
       pageTitle: const ModalSheetTitle('Join Household'),
       child: Padding(
-        padding: const EdgeInsets.fromLTRB(16, 16, 16, 16),
+        padding: EdgeInsets.all(AppSpacing.lg),
         child: JoinWithCodeForm(onAcceptInvite: onAcceptInvite),
       ),
     );
@@ -107,23 +109,22 @@ class _JoinWithCodeFormState extends ConsumerState<JoinWithCodeForm> {
       crossAxisAlignment: CrossAxisAlignment.start,
       mainAxisSize: MainAxisSize.min,
       children: [
-        const Text(
+        Text(
           'Enter the invitation code',
-          style: TextStyle(
-            color: CupertinoColors.secondaryLabel,
-            fontSize: 14,
+          style: AppTypography.body.copyWith(
+            color: AppColors.of(context).textSecondary,
           ),
         ),
-        const SizedBox(height: 16),
+        SizedBox(height: AppSpacing.lg),
         CupertinoTextField(
           controller: _controller,
           placeholder: 'Invitation code',
           autofocus: true,
           enabled: !_isJoining,
           onSubmitted: (_) => _joinHousehold(),
-          padding: const EdgeInsets.all(12),
+          padding: EdgeInsets.all(AppSpacing.md),
         ),
-        const SizedBox(height: 24),
+        SizedBox(height: AppSpacing.xl),
         SizedBox(
           width: double.infinity,
           child: _isJoining

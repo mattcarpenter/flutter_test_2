@@ -1,4 +1,8 @@
 import 'package:flutter/cupertino.dart';
+import '../../../theme/colors.dart';
+import '../../../theme/spacing.dart';
+import '../../../theme/typography.dart';
+import '../../../widgets/app_circle_button.dart';
 import '../models/household_invite.dart';
 import 'household_invite_tile.dart';
 import 'create_invite_modal.dart';
@@ -31,46 +35,44 @@ class HouseholdInvitesSection extends StatelessWidget {
             Expanded(
               child: Text(
                 'Pending Invites (${invites.length})',
-                style: CupertinoTheme.of(context).textTheme.textStyle.copyWith(
-                  fontSize: 20,
-                  fontWeight: FontWeight.w600,
+                style: AppTypography.h5.copyWith(
+                  color: AppColors.of(context).textPrimary,
                 ),
               ),
             ),
-            CupertinoButton(
-              padding: EdgeInsets.zero,
-              onPressed: isCreatingInvite ? null : () => _showCreateInviteModal(context),
-              child: isCreatingInvite
-                  ? const CupertinoActivityIndicator()
-                  : const Icon(CupertinoIcons.add_circled_solid),
-            ),
+            if (isCreatingInvite)
+              const CupertinoActivityIndicator()
+            else
+              AppCircleButton(
+                icon: AppCircleButtonIcon.plus,
+                onPressed: () => _showCreateInviteModal(context),
+              ),
           ],
         ),
-        const SizedBox(height: 12),
+        SizedBox(height: AppSpacing.md),
         if (invites.isEmpty)
           Container(
-            padding: const EdgeInsets.all(16),
+            padding: EdgeInsets.all(AppSpacing.lg),
             decoration: BoxDecoration(
-              color: CupertinoTheme.of(context).barBackgroundColor,
-              borderRadius: BorderRadius.circular(12),
+              color: AppColors.of(context).groupedListBackground,
+              borderRadius: BorderRadius.circular(8),
               border: Border.all(
-                color: CupertinoColors.separator,
+                color: AppColors.of(context).groupedListBorder,
                 width: 0.5,
               ),
             ),
-            child: const Center(
+            child: Center(
               child: Text(
                 'No pending invitations',
-                style: TextStyle(
-                  color: CupertinoColors.secondaryLabel,
-                  fontSize: 14,
+                style: AppTypography.body.copyWith(
+                  color: AppColors.of(context).textSecondary,
                 ),
               ),
             ),
           )
         else
           ...invites.map((invite) => Padding(
-            padding: const EdgeInsets.only(bottom: 8),
+            padding: EdgeInsets.only(bottom: AppSpacing.sm),
             child: HouseholdInviteTile(
               invite: invite,
               showActions: true,
