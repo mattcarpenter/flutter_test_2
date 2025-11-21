@@ -314,7 +314,7 @@ class _EditPantryItemPageState extends ConsumerState<_EditPantryItemPage> {
             ],
           ),
 
-          SizedBox(height: AppSpacing.sm),
+          SizedBox(height: AppSpacing.md),
 
           // No terms placeholder
           if (terms.isEmpty)
@@ -430,7 +430,7 @@ class _EditPantryItemPageState extends ConsumerState<_EditPantryItemPage> {
           },
           child: Container(
             decoration: BoxDecoration(
-              color: colors.input,
+              color: colors.groupedListBackground,
               border: border,
               borderRadius: borderRadius,
             ),
