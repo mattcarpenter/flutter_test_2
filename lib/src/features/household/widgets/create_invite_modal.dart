@@ -1,11 +1,16 @@
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:wolt_modal_sheet/wolt_modal_sheet.dart';
 import '../../../theme/colors.dart';
+import '../../../theme/spacing.dart';
+import '../../../theme/typography.dart';
+import '../../../widgets/app_button.dart';
+import '../../../widgets/app_circle_button.dart';
+import '../../../widgets/app_text_field_simple.dart';
 import '../../../widgets/error_dialog.dart';
-import '../../../widgets/wolt/text/modal_sheet_title.dart';
-import '../../../widgets/wolt/button/wolt_elevated_button.dart';
+import '../../../widgets/success_dialog.dart';
 import '../utils/error_messages.dart';
 
 void showCreateInviteModal(
@@ -35,20 +40,38 @@ class CreateInviteModalPage {
     required Future<String?> Function(String displayName) onCreateCodeInvite,
   }) {
     return WoltModalSheetPage(
+      navBarHeight: 55,
       backgroundColor: AppColors.of(context).background,
-      leadingNavBarWidget: CupertinoButton(
-        padding: const EdgeInsets.symmetric(horizontal: 16.0),
-        onPressed: () {
-          Navigator.of(context).pop();
-        },
-        child: const Text('Cancel'),
+      surfaceTintColor: Colors.transparent,
+      hasTopBarLayer: false,
+      isTopBarLayerAlwaysVisible: false,
+      trailingNavBarWidget: Padding(
+        padding: EdgeInsets.only(right: AppSpacing.lg),
+        child: AppCircleButton(
+          icon: AppCircleButtonIcon.close,
+          variant: AppCircleButtonVariant.neutral,
+          size: 32,
+          onPressed: () => Navigator.of(context).pop(),
+        ),
       ),
-      pageTitle: const ModalSheetTitle('Invite Member'),
       child: Padding(
-        padding: const EdgeInsets.fromLTRB(16, 16, 16, 16),
-        child: CreateInviteForm(
-          onCreateEmailInvite: onCreateEmailInvite,
-          onCreateCodeInvite: onCreateCodeInvite,
+        padding: EdgeInsets.fromLTRB(AppSpacing.lg, 0, AppSpacing.lg, AppSpacing.lg),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(
+              'Invite Member',
+              style: AppTypography.h4.copyWith(
+                color: AppColors.of(context).textPrimary,
+              ),
+            ),
+            SizedBox(height: AppSpacing.lg),
+            CreateInviteForm(
+              onCreateEmailInvite: onCreateEmailInvite,
+              onCreateCodeInvite: onCreateCodeInvite,
+            ),
+          ],
         ),
       ),
     );
@@ -74,12 +97,41 @@ class _CreateInviteFormState extends ConsumerState<CreateInviteForm> {
   final _emailController = TextEditingController();
   final _nameController = TextEditingController();
   bool _isCreating = false;
+  bool _hasEmailInput = false;
+  bool _hasNameInput = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _emailController.addListener(_updateEmailInput);
+    _nameController.addListener(_updateNameInput);
+  }
 
   @override
   void dispose() {
+    _emailController.removeListener(_updateEmailInput);
+    _nameController.removeListener(_updateNameInput);
     _emailController.dispose();
     _nameController.dispose();
     super.dispose();
+  }
+
+  void _updateEmailInput() {
+    final hasInput = _emailController.text.trim().isNotEmpty;
+    if (hasInput != _hasEmailInput) {
+      setState(() {
+        _hasEmailInput = hasInput;
+      });
+    }
+  }
+
+  void _updateNameInput() {
+    final hasInput = _nameController.text.trim().isNotEmpty;
+    if (hasInput != _hasNameInput) {
+      setState(() {
+        _hasNameInput = hasInput;
+      });
+    }
   }
 
   void _handleSegmentChanged(int? value) {
@@ -90,11 +142,20 @@ class _CreateInviteFormState extends ConsumerState<CreateInviteForm> {
     }
   }
 
+  bool get _canSubmit {
+    if (_isCreating) return false;
+    if (_selectedSegment == 0) {
+      return _hasEmailInput;
+    } else {
+      return _hasNameInput;
+    }
+  }
+
   void _createInvite() async {
     if (_selectedSegment == 0) {
       // Email invite
       if (_emailController.text.trim().isEmpty) return;
-      
+
       setState(() {
         _isCreating = true;
       });
@@ -103,7 +164,10 @@ class _CreateInviteFormState extends ConsumerState<CreateInviteForm> {
         await widget.onCreateEmailInvite(_emailController.text.trim());
         if (mounted) {
           Navigator.of(context).pop();
-          _showSuccessDialog('Invitation email has been sent!');
+          await SuccessDialog.show(
+            context,
+            message: 'Invitation email has been sent!',
+          );
         }
       } catch (e) {
         if (mounted) {
@@ -122,7 +186,7 @@ class _CreateInviteFormState extends ConsumerState<CreateInviteForm> {
     } else {
       // Code invite
       if (_nameController.text.trim().isEmpty) return;
-      
+
       setState(() {
         _isCreating = true;
       });
@@ -150,26 +214,10 @@ class _CreateInviteFormState extends ConsumerState<CreateInviteForm> {
     }
   }
 
-  void _showSuccessDialog(String message) {
-    showCupertinoDialog(
-      context: context,
-      builder: (context) => CupertinoAlertDialog(
-        title: const Text('Success'),
-        content: Text(message),
-        actions: [
-          CupertinoDialogAction(
-            onPressed: () => Navigator.of(context).pop(),
-            child: const Text('OK'),
-          ),
-        ],
-      ),
-    );
-  }
-
   void _showInviteCodeDialog(String inviteUrl) {
     showCupertinoDialog(
       context: context,
-      builder: (context) => CupertinoAlertDialog(
+      builder: (dialogContext) => CupertinoAlertDialog(
         title: const Text('Invite Code Created'),
         content: Column(
           mainAxisSize: MainAxisSize.min,
@@ -179,14 +227,15 @@ class _CreateInviteFormState extends ConsumerState<CreateInviteForm> {
             Container(
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
-                color: CupertinoColors.systemGrey6,
+                color: AppColors.of(dialogContext).surfaceVariant,
                 borderRadius: BorderRadius.circular(8),
               ),
               child: Text(
                 inviteUrl,
-                style: const TextStyle(
+                style: TextStyle(
                   fontFamily: 'monospace',
                   fontSize: 12,
+                  color: AppColors.of(dialogContext).textPrimary,
                 ),
               ),
             ),
@@ -196,13 +245,16 @@ class _CreateInviteFormState extends ConsumerState<CreateInviteForm> {
           CupertinoDialogAction(
             onPressed: () {
               Clipboard.setData(ClipboardData(text: inviteUrl));
-              Navigator.of(context).pop();
-              _showSuccessDialog('Invite URL copied to clipboard!');
+              Navigator.of(dialogContext).pop();
+              SuccessDialog.show(
+                context,
+                message: 'Invite URL copied to clipboard!',
+              );
             },
             child: const Text('Copy & Close'),
           ),
           CupertinoDialogAction(
-            onPressed: () => Navigator.of(context).pop(),
+            onPressed: () => Navigator.of(dialogContext).pop(),
             child: const Text('Close'),
           ),
         ],
@@ -216,14 +268,13 @@ class _CreateInviteFormState extends ConsumerState<CreateInviteForm> {
       crossAxisAlignment: CrossAxisAlignment.start,
       mainAxisSize: MainAxisSize.min,
       children: [
-        const Text(
+        Text(
           'Choose how to invite a new member',
-          style: TextStyle(
-            color: CupertinoColors.secondaryLabel,
-            fontSize: 14,
+          style: AppTypography.body.copyWith(
+            color: AppColors.of(context).textSecondary,
           ),
         ),
-        const SizedBox(height: 16),
+        SizedBox(height: AppSpacing.lg),
         CupertinoSlidingSegmentedControl<int>(
           groupValue: _selectedSegment,
           onValueChanged: _isCreating ? (_) {} : _handleSegmentChanged,
@@ -238,55 +289,49 @@ class _CreateInviteFormState extends ConsumerState<CreateInviteForm> {
             ),
           },
         ),
-        const SizedBox(height: 24),
+        SizedBox(height: AppSpacing.xl),
         if (_selectedSegment == 0) ...[
-          CupertinoTextField(
+          AppTextFieldSimple(
             controller: _emailController,
             placeholder: 'Email address',
             keyboardType: TextInputType.emailAddress,
             autofocus: true,
             enabled: !_isCreating,
             onSubmitted: (_) => _createInvite(),
-            padding: const EdgeInsets.all(12),
+            textInputAction: TextInputAction.done,
           ),
-          const SizedBox(height: 8),
-          const Text(
+          SizedBox(height: AppSpacing.sm),
+          Text(
             'An invitation email will be sent to this address',
-            style: TextStyle(
-              color: CupertinoColors.secondaryLabel,
-              fontSize: 12,
+            style: AppTypography.caption.copyWith(
+              color: AppColors.of(context).textTertiary,
             ),
           ),
         ] else ...[
-          CupertinoTextField(
+          AppTextFieldSimple(
             controller: _nameController,
             placeholder: 'Display name',
             autofocus: true,
             enabled: !_isCreating,
             onSubmitted: (_) => _createInvite(),
-            padding: const EdgeInsets.all(12),
+            textInputAction: TextInputAction.done,
           ),
-          const SizedBox(height: 8),
-          const Text(
+          SizedBox(height: AppSpacing.sm),
+          Text(
             'A shareable invitation code will be generated',
-            style: TextStyle(
-              color: CupertinoColors.secondaryLabel,
-              fontSize: 12,
+            style: AppTypography.caption.copyWith(
+              color: AppColors.of(context).textTertiary,
             ),
           ),
         ],
-        const SizedBox(height: 24),
-        SizedBox(
-          width: double.infinity,
-          child: _isCreating
-              ? const CupertinoButton(
-                  onPressed: null,
-                  child: CupertinoActivityIndicator(color: CupertinoColors.white),
-                )
-              : WoltElevatedButton(
-                  onPressed: _createInvite,
-                  child: Text(_selectedSegment == 0 ? 'Send Email' : 'Generate Code'),
-                ),
+        SizedBox(height: AppSpacing.xl),
+        AppButtonVariants.primaryFilled(
+          text: _selectedSegment == 0 ? 'Send Invitation' : 'Generate Code',
+          size: AppButtonSize.large,
+          shape: AppButtonShape.square,
+          fullWidth: true,
+          loading: _isCreating,
+          onPressed: _canSubmit ? _createInvite : null,
         ),
       ],
     );

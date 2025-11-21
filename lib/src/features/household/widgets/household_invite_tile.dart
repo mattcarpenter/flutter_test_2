@@ -146,54 +146,57 @@ class HouseholdInviteTile extends StatelessWidget {
   }
 
   Widget _buildStatusBadge(BuildContext context) {
+    final colors = AppColors.of(context);
     Color backgroundColor;
     Color textColor;
     String text;
 
     if (invite.isAccepting) {
-      backgroundColor = AppColorSwatches.warning[100]!;
-      textColor = AppColorSwatches.warning[700]!;
+      backgroundColor = colors.warningBackground;
+      textColor = colors.warning;
       text = 'Accepting...';
     } else if (invite.isRevoking) {
-      backgroundColor = AppColorSwatches.error[100]!;
-      textColor = AppColorSwatches.error[700]!;
+      backgroundColor = colors.errorBackground;
+      textColor = colors.error;
       text = 'Revoking...';
     } else {
       switch (invite.status) {
         case HouseholdInviteStatus.pending:
-          backgroundColor = AppColorSwatches.info[50]!;
-          textColor = AppColorSwatches.info[800]!;
+          backgroundColor = colors.infoBackground;
+          textColor = colors.info;
           text = 'Pending';
           break;
         case HouseholdInviteStatus.accepted:
-          backgroundColor = AppColorSwatches.success[100]!;
-          textColor = AppColorSwatches.success[700]!;
+          backgroundColor = colors.successBackground;
+          textColor = colors.success;
           text = 'Accepted';
           break;
         case HouseholdInviteStatus.declined:
-          backgroundColor = AppColorSwatches.error[100]!;
-          textColor = AppColorSwatches.error[700]!;
+          backgroundColor = colors.errorBackground;
+          textColor = colors.error;
           text = 'Declined';
           break;
         case HouseholdInviteStatus.revoked:
-          backgroundColor = AppColorSwatches.neutral[200]!;
-          textColor = AppColorSwatches.neutral[600]!;
+          backgroundColor = colors.surfaceVariant;
+          textColor = colors.textTertiary;
           text = 'Revoked';
           break;
       }
     }
 
     return Container(
-      padding: EdgeInsets.symmetric(horizontal: AppSpacing.sm, vertical: AppSpacing.xs),
+      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 4),
       decoration: BoxDecoration(
         color: backgroundColor,
-        borderRadius: BorderRadius.circular(6),
+        borderRadius: BorderRadius.circular(7),
       ),
       child: Text(
         text,
-        style: AppTypography.caption.copyWith(
-          color: textColor,
+        style: TextStyle(
+          fontSize: 11,
           fontWeight: FontWeight.w500,
+          color: textColor,
+          height: 1.0,
         ),
       ),
     );

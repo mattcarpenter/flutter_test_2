@@ -3,10 +3,14 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:wolt_modal_sheet/wolt_modal_sheet.dart';
 import '../models/household_member.dart';
 import '../../../theme/colors.dart';
+import '../../../theme/spacing.dart';
+import '../../../theme/typography.dart';
+import '../../../widgets/app_button.dart';
+import '../../../widgets/app_radio_button.dart';
+import '../../../widgets/utils/grouped_list_styling.dart';
 import '../../../widgets/error_dialog.dart';
 import '../../../widgets/success_dialog.dart';
 import '../../../widgets/wolt/text/modal_sheet_title.dart';
-import '../../../widgets/wolt/button/wolt_elevated_button.dart';
 import '../utils/error_messages.dart';
 
 void showLeaveHouseholdModal(
@@ -80,7 +84,7 @@ class LeaveHouseholdModalPage {
     return WoltModalSheetPage(
       backgroundColor: AppColors.of(context).background,
       leadingNavBarWidget: CupertinoButton(
-        padding: const EdgeInsets.symmetric(horizontal: 16.0),
+        padding: EdgeInsets.symmetric(horizontal: AppSpacing.lg),
         onPressed: () {
           Navigator.of(context).pop();
         },
@@ -88,7 +92,7 @@ class LeaveHouseholdModalPage {
       ),
       pageTitle: const ModalSheetTitle('Transfer Ownership'),
       child: Padding(
-        padding: const EdgeInsets.fromLTRB(16, 16, 16, 16),
+        padding: EdgeInsets.all(AppSpacing.lg),
         child: LeaveHouseholdForm(
           otherMembers: otherMembers,
           onLeaveHousehold: onLeaveHousehold,
@@ -162,62 +166,112 @@ class _LeaveHouseholdFormState extends ConsumerState<LeaveHouseholdForm> {
       crossAxisAlignment: CrossAxisAlignment.start,
       mainAxisSize: MainAxisSize.min,
       children: [
-        const Text(
+        Text(
           'As the owner, you must transfer ownership to another member before leaving.',
-          style: TextStyle(
-            color: CupertinoColors.secondaryLabel,
-            fontSize: 14,
+          style: AppTypography.body.copyWith(
+            color: AppColors.of(context).textSecondary,
           ),
         ),
-        const SizedBox(height: 24),
-        const Text(
-          'Select new owner:',
-          style: TextStyle(
-            fontSize: 16,
-            fontWeight: FontWeight.w500,
+        SizedBox(height: AppSpacing.xl),
+        Text(
+          'Select new owner',
+          style: AppTypography.h5.copyWith(
+            color: AppColors.of(context).textPrimary,
           ),
         ),
-        const SizedBox(height: 16),
-        Container(
-          decoration: BoxDecoration(
-            border: Border.all(
-              color: CupertinoColors.separator,
-              width: 0.5,
-            ),
-            borderRadius: BorderRadius.circular(8),
-          ),
-          child: SizedBox(
-            height: 120,
-            child: CupertinoPicker(
-              itemExtent: 44,
-              onSelectedItemChanged: _isLeaving ? null : (index) {
-                setState(() {
-                  _selectedNewOwner = widget.otherMembers[index];
-                });
-              },
-              children: widget.otherMembers.map((member) => Center(
-                child: Text(
-                  member.userName ?? member.userId,
-                  style: const TextStyle(fontSize: 16),
-                ),
-              )).toList(),
-            ),
-          ),
-        ),
-        const SizedBox(height: 24),
-        SizedBox(
-          width: double.infinity,
-          child: _isLeaving
-              ? const CupertinoButton(
-                  onPressed: null,
-                  child: CupertinoActivityIndicator(color: CupertinoColors.white),
-                )
-              : WoltElevatedButton(
-                  onPressed: _leaveHousehold,
-                  child: const Text('Transfer & Leave'),
-                ),
+        SizedBox(height: AppSpacing.md),
+        // Grouped list of members to select from
+        ...widget.otherMembers.asMap().entries.map((entry) {
+          final index = entry.key;
+          final member = entry.value;
+          final isFirst = index == 0;
+          final isLast = index == widget.otherMembers.length - 1;
+          final isSelected = _selectedNewOwner?.userId == member.userId;
+
+          return _buildMemberTile(
+            context,
+            member: member,
+            isSelected: isSelected,
+            isFirst: isFirst,
+            isLast: isLast,
+            onTap: _isLeaving ? null : () {
+              setState(() {
+                _selectedNewOwner = member;
+              });
+            },
+          );
+        }),
+        SizedBox(height: AppSpacing.xl),
+        AppButtonVariants.primaryFilled(
+          text: _isLeaving ? 'Transferring...' : 'Transfer & Leave',
+          size: AppButtonSize.large,
+          shape: AppButtonShape.square,
+          fullWidth: true,
+          loading: _isLeaving,
+          onPressed: _isLeaving || _selectedNewOwner == null ? null : _leaveHousehold,
         ),
       ],
+    );
+  }
+
+  Widget _buildMemberTile(
+    BuildContext context, {
+    required HouseholdMember member,
+    required bool isSelected,
+    required bool isFirst,
+    required bool isLast,
+    VoidCallback? onTap,
+  }) {
+    final borderRadius = GroupedListStyling.getBorderRadius(
+      isGrouped: true,
+      isFirstInGroup: isFirst,
+      isLastInGroup: isLast,
+    );
+    final border = GroupedListStyling.getBorder(
+      context: context,
+      isGrouped: true,
+      isFirstInGroup: isFirst,
+      isLastInGroup: isLast,
+      isDragging: false,
+    );
+
+    // Display name: prefer userName, then userEmail, finally fallback to truncated userId
+    final displayName = member.userName ?? member.userEmail ?? member.userId;
+
+    return GestureDetector(
+      onTap: onTap,
+      behavior: HitTestBehavior.opaque,
+      child: Container(
+        decoration: BoxDecoration(
+          color: AppColors.of(context).groupedListBackground,
+          borderRadius: borderRadius,
+          border: border,
+        ),
+        child: Padding(
+          padding: EdgeInsets.symmetric(
+            horizontal: AppSpacing.lg,
+            vertical: AppSpacing.md,
+          ),
+          child: Row(
+            children: [
+              AppRadioButton(
+                selected: isSelected,
+                onTap: onTap,
+              ),
+              SizedBox(width: AppSpacing.md),
+              Expanded(
+                child: Text(
+                  displayName,
+                  style: AppTypography.body.copyWith(
+                    color: AppColors.of(context).textPrimary,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
     );
   }
 }
