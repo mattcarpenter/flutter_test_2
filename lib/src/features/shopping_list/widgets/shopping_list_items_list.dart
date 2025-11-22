@@ -85,8 +85,15 @@ class _ShoppingListItemsListState extends ConsumerState<ShoppingListItemsList> {
                 _expandedCategories.remove(category);
               });
             },
-            header: DisclosureButton(
-              child: _buildCategoryHeader(context, category, categoryItems.length),
+            header: Theme(
+              data: Theme.of(context).copyWith(
+                splashColor: Colors.transparent,
+                highlightColor: Colors.transparent,
+                hoverColor: Colors.transparent,
+              ),
+              child: DisclosureButton(
+                child: _buildCategoryHeader(context, category, categoryItems.length),
+              ),
             ),
             child: DisclosureView(
               padding: EdgeInsets.zero,

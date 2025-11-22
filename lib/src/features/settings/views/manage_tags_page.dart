@@ -1,5 +1,4 @@
 import 'package:flutter/cupertino.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../mobile/utils/adaptive_sliver_page.dart';
@@ -43,31 +42,25 @@ class ManageTagsPage extends ConsumerWidget {
       }
     });
 
-    final backgroundColor = colors.brightness == Brightness.light
-        ? AppColorSwatches.neutral[100]!
-        : colors.background;
-
-    return CupertinoTheme(
-      data: CupertinoTheme.of(context).copyWith(
-        scaffoldBackgroundColor: backgroundColor,
-      ),
-      child: AdaptiveSliverPage(
-        title: 'Manage Tags',
-        automaticallyImplyLeading: true,
-        body: Container(
-          color: backgroundColor,
-          child: tagManagementState.isLoading
-              ? const Center(
-                  child: CupertinoActivityIndicator(),
-                )
-              : RefreshIndicator(
-                  onRefresh: () => tagManagementNotifier.refresh(),
-                  child: tagManagementState.tags.isEmpty
-                      ? _buildEmptyState(context, colors)
-                      : _buildTagsList(context, tagManagementState, tagManagementNotifier),
-                ),
-        ),
-      ),
+    return AdaptiveSliverPage(
+      title: 'Manage Tags',
+      automaticallyImplyLeading: true,
+      slivers: [
+        if (tagManagementState.isLoading)
+          const SliverFillRemaining(
+            child: Center(
+              child: CupertinoActivityIndicator(),
+            ),
+          )
+        else if (tagManagementState.tags.isEmpty)
+          SliverFillRemaining(
+            child: _buildEmptyState(context, colors),
+          )
+        else
+          SliverToBoxAdapter(
+            child: _buildTagsList(context, tagManagementState, tagManagementNotifier),
+          ),
+      ],
     );
   }
 
@@ -81,7 +74,7 @@ class ManageTagsPage extends ConsumerWidget {
             Icon(
               CupertinoIcons.tag,
               size: 64,
-              color: colors.textSecondary,
+              color: colors.textTertiary,
             ),
             SizedBox(height: AppSpacing.lg),
             Text(
@@ -113,41 +106,34 @@ class ManageTagsPage extends ConsumerWidget {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         SizedBox(height: AppSpacing.xl),
-        
+
         // Tags section
         SettingsGroup(
-            children: state.tags.map((tag) {
-              final recipeCount = state.recipeCounts[tag.id] ?? 0;
-              
-              return TagManagementRow(
-                tag: tag,
-                recipeCount: recipeCount,
-                onColorChanged: (color) {
-                  notifier.updateTagColor(tag.id, color);
-                },
-                onDelete: () {
-                  notifier.deleteTag(tag.id);
-                },
-              );
-            }).toList(),
+          header: 'Your Tags',
+          footer: 'Tap a color circle to change the tag color. Deleting a tag will remove it from all recipes.',
+          children: state.tags.indexed.map((indexed) {
+            final (index, tag) = indexed;
+            final recipeCount = state.recipeCounts[tag.id] ?? 0;
+            final isFirst = index == 0;
+            final isLast = index == state.tags.length - 1;
+
+            return TagManagementRow(
+              tag: tag,
+              recipeCount: recipeCount,
+              isFirst: isFirst,
+              isLast: isLast,
+              onColorChanged: (color) {
+                notifier.updateTagColor(tag.id, color);
+              },
+              onDelete: () {
+                notifier.deleteTag(tag.id);
+              },
+            );
+          }).toList(),
         ),
-        
-        SizedBox(height: AppSpacing.lg),
-        
-        // Help text
-        Padding(
-          padding: EdgeInsets.symmetric(horizontal: AppSpacing.lg),
-          child: Text(
-            'Tap a color circle to change the tag color. '
-            'Deleting a tag will remove it from all recipes.',
-            style: AppTypography.caption.copyWith(
-              color: AppColors.of(context).textSecondary,
-            ),
-          ),
-        ),
-        
-        // Add bottom spacing to ensure last item is visible
-        SizedBox(height: AppSpacing.xl * 3),
+
+        // Bottom spacing
+        SizedBox(height: AppSpacing.xxl),
       ],
     );
   }

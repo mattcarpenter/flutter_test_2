@@ -7,6 +7,7 @@ import '../../../theme/spacing.dart';
 import '../../../theme/typography.dart';
 import '../../../widgets/adaptive_pull_down/adaptive_pull_down.dart';
 import '../../../widgets/adaptive_pull_down/adaptive_menu_item.dart';
+import '../../../widgets/utils/grouped_list_styling.dart';
 
 /// Widget for managing individual tags in the tag management page
 /// Shows tag info, recipe count, and provides color change/delete actions
@@ -15,6 +16,8 @@ class TagManagementRow extends StatelessWidget {
   final int recipeCount;
   final Function(String color) onColorChanged;
   final VoidCallback onDelete;
+  final bool isFirst;
+  final bool isLast;
 
   const TagManagementRow({
     super.key,
@@ -22,6 +25,8 @@ class TagManagementRow extends StatelessWidget {
     required this.recipeCount,
     required this.onColorChanged,
     required this.onDelete,
+    this.isFirst = true,
+    this.isLast = true,
   });
 
   List<AdaptiveMenuItem> _buildColorMenuItems() {
@@ -97,8 +102,27 @@ class TagManagementRow extends StatelessWidget {
   Widget build(BuildContext context) {
     final colors = AppColors.of(context);
     final tagColor = TagColors.fromHex(tag.color);
-    
+
+    // Get grouped list styling
+    final borderRadius = GroupedListStyling.getBorderRadius(
+      isGrouped: true,
+      isFirstInGroup: isFirst,
+      isLastInGroup: isLast,
+    );
+    final border = GroupedListStyling.getBorder(
+      context: context,
+      isGrouped: true,
+      isFirstInGroup: isFirst,
+      isLastInGroup: isLast,
+      isDragging: false,
+    );
+
     return Container(
+      decoration: BoxDecoration(
+        color: colors.groupedListBackground,
+        borderRadius: borderRadius,
+        border: border,
+      ),
       padding: EdgeInsets.symmetric(
         horizontal: AppSpacing.lg,
         vertical: AppSpacing.md,

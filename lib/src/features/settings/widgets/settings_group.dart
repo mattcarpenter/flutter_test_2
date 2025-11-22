@@ -1,82 +1,72 @@
 import 'package:flutter/material.dart';
 import '../../../theme/colors.dart';
+import '../../../theme/spacing.dart';
 
 /// iOS-style grouped container for settings sections
-/// Similar to AppTextFieldGroup but specifically designed for settings
+/// Handles header/footer text - individual rows handle their own borders via GroupedListStyling
 class SettingsGroup extends StatelessWidget {
   final List<Widget> children;
   final EdgeInsetsGeometry? margin;
+  final String? header;
+  final String? footer;
 
   const SettingsGroup({
     super.key,
     required this.children,
     this.margin,
+    this.header,
+    this.footer,
   });
-
-  static const double _borderRadius = 8.0;
-
-  Widget _buildDivider(BuildContext context) {
-    final colors = AppColors.of(context);
-    
-    return Row(
-      children: [
-        // Left inset - white background to match the group
-        Container(
-          width: 16,
-          height: 1,
-          color: colors.brightness == Brightness.light 
-              ? Colors.white 
-              : colors.surface,
-        ),
-        // Center divider line
-        Expanded(
-          child: Container(
-            height: 1,
-            color: colors.border,
-          ),
-        ),
-        // Right inset - white background
-        Container(
-          width: 16,
-          height: 1,
-          color: colors.brightness == Brightness.light 
-              ? Colors.white 
-              : colors.surface,
-        ),
-      ],
-    );
-  }
 
   @override
   Widget build(BuildContext context) {
     final colors = AppColors.of(context);
-    
+
     if (children.isEmpty) return const SizedBox.shrink();
 
-    final List<Widget> childrenWithDividers = [];
-    
-    for (int i = 0; i < children.length; i++) {
-      childrenWithDividers.add(children[i]);
-      
-      // Add divider between items (not after the last one)
-      if (i < children.length - 1) {
-        childrenWithDividers.add(_buildDivider(context));
-      }
-    }
-
-    return Container(
-      margin: margin ?? const EdgeInsets.symmetric(horizontal: 16),
-      decoration: BoxDecoration(
-        color: colors.brightness == Brightness.light
-            ? Colors.white
-            : colors.surface,
-        borderRadius: BorderRadius.circular(_borderRadius),
-        // Remove border for cleaner iOS look
-      ),
-      clipBehavior: Clip.antiAlias,
+    return Padding(
+      padding: margin ?? EdgeInsets.symmetric(horizontal: AppSpacing.lg),
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: childrenWithDividers,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Optional header
+          if (header != null) ...[
+            Padding(
+              padding: EdgeInsets.only(
+                left: AppSpacing.sm,
+                bottom: AppSpacing.sm,
+              ),
+              child: Text(
+                header!.toUpperCase(),
+                style: TextStyle(
+                  fontSize: 13,
+                  fontWeight: FontWeight.w400,
+                  color: colors.textSecondary,
+                  letterSpacing: -0.08,
+                ),
+              ),
+            ),
+          ],
+          // Children (each row handles its own border/radius)
+          ...children,
+          // Optional footer
+          if (footer != null) ...[
+            Padding(
+              padding: EdgeInsets.only(
+                left: AppSpacing.sm,
+                top: AppSpacing.sm,
+              ),
+              child: Text(
+                footer!,
+                style: TextStyle(
+                  fontSize: 13,
+                  fontWeight: FontWeight.w400,
+                  color: colors.textSecondary,
+                ),
+              ),
+            ),
+          ],
+        ],
       ),
     );
   }

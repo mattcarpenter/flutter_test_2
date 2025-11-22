@@ -1,10 +1,11 @@
-import 'package:flutter/material.dart';
+import 'package:flutter/cupertino.dart';
 import '../../../theme/colors.dart';
 import '../../../theme/spacing.dart';
 import '../../../theme/typography.dart';
+import '../../../widgets/utils/grouped_list_styling.dart';
 
 /// iOS-style settings row with title, optional subtitle, and trailing widget
-/// Includes hover states and proper touch handling
+/// Includes press states and proper touch handling
 class SettingsRow extends StatefulWidget {
   final String title;
   final String? subtitle;
@@ -13,6 +14,9 @@ class SettingsRow extends StatefulWidget {
   final VoidCallback? onTap;
   final bool showChevron;
   final bool enabled;
+  final bool isDestructive;
+  final bool isFirst;
+  final bool isLast;
 
   const SettingsRow({
     super.key,
@@ -23,6 +27,9 @@ class SettingsRow extends StatefulWidget {
     this.onTap,
     this.showChevron = true,
     this.enabled = true,
+    this.isDestructive = false,
+    this.isFirst = true,
+    this.isLast = true,
   });
 
   @override
@@ -36,27 +43,55 @@ class _SettingsRowState extends State<SettingsRow> {
   Widget build(BuildContext context) {
     final colors = AppColors.of(context);
     final hasSubtitle = widget.subtitle != null && widget.subtitle!.isNotEmpty;
-    
+
+    // Get grouped list styling
+    final borderRadius = GroupedListStyling.getBorderRadius(
+      isGrouped: true,
+      isFirstInGroup: widget.isFirst,
+      isLastInGroup: widget.isLast,
+    );
+    final border = GroupedListStyling.getBorder(
+      context: context,
+      isGrouped: true,
+      isFirstInGroup: widget.isFirst,
+      isLastInGroup: widget.isLast,
+      isDragging: false,
+    );
+
+    // Determine text color
+    Color titleColor;
+    if (!widget.enabled) {
+      titleColor = colors.textDisabled;
+    } else if (widget.isDestructive) {
+      titleColor = colors.error;
+    } else {
+      titleColor = colors.textPrimary;
+    }
+
     Widget trailingWidget = const SizedBox.shrink();
-    
+
     if (widget.trailing != null) {
       trailingWidget = widget.trailing!;
     } else if (widget.showChevron && widget.onTap != null) {
       trailingWidget = Icon(
-        Icons.chevron_right,
-        color: widget.enabled ? colors.textSecondary : colors.textDisabled,
-        size: 20,
+        CupertinoIcons.chevron_right,
+        color: widget.enabled ? colors.textTertiary : colors.textDisabled,
+        size: 16,
       );
     }
 
     final content = Container(
+      decoration: BoxDecoration(
+        color: _isPressed && widget.enabled
+            ? colors.surfaceVariant
+            : colors.groupedListBackground,
+        borderRadius: borderRadius,
+        border: border,
+      ),
       padding: EdgeInsets.symmetric(
         horizontal: AppSpacing.lg,
-        vertical: hasSubtitle ? AppSpacing.md : AppSpacing.sm,
+        vertical: hasSubtitle ? AppSpacing.md : AppSpacing.lg,
       ),
-      color: _isPressed && widget.enabled 
-          ? colors.surfaceVariant 
-          : (colors.brightness == Brightness.light ? Colors.white : colors.surface),
       child: Row(
         children: [
           if (widget.leading != null) ...[
@@ -71,18 +106,16 @@ class _SettingsRowState extends State<SettingsRow> {
                 Text(
                   widget.title,
                   style: AppTypography.body.copyWith(
-                    color: widget.enabled 
-                        ? colors.textPrimary 
-                        : colors.textDisabled,
+                    color: titleColor,
                   ),
                 ),
                 if (hasSubtitle) ...[
                   SizedBox(height: 2),
                   Text(
                     widget.subtitle!,
-                    style: AppTypography.bodySmall.copyWith(
-                      color: widget.enabled 
-                          ? colors.textSecondary 
+                    style: AppTypography.caption.copyWith(
+                      color: widget.enabled
+                          ? colors.textSecondary
                           : colors.textDisabled,
                     ),
                   ),
@@ -90,8 +123,10 @@ class _SettingsRowState extends State<SettingsRow> {
               ],
             ),
           ),
-          SizedBox(width: AppSpacing.sm),
-          trailingWidget,
+          if (trailingWidget != const SizedBox.shrink()) ...[
+            SizedBox(width: AppSpacing.sm),
+            trailingWidget,
+          ],
         ],
       ),
     );
@@ -105,7 +140,101 @@ class _SettingsRowState extends State<SettingsRow> {
       onTapDown: (_) => setState(() => _isPressed = true),
       onTapUp: (_) => setState(() => _isPressed = false),
       onTapCancel: () => setState(() => _isPressed = false),
+      behavior: HitTestBehavior.opaque,
       child: content,
+    );
+  }
+}
+
+/// A toggle row for settings with a CupertinoSwitch
+class SettingsToggleRow extends StatelessWidget {
+  final String title;
+  final String? subtitle;
+  final Widget? leading;
+  final bool value;
+  final ValueChanged<bool>? onChanged;
+  final bool enabled;
+  final bool isFirst;
+  final bool isLast;
+
+  const SettingsToggleRow({
+    super.key,
+    required this.title,
+    this.subtitle,
+    this.leading,
+    required this.value,
+    this.onChanged,
+    this.enabled = true,
+    this.isFirst = true,
+    this.isLast = true,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = AppColors.of(context);
+    final hasSubtitle = subtitle != null && subtitle!.isNotEmpty;
+
+    // Get grouped list styling
+    final borderRadius = GroupedListStyling.getBorderRadius(
+      isGrouped: true,
+      isFirstInGroup: isFirst,
+      isLastInGroup: isLast,
+    );
+    final border = GroupedListStyling.getBorder(
+      context: context,
+      isGrouped: true,
+      isFirstInGroup: isFirst,
+      isLastInGroup: isLast,
+      isDragging: false,
+    );
+
+    return Container(
+      decoration: BoxDecoration(
+        color: colors.groupedListBackground,
+        borderRadius: borderRadius,
+        border: border,
+      ),
+      padding: EdgeInsets.symmetric(
+        horizontal: AppSpacing.lg,
+        vertical: hasSubtitle ? AppSpacing.md : AppSpacing.lg,
+      ),
+      child: Row(
+        children: [
+          if (leading != null) ...[
+            leading!,
+            SizedBox(width: AppSpacing.md),
+          ],
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  title,
+                  style: AppTypography.body.copyWith(
+                    color: enabled ? colors.textPrimary : colors.textDisabled,
+                  ),
+                ),
+                if (hasSubtitle) ...[
+                  SizedBox(height: 2),
+                  Text(
+                    subtitle!,
+                    style: AppTypography.caption.copyWith(
+                      color: enabled ? colors.textSecondary : colors.textDisabled,
+                    ),
+                  ),
+                ],
+              ],
+            ),
+          ),
+          SizedBox(width: AppSpacing.sm),
+          CupertinoSwitch(
+            value: value,
+            onChanged: enabled ? onChanged : null,
+            activeTrackColor: colors.primary,
+          ),
+        ],
+      ),
     );
   }
 }
