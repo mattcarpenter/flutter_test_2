@@ -18,7 +18,6 @@ void showShoppingListSelectionModal(BuildContext context, WidgetRef ref) {
   WoltModalSheet.show(
     useRootNavigator: true,
     context: context,
-    modalTypeBuilder: (_) => WoltModalType.bottomSheet(),
     pageListBuilder: (bottomSheetContext) => [
       ShoppingListSelectionPage.build(bottomSheetContext, ref),
       CreateShoppingListPage.build(bottomSheetContext, ref),

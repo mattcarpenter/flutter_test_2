@@ -22,7 +22,6 @@ void showUnifiedPantrySortFilterSheet(
   WoltModalSheet.show(
     useRootNavigator: true,
     context: context,
-    modalTypeBuilder: (_) => WoltModalType.bottomSheet(),
     pageListBuilder: (modalContext) {
       return [
         _UnifiedPantrySortFilterModalPage.build(

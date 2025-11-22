@@ -11,7 +11,6 @@ void showIngredientsModal(BuildContext context, List<Ingredient> ingredients) {
   WoltModalSheet.show(
     useRootNavigator: true,
     context: context,
-    modalTypeBuilder: (_) => WoltModalType.bottomSheet(),
     pageListBuilder: (modalContext) {
       return [
         SliverWoltModalSheetPage(

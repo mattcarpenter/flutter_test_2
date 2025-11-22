@@ -175,7 +175,6 @@ void showUnifiedSortFilterSheet(
   WoltModalSheet.show(
     useRootNavigator: true,
     context: context,
-    modalTypeBuilder: (_) => WoltModalType.bottomSheet(),
     pageListBuilder: (modalContext) {
       return [
         _UnifiedSortFilterModalPage.build(

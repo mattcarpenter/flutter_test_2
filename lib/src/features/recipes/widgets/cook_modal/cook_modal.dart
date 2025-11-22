@@ -23,7 +23,6 @@ void showCookModal(BuildContext context, {
   WoltModalSheet.show(
     useRootNavigator: true,
     context: context,
-    modalTypeBuilder: (_) => WoltModalType.bottomSheet(),
     pageListBuilder: (modalContext) {
       return [
         WoltModalSheetPage(

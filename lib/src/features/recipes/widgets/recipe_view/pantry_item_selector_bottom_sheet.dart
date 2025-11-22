@@ -18,7 +18,6 @@ void showPantryItemSelectorBottomSheet({
   WoltModalSheet.show(
     useRootNavigator: true,
     context: context,
-    modalTypeBuilder: (_) => WoltModalType.bottomSheet(),
     pageListBuilder: (modalContext) {
       return [
         WoltModalSheetPage(

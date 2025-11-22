@@ -232,7 +232,6 @@ class _IngredientListItemState extends ConsumerState<IngredientListItem> with Si
     WoltModalSheet.show(
       useRootNavigator: true,
       context: context,
-      modalTypeBuilder: (_) => WoltModalType.bottomSheet(),
       pageListBuilder: (modalContext) {
         return [
           WoltModalSheetPage(

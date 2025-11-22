@@ -26,7 +26,6 @@ void showAddRecipeModal(
   WoltModalSheet.show(
     useRootNavigator: true,
     context: context,
-    modalTypeBuilder: (_) => WoltModalType.bottomSheet(),
     pageListBuilder: (modalContext) => [
       _AddRecipeModalPage.build(
         context: modalContext,

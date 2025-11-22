@@ -46,7 +46,6 @@ void showIngredientMatchesBottomSheet(
   WoltModalSheet.show(
     useRootNavigator: true,
     context: context,
-    modalTypeBuilder: (_) => WoltModalType.bottomSheet(),
     pageIndexNotifier: pageIndexNotifier,
     pageListBuilder: (modalContext) {
       return [
