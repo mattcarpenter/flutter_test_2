@@ -56,9 +56,11 @@ class RecipeListItem extends StatelessWidget {
       subtitleText = servingsDisplay;
     }
 
-    return InkWell(
-      onTap: onTap,
-      child: Padding(
+    return Material(
+      type: MaterialType.transparency,
+      child: InkWell(
+        onTap: onTap,
+        child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg, vertical: AppSpacing.xs),
         child: Row(
           children: [
@@ -129,6 +131,7 @@ class RecipeListItem extends StatelessWidget {
             ],
           ],
         ),
+      ),
       ),
     );
   }
