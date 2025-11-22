@@ -88,35 +88,38 @@ class _PantryItemListState extends ConsumerState<PantryItemList> {
 
         // Add Disclosure widget for category
         categoryWidgets.add(
-          Disclosure(
-            closed: !isExpanded,
-            onOpen: () {
-              setState(() {
-                _expandedCategories.add(category);
-              });
-            },
-            onClose: () {
-              setState(() {
-                _expandedCategories.remove(category);
-              });
-            },
-            header: DisclosureButton(
-              child: _buildCategoryHeader(context, category, categoryItems.length),
-            ),
-            child: DisclosureView(
-              padding: EdgeInsets.zero,
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  for (int itemIndex = 0; itemIndex < categoryItems.length; itemIndex++)
-                    _buildPantryItemTile(
-                      context,
-                      ref,
-                      categoryItems[itemIndex],
-                      isFirst: itemIndex == 0,
-                      isLast: itemIndex == categoryItems.length - 1,
-                    ),
-                ],
+          Material(
+            type: MaterialType.transparency,
+            child: Disclosure(
+              closed: !isExpanded,
+              onOpen: () {
+                setState(() {
+                  _expandedCategories.add(category);
+                });
+              },
+              onClose: () {
+                setState(() {
+                  _expandedCategories.remove(category);
+                });
+              },
+              header: DisclosureButton(
+                child: _buildCategoryHeader(context, category, categoryItems.length),
+              ),
+              child: DisclosureView(
+                padding: EdgeInsets.zero,
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    for (int itemIndex = 0; itemIndex < categoryItems.length; itemIndex++)
+                      _buildPantryItemTile(
+                        context,
+                        ref,
+                        categoryItems[itemIndex],
+                        isFirst: itemIndex == 0,
+                        isLast: itemIndex == categoryItems.length - 1,
+                      ),
+                  ],
+                ),
               ),
             ),
           ),

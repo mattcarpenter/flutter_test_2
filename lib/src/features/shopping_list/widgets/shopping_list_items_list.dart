@@ -1,4 +1,5 @@
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:disclosure/disclosure.dart';
 import '../../../../database/database.dart';
@@ -70,43 +71,46 @@ class _ShoppingListItemsListState extends ConsumerState<ShoppingListItemsList> {
 
       // Add Disclosure widget for category
       categoryWidgets.add(
-        Disclosure(
-          closed: !isExpanded,
-          onOpen: () {
-            setState(() {
-              _expandedCategories.add(category);
-            });
-          },
-          onClose: () {
-            setState(() {
-              _expandedCategories.remove(category);
-            });
-          },
-          header: DisclosureButton(
-            child: _buildCategoryHeader(context, category, categoryItems.length),
-          ),
-          child: DisclosureView(
-            padding: EdgeInsets.zero,
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                for (int itemIndex = 0; itemIndex < categoryItems.length; itemIndex++)
-                  ShoppingListItemTile(
-                    item: categoryItems[itemIndex],
-                    isFirst: itemIndex == 0,
-                    isLast: itemIndex == categoryItems.length - 1,
-                    onBoughtToggle: (bought) async {
-                      final currentListId = ref.read(currentShoppingListProvider);
-                      await ref.read(shoppingListItemsProvider(currentListId).notifier)
-                          .markBought(categoryItems[itemIndex].id, bought: bought);
-                    },
-                    onDelete: () async {
-                      final currentListId = ref.read(currentShoppingListProvider);
-                      await ref.read(shoppingListItemsProvider(currentListId).notifier)
-                          .deleteItem(categoryItems[itemIndex].id);
-                    },
-                  ),
-              ],
+        Material(
+          type: MaterialType.transparency,
+          child: Disclosure(
+            closed: !isExpanded,
+            onOpen: () {
+              setState(() {
+                _expandedCategories.add(category);
+              });
+            },
+            onClose: () {
+              setState(() {
+                _expandedCategories.remove(category);
+              });
+            },
+            header: DisclosureButton(
+              child: _buildCategoryHeader(context, category, categoryItems.length),
+            ),
+            child: DisclosureView(
+              padding: EdgeInsets.zero,
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  for (int itemIndex = 0; itemIndex < categoryItems.length; itemIndex++)
+                    ShoppingListItemTile(
+                      item: categoryItems[itemIndex],
+                      isFirst: itemIndex == 0,
+                      isLast: itemIndex == categoryItems.length - 1,
+                      onBoughtToggle: (bought) async {
+                        final currentListId = ref.read(currentShoppingListProvider);
+                        await ref.read(shoppingListItemsProvider(currentListId).notifier)
+                            .markBought(categoryItems[itemIndex].id, bought: bought);
+                      },
+                      onDelete: () async {
+                        final currentListId = ref.read(currentShoppingListProvider);
+                        await ref.read(shoppingListItemsProvider(currentListId).notifier)
+                            .deleteItem(categoryItems[itemIndex].id);
+                      },
+                    ),
+                ],
+              ),
             ),
           ),
         ),
