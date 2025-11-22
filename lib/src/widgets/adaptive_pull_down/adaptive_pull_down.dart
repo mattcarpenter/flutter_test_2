@@ -50,10 +50,10 @@ class AdaptivePullDownButton extends StatelessWidget {
         },
         routeTheme: const PullDownMenuRouteTheme(
           shadow: BoxShadow(
-            color: Color(0x33000000), // Black with 20% opacity
-            blurRadius: 64,
-            offset: Offset(0, 6),
-            spreadRadius: 14,
+            color: Color(0x20000000), // Black with ~12% opacity
+            blurRadius: 32,
+            offset: Offset(0, 8),
+            spreadRadius: 0, // No spread for natural soft fade
           ),
         ),
       );

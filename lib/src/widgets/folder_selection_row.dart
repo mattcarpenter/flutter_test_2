@@ -46,7 +46,7 @@ class FolderSelectionRow extends StatelessWidget {
 
     return Container(
       decoration: BoxDecoration(
-        color: colors.input,
+        color: colors.groupedListBackground,
         border: border,
         borderRadius: borderRadius,
       ),

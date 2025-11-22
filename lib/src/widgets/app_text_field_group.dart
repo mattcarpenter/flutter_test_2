@@ -26,17 +26,20 @@ class _AppTextFieldGroupState extends State<AppTextFieldGroup> {
 
   Widget _buildDivider() {
     final colors = AppColors.of(context);
-    final borderColor = widget.errorText != null ? colors.error : colors.border;
-    
+    // Use borderStrong for better visibility in light mode
+    final borderColor = widget.errorText != null ? colors.error : colors.borderStrong;
+    // Match the container background color
+    final insetColor = widget.variant == AppTextFieldVariant.filled
+        ? colors.inputBackgroundFilled
+        : colors.input;
+
     return Row(
       children: [
         // Left inset - background color
         Container(
           width: 16,
           height: 1,
-          color: widget.variant == AppTextFieldVariant.filled 
-              ? colors.inputBackgroundFilled 
-              : colors.surface,
+          color: insetColor,
         ),
         // Center divider line
         Expanded(
@@ -49,9 +52,7 @@ class _AppTextFieldGroupState extends State<AppTextFieldGroup> {
         Container(
           width: 16,
           height: 1,
-          color: widget.variant == AppTextFieldVariant.filled 
-              ? colors.inputBackgroundFilled 
-              : colors.surface,
+          color: insetColor,
         ),
       ],
     );
