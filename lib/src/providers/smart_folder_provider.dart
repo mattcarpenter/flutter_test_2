@@ -42,6 +42,48 @@ final ingredientTermSearchProvider = FutureProvider.family<List<IngredientTermSe
   return repo.searchIngredientTerms(query);
 });
 
+/// StateNotifier for smart folder search query
+class SmartFolderSearchNotifier extends StateNotifier<String> {
+  SmartFolderSearchNotifier() : super('');
+
+  void search(String query) {
+    state = query;
+  }
+
+  void clear() {
+    state = '';
+  }
+}
+
+/// Provider for smart folder search query state
+final smartFolderSearchQueryProvider = StateNotifierProvider<SmartFolderSearchNotifier, String>((ref) {
+  return SmartFolderSearchNotifier();
+});
+
+/// Provider that filters smart folder recipes based on search query
+/// This does client-side filtering of already-loaded recipes
+final smartFolderFilteredRecipesProvider = Provider.family<AsyncValue<List<RecipeEntry>>, RecipeFolderEntry>((ref, folder) {
+  final recipesAsync = ref.watch(smartFolderRecipesProvider(folder));
+  final searchQuery = ref.watch(smartFolderSearchQueryProvider).toLowerCase().trim();
+
+  return recipesAsync.when(
+    loading: () => const AsyncValue.loading(),
+    error: (e, st) => AsyncValue.error(e, st),
+    data: (recipes) {
+      if (searchQuery.isEmpty) {
+        return AsyncValue.data(recipes);
+      }
+
+      // Filter recipes by title matching the search query
+      final filtered = recipes.where((recipe) {
+        return recipe.title.toLowerCase().contains(searchQuery);
+      }).toList();
+
+      return AsyncValue.data(filtered);
+    },
+  );
+});
+
 /// Provider that returns recipe counts for all smart folders
 /// Returns a map of folder ID to recipe count
 final smartFolderCountsProvider = FutureProvider<Map<String, int>>((ref) async {

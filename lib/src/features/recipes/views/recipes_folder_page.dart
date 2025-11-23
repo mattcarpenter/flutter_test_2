@@ -17,6 +17,7 @@ import '../utils/filter_utils.dart';
 import '../widgets/filter_sort/unified_sort_filter_sheet.dart';
 import '../widgets/recipe_list.dart';
 import '../widgets/recipe_search_results.dart';
+import '../widgets/smart_folder_search_results.dart';
 import 'add_recipe_modal.dart';
 
 class RecipesFolderPage extends ConsumerWidget {
@@ -236,7 +237,16 @@ class RecipesFolderPage extends ConsumerWidget {
 
     return AdaptiveSliverPage(
       title: title,
-      searchEnabled: false, // Disable search for smart folders
+      searchEnabled: true,
+      searchResultsBuilder: (context, query) => SmartFolderSearchResults(
+        folder: folder,
+        currentPageTitle: title,
+      ),
+      onSearchChanged: (query) {
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          ref.read(smartFolderSearchQueryProvider.notifier).search(query);
+        });
+      },
       slivers: [
         recipesAsync.when(
           loading: () => const SliverFillRemaining(
