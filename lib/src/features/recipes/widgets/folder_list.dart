@@ -9,6 +9,7 @@ import '../../../providers/recipe_provider.dart';
 import '../../../providers/smart_folder_provider.dart';
 import '../../../theme/spacing.dart';
 import '../views/edit_smart_folder_modal.dart';
+import '../views/rename_folder_modal.dart';
 import 'folder_card.dart';
 
 class FolderList extends ConsumerStatefulWidget {
@@ -164,6 +165,12 @@ class _FolderListState extends ConsumerState<FolderList> {
                             onEdit: isSmartFolder
                                 ? () => showEditSmartFolderModal(context, regularFolder)
                                 : null,
+                            // Pass rename callback for all folders
+                            onRename: () => showRenameFolderModal(
+                              context,
+                              folderId: regularFolder.id,
+                              currentName: regularFolder.name,
+                            ),
                           ),
                         );
                       }

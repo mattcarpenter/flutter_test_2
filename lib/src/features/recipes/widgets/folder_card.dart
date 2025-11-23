@@ -18,6 +18,7 @@ class FolderCard extends ConsumerStatefulWidget {
   final VoidCallback onTap;
   final VoidCallback onDelete;
   final VoidCallback? onEdit; // Optional edit callback for smart folders
+  final VoidCallback? onRename; // Optional rename callback
 
   const FolderCard({
     Key? key,
@@ -29,6 +30,7 @@ class FolderCard extends ConsumerStatefulWidget {
     required this.onTap,
     required this.onDelete,
     this.onEdit,
+    this.onRename,
   }) : super(key: key);
 
   @override
@@ -99,6 +101,7 @@ class _FolderCardState extends ConsumerState<FolderCard> with SingleTickerProvid
             folderType: widget.folderType,
             onDelete: _startDeletionAnimation,
             onEdit: widget.onEdit,
+            onRename: widget.onRename,
           ),
         ),
       ),
@@ -114,6 +117,7 @@ class _FolderCardContextMenu extends ConsumerWidget {
   final int folderType;
   final VoidCallback onDelete;
   final VoidCallback? onEdit;
+  final VoidCallback? onRename;
 
   const _FolderCardContextMenu({
     Key? key,
@@ -124,6 +128,7 @@ class _FolderCardContextMenu extends ConsumerWidget {
     required this.folderType,
     required this.onDelete,
     this.onEdit,
+    this.onRename,
   }) : super(key: key);
 
   @override
@@ -157,11 +162,18 @@ class _FolderCardContextMenu extends ConsumerWidget {
       menuProvider: (_) {
         return Menu(
           children: [
+            // Show rename option for all folders
+            if (onRename != null)
+              MenuAction(
+                title: 'Rename Folder',
+                image: MenuImage.icon(Icons.drive_file_rename_outline),
+                callback: onRename!,
+              ),
             // Show edit option for smart folders
             if (isSmartFolder && onEdit != null)
               MenuAction(
                 title: 'Edit Smart Folder',
-                image: MenuImage.icon(Icons.edit),
+                image: MenuImage.icon(Icons.tune),
                 callback: onEdit!,
               ),
             MenuAction(

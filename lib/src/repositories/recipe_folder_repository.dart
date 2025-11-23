@@ -90,6 +90,15 @@ class RecipeFolderRepository {
     ));
   }
 
+  /// Rename a folder
+  Future<int> renameFolder(String id, String newName) {
+    return (_db.update(_db.recipeFolders)
+      ..where((tbl) => tbl.id.equals(id))
+    ).write(RecipeFoldersCompanion(
+      name: Value(newName),
+    ));
+  }
+
   Future<void> deleteFolderAndCleanupReferences(String folderId, RecipeRepository recipeRepository) async {
     // Use a transaction to ensure atomicity
     return _db.transaction(() async {

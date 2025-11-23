@@ -5,13 +5,13 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:wolt_modal_sheet/wolt_modal_sheet.dart';
 
 import '../../../../database/database.dart';
+import '../../../models/ingredient_term_search_result.dart';
 import '../../../providers/recipe_folder_provider.dart';
 import '../../../providers/recipe_tag_provider.dart';
 import '../../../providers/smart_folder_provider.dart';
 import '../../../theme/colors.dart';
 import '../../../theme/spacing.dart';
 import '../../../theme/typography.dart';
-import '../../../models/ingredient_term_search_result.dart';
 import '../../../utils/term_search_utils.dart';
 import '../../../widgets/app_button.dart';
 import '../../../widgets/app_circle_button.dart';
@@ -25,25 +25,28 @@ Future<bool?> showEditSmartFolderModal(BuildContext context, RecipeFolderEntry f
     useRootNavigator: true,
     context: context,
     pageListBuilder: (bottomSheetContext) => [
-      EditSmartFolderModalPage.build(context: bottomSheetContext, folder: folder),
+      _EditSmartFolderPage.build(context: bottomSheetContext, folder: folder),
     ],
   );
 }
 
-class EditSmartFolderModalPage {
-  EditSmartFolderModalPage._();
+class _EditSmartFolderPage {
+  _EditSmartFolderPage._();
 
   static SliverWoltModalSheetPage build({
     required BuildContext context,
     required RecipeFolderEntry folder,
   }) {
+    final isTagBased = folder.folderType == 1;
+    final title = isTagBased ? 'Edit Tags' : 'Edit Ingredients';
+
     return SliverWoltModalSheetPage(
       navBarHeight: 55,
       backgroundColor: AppColors.of(context).background,
       surfaceTintColor: Colors.transparent,
       hasTopBarLayer: true,
       isTopBarLayerAlwaysVisible: false,
-      topBarTitle: ModalSheetTitle('Edit Smart Folder'),
+      topBarTitle: ModalSheetTitle(title),
       trailingNavBarWidget: Padding(
         padding: EdgeInsets.only(right: AppSpacing.lg),
         child: AppCircleButton(
@@ -55,40 +58,38 @@ class EditSmartFolderModalPage {
       ),
       mainContentSliversBuilder: (context) => [
         SliverToBoxAdapter(
-          child: EditSmartFolderForm(folder: folder),
+          child: _EditSmartFolderContent(folder: folder),
         ),
       ],
     );
   }
 }
 
-class EditSmartFolderForm extends ConsumerStatefulWidget {
+class _EditSmartFolderContent extends ConsumerStatefulWidget {
   final RecipeFolderEntry folder;
 
-  const EditSmartFolderForm({super.key, required this.folder});
+  const _EditSmartFolderContent({required this.folder});
 
   @override
-  ConsumerState<EditSmartFolderForm> createState() => _EditSmartFolderFormState();
+  ConsumerState<_EditSmartFolderContent> createState() => _EditSmartFolderContentState();
 }
 
-class _EditSmartFolderFormState extends ConsumerState<EditSmartFolderForm> {
-  late final TextEditingController _nameController;
+class _EditSmartFolderContentState extends ConsumerState<_EditSmartFolderContent> {
   final _searchController = TextEditingController();
   late bool _matchAll;
   bool _isSaving = false;
+  bool _isSearching = false;
+  bool _hasSearched = false;
 
   // For tag-based folders
   late Set<String> _selectedTagNames;
 
   // For ingredient-based folders
   late List<String> _selectedTerms;
-  bool _isSearching = false;
-  bool _hasSearched = false; // Track if user has searched at least once
 
   @override
   void initState() {
     super.initState();
-    _nameController = TextEditingController(text: widget.folder.name);
     _matchAll = widget.folder.filterLogic == 1;
 
     // Initialize selected items based on folder type
@@ -109,13 +110,11 @@ class _EditSmartFolderFormState extends ConsumerState<EditSmartFolderForm> {
 
   @override
   void dispose() {
-    _nameController.dispose();
     _searchController.dispose();
     super.dispose();
   }
 
   bool get _canSave {
-    if (_nameController.text.trim().isEmpty) return false;
     if (widget.folder.folderType == 1) {
       return _selectedTagNames.isNotEmpty;
     } else {
@@ -133,7 +132,6 @@ class _EditSmartFolderFormState extends ConsumerState<EditSmartFolderForm> {
 
       await container.read(recipeFolderNotifierProvider.notifier).updateSmartFolderSettings(
         id: widget.folder.id,
-        name: _nameController.text.trim(),
         filterLogic: _matchAll ? 1 : 0,
         tags: widget.folder.folderType == 1 ? _selectedTagNames.toList() : null,
         terms: widget.folder.folderType == 2 ? _selectedTerms : null,
@@ -202,42 +200,7 @@ class _EditSmartFolderFormState extends ConsumerState<EditSmartFolderForm> {
         crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisSize: MainAxisSize.min,
         children: [
-          // Folder name input
-          AppTextFieldSimple(
-            controller: _nameController,
-            placeholder: 'Folder name',
-            autofocus: false,
-            onChanged: (_) => setState(() {}),
-          ),
-
-          SizedBox(height: AppSpacing.xl),
-
-          // Folder type indicator (read-only)
-          Container(
-            padding: EdgeInsets.all(AppSpacing.md),
-            decoration: BoxDecoration(
-              color: colors.surfaceVariant,
-              borderRadius: BorderRadius.circular(8),
-            ),
-            child: Row(
-              children: [
-                Icon(
-                  isTagBased ? CupertinoIcons.tag : CupertinoIcons.list_bullet,
-                  size: 16,
-                  color: colors.textSecondary,
-                ),
-                SizedBox(width: AppSpacing.sm),
-                Text(
-                  isTagBased ? 'Tag-based smart folder' : 'Ingredient-based smart folder',
-                  style: AppTypography.body.copyWith(color: colors.textSecondary),
-                ),
-              ],
-            ),
-          ),
-
-          SizedBox(height: AppSpacing.xl),
-
-          // AND/OR toggle
+          // Match logic toggle
           Row(
             children: [
               Text(
@@ -285,6 +248,8 @@ class _EditSmartFolderFormState extends ConsumerState<EditSmartFolderForm> {
             loading: _isSaving,
             onPressed: _canSave ? _saveChanges : null,
           ),
+
+          SizedBox(height: AppSpacing.md),
         ],
       ),
     );
@@ -320,7 +285,6 @@ class _EditSmartFolderFormState extends ConsumerState<EditSmartFolderForm> {
               style: AppTypography.label.copyWith(color: colors.textSecondary),
             ),
             SizedBox(height: AppSpacing.sm),
-            // Use grouped list styling for tags
             ...tags.asMap().entries.map((entry) {
               final index = entry.key;
               final tag = entry.value;
@@ -357,13 +321,12 @@ class _EditSmartFolderFormState extends ConsumerState<EditSmartFolderForm> {
         ? ref.watch(ingredientTermSearchProvider(searchQuery))
         : null;
 
-    // Determine if we should show the results container
     final showResultsContainer = _hasSearched || searchQuery.isNotEmpty;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        // Selected terms as pills (show above search if any selected)
+        // Selected terms as pills
         if (_selectedTerms.isNotEmpty) ...[
           Text(
             'Selected ingredients',
@@ -380,9 +343,9 @@ class _EditSmartFolderFormState extends ConsumerState<EditSmartFolderForm> {
                   vertical: AppSpacing.sm,
                 ),
                 decoration: BoxDecoration(
-                  color: colors.primary.withOpacity(0.1),
+                  color: colors.primary.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(16),
-                  border: Border.all(color: colors.primary.withOpacity(0.3)),
+                  border: Border.all(color: colors.primary.withValues(alpha: 0.3)),
                 ),
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
@@ -400,7 +363,7 @@ class _EditSmartFolderFormState extends ConsumerState<EditSmartFolderForm> {
                       child: Icon(
                         CupertinoIcons.xmark_circle_fill,
                         size: 18,
-                        color: colors.primary.withOpacity(0.6),
+                        color: colors.primary.withValues(alpha: 0.6),
                       ),
                     ),
                   ],
@@ -454,26 +417,7 @@ class _EditSmartFolderFormState extends ConsumerState<EditSmartFolderForm> {
       );
     }
 
-    if (searchQuery.isEmpty) {
-      return Container(
-        decoration: BoxDecoration(
-          color: colors.groupedListBackground,
-          border: Border.all(color: colors.groupedListBorder),
-          borderRadius: BorderRadius.circular(8),
-        ),
-        child: Center(
-          child: Padding(
-            padding: EdgeInsets.all(AppSpacing.lg),
-            child: Text(
-              'Type to search ingredients',
-              style: AppTypography.body.copyWith(color: colors.textTertiary),
-            ),
-          ),
-        ),
-      );
-    }
-
-    if (searchAsync == null) {
+    if (searchQuery.isEmpty || searchAsync == null) {
       return const SizedBox.shrink();
     }
 
@@ -514,7 +458,6 @@ class _EditSmartFolderFormState extends ConsumerState<EditSmartFolderForm> {
           );
         }
 
-        // Sort results by relevance
         final sorted = TermSearchUtils.sortByRelevance(results, searchQuery);
 
         return Container(
@@ -529,14 +472,12 @@ class _EditSmartFolderFormState extends ConsumerState<EditSmartFolderForm> {
             itemBuilder: (context, index) {
               final result = sorted[index];
               final isAlreadySelected = _selectedTerms.contains(result.term);
-              final isFirst = index == 0;
               final isLast = index == sorted.length - 1;
 
               return _IngredientResultRow(
                 term: result.term,
                 recipeCount: result.recipeCount,
                 isSelected: isAlreadySelected,
-                isFirst: isFirst,
                 isLast: isLast,
                 onTap: isAlreadySelected ? null : () => _addTerm(result.term),
               );
@@ -548,7 +489,10 @@ class _EditSmartFolderFormState extends ConsumerState<EditSmartFolderForm> {
   }
 }
 
-/// Tag selection row using grouped list styling
+// =============================================================================
+// Shared Widgets
+// =============================================================================
+
 class _TagSelectionRow extends StatelessWidget {
   final String tagName;
   final String tagColor;
@@ -605,7 +549,6 @@ class _TagSelectionRow extends StatelessWidget {
         ),
         child: Row(
           children: [
-            // Color indicator
             Container(
               width: 12,
               height: 12,
@@ -615,14 +558,12 @@ class _TagSelectionRow extends StatelessWidget {
               ),
             ),
             SizedBox(width: AppSpacing.md),
-            // Tag name
             Expanded(
               child: Text(
                 tagName,
                 style: AppTypography.body.copyWith(color: colors.textPrimary),
               ),
             ),
-            // Checkbox
             Icon(
               isSelected ? CupertinoIcons.checkmark_circle_fill : CupertinoIcons.circle,
               color: isSelected ? colors.primary : colors.textTertiary,
@@ -635,12 +576,10 @@ class _TagSelectionRow extends StatelessWidget {
   }
 }
 
-/// Ingredient search result row using grouped list styling
 class _IngredientResultRow extends StatelessWidget {
   final String term;
   final int recipeCount;
   final bool isSelected;
-  final bool isFirst;
   final bool isLast;
   final VoidCallback? onTap;
 
@@ -648,7 +587,6 @@ class _IngredientResultRow extends StatelessWidget {
     required this.term,
     required this.recipeCount,
     required this.isSelected,
-    required this.isFirst,
     required this.isLast,
     this.onTap,
   });
@@ -656,9 +594,6 @@ class _IngredientResultRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colors = AppColors.of(context);
-
-    // For items inside a container that already has borders,
-    // we only need separators between items (not full GroupedListStyling borders)
     final showSeparator = !isLast;
 
     return GestureDetector(
@@ -676,7 +611,6 @@ class _IngredientResultRow extends StatelessWidget {
         ),
         child: Row(
           children: [
-            // Term name and recipe count
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -698,7 +632,6 @@ class _IngredientResultRow extends StatelessWidget {
                 ],
               ),
             ),
-            // Selection indicator
             if (isSelected)
               Icon(
                 CupertinoIcons.checkmark_circle_fill,

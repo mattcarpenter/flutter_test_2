@@ -1,36 +1,218 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:supabase_flutter/supabase_flutter.dart' as supabase_flutter;
+import 'package:provider/provider.dart' as provider;
 import 'package:wolt_modal_sheet/wolt_modal_sheet.dart';
 
-import '../../../providers/recipe_folder_provider.dart';
+import '../../../models/ingredient_term_search_result.dart';
 import '../../../providers/recipe_tag_provider.dart';
 import '../../../providers/smart_folder_provider.dart';
 import '../../../theme/colors.dart';
 import '../../../theme/spacing.dart';
 import '../../../theme/typography.dart';
-import '../../../models/ingredient_term_search_result.dart';
 import '../../../utils/term_search_utils.dart';
 import '../../../widgets/app_button.dart';
 import '../../../widgets/app_circle_button.dart';
 import '../../../widgets/app_text_field_simple.dart';
 import '../../../widgets/utils/grouped_list_styling.dart';
 import '../../../widgets/wolt/text/modal_sheet_title.dart';
+import '../widgets/smart_folder_wizard_view_model.dart';
 
-/// Show the smart folder creation modal
+/// Show the smart folder creation wizard
 Future<String?> showAddSmartFolderModal(BuildContext context) {
   return WoltModalSheet.show<String>(
     useRootNavigator: true,
     context: context,
+    modalDecorator: (child) {
+      return Consumer(
+        builder: (context, ref, _) {
+          return provider.ChangeNotifierProvider<SmartFolderWizardViewModel>(
+            create: (_) => SmartFolderWizardViewModel(ref: ref),
+            child: child,
+          );
+        },
+      );
+    },
     pageListBuilder: (bottomSheetContext) => [
-      AddSmartFolderModalPage.build(context: bottomSheetContext),
+      _TypeSelectionPage.build(context: bottomSheetContext),
+      _ConfigurationPage.build(context: bottomSheetContext),
+      _NamingPage.build(context: bottomSheetContext),
     ],
   );
 }
 
-class AddSmartFolderModalPage {
-  AddSmartFolderModalPage._();
+// =============================================================================
+// Page 1: Type Selection
+// =============================================================================
+
+class _TypeSelectionPage {
+  _TypeSelectionPage._();
+
+  static WoltModalSheetPage build({required BuildContext context}) {
+    return WoltModalSheetPage(
+      navBarHeight: 55,
+      backgroundColor: AppColors.of(context).background,
+      surfaceTintColor: Colors.transparent,
+      hasTopBarLayer: false,
+      trailingNavBarWidget: Padding(
+        padding: EdgeInsets.only(right: AppSpacing.lg),
+        child: AppCircleButton(
+          icon: AppCircleButtonIcon.close,
+          variant: AppCircleButtonVariant.neutral,
+          size: 32,
+          onPressed: () => Navigator.of(context).pop(),
+        ),
+      ),
+      child: const _TypeSelectionContent(),
+    );
+  }
+}
+
+class _TypeSelectionContent extends StatelessWidget {
+  const _TypeSelectionContent();
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = AppColors.of(context);
+
+    return Padding(
+      padding: EdgeInsets.fromLTRB(AppSpacing.lg, 0, AppSpacing.lg, AppSpacing.lg),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text(
+            'New Smart Folder',
+            style: AppTypography.h4.copyWith(color: colors.textPrimary),
+          ),
+          SizedBox(height: AppSpacing.sm),
+          Text(
+            'Smart folders automatically collect recipes based on your criteria.',
+            style: AppTypography.body.copyWith(color: colors.textSecondary),
+          ),
+          SizedBox(height: AppSpacing.xl),
+
+          // Tags option card
+          _TypeOptionCard(
+            icon: CupertinoIcons.tag,
+            title: 'By Tags',
+            description: 'Group recipes that have specific tags like "Vegetarian" or "Quick Meals"',
+            onTap: () {
+              final viewModel = provider.Provider.of<SmartFolderWizardViewModel>(
+                context,
+                listen: false,
+              );
+              viewModel.setFolderType(1);
+              WoltModalSheet.of(context).showNext();
+            },
+          ),
+
+          SizedBox(height: AppSpacing.md),
+
+          // Ingredients option card
+          _TypeOptionCard(
+            icon: CupertinoIcons.list_bullet,
+            title: 'By Ingredients',
+            description: 'Group recipes that contain specific ingredients like "chicken" or "pasta"',
+            onTap: () {
+              final viewModel = provider.Provider.of<SmartFolderWizardViewModel>(
+                context,
+                listen: false,
+              );
+              viewModel.setFolderType(2);
+              WoltModalSheet.of(context).showNext();
+            },
+          ),
+
+          SizedBox(height: AppSpacing.lg),
+        ],
+      ),
+    );
+  }
+}
+
+class _TypeOptionCard extends StatelessWidget {
+  final IconData icon;
+  final String title;
+  final String description;
+  final VoidCallback onTap;
+
+  const _TypeOptionCard({
+    required this.icon,
+    required this.title,
+    required this.description,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = AppColors.of(context);
+
+    return GestureDetector(
+      onTap: onTap,
+      behavior: HitTestBehavior.opaque,
+      child: Container(
+        padding: EdgeInsets.all(AppSpacing.lg),
+        decoration: BoxDecoration(
+          color: colors.groupedListBackground,
+          border: Border.all(color: colors.groupedListBorder),
+          borderRadius: BorderRadius.circular(12),
+        ),
+        child: Row(
+          children: [
+            Container(
+              width: 48,
+              height: 48,
+              decoration: BoxDecoration(
+                color: colors.primary.withValues(alpha: 0.1),
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: Icon(
+                icon,
+                color: colors.primary,
+                size: 24,
+              ),
+            ),
+            SizedBox(width: AppSpacing.lg),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    title,
+                    style: AppTypography.body.copyWith(
+                      color: colors.textPrimary,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                  SizedBox(height: AppSpacing.xs),
+                  Text(
+                    description,
+                    style: AppTypography.caption.copyWith(
+                      color: colors.textSecondary,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            Icon(
+              CupertinoIcons.chevron_right,
+              color: colors.textTertiary,
+              size: 20,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+// =============================================================================
+// Page 2: Configuration (Tags or Ingredients)
+// =============================================================================
+
+class _ConfigurationPage {
+  _ConfigurationPage._();
 
   static SliverWoltModalSheetPage build({required BuildContext context}) {
     return SliverWoltModalSheetPage(
@@ -39,8 +221,18 @@ class AddSmartFolderModalPage {
       surfaceTintColor: Colors.transparent,
       hasTopBarLayer: true,
       isTopBarLayerAlwaysVisible: false,
-      topBarTitle: ModalSheetTitle('New Smart Folder'),
-      hasSabGradient: true,
+      topBarTitle: const _ConfigurationPageTitle(),
+      leadingNavBarWidget: Padding(
+        padding: EdgeInsets.only(left: AppSpacing.lg),
+        child: AppCircleButton(
+          icon: AppCircleButtonIcon.back,
+          variant: AppCircleButtonVariant.neutral,
+          size: 32,
+          onPressed: () {
+            WoltModalSheet.of(context).showPrevious();
+          },
+        ),
+      ),
       trailingNavBarWidget: Padding(
         padding: EdgeInsets.only(right: AppSpacing.lg),
         child: AppCircleButton(
@@ -52,77 +244,43 @@ class AddSmartFolderModalPage {
       ),
       mainContentSliversBuilder: (context) => [
         const SliverToBoxAdapter(
-          child: AddSmartFolderForm(),
+          child: _ConfigurationContent(),
         ),
       ],
     );
   }
 }
 
-class AddSmartFolderForm extends ConsumerStatefulWidget {
-  const AddSmartFolderForm({super.key});
+class _ConfigurationPageTitle extends StatelessWidget {
+  const _ConfigurationPageTitle();
 
   @override
-  ConsumerState<AddSmartFolderForm> createState() => _AddSmartFolderFormState();
+  Widget build(BuildContext context) {
+    return provider.Consumer<SmartFolderWizardViewModel>(
+      builder: (context, viewModel, _) {
+        final title = viewModel.folderType == 1 ? 'Select Tags' : 'Select Ingredients';
+        return ModalSheetTitle(title);
+      },
+    );
+  }
 }
 
-class _AddSmartFolderFormState extends ConsumerState<AddSmartFolderForm> {
-  int _selectedType = 0; // 0 = tags, 1 = ingredients
-  final _nameController = TextEditingController();
+class _ConfigurationContent extends ConsumerStatefulWidget {
+  const _ConfigurationContent();
+
+  @override
+  ConsumerState<_ConfigurationContent> createState() => _ConfigurationContentState();
+}
+
+class _ConfigurationContentState extends ConsumerState<_ConfigurationContent> {
   final _searchController = TextEditingController();
-  bool _matchAll = false; // false = OR, true = AND
-  bool _isCreating = false;
-
-  // For tag-based folders
-  final Set<String> _selectedTagNames = {};
-
-  // For ingredient-based folders
-  final List<String> _selectedTerms = [];
   bool _isSearching = false;
-  bool _hasSearched = false; // Track if user has searched at least once
+  bool _hasSearched = false;
 
   @override
   void dispose() {
-    _nameController.dispose();
     _searchController.dispose();
     super.dispose();
-  }
-
-  bool get _canCreate {
-    if (_nameController.text.trim().isEmpty) return false;
-    if (_selectedType == 0) {
-      return _selectedTagNames.isNotEmpty;
-    } else {
-      return _selectedTerms.isNotEmpty;
-    }
-  }
-
-  Future<void> _createSmartFolder() async {
-    if (!_canCreate || _isCreating) return;
-
-    setState(() => _isCreating = true);
-
-    try {
-      final container = ProviderScope.containerOf(context);
-      final userId = supabase_flutter.Supabase.instance.client.auth.currentUser?.id;
-
-      await container.read(recipeFolderNotifierProvider.notifier).addSmartFolder(
-        name: _nameController.text.trim(),
-        folderType: _selectedType == 0 ? 1 : 2,
-        filterLogic: _matchAll ? 1 : 0,
-        tags: _selectedType == 0 ? _selectedTagNames.toList() : null,
-        terms: _selectedType == 1 ? _selectedTerms : null,
-        userId: userId,
-      );
-
-      if (mounted) {
-        Navigator.of(context).pop(_nameController.text.trim());
-      }
-    } finally {
-      if (mounted) {
-        setState(() => _isCreating = false);
-      }
-    }
   }
 
   Future<void> _searchTerms(String query) async {
@@ -151,129 +309,79 @@ class _AddSmartFolderFormState extends ConsumerState<AddSmartFolderForm> {
     }
   }
 
-  void _addTerm(String term) {
-    if (!_selectedTerms.contains(term)) {
-      setState(() {
-        _selectedTerms.add(term);
-        _searchController.clear();
-        _hasSearched = false;
-      });
-    }
-  }
-
-  void _removeTerm(String term) {
-    setState(() {
-      _selectedTerms.remove(term);
-    });
-  }
-
   @override
   Widget build(BuildContext context) {
     final colors = AppColors.of(context);
 
-    return Padding(
-      padding: EdgeInsets.all(AppSpacing.lg),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          // Folder name input
-          AppTextFieldSimple(
-            controller: _nameController,
-            placeholder: 'Folder name',
-            autofocus: true,
-            onChanged: (_) => setState(() {}),
-          ),
+    return provider.Consumer<SmartFolderWizardViewModel>(
+      builder: (context, viewModel, _) {
+        final isTagBased = viewModel.folderType == 1;
 
-          SizedBox(height: AppSpacing.xl),
-
-          // Type selector (Cupertino segmented control)
-          Text(
-            'Filter recipes by',
-            style: AppTypography.label.copyWith(color: colors.textSecondary),
-          ),
-          SizedBox(height: AppSpacing.sm),
-          SizedBox(
-            width: double.infinity,
-            child: CupertinoSlidingSegmentedControl<int>(
-              groupValue: _selectedType,
-              onValueChanged: (value) {
-                if (value != null) {
-                  setState(() => _selectedType = value);
-                }
-              },
-              children: const {
-                0: Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                  child: Text('Tags'),
-                ),
-                1: Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                  child: Text('Ingredients'),
-                ),
-              },
-            ),
-          ),
-
-          SizedBox(height: AppSpacing.xl),
-
-          // AND/OR toggle
-          Row(
+        return Padding(
+          padding: EdgeInsets.all(AppSpacing.lg),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
             children: [
-              Text(
-                'Match',
-                style: AppTypography.body.copyWith(color: colors.textPrimary),
-              ),
-              SizedBox(width: AppSpacing.sm),
-              CupertinoSlidingSegmentedControl<bool>(
-                groupValue: _matchAll,
-                onValueChanged: (value) {
-                  if (value != null) {
-                    setState(() => _matchAll = value);
-                  }
-                },
-                children: const {
-                  false: Padding(
-                    padding: EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                    child: Text('Any'),
+              // Match logic toggle
+              Row(
+                children: [
+                  Text(
+                    'Match',
+                    style: AppTypography.body.copyWith(color: colors.textPrimary),
                   ),
-                  true: Padding(
-                    padding: EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                    child: Text('All'),
+                  SizedBox(width: AppSpacing.sm),
+                  CupertinoSlidingSegmentedControl<bool>(
+                    groupValue: viewModel.matchAll,
+                    onValueChanged: (value) {
+                      if (value != null) {
+                        viewModel.setMatchAll(value);
+                      }
+                    },
+                    children: const {
+                      false: Padding(
+                        padding: EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                        child: Text('Any'),
+                      ),
+                      true: Padding(
+                        padding: EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                        child: Text('All'),
+                      ),
+                    },
                   ),
-                },
+                ],
               ),
+
+              SizedBox(height: AppSpacing.xl),
+
+              // Type-specific content
+              if (isTagBased)
+                _buildTagSelection(colors, viewModel)
+              else
+                _buildIngredientSelection(colors, viewModel),
+
+              SizedBox(height: AppSpacing.xl),
+
+              // Next button
+              AppButtonVariants.primaryFilled(
+                text: 'Next',
+                size: AppButtonSize.large,
+                shape: AppButtonShape.square,
+                fullWidth: true,
+                onPressed: viewModel.canProceedFromPage2
+                    ? () => WoltModalSheet.of(context).showNext()
+                    : null,
+              ),
+
+              SizedBox(height: AppSpacing.md),
             ],
           ),
-
-          SizedBox(height: AppSpacing.xl),
-
-          // Type-specific content
-          if (_selectedType == 0)
-            _buildTagSelection(colors)
-          else
-            _buildIngredientSelection(colors),
-
-          SizedBox(height: AppSpacing.xl),
-
-          // Create button
-          AppButtonVariants.primaryFilled(
-            text: 'Create Smart Folder',
-            size: AppButtonSize.large,
-            shape: AppButtonShape.square,
-            fullWidth: true,
-            loading: _isCreating,
-            onPressed: _canCreate ? _createSmartFolder : null,
-          ),
-
-          // Extra bottom padding for safe area
-          SizedBox(height: AppSpacing.md),
-        ],
-      ),
+        );
+      },
     );
   }
 
-  Widget _buildTagSelection(AppColors colors) {
+  Widget _buildTagSelection(AppColors colors, SmartFolderWizardViewModel viewModel) {
     final tagsAsync = ref.watch(recipeTagNotifierProvider);
 
     return tagsAsync.when(
@@ -303,11 +411,10 @@ class _AddSmartFolderFormState extends ConsumerState<AddSmartFolderForm> {
               style: AppTypography.label.copyWith(color: colors.textSecondary),
             ),
             SizedBox(height: AppSpacing.sm),
-            // Use grouped list styling for tags
             ...tags.asMap().entries.map((entry) {
               final index = entry.key;
               final tag = entry.value;
-              final isSelected = _selectedTagNames.contains(tag.name);
+              final isSelected = viewModel.isTagSelected(tag.name);
               final isFirst = index == 0;
               final isLast = index == tags.length - 1;
 
@@ -317,15 +424,7 @@ class _AddSmartFolderFormState extends ConsumerState<AddSmartFolderForm> {
                 isSelected: isSelected,
                 isFirst: isFirst,
                 isLast: isLast,
-                onToggle: () {
-                  setState(() {
-                    if (isSelected) {
-                      _selectedTagNames.remove(tag.name);
-                    } else {
-                      _selectedTagNames.add(tag.name);
-                    }
-                  });
-                },
+                onToggle: () => viewModel.toggleTag(tag.name),
               );
             }),
           ],
@@ -334,20 +433,19 @@ class _AddSmartFolderFormState extends ConsumerState<AddSmartFolderForm> {
     );
   }
 
-  Widget _buildIngredientSelection(AppColors colors) {
+  Widget _buildIngredientSelection(AppColors colors, SmartFolderWizardViewModel viewModel) {
     final searchQuery = _searchController.text.trim();
     final searchAsync = searchQuery.isNotEmpty
         ? ref.watch(ingredientTermSearchProvider(searchQuery))
         : null;
 
-    // Determine if we should show the results container
     final showResultsContainer = _hasSearched || searchQuery.isNotEmpty;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        // Selected terms as pills (show above search if any selected)
-        if (_selectedTerms.isNotEmpty) ...[
+        // Selected terms as pills
+        if (viewModel.selectedTerms.isNotEmpty) ...[
           Text(
             'Selected ingredients',
             style: AppTypography.label.copyWith(color: colors.textSecondary),
@@ -356,16 +454,16 @@ class _AddSmartFolderFormState extends ConsumerState<AddSmartFolderForm> {
           Wrap(
             spacing: AppSpacing.sm,
             runSpacing: AppSpacing.sm,
-            children: _selectedTerms.map((term) {
+            children: viewModel.selectedTerms.map((term) {
               return Container(
                 padding: EdgeInsets.symmetric(
                   horizontal: AppSpacing.md,
                   vertical: AppSpacing.sm,
                 ),
                 decoration: BoxDecoration(
-                  color: colors.primary.withOpacity(0.1),
+                  color: colors.primary.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(16),
-                  border: Border.all(color: colors.primary.withOpacity(0.3)),
+                  border: Border.all(color: colors.primary.withValues(alpha: 0.3)),
                 ),
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
@@ -379,11 +477,11 @@ class _AddSmartFolderFormState extends ConsumerState<AddSmartFolderForm> {
                     ),
                     SizedBox(width: AppSpacing.xs),
                     GestureDetector(
-                      onTap: () => _removeTerm(term),
+                      onTap: () => viewModel.removeTerm(term),
                       child: Icon(
                         CupertinoIcons.xmark_circle_fill,
                         size: 18,
-                        color: colors.primary.withOpacity(0.6),
+                        color: colors.primary.withValues(alpha: 0.6),
                       ),
                     ),
                   ],
@@ -413,7 +511,7 @@ class _AddSmartFolderFormState extends ConsumerState<AddSmartFolderForm> {
             opacity: showResultsContainer ? 1.0 : 0.0,
             child: ClipRRect(
               borderRadius: BorderRadius.circular(8),
-              child: _buildSearchResultsContent(colors, searchAsync, searchQuery),
+              child: _buildSearchResultsContent(colors, searchAsync, searchQuery, viewModel),
             ),
           ),
         ),
@@ -425,6 +523,7 @@ class _AddSmartFolderFormState extends ConsumerState<AddSmartFolderForm> {
     AppColors colors,
     AsyncValue<List<IngredientTermSearchResult>>? searchAsync,
     String searchQuery,
+    SmartFolderWizardViewModel viewModel,
   ) {
     if (_isSearching) {
       return Container(
@@ -437,26 +536,7 @@ class _AddSmartFolderFormState extends ConsumerState<AddSmartFolderForm> {
       );
     }
 
-    if (searchQuery.isEmpty) {
-      return Container(
-        decoration: BoxDecoration(
-          color: colors.groupedListBackground,
-          border: Border.all(color: colors.groupedListBorder),
-          borderRadius: BorderRadius.circular(8),
-        ),
-        child: Center(
-          child: Padding(
-            padding: EdgeInsets.all(AppSpacing.lg),
-            child: Text(
-              'Type to search ingredients',
-              style: AppTypography.body.copyWith(color: colors.textTertiary),
-            ),
-          ),
-        ),
-      );
-    }
-
-    if (searchAsync == null) {
+    if (searchQuery.isEmpty || searchAsync == null) {
       return const SizedBox.shrink();
     }
 
@@ -497,7 +577,6 @@ class _AddSmartFolderFormState extends ConsumerState<AddSmartFolderForm> {
           );
         }
 
-        // Sort results by relevance
         final sorted = TermSearchUtils.sortByRelevance(results, searchQuery);
 
         return Container(
@@ -511,17 +590,21 @@ class _AddSmartFolderFormState extends ConsumerState<AddSmartFolderForm> {
             itemCount: sorted.length,
             itemBuilder: (context, index) {
               final result = sorted[index];
-              final isAlreadySelected = _selectedTerms.contains(result.term);
-              final isFirst = index == 0;
+              final isAlreadySelected = viewModel.isTermSelected(result.term);
               final isLast = index == sorted.length - 1;
 
               return _IngredientResultRow(
                 term: result.term,
                 recipeCount: result.recipeCount,
                 isSelected: isAlreadySelected,
-                isFirst: isFirst,
                 isLast: isLast,
-                onTap: isAlreadySelected ? null : () => _addTerm(result.term),
+                onTap: isAlreadySelected
+                    ? null
+                    : () {
+                        viewModel.addTerm(result.term);
+                        _searchController.clear();
+                        setState(() => _hasSearched = false);
+                      },
               );
             },
           ),
@@ -531,7 +614,150 @@ class _AddSmartFolderFormState extends ConsumerState<AddSmartFolderForm> {
   }
 }
 
-/// Tag selection row using grouped list styling
+// =============================================================================
+// Page 3: Naming
+// =============================================================================
+
+class _NamingPage {
+  _NamingPage._();
+
+  static WoltModalSheetPage build({required BuildContext context}) {
+    return WoltModalSheetPage(
+      navBarHeight: 55,
+      backgroundColor: AppColors.of(context).background,
+      surfaceTintColor: Colors.transparent,
+      hasTopBarLayer: false,
+      leadingNavBarWidget: Padding(
+        padding: EdgeInsets.only(left: AppSpacing.lg),
+        child: AppCircleButton(
+          icon: AppCircleButtonIcon.back,
+          variant: AppCircleButtonVariant.neutral,
+          size: 32,
+          onPressed: () {
+            WoltModalSheet.of(context).showPrevious();
+          },
+        ),
+      ),
+      trailingNavBarWidget: Padding(
+        padding: EdgeInsets.only(right: AppSpacing.lg),
+        child: AppCircleButton(
+          icon: AppCircleButtonIcon.close,
+          variant: AppCircleButtonVariant.neutral,
+          size: 32,
+          onPressed: () => Navigator.of(context).pop(),
+        ),
+      ),
+      child: const _NamingContent(),
+    );
+  }
+}
+
+class _NamingContent extends StatefulWidget {
+  const _NamingContent();
+
+  @override
+  State<_NamingContent> createState() => _NamingContentState();
+}
+
+class _NamingContentState extends State<_NamingContent> {
+  final _nameController = TextEditingController();
+
+  @override
+  void dispose() {
+    _nameController.dispose();
+    super.dispose();
+  }
+
+  Future<void> _createFolder() async {
+    final viewModel = provider.Provider.of<SmartFolderWizardViewModel>(
+      context,
+      listen: false,
+    );
+
+    final result = await viewModel.createSmartFolder();
+    if (result != null && mounted) {
+      Navigator.of(context).pop(result);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = AppColors.of(context);
+
+    return provider.Consumer<SmartFolderWizardViewModel>(
+      builder: (context, viewModel, _) {
+        // Build summary text
+        final summaryParts = <String>[];
+        if (viewModel.folderType == 1) {
+          final count = viewModel.selectedTagNames.length;
+          summaryParts.add('$count tag${count == 1 ? '' : 's'} selected');
+        } else {
+          final count = viewModel.selectedTerms.length;
+          summaryParts.add('$count ingredient${count == 1 ? '' : 's'} selected');
+        }
+        summaryParts.add(viewModel.matchAll ? 'Match All' : 'Match Any');
+
+        return Padding(
+          padding: EdgeInsets.fromLTRB(AppSpacing.lg, 0, AppSpacing.lg, AppSpacing.lg),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                'Name Your Folder',
+                style: AppTypography.h4.copyWith(color: colors.textPrimary),
+              ),
+              SizedBox(height: AppSpacing.sm),
+              Text(
+                summaryParts.join(' \u2022 '),
+                style: AppTypography.body.copyWith(color: colors.textSecondary),
+              ),
+              SizedBox(height: AppSpacing.xl),
+
+              // Name input
+              AppTextFieldSimple(
+                controller: _nameController,
+                placeholder: 'Folder name',
+                autofocus: true,
+                onChanged: (value) {
+                  viewModel.setFolderName(value);
+                },
+              ),
+
+              SizedBox(height: AppSpacing.xl),
+
+              // Error message
+              if (viewModel.errorMessage != null) ...[
+                Text(
+                  viewModel.errorMessage!,
+                  style: AppTypography.body.copyWith(color: colors.error),
+                ),
+                SizedBox(height: AppSpacing.md),
+              ],
+
+              // Create button
+              AppButtonVariants.primaryFilled(
+                text: 'Create Smart Folder',
+                size: AppButtonSize.large,
+                shape: AppButtonShape.square,
+                fullWidth: true,
+                loading: viewModel.isCreating,
+                onPressed: viewModel.canCreate ? _createFolder : null,
+              ),
+
+              SizedBox(height: AppSpacing.md),
+            ],
+          ),
+        );
+      },
+    );
+  }
+}
+
+// =============================================================================
+// Shared Widgets
+// =============================================================================
+
 class _TagSelectionRow extends StatelessWidget {
   final String tagName;
   final String tagColor;
@@ -588,7 +814,6 @@ class _TagSelectionRow extends StatelessWidget {
         ),
         child: Row(
           children: [
-            // Color indicator
             Container(
               width: 12,
               height: 12,
@@ -598,14 +823,12 @@ class _TagSelectionRow extends StatelessWidget {
               ),
             ),
             SizedBox(width: AppSpacing.md),
-            // Tag name
             Expanded(
               child: Text(
                 tagName,
                 style: AppTypography.body.copyWith(color: colors.textPrimary),
               ),
             ),
-            // Checkbox
             Icon(
               isSelected ? CupertinoIcons.checkmark_circle_fill : CupertinoIcons.circle,
               color: isSelected ? colors.primary : colors.textTertiary,
@@ -618,12 +841,10 @@ class _TagSelectionRow extends StatelessWidget {
   }
 }
 
-/// Ingredient search result row using grouped list styling
 class _IngredientResultRow extends StatelessWidget {
   final String term;
   final int recipeCount;
   final bool isSelected;
-  final bool isFirst;
   final bool isLast;
   final VoidCallback? onTap;
 
@@ -631,7 +852,6 @@ class _IngredientResultRow extends StatelessWidget {
     required this.term,
     required this.recipeCount,
     required this.isSelected,
-    required this.isFirst,
     required this.isLast,
     this.onTap,
   });
@@ -639,9 +859,6 @@ class _IngredientResultRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colors = AppColors.of(context);
-
-    // For items inside a container that already has borders,
-    // we only need separators between items (not full GroupedListStyling borders)
     final showSeparator = !isLast;
 
     return GestureDetector(
@@ -659,7 +876,6 @@ class _IngredientResultRow extends StatelessWidget {
         ),
         child: Row(
           children: [
-            // Term name and recipe count
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -681,7 +897,6 @@ class _IngredientResultRow extends StatelessWidget {
                 ],
               ),
             ),
-            // Selection indicator
             if (isSelected)
               Icon(
                 CupertinoIcons.checkmark_circle_fill,

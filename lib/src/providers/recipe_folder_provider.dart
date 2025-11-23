@@ -56,6 +56,15 @@ class RecipeFolderNotifier extends StateNotifier<AsyncValue<List<RecipeFolderEnt
     }
   }
 
+  /// Rename a folder (works for both regular and smart folders)
+  Future<void> renameFolder(String id, String newName) async {
+    try {
+      await _repository.renameFolder(id, newName);
+    } catch (e, stack) {
+      state = AsyncValue.error(e, stack);
+    }
+  }
+
   /// Add a smart folder
   Future<String?> addSmartFolder({
     required String name,
