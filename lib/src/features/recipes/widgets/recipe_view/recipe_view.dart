@@ -119,7 +119,9 @@ class _RecipeViewState extends ConsumerState<RecipeView> {
               const SizedBox(height: 8),
               Text(
                 recipe.description!,
-                style: Theme.of(context).textTheme.bodyLarge,
+                style: AppTypography.body.copyWith(
+                  color: AppColors.of(context).textPrimary,
+                ),
               ),
             ],
 
@@ -164,8 +166,8 @@ class _RecipeViewState extends ConsumerState<RecipeView> {
               const SizedBox(height: 16),
               Text(
                 'Source: ${recipe.source}',
-                style: Theme.of(context).textTheme.bodyMedium!.copyWith(
-                  fontStyle: FontStyle.italic,
+                style: AppTypography.body.copyWith(
+                  color: AppColors.of(context).textSecondary,
                 ),
               ),
             ],
@@ -195,16 +197,10 @@ class _RecipeViewState extends ConsumerState<RecipeView> {
                 ),
               ),
               const SizedBox(height: 8),
-              Container(
-                padding: const EdgeInsets.all(12),
-                decoration: BoxDecoration(
-                  color: Colors.grey.shade50,
-                  borderRadius: BorderRadius.circular(8),
-                  border: Border.all(color: Colors.grey.shade200),
-                ),
-                child: Text(
-                  recipe.generalNotes!,
-                  style: AppTypography.body,
+              Text(
+                recipe.generalNotes!,
+                style: AppTypography.body.copyWith(
+                  color: AppColors.of(context).textPrimary,
                 ),
               ),
             ],

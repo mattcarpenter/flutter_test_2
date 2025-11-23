@@ -1,4 +1,5 @@
 import 'package:flutter/cupertino.dart';
+import 'package:shimmer/shimmer.dart';
 import '../../../theme/colors.dart';
 import '../../../theme/spacing.dart';
 import '../../../theme/typography.dart';
@@ -51,13 +52,7 @@ class HouseholdMemberTile extends StatelessWidget {
           children: [
             // Member name/email
             Expanded(
-              child: Text(
-                member.userName ?? member.userEmail ?? member.userId,
-                style: AppTypography.body.copyWith(
-                  color: AppColors.of(context).textPrimary,
-                  fontWeight: FontWeight.w500,
-                ),
-              ),
+              child: _buildMemberName(context),
             ),
             // Owner chip (only for owners)
             if (member.isOwner) ...[
@@ -84,6 +79,48 @@ class HouseholdMemberTile extends StatelessWidget {
     );
   }
 
+  Widget _buildMemberName(BuildContext context) {
+    final displayName = member.userName ?? member.userEmail;
+    final textStyle = AppTypography.body.copyWith(
+      color: AppColors.of(context).textPrimary,
+      fontWeight: FontWeight.w500,
+    );
+
+    // Calculate the actual line height to prevent layout shift
+    final fontSize = textStyle.fontSize ?? 15;
+    final lineHeight = textStyle.height ?? 1.5;
+    final actualHeight = fontSize * lineHeight;
+
+    // Show shimmer while loading (when we only have the userId)
+    if (displayName == null) {
+      final colors = AppColors.of(context);
+      final isDark = colors.brightness == Brightness.dark;
+      return SizedBox(
+        height: actualHeight,
+        child: Align(
+          alignment: Alignment.centerLeft,
+          child: Shimmer.fromColors(
+            baseColor: isDark ? colors.surfaceElevated : CupertinoColors.systemGrey5,
+            highlightColor: isDark ? colors.surfaceElevatedBorder : CupertinoColors.systemGrey6,
+            child: Container(
+              height: fontSize, // Shimmer bar slightly shorter than line height
+              width: 140,
+              decoration: BoxDecoration(
+                color: CupertinoColors.white,
+                borderRadius: BorderRadius.circular(4),
+              ),
+            ),
+          ),
+        ),
+      );
+    }
+
+    return Text(
+      displayName,
+      style: textStyle,
+    );
+  }
+
   Widget _buildOwnerChip(BuildContext context) {
     final colors = AppColors.of(context);
     return Container(
@@ -107,11 +144,12 @@ class HouseholdMemberTile extends StatelessWidget {
   }
 
   void _showRemoveConfirmation(BuildContext context) {
+    final displayName = member.userName ?? member.userEmail ?? 'this member';
     showCupertinoDialog(
       context: context,
       builder: (context) => CupertinoAlertDialog(
         title: const Text('Remove Member'),
-        content: Text('Are you sure you want to remove ${member.userName ?? member.userEmail ?? member.userId} from the household?'),
+        content: Text('Are you sure you want to remove $displayName from the household?'),
         actions: [
           CupertinoDialogAction(
             child: const Text('Cancel'),
