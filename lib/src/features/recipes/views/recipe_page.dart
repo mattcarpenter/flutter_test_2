@@ -242,13 +242,16 @@ class _RecipePageState extends ConsumerState<RecipePage> {
       builder: (context, child) {
         final offset = _scrollController.hasClients ? _scrollController.offset : 0;
 
-        // Calculate fade timing to complete when rounded rect TOP meets header
-        // This prevents the rounded rect from appearing under a translucent header
+        // Calculate fade timing to complete when content meets header
         final headerHeight = MediaQuery.of(context).padding.top + 60;
-        final fadeStartOffset = heroHeight * 0.5;
-        // End fade when rounded rect top (16px above content) meets header bottom
-        final fadeEndOffset = heroHeight - (headerHeight/2) - 16;
-        final fadeDuration = fadeEndOffset - fadeStartOffset;
+
+        // For images: start fade at 50% of hero, end when rounded rect meets header
+        // For no images: start at 0, end when content meets header (shorter hero needs earlier fade)
+        final fadeStartOffset = hasImages ? heroHeight * 0.5 : 0.0;
+        final fadeEndOffset = hasImages
+            ? heroHeight - (headerHeight / 2) - 16
+            : heroHeight - headerHeight;
+        final fadeDuration = (fadeEndOffset - fadeStartOffset).clamp(1.0, double.infinity);
 
         final opacity = ((offset - fadeStartOffset) / fadeDuration).clamp(0.0, 1.0);
 
@@ -282,11 +285,15 @@ class _RecipePageState extends ConsumerState<RecipePage> {
         final offset = _scrollController.hasClients ? _scrollController.offset : 0;
 
         // Calculate same fade timing as header overlay
-        // Complete transition when rounded rect top meets header bottom
         final headerHeight = MediaQuery.of(context).padding.top + 60;
-        final fadeStartOffset = heroHeight * 0.5;
-        final fadeEndOffset = heroHeight - (headerHeight/2) - 16;
-        final fadeDuration = fadeEndOffset - fadeStartOffset;
+
+        // For images: start fade at 50% of hero, end when rounded rect meets header
+        // For no images: start at 0, end when content meets header (shorter hero needs earlier fade)
+        final fadeStartOffset = hasImages ? heroHeight * 0.5 : 0.0;
+        final fadeEndOffset = hasImages
+            ? heroHeight - (headerHeight / 2) - 16
+            : heroHeight - headerHeight;
+        final fadeDuration = (fadeEndOffset - fadeStartOffset).clamp(1.0, double.infinity);
 
         final opacity = ((offset - fadeStartOffset) / fadeDuration).clamp(0.0, 1.0);
 
