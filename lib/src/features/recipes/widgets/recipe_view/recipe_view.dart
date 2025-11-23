@@ -234,6 +234,7 @@ class _RecipeViewState extends ConsumerState<RecipeView> {
           value,
           style: AppTypography.body.copyWith(
             fontWeight: FontWeight.w500,
+            color: AppColors.of(context).textPrimary,
           ),
         ),
       ],
