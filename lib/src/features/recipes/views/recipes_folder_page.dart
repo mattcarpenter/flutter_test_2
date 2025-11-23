@@ -19,6 +19,7 @@ import '../widgets/recipe_list.dart';
 import '../widgets/recipe_search_results.dart';
 import '../widgets/smart_folder_search_results.dart';
 import 'add_recipe_modal.dart';
+import 'edit_smart_folder_modal.dart';
 
 class RecipesFolderPage extends ConsumerWidget {
   final String? folderId;
@@ -271,7 +272,21 @@ class RecipesFolderPage extends ConsumerWidget {
           },
         ),
       ],
-      // No trailing add button for smart folders since recipes can't be added directly
+      // Trailing menu with edit option for smart folders
+      trailing: AdaptivePullDownButton(
+        items: [
+          AdaptiveMenuItem(
+            title: 'Edit Smart Folder',
+            icon: const Icon(Icons.tune),
+            onTap: () {
+              showEditSmartFolderModal(context, folder);
+            },
+          ),
+        ],
+        child: const AppCircleButton(
+          icon: AppCircleButtonIcon.ellipsis,
+        ),
+      ),
       previousPageTitle: previousPageTitle,
       automaticallyImplyLeading: true,
     );
