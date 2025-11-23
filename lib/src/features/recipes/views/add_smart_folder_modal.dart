@@ -323,38 +323,7 @@ class _ConfigurationContentState extends ConsumerState<_ConfigurationContent> {
             crossAxisAlignment: CrossAxisAlignment.start,
             mainAxisSize: MainAxisSize.min,
             children: [
-              // Match logic toggle
-              Row(
-                children: [
-                  Text(
-                    'Match',
-                    style: AppTypography.body.copyWith(color: colors.textPrimary),
-                  ),
-                  SizedBox(width: AppSpacing.sm),
-                  CupertinoSlidingSegmentedControl<bool>(
-                    groupValue: viewModel.matchAll,
-                    onValueChanged: (value) {
-                      if (value != null) {
-                        viewModel.setMatchAll(value);
-                      }
-                    },
-                    children: const {
-                      false: Padding(
-                        padding: EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                        child: Text('Any'),
-                      ),
-                      true: Padding(
-                        padding: EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                        child: Text('All'),
-                      ),
-                    },
-                  ),
-                ],
-              ),
-
-              SizedBox(height: AppSpacing.xl),
-
-              // Type-specific content
+              // Type-specific content (ingredients has its own match toggle at bottom)
               if (isTagBased)
                 _buildTagSelection(colors, viewModel)
               else
@@ -406,9 +375,15 @@ class _ConfigurationContentState extends ConsumerState<_ConfigurationContent> {
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            // Section header with subtext
             Text(
-              'Select tags',
-              style: AppTypography.label.copyWith(color: colors.textSecondary),
+              'Matching Tags',
+              style: AppTypography.h5.copyWith(color: colors.textPrimary),
+            ),
+            SizedBox(height: AppSpacing.xs),
+            Text(
+              'Recipes with these tags will appear in this folder',
+              style: AppTypography.body.copyWith(color: colors.textSecondary),
             ),
             SizedBox(height: AppSpacing.sm),
             ...tags.asMap().entries.map((entry) {
@@ -427,6 +402,44 @@ class _ConfigurationContentState extends ConsumerState<_ConfigurationContent> {
                 onToggle: () => viewModel.toggleTag(tag.name),
               );
             }),
+
+            SizedBox(height: AppSpacing.lg),
+
+            // Match logic section with description
+            Text(
+              'Matching',
+              style: AppTypography.h5.copyWith(color: colors.textPrimary),
+            ),
+            SizedBox(height: AppSpacing.sm),
+            Row(
+              children: [
+                CupertinoSlidingSegmentedControl<bool>(
+                  groupValue: viewModel.matchAll,
+                  onValueChanged: (value) {
+                    if (value != null) {
+                      viewModel.setMatchAll(value);
+                    }
+                  },
+                  children: const {
+                    false: Padding(
+                      padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                      child: Text('Any'),
+                    ),
+                    true: Padding(
+                      padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                      child: Text('All'),
+                    ),
+                  },
+                ),
+              ],
+            ),
+            SizedBox(height: AppSpacing.xs),
+            Text(
+              viewModel.matchAll
+                  ? 'Recipe must have every selected tag'
+                  : 'Recipe must have at least one selected tag',
+              style: AppTypography.body.copyWith(color: colors.textSecondary),
+            ),
           ],
         );
       },
@@ -440,17 +453,25 @@ class _ConfigurationContentState extends ConsumerState<_ConfigurationContent> {
         : null;
 
     final showResultsContainer = _hasSearched || searchQuery.isNotEmpty;
+    final hasSelectedTerms = viewModel.selectedTerms.isNotEmpty;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        // Selected terms as pills
-        if (viewModel.selectedTerms.isNotEmpty) ...[
-          Text(
-            'Selected ingredients',
-            style: AppTypography.label.copyWith(color: colors.textSecondary),
-          ),
-          SizedBox(height: AppSpacing.sm),
+        // Section header with subtext
+        Text(
+          'Matching Ingredients',
+          style: AppTypography.h5.copyWith(color: colors.textPrimary),
+        ),
+        SizedBox(height: AppSpacing.xs),
+        Text(
+          'Recipes containing these ingredients will appear in this folder',
+          style: AppTypography.body.copyWith(color: colors.textSecondary),
+        ),
+        SizedBox(height: AppSpacing.md),
+
+        // Selected terms as chips
+        if (hasSelectedTerms) ...[
           Wrap(
             spacing: AppSpacing.sm,
             runSpacing: AppSpacing.sm,
@@ -489,7 +510,7 @@ class _ConfigurationContentState extends ConsumerState<_ConfigurationContent> {
               );
             }).toList(),
           ),
-          SizedBox(height: AppSpacing.lg),
+          SizedBox(height: AppSpacing.md),
         ],
 
         // Search input
@@ -514,6 +535,44 @@ class _ConfigurationContentState extends ConsumerState<_ConfigurationContent> {
               child: _buildSearchResultsContent(colors, searchAsync, searchQuery, viewModel),
             ),
           ),
+        ),
+
+        SizedBox(height: AppSpacing.lg),
+
+        // Match logic section with description
+        Text(
+          'Matching',
+          style: AppTypography.h5.copyWith(color: colors.textPrimary),
+        ),
+        SizedBox(height: AppSpacing.sm),
+        Row(
+          children: [
+            CupertinoSlidingSegmentedControl<bool>(
+              groupValue: viewModel.matchAll,
+              onValueChanged: (value) {
+                if (value != null) {
+                  viewModel.setMatchAll(value);
+                }
+              },
+              children: const {
+                false: Padding(
+                  padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                  child: Text('Any'),
+                ),
+                true: Padding(
+                  padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                  child: Text('All'),
+                ),
+              },
+            ),
+          ],
+        ),
+        SizedBox(height: AppSpacing.xs),
+        Text(
+          viewModel.matchAll
+              ? 'Recipe must contain every selected ingredient'
+              : 'Recipe must contain at least one selected ingredient',
+          style: AppTypography.body.copyWith(color: colors.textSecondary),
         ),
       ],
     );

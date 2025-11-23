@@ -260,32 +260,18 @@ class _FolderCardContent extends ConsumerWidget {
                 mainAxisAlignment: MainAxisAlignment.center,
                 mainAxisSize: MainAxisSize.min, // Important: minimize column height
                 children: [
-                  Row(
-                    children: [
-                      // Smart folder indicator
-                      if (folderType == 1) ...[
-                        Icon(CupertinoIcons.tag, size: 12, color: colors.textTertiary),
-                        const SizedBox(width: 4),
-                      ] else if (folderType == 2) ...[
-                        Icon(CupertinoIcons.list_bullet, size: 12, color: colors.textTertiary),
-                        const SizedBox(width: 4),
-                      ],
-                      Expanded(
-                        child: Text(
-                          folderName,
-                          style: CupertinoTheme.of(context)
-                              .textTheme
-                              .textStyle
-                              .copyWith(
-                                fontSize: 13, // Reduced by 1px (was 14)
-                                fontWeight: FontWeight.w600,
-                                color: colors.textPrimary, // Theme-aware white/black text
-                              ),
-                          maxLines: 1, // Only 1 line
-                          overflow: TextOverflow.ellipsis,
+                  Text(
+                    folderName,
+                    style: CupertinoTheme.of(context)
+                        .textTheme
+                        .textStyle
+                        .copyWith(
+                          fontSize: 13, // Reduced by 1px (was 14)
+                          fontWeight: FontWeight.w600,
+                          color: colors.textPrimary, // Theme-aware white/black text
                         ),
-                      ),
-                    ],
+                    maxLines: 1, // Only 1 line
+                    overflow: TextOverflow.ellipsis,
                   ),
                   const SizedBox(height: 1.0), // Reduced spacing
                   Text(
