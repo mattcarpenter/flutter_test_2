@@ -39,9 +39,46 @@ class $RecipeFoldersTable extends RecipeFolders
   late final GeneratedColumn<int> deletedAt = GeneratedColumn<int>(
       'deleted_at', aliasedName, true,
       type: DriftSqlType.int, requiredDuringInsert: false);
+  static const VerificationMeta _folderTypeMeta =
+      const VerificationMeta('folderType');
   @override
-  List<GeneratedColumn> get $columns =>
-      [id, name, userId, householdId, deletedAt];
+  late final GeneratedColumn<int> folderType = GeneratedColumn<int>(
+      'folder_type', aliasedName, false,
+      type: DriftSqlType.int,
+      requiredDuringInsert: false,
+      defaultValue: const Constant(0));
+  static const VerificationMeta _filterLogicMeta =
+      const VerificationMeta('filterLogic');
+  @override
+  late final GeneratedColumn<int> filterLogic = GeneratedColumn<int>(
+      'filter_logic', aliasedName, false,
+      type: DriftSqlType.int,
+      requiredDuringInsert: false,
+      defaultValue: const Constant(0));
+  static const VerificationMeta _smartFilterTagsMeta =
+      const VerificationMeta('smartFilterTags');
+  @override
+  late final GeneratedColumn<String> smartFilterTags = GeneratedColumn<String>(
+      'smart_filter_tags', aliasedName, true,
+      type: DriftSqlType.string, requiredDuringInsert: false);
+  static const VerificationMeta _smartFilterTermsMeta =
+      const VerificationMeta('smartFilterTerms');
+  @override
+  late final GeneratedColumn<String> smartFilterTerms = GeneratedColumn<String>(
+      'smart_filter_terms', aliasedName, true,
+      type: DriftSqlType.string, requiredDuringInsert: false);
+  @override
+  List<GeneratedColumn> get $columns => [
+        id,
+        name,
+        userId,
+        householdId,
+        deletedAt,
+        folderType,
+        filterLogic,
+        smartFilterTags,
+        smartFilterTerms
+      ];
   @override
   String get aliasedName => _alias ?? actualTableName;
   @override
@@ -75,6 +112,30 @@ class $RecipeFoldersTable extends RecipeFolders
       context.handle(_deletedAtMeta,
           deletedAt.isAcceptableOrUnknown(data['deleted_at']!, _deletedAtMeta));
     }
+    if (data.containsKey('folder_type')) {
+      context.handle(
+          _folderTypeMeta,
+          folderType.isAcceptableOrUnknown(
+              data['folder_type']!, _folderTypeMeta));
+    }
+    if (data.containsKey('filter_logic')) {
+      context.handle(
+          _filterLogicMeta,
+          filterLogic.isAcceptableOrUnknown(
+              data['filter_logic']!, _filterLogicMeta));
+    }
+    if (data.containsKey('smart_filter_tags')) {
+      context.handle(
+          _smartFilterTagsMeta,
+          smartFilterTags.isAcceptableOrUnknown(
+              data['smart_filter_tags']!, _smartFilterTagsMeta));
+    }
+    if (data.containsKey('smart_filter_terms')) {
+      context.handle(
+          _smartFilterTermsMeta,
+          smartFilterTerms.isAcceptableOrUnknown(
+              data['smart_filter_terms']!, _smartFilterTermsMeta));
+    }
     return context;
   }
 
@@ -94,6 +155,14 @@ class $RecipeFoldersTable extends RecipeFolders
           .read(DriftSqlType.string, data['${effectivePrefix}household_id']),
       deletedAt: attachedDatabase.typeMapping
           .read(DriftSqlType.int, data['${effectivePrefix}deleted_at']),
+      folderType: attachedDatabase.typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}folder_type'])!,
+      filterLogic: attachedDatabase.typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}filter_logic'])!,
+      smartFilterTags: attachedDatabase.typeMapping.read(
+          DriftSqlType.string, data['${effectivePrefix}smart_filter_tags']),
+      smartFilterTerms: attachedDatabase.typeMapping.read(
+          DriftSqlType.string, data['${effectivePrefix}smart_filter_terms']),
     );
   }
 
@@ -110,12 +179,20 @@ class RecipeFolderEntry extends DataClass
   final String? userId;
   final String? householdId;
   final int? deletedAt;
+  final int folderType;
+  final int filterLogic;
+  final String? smartFilterTags;
+  final String? smartFilterTerms;
   const RecipeFolderEntry(
       {required this.id,
       required this.name,
       this.userId,
       this.householdId,
-      this.deletedAt});
+      this.deletedAt,
+      required this.folderType,
+      required this.filterLogic,
+      this.smartFilterTags,
+      this.smartFilterTerms});
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
@@ -129,6 +206,14 @@ class RecipeFolderEntry extends DataClass
     }
     if (!nullToAbsent || deletedAt != null) {
       map['deleted_at'] = Variable<int>(deletedAt);
+    }
+    map['folder_type'] = Variable<int>(folderType);
+    map['filter_logic'] = Variable<int>(filterLogic);
+    if (!nullToAbsent || smartFilterTags != null) {
+      map['smart_filter_tags'] = Variable<String>(smartFilterTags);
+    }
+    if (!nullToAbsent || smartFilterTerms != null) {
+      map['smart_filter_terms'] = Variable<String>(smartFilterTerms);
     }
     return map;
   }
@@ -145,6 +230,14 @@ class RecipeFolderEntry extends DataClass
       deletedAt: deletedAt == null && nullToAbsent
           ? const Value.absent()
           : Value(deletedAt),
+      folderType: Value(folderType),
+      filterLogic: Value(filterLogic),
+      smartFilterTags: smartFilterTags == null && nullToAbsent
+          ? const Value.absent()
+          : Value(smartFilterTags),
+      smartFilterTerms: smartFilterTerms == null && nullToAbsent
+          ? const Value.absent()
+          : Value(smartFilterTerms),
     );
   }
 
@@ -157,6 +250,10 @@ class RecipeFolderEntry extends DataClass
       userId: serializer.fromJson<String?>(json['userId']),
       householdId: serializer.fromJson<String?>(json['householdId']),
       deletedAt: serializer.fromJson<int?>(json['deletedAt']),
+      folderType: serializer.fromJson<int>(json['folderType']),
+      filterLogic: serializer.fromJson<int>(json['filterLogic']),
+      smartFilterTags: serializer.fromJson<String?>(json['smartFilterTags']),
+      smartFilterTerms: serializer.fromJson<String?>(json['smartFilterTerms']),
     );
   }
   @override
@@ -168,6 +265,10 @@ class RecipeFolderEntry extends DataClass
       'userId': serializer.toJson<String?>(userId),
       'householdId': serializer.toJson<String?>(householdId),
       'deletedAt': serializer.toJson<int?>(deletedAt),
+      'folderType': serializer.toJson<int>(folderType),
+      'filterLogic': serializer.toJson<int>(filterLogic),
+      'smartFilterTags': serializer.toJson<String?>(smartFilterTags),
+      'smartFilterTerms': serializer.toJson<String?>(smartFilterTerms),
     };
   }
 
@@ -176,13 +277,25 @@ class RecipeFolderEntry extends DataClass
           String? name,
           Value<String?> userId = const Value.absent(),
           Value<String?> householdId = const Value.absent(),
-          Value<int?> deletedAt = const Value.absent()}) =>
+          Value<int?> deletedAt = const Value.absent(),
+          int? folderType,
+          int? filterLogic,
+          Value<String?> smartFilterTags = const Value.absent(),
+          Value<String?> smartFilterTerms = const Value.absent()}) =>
       RecipeFolderEntry(
         id: id ?? this.id,
         name: name ?? this.name,
         userId: userId.present ? userId.value : this.userId,
         householdId: householdId.present ? householdId.value : this.householdId,
         deletedAt: deletedAt.present ? deletedAt.value : this.deletedAt,
+        folderType: folderType ?? this.folderType,
+        filterLogic: filterLogic ?? this.filterLogic,
+        smartFilterTags: smartFilterTags.present
+            ? smartFilterTags.value
+            : this.smartFilterTags,
+        smartFilterTerms: smartFilterTerms.present
+            ? smartFilterTerms.value
+            : this.smartFilterTerms,
       );
   RecipeFolderEntry copyWithCompanion(RecipeFoldersCompanion data) {
     return RecipeFolderEntry(
@@ -192,6 +305,16 @@ class RecipeFolderEntry extends DataClass
       householdId:
           data.householdId.present ? data.householdId.value : this.householdId,
       deletedAt: data.deletedAt.present ? data.deletedAt.value : this.deletedAt,
+      folderType:
+          data.folderType.present ? data.folderType.value : this.folderType,
+      filterLogic:
+          data.filterLogic.present ? data.filterLogic.value : this.filterLogic,
+      smartFilterTags: data.smartFilterTags.present
+          ? data.smartFilterTags.value
+          : this.smartFilterTags,
+      smartFilterTerms: data.smartFilterTerms.present
+          ? data.smartFilterTerms.value
+          : this.smartFilterTerms,
     );
   }
 
@@ -202,13 +325,18 @@ class RecipeFolderEntry extends DataClass
           ..write('name: $name, ')
           ..write('userId: $userId, ')
           ..write('householdId: $householdId, ')
-          ..write('deletedAt: $deletedAt')
+          ..write('deletedAt: $deletedAt, ')
+          ..write('folderType: $folderType, ')
+          ..write('filterLogic: $filterLogic, ')
+          ..write('smartFilterTags: $smartFilterTags, ')
+          ..write('smartFilterTerms: $smartFilterTerms')
           ..write(')'))
         .toString();
   }
 
   @override
-  int get hashCode => Object.hash(id, name, userId, householdId, deletedAt);
+  int get hashCode => Object.hash(id, name, userId, householdId, deletedAt,
+      folderType, filterLogic, smartFilterTags, smartFilterTerms);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -217,7 +345,11 @@ class RecipeFolderEntry extends DataClass
           other.name == this.name &&
           other.userId == this.userId &&
           other.householdId == this.householdId &&
-          other.deletedAt == this.deletedAt);
+          other.deletedAt == this.deletedAt &&
+          other.folderType == this.folderType &&
+          other.filterLogic == this.filterLogic &&
+          other.smartFilterTags == this.smartFilterTags &&
+          other.smartFilterTerms == this.smartFilterTerms);
 }
 
 class RecipeFoldersCompanion extends UpdateCompanion<RecipeFolderEntry> {
@@ -226,6 +358,10 @@ class RecipeFoldersCompanion extends UpdateCompanion<RecipeFolderEntry> {
   final Value<String?> userId;
   final Value<String?> householdId;
   final Value<int?> deletedAt;
+  final Value<int> folderType;
+  final Value<int> filterLogic;
+  final Value<String?> smartFilterTags;
+  final Value<String?> smartFilterTerms;
   final Value<int> rowid;
   const RecipeFoldersCompanion({
     this.id = const Value.absent(),
@@ -233,6 +369,10 @@ class RecipeFoldersCompanion extends UpdateCompanion<RecipeFolderEntry> {
     this.userId = const Value.absent(),
     this.householdId = const Value.absent(),
     this.deletedAt = const Value.absent(),
+    this.folderType = const Value.absent(),
+    this.filterLogic = const Value.absent(),
+    this.smartFilterTags = const Value.absent(),
+    this.smartFilterTerms = const Value.absent(),
     this.rowid = const Value.absent(),
   });
   RecipeFoldersCompanion.insert({
@@ -241,6 +381,10 @@ class RecipeFoldersCompanion extends UpdateCompanion<RecipeFolderEntry> {
     this.userId = const Value.absent(),
     this.householdId = const Value.absent(),
     this.deletedAt = const Value.absent(),
+    this.folderType = const Value.absent(),
+    this.filterLogic = const Value.absent(),
+    this.smartFilterTags = const Value.absent(),
+    this.smartFilterTerms = const Value.absent(),
     this.rowid = const Value.absent(),
   }) : name = Value(name);
   static Insertable<RecipeFolderEntry> custom({
@@ -249,6 +393,10 @@ class RecipeFoldersCompanion extends UpdateCompanion<RecipeFolderEntry> {
     Expression<String>? userId,
     Expression<String>? householdId,
     Expression<int>? deletedAt,
+    Expression<int>? folderType,
+    Expression<int>? filterLogic,
+    Expression<String>? smartFilterTags,
+    Expression<String>? smartFilterTerms,
     Expression<int>? rowid,
   }) {
     return RawValuesInsertable({
@@ -257,6 +405,10 @@ class RecipeFoldersCompanion extends UpdateCompanion<RecipeFolderEntry> {
       if (userId != null) 'user_id': userId,
       if (householdId != null) 'household_id': householdId,
       if (deletedAt != null) 'deleted_at': deletedAt,
+      if (folderType != null) 'folder_type': folderType,
+      if (filterLogic != null) 'filter_logic': filterLogic,
+      if (smartFilterTags != null) 'smart_filter_tags': smartFilterTags,
+      if (smartFilterTerms != null) 'smart_filter_terms': smartFilterTerms,
       if (rowid != null) 'rowid': rowid,
     });
   }
@@ -267,6 +419,10 @@ class RecipeFoldersCompanion extends UpdateCompanion<RecipeFolderEntry> {
       Value<String?>? userId,
       Value<String?>? householdId,
       Value<int?>? deletedAt,
+      Value<int>? folderType,
+      Value<int>? filterLogic,
+      Value<String?>? smartFilterTags,
+      Value<String?>? smartFilterTerms,
       Value<int>? rowid}) {
     return RecipeFoldersCompanion(
       id: id ?? this.id,
@@ -274,6 +430,10 @@ class RecipeFoldersCompanion extends UpdateCompanion<RecipeFolderEntry> {
       userId: userId ?? this.userId,
       householdId: householdId ?? this.householdId,
       deletedAt: deletedAt ?? this.deletedAt,
+      folderType: folderType ?? this.folderType,
+      filterLogic: filterLogic ?? this.filterLogic,
+      smartFilterTags: smartFilterTags ?? this.smartFilterTags,
+      smartFilterTerms: smartFilterTerms ?? this.smartFilterTerms,
       rowid: rowid ?? this.rowid,
     );
   }
@@ -296,6 +456,18 @@ class RecipeFoldersCompanion extends UpdateCompanion<RecipeFolderEntry> {
     if (deletedAt.present) {
       map['deleted_at'] = Variable<int>(deletedAt.value);
     }
+    if (folderType.present) {
+      map['folder_type'] = Variable<int>(folderType.value);
+    }
+    if (filterLogic.present) {
+      map['filter_logic'] = Variable<int>(filterLogic.value);
+    }
+    if (smartFilterTags.present) {
+      map['smart_filter_tags'] = Variable<String>(smartFilterTags.value);
+    }
+    if (smartFilterTerms.present) {
+      map['smart_filter_terms'] = Variable<String>(smartFilterTerms.value);
+    }
     if (rowid.present) {
       map['rowid'] = Variable<int>(rowid.value);
     }
@@ -310,6 +482,10 @@ class RecipeFoldersCompanion extends UpdateCompanion<RecipeFolderEntry> {
           ..write('userId: $userId, ')
           ..write('householdId: $householdId, ')
           ..write('deletedAt: $deletedAt, ')
+          ..write('folderType: $folderType, ')
+          ..write('filterLogic: $filterLogic, ')
+          ..write('smartFilterTags: $smartFilterTags, ')
+          ..write('smartFilterTerms: $smartFilterTerms, ')
           ..write('rowid: $rowid')
           ..write(')'))
         .toString();
@@ -9981,6 +10157,10 @@ typedef $$RecipeFoldersTableCreateCompanionBuilder = RecipeFoldersCompanion
   Value<String?> userId,
   Value<String?> householdId,
   Value<int?> deletedAt,
+  Value<int> folderType,
+  Value<int> filterLogic,
+  Value<String?> smartFilterTags,
+  Value<String?> smartFilterTerms,
   Value<int> rowid,
 });
 typedef $$RecipeFoldersTableUpdateCompanionBuilder = RecipeFoldersCompanion
@@ -9990,6 +10170,10 @@ typedef $$RecipeFoldersTableUpdateCompanionBuilder = RecipeFoldersCompanion
   Value<String?> userId,
   Value<String?> householdId,
   Value<int?> deletedAt,
+  Value<int> folderType,
+  Value<int> filterLogic,
+  Value<String?> smartFilterTags,
+  Value<String?> smartFilterTerms,
   Value<int> rowid,
 });
 
@@ -10016,6 +10200,20 @@ class $$RecipeFoldersTableFilterComposer
 
   ColumnFilters<int> get deletedAt => $composableBuilder(
       column: $table.deletedAt, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<int> get folderType => $composableBuilder(
+      column: $table.folderType, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<int> get filterLogic => $composableBuilder(
+      column: $table.filterLogic, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get smartFilterTags => $composableBuilder(
+      column: $table.smartFilterTags,
+      builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get smartFilterTerms => $composableBuilder(
+      column: $table.smartFilterTerms,
+      builder: (column) => ColumnFilters(column));
 }
 
 class $$RecipeFoldersTableOrderingComposer
@@ -10041,6 +10239,20 @@ class $$RecipeFoldersTableOrderingComposer
 
   ColumnOrderings<int> get deletedAt => $composableBuilder(
       column: $table.deletedAt, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<int> get folderType => $composableBuilder(
+      column: $table.folderType, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<int> get filterLogic => $composableBuilder(
+      column: $table.filterLogic, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get smartFilterTags => $composableBuilder(
+      column: $table.smartFilterTags,
+      builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get smartFilterTerms => $composableBuilder(
+      column: $table.smartFilterTerms,
+      builder: (column) => ColumnOrderings(column));
 }
 
 class $$RecipeFoldersTableAnnotationComposer
@@ -10066,6 +10278,18 @@ class $$RecipeFoldersTableAnnotationComposer
 
   GeneratedColumn<int> get deletedAt =>
       $composableBuilder(column: $table.deletedAt, builder: (column) => column);
+
+  GeneratedColumn<int> get folderType => $composableBuilder(
+      column: $table.folderType, builder: (column) => column);
+
+  GeneratedColumn<int> get filterLogic => $composableBuilder(
+      column: $table.filterLogic, builder: (column) => column);
+
+  GeneratedColumn<String> get smartFilterTags => $composableBuilder(
+      column: $table.smartFilterTags, builder: (column) => column);
+
+  GeneratedColumn<String> get smartFilterTerms => $composableBuilder(
+      column: $table.smartFilterTerms, builder: (column) => column);
 }
 
 class $$RecipeFoldersTableTableManager extends RootTableManager<
@@ -10099,6 +10323,10 @@ class $$RecipeFoldersTableTableManager extends RootTableManager<
             Value<String?> userId = const Value.absent(),
             Value<String?> householdId = const Value.absent(),
             Value<int?> deletedAt = const Value.absent(),
+            Value<int> folderType = const Value.absent(),
+            Value<int> filterLogic = const Value.absent(),
+            Value<String?> smartFilterTags = const Value.absent(),
+            Value<String?> smartFilterTerms = const Value.absent(),
             Value<int> rowid = const Value.absent(),
           }) =>
               RecipeFoldersCompanion(
@@ -10107,6 +10335,10 @@ class $$RecipeFoldersTableTableManager extends RootTableManager<
             userId: userId,
             householdId: householdId,
             deletedAt: deletedAt,
+            folderType: folderType,
+            filterLogic: filterLogic,
+            smartFilterTags: smartFilterTags,
+            smartFilterTerms: smartFilterTerms,
             rowid: rowid,
           ),
           createCompanionCallback: ({
@@ -10115,6 +10347,10 @@ class $$RecipeFoldersTableTableManager extends RootTableManager<
             Value<String?> userId = const Value.absent(),
             Value<String?> householdId = const Value.absent(),
             Value<int?> deletedAt = const Value.absent(),
+            Value<int> folderType = const Value.absent(),
+            Value<int> filterLogic = const Value.absent(),
+            Value<String?> smartFilterTags = const Value.absent(),
+            Value<String?> smartFilterTerms = const Value.absent(),
             Value<int> rowid = const Value.absent(),
           }) =>
               RecipeFoldersCompanion.insert(
@@ -10123,6 +10359,10 @@ class $$RecipeFoldersTableTableManager extends RootTableManager<
             userId: userId,
             householdId: householdId,
             deletedAt: deletedAt,
+            folderType: folderType,
+            filterLogic: filterLogic,
+            smartFilterTags: smartFilterTags,
+            smartFilterTerms: smartFilterTerms,
             rowid: rowid,
           ),
           withReferenceMapper: (p0) => p0

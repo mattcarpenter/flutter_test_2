@@ -14,8 +14,10 @@ class FolderCard extends ConsumerStatefulWidget {
   final String folderName;
   final int recipeCount;
   final double thumbnailSize;
+  final int folderType; // 0=normal, 1=smartTag, 2=smartIngredient
   final VoidCallback onTap;
   final VoidCallback onDelete;
+  final VoidCallback? onEdit; // Optional edit callback for smart folders
 
   const FolderCard({
     Key? key,
@@ -23,8 +25,10 @@ class FolderCard extends ConsumerStatefulWidget {
     required this.folderName,
     required this.recipeCount,
     required this.thumbnailSize,
+    this.folderType = 0,
     required this.onTap,
     required this.onDelete,
+    this.onEdit,
   }) : super(key: key);
 
   @override
@@ -92,7 +96,9 @@ class _FolderCardState extends ConsumerState<FolderCard> with SingleTickerProvid
             folderName: widget.folderName,
             recipeCount: widget.recipeCount,
             thumbnailSize: widget.thumbnailSize,
+            folderType: widget.folderType,
             onDelete: _startDeletionAnimation,
+            onEdit: widget.onEdit,
           ),
         ),
       ),
@@ -105,7 +111,9 @@ class _FolderCardContextMenu extends ConsumerWidget {
   final String folderName;
   final int recipeCount;
   final double thumbnailSize;
+  final int folderType;
   final VoidCallback onDelete;
+  final VoidCallback? onEdit;
 
   const _FolderCardContextMenu({
     Key? key,
@@ -113,23 +121,29 @@ class _FolderCardContextMenu extends ConsumerWidget {
     required this.folderName,
     required this.recipeCount,
     required this.thumbnailSize,
+    required this.folderType,
     required this.onDelete,
+    this.onEdit,
   }) : super(key: key);
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final isSmartFolder = folderType != 0;
+
     return ContextMenuWidget(
       liftBuilder: (context, child) => _FolderCardContent(
         folderId: folderId,
         folderName: folderName,
         recipeCount: recipeCount,
         thumbnailSize: thumbnailSize,
+        folderType: folderType,
       ),
       previewBuilder: (context, child) => _FolderCardContent(
         folderId: folderId,
         folderName: folderName,
         recipeCount: recipeCount,
         thumbnailSize: thumbnailSize,
+        folderType: folderType,
         isPreview: true,
       ),
       child: _FolderCardContent(
@@ -137,11 +151,19 @@ class _FolderCardContextMenu extends ConsumerWidget {
         folderName: folderName,
         recipeCount: recipeCount,
         thumbnailSize: thumbnailSize,
+        folderType: folderType,
         isChild: true,
       ),
       menuProvider: (_) {
         return Menu(
           children: [
+            // Show edit option for smart folders
+            if (isSmartFolder && onEdit != null)
+              MenuAction(
+                title: 'Edit Smart Folder',
+                image: MenuImage.icon(Icons.edit),
+                callback: onEdit!,
+              ),
             MenuAction(
               title: 'Delete Folder',
               image: MenuImage.icon(Icons.delete),
@@ -160,6 +182,7 @@ class _FolderCardContent extends ConsumerWidget {
   final String folderName;
   final int recipeCount;
   final double thumbnailSize;
+  final int folderType;
   final bool isPreview;
   final bool isChild;
 
@@ -169,6 +192,7 @@ class _FolderCardContent extends ConsumerWidget {
     required this.folderName,
     required this.recipeCount,
     required this.thumbnailSize,
+    this.folderType = 0,
     this.isPreview = false,
     this.isChild = false,
   }) : super(key: key);
@@ -224,18 +248,32 @@ class _FolderCardContent extends ConsumerWidget {
                 mainAxisAlignment: MainAxisAlignment.center,
                 mainAxisSize: MainAxisSize.min, // Important: minimize column height
                 children: [
-                  Text(
-                    folderName,
-                    style: CupertinoTheme.of(context)
-                        .textTheme
-                        .textStyle
-                        .copyWith(
-                          fontSize: 13, // Reduced by 1px (was 14)
-                          fontWeight: FontWeight.w600,
-                          color: colors.textPrimary, // Theme-aware white/black text
+                  Row(
+                    children: [
+                      // Smart folder indicator
+                      if (folderType == 1) ...[
+                        Icon(CupertinoIcons.tag, size: 12, color: colors.textTertiary),
+                        const SizedBox(width: 4),
+                      ] else if (folderType == 2) ...[
+                        Icon(CupertinoIcons.list_bullet, size: 12, color: colors.textTertiary),
+                        const SizedBox(width: 4),
+                      ],
+                      Expanded(
+                        child: Text(
+                          folderName,
+                          style: CupertinoTheme.of(context)
+                              .textTheme
+                              .textStyle
+                              .copyWith(
+                                fontSize: 13, // Reduced by 1px (was 14)
+                                fontWeight: FontWeight.w600,
+                                color: colors.textPrimary, // Theme-aware white/black text
+                              ),
+                          maxLines: 1, // Only 1 line
+                          overflow: TextOverflow.ellipsis,
                         ),
-                    maxLines: 1, // Only 1 line
-                    overflow: TextOverflow.ellipsis,
+                      ),
+                    ],
                   ),
                   const SizedBox(height: 1.0), // Reduced spacing
                   Text(

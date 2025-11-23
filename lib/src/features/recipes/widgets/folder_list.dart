@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -5,7 +6,9 @@ import '../../../../database/database.dart';
 import '../../../constants/folder_constants.dart';
 import '../../../providers/recipe_folder_provider.dart';
 import '../../../providers/recipe_provider.dart';
+import '../../../providers/smart_folder_provider.dart';
 import '../../../theme/spacing.dart';
+import '../views/edit_smart_folder_modal.dart';
 import 'folder_card.dart';
 
 class FolderList extends ConsumerStatefulWidget {
@@ -42,8 +45,12 @@ class _FolderListState extends ConsumerState<FolderList> {
     // Watch for folder changes using the StateNotifierProvider.
     final foldersAsyncValue = ref.watch(recipeFolderNotifierProvider);
 
-    // Get recipe counts for all folders
+    // Get recipe counts for all folders (normal folders counted by assignment)
     final folderCounts = ref.watch(recipeFolderCountProvider);
+
+    // Get recipe counts for smart folders (counted by matching criteria)
+    final smartFolderCountsAsync = ref.watch(smartFolderCountsProvider);
+    final smartFolderCounts = smartFolderCountsAsync.valueOrNull ?? {};
 
     return Padding(
       padding: const EdgeInsets.only(top: AppSpacing.md, bottom: AppSpacing.lg), // 12px top, 16px bottom
@@ -127,7 +134,12 @@ class _FolderListState extends ConsumerState<FolderList> {
                       } else {
                         // Regular folder handling
                         final regularFolder = folder as RecipeFolderEntry;
-                        final count = folderCounts[regularFolder.id] ?? 0;
+                        final isSmartFolder = regularFolder.folderType != 0;
+                        // Use smart folder counts for smart folders, normal folder counts otherwise
+                        final count = isSmartFolder
+                            ? (smartFolderCounts[regularFolder.id] ?? 0)
+                            : (folderCounts[regularFolder.id] ?? 0);
+
                         folderCardWidget = SizedBox(
                           width: cardWidth,
                           height: cardHeight,
@@ -136,6 +148,7 @@ class _FolderListState extends ConsumerState<FolderList> {
                             folderName: regularFolder.name,
                             recipeCount: count,
                             thumbnailSize: thumbnailSize,
+                            folderType: regularFolder.folderType,
                             onTap: () {
                               context.push('/recipes/folder/${regularFolder.id}', extra: {
                                 'folderTitle': regularFolder.name,
@@ -147,6 +160,10 @@ class _FolderListState extends ConsumerState<FolderList> {
                                   .read(recipeFolderNotifierProvider.notifier)
                                   .deleteFolder(regularFolder.id);
                             },
+                            // Pass edit callback for smart folders
+                            onEdit: isSmartFolder
+                                ? () => showEditSmartFolderModal(context, regularFolder)
+                                : null,
                           ),
                         );
                       }

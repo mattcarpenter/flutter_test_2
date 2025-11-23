@@ -55,6 +55,54 @@ class RecipeFolderNotifier extends StateNotifier<AsyncValue<List<RecipeFolderEnt
       state = AsyncValue.error(e, stack);
     }
   }
+
+  /// Add a smart folder
+  Future<String?> addSmartFolder({
+    required String name,
+    required int folderType,
+    required int filterLogic,
+    List<String>? tags,
+    List<String>? terms,
+    String? userId,
+    String? householdId,
+  }) async {
+    try {
+      final newFolder = await _repository.addSmartFolder(
+        name: name,
+        folderType: folderType,
+        filterLogic: filterLogic,
+        tags: tags,
+        terms: terms,
+        userId: userId,
+        householdId: householdId,
+      );
+      return newFolder.id;
+    } catch (e, stack) {
+      state = AsyncValue.error(e, stack);
+      return null;
+    }
+  }
+
+  /// Update smart folder settings
+  Future<void> updateSmartFolderSettings({
+    required String id,
+    String? name,
+    int? filterLogic,
+    List<String>? tags,
+    List<String>? terms,
+  }) async {
+    try {
+      await _repository.updateSmartFolderSettings(
+        id: id,
+        name: name,
+        filterLogic: filterLogic,
+        tags: tags,
+        terms: terms,
+      );
+    } catch (e, stack) {
+      state = AsyncValue.error(e, stack);
+    }
+  }
 }
 
 // Provider to expose the RecipeFolderNotifier.

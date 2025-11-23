@@ -5,7 +5,9 @@ import '../../../../database/database.dart';
 import '../../../constants/folder_constants.dart';
 import '../../../mobile/utils/adaptive_sliver_page.dart';
 import '../../../providers/recipe_filter_sort_provider.dart';
+import '../../../providers/recipe_folder_provider.dart';
 import '../../../providers/recipe_provider.dart';
+import '../../../providers/smart_folder_provider.dart';
 import '../../../widgets/adaptive_pull_down/adaptive_menu_item.dart';
 import '../../../widgets/adaptive_pull_down/adaptive_pull_down.dart';
 import '../../../widgets/app_button.dart';
@@ -31,7 +33,19 @@ class RecipesFolderPage extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    // Watch all recipes
+    // Check if this is a smart folder
+    final foldersAsync = ref.watch(recipeFolderNotifierProvider);
+    final currentFolder = foldersAsync.whenOrNull(
+      data: (folders) => folders.where((f) => f.id == folderId).firstOrNull,
+    );
+    final isSmartFolder = currentFolder != null && currentFolder.folderType != 0;
+
+    // If smart folder, use the dedicated provider
+    if (isSmartFolder) {
+      return _buildSmartFolderPage(context, ref, currentFolder);
+    }
+
+    // Watch all recipes (for normal folders)
     final recipesAsyncValue = ref.watch(recipeNotifierProvider);
 
     // Watch pantry recipe matches if needed for filtering
@@ -211,6 +225,43 @@ class RecipesFolderPage extends ConsumerWidget {
           icon: AppCircleButtonIcon.plus,
         ),
       ),
+      previousPageTitle: previousPageTitle,
+      automaticallyImplyLeading: true,
+    );
+  }
+
+  /// Build page for smart folders using the dedicated provider
+  Widget _buildSmartFolderPage(BuildContext context, WidgetRef ref, RecipeFolderEntry folder) {
+    final recipesAsync = ref.watch(smartFolderRecipesProvider(folder));
+
+    return AdaptiveSliverPage(
+      title: title,
+      searchEnabled: false, // Disable search for smart folders
+      slivers: [
+        recipesAsync.when(
+          loading: () => const SliverFillRemaining(
+            child: Center(child: CircularProgressIndicator()),
+          ),
+          error: (error, stack) => SliverFillRemaining(
+            child: Center(child: Text('Error: $error')),
+          ),
+          data: (recipes) {
+            if (recipes.isEmpty) {
+              return SliverFillRemaining(
+                child: Center(
+                  child: Text(
+                    folder.folderType == 1
+                        ? 'No recipes match the selected tags'
+                        : 'No recipes match the selected ingredients',
+                  ),
+                ),
+              );
+            }
+            return RecipesList(recipes: recipes, currentPageTitle: title);
+          },
+        ),
+      ],
+      // No trailing add button for smart folders since recipes can't be added directly
       previousPageTitle: previousPageTitle,
       automaticallyImplyLeading: true,
     );

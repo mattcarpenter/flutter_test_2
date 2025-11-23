@@ -15,6 +15,7 @@ import '../../../widgets/adaptive_pull_down/adaptive_pull_down.dart';
 import '../../../widgets/app_circle_button.dart';
 import '../widgets/recipe_search_results.dart';
 import 'add_folder_modal.dart';
+import 'add_smart_folder_modal.dart';
 import '../widgets/folder_list.dart';
 import '../widgets/recipe_list.dart';
 import '../widgets/pinned_recipes_section.dart';
@@ -56,11 +57,26 @@ class RecipesTab extends ConsumerWidget {
                     color: AppColors.of(context).headingSecondary,
                   ),
                 ),
-                AppCircleButton(
-                  icon: AppCircleButtonIcon.plus,
-                  onPressed: () {
-                    showAddFolderModal(context);
-                  },
+                AdaptivePullDownButton(
+                  items: [
+                    AdaptiveMenuItem(
+                      title: 'Add Folder',
+                      icon: const Icon(CupertinoIcons.folder),
+                      onTap: () {
+                        showAddFolderModal(context);
+                      },
+                    ),
+                    AdaptiveMenuItem(
+                      title: 'Add Smart Folder',
+                      icon: const Icon(CupertinoIcons.sparkles),
+                      onTap: () {
+                        showAddSmartFolderModal(context);
+                      },
+                    ),
+                  ],
+                  child: const AppCircleButton(
+                    icon: AppCircleButtonIcon.plus,
+                  ),
                 ),
               ],
             ),
@@ -84,6 +100,13 @@ class RecipesTab extends ConsumerWidget {
             title: 'Add Folder', icon: const Icon(CupertinoIcons.folder), onTap: () {
               showAddFolderModal(context);
             }
+          ),
+          AdaptiveMenuItem(
+            title: 'Add Smart Folder',
+            icon: const Icon(CupertinoIcons.sparkles),
+            onTap: () {
+              showAddSmartFolderModal(context);
+            },
           ),
           AdaptiveMenuItem(
             title: 'Add Recipe',

@@ -21,6 +21,8 @@ class TemporaryFolder {
       id: id,
       name: name,
       userId: supabase_flutter.Supabase.instance.client.auth.currentUser?.id ?? '',
+      folderType: 0, // Normal folder
+      filterLogic: 0, // Default OR logic (not used for normal folders)
     );
   }
 }
@@ -49,16 +51,20 @@ class FolderSelectionViewModel extends ChangeNotifier {
   String? get errorMessage => _errorMessage;
   
   /// Get all folders (existing + temporary) for display
+  /// Filters out smart folders since recipes can only be assigned to normal folders
   List<RecipeFolderEntry> getAllDisplayFolders() {
     final existingFoldersAsync = ref.read(recipeFolderNotifierProvider);
     final existingFolders = existingFoldersAsync.value ?? <RecipeFolderEntry>[];
-    
-    // Combine existing folders with temporary folders
+
+    // Filter out smart folders (folderType != 0)
+    final normalFolders = existingFolders.where((f) => f.folderType == 0).toList();
+
+    // Combine normal folders with temporary folders
     final allFolders = <RecipeFolderEntry>[
-      ...existingFolders,
+      ...normalFolders,
       ..._temporaryFolders.map((tempFolder) => tempFolder.toRecipeFolderEntry()),
     ];
-    
+
     return allFolders;
   }
   

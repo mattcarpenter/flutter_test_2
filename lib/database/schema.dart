@@ -68,6 +68,11 @@ Schema schema = const Schema(([
     Column.text('parent_id'),
     Column.text('household_id'),
     Column.integer('deleted_at'),
+    // Smart folder columns
+    Column.integer('folder_type'),      // 0=normal, 1=smartTag, 2=smartIngredient
+    Column.integer('filter_logic'),     // 0=OR, 1=AND
+    Column.text('smart_filter_tags'),   // JSON array of tag names
+    Column.text('smart_filter_terms'),  // JSON array of ingredient terms
   ]),
   Table(recipeTagsTable, [
     Column.text('name'),

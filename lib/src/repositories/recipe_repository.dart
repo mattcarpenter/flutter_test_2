@@ -299,6 +299,8 @@ class RecipeRepository {
             id: folderId,
             name: row.read<String>('folder_name'),
             deletedAt: row.read<int?>('folder_deleted_at'),
+            folderType: 0, // Default to normal folder
+            filterLogic: 0, // Default OR logic
           );
           recipeMap[recipeId]!.folders.add(folder);
         }
@@ -418,6 +420,8 @@ class RecipeRepository {
             id: folderId,
             name: row.read<String>('folder_name'),
             deletedAt: row.read<int?>('folder_deleted_at'),
+            folderType: 0, // Default to normal folder
+            filterLogic: 0, // Default OR logic
           );
           recipeMap[recipeId]!.folders.add(folder);
         }

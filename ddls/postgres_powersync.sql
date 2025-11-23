@@ -67,10 +67,22 @@ CREATE TABLE public.recipe_folders (
                                        user_id uuid NULL,
                                        household_id uuid NULL,
                                        deleted_at bigint NULL,
+                                       -- Smart folder columns
+                                       folder_type integer NOT NULL DEFAULT 0,      -- 0=normal, 1=smartTag, 2=smartIngredient
+                                       filter_logic integer NOT NULL DEFAULT 0,     -- 0=OR, 1=AND
+                                       smart_filter_tags text NULL,                 -- JSON array of tag names
+                                       smart_filter_terms text NULL,                -- JSON array of ingredient terms
                                        CONSTRAINT recipe_folders_pkey PRIMARY KEY (id),
                                        CONSTRAINT recipe_folders_household_id_fkey FOREIGN KEY (household_id) REFERENCES public.households (id) ON DELETE CASCADE,
                                        CONSTRAINT recipe_folders_user_id_fkey FOREIGN KEY (user_id) REFERENCES auth.users (id) ON DELETE CASCADE
 ) TABLESPACE pg_default;
+
+-- Note: For manual migration if needed later:
+-- ALTER TABLE public.recipe_folders
+--   ADD COLUMN IF NOT EXISTS folder_type integer NOT NULL DEFAULT 0,
+--   ADD COLUMN IF NOT EXISTS filter_logic integer NOT NULL DEFAULT 0,
+--   ADD COLUMN IF NOT EXISTS smart_filter_tags text NULL,
+--   ADD COLUMN IF NOT EXISTS smart_filter_terms text NULL;
 
 CREATE INDEX IF NOT EXISTS recipe_folders_user_idx
     ON public.recipe_folders USING btree (user_id) TABLESPACE pg_default;
