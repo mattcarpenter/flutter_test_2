@@ -83,6 +83,7 @@ dependencies:
   purchases_flutter: ^9.0.0-beta.1
   purchases_ui_flutter: ^9.0.0-beta.1
   flutter_slidable: ^4.0.0
+  package_info_plus: ^8.0.0
 
 dev_dependencies:
   flutter_test:

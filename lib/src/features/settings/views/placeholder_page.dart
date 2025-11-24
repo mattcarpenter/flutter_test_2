@@ -1,5 +1,7 @@
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:package_info_plus/package_info_plus.dart';
 
 import '../../../mobile/utils/adaptive_sliver_page.dart';
 import '../../../theme/colors.dart';
@@ -143,12 +145,20 @@ class TermsOfUsePage extends PlaceholderSettingsPage {
         );
 }
 
-class AcknowledgementsPage extends PlaceholderSettingsPage {
-  const AcknowledgementsPage({super.key})
-      : super(
-          title: 'Acknowledgements',
-          icon: CupertinoIcons.heart,
-          message: 'Coming Soon',
-          description: 'Credits and thanks to open source libraries used in this app.',
+class AcknowledgementsPage extends StatelessWidget {
+  const AcknowledgementsPage({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return FutureBuilder<PackageInfo>(
+      future: PackageInfo.fromPlatform(),
+      builder: (context, snapshot) {
+        final version = snapshot.data?.version ?? '';
+        return LicensePage(
+          applicationName: 'Recipe App',
+          applicationVersion: version,
         );
+      },
+    );
+  }
 }
