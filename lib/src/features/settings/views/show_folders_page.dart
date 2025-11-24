@@ -6,8 +6,8 @@ import '../../../theme/colors.dart';
 import '../../../theme/spacing.dart';
 import '../../../theme/typography.dart';
 import '../providers/app_settings_provider.dart';
-import '../widgets/settings_group.dart';
-import '../widgets/settings_row.dart';
+import '../widgets/settings_group_condensed.dart';
+import '../widgets/settings_row_condensed.dart';
 
 /// Page for configuring how many folders to show on the recipes page
 class ShowFoldersPage extends ConsumerWidget {
@@ -30,36 +30,18 @@ class ShowFoldersPage extends ConsumerWidget {
               SizedBox(height: AppSpacing.xl),
 
               // Options group
-              SettingsGroup(
+              SettingsGroupCondensed(
                 children: [
-                  SettingsRow(
+                  SettingsSelectionRow(
                     title: 'All folders',
-                    trailing: showFolders == 'all'
-                        ? Icon(
-                            CupertinoIcons.checkmark,
-                            color: colors.primary,
-                            size: 20,
-                          )
-                        : null,
-                    showChevron: false,
-                    isFirst: true,
-                    isLast: false,
+                    isSelected: showFolders == 'all',
                     onTap: () {
                       ref.read(appSettingsProvider.notifier).setShowFolders('all');
                     },
                   ),
-                  SettingsRow(
+                  SettingsSelectionRow(
                     title: 'First N folders',
-                    trailing: showFolders == 'firstN'
-                        ? Icon(
-                            CupertinoIcons.checkmark,
-                            color: colors.primary,
-                            size: 20,
-                          )
-                        : null,
-                    showChevron: false,
-                    isFirst: false,
-                    isLast: true,
+                    isSelected: showFolders == 'firstN',
                     onTap: () {
                       ref.read(appSettingsProvider.notifier).setShowFolders('firstN');
                     },
@@ -69,8 +51,8 @@ class ShowFoldersPage extends ConsumerWidget {
 
               // Number picker when "First N" is selected
               if (showFolders == 'firstN') ...[
-                SizedBox(height: AppSpacing.xl),
-                SettingsGroup(
+                SizedBox(height: AppSpacing.lg),
+                SettingsGroupCondensed(
                   header: 'Number of Folders',
                   footer: 'Show this many folders on the recipes page.',
                   children: [
@@ -108,15 +90,8 @@ class _FolderCountPicker extends StatelessWidget {
     final colors = AppColors.of(context);
 
     return Container(
-      decoration: BoxDecoration(
-        color: colors.groupedListBackground,
-        borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: colors.groupedListBorder),
-      ),
-      padding: EdgeInsets.symmetric(
-        horizontal: AppSpacing.lg,
-        vertical: AppSpacing.md,
-      ),
+      height: 48,
+      padding: EdgeInsets.symmetric(horizontal: AppSpacing.lg),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [

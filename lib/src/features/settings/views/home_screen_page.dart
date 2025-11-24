@@ -5,8 +5,8 @@ import '../../../mobile/utils/adaptive_sliver_page.dart';
 import '../../../theme/colors.dart';
 import '../../../theme/spacing.dart';
 import '../providers/app_settings_provider.dart';
-import '../widgets/settings_group.dart';
-import '../widgets/settings_row.dart';
+import '../widgets/settings_group_condensed.dart';
+import '../widgets/settings_row_condensed.dart';
 
 /// Page for selecting which tab opens when app launches
 class HomeScreenPage extends ConsumerWidget {
@@ -49,29 +49,14 @@ class HomeScreenPage extends ConsumerWidget {
           child: Column(
             children: [
               SizedBox(height: AppSpacing.xl),
-              SettingsGroup(
+              SettingsGroupCondensed(
                 footer: 'Choose which tab opens when the app launches. Changes take effect on next app launch.',
-                children: options.indexed.map((indexed) {
-                  final (index, option) = indexed;
+                children: options.map((option) {
                   final isSelected = currentHomeScreen == option.value;
 
-                  return SettingsRow(
+                  return SettingsSelectionRow(
                     title: option.title,
-                    leading: Icon(
-                      option.icon,
-                      size: 22,
-                      color: colors.primary,
-                    ),
-                    trailing: isSelected
-                        ? Icon(
-                            CupertinoIcons.checkmark,
-                            color: colors.primary,
-                            size: 20,
-                          )
-                        : null,
-                    showChevron: false,
-                    isFirst: index == 0,
-                    isLast: index == options.length - 1,
+                    isSelected: isSelected,
                     onTap: () {
                       ref.read(appSettingsProvider.notifier).setHomeScreen(option.value);
                     },

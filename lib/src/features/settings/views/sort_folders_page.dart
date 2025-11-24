@@ -10,8 +10,8 @@ import '../../../theme/colors.dart';
 import '../../../theme/spacing.dart';
 import '../../../theme/typography.dart';
 import '../providers/app_settings_provider.dart';
-import '../widgets/settings_group.dart';
-import '../widgets/settings_row.dart';
+import '../widgets/settings_group_condensed.dart';
+import '../widgets/settings_row_condensed.dart';
 
 /// Wrapper class to unify RecipeFolderEntry and virtual folders in drag list
 class _FolderItem {
@@ -103,28 +103,13 @@ class _SortFoldersPageState extends ConsumerState<SortFoldersPage> {
               SizedBox(height: AppSpacing.xl),
 
               // Sort options
-              SettingsGroup(
-                children: sortOptions.indexed.map((indexed) {
-                  final (index, option) = indexed;
+              SettingsGroupCondensed(
+                children: sortOptions.map((option) {
                   final isSelected = currentSortOption == option.value;
 
-                  return SettingsRow(
+                  return SettingsSelectionRow(
                     title: option.title,
-                    leading: Icon(
-                      option.icon,
-                      size: 22,
-                      color: colors.primary,
-                    ),
-                    trailing: isSelected
-                        ? Icon(
-                            CupertinoIcons.checkmark,
-                            color: colors.primary,
-                            size: 20,
-                          )
-                        : null,
-                    showChevron: false,
-                    isFirst: index == 0,
-                    isLast: index == sortOptions.length - 1,
+                    isSelected: isSelected,
                     onTap: () {
                       ref.read(appSettingsProvider.notifier).setFolderSortOption(option.value);
                     },
@@ -170,56 +155,79 @@ class _SortFoldersPageState extends ConsumerState<SortFoldersPage> {
     // Includes the virtual Uncategorized folder
     final orderedItems = _applyCustomOrder(folders, customOrder);
 
-    return SettingsGroup(
-      header: 'Drag to Reorder',
-      footer: 'Drag folders to set your preferred order. New folders will appear at the bottom.',
-      children: [
-        Container(
-          decoration: BoxDecoration(
-            color: colors.groupedListBackground,
-            borderRadius: BorderRadius.circular(8),
-            border: Border.all(color: colors.groupedListBorder),
+    return Padding(
+      padding: EdgeInsets.symmetric(horizontal: AppSpacing.lg),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Header
+          Padding(
+            padding: EdgeInsets.only(left: AppSpacing.lg, bottom: AppSpacing.sm),
+            child: Text(
+              'CUSTOM ORDER',
+              style: AppTypography.caption.copyWith(
+                color: colors.textSecondary,
+                fontWeight: FontWeight.w500,
+                letterSpacing: 0.5,
+              ),
+            ),
           ),
-          clipBehavior: Clip.antiAlias,
-          child: ReorderableListView.builder(
-            shrinkWrap: true,
-            physics: const NeverScrollableScrollPhysics(),
-            buildDefaultDragHandles: false,
-            itemCount: orderedItems.length,
-            itemBuilder: (context, index) {
-              final item = orderedItems[index];
-              final isFirst = index == 0;
-              final isLast = index == orderedItems.length - 1;
 
-              return _DraggableFolderItem(
-                key: ValueKey(item.id),
-                item: item,
-                index: index,
-                isFirst: isFirst,
-                isLast: isLast,
-              );
-            },
-            proxyDecorator: (child, index, animation) {
-              return AnimatedBuilder(
-                animation: animation,
-                builder: (context, child) {
-                  final elevation = Tween<double>(begin: 0, end: 6).evaluate(animation);
-                  return Material(
-                    elevation: elevation,
-                    color: colors.groupedListBackground,
-                    borderRadius: BorderRadius.circular(8),
-                    child: child,
-                  );
-                },
-                child: child,
-              );
-            },
-            onReorder: (oldIndex, newIndex) {
-              _handleReorder(orderedItems, oldIndex, newIndex);
-            },
+          // Drag list with connected borders like IngredientsSection
+          ClipRRect(
+            borderRadius: BorderRadius.circular(8),
+            child: ReorderableListView.builder(
+              shrinkWrap: true,
+              physics: const NeverScrollableScrollPhysics(),
+              buildDefaultDragHandles: false,
+              itemCount: orderedItems.length,
+              itemBuilder: (context, index) {
+                final item = orderedItems[index];
+                final isFirst = index == 0;
+                final isLast = index == orderedItems.length - 1;
+
+                return _DraggableFolderItem(
+                  key: ValueKey(item.id),
+                  item: item,
+                  index: index,
+                  isFirst: isFirst,
+                  isLast: isLast,
+                  totalCount: orderedItems.length,
+                );
+              },
+              proxyDecorator: (child, index, animation) {
+                return AnimatedBuilder(
+                  animation: animation,
+                  builder: (context, child) {
+                    final elevation = Tween<double>(begin: 0, end: 6).evaluate(animation);
+                    return Material(
+                      elevation: elevation,
+                      color: colors.input,
+                      borderRadius: BorderRadius.circular(8),
+                      child: child,
+                    );
+                  },
+                  child: child,
+                );
+              },
+              onReorder: (oldIndex, newIndex) {
+                _handleReorder(orderedItems, oldIndex, newIndex);
+              },
+            ),
           ),
-        ),
-      ],
+
+          // Footer
+          Padding(
+            padding: EdgeInsets.only(left: AppSpacing.lg, top: AppSpacing.sm),
+            child: Text(
+              'Drag folders to set your preferred order.',
+              style: AppTypography.caption.copyWith(
+                color: colors.textTertiary,
+              ),
+            ),
+          ),
+        ],
+      ),
     );
   }
 
@@ -288,12 +296,13 @@ class _SortOption {
   });
 }
 
-/// Draggable folder item for the custom order list
+/// Draggable folder item for the custom order list with connected borders
 class _DraggableFolderItem extends StatelessWidget {
   final _FolderItem item;
   final int index;
   final bool isFirst;
   final bool isLast;
+  final int totalCount;
 
   const _DraggableFolderItem({
     super.key,
@@ -301,7 +310,43 @@ class _DraggableFolderItem extends StatelessWidget {
     required this.index,
     required this.isFirst,
     required this.isLast,
+    required this.totalCount,
   });
+
+  // Border radius calculation for connected group styling
+  BorderRadius _getBorderRadius() {
+    if (isFirst && isLast) {
+      return BorderRadius.circular(8.0);
+    } else if (isFirst) {
+      return const BorderRadius.only(
+        topLeft: Radius.circular(8.0),
+        topRight: Radius.circular(8.0),
+      );
+    } else if (isLast) {
+      return const BorderRadius.only(
+        bottomLeft: Radius.circular(8.0),
+        bottomRight: Radius.circular(8.0),
+      );
+    } else {
+      return BorderRadius.zero;
+    }
+  }
+
+  // Border calculation - omit top border for non-first items to prevent double borders
+  Border _getBorder(AppColors colors) {
+    final borderColor = colors.borderStrong;
+    const borderWidth = 1.0;
+
+    if (isFirst) {
+      return Border.all(color: borderColor, width: borderWidth);
+    } else {
+      return Border(
+        left: BorderSide(color: borderColor, width: borderWidth),
+        right: BorderSide(color: borderColor, width: borderWidth),
+        bottom: BorderSide(color: borderColor, width: borderWidth),
+      );
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -318,54 +363,53 @@ class _DraggableFolderItem extends StatelessWidget {
     }
 
     return Container(
+      height: 48,
       decoration: BoxDecoration(
-        border: !isLast
-            ? Border(
-                bottom: BorderSide(
-                  color: colors.groupedListBorder,
-                  width: 0.5,
-                ),
-              )
-            : null,
+        color: colors.input,
+        border: _getBorder(colors),
+        borderRadius: _getBorderRadius(),
       ),
-      child: Padding(
-        padding: EdgeInsets.symmetric(
-          horizontal: AppSpacing.lg,
-          vertical: AppSpacing.md + 2,
-        ),
-        child: Row(
-          children: [
-            // Drag handle
-            ReorderableDragStartListener(
-              index: index,
+      child: Row(
+        children: [
+          SizedBox(width: AppSpacing.md),
+
+          // Drag handle
+          ReorderableDragStartListener(
+            index: index,
+            child: Padding(
+              padding: EdgeInsets.symmetric(horizontal: AppSpacing.xs),
               child: Icon(
                 CupertinoIcons.line_horizontal_3,
                 color: colors.textTertiary,
                 size: 20,
               ),
             ),
-            SizedBox(width: AppSpacing.md),
+          ),
 
-            // Folder icon
-            Icon(
-              folderIcon,
-              color: colors.primary,
-              size: 22,
-            ),
-            SizedBox(width: AppSpacing.md),
+          SizedBox(width: AppSpacing.sm),
 
-            // Folder name
-            Expanded(
-              child: Text(
-                item.name,
-                style: AppTypography.body.copyWith(
-                  color: colors.textPrimary,
-                ),
-                overflow: TextOverflow.ellipsis,
+          // Folder icon
+          Icon(
+            folderIcon,
+            color: colors.primary,
+            size: 20,
+          ),
+
+          SizedBox(width: AppSpacing.md),
+
+          // Folder name
+          Expanded(
+            child: Text(
+              item.name,
+              style: AppTypography.body.copyWith(
+                color: colors.textPrimary,
               ),
+              overflow: TextOverflow.ellipsis,
             ),
-          ],
-        ),
+          ),
+
+          SizedBox(width: AppSpacing.md),
+        ],
       ),
     );
   }

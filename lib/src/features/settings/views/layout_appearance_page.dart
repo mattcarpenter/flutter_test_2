@@ -6,8 +6,8 @@ import '../../../mobile/utils/adaptive_sliver_page.dart';
 import '../../../theme/colors.dart';
 import '../../../theme/spacing.dart';
 import '../providers/app_settings_provider.dart';
-import '../widgets/settings_group.dart';
-import '../widgets/settings_row.dart';
+import '../widgets/settings_group_condensed.dart';
+import '../widgets/settings_row_condensed.dart';
 
 /// Sub-page for layout and appearance settings
 class LayoutAppearancePage extends ConsumerWidget {
@@ -39,33 +39,29 @@ class LayoutAppearancePage extends ConsumerWidget {
               SizedBox(height: AppSpacing.xl),
 
               // Recipes Page section
-              SettingsGroup(
+              SettingsGroupCondensed(
                 header: 'Recipes Page',
                 children: [
-                  SettingsRow(
+                  SettingsRowCondensed(
                     title: 'Show Folders',
-                    subtitle: showFoldersLabel,
+                    value: showFoldersLabel,
                     leading: Icon(
                       CupertinoIcons.folder,
                       size: 22,
                       color: colors.primary,
                     ),
-                    isFirst: true,
-                    isLast: false,
                     onTap: () {
                       context.push('/settings/layout-appearance/show-folders');
                     },
                   ),
-                  SettingsRow(
+                  SettingsRowCondensed(
                     title: 'Sort Folders',
-                    subtitle: sortFoldersLabel,
+                    value: sortFoldersLabel,
                     leading: Icon(
                       CupertinoIcons.arrow_up_arrow_down,
                       size: 22,
                       color: colors.primary,
                     ),
-                    isFirst: false,
-                    isLast: true,
                     onTap: () {
                       context.push('/settings/layout-appearance/sort-folders');
                     },
@@ -73,15 +69,15 @@ class LayoutAppearancePage extends ConsumerWidget {
                 ],
               ),
 
-              SizedBox(height: AppSpacing.xl),
+              SizedBox(height: AppSpacing.lg),
 
               // Color Theme section
-              SettingsGroup(
-                header: 'Color Theme',
+              SettingsGroupCondensed(
+                header: 'Appearance',
                 children: [
-                  SettingsRow(
-                    title: 'Theme',
-                    subtitle: themeLabel,
+                  SettingsRowCondensed(
+                    title: 'Color Theme',
+                    value: themeLabel,
                     leading: Icon(
                       CupertinoIcons.circle_lefthalf_fill,
                       size: 22,
@@ -91,18 +87,9 @@ class LayoutAppearancePage extends ConsumerWidget {
                       context.push('/settings/layout-appearance/theme');
                     },
                   ),
-                ],
-              ),
-
-              SizedBox(height: AppSpacing.xl),
-
-              // Recipes section
-              SettingsGroup(
-                header: 'Recipes',
-                children: [
-                  SettingsRow(
-                    title: 'Font Size',
-                    subtitle: fontSizeLabel,
+                  SettingsRowCondensed(
+                    title: 'Recipe Font Size',
+                    value: fontSizeLabel,
                     leading: Icon(
                       CupertinoIcons.textformat_size,
                       size: 22,

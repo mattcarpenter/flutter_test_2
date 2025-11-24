@@ -6,8 +6,8 @@ import '../../../mobile/utils/adaptive_sliver_page.dart';
 import '../../../theme/spacing.dart';
 import '../../../theme/colors.dart';
 import '../providers/app_settings_provider.dart';
-import '../widgets/settings_group.dart';
-import '../widgets/settings_row.dart';
+import '../widgets/settings_group_condensed.dart';
+import '../widgets/settings_row_condensed.dart';
 
 class SettingsPage extends ConsumerWidget {
   final VoidCallback? onMenuPressed;
@@ -42,11 +42,11 @@ class SettingsPage extends ConsumerWidget {
               SizedBox(height: AppSpacing.xl),
 
               // Home Screen section
-              SettingsGroup(
+              SettingsGroupCondensed(
                 children: [
-                  SettingsRow(
+                  SettingsRowCondensed(
                     title: 'Home Screen',
-                    subtitle: homeScreenLabel,
+                    value: homeScreenLabel,
                     leading: Icon(
                       CupertinoIcons.house,
                       size: 22,
@@ -59,12 +59,12 @@ class SettingsPage extends ConsumerWidget {
                 ],
               ),
 
-              SizedBox(height: AppSpacing.xl),
+              SizedBox(height: AppSpacing.lg),
 
               // Layout & Appearance section
-              SettingsGroup(
+              SettingsGroupCondensed(
                 children: [
-                  SettingsRow(
+                  SettingsRowCondensed(
                     title: 'Layout & Appearance',
                     leading: Icon(
                       CupertinoIcons.paintbrush,
@@ -78,13 +78,13 @@ class SettingsPage extends ConsumerWidget {
                 ],
               ),
 
-              SizedBox(height: AppSpacing.xl),
+              SizedBox(height: AppSpacing.lg),
 
               // Recipes section
-              SettingsGroup(
+              SettingsGroupCondensed(
                 header: 'Recipes',
                 children: [
-                  SettingsRow(
+                  SettingsRowCondensed(
                     title: 'Manage Tags',
                     leading: Icon(
                       CupertinoIcons.tag,
@@ -98,12 +98,12 @@ class SettingsPage extends ConsumerWidget {
                 ],
               ),
 
-              SizedBox(height: AppSpacing.xl),
+              SizedBox(height: AppSpacing.lg),
 
               // Account section
-              SettingsGroup(
+              SettingsGroupCondensed(
                 children: [
-                  SettingsRow(
+                  SettingsRowCondensed(
                     title: 'Account',
                     leading: Icon(
                       CupertinoIcons.person_circle,
@@ -117,33 +117,29 @@ class SettingsPage extends ConsumerWidget {
                 ],
               ),
 
-              SizedBox(height: AppSpacing.xl),
+              SizedBox(height: AppSpacing.lg),
 
               // Import/Export section
-              SettingsGroup(
+              SettingsGroupCondensed(
                 children: [
-                  SettingsRow(
+                  SettingsRowCondensed(
                     title: 'Import Recipes',
                     leading: Icon(
                       CupertinoIcons.arrow_down_doc,
                       size: 22,
                       color: colors.primary,
                     ),
-                    isFirst: true,
-                    isLast: false,
                     onTap: () {
                       context.push('/settings/import');
                     },
                   ),
-                  SettingsRow(
+                  SettingsRowCondensed(
                     title: 'Export Recipes',
                     leading: Icon(
                       CupertinoIcons.arrow_up_doc,
                       size: 22,
                       color: colors.primary,
                     ),
-                    isFirst: false,
-                    isLast: true,
                     onTap: () {
                       context.push('/settings/export');
                     },
@@ -151,33 +147,29 @@ class SettingsPage extends ConsumerWidget {
                 ],
               ),
 
-              SizedBox(height: AppSpacing.xl),
+              SizedBox(height: AppSpacing.lg),
 
               // Help section
-              SettingsGroup(
+              SettingsGroupCondensed(
                 children: [
-                  SettingsRow(
+                  SettingsRowCondensed(
                     title: 'Help',
                     leading: Icon(
                       CupertinoIcons.question_circle,
                       size: 22,
                       color: colors.primary,
                     ),
-                    isFirst: true,
-                    isLast: false,
                     onTap: () {
                       context.push('/settings/help');
                     },
                   ),
-                  SettingsRow(
+                  SettingsRowCondensed(
                     title: 'Support',
                     leading: Icon(
                       CupertinoIcons.chat_bubble_2,
                       size: 22,
                       color: colors.primary,
                     ),
-                    isFirst: false,
-                    isLast: true,
                     onTap: () {
                       context.push('/settings/support');
                     },
@@ -185,46 +177,40 @@ class SettingsPage extends ConsumerWidget {
                 ],
               ),
 
-              SizedBox(height: AppSpacing.xl),
+              SizedBox(height: AppSpacing.lg),
 
               // Legal section
-              SettingsGroup(
+              SettingsGroupCondensed(
                 children: [
-                  SettingsRow(
+                  SettingsRowCondensed(
                     title: 'Privacy Policy',
                     leading: Icon(
                       CupertinoIcons.shield,
                       size: 22,
                       color: colors.primary,
                     ),
-                    isFirst: true,
-                    isLast: false,
                     onTap: () {
                       context.push('/settings/privacy');
                     },
                   ),
-                  SettingsRow(
+                  SettingsRowCondensed(
                     title: 'Terms of Use',
                     leading: Icon(
                       CupertinoIcons.doc_text,
                       size: 22,
                       color: colors.primary,
                     ),
-                    isFirst: false,
-                    isLast: false,
                     onTap: () {
                       context.push('/settings/terms');
                     },
                   ),
-                  SettingsRow(
+                  SettingsRowCondensed(
                     title: 'Acknowledgements',
                     leading: Icon(
                       CupertinoIcons.heart,
                       size: 22,
                       color: colors.primary,
                     ),
-                    isFirst: false,
-                    isLast: true,
                     onTap: () {
                       context.push('/settings/acknowledgements');
                     },
