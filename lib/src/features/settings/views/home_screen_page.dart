@@ -2,7 +2,6 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../mobile/utils/adaptive_sliver_page.dart';
-import '../../../theme/colors.dart';
 import '../../../theme/spacing.dart';
 import '../providers/app_settings_provider.dart';
 import '../widgets/settings_group_condensed.dart';
@@ -14,7 +13,6 @@ class HomeScreenPage extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final colors = AppColors.of(context);
     final currentHomeScreen = ref.watch(homeScreenProvider);
 
     final options = [

@@ -15,7 +15,6 @@ class ShowFoldersPage extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final colors = AppColors.of(context);
     final showFolders = ref.watch(showFoldersProvider);
     final showFoldersCount = ref.watch(showFoldersCountProvider);
 
@@ -51,7 +50,7 @@ class ShowFoldersPage extends ConsumerWidget {
 
               // Number picker when "First N" is selected
               if (showFolders == 'firstN') ...[
-                SizedBox(height: AppSpacing.lg),
+                SizedBox(height: AppSpacing.settingsGroupGap),
                 SettingsGroupCondensed(
                   header: 'Number of Folders',
                   footer: 'Show this many folders on the recipes page.',

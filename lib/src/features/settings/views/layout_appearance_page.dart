@@ -69,7 +69,7 @@ class LayoutAppearancePage extends ConsumerWidget {
                 ],
               ),
 
-              SizedBox(height: AppSpacing.lg),
+              SizedBox(height: AppSpacing.settingsGroupGap),
 
               // Color Theme section
               SettingsGroupCondensed(

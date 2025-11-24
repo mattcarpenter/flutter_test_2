@@ -119,7 +119,7 @@ class _SortFoldersPageState extends ConsumerState<SortFoldersPage> {
 
               // Custom order drag list (only show when custom is selected)
               if (currentSortOption == 'custom') ...[
-                SizedBox(height: AppSpacing.xl),
+                SizedBox(height: AppSpacing.settingsGroupGap),
                 foldersAsync.when(
                   data: (folders) => _buildCustomOrderSection(
                     context,

@@ -15,7 +15,6 @@ class RecipeFontSizePage extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final colors = AppColors.of(context);
     final currentFontSize = ref.watch(recipeFontSizeProvider);
 
     final options = [
@@ -62,7 +61,7 @@ class RecipeFontSizePage extends ConsumerWidget {
                 }).toList(),
               ),
 
-              SizedBox(height: AppSpacing.lg),
+              SizedBox(height: AppSpacing.settingsGroupGap),
 
               // Preview section
               SettingsGroupCondensed(

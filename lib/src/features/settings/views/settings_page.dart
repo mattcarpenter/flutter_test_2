@@ -59,7 +59,7 @@ class SettingsPage extends ConsumerWidget {
                 ],
               ),
 
-              SizedBox(height: AppSpacing.lg),
+              SizedBox(height: AppSpacing.settingsGroupGap),
 
               // Layout & Appearance section
               SettingsGroupCondensed(
@@ -78,11 +78,10 @@ class SettingsPage extends ConsumerWidget {
                 ],
               ),
 
-              SizedBox(height: AppSpacing.lg),
+              SizedBox(height: AppSpacing.settingsGroupGap),
 
-              // Recipes section
+              // Manage Tags section
               SettingsGroupCondensed(
-                header: 'Recipes',
                 children: [
                   SettingsRowCondensed(
                     title: 'Manage Tags',
@@ -98,7 +97,7 @@ class SettingsPage extends ConsumerWidget {
                 ],
               ),
 
-              SizedBox(height: AppSpacing.lg),
+              SizedBox(height: AppSpacing.settingsGroupGap),
 
               // Account section
               SettingsGroupCondensed(
@@ -117,7 +116,7 @@ class SettingsPage extends ConsumerWidget {
                 ],
               ),
 
-              SizedBox(height: AppSpacing.lg),
+              SizedBox(height: AppSpacing.settingsGroupGap),
 
               // Import/Export section
               SettingsGroupCondensed(
@@ -147,7 +146,7 @@ class SettingsPage extends ConsumerWidget {
                 ],
               ),
 
-              SizedBox(height: AppSpacing.lg),
+              SizedBox(height: AppSpacing.settingsGroupGap),
 
               // Help section
               SettingsGroupCondensed(
@@ -177,7 +176,7 @@ class SettingsPage extends ConsumerWidget {
                 ],
               ),
 
-              SizedBox(height: AppSpacing.lg),
+              SizedBox(height: AppSpacing.settingsGroupGap),
 
               // Legal section
               SettingsGroupCondensed(
@@ -219,6 +218,7 @@ class SettingsPage extends ConsumerWidget {
               ),
 
               // Bottom spacing
+              SizedBox(height: AppSpacing.xxl),
               SizedBox(height: AppSpacing.xxl),
             ],
           ),
