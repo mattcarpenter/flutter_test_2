@@ -4,6 +4,7 @@ import 'package:recipe_app/src/features/recipes/widgets/recipe_view/recipe_image
 import 'package:recipe_app/src/features/recipes/widgets/recipe_view/recipe_ingredients_view.dart';
 import 'package:recipe_app/src/features/recipes/widgets/recipe_view/recipe_steps_view.dart';
 import 'package:recipe_app/src/providers/pantry_provider.dart';
+import '../../../settings/providers/app_settings_provider.dart';
 import '../../../../providers/recipe_provider.dart' as recipe_provider;
 import '../../../../providers/recently_viewed_provider.dart';
 import '../../../../providers/cook_provider.dart';
@@ -71,6 +72,11 @@ class _RecipeViewState extends ConsumerState<RecipeView> {
     ref.watch(pantryItemsProvider);
     final recipeAsync = ref.watch(recipe_provider.recipeByIdStreamProvider(widget.recipeId));
 
+    // Get font scale from settings
+    final fontScale = ref.watch(recipeFontScaleProvider);
+    final baseFontSize = AppTypography.body.fontSize ?? 16.0;
+    final scaledFontSize = baseFontSize * fontScale;
+
     return recipeAsync.when(
       loading: () => const Center(child: CircularProgressIndicator()),
       error: (error, stack) => Center(child: Text('Error loading recipe: $error')),
@@ -120,6 +126,7 @@ class _RecipeViewState extends ConsumerState<RecipeView> {
               Text(
                 recipe.description!,
                 style: AppTypography.body.copyWith(
+                  fontSize: scaledFontSize,
                   color: AppColors.of(context).textPrimary,
                 ),
               ),
@@ -137,24 +144,28 @@ class _RecipeViewState extends ConsumerState<RecipeView> {
                     context,
                     label: 'Servings',
                     value: '${recipe.servings}',
+                    fontScale: fontScale,
                   ),
                 if (recipe.prepTime != null)
                   _buildInfoItem(
                     context,
                     label: 'Prep Time',
                     value: DurationFormatter.formatMinutes(recipe.prepTime!),
+                    fontScale: fontScale,
                   ),
                 if (recipe.cookTime != null)
                   _buildInfoItem(
                     context,
                     label: 'Cook Time',
                     value: DurationFormatter.formatMinutes(recipe.cookTime!),
+                    fontScale: fontScale,
                   ),
                 if (totalTime.isNotEmpty)
                   _buildInfoItem(
                     context,
                     label: 'Total',
                     value: totalTime,
+                    fontScale: fontScale,
                   ),
                 if (recipe.rating != null && recipe.rating! > 0)
                   _buildRatingItem(context, recipe.rating!),
@@ -167,6 +178,7 @@ class _RecipeViewState extends ConsumerState<RecipeView> {
               Text(
                 'Source: ${recipe.source}',
                 style: AppTypography.body.copyWith(
+                  fontSize: scaledFontSize,
                   color: AppColors.of(context).textSecondary,
                 ),
               ),
@@ -200,6 +212,7 @@ class _RecipeViewState extends ConsumerState<RecipeView> {
               Text(
                 recipe.generalNotes!,
                 style: AppTypography.body.copyWith(
+                  fontSize: scaledFontSize,
                   color: AppColors.of(context).textPrimary,
                 ),
               ),
@@ -216,7 +229,11 @@ class _RecipeViewState extends ConsumerState<RecipeView> {
       BuildContext context, {
         required String label,
         required String value,
+        double fontScale = 1.0,
       }) {
+    final baseFontSize = AppTypography.body.fontSize ?? 16.0;
+    final scaledFontSize = baseFontSize * fontScale;
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -229,6 +246,7 @@ class _RecipeViewState extends ConsumerState<RecipeView> {
         Text(
           value,
           style: AppTypography.body.copyWith(
+            fontSize: scaledFontSize,
             fontWeight: FontWeight.w500,
             color: AppColors.of(context).textPrimary,
           ),

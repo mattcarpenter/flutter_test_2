@@ -1,20 +1,27 @@
 import 'package:flutter/material.dart' hide Step;
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../../database/models/steps.dart';
+import '../../../settings/providers/app_settings_provider.dart';
 import '../../../../theme/typography.dart';
 import '../../../../theme/colors.dart';
 import '../../../../theme/spacing.dart';
 
-class RecipeStepsView extends StatelessWidget {
+class RecipeStepsView extends ConsumerWidget {
   final List<Step> steps;
 
   const RecipeStepsView({Key? key, required this.steps}) : super(key: key);
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final colors = AppColors.of(context);
     final brightness = Theme.of(context).brightness;
     final isLight = brightness == Brightness.light;
+
+    // Get font scale from settings - use AppTypography.body as the base for consistency
+    final fontScale = ref.watch(recipeFontScaleProvider);
+    final baseBodyStyle = AppTypography.body;
+    final scaledFontSize = (baseBodyStyle.fontSize ?? 15.0) * fontScale;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -98,8 +105,8 @@ class RecipeStepsView extends StatelessWidget {
                         // Step text
                         Text(
                           step.text,
-                          style: TextStyle(
-                            fontSize: 16,
+                          style: baseBodyStyle.copyWith(
+                            fontSize: scaledFontSize,
                             color: colors.contentPrimary,
                           ),
                         ),

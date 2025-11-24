@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import '../../../../../database/models/ingredients.dart';
 import '../../../../models/ingredient_pantry_match.dart';
 import '../../../../providers/recipe_provider.dart';
+import '../../../settings/providers/app_settings_provider.dart';
 import '../../../../theme/typography.dart';
 import '../../../../theme/colors.dart';
 import '../../../../theme/spacing.dart';
@@ -54,6 +55,11 @@ class _RecipeIngredientsViewState extends ConsumerState<RecipeIngredientsView> {
         currentMatches = matchesAsync.valueOrNull;
       }
     }
+
+    // Get font scale from settings - use AppTypography.body as the base for consistency
+    final fontScale = ref.watch(recipeFontScaleProvider);
+    final baseStyle = AppTypography.body;
+    final scaledFontSize = (baseStyle.fontSize ?? 15.0) * fontScale;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -114,9 +120,8 @@ class _RecipeIngredientsViewState extends ConsumerState<RecipeIngredientsView> {
                     // Simple bullet point
                     Text(
                       '•',
-                      style: TextStyle(
-                        fontSize: 16,
-                        height: 1.0,
+                      style: AppTypography.body.copyWith(
+                        fontSize: scaledFontSize,
                         color: AppColors.of(context).contentSecondary,
                       ),
                     ),
@@ -126,6 +131,7 @@ class _RecipeIngredientsViewState extends ConsumerState<RecipeIngredientsView> {
                     Expanded(
                       child: _buildParsedIngredientText(
                         ingredient.name,
+                        fontSize: scaledFontSize,
                         isLinkedRecipe: ingredient.recipeId != null,
                       ),
                     ),
@@ -172,18 +178,20 @@ class _RecipeIngredientsViewState extends ConsumerState<RecipeIngredientsView> {
   }
 
   /// Builds a RichText widget with bold quantities parsed from ingredient text
-  Widget _buildParsedIngredientText(String text, {bool isLinkedRecipe = false}) {
+  Widget _buildParsedIngredientText(String text, {required double fontSize, bool isLinkedRecipe = false}) {
     final colors = AppColors.of(context);
+    // Use AppTypography.body as base style for consistency with notes/description
+    final baseStyle = AppTypography.body.copyWith(
+      fontSize: fontSize,
+      color: colors.contentPrimary,
+    );
 
     try {
       final parseResult = _parser.parse(text);
 
       if (parseResult.quantities.isEmpty) {
         // No quantities found, return plain text
-        return Text(
-          text,
-          style: TextStyle(fontSize: 16, color: colors.contentPrimary),
-        );
+        return Text(text, style: baseStyle);
       }
 
       final children = <InlineSpan>[];
@@ -195,14 +203,14 @@ class _RecipeIngredientsViewState extends ConsumerState<RecipeIngredientsView> {
         if (quantity.start > currentIndex) {
           children.add(TextSpan(
             text: text.substring(currentIndex, quantity.start),
-            style: TextStyle(fontSize: 16, color: colors.contentPrimary),
+            style: baseStyle,
           ));
         }
 
         // Quantity with bold formatting
         children.add(TextSpan(
           text: text.substring(quantity.start, quantity.end),
-          style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: colors.contentPrimary),
+          style: baseStyle.copyWith(fontWeight: FontWeight.bold),
         ));
 
         currentIndex = quantity.end;
@@ -212,7 +220,7 @@ class _RecipeIngredientsViewState extends ConsumerState<RecipeIngredientsView> {
       if (currentIndex < text.length) {
         children.add(TextSpan(
           text: text.substring(currentIndex),
-          style: TextStyle(fontSize: 16, color: colors.contentPrimary),
+          style: baseStyle,
         ));
       }
 
@@ -245,10 +253,7 @@ class _RecipeIngredientsViewState extends ConsumerState<RecipeIngredientsView> {
     } catch (e) {
       // Fallback to plain text if parsing fails - use RichText for consistency
       final fallbackChildren = <InlineSpan>[
-        TextSpan(
-          text: text,
-          style: TextStyle(fontSize: 16, color: colors.contentPrimary),
-        ),
+        TextSpan(text: text, style: baseStyle),
       ];
 
       // Add external link icon inline for linked recipes
