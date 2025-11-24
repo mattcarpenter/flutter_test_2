@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../database/database.dart';
 import '../../../constants/folder_constants.dart';
+import '../../../features/settings/providers/app_settings_provider.dart';
 import '../../../providers/recipe_folder_provider.dart';
 import '../../../providers/recipe_provider.dart';
 import '../../../providers/smart_folder_provider.dart';
@@ -53,6 +54,12 @@ class _FolderListState extends ConsumerState<FolderList> {
     final smartFolderCountsAsync = ref.watch(smartFolderCountsProvider);
     final smartFolderCounts = smartFolderCountsAsync.valueOrNull ?? {};
 
+    // Get folder display settings
+    final folderSortOption = ref.watch(folderSortOptionProvider);
+    final customFolderOrder = ref.watch(customFolderOrderProvider);
+    final showFolders = ref.watch(showFoldersProvider);
+    final showFoldersCount = ref.watch(showFoldersCountProvider);
+
     return Padding(
       padding: const EdgeInsets.only(top: AppSpacing.md, bottom: AppSpacing.lg), // 12px top, 16px bottom
       child: Column(
@@ -60,13 +67,21 @@ class _FolderListState extends ConsumerState<FolderList> {
         children: [
           foldersAsyncValue.when(
             data: (folders) {
-              // Create a new list with regular folders plus the uncategorized folder
-              final List<dynamic> allFolders = [
+              // Apply sorting to folders
+              final sortedFolders = _applySortOrder(folders, folderSortOption, customFolderOrder);
+
+              // Create a new list with uncategorized folder plus sorted regular folders
+              List<dynamic> allFolders = [
                 // Add the virtual "Uncategorized" folder at the beginning
                 _createUncategorizedFolder(),
-                // Add the regular folders
-                ...folders,
+                // Add the sorted regular folders
+                ...sortedFolders,
               ];
+
+              // Apply folder limit if set to 'firstN'
+              if (showFolders == 'firstN' && allFolders.length > showFoldersCount) {
+                allFolders = allFolders.take(showFoldersCount).toList();
+              }
 
               // Use a simple responsive grid approach instead of WoltResponsiveLayoutGrid
               return LayoutBuilder(
@@ -197,6 +212,60 @@ class _FolderListState extends ConsumerState<FolderList> {
       id: kUncategorizedFolderId,
       name: kUncategorizedFolderName,
     );
+  }
+
+  /// Apply sort order to folders based on settings
+  List<RecipeFolderEntry> _applySortOrder(
+    List<RecipeFolderEntry> folders,
+    String sortOption,
+    List<String> customOrder,
+  ) {
+    // Create a mutable copy
+    final sortedFolders = List<RecipeFolderEntry>.from(folders);
+
+    switch (sortOption) {
+      case 'alphabetical_asc':
+        sortedFolders.sort((a, b) => a.name.toLowerCase().compareTo(b.name.toLowerCase()));
+        break;
+      case 'alphabetical_desc':
+        sortedFolders.sort((a, b) => b.name.toLowerCase().compareTo(a.name.toLowerCase()));
+        break;
+      case 'newest':
+        // Note: RecipeFolderEntry doesn't have createdAt, so newest uses insertion order (no change)
+        // Folders are returned from DB in insertion order, so we reverse for newest first
+        return sortedFolders.reversed.toList();
+      case 'oldest':
+        // Oldest = original insertion order (no change needed)
+        break;
+      case 'custom':
+        return _applyCustomOrder(sortedFolders, customOrder);
+      default:
+        // Default to alphabetical A-Z
+        sortedFolders.sort((a, b) => a.name.toLowerCase().compareTo(b.name.toLowerCase()));
+    }
+
+    return sortedFolders;
+  }
+
+  /// Apply custom order based on saved folder ID list
+  List<RecipeFolderEntry> _applyCustomOrder(
+    List<RecipeFolderEntry> folders,
+    List<String> customOrder,
+  ) {
+    final orderedFolders = <RecipeFolderEntry>[];
+    final folderMap = {for (var f in folders) f.id: f};
+
+    // Add folders in custom order
+    for (final id in customOrder) {
+      if (folderMap.containsKey(id)) {
+        orderedFolders.add(folderMap.remove(id)!);
+      }
+    }
+
+    // Append remaining (new) folders at bottom
+    orderedFolders.addAll(folderMap.values);
+
+    return orderedFolders;
   }
 }
 

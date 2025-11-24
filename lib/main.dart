@@ -15,6 +15,9 @@ import 'src/settings/settings_service.dart';
 import 'src/repositories/base_repository.dart';
 import 'package:sqflite/sqflite.dart' show databaseFactory;
 import 'package:path_provider/path_provider.dart';
+import 'src/features/settings/services/settings_storage_service.dart';
+import 'src/features/settings/models/app_settings.dart';
+import 'src/features/settings/providers/app_settings_provider.dart';
 
 Future<void> _configureMacosWindowUtils() async {
   const config = MacosWindowUtilsConfig(
@@ -47,6 +50,11 @@ void main() async {
   // This prevents a sudden theme change when the app is first displayed.
   await settingsController.loadSettings();
 
+  // Pre-load app settings before running the app
+  // This ensures home screen preference is available when router is created
+  final settingsStorageService = SettingsStorageService();
+  final appSettings = await settingsStorageService.loadSettings();
+
   if (Platform.isMacOS) {
     await _configureMacosWindowUtils();
   }
@@ -60,7 +68,16 @@ void main() async {
   // SettingsController for changes, then passes it further down to the
   // SettingsView.
   runApp(ProviderScope(
-      overrides: overrides,
+      overrides: [
+        ...overrides,
+        // Override the settings provider with pre-loaded settings
+        appSettingsProvider.overrideWith((ref) {
+          final notifier = AppSettingsNotifier(settingsStorageService);
+          // Set the pre-loaded settings immediately
+          notifier.setPreloadedSettings(appSettings);
+          return notifier;
+        }),
+      ],
       child: MyApp(settingsController: settingsController))
   );
 }

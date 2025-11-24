@@ -3,6 +3,7 @@ import 'package:cupertino_sidebar/cupertino_sidebar.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
 import 'package:recipe_app/src/features/recipes/views/recipe_page.dart';
@@ -23,6 +24,14 @@ import '../features/auth/views/sign_up_page.dart';
 import '../features/auth/views/forgot_password_page.dart';
 import '../features/settings/views/settings_page.dart';
 import '../features/settings/views/manage_tags_page.dart';
+import '../features/settings/views/home_screen_page.dart';
+import '../features/settings/views/layout_appearance_page.dart';
+import '../features/settings/views/theme_mode_page.dart';
+import '../features/settings/views/show_folders_page.dart';
+import '../features/settings/views/sort_folders_page.dart';
+import '../features/settings/views/recipe_font_size_page.dart';
+import '../features/settings/views/placeholder_page.dart';
+import '../features/settings/providers/app_settings_provider.dart';
 import '../features/meal_plans/views/meal_plans_root.dart';
 import '../features/meal_plans/views/meal_plans_sub_page.dart';
 import '../features/recipes/views/recipes_root.dart';
@@ -36,14 +45,14 @@ bool isTablet(BuildContext context) {
   return MediaQuery.of(context).size.shortestSide >= 600;
 }
 
-class AdaptiveApp2 extends StatefulWidget {
+class AdaptiveApp2 extends ConsumerStatefulWidget {
   const AdaptiveApp2({super.key});
 
   @override
-  State<AdaptiveApp2> createState() => _AdaptiveApp2State();
+  ConsumerState<AdaptiveApp2> createState() => _AdaptiveApp2State();
 }
 
-class _AdaptiveApp2State extends State<AdaptiveApp2> {
+class _AdaptiveApp2State extends ConsumerState<AdaptiveApp2> {
   GoRouter? _router;
 
   @override
@@ -52,19 +61,38 @@ class _AdaptiveApp2State extends State<AdaptiveApp2> {
     // Only create the GoRouter once. We use `isTablet(context)` here
     // but do not re-create the router on subsequent rebuilds.
     if (_router == null) {
-      _router = _createRouter(isTablet(context));
+      // Get initial home screen from settings (sync read since settings load on app start)
+      final homeScreen = ref.read(homeScreenProvider);
+      final initialLocation = switch (homeScreen) {
+        'shopping' => '/shopping',
+        'meal_plans' => '/meal_plans',
+        'pantry' => '/pantry',
+        _ => '/recipes',
+      };
+      _router = _createRouter(isTablet(context), initialLocation);
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    final Brightness brightness = MediaQuery.of(context).platformBrightness;
-    final bool isDarkMode = brightness == Brightness.dark;
+    // Get platform brightness as fallback
+    final Brightness platformBrightness = MediaQuery.of(context).platformBrightness;
+
+    // Watch the theme mode setting
+    final themeMode = ref.watch(appThemeModeProvider);
+
+    // Determine effective brightness based on theme setting
+    final bool isDarkMode = switch (themeMode) {
+      ThemeMode.light => false,
+      ThemeMode.dark => true,
+      ThemeMode.system => platformBrightness == Brightness.dark,
+    };
 
     // Safely unwrap the router we created.
     final router = _router!;
 
     if (Platform.isIOS) {
+      // CupertinoApp doesn't have themeMode, so we manually select the theme
       return CupertinoApp.router(
         routeInformationParser: router.routeInformationParser,
         routerDelegate: router.routerDelegate,
@@ -82,10 +110,12 @@ class _AdaptiveApp2State extends State<AdaptiveApp2> {
             : AppTheme.cupertinoLightTheme,
       );
     } else {
+      // MaterialApp supports themeMode directly
       return MaterialApp.router(
         routeInformationParser: router.routeInformationParser,
         routerDelegate: router.routerDelegate,
         routeInformationProvider: router.routeInformationProvider,
+        themeMode: themeMode,
         theme: AppTheme.materialLightTheme,
         darkTheme: AppTheme.materialDarkTheme,
       );
@@ -93,7 +123,7 @@ class _AdaptiveApp2State extends State<AdaptiveApp2> {
   }
 
   /// Create a [GoRouter] instance with shell routing for the bottom tabs.
-  GoRouter _createRouter(bool isTablet) {
+  GoRouter _createRouter(bool isTablet, String initialLocation) {
     // Navigator keys for each tab's separate shell:
     final _rootNavKey   = GlobalKey<NavigatorState>(debugLabel: 'rootNavKey');
     final _recipesNavKey   = GlobalKey<NavigatorState>(debugLabel: 'recipesNavKey');
@@ -269,11 +299,118 @@ class _AdaptiveApp2State extends State<AdaptiveApp2> {
           GoRoute(
             path: '/settings',
             routes: [
+              // Manage Tags
               GoRoute(
                 path: 'tags',
                 pageBuilder: (context, state) => _platformPage(
                   state: state,
                   child: const ManageTagsPage(),
+                ),
+              ),
+              // Home Screen selection
+              GoRoute(
+                path: 'home-screen',
+                pageBuilder: (context, state) => _platformPage(
+                  state: state,
+                  child: const HomeScreenPage(),
+                ),
+              ),
+              // Layout & Appearance sub-page
+              GoRoute(
+                path: 'layout-appearance',
+                routes: [
+                  GoRoute(
+                    path: 'show-folders',
+                    pageBuilder: (context, state) => _platformPage(
+                      state: state,
+                      child: const ShowFoldersPage(),
+                    ),
+                  ),
+                  GoRoute(
+                    path: 'sort-folders',
+                    pageBuilder: (context, state) => _platformPage(
+                      state: state,
+                      child: const SortFoldersPage(),
+                    ),
+                  ),
+                  GoRoute(
+                    path: 'theme',
+                    pageBuilder: (context, state) => _platformPage(
+                      state: state,
+                      child: const ThemeModePage(),
+                    ),
+                  ),
+                  GoRoute(
+                    path: 'font-size',
+                    pageBuilder: (context, state) => _platformPage(
+                      state: state,
+                      child: const RecipeFontSizePage(),
+                    ),
+                  ),
+                ],
+                pageBuilder: (context, state) => _platformPage(
+                  state: state,
+                  child: const LayoutAppearancePage(),
+                ),
+              ),
+              // Account placeholder
+              GoRoute(
+                path: 'account',
+                pageBuilder: (context, state) => _platformPage(
+                  state: state,
+                  child: const AccountPage(),
+                ),
+              ),
+              // Import/Export placeholders
+              GoRoute(
+                path: 'import',
+                pageBuilder: (context, state) => _platformPage(
+                  state: state,
+                  child: const ImportRecipesPage(),
+                ),
+              ),
+              GoRoute(
+                path: 'export',
+                pageBuilder: (context, state) => _platformPage(
+                  state: state,
+                  child: const ExportRecipesPage(),
+                ),
+              ),
+              // Help/Support placeholders
+              GoRoute(
+                path: 'help',
+                pageBuilder: (context, state) => _platformPage(
+                  state: state,
+                  child: const HelpPage(),
+                ),
+              ),
+              GoRoute(
+                path: 'support',
+                pageBuilder: (context, state) => _platformPage(
+                  state: state,
+                  child: const SupportPage(),
+                ),
+              ),
+              // Legal placeholders
+              GoRoute(
+                path: 'privacy',
+                pageBuilder: (context, state) => _platformPage(
+                  state: state,
+                  child: const PrivacyPolicyPage(),
+                ),
+              ),
+              GoRoute(
+                path: 'terms',
+                pageBuilder: (context, state) => _platformPage(
+                  state: state,
+                  child: const TermsOfUsePage(),
+                ),
+              ),
+              GoRoute(
+                path: 'acknowledgements',
+                pageBuilder: (context, state) => _platformPage(
+                  state: state,
+                  child: const AcknowledgementsPage(),
                 ),
               ),
             ],
@@ -292,7 +429,7 @@ class _AdaptiveApp2State extends State<AdaptiveApp2> {
 
     return GoRouter(
       debugLogDiagnostics: true,
-      initialLocation: '/recipes',
+      initialLocation: initialLocation,
       navigatorKey: _rootNavKey,
       routes: [
         GoRoute(
