@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:crypto/crypto.dart';
 import 'package:flutter/foundation.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:sign_in_with_apple/sign_in_with_apple.dart';
@@ -275,8 +276,11 @@ class AuthService {
   }
 
   /// Sign in with Apple (iOS only)
+  /// Uses native Sign in with Apple with proper nonce for Supabase authentication
   Future<AuthResponse> signInWithApple() async {
     try {
+      debugPrint('Apple Sign-In: Starting native flow');
+
       // Check if Apple Sign-In is available
       if (!await SignInWithApple.isAvailable()) {
         throw AuthApiException(
@@ -285,12 +289,20 @@ class AuthService {
         );
       }
 
-      // Start the Apple Sign-In flow
+      // Generate a secure random nonce using Supabase's built-in method
+      final rawNonce = _supabase.auth.generateRawNonce();
+      // Hash the nonce with SHA-256 for Apple
+      final hashedNonce = sha256.convert(utf8.encode(rawNonce)).toString();
+
+      debugPrint('Apple Sign-In: Generated nonce, requesting credentials');
+
+      // Start the Apple Sign-In flow with hashed nonce
       final credential = await SignInWithApple.getAppleIDCredential(
         scopes: [
           AppleIDAuthorizationScopes.email,
           AppleIDAuthorizationScopes.fullName,
         ],
+        nonce: hashedNonce,
       );
 
       final idToken = credential.identityToken;
@@ -301,10 +313,13 @@ class AuthService {
         );
       }
 
-      // Exchange tokens with Supabase
+      debugPrint('Apple Sign-In: Got ID token, authenticating with Supabase');
+
+      // Exchange tokens with Supabase using the RAW nonce (not hashed)
       final response = await _supabase.auth.signInWithIdToken(
         provider: OAuthProvider.apple,
         idToken: idToken,
+        nonce: rawNonce,
       );
 
       if (response.user == null || response.session == null) {
@@ -314,12 +329,43 @@ class AuthService {
         );
       }
 
+      debugPrint('Apple Sign-In: Successfully authenticated with Supabase');
+
+      // Apple only provides the user's name on the FIRST sign-in
+      // Save it to user metadata if available
+      if (credential.givenName != null || credential.familyName != null) {
+        final fullName = [credential.givenName, credential.familyName]
+            .where((n) => n != null && n.isNotEmpty)
+            .join(' ');
+        if (fullName.isNotEmpty) {
+          debugPrint('Apple Sign-In: Saving user full name to metadata');
+          try {
+            await _supabase.auth.updateUser(
+              UserAttributes(data: {'full_name': fullName}),
+            );
+          } catch (e) {
+            // Don't fail the sign-in if metadata update fails
+            debugPrint('Apple Sign-In: Failed to save full name: $e');
+          }
+        }
+      }
+
       return response;
     } on AuthException catch (e) {
-      debugPrint('Apple sign in error: ${e.message}');
+      debugPrint('Apple sign in auth error: ${e.message}');
       throw AuthApiException.fromAuthException(e);
     } catch (e) {
       debugPrint('Apple sign in error: $e');
+      if (e is AuthApiException) {
+        rethrow;
+      }
+      // Check if user cancelled
+      if (e.toString().contains('canceled') || e.toString().contains('cancelled')) {
+        throw AuthApiException(
+          message: 'Sign in was cancelled',
+          type: AuthErrorType.cancelled,
+        );
+      }
       throw AuthApiException.fromException(Exception(e.toString()));
     }
   }

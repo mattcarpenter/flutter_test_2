@@ -1,3 +1,5 @@
+import 'dart:io' show Platform;
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -28,6 +30,7 @@ class _SignUpPageState extends ConsumerState<SignUpPage> {
   
   bool _isEmailSignUpLoading = false;
   bool _isGoogleLoading = false;
+  bool _isAppleLoading = false;
   bool _acceptTerms = false;
 
   @override
@@ -113,6 +116,38 @@ class _SignUpPageState extends ConsumerState<SignUpPage> {
     }
   }
 
+  void _handleAppleSignIn() async {
+    if (_isAppleLoading) return;
+
+    setState(() {
+      _isAppleLoading = true;
+    });
+
+    try {
+      await ref.read(authNotifierProvider.notifier).signInWithApple();
+      if (mounted) {
+        context.go('/recipes');
+      }
+    } catch (e) {
+      if (mounted) {
+        // Don't show error for user cancellation
+        final errorMessage = e.toString().toLowerCase();
+        if (!errorMessage.contains('cancel')) {
+          await ErrorDialog.show(
+            context,
+            message: 'Failed to sign in with Apple. Please try again.',
+          );
+        }
+      }
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isAppleLoading = false;
+        });
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return AdaptiveSliverPage(
@@ -131,7 +166,7 @@ class _SignUpPageState extends ConsumerState<SignUpPage> {
               EmailFormField(
                 controller: _emailController,
                 focusNode: _emailFocusNode,
-                enabled: !_isEmailSignUpLoading && !_isGoogleLoading,
+                enabled: !_isEmailSignUpLoading && !_isGoogleLoading && !_isAppleLoading,
                 onSubmitted: (_) => _passwordFocusNode.requestFocus(),
               ),
               const SizedBox(height: 16),
@@ -140,7 +175,7 @@ class _SignUpPageState extends ConsumerState<SignUpPage> {
               PasswordFormField(
                 controller: _passwordController,
                 focusNode: _passwordFocusNode,
-                enabled: !_isEmailSignUpLoading && !_isGoogleLoading,
+                enabled: !_isEmailSignUpLoading && !_isGoogleLoading && !_isAppleLoading,
                 textInputAction: TextInputAction.next,
                 onSubmitted: (_) => _confirmPasswordFocusNode.requestFocus(),
               ),
@@ -151,7 +186,7 @@ class _SignUpPageState extends ConsumerState<SignUpPage> {
                 controller: _confirmPasswordController,
                 passwordController: _passwordController,
                 focusNode: _confirmPasswordFocusNode,
-                enabled: !_isEmailSignUpLoading && !_isGoogleLoading,
+                enabled: !_isEmailSignUpLoading && !_isGoogleLoading && !_isAppleLoading,
                 onSubmitted: (_) => _handleEmailSignUp(),
               ),
               const SizedBox(height: 24),
@@ -162,7 +197,7 @@ class _SignUpPageState extends ConsumerState<SignUpPage> {
                 children: [
                   Checkbox(
                     value: _acceptTerms,
-                    onChanged: _isEmailSignUpLoading || _isGoogleLoading
+                    onChanged: _isEmailSignUpLoading || _isGoogleLoading || _isAppleLoading
                         ? null
                         : (value) {
                             setState(() {
@@ -207,7 +242,7 @@ class _SignUpPageState extends ConsumerState<SignUpPage> {
                 text: 'Create Account',
                 onPressed: _handleEmailSignUp,
                 isLoading: _isEmailSignUpLoading,
-                enabled: !_isGoogleLoading,
+                enabled: !_isGoogleLoading && !_isAppleLoading,
               ),
               const SizedBox(height: 32),
 
@@ -235,6 +270,15 @@ class _SignUpPageState extends ConsumerState<SignUpPage> {
                 onPressed: _handleGoogleSignIn,
                 isLoading: _isGoogleLoading,
               ),
+
+              // Apple sign in button (iOS only)
+              if (Platform.isIOS) ...[
+                const SizedBox(height: 16),
+                AppleSignInButton(
+                  onPressed: _handleAppleSignIn,
+                  isLoading: _isAppleLoading,
+                ),
+              ],
               const SizedBox(height: 32),
 
               // Sign in link

@@ -1,3 +1,5 @@
+import 'dart:io' show Platform;
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -26,6 +28,7 @@ class _SignInPageState extends ConsumerState<SignInPage> {
   
   bool _isEmailSignInLoading = false;
   bool _isGoogleLoading = false;
+  bool _isAppleLoading = false;
 
   @override
   void dispose() {
@@ -104,6 +107,38 @@ class _SignInPageState extends ConsumerState<SignInPage> {
     }
   }
 
+  void _handleAppleSignIn() async {
+    if (_isAppleLoading) return;
+
+    setState(() {
+      _isAppleLoading = true;
+    });
+
+    try {
+      await ref.read(authNotifierProvider.notifier).signInWithApple();
+      if (mounted) {
+        context.go('/recipes');
+      }
+    } catch (e) {
+      if (mounted) {
+        // Don't show error for user cancellation
+        final errorMessage = e.toString().toLowerCase();
+        if (!errorMessage.contains('cancel')) {
+          await ErrorDialog.show(
+            context,
+            message: 'Failed to sign in with Apple. Please try again.',
+          );
+        }
+      }
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isAppleLoading = false;
+        });
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return AdaptiveSliverPage(
@@ -126,7 +161,7 @@ class _SignInPageState extends ConsumerState<SignInPage> {
                 keyboardType: TextInputType.emailAddress,
                 textInputAction: TextInputAction.next,
                 focusNode: _emailFocusNode,
-                enabled: !_isEmailSignInLoading && !_isGoogleLoading,
+                enabled: !_isEmailSignInLoading && !_isGoogleLoading && !_isAppleLoading,
                 onSubmitted: (_) => _passwordFocusNode.requestFocus(),
               ),
               const SizedBox(height: 16),
@@ -138,7 +173,7 @@ class _SignInPageState extends ConsumerState<SignInPage> {
                 obscureText: true,
                 textInputAction: TextInputAction.done,
                 focusNode: _passwordFocusNode,
-                enabled: !_isEmailSignInLoading && !_isGoogleLoading,
+                enabled: !_isEmailSignInLoading && !_isGoogleLoading && !_isAppleLoading,
                 onSubmitted: (_) => _handleEmailSignIn(),
               ),
               const SizedBox(height: 24),
@@ -148,7 +183,7 @@ class _SignInPageState extends ConsumerState<SignInPage> {
                 text: 'Sign In',
                 onPressed: _handleEmailSignIn,
                 isLoading: _isEmailSignInLoading,
-                enabled: !_isGoogleLoading,
+                enabled: !_isGoogleLoading && !_isAppleLoading,
               ),
               const SizedBox(height: 16),
 
@@ -191,6 +226,15 @@ class _SignInPageState extends ConsumerState<SignInPage> {
                 onPressed: _handleGoogleSignIn,
                 isLoading: _isGoogleLoading,
               ),
+
+              // Apple sign in button (iOS only)
+              if (Platform.isIOS) ...[
+                const SizedBox(height: 16),
+                AppleSignInButton(
+                  onPressed: _handleAppleSignIn,
+                  isLoading: _isAppleLoading,
+                ),
+              ],
               const SizedBox(height: 32),
 
               // Sign up link
