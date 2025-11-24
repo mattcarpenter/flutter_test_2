@@ -217,9 +217,9 @@ class SettingsPage extends ConsumerWidget {
                 ],
               ),
 
-              // Bottom spacing
-              SizedBox(height: AppSpacing.xxl),
-              SizedBox(height: AppSpacing.xxl),
+              // Bottom spacing - extra large to ensure content is always scrollable
+              // and prevents large title animation bounce loop on iPad landscape
+              const SizedBox(height: 200),
             ],
           ),
         ),

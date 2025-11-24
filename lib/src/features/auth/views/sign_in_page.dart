@@ -7,6 +7,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../../mobile/utils/adaptive_sliver_page.dart';
 import '../../../providers/auth_provider.dart';
+import '../../../theme/colors.dart';
 import '../../../widgets/error_dialog.dart';
 import '../widgets/auth_form_field.dart';
 import '../widgets/auth_button.dart';
@@ -241,13 +242,16 @@ class _SignInPageState extends ConsumerState<SignInPage> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  const Text('Don\'t have an account? '),
+                  Text(
+                    'Don\'t have an account? ',
+                    style: TextStyle(color: AppColors.of(context).textSecondary),
+                  ),
                   GestureDetector(
                     onTap: () => context.go('/auth/signup'),
                     child: Text(
                       'Sign Up',
                       style: TextStyle(
-                        color: Theme.of(context).primaryColor,
+                        color: AppColors.of(context).primary,
                         fontWeight: FontWeight.w600,
                       ),
                     ),

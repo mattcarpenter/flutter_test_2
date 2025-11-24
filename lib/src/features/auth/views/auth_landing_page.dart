@@ -1,3 +1,5 @@
+import 'dart:io' show Platform;
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -5,6 +7,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../../mobile/utils/adaptive_sliver_page.dart';
 import '../../../providers/auth_provider.dart';
+import '../../../theme/colors.dart';
 import '../../../widgets/error_dialog.dart';
 import '../widgets/auth_button.dart';
 import '../widgets/social_auth_button.dart';
@@ -23,6 +26,10 @@ class AuthLandingPage extends ConsumerStatefulWidget {
 
 class _AuthLandingPageState extends ConsumerState<AuthLandingPage> {
   bool _isGoogleLoading = false;
+  bool _isAppleLoading = false;
+
+  // Max width for buttons on larger screens (iPad landscape)
+  static const double _maxButtonWidth = 400.0;
 
   void _handleGoogleSignIn() async {
     if (_isGoogleLoading) return;
@@ -52,8 +59,42 @@ class _AuthLandingPageState extends ConsumerState<AuthLandingPage> {
     }
   }
 
+  void _handleAppleSignIn() async {
+    if (_isAppleLoading) return;
+
+    setState(() {
+      _isAppleLoading = true;
+    });
+
+    try {
+      await ref.read(authNotifierProvider.notifier).signInWithApple();
+      if (mounted) {
+        context.go('/recipes');
+      }
+    } catch (e) {
+      if (mounted) {
+        // Don't show error for user cancellation
+        final errorMessage = e.toString().toLowerCase();
+        if (!errorMessage.contains('cancel')) {
+          await ErrorDialog.show(
+            context,
+            message: 'Failed to sign in with Apple. Please try again.',
+          );
+        }
+      }
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isAppleLoading = false;
+        });
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
+    final colors = AppColors.of(context);
+
     return AdaptiveSliverPage(
       title: 'Welcome',
       leading: widget.onMenuPressed != null
@@ -64,64 +105,82 @@ class _AuthLandingPageState extends ConsumerState<AuthLandingPage> {
           : null,
       body: Padding(
         padding: const EdgeInsets.all(24.0),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            // App branding section
-            const Icon(
-              Icons.restaurant_menu,
-              size: 80,
-              color: Colors.blue,
-            ),
-            const SizedBox(height: 16),
-            Text(
-              'Recipe Manager',
-              style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                fontWeight: FontWeight.bold,
-              ),
-              textAlign: TextAlign.center,
-            ),
-            const SizedBox(height: 8),
-            Text(
-              'Organize, cook, and share your favorite recipes',
-              style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                color: Colors.grey[600],
-              ),
-              textAlign: TextAlign.center,
-            ),
-            const SizedBox(height: 48),
-
-            // Auth buttons
-            AuthButton.primary(
-              text: 'Continue with Email',
-              onPressed: () => context.go('/auth/signup'),
-            ),
-            const SizedBox(height: 16),
-            GoogleSignInButton(
-              onPressed: _handleGoogleSignIn,
-              isLoading: _isGoogleLoading,
-            ),
-            const SizedBox(height: 32),
-
-            // Sign in link
-            Row(
+        child: Center(
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: _maxButtonWidth),
+            child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                const Text('Already have an account? '),
-                GestureDetector(
-                  onTap: () => context.go('/auth/signin'),
-                  child: Text(
-                    'Sign In',
-                    style: TextStyle(
-                      color: Theme.of(context).primaryColor,
-                      fontWeight: FontWeight.w600,
-                    ),
+                // App branding section
+                Icon(
+                  Icons.restaurant_menu,
+                  size: 80,
+                  color: colors.primary,
+                ),
+                const SizedBox(height: 16),
+                Text(
+                  'Recipe Manager',
+                  style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+                    fontWeight: FontWeight.bold,
+                    color: colors.textPrimary,
                   ),
+                  textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  'Organize, cook, and share your favorite recipes',
+                  style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                    color: colors.textSecondary,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: 48),
+
+                // Auth buttons
+                AuthButton.primary(
+                  text: 'Continue with Email',
+                  onPressed: () => context.go('/auth/signup'),
+                ),
+                const SizedBox(height: 16),
+                GoogleSignInButton(
+                  onPressed: _handleGoogleSignIn,
+                  isLoading: _isGoogleLoading,
+                ),
+
+                // Apple sign in button (iOS only)
+                if (Platform.isIOS) ...[
+                  const SizedBox(height: 16),
+                  AppleSignInButton(
+                    onPressed: _handleAppleSignIn,
+                    isLoading: _isAppleLoading,
+                  ),
+                ],
+                const SizedBox(height: 32),
+
+                // Sign in link
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text(
+                      'Already have an account? ',
+                      style: TextStyle(color: colors.textSecondary),
+                    ),
+                    GestureDetector(
+                      onTap: () => context.go('/auth/signin'),
+                      child: Text(
+                        'Sign In',
+                        style: TextStyle(
+                          color: colors.primary,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
               ],
             ),
-          ],
+          ),
         ),
       ),
     );
