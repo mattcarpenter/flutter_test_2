@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../database/database.dart';
+import '../../../constants/folder_constants.dart';
 import '../../../mobile/utils/adaptive_sliver_page.dart';
 import '../../../providers/recipe_folder_provider.dart';
 import '../../../theme/colors.dart';
@@ -11,6 +12,38 @@ import '../../../theme/typography.dart';
 import '../providers/app_settings_provider.dart';
 import '../widgets/settings_group.dart';
 import '../widgets/settings_row.dart';
+
+/// Wrapper class to unify RecipeFolderEntry and virtual folders in drag list
+class _FolderItem {
+  final String id;
+  final String name;
+  final int folderType; // 0 = regular, -1 = uncategorized virtual folder, >0 = smart folder
+
+  const _FolderItem({
+    required this.id,
+    required this.name,
+    required this.folderType,
+  });
+
+  factory _FolderItem.fromFolder(RecipeFolderEntry folder) {
+    return _FolderItem(
+      id: folder.id,
+      name: folder.name,
+      folderType: folder.folderType,
+    );
+  }
+
+  factory _FolderItem.uncategorized() {
+    return _FolderItem(
+      id: kUncategorizedFolderId,
+      name: kUncategorizedFolderName,
+      folderType: -1, // Special type for uncategorized
+    );
+  }
+
+  bool get isUncategorized => folderType == -1;
+  bool get isSmartFolder => folderType > 0;
+}
 
 /// Page for selecting folder sort option with custom drag-and-drop ordering
 class SortFoldersPage extends ConsumerStatefulWidget {
@@ -133,7 +166,8 @@ class _SortFoldersPageState extends ConsumerState<SortFoldersPage> {
     List<String> customOrder,
   ) {
     // Build ordered list: folders in customOrder first, then new folders at end
-    final orderedFolders = _applyCustomOrder(folders, customOrder);
+    // Includes the virtual Uncategorized folder
+    final orderedItems = _applyCustomOrder(folders, customOrder);
 
     return SettingsGroup(
       header: 'Drag to Reorder',
@@ -150,15 +184,15 @@ class _SortFoldersPageState extends ConsumerState<SortFoldersPage> {
             shrinkWrap: true,
             physics: const NeverScrollableScrollPhysics(),
             buildDefaultDragHandles: false,
-            itemCount: orderedFolders.length,
+            itemCount: orderedItems.length,
             itemBuilder: (context, index) {
-              final folder = orderedFolders[index];
+              final item = orderedItems[index];
               final isFirst = index == 0;
-              final isLast = index == orderedFolders.length - 1;
+              final isLast = index == orderedItems.length - 1;
 
               return _DraggableFolderItem(
-                key: ValueKey(folder.id),
-                folder: folder,
+                key: ValueKey(item.id),
+                item: item,
                 index: index,
                 isFirst: isFirst,
                 isLast: isLast,
@@ -180,7 +214,7 @@ class _SortFoldersPageState extends ConsumerState<SortFoldersPage> {
               );
             },
             onReorder: (oldIndex, newIndex) {
-              _handleReorder(orderedFolders, oldIndex, newIndex);
+              _handleReorder(orderedItems, oldIndex, newIndex);
             },
           ),
         ),
@@ -188,28 +222,34 @@ class _SortFoldersPageState extends ConsumerState<SortFoldersPage> {
     );
   }
 
-  List<RecipeFolderEntry> _applyCustomOrder(
+  List<_FolderItem> _applyCustomOrder(
     List<RecipeFolderEntry> folders,
     List<String> customOrder,
   ) {
-    final orderedFolders = <RecipeFolderEntry>[];
-    final folderMap = {for (var f in folders) f.id: f};
+    final orderedItems = <_FolderItem>[];
 
-    // Add folders in custom order
+    // Create map of all folder items including uncategorized
+    final uncategorized = _FolderItem.uncategorized();
+    final itemMap = <String, _FolderItem>{
+      uncategorized.id: uncategorized,
+      for (var f in folders) f.id: _FolderItem.fromFolder(f),
+    };
+
+    // Add items in custom order
     for (final id in customOrder) {
-      if (folderMap.containsKey(id)) {
-        orderedFolders.add(folderMap.remove(id)!);
+      if (itemMap.containsKey(id)) {
+        orderedItems.add(itemMap.remove(id)!);
       }
     }
 
-    // Append remaining (new) folders at bottom
-    orderedFolders.addAll(folderMap.values);
+    // Append remaining (new) items at bottom
+    orderedItems.addAll(itemMap.values);
 
-    return orderedFolders;
+    return orderedItems;
   }
 
   void _handleReorder(
-    List<RecipeFolderEntry> orderedFolders,
+    List<_FolderItem> orderedItems,
     int oldIndex,
     int newIndex,
   ) {
@@ -218,12 +258,12 @@ class _SortFoldersPageState extends ConsumerState<SortFoldersPage> {
     }
 
     // Create new order list
-    final newOrderedFolders = List<RecipeFolderEntry>.from(orderedFolders);
-    final item = newOrderedFolders.removeAt(oldIndex);
-    newOrderedFolders.insert(newIndex, item);
+    final newOrderedItems = List<_FolderItem>.from(orderedItems);
+    final item = newOrderedItems.removeAt(oldIndex);
+    newOrderedItems.insert(newIndex, item);
 
     // Extract IDs for the new order
-    final newOrder = newOrderedFolders.map((f) => f.id).toList();
+    final newOrder = newOrderedItems.map((f) => f.id).toList();
 
     // Update local state immediately for responsive UI
     setState(() {
@@ -249,14 +289,14 @@ class _SortOption {
 
 /// Draggable folder item for the custom order list
 class _DraggableFolderItem extends StatelessWidget {
-  final RecipeFolderEntry folder;
+  final _FolderItem item;
   final int index;
   final bool isFirst;
   final bool isLast;
 
   const _DraggableFolderItem({
     super.key,
-    required this.folder,
+    required this.item,
     required this.index,
     required this.isFirst,
     required this.isLast,
@@ -265,7 +305,16 @@ class _DraggableFolderItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colors = AppColors.of(context);
-    final isSmartFolder = (folder.folderType ?? 0) > 0;
+
+    // Determine icon based on folder type
+    IconData folderIcon;
+    if (item.isUncategorized) {
+      folderIcon = CupertinoIcons.tray;
+    } else if (item.isSmartFolder) {
+      folderIcon = CupertinoIcons.wand_stars;
+    } else {
+      folderIcon = CupertinoIcons.folder;
+    }
 
     return Container(
       decoration: BoxDecoration(
@@ -298,7 +347,7 @@ class _DraggableFolderItem extends StatelessWidget {
 
             // Folder icon
             Icon(
-              isSmartFolder ? CupertinoIcons.wand_stars : CupertinoIcons.folder,
+              folderIcon,
               color: colors.primary,
               size: 22,
             ),
@@ -307,7 +356,7 @@ class _DraggableFolderItem extends StatelessWidget {
             // Folder name
             Expanded(
               child: Text(
-                folder.name,
+                item.name,
                 style: AppTypography.body.copyWith(
                   color: colors.textPrimary,
                 ),

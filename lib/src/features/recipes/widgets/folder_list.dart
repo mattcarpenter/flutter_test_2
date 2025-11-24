@@ -67,16 +67,16 @@ class _FolderListState extends ConsumerState<FolderList> {
         children: [
           foldersAsyncValue.when(
             data: (folders) {
-              // Apply sorting to folders
-              final sortedFolders = _applySortOrder(folders, folderSortOption, customFolderOrder);
+              // Create list with uncategorized folder included
+              final uncategorizedFolder = _createUncategorizedFolder();
 
-              // Create a new list with uncategorized folder plus sorted regular folders
-              List<dynamic> allFolders = [
-                // Add the virtual "Uncategorized" folder at the beginning
-                _createUncategorizedFolder(),
-                // Add the sorted regular folders
-                ...sortedFolders,
-              ];
+              // Apply sorting to all folders (including uncategorized)
+              List<dynamic> allFolders = _applySortOrder(
+                folders,
+                uncategorizedFolder,
+                folderSortOption,
+                customFolderOrder,
+              );
 
               // Apply folder limit if set to 'firstN'
               if (showFolders == 'firstN' && allFolders.length > showFoldersCount) {
@@ -214,46 +214,69 @@ class _FolderListState extends ConsumerState<FolderList> {
     );
   }
 
-  /// Apply sort order to folders based on settings
-  List<RecipeFolderEntry> _applySortOrder(
+  /// Apply sort order to folders based on settings (includes uncategorized folder)
+  List<dynamic> _applySortOrder(
     List<RecipeFolderEntry> folders,
+    VirtualFolder uncategorizedFolder,
     String sortOption,
     List<String> customOrder,
   ) {
-    // Create a mutable copy
-    final sortedFolders = List<RecipeFolderEntry>.from(folders);
-
     switch (sortOption) {
       case 'alphabetical_asc':
-        sortedFolders.sort((a, b) => a.name.toLowerCase().compareTo(b.name.toLowerCase()));
-        break;
+        // Sort all folders including uncategorized by name A-Z
+        final allFolders = <dynamic>[uncategorizedFolder, ...folders];
+        allFolders.sort((a, b) {
+          final nameA = a is VirtualFolder ? a.name : (a as RecipeFolderEntry).name;
+          final nameB = b is VirtualFolder ? b.name : (b as RecipeFolderEntry).name;
+          return nameA.toLowerCase().compareTo(nameB.toLowerCase());
+        });
+        return allFolders;
+
       case 'alphabetical_desc':
-        sortedFolders.sort((a, b) => b.name.toLowerCase().compareTo(a.name.toLowerCase()));
-        break;
+        // Sort all folders including uncategorized by name Z-A
+        final allFolders = <dynamic>[uncategorizedFolder, ...folders];
+        allFolders.sort((a, b) {
+          final nameA = a is VirtualFolder ? a.name : (a as RecipeFolderEntry).name;
+          final nameB = b is VirtualFolder ? b.name : (b as RecipeFolderEntry).name;
+          return nameB.toLowerCase().compareTo(nameA.toLowerCase());
+        });
+        return allFolders;
+
       case 'newest':
-        // Note: RecipeFolderEntry doesn't have createdAt, so newest uses insertion order (no change)
-        // Folders are returned from DB in insertion order, so we reverse for newest first
-        return sortedFolders.reversed.toList();
+        // Newest first: uncategorized has createdAt=0, so it goes last
+        // Regular folders in reverse insertion order, uncategorized at end
+        return [...folders.reversed, uncategorizedFolder];
+
       case 'oldest':
-        // Oldest = original insertion order (no change needed)
-        break;
+        // Oldest first: uncategorized has createdAt=0, so it goes first
+        return [uncategorizedFolder, ...folders];
+
       case 'custom':
-        return _applyCustomOrder(sortedFolders, customOrder);
+        return _applyCustomOrder(folders, uncategorizedFolder, customOrder);
+
       default:
         // Default to alphabetical A-Z
-        sortedFolders.sort((a, b) => a.name.toLowerCase().compareTo(b.name.toLowerCase()));
+        final allFolders = <dynamic>[uncategorizedFolder, ...folders];
+        allFolders.sort((a, b) {
+          final nameA = a is VirtualFolder ? a.name : (a as RecipeFolderEntry).name;
+          final nameB = b is VirtualFolder ? b.name : (b as RecipeFolderEntry).name;
+          return nameA.toLowerCase().compareTo(nameB.toLowerCase());
+        });
+        return allFolders;
     }
-
-    return sortedFolders;
   }
 
-  /// Apply custom order based on saved folder ID list
-  List<RecipeFolderEntry> _applyCustomOrder(
+  /// Apply custom order based on saved folder ID list (includes uncategorized)
+  List<dynamic> _applyCustomOrder(
     List<RecipeFolderEntry> folders,
+    VirtualFolder uncategorizedFolder,
     List<String> customOrder,
   ) {
-    final orderedFolders = <RecipeFolderEntry>[];
-    final folderMap = {for (var f in folders) f.id: f};
+    final orderedFolders = <dynamic>[];
+    final folderMap = <String, dynamic>{
+      uncategorizedFolder.id: uncategorizedFolder,
+      for (var f in folders) f.id: f,
+    };
 
     // Add folders in custom order
     for (final id in customOrder) {
