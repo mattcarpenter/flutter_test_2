@@ -30,6 +30,7 @@ import '../features/settings/views/theme_mode_page.dart';
 import '../features/settings/views/show_folders_page.dart';
 import '../features/settings/views/sort_folders_page.dart';
 import '../features/settings/views/recipe_font_size_page.dart';
+import '../features/settings/views/account_page.dart';
 import '../features/settings/views/placeholder_page.dart';
 import '../features/settings/providers/app_settings_provider.dart';
 import '../features/meal_plans/views/meal_plans_root.dart';

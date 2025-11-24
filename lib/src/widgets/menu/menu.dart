@@ -2,10 +2,8 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../database/powersync.dart';
 import '../../providers/auth_provider.dart';
 import '../../providers/subscription_provider.dart';
-import '../../repositories/upload_queue_repository.dart';
 import '../../utils/feature_flags.dart';
 import 'menu_item.dart';
 
@@ -193,7 +191,8 @@ class Menu extends ConsumerWidget {
             onRouteGo('/settings');
           },
         ),
-        // Auth menu item - conditional based on authentication state
+        // Sign in menu item - only show when not authenticated
+        // Sign out is now in Settings > Account
         if (!isAuthenticated)
           MenuItem(
             index: 9,
@@ -208,110 +207,7 @@ class Menu extends ConsumerWidget {
               onRouteGo('/auth');
             },
           ),
-        if (isAuthenticated)
-          MenuItem(
-            index: 9,
-            title: 'Sign Out',
-            icon: CupertinoIcons.person_circle_fill,
-            isActive: false, // Sign out never active
-            color: primaryColor,
-            textColor: textColor,
-            activeTextColor: activeTextColor,
-            backgroundColor: backgroundColor,
-            onTap: (_) async {
-              await _handleSignOut(context, ref);
-            },
-          ),
       ],
     );
-  }
-
-  /// Handle sign out with sync status checking
-  Future<void> _handleSignOut(BuildContext context, WidgetRef ref) async {
-    try {
-      final hasPendingSync = await _hasPendingSync(ref);
-      
-      if (hasPendingSync) {
-        if (!context.mounted) return;
-        final shouldSignOut = await _showSyncWarningDialog(context);
-        if (!shouldSignOut) return; // User cancelled
-      }
-      
-      // Proceed with sign out
-      await ref.read(authNotifierProvider.notifier).signOut();
-    } catch (e) {
-      // Show error dialog if sign out fails
-      if (context.mounted) {
-        showCupertinoDialog(
-          context: context,
-          builder: (context) => CupertinoAlertDialog(
-            title: const Text('Sign Out Error'),
-            content: Text('Failed to sign out: $e'),
-            actions: [
-              CupertinoDialogAction(
-                child: const Text('OK'),
-                onPressed: () => Navigator.of(context).pop(),
-              ),
-            ],
-          ),
-        );
-      }
-    }
-  }
-
-  /// Check if there's pending sync activity
-  Future<bool> _hasPendingSync(WidgetRef ref) async {
-    try {
-      // Check PowerSync sync status
-      final syncStatus = db.currentStatus;
-      
-      // Check if actively syncing
-      if (syncStatus.uploading == true || syncStatus.downloading == true) {
-        return true;
-      }
-      
-      // If not connected and hasn't completed initial sync
-      if (syncStatus.connected != true && syncStatus.hasSynced != true) {
-        return true;
-      }
-
-      // Check custom upload queue for images
-      final uploadRepo = ref.read(uploadQueueRepositoryProvider);
-      final pendingUploads = await uploadRepo.getPendingEntries();
-      if (pendingUploads.isNotEmpty) {
-        return true;
-      }
-
-      return false;
-    } catch (e) {
-      // On error, show warning to be safe
-      return true;
-    }
-  }
-
-  /// Show warning dialog for pending sync
-  Future<bool> _showSyncWarningDialog(BuildContext context) async {
-    return await showCupertinoDialog<bool>(
-      context: context,
-      barrierDismissible: false,
-      builder: (context) => CupertinoAlertDialog(
-        title: const Text('Unsaved Changes'),
-        content: const Text(
-          'Some data hasn\'t finished syncing. If you sign out now, '
-          'your recent changes may be lost.',
-        ),
-        actions: [
-          CupertinoDialogAction(
-            child: const Text('Cancel'),
-            onPressed: () => Navigator.of(context).pop(false),
-          ),
-          CupertinoDialogAction(
-            isDestructiveAction: true,
-            child: const Text('Sign Out Anyway'),
-            onPressed: () => Navigator.of(context).pop(true),
-          ),
-        ],
-      ),
-    ) ?? false; // Return false if dialog is dismissed
   }
 }

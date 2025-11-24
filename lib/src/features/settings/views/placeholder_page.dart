@@ -75,16 +75,6 @@ class PlaceholderSettingsPage extends ConsumerWidget {
 
 // Pre-configured placeholder pages for specific settings
 
-class AccountPage extends PlaceholderSettingsPage {
-  const AccountPage({super.key})
-      : super(
-          title: 'Account',
-          icon: CupertinoIcons.person_circle,
-          message: 'Coming Soon',
-          description: 'Manage your account settings, profile, and subscription.',
-        );
-}
-
 class ImportRecipesPage extends PlaceholderSettingsPage {
   const ImportRecipesPage({super.key})
       : super(
