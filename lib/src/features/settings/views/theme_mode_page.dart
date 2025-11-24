@@ -41,6 +41,7 @@ class ThemeModePage extends ConsumerWidget {
     return AdaptiveSliverPage(
       title: 'Color Theme',
       automaticallyImplyLeading: true,
+      previousPageTitle: 'Layout',
       slivers: [
         SliverToBoxAdapter(
           child: Column(

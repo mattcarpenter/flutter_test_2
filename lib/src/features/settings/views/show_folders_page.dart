@@ -22,6 +22,7 @@ class ShowFoldersPage extends ConsumerWidget {
     return AdaptiveSliverPage(
       title: 'Show Folders',
       automaticallyImplyLeading: true,
+      previousPageTitle: 'Layout',
       slivers: [
         SliverToBoxAdapter(
           child: Column(

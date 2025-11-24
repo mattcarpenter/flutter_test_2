@@ -95,6 +95,7 @@ class _SortFoldersPageState extends ConsumerState<SortFoldersPage> {
     return AdaptiveSliverPage(
       title: 'Sort Folders',
       automaticallyImplyLeading: true,
+      previousPageTitle: 'Layout',
       slivers: [
         SliverToBoxAdapter(
           child: Column(

@@ -43,6 +43,7 @@ class HomeScreenPage extends ConsumerWidget {
     return AdaptiveSliverPage(
       title: 'Home Screen',
       automaticallyImplyLeading: true,
+      previousPageTitle: 'Settings',
       slivers: [
         SliverToBoxAdapter(
           child: Column(

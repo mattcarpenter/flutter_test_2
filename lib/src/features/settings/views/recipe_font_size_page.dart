@@ -39,6 +39,7 @@ class RecipeFontSizePage extends ConsumerWidget {
     return AdaptiveSliverPage(
       title: 'Font Size',
       automaticallyImplyLeading: true,
+      previousPageTitle: 'Layout',
       slivers: [
         SliverToBoxAdapter(
           child: Column(

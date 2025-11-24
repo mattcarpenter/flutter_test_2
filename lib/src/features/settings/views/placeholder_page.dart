@@ -12,6 +12,7 @@ class PlaceholderSettingsPage extends ConsumerWidget {
   final IconData icon;
   final String message;
   final String? description;
+  final String previousPageTitle;
 
   const PlaceholderSettingsPage({
     super.key,
@@ -19,6 +20,7 @@ class PlaceholderSettingsPage extends ConsumerWidget {
     required this.icon,
     this.message = 'Coming Soon',
     this.description,
+    this.previousPageTitle = 'Settings',
   });
 
   @override
@@ -28,6 +30,7 @@ class PlaceholderSettingsPage extends ConsumerWidget {
     return AdaptiveSliverPage(
       title: title,
       automaticallyImplyLeading: true,
+      previousPageTitle: previousPageTitle,
       slivers: [
         SliverFillRemaining(
           child: Center(

@@ -45,6 +45,7 @@ class ManageTagsPage extends ConsumerWidget {
     return AdaptiveSliverPage(
       title: 'Manage Tags',
       automaticallyImplyLeading: true,
+      previousPageTitle: 'Settings',
       slivers: [
         if (tagManagementState.isLoading)
           const SliverFillRemaining(

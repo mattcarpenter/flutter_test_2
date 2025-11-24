@@ -31,6 +31,7 @@ class LayoutAppearancePage extends ConsumerWidget {
     return AdaptiveSliverPage(
       title: 'Layout & Appearance',
       automaticallyImplyLeading: true,
+      previousPageTitle: 'Settings',
       slivers: [
         SliverToBoxAdapter(
           child: Column(
