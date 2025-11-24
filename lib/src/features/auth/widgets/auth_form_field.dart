@@ -17,6 +17,9 @@ class AuthFormField extends StatelessWidget {
   final bool enabled;
   final bool autofocus;
   final List<String>? autofillHints;
+  final bool autocorrect;
+  final bool enableSuggestions;
+  final TextCapitalization textCapitalization;
 
   const AuthFormField({
     super.key,
@@ -33,6 +36,9 @@ class AuthFormField extends StatelessWidget {
     this.enabled = true,
     this.autofocus = false,
     this.autofillHints,
+    this.autocorrect = true,
+    this.enableSuggestions = true,
+    this.textCapitalization = TextCapitalization.none,
   });
 
   @override
@@ -62,6 +68,9 @@ class AuthFormField extends StatelessWidget {
                 obscureText: obscureText,
                 keyboardType: keyboardType ?? TextInputType.text,
                 textInputAction: textInputAction,
+                autocorrect: autocorrect,
+                enableSuggestions: enableSuggestions,
+                textCapitalization: textCapitalization,
                 onChanged: (value) {
                   field.didChange(value);
                   onChanged?.call(value);
@@ -73,7 +82,7 @@ class AuthFormField extends StatelessWidget {
                 autofillHints: autofillHints,
                 decoration: BoxDecoration(
                   border: Border.all(
-                    color: field.hasError 
+                    color: field.hasError
                         ? CupertinoColors.destructiveRed
                         : CupertinoColors.systemGrey4,
                     width: field.hasError ? 2 : 1,
@@ -104,6 +113,9 @@ class AuthFormField extends StatelessWidget {
         obscureText: obscureText,
         keyboardType: keyboardType ?? TextInputType.text,
         textInputAction: textInputAction,
+        autocorrect: autocorrect,
+        enableSuggestions: enableSuggestions,
+        textCapitalization: textCapitalization,
         onChanged: onChanged,
         onSubmitted: onSubmitted,
         focusNode: focusNode,
@@ -129,6 +141,9 @@ class AuthFormField extends StatelessWidget {
         obscureText: obscureText,
         keyboardType: keyboardType ?? TextInputType.text,
         textInputAction: textInputAction,
+        autocorrect: autocorrect,
+        enableSuggestions: enableSuggestions,
+        textCapitalization: textCapitalization,
         onChanged: onChanged,
         onFieldSubmitted: onSubmitted,
         focusNode: focusNode,
@@ -151,6 +166,9 @@ class AuthFormField extends StatelessWidget {
         obscureText: obscureText,
         keyboardType: keyboardType ?? TextInputType.text,
         textInputAction: textInputAction,
+        autocorrect: autocorrect,
+        enableSuggestions: enableSuggestions,
+        textCapitalization: textCapitalization,
         onChanged: onChanged,
         onSubmitted: onSubmitted,
         focusNode: focusNode,
@@ -208,6 +226,8 @@ class EmailFormField extends StatelessWidget {
       placeholder: 'your@email.com',
       keyboardType: TextInputType.emailAddress,
       textInputAction: TextInputAction.next,
+      autocorrect: false,
+      enableSuggestions: false,
       validator: _validateEmail,
       onChanged: onChanged,
       onSubmitted: onSubmitted,

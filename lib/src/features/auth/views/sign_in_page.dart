@@ -140,125 +140,114 @@ class _SignInPageState extends ConsumerState<SignInPage> {
     }
   }
 
+  // Max width for form on larger screens (iPad landscape)
+  static const double _maxFormWidth = 400.0;
+
   @override
   Widget build(BuildContext context) {
     return AdaptiveSliverPage(
       title: 'Sign In',
       automaticallyImplyLeading: true,
+      previousPageTitle: 'Sign Up',
       body: Padding(
         padding: const EdgeInsets.all(24.0),
-        child: Form(
-          key: _formKey,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              const SizedBox(height: 24),
-
-              // Email field (no validation for sign-in)
-              AuthFormField(
-                controller: _emailController,
-                label: 'Email',
-                placeholder: 'your@email.com',
-                keyboardType: TextInputType.emailAddress,
-                textInputAction: TextInputAction.next,
-                focusNode: _emailFocusNode,
-                enabled: !_isEmailSignInLoading && !_isGoogleLoading && !_isAppleLoading,
-                onSubmitted: (_) => _passwordFocusNode.requestFocus(),
-              ),
-              const SizedBox(height: 16),
-
-              // Password field (no validation for sign-in)
-              AuthFormField(
-                controller: _passwordController,
-                label: 'Password',
-                obscureText: true,
-                textInputAction: TextInputAction.done,
-                focusNode: _passwordFocusNode,
-                enabled: !_isEmailSignInLoading && !_isGoogleLoading && !_isAppleLoading,
-                onSubmitted: (_) => _handleEmailSignIn(),
-              ),
-              const SizedBox(height: 24),
-
-              // Sign in button
-              AuthButton.primary(
-                text: 'Sign In',
-                onPressed: _handleEmailSignIn,
-                isLoading: _isEmailSignInLoading,
-                enabled: !_isGoogleLoading && !_isAppleLoading,
-              ),
-              const SizedBox(height: 16),
-
-              // Forgot password link
-              Center(
-                child: GestureDetector(
-                  onTap: () => context.go('/auth/forgot-password'),
-                  child: Text(
-                    'Forgot Password?',
-                    style: TextStyle(
-                      color: Theme.of(context).primaryColor,
-                      fontWeight: FontWeight.w500,
-                    ),
-                  ),
-                ),
-              ),
-              const SizedBox(height: 32),
-
-              // Divider
-              Row(
+        child: Center(
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: _maxFormWidth),
+            child: Form(
+              key: _formKey,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  const Expanded(child: Divider()),
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 16),
-                    child: Text(
-                      'OR',
-                      style: TextStyle(
-                        color: Colors.grey[600],
-                        fontWeight: FontWeight.w500,
+                  const SizedBox(height: 24),
+
+                  // Email field (no validation for sign-in)
+                  AuthFormField(
+                    controller: _emailController,
+                    label: 'Email',
+                    placeholder: 'your@email.com',
+                    keyboardType: TextInputType.emailAddress,
+                    textInputAction: TextInputAction.next,
+                    autocorrect: false,
+                    enableSuggestions: false,
+                    focusNode: _emailFocusNode,
+                    enabled: !_isEmailSignInLoading && !_isGoogleLoading && !_isAppleLoading,
+                    onSubmitted: (_) => _passwordFocusNode.requestFocus(),
+                  ),
+                  const SizedBox(height: 16),
+
+                  // Password field (no validation for sign-in)
+                  AuthFormField(
+                    controller: _passwordController,
+                    label: 'Password',
+                    obscureText: true,
+                    textInputAction: TextInputAction.done,
+                    focusNode: _passwordFocusNode,
+                    enabled: !_isEmailSignInLoading && !_isGoogleLoading && !_isAppleLoading,
+                    onSubmitted: (_) => _handleEmailSignIn(),
+                  ),
+                  const SizedBox(height: 24),
+
+                  // Sign in button
+                  AuthButton.primary(
+                    text: 'Sign In',
+                    onPressed: _handleEmailSignIn,
+                    isLoading: _isEmailSignInLoading,
+                    enabled: !_isGoogleLoading && !_isAppleLoading,
+                  ),
+                  const SizedBox(height: 16),
+
+                  // Forgot password link
+                  Center(
+                    child: GestureDetector(
+                      onTap: () => context.go('/auth/forgot-password'),
+                      child: Text(
+                        'Forgot Password?',
+                        style: TextStyle(
+                          color: Theme.of(context).primaryColor,
+                          fontWeight: FontWeight.w500,
+                        ),
                       ),
                     ),
                   ),
-                  const Expanded(child: Divider()),
-                ],
-              ),
-              const SizedBox(height: 32),
+                  const SizedBox(height: 32),
 
-              // Google sign in button
-              GoogleSignInButton(
-                onPressed: _handleGoogleSignIn,
-                isLoading: _isGoogleLoading,
-              ),
-
-              // Apple sign in button (iOS only)
-              if (Platform.isIOS) ...[
-                const SizedBox(height: 16),
-                AppleSignInButton(
-                  onPressed: _handleAppleSignIn,
-                  isLoading: _isAppleLoading,
-                ),
-              ],
-              const SizedBox(height: 32),
-
-              // Sign up link
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Text(
-                    'Don\'t have an account? ',
-                    style: TextStyle(color: AppColors.of(context).textSecondary),
-                  ),
-                  GestureDetector(
-                    onTap: () => context.go('/auth/signup'),
-                    child: Text(
-                      'Sign Up',
-                      style: TextStyle(
-                        color: AppColors.of(context).primary,
-                        fontWeight: FontWeight.w600,
+                  // Divider
+                  Row(
+                    children: [
+                      const Expanded(child: Divider()),
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 16),
+                        child: Text(
+                          'OR',
+                          style: TextStyle(
+                            color: Colors.grey[600],
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
                       ),
-                    ),
+                      const Expanded(child: Divider()),
+                    ],
                   ),
+                  const SizedBox(height: 32),
+
+                  // Google sign in button
+                  GoogleSignInButton(
+                    onPressed: _handleGoogleSignIn,
+                    isLoading: _isGoogleLoading,
+                  ),
+
+                  // Apple sign in button (iOS only)
+                  if (Platform.isIOS) ...[
+                    const SizedBox(height: 16),
+                    AppleSignInButton(
+                      onPressed: _handleAppleSignIn,
+                      isLoading: _isAppleLoading,
+                    ),
+                  ],
                 ],
               ),
-            ],
+            ),
           ),
         ),
       ),
