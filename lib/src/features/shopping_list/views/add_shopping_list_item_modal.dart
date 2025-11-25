@@ -246,7 +246,7 @@ class _AddShoppingListItemFormState extends ConsumerState<AddShoppingListItemFor
           Container(
             padding: EdgeInsets.all(AppSpacing.md),
             decoration: BoxDecoration(
-              color: Colors.white,
+              color: AppColors.of(context).surface,
               borderRadius: BorderRadius.circular(8),
             ),
             child: Row(

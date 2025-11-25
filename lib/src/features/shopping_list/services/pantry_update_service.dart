@@ -64,12 +64,9 @@ class PantryUpdateService {
     ShoppingListItemEntry shoppingItem,
     List<PantryItemEntry> pantryItems,
   ) {
-    // Get shopping item terms
-    final shoppingTerms = shoppingItem.terms ?? [];
-    if (shoppingTerms.isEmpty) {
-      // No terms to match
-      return null;
-    }
+    // Get shopping item terms, use name as fallback if no terms
+    final rawTerms = shoppingItem.terms ?? [];
+    final shoppingTerms = rawTerms.isNotEmpty ? rawTerms : [shoppingItem.name];
 
     // Normalize shopping terms for comparison
     final normalizedShoppingTerms = shoppingTerms
