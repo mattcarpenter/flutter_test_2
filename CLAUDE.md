@@ -103,9 +103,55 @@ flutter format .
 ### Design System Rules
 
 - **Never hardcode spacing values** - always use AppSpacing constants
-- **Never hardcode colors** - use AppColors for theme-aware colors or AppColorSwatches for fixed colors  
+- **Never hardcode colors** - use AppColors for theme-aware colors or AppColorSwatches for fixed colors
 - **Prefer semantic typography** - use AppTypography over custom TextStyle when possible
 - **Follow existing patterns** - examine similar components before creating new styling
+
+## Logging
+
+**IMPORTANT**: Use `AppLogger` for all logging. Never use `print()` or `debugPrint()`.
+
+### Usage
+
+```dart
+import '../services/logging/app_logger.dart';
+
+// Log levels (from most to least verbose)
+AppLogger.trace('Detailed diagnostic info');  // Console only, not written to file
+AppLogger.debug('Debug information');          // Written to file
+AppLogger.info('Notable events');              // Written to file
+AppLogger.warning('Potential issues');         // Written to file
+AppLogger.error('Errors', error, stackTrace);  // Written to file
+AppLogger.fatal('Critical failures');          // Written to file
+```
+
+### When to Use Each Level
+
+| Level | Use For | Example |
+|-------|---------|---------|
+| `trace` | Verbose diagnostics, not needed in log files | Loop iterations, routine state changes |
+| `debug` | Development debugging info | Service initialization, state transitions |
+| `info` | Notable runtime events | User actions, sync completed |
+| `warning` | Recoverable issues | Retry attempts, fallback behavior |
+| `error` | Failures that need attention | API errors, exceptions |
+| `fatal` | Critical failures | App cannot continue |
+
+### Guidelines
+
+- **Never use `print()` or `debugPrint()`** - these bypass the logging system
+- **Always include error and stackTrace** for error/fatal levels: `AppLogger.error('Failed', e, stack)`
+- **Sensitive data is auto-sanitized** - JWTs, emails, URLs, API keys are redacted in log files
+- **Be concise** - log messages should be short and actionable
+- **Don't over-log** - avoid logging inside tight loops or frequent callbacks
+
+### Log File Location
+
+Logs are written to `app_logs.txt` in the app's documents directory with:
+- Rolling file with 2MB cap
+- Timestamps and log levels
+- Automatic sanitization of sensitive data
+
+Users can export logs from Settings > Support > Share Logs.
 
 ## Bottom Sheet (Wolt Modal) Design Guidelines
 
