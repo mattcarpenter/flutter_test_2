@@ -8,6 +8,7 @@ list(APPEND FLUTTER_PLUGIN_LIST
   connectivity_plus
   file_selector_windows
   flutter_acrylic
+  flutter_inappwebview_windows
   irondash_engine_context
   mecab_dart
   powersync_flutter_libs

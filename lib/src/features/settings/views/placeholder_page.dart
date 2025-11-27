@@ -95,26 +95,6 @@ class ExportRecipesPage extends PlaceholderSettingsPage {
         );
 }
 
-class PrivacyPolicyPage extends PlaceholderSettingsPage {
-  const PrivacyPolicyPage({super.key})
-      : super(
-          title: 'Privacy Policy',
-          icon: CupertinoIcons.shield,
-          message: 'Coming Soon',
-          description: 'Learn about how we handle your data and privacy.',
-        );
-}
-
-class TermsOfUsePage extends PlaceholderSettingsPage {
-  const TermsOfUsePage({super.key})
-      : super(
-          title: 'Terms of Use',
-          icon: CupertinoIcons.doc_text,
-          message: 'Coming Soon',
-          description: 'Read our terms and conditions.',
-        );
-}
-
 class AcknowledgementsPage extends StatelessWidget {
   const AcknowledgementsPage({super.key});
 
