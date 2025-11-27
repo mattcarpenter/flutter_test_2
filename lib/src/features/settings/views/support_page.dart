@@ -1,5 +1,10 @@
+import 'dart:io';
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:package_info_plus/package_info_plus.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import '../../../mobile/utils/adaptive_sliver_page.dart';
 import '../../../theme/colors.dart';
@@ -65,10 +70,9 @@ class SupportPage extends ConsumerWidget {
 
               SizedBox(height: AppSpacing.settingsGroupGap),
 
-              // Contact section (placeholder for future)
+              // Contact section
               SettingsGroupCondensed(
                 header: 'Contact',
-                footer: 'We typically respond within 24 hours.',
                 children: [
                   SettingsRowCondensed(
                     title: 'Email Support',
@@ -77,10 +81,7 @@ class SupportPage extends ConsumerWidget {
                       size: 22,
                       color: colors.primary,
                     ),
-                    onTap: () {
-                      // TODO: Open email compose
-                      AppLogger.info('Email support tapped');
-                    },
+                    onTap: () => _openEmailSupport(context),
                   ),
                 ],
               ),
@@ -191,5 +192,65 @@ class SupportPage extends ConsumerWidget {
         ],
       ),
     );
+  }
+
+  Future<void> _openEmailSupport(BuildContext context) async {
+    try {
+      // Gather device and app info
+      final packageInfo = await PackageInfo.fromPlatform();
+      final userId = Supabase.instance.client.auth.currentUser?.id ?? 'Not signed in';
+
+      final appVersion = '${packageInfo.version}+${packageInfo.buildNumber}';
+      final platform = Platform.operatingSystem;
+      final osVersion = Platform.operatingSystemVersion;
+
+      final body = '''
+
+
+---
+Please describe your issue above this line
+---
+User ID: $userId
+App Version: $appVersion
+Platform: $platform
+OS Version: $osVersion
+''';
+
+      final uri = Uri(
+        scheme: 'mailto',
+        path: 'support@stockpot.app',
+        query: _encodeQueryParameters({
+          'subject': 'Stockpot Support Request',
+          'body': body,
+        }),
+      );
+
+      if (await canLaunchUrl(uri)) {
+        await launchUrl(uri);
+      } else {
+        if (context.mounted) {
+          _showAlert(
+            context,
+            title: 'Unable to Open Email',
+            message: 'Please email us at support@stockpot.app',
+          );
+        }
+      }
+    } catch (e) {
+      AppLogger.error('Failed to open email client', e);
+      if (context.mounted) {
+        _showAlert(
+          context,
+          title: 'Error',
+          message: 'Unable to open email client. Please email us at support@stockpot.app',
+        );
+      }
+    }
+  }
+
+  String? _encodeQueryParameters(Map<String, String> params) {
+    return params.entries
+        .map((e) => '${Uri.encodeComponent(e.key)}=${Uri.encodeComponent(e.value)}')
+        .join('&');
   }
 }

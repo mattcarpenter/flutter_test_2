@@ -134,12 +134,29 @@ class AppLogger {
       'GoRouter',
     };
 
+    // Logger prefixes - any logger starting with these goes to trace
+    const verboseLoggerPrefixes = [
+      'supabase.realtime', // Connection chatter
+    ];
+
+    // Specific message patterns to completely skip (too spammy even for console)
+    const skipMessagePatterns = [
+      'Access token expires in', // supabase.auth countdown every tick
+    ];
+
     // Listen to all log records and forward to our logger
     _loggingSubscription = logging.Logger.root.onRecord.listen((record) {
+      // Skip specific spammy messages entirely
+      if (skipMessagePatterns.any((p) => record.message.contains(p))) {
+        return;
+      }
+
       final message = '[${record.loggerName}] ${record.message}';
 
       // Downgrade verbose loggers to trace (console only, not written to file)
-      if (verboseLoggers.contains(record.loggerName)) {
+      final isVerbose = verboseLoggers.contains(record.loggerName) ||
+          verboseLoggerPrefixes.any((p) => record.loggerName.startsWith(p));
+      if (isVerbose) {
         trace(message);
         return;
       }
