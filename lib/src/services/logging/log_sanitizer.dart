@@ -66,6 +66,12 @@ class LogSanitizer {
       '[REDACTED_PHONE]',
     );
 
+    // URLs (http, https, wss, ws) - preserve scheme for debugging context
+    result = result.replaceAllMapped(
+      RegExp(r'(https?|wss?)://[^\s,\]}\)]+'),
+      (match) => '${match.group(1)}://[REDACTED_URL]',
+    );
+
     return result;
   }
 }

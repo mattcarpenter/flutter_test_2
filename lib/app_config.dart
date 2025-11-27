@@ -1,8 +1,9 @@
 import 'dart:io';
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:path/path.dart' as p;
+
+import 'src/services/logging/app_logger.dart';
 
 class AppConfig {
   // Production fallback values - used when .env file is not available (like in production builds)
@@ -14,25 +15,20 @@ class AppConfig {
   static const String _prodIngredientApiUrl = 'http://localhost:3000';
 
   static bool _isInitialized = false;
-  static bool _isTestMode = false;
 
   // Initialize by loading the appropriate .env file if in development
   static Future<void> initialize({bool isTest = false}) async {
-    debugPrint('Initializing appconfig...');
-    _isTestMode = isTest;
-
     try {
       if (isTest) {
         final envFilePath = p.join(Directory.current.path, '.env.test');
         await dotenv.load(fileName: envFilePath);
-      };
+      }
       _isInitialized = true;
     } catch (e) {
-      debugPrint("Error loading environment: $e");
+      AppLogger.error('Error loading environment', e);
       // Continue with hardcoded values
       _isInitialized = true; // Still mark as initialized to use fallbacks
     }
-    debugPrint('AppConfig initialized.');
   }
 
   // Getters that try env vars first, then fall back to hardcoded production values
@@ -64,7 +60,7 @@ class AppConfig {
   // Helper to ensure initialization
   static void _ensureInitialized() {
     if (!_isInitialized) {
-      debugPrint("Warning: AppConfig.initialize() was not called. Using production values.");
+      AppLogger.warning('AppConfig.initialize() was not called. Using production values.');
       _isInitialized = true;
     }
   }

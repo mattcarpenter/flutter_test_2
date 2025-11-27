@@ -18,6 +18,7 @@ import '../models/ingredient_pantry_match.dart';
 import '../models/recipe_pantry_match.dart';
 import '../models/recipe_with_folders.dart';
 import '../managers/ingredient_term_queue_manager.dart';
+import '../services/logging/app_logger.dart';
 
 class RecipeRepository {
   final AppDatabase _db;
@@ -64,10 +65,10 @@ class RecipeRepository {
                 ingredients,
               );
             } else {
-              debugPrint('Warning: Could not find recipe to queue ingredients');
+              AppLogger.warning('Could not find recipe to queue ingredients');
             }
           } catch (e) {
-            debugPrint('Error finding recipe to queue ingredients: $e');
+            AppLogger.error('Error finding recipe to queue ingredients', e);
           }
         }
       }
@@ -641,7 +642,7 @@ class RecipeRepository {
       // Step 2: Process results in Dart to handle recipe dependencies
       return await _processRecipeMatches(results);
     } catch (e) {
-      debugPrint('Error finding matching recipes: $e');
+      AppLogger.error('Error finding matching recipes', e);
       rethrow;
     }
   }
@@ -895,7 +896,7 @@ class RecipeRepository {
 
         if (ingredient == null) {
           // This shouldn't happen if the database is consistent
-          debugPrint('Warning: Ingredient ID $ingredientId not found in recipe $recipeId');
+          AppLogger.warning('Ingredient ID $ingredientId not found in recipe $recipeId');
           continue;
         }
 
@@ -949,7 +950,7 @@ class RecipeRepository {
         matches: matches,
       );
     } catch (e) {
-      debugPrint('Error finding pantry matches for recipe $recipeId: $e');
+      AppLogger.error('Error finding pantry matches for recipe $recipeId', e);
       rethrow;
     }
   }

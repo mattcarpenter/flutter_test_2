@@ -44,8 +44,6 @@ class _RecipeViewState extends ConsumerState<RecipeView> {
 
       // Track this recipe as recently viewed
       ref.read(recentlyViewedProvider.notifier).addRecentlyViewed(widget.recipeId);
-
-      print("Initialized recipe view for ${widget.recipeId}, refreshed providers");
     });
   }
 
@@ -60,8 +58,6 @@ class _RecipeViewState extends ConsumerState<RecipeView> {
 
         // Track the new recipe as recently viewed
         ref.read(recentlyViewedProvider.notifier).addRecentlyViewed(widget.recipeId);
-
-        print("Recipe ID changed, refreshed providers");
       });
     }
   }

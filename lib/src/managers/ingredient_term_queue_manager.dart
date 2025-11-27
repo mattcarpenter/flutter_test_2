@@ -1,7 +1,6 @@
 // lib/src/managers/ingredient_term_queue_manager.dart
 import 'dart:async';
 import 'dart:convert';
-import 'package:flutter/foundation.dart';
 import 'package:drift/drift.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
@@ -14,6 +13,7 @@ import '../providers/converter_provider.dart';
 import '../repositories/ingredient_term_queue_repository.dart';
 import '../repositories/recipe_repository.dart';
 import '../services/ingredient_canonicalization_service.dart';
+import '../services/logging/app_logger.dart';
 
 class IngredientTermQueueManager {
   final IngredientTermQueueRepository repository;
@@ -60,12 +60,12 @@ class IngredientTermQueueManager {
             Connectivity().onConnectivityChanged.listen((results) {
               // If we have connectivity, process the queue
               if (results.isNotEmpty && !results.contains(ConnectivityResult.none)) {
-                debugPrint('Connectivity regained, processing ingredient term queue.');
+                AppLogger.info('Connectivity regained, processing ingredient term queue.');
                 processQueue();
               }
             });
       } catch (e) {
-        debugPrint('Warning: Could not initialize connectivity listener: $e');
+        AppLogger.warning('Could not initialize connectivity listener: $e');
       }
     }
   }
@@ -78,8 +78,6 @@ class IngredientTermQueueManager {
   /// Process converters from the API response
   Future<void> _processConverters(Map<String, ConverterData> converters, String? householdId) async {
     if (converters.isEmpty) return;
-
-    debugPrint('Processing ${converters.length} converters from API response');
 
     // Get the current user ID from Supabase
     final userId = Supabase.instance.client.auth.currentSession?.user.id;
@@ -96,7 +94,6 @@ class IngredientTermQueueManager {
 
       // Only add if it doesn't exist
       if (!exists) {
-        debugPrint('Adding new converter for ${converter.term} (${converter.fromUnit} to ${converter.toBaseUnit})');
         await converterNotifier.addConverter(
           term: converter.term,
           fromUnit: converter.fromUnit,
@@ -107,8 +104,6 @@ class IngredientTermQueueManager {
           userId: userId,
           householdId: householdId,
         );
-      } else {
-        debugPrint('Converter already exists for ${converter.term} (${converter.fromUnit} to ${converter.toBaseUnit})');
       }
     }
   }
@@ -130,7 +125,6 @@ class IngredientTermQueueManager {
 
     // Skip if ingredient has no name or empty name
     if (ingredient.name.trim().isEmpty) {
-      debugPrint('Skipping ingredient with empty name in recipe $recipeId');
       return;
     }
 
@@ -200,18 +194,16 @@ class IngredientTermQueueManager {
         final List<ConnectivityResult> connectivityResults =
             await Connectivity().checkConnectivity();
         if (connectivityResults.contains(ConnectivityResult.none)) {
-          debugPrint('Offline: ingredient term queue processing deferred.');
           return;
         }
       } catch (e) {
-        debugPrint('Error checking connectivity. Assuming online: $e');
+        AppLogger.warning('Error checking connectivity. Assuming online: $e');
         // Continue processing in case of connectivity check errors
       }
     }
 
     if (_isProcessing) return;
     _isProcessing = true;
-    debugPrint('Processing ingredient term queue...');
 
     try {
       // Fetch all pending entries
@@ -257,7 +249,6 @@ class IngredientTermQueueManager {
         // Skip ingredients with missing or empty names
         final name = ingredientData['name'];
         if (name == null || name.toString().trim().isEmpty) {
-          debugPrint('Skipping ingredient with empty name in queue entry ${entry.id}');
           await repository.deleteEntry(entry.id);
           continue;
         }
@@ -309,7 +300,7 @@ class IngredientTermQueueManager {
 
           // Get the recipe to update
           if (_recipeRepository == null) {
-            debugPrint('Recipe repository not initialized, skipping recipe update');
+            AppLogger.warning('Recipe repository not initialized, skipping recipe update');
             continue;
           }
 
@@ -327,18 +318,10 @@ class IngredientTermQueueManager {
           final List<Ingredient> currentIngredients = recipe.ingredients ?? [];
           bool ingredientsChanged = false;
 
-          // DEBUG: Check ingredient IDs before processing
-          debugPrint('DEBUG: Current ingredients before processing:');
-          for (final ing in currentIngredients) {
-            debugPrint('  - ${ing.name} (ID: ${ing.id})');
-          }
-
           // Update each ingredient with its terms
           for (final entryData in recipeEntries) {
             final entry = entryData['entry'];
             final ingredientId = entryData['ingredientId'];
-
-            debugPrint('DEBUG: Processing entry for ingredient ID: $ingredientId');
 
             // Find the ingredient in the current list
             final ingredientIndex = currentIngredients
@@ -382,16 +365,13 @@ class IngredientTermQueueManager {
 
                 // Update the ingredient with merged terms, category, and mark as canonicalized
                 final originalIngredient = currentIngredients[ingredientIndex];
-                debugPrint('DEBUG: Original ingredient ID before copyWith: ${originalIngredient.id}');
-                
+
                 final updatedIngredient = originalIngredient.copyWith(
                   terms: mergedTerms,
                   isCanonicalised: true,
                   category: category,
                 );
-                
-                debugPrint('DEBUG: Updated ingredient ID after copyWith: ${updatedIngredient.id}');
-                
+
                 currentIngredients[ingredientIndex] = updatedIngredient;
                 ingredientsChanged = true;
 
@@ -445,12 +425,6 @@ class IngredientTermQueueManager {
 
           // Update the recipe with the modified ingredients
           if (ingredientsChanged && _recipeRepository != null) {
-            // DEBUG: Check ingredient IDs before saving
-            debugPrint('DEBUG: Final ingredients before updateRecipe:');
-            for (final ing in currentIngredients) {
-              debugPrint('  - ${ing.name} (ID: ${ing.id})');
-            }
-            
             final updatedRecipe = recipe.copyWith(
               ingredients: Value(currentIngredients),
               updatedAt: Value(DateTime.now().millisecondsSinceEpoch),
@@ -459,7 +433,7 @@ class IngredientTermQueueManager {
           }
 
         } catch (e) {
-          debugPrint('Error processing ingredients for recipe $recipeId: $e');
+          AppLogger.error('Error processing ingredients for recipe $recipeId', e);
 
           // Mark all entries for this recipe as pending with incremented retry count
           final recipeEntries = entryMap.values
@@ -501,7 +475,6 @@ class IngredientTermQueueManager {
         }
 
         if (minDelayMillis != null && minDelayMillis > 0) {
-          debugPrint('Scheduling next ingredient term processing in ${minDelayMillis}ms.');
           _scheduleProcessing(delay: Duration(milliseconds: minDelayMillis));
         }
       }

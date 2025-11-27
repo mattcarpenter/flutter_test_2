@@ -1,6 +1,5 @@
 import 'dart:async';
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../database/database.dart';
@@ -8,6 +7,7 @@ import '../../database/powersync.dart';
 import '../../database/models/user_subscriptions.dart';
 import '../models/subscription_state.dart';
 import '../services/subscription_service.dart';
+import '../services/logging/app_logger.dart';
 import 'auth_provider.dart';
 
 /// StateNotifier for managing subscription state and operations
@@ -29,7 +29,6 @@ class SubscriptionNotifier extends StateNotifier<SubscriptionState> {
   void _initializeSubscriptionState() {
     // Listen to auth state changes
     _ref.listen(authNotifierProvider, (previous, next) {
-      debugPrint('SubscriptionNotifier: Auth state changed');
       _updateSubscriptionState();
     });
 
@@ -43,7 +42,7 @@ class SubscriptionNotifier extends StateNotifier<SubscriptionState> {
       _subscriptionService.refreshSubscriptionStatus().then((_) {
         final hasPlus = _subscriptionService.hasPlusSync();
         final metadata = _subscriptionService.getSubscriptionMetadata();
-        
+
         // Build entitlements map from metadata
         final entitlements = <String, bool>{};
         if (metadata != null) {
@@ -56,20 +55,18 @@ class SubscriptionNotifier extends StateNotifier<SubscriptionState> {
         }
         // Always include plus entitlement
         entitlements['plus'] = hasPlus;
-        
+
         state = state.updateAccess(
           hasPlus: hasPlus,
           subscriptionMetadata: metadata,
           entitlements: entitlements,
         );
-        
-        debugPrint('SubscriptionNotifier: Updated state - hasPlus: $hasPlus, entitlements: $entitlements');
       }).catchError((e) {
-        debugPrint('SubscriptionNotifier: Error refreshing subscription: $e');
+        AppLogger.error('Error refreshing subscription state', e);
         state = state.setError(e.toString());
       });
     } catch (e) {
-      debugPrint('SubscriptionNotifier: Error updating state: $e');
+      AppLogger.error('Error updating subscription state', e);
       state = state.setError(e.toString());
     }
   }
@@ -78,15 +75,15 @@ class SubscriptionNotifier extends StateNotifier<SubscriptionState> {
   Future<void> initialize() async {
     try {
       state = state.copyWith(isLoading: true);
-      
+
       await _subscriptionService.initialize();
       await _subscriptionService.syncUserId();
-      
+
       _updateSubscriptionState();
-      
+
       state = state.copyWith(isLoading: false);
     } catch (e) {
-      debugPrint('SubscriptionNotifier: Initialization failed: $e');
+      AppLogger.error('Subscription initialization failed', e);
       state = state.copyWith(
         isLoading: false,
         error: e.toString(),
@@ -98,20 +95,20 @@ class SubscriptionNotifier extends StateNotifier<SubscriptionState> {
   Future<bool> presentPaywall() async {
     try {
       state = state.copyWith(isShowingPaywall: true);
-      
+
       final purchased = await _subscriptionService.presentPaywall();
-      
+
       if (purchased) {
         // Invalidate hybrid provider to refresh with new RevenueCat state
         _ref.invalidate(hasPlusHybridProvider);
-        
+
         // Also update local state (database may take time to sync)
         _updateSubscriptionState();
       }
-      
+
       return purchased;
     } catch (e) {
-      debugPrint('SubscriptionNotifier: Paywall error: $e');
+      AppLogger.error('Paywall error', e);
       state = state.copyWith(error: e.toString());
       return false;
     } finally {
@@ -138,17 +135,16 @@ class SubscriptionNotifier extends StateNotifier<SubscriptionState> {
   Future<void> restorePurchases() async {
     try {
       state = state.copyWith(isRestoring: true);
-      
+
       await _subscriptionService.restorePurchases();
-      
+
       // Invalidate hybrid provider to refresh with new RevenueCat state
       _ref.invalidate(hasPlusHybridProvider);
-      
+
       // Update local state (database may take time to sync)
       _updateSubscriptionState();
-      
     } catch (e) {
-      debugPrint('SubscriptionNotifier: Restore error: $e');
+      AppLogger.error('Restore purchases error', e);
       state = state.copyWith(error: e.toString());
     } finally {
       state = state.copyWith(isRestoring: false);
@@ -159,17 +155,16 @@ class SubscriptionNotifier extends StateNotifier<SubscriptionState> {
   Future<void> refresh() async {
     try {
       state = state.copyWith(isLoading: true);
-      
+
       await _subscriptionService.refreshSubscriptionStatus();
       await _subscriptionService.refreshRevenueCatState();
-      
+
       // Invalidate hybrid provider to refresh with latest state
       _ref.invalidate(hasPlusHybridProvider);
-      
+
       _updateSubscriptionState();
-      
     } catch (e) {
-      debugPrint('SubscriptionNotifier: Refresh error: $e');
+      AppLogger.error('Subscription refresh error', e);
       state = state.copyWith(error: e.toString());
     } finally {
       state = state.copyWith(isLoading: false);
@@ -178,7 +173,6 @@ class SubscriptionNotifier extends StateNotifier<SubscriptionState> {
 
   @override
   void dispose() {
-    debugPrint('SubscriptionNotifier: Disposing');
     _authSubscription.cancel();
     super.dispose();
   }
@@ -193,11 +187,9 @@ final subscriptionServiceProvider = Provider<SubscriptionService>((ref) {
 final allSubscriptionsStreamProvider = StreamProvider<List<UserSubscriptionEntry>>((ref) {
   final currentUser = ref.watch(currentUserProvider);
   if (currentUser == null) {
-    debugPrint('allSubscriptionsStreamProvider: No current user');
     return Stream.value([]);
   }
-  
-  debugPrint('allSubscriptionsStreamProvider: Watching all subscriptions for user ${currentUser.id}');
+
   // Get ALL subscriptions that PowerSync synced down
   // PowerSync sync rules ensure user only gets subscriptions they're entitled to
   return appDb.select(appDb.userSubscriptions).watch();
@@ -233,46 +225,28 @@ final subscriptionProvider = StateNotifierProvider<SubscriptionNotifier, Subscri
 // Reactive provider for checking Plus access - checks ALL subscriptions
 final hasPlusProvider = Provider<bool>((ref) {
   final subscriptionsAsync = ref.watch(allSubscriptionsStreamProvider);
-  
+
   return subscriptionsAsync.when(
     data: (subscriptions) {
       // Check if ANY subscription has plus entitlement and is active
-      final hasPlus = subscriptions.any((subscription) => 
-        subscription.entitlements.contains('plus') && 
-        subscription.status == SubscriptionStatus.active);
-      
-      debugPrint('hasPlusProvider: Found ${subscriptions.length} subscriptions, hasPlus=$hasPlus');
-      if (subscriptions.isNotEmpty) {
-        final firstSub = subscriptions.first;
-        debugPrint('hasPlusProvider: First subscription - status=${firstSub.status.name}, entitlements=${firstSub.entitlements}');
-      }
-      return hasPlus;
+      return subscriptions.any((subscription) =>
+          subscription.entitlements.contains('plus') &&
+          subscription.status == SubscriptionStatus.active);
     },
-    loading: () {
-      debugPrint('hasPlusProvider: Loading subscriptions...');
-      return false; // Default to no access while loading
-    },
-    error: (error, _) {
-      debugPrint('hasPlusProvider: Error loading subscriptions: $error');
-      return false; // Default to no access on error
-    },
+    loading: () => false, // Default to no access while loading
+    error: (error, _) => false, // Default to no access on error
   );
 });
 
 // Hybrid provider that combines database and RevenueCat for immediate access
 final hasPlusHybridProvider = FutureProvider<bool>((ref) async {
   final subscriptionService = ref.watch(subscriptionServiceProvider);
-  
-  debugPrint('hasPlusHybridProvider: Starting hybrid check');
-  
+
   // First ensure we have fresh database cache
   await subscriptionService.refreshSubscriptionStatus();
-  
+
   // Use hybrid check with RevenueCat fallback
-  final result = await subscriptionService.hasPlus(allowRevenueCatFallback: true);
-  
-  debugPrint('hasPlusHybridProvider: Result = $result');
-  return result;
+  return await subscriptionService.hasPlus(allowRevenueCatFallback: true);
 });
 
 // Convenience provider for loading states

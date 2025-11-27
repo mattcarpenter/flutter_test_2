@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:drift/drift.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -48,38 +47,25 @@ class HouseholdNotifier extends StateNotifier<HouseholdState> {
     _householdSubscription = _householdRepository
         .watchCurrentUserHousehold(_currentUserId)
         .listen((household) {
-      print('HOUSEHOLD DEBUG: Stream emitted household: ${household?.name} (id: ${household?.id})');
       state = state.copyWith(currentHousehold: household);
-      
+
       if (household != null) {
-        print('HOUSEHOLD DEBUG: Starting to watch household data for: ${household.id}');
         _startWatchingHouseholdData(household.id);
       } else {
-        print('HOUSEHOLD DEBUG: No household found, stopping watch');
         _stopWatchingHouseholdData();
       }
     });
 
     // Watch user's incoming invites by email
     if (_currentUserEmail != null) {
-      print('HOUSEHOLD DEBUG: Watching invites for email: $_currentUserEmail');
       _userInvitesSubscription = _inviteRepository
           .watchUserInvites(_currentUserEmail)
           .listen((invites) {
-        print('HOUSEHOLD DEBUG: Received ${invites.length} invites from repository:');
-        for (var invite in invites) {
-          print('  - ID: ${invite.id}');
-          print('  - Code: ${invite.inviteCode}');
-          print('  - Email: ${invite.email}');
-          print('  - Type: ${invite.inviteType}');
-          print('  - Status: ${invite.status}');
-        }
         state = state.copyWith(
           incomingInvites: invites.map((e) => HouseholdInvite.fromDrift(e)).toList(),
         );
       });
     } else {
-      print('HOUSEHOLD DEBUG: No email available, creating empty stream');
       // Create a dummy subscription if no email
       _userInvitesSubscription = Stream<List<HouseholdInviteEntry>>.empty().listen((_) {});
     }
@@ -142,7 +128,6 @@ class HouseholdNotifier extends StateNotifier<HouseholdState> {
       state = state.copyWith(members: enrichedMembers);
     } catch (e) {
       // Silently fail - emails are optional enhancement
-      debugPrint('Failed to fetch member emails: $e');
     }
   }
 
@@ -202,19 +187,16 @@ class HouseholdNotifier extends StateNotifier<HouseholdState> {
 
   Future<String?> createCodeInvite(String displayName) async {
     if (state.currentHousehold == null) return null;
-    
+
     state = state.copyWith(isCreatingInvite: true, error: null);
-    
+
     try {
-      print('HOUSEHOLD PROVIDER: Creating code invite for: $displayName');
       final response = await _service.createCodeInvite(
         state.currentHousehold!.id,
         displayName,
       );
-      print('HOUSEHOLD PROVIDER: Successfully created invite, URL: ${response.inviteUrl}');
       return response.inviteUrl; // Return the shareable URL
     } catch (e) {
-      print('HOUSEHOLD PROVIDER: Error creating invite: $e');
       state = state.copyWith(error: e.toString());
       rethrow; // Re-throw so UI can show error dialog
     } finally {
@@ -258,28 +240,21 @@ class HouseholdNotifier extends StateNotifier<HouseholdState> {
   }
 
   Future<void> acceptInvite(String inviteCode) async {
-    print('HOUSEHOLD PROVIDER: Accepting invite with code: $inviteCode');
-    
     // Find the invite and mark it as accepting
     final inviteIndex = state.incomingInvites.indexWhere(
       (invite) => invite.inviteCode == inviteCode,
     );
-    
+
     if (inviteIndex != -1) {
       final updatedInvites = [...state.incomingInvites];
       updatedInvites[inviteIndex] = updatedInvites[inviteIndex].copyWith(isAccepting: true);
       state = state.copyWith(incomingInvites: updatedInvites);
     }
-    
+
     try {
-      print('HOUSEHOLD PROVIDER: Calling service.acceptInvite...');
       await _service.acceptInvite(inviteCode);
-      print('HOUSEHOLD PROVIDER: Successfully accepted invite');
       // PowerSync will automatically sync household data to the user's device
-      // The invite will be removed from incomingInvites when PowerSync updates
-      
     } catch (e) {
-      print('HOUSEHOLD PROVIDER: Error accepting invite: $e');
       // Revert the accepting state on error
       if (inviteIndex != -1) {
         final revertedInvites = [...state.incomingInvites];

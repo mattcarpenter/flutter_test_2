@@ -265,7 +265,7 @@ Future<String> getDatabasePath({ bool isTest = false}) async {
 Future<void> openDatabase({bool isTest = false}) async {
 
   final databasePath = await getDatabasePath(isTest: isTest);
-  print('Opening database at $databasePath');
+  log.info('Opening database at $databasePath');
 
   if (isTest) {
     db = PowerSyncDatabase.withFactory(CustomOpenFactoryForTest(path: databasePath), schema: schema, logger: attachedLogger);

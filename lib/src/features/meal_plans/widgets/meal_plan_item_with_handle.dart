@@ -115,21 +115,9 @@ class MealPlanItemWithHandle extends ConsumerWidget {
                   color: CupertinoColors.tertiaryLabel.resolveFrom(context).withOpacity(0.3),
                 ),
               ),
-              onDragStarted: () {
-                print('=== DRAG STARTED ===');
-                print('Item: ${item.id}');
-                print('Source date: $dateString');
-              },
-              onDragEnd: (details) {
-                print('=== DRAG ENDED ===');
-                print('Offset: ${details.offset}');
-                print('Velocity: ${details.velocity}');
-              },
-              onDraggableCanceled: (velocity, offset) {
-                print('=== DRAG CANCELED ===');
-                print('Velocity: $velocity');
-                print('Offset: $offset');
-              },
+              onDragStarted: () {},
+              onDragEnd: (details) {},
+              onDraggableCanceled: (velocity, offset) {},
               child: Container(
                 padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                 color: Colors.transparent, // Important for hit testing

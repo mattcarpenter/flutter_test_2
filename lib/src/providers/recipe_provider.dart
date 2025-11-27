@@ -18,6 +18,7 @@ import '../models/ingredient_pantry_match.dart';
 import '../models/recipe_pantry_match.dart';
 import '../models/recipe_with_folders.dart';
 import '../repositories/recipe_repository.dart';
+import '../services/logging/app_logger.dart';
 
 class RecipeNotifier extends StateNotifier<AsyncValue<List<RecipeWithFolders>>> {
   final RecipeRepository _repository;
@@ -391,7 +392,7 @@ class RecipeNotifier extends StateNotifier<AsyncValue<List<RecipeWithFolders>>> 
           importedCount++;
         } catch(e) {
           // Handle any errors that occur during the import
-          print('Error importing recipe: $e');
+          AppLogger.error('Error importing recipe', e);
         }
       }
 
@@ -630,13 +631,10 @@ final recipeIngredientMatchesProvider = FutureProvider.family<RecipeIngredientMa
     ref.watch(recipeByIdStreamProvider(recipeId));
 
     try {
-      print("Fetching ingredient matches for $recipeId");
       final repository = ref.read(recipeRepositoryProvider);
       final matches = await repository.findPantryMatchesForRecipe(recipeId);
-      print("Found ${matches.matches.length} ingredient matches for recipe $recipeId");
       return matches;
     } catch (e) {
-      print("Error fetching ingredient matches for $recipeId: $e");
       // Re-throw to let the UI handle the error state
       rethrow;
     }

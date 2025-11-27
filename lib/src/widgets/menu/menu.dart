@@ -92,9 +92,6 @@ class Menu extends ConsumerWidget {
           backgroundColor: backgroundColor,
           trailing: PremiumBadge(feature: 'labs'),
           onTap: (_) async {
-            final debugInfo = ref.read(subscriptionDebugProvider);
-            debugPrint('Labs tapped - hasAccess: $hasPlus, debugInfo: $debugInfo');
-            
             if (hasPlus) {
               onRouteGo('/labs');
             } else {
@@ -107,7 +104,6 @@ class Menu extends ConsumerWidget {
                 // If user cancels paywall, stay where they were (no navigation)
               } catch (e) {
                 // Error presenting paywall, stay where they were
-                debugPrint('Error presenting paywall: $e');
               }
             }
           },

@@ -121,43 +121,23 @@ class HouseholdManagementService {
     String householdId,
     String displayName,
   ) async {
-    print('HOUSEHOLD API: Creating code invite for household: $householdId, displayName: $displayName');
-    print('HOUSEHOLD API: Calling $apiBaseUrl/v1/household/invites');
+    final response = await http.post(
+      Uri.parse('$apiBaseUrl/v1/household/invites'),
+      headers: {
+        'Authorization': 'Bearer ${getAuthToken()}',
+        'Content-Type': 'application/json',
+      },
+      body: json.encode({
+        'householdId': householdId,
+        'displayName': displayName,
+        'inviteType': 'code',
+      }),
+    );
 
-    final authToken = getAuthToken();
-    print('HOUSEHOLD API: Auth token: ${authToken.substring(0, 20)}...');
-
-    final requestBody = {
-      'householdId': householdId,
-      'displayName': displayName,
-      'inviteType': 'code',
-    };
-    print('HOUSEHOLD API: Request body: ${json.encode(requestBody)}');
-
-    try {
-      final response = await http.post(
-        Uri.parse('$apiBaseUrl/v1/household/invites'),
-        headers: {
-          'Authorization': 'Bearer $authToken',
-          'Content-Type': 'application/json',
-        },
-        body: json.encode(requestBody),
-      );
-
-      print('HOUSEHOLD API: Response status: ${response.statusCode}');
-      print('HOUSEHOLD API: Response body: ${response.body}');
-
-      if (response.statusCode == 201) {
-        final responseData = json.decode(response.body);
-        print('HOUSEHOLD API: Successfully created invite: ${responseData['invite']['id']}');
-        return CreateInviteResponse.fromJson(responseData);
-      } else {
-        print('HOUSEHOLD API: Error response: ${response.statusCode} - ${response.body}');
-        throw HouseholdApiException.fromResponse(response);
-      }
-    } catch (e) {
-      print('HOUSEHOLD API: Exception occurred: $e');
-      rethrow;
+    if (response.statusCode == 201) {
+      return CreateInviteResponse.fromJson(json.decode(response.body));
+    } else {
+      throw HouseholdApiException.fromResponse(response);
     }
   }
 
@@ -188,18 +168,12 @@ class HouseholdManagementService {
   }
 
   Future<AcceptInviteResponse> acceptInvite(String inviteCode) async {
-    print('HOUSEHOLD SERVICE: Accepting invite with code: $inviteCode');
-    print('HOUSEHOLD SERVICE: Calling $apiBaseUrl/v1/household/invites/$inviteCode/accept');
-    
     final response = await http.post(
       Uri.parse('$apiBaseUrl/v1/household/invites/$inviteCode/accept'),
       headers: {
         'Authorization': 'Bearer ${getAuthToken()}',
       },
     );
-
-    print('HOUSEHOLD SERVICE: Accept response status: ${response.statusCode}');
-    print('HOUSEHOLD SERVICE: Accept response body: ${response.body}');
 
     if (response.statusCode == 200) {
       return AcceptInviteResponse.fromJson(json.decode(response.body));

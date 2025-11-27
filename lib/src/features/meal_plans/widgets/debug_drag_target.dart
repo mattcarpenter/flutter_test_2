@@ -38,11 +38,9 @@ class _DebugDragTargetState extends State<DebugDragTarget> {
               ),
               onDragStarted: () {
                 setState(() => _status = 'Drag started');
-                print('Drag started');
               },
               onDragEnd: (details) {
                 setState(() => _status = 'Drag ended at ${details.offset}');
-                print('Drag ended: $details');
               },
               child: Container(
                 width: 100,
@@ -61,7 +59,6 @@ class _DebugDragTargetState extends State<DebugDragTarget> {
             padding: EdgeInsets.all(20),
             child: DragTarget<String>(
               onWillAcceptWithDetails: (details) {
-                print('Will accept: ${details.data}');
                 return true;
               },
               onAcceptWithDetails: (details) {

@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:wolt_modal_sheet/wolt_modal_sheet.dart';
 import '../../../providers/shopping_list_provider.dart';
+import '../../../services/logging/app_logger.dart';
 import '../../../theme/colors.dart';
 import '../../../theme/spacing.dart';
 import '../../../theme/typography.dart';
@@ -163,7 +164,7 @@ class _AddShoppingListItemFormState extends ConsumerState<AddShoppingListItemFor
       setState(() {
         _isLoading = false;
       });
-      debugPrint('Error adding shopping list item: $e');
+      AppLogger.error('Error adding shopping list item', e);
 
       if (mounted) {
         showCupertinoDialog(
@@ -192,7 +193,7 @@ class _AddShoppingListItemFormState extends ConsumerState<AddShoppingListItemFor
         _lastAddedItem = null;
       });
     } catch (e) {
-      debugPrint('Error deleting last item: $e');
+      AppLogger.error('Error deleting last item', e);
     }
   }
 

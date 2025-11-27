@@ -291,10 +291,6 @@ class _RecipeIngredientsViewState extends ConsumerState<RecipeIngredientsView> {
 
   /// Shows the bottom sheet with ingredient match details
   void _showMatchesBottomSheet(BuildContext context, WidgetRef ref, RecipeIngredientMatches matches) {
-    print("Opening ingredient matches bottom sheet for recipe ${matches.recipeId}");
-    print("Current matches: ${matches.matches.length}");
-    print("Matched ingredients: ${matches.matches.where((m) => m.hasMatch).length}");
-
     // Refresh the recipe ingredient match data before showing the sheet
     // This ensures we have the latest data including newly added ingredients
     ref.invalidate(recipeIngredientMatchesProvider(matches.recipeId));
@@ -303,15 +299,11 @@ class _RecipeIngredientsViewState extends ConsumerState<RecipeIngredientsView> {
     Future.microtask(() {
       // Wait for the provider to refresh its data before showing the sheet
       ref.read(recipeIngredientMatchesProvider(matches.recipeId).future).then((refreshedMatches) {
-        print("Refreshed matches: ${refreshedMatches.matches.length}");
-        print("Refreshed matched ingredients: ${refreshedMatches.matches.where((m) => m.hasMatch).length}");
-
         showIngredientMatchesBottomSheet(
           context,
           matches: refreshedMatches,
         );
       }).catchError((error) {
-        print("Error refreshing matches: $error");
         // If there's an error refreshing, still show the sheet with the original data
         showIngredientMatchesBottomSheet(
           context,

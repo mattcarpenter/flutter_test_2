@@ -1,7 +1,6 @@
 // lib/managers/upload_queue_manager.dart
 import 'dart:async';
 import 'dart:io';
-import 'package:flutter/foundation.dart';
 import 'package:drift/drift.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
@@ -12,6 +11,7 @@ import '../../database/database.dart';
 import '../../database/models/recipe_images.dart';
 import '../../database/powersync.dart';
 import '../repositories/upload_queue_repository.dart';
+import '../services/logging/app_logger.dart';
 
 class UploadQueueManager {
   final UploadQueueRepository repository;
@@ -38,7 +38,7 @@ class UploadQueueManager {
         Connectivity().onConnectivityChanged.listen((results) {
           // If the list does NOT contain ConnectivityResult.none, assume connectivity.
           if (results.isNotEmpty && !results.contains(ConnectivityResult.none)) {
-            debugPrint('Connectivity regained, processing upload queue.');
+            AppLogger.info('Connectivity regained, processing upload queue.');
             processQueue();
           }
         });
@@ -80,7 +80,6 @@ class UploadQueueManager {
 
     final existingEntry = await repository.getEntryByFileName(fileName);
     if (existingEntry != null) {
-      debugPrint('Entry for file $fileName already exists in the queue.');
       return 0;
     }
 
@@ -89,11 +88,11 @@ class UploadQueueManager {
       final fullPath = await repository.resolveFullPath(fileName);
       final file = File(fullPath);
       if (!await file.exists()) {
-        debugPrint('File $fileName does not exist locally, skipping upload queue.');
+        AppLogger.warning('File $fileName does not exist locally, skipping upload queue.');
         return 0;
       }
     } catch (e) {
-      debugPrint('Error checking file existence: $e');
+      AppLogger.warning('Error checking file existence: $e');
       return 0;
     }
 
@@ -124,19 +123,17 @@ class UploadQueueManager {
     final List<ConnectivityResult> connectivityResults =
     await Connectivity().checkConnectivity();
     if (connectivityResults.contains(ConnectivityResult.none)) {
-      debugPrint('Offline: upload queue processing deferred.');
+      AppLogger.info('Offline: upload queue processing deferred.');
       return;
     }
 
     // Check if the user is logged in.
     if (supabaseClient.auth.currentUser == null) {
-      debugPrint("User not logged in: skipping upload processing.");
       return;
     }
 
     if (_isProcessing) return;
     _isProcessing = true;
-    debugPrint('Processing upload queue...');
 
     try {
       // Fetch all pending entries.
@@ -189,8 +186,7 @@ class UploadQueueManager {
           final uploadedUrl = await uploadImageToSupabase(file);
           final uploadedUrlSmall = await uploadImageToSupabase(fileSmall);
 
-          debugPrint('Upload succeeded: $uploadedUrl');
-          debugPrint('Small uploaded: $uploadedUrlSmall');
+          AppLogger.info('Upload succeeded: $uploadedUrl');
 
           // Mark entry as uploaded.
           final uploadedEntry = entry.copyWith(
@@ -209,7 +205,7 @@ class UploadQueueManager {
         } catch (e) {
           // On error, increment retry count and revert status to pending.
           final newRetryCount = entry.retryCount + 1;
-          debugPrint('Upload failed for ${entry.fileName}: $e');
+          AppLogger.error('Upload failed for ${entry.fileName}', e);
           final failedEntry = entry.copyWith(
             retryCount: newRetryCount,
             lastTryTimestamp: Value(DateTime.now().millisecondsSinceEpoch),
@@ -241,7 +237,6 @@ class UploadQueueManager {
           }
         }
         if (minDelayMillis != null && minDelayMillis > 0) {
-          debugPrint('Scheduling next processing cycle in ${minDelayMillis}ms.');
           _scheduleProcessing(delay: Duration(milliseconds: minDelayMillis));
         }
       }

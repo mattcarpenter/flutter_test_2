@@ -9,6 +9,7 @@ import 'package:sign_in_with_apple/sign_in_with_apple.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../features/auth/models/auth_error.dart';
+import 'logging/app_logger.dart';
 
 class AuthApiException implements Exception {
   final String message;
@@ -62,13 +63,10 @@ class AuthApiException implements Exception {
 
 class AuthService {
   final SupabaseClient _supabase;
-  
+
   // Google Sign-In v7.x approach - use instance and initialize
   final GoogleSignIn _googleSignIn = GoogleSignIn.instance;
   bool _isInitialized = false;
-  
-  // Debug counter to track multiple calls
-  static int _signInCallCount = 0;
 
   AuthService() : _supabase = Supabase.instance.client;
 
@@ -81,7 +79,6 @@ class AuthService {
         serverClientId: '954511479486-tqc04eefqqk06usqkcic4sct2v9u8eko.apps.googleusercontent.com',
       );
       _isInitialized = true;
-      debugPrint('🔧 GoogleSignIn initialized with client IDs');
     }
   }
 
@@ -127,10 +124,10 @@ class AuthService {
 
       return response;
     } on AuthException catch (e) {
-      debugPrint('Auth sign up error: ${e.message}');
+      AppLogger.error('Sign up failed', e);
       throw AuthApiException.fromAuthException(e);
     } catch (e) {
-      debugPrint('Sign up error: $e');
+      AppLogger.error('Sign up failed', e);
       throw AuthApiException.fromException(Exception(e.toString()));
     }
   }
@@ -155,10 +152,10 @@ class AuthService {
 
       return response;
     } on AuthException catch (e) {
-      debugPrint('Auth sign in error: ${e.message}');
+      AppLogger.error('Sign in failed', e);
       throw AuthApiException.fromAuthException(e);
     } catch (e) {
-      debugPrint('Sign in error: $e');
+      AppLogger.error('Sign in failed', e);
       throw AuthApiException.fromException(Exception(e.toString()));
     }
   }
@@ -166,58 +163,37 @@ class AuthService {
   /// Sign in with Google using native authentication (v7.x compatible with Supabase)
   Future<AuthResponse> signInWithGoogle() async {
     try {
-      _signInCallCount++;
-      debugPrint('🔥 GOOGLE SIGN-IN CALLED #$_signInCallCount');
-      
       await _ensureInitialized();
-      
-      debugPrint('Google Sign-In: Starting v7.x compatible flow');
 
       // Try lightweight authentication first (no UI if already signed in)
-      debugPrint('🚀 Attempting lightweight authentication...');
       await _googleSignIn.attemptLightweightAuthentication();
-      
-      // Now authenticate (this should minimize consent screens)
-      debugPrint('🚀 About to call authenticate()...');
+
+      // Authenticate with Google
       final googleUser = await _googleSignIn.authenticate();
-      
-      debugPrint('✅ authenticate() completed, user: ${googleUser.displayName}');
 
-      debugPrint('Google Sign-In: User signed in, getting tokens');
-
-      // Get Google authentication tokens - but v7.x has different token access
+      // Get Google authentication tokens
       final googleAuth = googleUser.authentication;
       final idToken = googleAuth.idToken;
-      
-      debugPrint('   Has idToken: ${idToken != null}');
-      
-      // In v7.x, we need to get accessToken differently
+
+      // In v7.x, we need to get accessToken via authorization client
       String? accessToken;
       try {
-        // Try to use the authorization client for access token
         final authClient = googleUser.authorizationClient;
         final authorization = await authClient.authorizationForScopes(['openid', 'email', 'profile']);
-        
+
         if (authorization != null) {
           accessToken = authorization.accessToken;
-          debugPrint('   Got access token from existing authorization');
         } else {
-          // Need to authorize scopes
-          debugPrint('   No existing authorization, requesting scopes...');
           final newAuth = await authClient.authorizeScopes(['openid', 'email', 'profile']);
           accessToken = newAuth.accessToken;
-          debugPrint('   Got access token from new authorization');
         }
       } catch (e) {
-        debugPrint('   Error getting access token: $e');
+        AppLogger.error('Failed to get Google access token', e);
         throw AuthApiException(
-          message: 'Failed to get access token: $e',
+          message: 'Failed to get access token',
           type: AuthErrorType.unknown,
         );
       }
-      
-      debugPrint('   Has accessToken: ${accessToken != null}');
-      debugPrint('   Has idToken: ${idToken != null}');
 
       if (accessToken == null || accessToken.isEmpty) {
         throw AuthApiException(
@@ -232,45 +208,20 @@ class AuthService {
         );
       }
 
-      debugPrint('Google Sign-In: Got tokens, attempting Supabase authentication');
-      
-      // DEBUG: Let's decode the ID token to see what's actually in it
-      debugPrint('=== TOKEN DEBUG INFO ===');
-      debugPrint('Access Token (first 50 chars): ${accessToken.substring(0, 50)}...');
-      debugPrint('ID Token (first 50 chars): ${idToken.substring(0, 50)}...');
-      
-      // Decode the ID token payload to see the audience
-      try {
-        final parts = idToken.split('.');
-        if (parts.length == 3) {
-          // Decode the payload (middle part)
-          String payload = parts[1];
-          // Add padding if needed
-          while (payload.length % 4 != 0) {
-            payload += '=';
-          }
-          final decoded = utf8.decode(base64Url.decode(payload));
-          debugPrint('ID Token Payload: $decoded');
-        }
-      } catch (e) {
-        debugPrint('Failed to decode token: $e');
-      }
-      debugPrint('=== END TOKEN DEBUG ===');
-
-      // Exchange tokens with Supabase using exact documented approach
+      // Exchange tokens with Supabase
       return await _supabase.auth.signInWithIdToken(
         provider: OAuthProvider.google,
         idToken: idToken,
         accessToken: accessToken,
       );
     } on AuthException catch (e) {
-      debugPrint('Google sign in error: ${e.message}');
+      AppLogger.error('Google sign in failed', e);
       throw AuthApiException.fromAuthException(e);
     } catch (e) {
-      debugPrint('Google sign in error: $e');
       if (e is AuthApiException) {
         rethrow;
       }
+      AppLogger.error('Google sign in failed', e);
       throw AuthApiException.fromException(Exception(e.toString()));
     }
   }
@@ -279,8 +230,6 @@ class AuthService {
   /// Uses native Sign in with Apple with proper nonce for Supabase authentication
   Future<AuthResponse> signInWithApple() async {
     try {
-      debugPrint('Apple Sign-In: Starting native flow');
-
       // Check if Apple Sign-In is available
       if (!await SignInWithApple.isAvailable()) {
         throw AuthApiException(
@@ -293,8 +242,6 @@ class AuthService {
       final rawNonce = _supabase.auth.generateRawNonce();
       // Hash the nonce with SHA-256 for Apple
       final hashedNonce = sha256.convert(utf8.encode(rawNonce)).toString();
-
-      debugPrint('Apple Sign-In: Generated nonce, requesting credentials');
 
       // Start the Apple Sign-In flow with hashed nonce
       final credential = await SignInWithApple.getAppleIDCredential(
@@ -313,8 +260,6 @@ class AuthService {
         );
       }
 
-      debugPrint('Apple Sign-In: Got ID token, authenticating with Supabase');
-
       // Exchange tokens with Supabase using the RAW nonce (not hashed)
       final response = await _supabase.auth.signInWithIdToken(
         provider: OAuthProvider.apple,
@@ -329,8 +274,6 @@ class AuthService {
         );
       }
 
-      debugPrint('Apple Sign-In: Successfully authenticated with Supabase');
-
       // Apple only provides the user's name on the FIRST sign-in
       // Save it to user metadata if available
       if (credential.givenName != null || credential.familyName != null) {
@@ -338,24 +281,22 @@ class AuthService {
             .where((n) => n != null && n.isNotEmpty)
             .join(' ');
         if (fullName.isNotEmpty) {
-          debugPrint('Apple Sign-In: Saving user full name to metadata');
           try {
             await _supabase.auth.updateUser(
               UserAttributes(data: {'full_name': fullName}),
             );
           } catch (e) {
             // Don't fail the sign-in if metadata update fails
-            debugPrint('Apple Sign-In: Failed to save full name: $e');
+            AppLogger.warning('Failed to save Apple user full name', e);
           }
         }
       }
 
       return response;
     } on AuthException catch (e) {
-      debugPrint('Apple sign in auth error: ${e.message}');
+      AppLogger.error('Apple sign in failed', e);
       throw AuthApiException.fromAuthException(e);
     } catch (e) {
-      debugPrint('Apple sign in error: $e');
       if (e is AuthApiException) {
         rethrow;
       }
@@ -366,6 +307,7 @@ class AuthService {
           type: AuthErrorType.cancelled,
         );
       }
+      AppLogger.error('Apple sign in failed', e);
       throw AuthApiException.fromException(Exception(e.toString()));
     }
   }
@@ -378,24 +320,23 @@ class AuthService {
         redirectTo: _getPasswordResetUrl(),
       );
     } on AuthException catch (e) {
-      debugPrint('Password reset error: ${e.message}');
+      AppLogger.error('Password reset failed', e);
       throw AuthApiException.fromAuthException(e);
     } catch (e) {
-      debugPrint('Password reset error: $e');
+      AppLogger.error('Password reset failed', e);
       throw AuthApiException.fromException(Exception(e.toString()));
     }
   }
-
 
   /// Sign out
   Future<void> signOut() async {
     try {
       await _supabase.auth.signOut();
     } on AuthException catch (e) {
-      debugPrint('Sign out error: ${e.message}');
+      AppLogger.error('Sign out failed', e);
       throw AuthApiException.fromAuthException(e);
     } catch (e) {
-      debugPrint('Sign out error: $e');
+      AppLogger.error('Sign out failed', e);
       throw AuthApiException.fromException(Exception(e.toString()));
     }
   }
@@ -416,10 +357,10 @@ class AuthService {
 
       return response;
     } on AuthException catch (e) {
-      debugPrint('Update metadata error: ${e.message}');
+      AppLogger.error('Update user metadata failed', e);
       throw AuthApiException.fromAuthException(e);
     } catch (e) {
-      debugPrint('Update metadata error: $e');
+      AppLogger.error('Update user metadata failed', e);
       throw AuthApiException.fromException(Exception(e.toString()));
     }
   }

@@ -27,6 +27,7 @@ import 'package:recipe_app/src/widgets/adaptive_pull_down/adaptive_pull_down.dar
 import 'package:recipe_app/src/widgets/adaptive_pull_down/adaptive_menu_item.dart';
 import 'package:recipe_app/src/services/ingredient_parser_service.dart';
 import 'package:recipe_app/src/features/meal_plans/models/aggregated_ingredient.dart';
+import 'package:recipe_app/src/services/logging/app_logger.dart';
 import 'add_recipe_ingredients_to_shopping_list_modal.dart';
 
 /// Shows a bottom sheet displaying ingredient-pantry match details
@@ -1282,7 +1283,7 @@ class _AddCustomTermPageState extends ConsumerState<AddCustomTermPage> {
       // Navigate back to ingredient detail page
       widget.pageIndexNotifier.value = 1;
     } catch (e) {
-      debugPrint('Error adding term: $e');
+      AppLogger.error('Error adding term', e);
     } finally {
       setState(() {
         _isLoading = false;
@@ -1434,7 +1435,7 @@ class _SelectFromPantryPageState extends ConsumerState<SelectFromPantryPage> {
       // Navigate back to ingredient detail page
       widget.pageIndexNotifier.value = 1;
     } catch (e) {
-      debugPrint('Error adding pantry item term: $e');
+      AppLogger.error('Error adding pantry item term', e);
     }
   }
 

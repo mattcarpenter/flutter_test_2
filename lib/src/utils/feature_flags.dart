@@ -132,25 +132,18 @@ class FeatureGate extends ConsumerWidget {
       data: (hasPlus) {
         // Check feature access using hybrid provider result
         final hasAccess = FeatureFlags.hasFeatureSync(feature, SubscriptionState(hasPlus: hasPlus));
-        
-        // Debug logging to trace the issue
-        debugPrint('FeatureGate($feature): hasPlusHybridProvider=$hasPlus, hasAccess=$hasAccess');
-        
+
         if (hasAccess) {
-          debugPrint('FeatureGate($feature): Showing child (access granted)');
           return child;
         }
-        
+
         // User doesn't have access, show fallback or upgrade prompt
-        debugPrint('FeatureGate($feature): Showing upgrade prompt (access denied)');
         return fallback ?? _buildUpgradePrompt(context, ref);
       },
       loading: () {
-        debugPrint('FeatureGate($feature): Showing loading indicator');
         return const Center(child: CupertinoActivityIndicator());
       },
       error: (e, _) {
-        debugPrint('FeatureGate($feature): Showing error widget - $e');
         return _buildErrorWidget(context, ref, e.toString());
       },
     );

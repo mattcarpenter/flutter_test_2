@@ -3,6 +3,8 @@ import 'dart:io';
 import 'package:path_provider/path_provider.dart';
 import '../models/app_settings.dart';
 
+import '../../../services/logging/app_logger.dart';
+
 /// Service for persisting app settings to a JSON file
 class SettingsStorageService {
   static const String _fileName = 'app_settings.json';
@@ -36,7 +38,7 @@ class SettingsStorageService {
       return AppSettings.fromJson(json);
     } catch (e) {
       // If there's any error parsing, return defaults
-      print('Error loading settings: $e');
+      AppLogger.error('Error loading settings', e);
       return const AppSettings();
     }
   }
@@ -57,7 +59,7 @@ class SettingsStorageService {
       await tempFile.writeAsString(jsonString);
       await tempFile.rename(file.path);
     } catch (e) {
-      print('Error saving settings: $e');
+      AppLogger.error('Error saving settings', e);
       rethrow;
     }
   }
@@ -70,7 +72,7 @@ class SettingsStorageService {
         await file.delete();
       }
     } catch (e) {
-      print('Error deleting settings: $e');
+      AppLogger.error('Error deleting settings', e);
     }
   }
 }

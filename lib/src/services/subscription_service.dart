@@ -1,16 +1,15 @@
 import 'dart:async';
 
 import 'package:collection/collection.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:purchases_flutter/purchases_flutter.dart';
 import 'package:purchases_ui_flutter/purchases_ui_flutter.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-import 'package:drift/drift.dart';
 
 import '../../database/powersync.dart';
 import '../../database/database.dart';
 import '../../database/models/user_subscriptions.dart';
+import 'logging/app_logger.dart';
 
 /// Exception thrown when subscription operations fail
 class SubscriptionApiException implements Exception {
@@ -117,34 +116,30 @@ class SubscriptionService {
   /// Initialize RevenueCat SDK
   Future<void> initialize() async {
     if (_isInitialized) return;
-    
+
     // Prevent multiple initializations
     if (_initCompleter != null) {
       await _initCompleter!.future;
       return;
     }
-    
+
     _initCompleter = Completer<void>();
-    
+
     try {
-      debugPrint('SubscriptionService: Initializing RevenueCat with API key: $_apiKey');
-      
       // Configure RevenueCat
       final configuration = PurchasesConfiguration(_apiKey);
       await Purchases.configure(configuration);
-      
+
       // Set user ID if authenticated
       final currentUser = _supabase.auth.currentUser;
       if (currentUser != null) {
-        debugPrint('SubscriptionService: Setting user ID: ${currentUser.id}');
         await Purchases.logIn(currentUser.id);
       }
-      
+
       _isInitialized = true;
       _initCompleter!.complete();
-      debugPrint('SubscriptionService: Initialization complete');
     } catch (e) {
-      debugPrint('SubscriptionService: Initialization failed: $e');
+      AppLogger.error('RevenueCat initialization failed', e);
       _initCompleter!.completeError(e);
       _initCompleter = null;
       rethrow;
@@ -162,67 +157,42 @@ class SubscriptionService {
   Future<bool> hasPlus({bool allowRevenueCatFallback = true}) async {
     try {
       final user = _supabase.auth.currentUser;
-      debugPrint('SubscriptionService.hasPlus: Starting check for user: ${user?.id}');
-      
-      if (user == null) {
-        debugPrint('SubscriptionService.hasPlus: No current user, returning false');
-        return false;
-      }
-      
+      if (user == null) return false;
+
       // 1. First check PowerSync database (cached)
-      debugPrint('SubscriptionService.hasPlus: Checking cached subscriptions - lastUserId: $_lastUserId, currentUserId: ${user.id}, cachedCount: ${_cachedSubscriptions.length}');
-      
       if (_lastUserId == user.id && _cachedSubscriptions.isNotEmpty) {
-        final dbHasPlus = _cachedSubscriptions.any((subscription) => 
-          subscription.entitlements.contains(_entitlementId) && 
-          subscription.status == SubscriptionStatus.active);
-        debugPrint('SubscriptionService.hasPlus: Database check - found ${_cachedSubscriptions.length} subscriptions, hasPlus: $dbHasPlus');
-        if (dbHasPlus) {
-          debugPrint('SubscriptionService.hasPlus: Database check passed, returning true');
-          return true;
-        }
-      } else {
-        debugPrint('SubscriptionService.hasPlus: No valid cached subscriptions, need to refresh');
+        final dbHasPlus = _cachedSubscriptions.any((subscription) =>
+            subscription.entitlements.contains(_entitlementId) &&
+            subscription.status == SubscriptionStatus.active);
+        if (dbHasPlus) return true;
       }
-      
+
       // 2. If not in database and fallback allowed, check RevenueCat
       if (allowRevenueCatFallback && _isInitialized) {
         try {
-          debugPrint('SubscriptionService.hasPlus: Checking RevenueCat fallback');
-          
           // Ensure RevenueCat has correct user
           final currentRevenueCatUser = await Purchases.appUserID;
-          debugPrint('SubscriptionService.hasPlus: Current RevenueCat user: $currentRevenueCatUser, Expected: ${user.id}');
-          
           if (currentRevenueCatUser != user.id) {
-            debugPrint('SubscriptionService.hasPlus: Wrong user in RevenueCat, logging in correct user');
             await Purchases.logIn(user.id);
           }
-          
+
           // Get fresh customer info
           final customerInfo = await Purchases.getCustomerInfo();
-          
+
           // Cache it with user ID
           _cachedCustomerInfo = customerInfo;
           _customerInfoUserId = user.id;
           _customerInfoLastUpdated = DateTime.now();
-          
-          // Check entitlements
-          final hasActiveEntitlement = customerInfo.entitlements.active.containsKey(_entitlementId);
-          debugPrint('SubscriptionService.hasPlus: RevenueCat check - active entitlements: ${customerInfo.entitlements.active.keys.toList()}, hasPlus: $hasActiveEntitlement');
-          
-          return hasActiveEntitlement;
+
+          return customerInfo.entitlements.active.containsKey(_entitlementId);
         } catch (e) {
-          debugPrint('SubscriptionService.hasPlus: RevenueCat fallback failed: $e');
+          AppLogger.warning('RevenueCat fallback check failed', e);
         }
-      } else {
-        debugPrint('SubscriptionService.hasPlus: RevenueCat fallback not allowed or not initialized - allowFallback: $allowRevenueCatFallback, isInitialized: $_isInitialized');
       }
-      
-      debugPrint('SubscriptionService.hasPlus: All checks failed, returning false');
+
       return false;
     } catch (e) {
-      debugPrint('SubscriptionService.hasPlus: Error checking Plus access: $e');
+      AppLogger.error('Error checking Plus subscription', e);
       return false; // Fail closed
     }
   }
@@ -232,18 +202,17 @@ class SubscriptionService {
     try {
       final user = _supabase.auth.currentUser;
       if (user == null) return false;
-      
+
       // Check if ANY cached subscription has plus entitlement and is active
       if (_lastUserId == user.id && _cachedSubscriptions.isNotEmpty) {
-        return _cachedSubscriptions.any((subscription) => 
-          subscription.entitlements.contains(_entitlementId) && 
-          subscription.status == SubscriptionStatus.active);
+        return _cachedSubscriptions.any((subscription) =>
+            subscription.entitlements.contains(_entitlementId) &&
+            subscription.status == SubscriptionStatus.active);
       }
-      
+
       // No cached data available - refresh needed
       return false;
     } catch (e) {
-      debugPrint('SubscriptionService: Error checking Plus access: $e');
       return false; // Fail closed
     }
   }
@@ -286,7 +255,6 @@ class SubscriptionService {
       
       return null;
     } catch (e) {
-      debugPrint('SubscriptionService: Error getting subscription metadata: $e');
       return null;
     }
   }
@@ -295,33 +263,29 @@ class SubscriptionService {
   Future<bool> presentPaywall() async {
     try {
       await _ensureInitialized();
-      
-      debugPrint('SubscriptionService: Presenting paywall');
+
       final result = await RevenueCatUI.presentPaywall();
-      
-      debugPrint('SubscriptionService: Paywall result: ${result.name}');
       final purchased = result == PaywallResult.purchased;
-      
+
       if (purchased) {
         // Immediately refresh RevenueCat state for instant access
         await refreshRevenueCatState();
       }
-      
+
       return purchased;
     } on PlatformException catch (e) {
-      debugPrint('SubscriptionService: Error presenting paywall: $e');
-      
-      // Create a mock PurchasesError for consistent error handling
+      AppLogger.error('Error presenting paywall', e);
+
       final purchasesError = PurchasesError(
         PurchasesErrorCode.unknownError,
         e.message ?? 'Unknown error',
         '',
         e.details?.toString() ?? '',
       );
-      
+
       throw SubscriptionApiException.fromPurchasesError(purchasesError);
     } catch (e) {
-      debugPrint('SubscriptionService: Unexpected error presenting paywall: $e');
+      AppLogger.error('Error presenting paywall', e);
       throw SubscriptionApiException.fromException(Exception(e.toString()));
     }
   }
@@ -330,19 +294,12 @@ class SubscriptionService {
   Future<bool> presentPaywallIfNeeded() async {
     try {
       await _ensureInitialized();
-      
-      debugPrint('SubscriptionService: Checking if paywall needed');
+
       final hasActivePlus = await hasPlus();
-      
-      if (hasActivePlus) {
-        debugPrint('SubscriptionService: User already has Plus, skipping paywall');
-        return true;
-      }
-      
-      debugPrint('SubscriptionService: User needs Plus, presenting paywall');
+      if (hasActivePlus) return true;
+
       return await presentPaywall();
     } catch (e) {
-      debugPrint('SubscriptionService: Error in presentPaywallIfNeeded: $e');
       rethrow;
     }
   }
@@ -351,15 +308,11 @@ class SubscriptionService {
   Future<void> restorePurchases() async {
     try {
       await _ensureInitialized();
-      
-      debugPrint('SubscriptionService: Restoring purchases');
+
       final customerInfo = await Purchases.restorePurchases();
-      
       final hasActiveEntitlements = customerInfo.entitlements.active.isNotEmpty;
-      debugPrint('SubscriptionService: Restored purchases, active entitlements: $hasActiveEntitlements');
-      
+
       if (hasActiveEntitlements) {
-        // Immediately refresh RevenueCat state for instant access
         await refreshRevenueCatState();
       } else {
         throw SubscriptionApiException(
@@ -368,19 +321,19 @@ class SubscriptionService {
         );
       }
     } on PlatformException catch (e) {
-      debugPrint('SubscriptionService: Error restoring purchases: $e');
-      
-      // Create a mock PurchasesError for consistent error handling
+      AppLogger.error('Error restoring purchases', e);
+
       final purchasesError = PurchasesError(
         PurchasesErrorCode.unknownError,
         e.message ?? 'Unknown error',
         '',
         e.details?.toString() ?? '',
       );
-      
+
       throw SubscriptionApiException.fromPurchasesError(purchasesError);
     } catch (e) {
-      debugPrint('SubscriptionService: Unexpected error restoring purchases: $e');
+      if (e is SubscriptionApiException) rethrow;
+      AppLogger.error('Error restoring purchases', e);
       throw SubscriptionApiException.fromException(Exception(e.toString()));
     }
   }
@@ -389,31 +342,27 @@ class SubscriptionService {
   Future<void> syncUserId() async {
     try {
       await _ensureInitialized();
-      
+
       final currentUser = _supabase.auth.currentUser;
       if (currentUser == null) {
-        debugPrint('SubscriptionService: No authenticated user, logging out from RevenueCat');
         await Purchases.logOut();
         return;
       }
-      
-      debugPrint('SubscriptionService: Syncing user ID: ${currentUser.id}');
+
       await Purchases.logIn(currentUser.id);
-      debugPrint('SubscriptionService: User ID sync complete');
     } on PlatformException catch (e) {
-      debugPrint('SubscriptionService: Error syncing user ID: $e');
-      
-      // Create a mock PurchasesError for consistent error handling
+      AppLogger.error('Error syncing RevenueCat user ID', e);
+
       final purchasesError = PurchasesError(
         PurchasesErrorCode.unknownError,
         e.message ?? 'Unknown error',
         '',
         e.details?.toString() ?? '',
       );
-      
+
       throw SubscriptionApiException.fromPurchasesError(purchasesError);
     } catch (e) {
-      debugPrint('SubscriptionService: Unexpected error syncing user ID: $e');
+      AppLogger.error('Error syncing RevenueCat user ID', e);
       throw SubscriptionApiException.fromException(Exception(e.toString()));
     }
   }
@@ -423,21 +372,15 @@ class SubscriptionService {
     try {
       final user = _supabase.auth.currentUser;
       if (user == null) return;
-      
-      debugPrint('SubscriptionService: Refreshing all subscriptions from database');
-      
+
       // Get ALL subscriptions that PowerSync synced down
-      // PowerSync sync rules ensure user only gets subscriptions they're entitled to
       final subscriptions = await appDb.select(appDb.userSubscriptions).get();
-      
+
       // Update cache
       _cachedSubscriptions = subscriptions;
       _lastUserId = user.id;
-      
-      debugPrint('SubscriptionService: Cached ${subscriptions.length} subscriptions');
-      
     } catch (e) {
-      debugPrint('SubscriptionService: Error refreshing subscriptions: $e');
+      AppLogger.error('Error refreshing subscriptions from database', e);
       rethrow;
     }
   }
@@ -495,29 +438,24 @@ class SubscriptionService {
         _customerInfoLastUpdated = null;
         return;
       }
-      
+
       await _ensureInitialized();
-      
-      debugPrint('SubscriptionService: Refreshing RevenueCat state');
-      
+
       // Ensure correct user is logged in
       final currentRevenueCatUser = await Purchases.appUserID;
       if (currentRevenueCatUser != user.id) {
-        debugPrint('SubscriptionService: Logging in correct user to RevenueCat');
         await Purchases.logIn(user.id);
       }
-      
+
       // Get fresh customer info
       final customerInfo = await Purchases.getCustomerInfo();
-      
+
       // Update cache
       _cachedCustomerInfo = customerInfo;
       _customerInfoUserId = user.id;
       _customerInfoLastUpdated = DateTime.now();
-      
-      debugPrint('SubscriptionService: RevenueCat state refreshed - active entitlements: ${customerInfo.entitlements.active.keys.toList()}');
     } catch (e) {
-      debugPrint('SubscriptionService: Error refreshing RevenueCat state: $e');
+      AppLogger.warning('Error refreshing RevenueCat state', e);
     }
   }
 
@@ -530,16 +468,15 @@ class SubscriptionService {
         _lastUserId = null;
         return;
       }
-      
+
       // Skip if already cached for this user
       if (_lastUserId == user.id && _cachedSubscriptions.isNotEmpty) {
         return;
       }
-      
+
       await refreshSubscriptionStatus();
     } catch (e) {
-      debugPrint('SubscriptionService: Error initializing subscription cache: $e');
+      AppLogger.warning('Error initializing subscription cache', e);
     }
   }
-
 }

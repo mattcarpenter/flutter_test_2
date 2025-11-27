@@ -11,7 +11,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../../../database/models/recipe_images.dart';
 import 'package:recipe_app/src/managers/upload_queue_manager.dart';
 
-import '../../../../../widgets/local_or_network_image.dart'; // import your manager file
+import '../../../../../widgets/local_or_network_image.dart';
+import '../../../../../services/logging/app_logger.dart';
 
 /// Represents the state of an image in the picker, tracking whether it's fresh or persisted
 class ImageState {
@@ -320,7 +321,7 @@ class _ImagePickerSectionState extends ConsumerState<ImagePickerSection> {
           await imageState.cachedFile!.delete();
         }
       } catch (e) {
-        debugPrint('Error deleting cached file: $e');
+        AppLogger.warning('Error deleting cached file: $e');
       }
 
       // Also delete the full-size version
@@ -331,7 +332,7 @@ class _ImagePickerSectionState extends ConsumerState<ImagePickerSection> {
           await file.delete();
         }
       } catch (e) {
-        debugPrint('Error deleting full-size file: $e');
+        AppLogger.warning('Error deleting full-size file: $e');
       }
     } else {
       // For persisted images, use the original logic
@@ -347,7 +348,7 @@ class _ImagePickerSectionState extends ConsumerState<ImagePickerSection> {
     try {
       await uploadQueueManager.removeFromQueue(recipeImage.fileName);
     } catch (e) {
-      debugPrint('Error removing image from upload queue: $e');
+      AppLogger.warning('Error removing image from upload queue: $e');
     }
 
     // Remove from internal state with animation

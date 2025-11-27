@@ -262,9 +262,7 @@ extension RecipeFiltering on List<RecipeEntry> {
   /// Apply filters to a recipe list
   List<RecipeEntry> applyFilters(Map<FilterType, dynamic> filters) {
     if (filters.isEmpty) return this;
-    
-    print('Filtering ${length} recipes with filters: $filters');
-    
+
     return where((recipe) {
       // Check each filter type
       for (final filterEntry in filters.entries) {
@@ -317,7 +315,6 @@ extension RecipeFiltering on List<RecipeEntry> {
           case FilterType.pantryMatch:
             // This filter needs to be applied separately with pantry match data
             // We'll skip it in this function and handle it in RecipesFolderPage
-            print('Skipping pantry match filter in RecipeFiltering extension');
             continue;
             
           case FilterType.tags:

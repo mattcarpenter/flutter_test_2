@@ -8,6 +8,7 @@ import 'package:supabase_flutter/supabase_flutter.dart' as supabase_flutter;
 import 'package:uuid/uuid.dart';
 
 import '../../../../theme/spacing.dart';
+import '../../../../services/logging/app_logger.dart';
 
 import '../../../../../database/database.dart';
 import '../../../../../database/models/ingredients.dart';
@@ -197,7 +198,7 @@ class RecipeEditorFormState extends ConsumerState<RecipeEditorForm> {
 
       if (widget.onSave != null) widget.onSave!();
     } catch (e) {
-      debugPrint('Error saving recipe: $e');
+      AppLogger.error('Error saving recipe', e);
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Failed to save recipe: $e')),
       );

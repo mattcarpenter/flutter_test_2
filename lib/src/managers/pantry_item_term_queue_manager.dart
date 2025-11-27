@@ -1,7 +1,6 @@
 // lib/src/managers/pantry_item_term_queue_manager.dart
 import 'dart:async';
 import 'dart:convert';
-import 'package:flutter/foundation.dart';
 import 'package:drift/drift.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
@@ -11,6 +10,7 @@ import '../../database/powersync.dart';
 import '../repositories/pantry_item_term_queue_repository.dart';
 import '../repositories/pantry_repository.dart';
 import '../services/ingredient_canonicalization_service.dart';
+import '../services/logging/app_logger.dart';
 
 class PantryItemTermQueueManager {
   final PantryItemTermQueueRepository repository;
@@ -55,12 +55,12 @@ class PantryItemTermQueueManager {
             Connectivity().onConnectivityChanged.listen((results) {
               // If we have connectivity, process the queue
               if (results.isNotEmpty && !results.contains(ConnectivityResult.none)) {
-                debugPrint('Connectivity regained, processing pantry item term queue.');
+                AppLogger.info('Connectivity regained, processing pantry item term queue.');
                 processQueue();
               }
             });
       } catch (e) {
-        debugPrint('Warning: Could not initialize connectivity listener: $e');
+        AppLogger.warning('Could not initialize connectivity listener: $e');
       }
     }
   }
@@ -89,7 +89,6 @@ class PantryItemTermQueueManager {
 
     // Skip if pantry item has no name or empty name
     if (name.trim().isEmpty) {
-      debugPrint('Skipping pantry item with empty name: $pantryItemId');
       return;
     }
 
@@ -136,18 +135,17 @@ class PantryItemTermQueueManager {
         final List<ConnectivityResult> connectivityResults =
             await Connectivity().checkConnectivity();
         if (connectivityResults.contains(ConnectivityResult.none)) {
-          debugPrint('Offline: pantry item term queue processing deferred.');
+          AppLogger.info('Offline: pantry item term queue processing deferred.');
           return;
         }
       } catch (e) {
-        debugPrint('Error checking connectivity. Assuming online: $e');
+        AppLogger.warning('Error checking connectivity. Assuming online: $e');
         // Continue processing in case of connectivity check errors
       }
     }
 
     if (_isProcessing) return;
     _isProcessing = true;
-    debugPrint('Processing pantry item term queue...');
 
     try {
       // Fetch all pending entries
@@ -192,7 +190,6 @@ class PantryItemTermQueueManager {
         // Skip pantry items with missing or empty names
         final name = pantryItemData['name'];
         if (name == null || (name is String && name.trim().isEmpty)) {
-          debugPrint('Skipping pantry item with empty name in queue entry ${entry.id}');
           await repository.deleteEntry(entry.id);
           continue;
         }
@@ -265,7 +262,7 @@ class PantryItemTermQueueManager {
                 category: category,
               );
             } else {
-              debugPrint('Pantry repository not initialized, skipping pantry item update');
+              AppLogger.warning('Pantry repository not initialized, skipping pantry item update');
             }
 
             // Mark the entry as completed
@@ -315,7 +312,7 @@ class PantryItemTermQueueManager {
             await repository.updateEntry(completedEntry);
           }
         } catch (e) {
-          debugPrint('Error processing pantry item $pantryItemId: $e');
+          AppLogger.error('Error processing pantry item $pantryItemId', e);
 
           // Mark entry as pending with incremented retry count
           final failedEntry = entry.copyWith(
@@ -352,7 +349,6 @@ class PantryItemTermQueueManager {
         }
 
         if (minDelayMillis != null && minDelayMillis > 0) {
-          debugPrint('Scheduling next pantry item term processing in ${minDelayMillis}ms.');
           _scheduleProcessing(delay: Duration(milliseconds: minDelayMillis));
         }
       }

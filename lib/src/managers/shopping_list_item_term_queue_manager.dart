@@ -1,13 +1,10 @@
 import 'dart:async';
-import 'package:flutter/foundation.dart';
-import 'package:drift/drift.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
 import '../../database/database.dart';
-import '../../database/powersync.dart';
 import '../repositories/shopping_list_item_term_queue_repository.dart';
 import '../repositories/shopping_list_repository.dart';
 import '../services/ingredient_canonicalization_service.dart';
+import '../services/logging/app_logger.dart';
 
 class ShoppingListItemTermQueueManager {
   final ShoppingListItemTermQueueRepository repository;
@@ -49,12 +46,12 @@ class ShoppingListItemTermQueueManager {
             Connectivity().onConnectivityChanged.listen((results) {
               // If we have connectivity, process the queue
               if (results.isNotEmpty && !results.contains(ConnectivityResult.none)) {
-                debugPrint('Connectivity regained, processing shopping list item term queue.');
+                AppLogger.info('Connectivity regained, processing shopping list item term queue.');
                 processQueue();
               }
             });
       } catch (e) {
-        debugPrint('Warning: Could not initialize connectivity listener: $e');
+        AppLogger.error('Warning: Could not initialize connectivity listener', e);
       }
     }
   }
@@ -79,7 +76,6 @@ class ShoppingListItemTermQueueManager {
 
     // Skip if shopping list item has no name or empty name
     if (name.trim().isEmpty) {
-      debugPrint('Skipping shopping list item with empty name: $shoppingListItemId');
       return;
     }
 
@@ -127,13 +123,10 @@ class ShoppingListItemTermQueueManager {
     try {
       // Get all pending entries
       final pendingEntries = await repository.watchPendingEntries().first;
-      
+
       if (pendingEntries.isEmpty) {
-        debugPrint('No pending shopping list items to process');
         return;
       }
-
-      debugPrint('Processing ${pendingEntries.length} pending shopping list items');
 
       // Group entries by user for batch processing
       final entriesByUser = <String?, List<ShoppingListItemTermQueueEntry>>{};
@@ -150,13 +143,12 @@ class ShoppingListItemTermQueueManager {
       // Check for retryable entries
       final retryableEntries = await repository.getRetryableEntries(maxRetries);
       if (retryableEntries.isNotEmpty) {
-        debugPrint('Found ${retryableEntries.length} retryable entries');
         for (final entry in retryableEntries) {
           await _processEntry(entry, isRetry: true);
         }
       }
     } catch (e) {
-      debugPrint('Error processing shopping list item term queue: $e');
+      AppLogger.error('Error processing shopping list item term queue', e);
     } finally {
       _isProcessing = false;
     }
@@ -216,8 +208,6 @@ class ShoppingListItemTermQueueManager {
             shoppingListItemId: entry.shoppingListItemId,
             status: 'completed',
           );
-
-          debugPrint('Successfully canonicalized shopping list item: $originalName -> ${termStrings.join(', ')}');
         } else {
           // No terms returned, mark as failed
           await repository.updateEntry(
@@ -229,8 +219,8 @@ class ShoppingListItemTermQueueManager {
         }
       }
     } catch (e) {
-      debugPrint('Error processing batch: $e');
-      
+      AppLogger.error('Error processing batch', e);
+
       // Mark all entries in batch as failed
       for (final entry in batch) {
         await repository.updateEntry(
@@ -278,8 +268,6 @@ class ShoppingListItemTermQueueManager {
             shoppingListItemId: entry.shoppingListItemId,
             status: 'completed',
           );
-
-          debugPrint('Successfully canonicalized shopping list item: ${entry.name} -> ${termStrings.join(', ')}');
         } else {
           throw Exception('No terms returned from canonicalization');
         }
@@ -287,8 +275,8 @@ class ShoppingListItemTermQueueManager {
         throw Exception('Canonicalization returned null');
       }
     } catch (e) {
-      debugPrint('Error processing entry ${entry.shoppingListItemId}: $e');
-      
+      AppLogger.error('Error processing entry ${entry.shoppingListItemId}', e);
+
       final newRetryCount = entry.retryCount + 1;
       final shouldRetryLater = newRetryCount < maxRetries;
       

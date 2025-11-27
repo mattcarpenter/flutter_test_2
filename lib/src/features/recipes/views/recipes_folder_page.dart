@@ -53,12 +53,8 @@ class RecipesFolderPage extends ConsumerWidget {
     // Watch pantry recipe matches if needed for filtering
     final pantryMatchesAsyncValue = ref.watch(pantryRecipeMatchProvider);
 
-    // Listen to filter changes for debugging and to load necessary data
+    // Listen to filter changes to load necessary data
     ref.listen(recipeFolderFilterSortProvider, (previous, current) {
-      print('Filter state changed:');
-      print('Previous: ${previous?.activeFilters}');
-      print('Current: ${current.activeFilters}');
-
       // Initiate pantry match loading if needed
       FilterUtils.loadPantryMatchesIfNeeded(
         filterState: current,
@@ -162,15 +158,11 @@ class RecipesFolderPage extends ConsumerWidget {
 
             // Apply all other filters
             if (filterSortState.hasFilters) {
-              print('Applying filters to ${filteredRecipes.length} recipes: ${filterSortState.activeFilters}');
-
               filteredRecipes = FilterUtils.applyFilters(
                 recipes: filteredRecipes,
                 filterState: filterSortState,
                 pantryMatchesAsyncValue: pantryMatchesAsyncValue,
               );
-
-              print('After filtering: ${filteredRecipes.length} recipes remaining');
             }
 
             // Apply sorting

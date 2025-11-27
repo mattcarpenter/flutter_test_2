@@ -1,6 +1,5 @@
 import 'dart:async';
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
@@ -32,8 +31,6 @@ class AuthNotifier extends StateNotifier<models.AuthState> {
 
     // Listen to auth state changes
     _authSubscription = _authService.authStateChangesWithSession.listen((authState) {
-      debugPrint('Auth state changed: ${authState.event}');
-      
       switch (authState.event) {
         case AuthChangeEvent.signedIn:
           if (authState.session?.user != null) {

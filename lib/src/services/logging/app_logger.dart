@@ -1,7 +1,9 @@
+import 'dart:async';
 import 'dart:io';
 
 import 'package:flutter/foundation.dart';
 import 'package:logger/logger.dart';
+import 'package:logging/logging.dart' as logging;
 import 'package:path_provider/path_provider.dart';
 
 import 'rolling_file_output.dart';
@@ -26,6 +28,7 @@ class AppLogger {
   static Logger? _logger;
   static RollingFileOutput? _fileOutput;
   static File? _logFile;
+  static StreamSubscription<logging.LogRecord>? _loggingSubscription;
 
   /// Whether the logger has been initialized.
   static bool get isInitialized => _logger != null;
@@ -75,6 +78,7 @@ class AppLogger {
       );
 
       _setupErrorHandlers();
+      _bridgeDartLogging();
 
       info('Logger initialized');
     } catch (e, stack) {
@@ -112,6 +116,47 @@ class AppLogger {
       originalPlatformError?.call(err, stack);
       return true;
     };
+  }
+
+  /// Bridge Dart's `package:logging` to AppLogger.
+  /// This captures logs from packages like Supabase, PowerSync, GoRouter.
+  static void _bridgeDartLogging() {
+    // Enable all log levels from the logging package
+    logging.hierarchicalLoggingEnabled = true;
+    logging.Logger.root.level = logging.Level.ALL;
+
+    // Cancel any existing subscription
+    _loggingSubscription?.cancel();
+
+    // Verbose loggers that should only go to console (trace level), not file.
+    // These produce noisy output that's not useful in log files.
+    const verboseLoggers = {
+      'GoRouter',
+    };
+
+    // Listen to all log records and forward to our logger
+    _loggingSubscription = logging.Logger.root.onRecord.listen((record) {
+      final message = '[${record.loggerName}] ${record.message}';
+
+      // Downgrade verbose loggers to trace (console only, not written to file)
+      if (verboseLoggers.contains(record.loggerName)) {
+        trace(message);
+        return;
+      }
+
+      // Map logging levels to our logger levels
+      if (record.level >= logging.Level.SEVERE) {
+        error(message, record.error, record.stackTrace);
+      } else if (record.level >= logging.Level.WARNING) {
+        warning(message, record.error, record.stackTrace);
+      } else if (record.level >= logging.Level.INFO) {
+        info(message);
+      } else if (record.level >= logging.Level.CONFIG) {
+        debug(message);
+      } else {
+        trace(message);
+      }
+    });
   }
 
   // ============ Logging Methods ============
