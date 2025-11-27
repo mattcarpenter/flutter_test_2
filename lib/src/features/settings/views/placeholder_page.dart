@@ -95,16 +95,6 @@ class ExportRecipesPage extends PlaceholderSettingsPage {
         );
 }
 
-class SupportPage extends PlaceholderSettingsPage {
-  const SupportPage({super.key})
-      : super(
-          title: 'Support',
-          icon: CupertinoIcons.chat_bubble_2,
-          message: 'Coming Soon',
-          description: 'Contact our support team for assistance.',
-        );
-}
-
 class PrivacyPolicyPage extends PlaceholderSettingsPage {
   const PrivacyPolicyPage({super.key})
       : super(

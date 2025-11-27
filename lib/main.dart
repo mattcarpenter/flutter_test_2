@@ -18,6 +18,7 @@ import 'package:path_provider/path_provider.dart';
 import 'src/features/settings/services/settings_storage_service.dart';
 import 'src/features/settings/models/app_settings.dart';
 import 'src/features/settings/providers/app_settings_provider.dart';
+import 'src/services/logging/app_logger.dart';
 
 Future<void> _configureMacosWindowUtils() async {
   const config = MacosWindowUtilsConfig(
@@ -28,6 +29,9 @@ Future<void> _configureMacosWindowUtils() async {
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  // Initialize logging first so we can capture any errors during startup
+  await AppLogger.init();
 
   MecabWrapper().initialize();
 
@@ -44,7 +48,7 @@ void main() async {
   final settingsController = SettingsController(SettingsService());
 
   final directory = await getApplicationDocumentsDirectory();
-  print('SQLite DB Path: ${directory.path}');
+  AppLogger.debug('SQLite DB Path: ${directory.path}');
 
   // Load the user's preferred theme while the splash screen is displayed.
   // This prevents a sudden theme change when the app is first displayed.

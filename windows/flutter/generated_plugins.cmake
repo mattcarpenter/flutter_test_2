@@ -12,6 +12,7 @@ list(APPEND FLUTTER_PLUGIN_LIST
   mecab_dart
   powersync_flutter_libs
   screen_retriever_windows
+  share_plus
   sqlite3_flutter_libs
   super_native_extensions
   system_theme
