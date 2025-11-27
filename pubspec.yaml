@@ -136,3 +136,7 @@ flutter:
     - assets/ipadic.tar.xz
     - assets/recipes.json
     - assets/recipes-matt.json
+    # Help documentation
+    - assets/docs/quick-questions/
+    - assets/docs/learn-more/
+    - assets/docs/troubleshooting/

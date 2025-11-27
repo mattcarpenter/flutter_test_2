@@ -95,16 +95,6 @@ class ExportRecipesPage extends PlaceholderSettingsPage {
         );
 }
 
-class HelpPage extends PlaceholderSettingsPage {
-  const HelpPage({super.key})
-      : super(
-          title: 'Help',
-          icon: CupertinoIcons.question_circle,
-          message: 'Coming Soon',
-          description: 'Get help with using the app and find answers to common questions.',
-        );
-}
-
 class SupportPage extends PlaceholderSettingsPage {
   const SupportPage({super.key})
       : super(
