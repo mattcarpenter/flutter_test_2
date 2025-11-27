@@ -9,7 +9,7 @@ class PrivacyPolicyPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return const WebViewPage(
       title: 'Privacy Policy',
-      url: 'https://www.zehitomo.com/',
+      url: 'https://www.stockpot.app/privacy-policy',
     );
   }
 }
@@ -21,7 +21,7 @@ class TermsOfUsePage extends StatelessWidget {
   Widget build(BuildContext context) {
     return const WebViewPage(
       title: 'Terms of Use',
-      url: 'https://www.zehitomo.com',
+      url: 'https://www.stockpot.app/terms-of-use',
     );
   }
 }
