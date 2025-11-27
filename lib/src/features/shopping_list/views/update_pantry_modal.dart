@@ -12,6 +12,7 @@ import '../../../widgets/app_button.dart';
 import '../../../widgets/app_circle_button.dart';
 import '../../../widgets/wolt/text/modal_sheet_title.dart';
 import '../../../services/ingredient_parser_service.dart';
+import '../../../services/logging/app_logger.dart';
 import '../models/pantry_update_models.dart';
 import '../services/pantry_update_service.dart';
 import '../widgets/pantry_update_item_tile.dart';
@@ -419,7 +420,7 @@ class UpdatePantryButton extends ConsumerWidget {
         await shoppingListNotifier.deleteMultipleItems(processedItemIds);
       }
     } catch (e) {
-      debugPrint('Error updating pantry: $e');
+      AppLogger.error('Failed to update pantry from shopping list', e);
       // Errors are logged but not shown to user since modal is already closed
     }
   }

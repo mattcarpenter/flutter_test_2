@@ -1,11 +1,11 @@
 import 'dart:convert';
-import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:uuid/uuid.dart';
 import '../../app_config.dart';
 import '../../database/database.dart';
 import '../../database/models/ingredient_terms.dart';
+import 'logging/app_logger.dart';
 
 /// Class representing a converter returned from the API
 class ConverterData {
@@ -94,6 +94,7 @@ class IngredientCanonicalizer {
       );
 
       if (response.statusCode != 200) {
+        AppLogger.warning('Canonicalization API returned ${response.statusCode}');
         throw Exception('API request failed with status: ${response.statusCode}, body: ${response.body}');
       }
 
@@ -162,7 +163,7 @@ class IngredientCanonicalizer {
 
       return CanonicalizeResult(terms: terms, converters: converters, categories: categories);
     } catch (e) {
-      debugPrint('Error in canonicalizeIngredients: $e');
+      AppLogger.error('Canonicalization failed for ${ingredients.length} ingredients', e);
       rethrow;
     }
   }
@@ -179,7 +180,7 @@ class IngredientCanonicalizer {
 
       return await canonicalizeIngredients([ingredient]);
     } catch (e) {
-      debugPrint('Error in canonicalizeSingleIngredient: $e');
+      AppLogger.error('Single ingredient canonicalization failed: $name', e);
       return null;
     }
   }

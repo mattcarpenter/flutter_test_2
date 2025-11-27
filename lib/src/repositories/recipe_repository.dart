@@ -708,6 +708,7 @@ class RecipeRepository {
   ) async {
     // Prevent infinite recursion
     if (depth > 3 || visitedRecipes.contains(recipeId)) {
+      AppLogger.warning('Recipe match: Recursion limit hit for recipe $recipeId (depth=$depth, visited=${visitedRecipes.contains(recipeId)})');
       return _RecipeMatchResult(0, ingredientRows.length, false);
     }
 
@@ -739,6 +740,7 @@ class RecipeRepository {
   /// Check if a linked recipe can be made with current pantry
   Future<bool> _isLinkedRecipeMakeable(String recipeId, Set<String> visitedRecipes, int depth) async {
     if (depth > 3 || visitedRecipes.contains(recipeId)) {
+      AppLogger.warning('Linked recipe $recipeId: Depth exceeded ($depth) or circular reference');
       return false;
     }
 

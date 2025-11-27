@@ -171,6 +171,27 @@ class AppLogger {
     _log(Level.debug, message, error, stackTrace);
   }
 
+  /// Debounce tracking for repeated logs
+  static final Map<String, DateTime> _debounceTimestamps = {};
+
+  /// Log a debug message, but skip if same key was logged recently.
+  /// Use [key] to group related messages (e.g., recipe ID).
+  /// Default debounce is 2 seconds.
+  static void debugDebounced(
+    String message, {
+    String? key,
+    Duration debounce = const Duration(seconds: 2),
+  }) {
+    final logKey = key ?? message;
+    final now = DateTime.now();
+    final lastTime = _debounceTimestamps[logKey];
+
+    if (lastTime == null || now.difference(lastTime) > debounce) {
+      _debounceTimestamps[logKey] = now;
+      debug(message);
+    }
+  }
+
   /// Log an info message.
   static void info(String message, [dynamic error, StackTrace? stackTrace]) {
     _log(Level.info, message, error, stackTrace);

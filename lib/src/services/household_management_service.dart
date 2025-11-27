@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../database/database.dart';
 import '../../app_config.dart';
+import 'logging/app_logger.dart';
 
 // Data models for API communication
 class CreateInviteResponse {
@@ -168,17 +169,22 @@ class HouseholdManagementService {
   }
 
   Future<AcceptInviteResponse> acceptInvite(String inviteCode) async {
-    final response = await http.post(
-      Uri.parse('$apiBaseUrl/v1/household/invites/$inviteCode/accept'),
-      headers: {
-        'Authorization': 'Bearer ${getAuthToken()}',
-      },
-    );
+    try {
+      final response = await http.post(
+        Uri.parse('$apiBaseUrl/v1/household/invites/$inviteCode/accept'),
+        headers: {
+          'Authorization': 'Bearer ${getAuthToken()}',
+        },
+      );
 
-    if (response.statusCode == 200) {
-      return AcceptInviteResponse.fromJson(json.decode(response.body));
-    } else {
-      throw HouseholdApiException.fromResponse(response);
+      if (response.statusCode == 200) {
+        return AcceptInviteResponse.fromJson(json.decode(response.body));
+      } else {
+        throw HouseholdApiException.fromResponse(response);
+      }
+    } catch (e) {
+      AppLogger.warning('Accept invite failed', e);
+      rethrow;
     }
   }
 
@@ -212,22 +218,27 @@ class HouseholdManagementService {
     String householdId, {
     String? newOwnerId,
   }) async {
-    final response = await http.post(
-      Uri.parse('$apiBaseUrl/v1/household/leave'),
-      headers: {
-        'Authorization': 'Bearer ${getAuthToken()}',
-        'Content-Type': 'application/json',
-      },
-      body: json.encode({
-        'householdId': householdId,
-        if (newOwnerId != null) 'newOwnerId': newOwnerId,
-      }),
-    );
+    try {
+      final response = await http.post(
+        Uri.parse('$apiBaseUrl/v1/household/leave'),
+        headers: {
+          'Authorization': 'Bearer ${getAuthToken()}',
+          'Content-Type': 'application/json',
+        },
+        body: json.encode({
+          'householdId': householdId,
+          if (newOwnerId != null) 'newOwnerId': newOwnerId,
+        }),
+      );
 
-    if (response.statusCode == 200) {
-      return LeaveHouseholdResponse.fromJson(json.decode(response.body));
-    } else {
-      throw HouseholdApiException.fromResponse(response);
+      if (response.statusCode == 200) {
+        return LeaveHouseholdResponse.fromJson(json.decode(response.body));
+      } else {
+        throw HouseholdApiException.fromResponse(response);
+      }
+    } catch (e) {
+      AppLogger.warning('Leave household failed', e);
+      rethrow;
     }
   }
   

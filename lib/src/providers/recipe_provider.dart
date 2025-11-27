@@ -633,6 +633,17 @@ final recipeIngredientMatchesProvider = FutureProvider.family<RecipeIngredientMa
     try {
       final repository = ref.read(recipeRepositoryProvider);
       final matches = await repository.findPantryMatchesForRecipe(recipeId);
+
+      // Log match summary (debounced to avoid spam on reactive updates)
+      final matched = matches.matches.where((m) => m.hasMatch).toList();
+      final missing = matches.matches.where((m) => !m.hasMatch).toList();
+      final matchedStr = matched.map((m) => '${m.ingredient.name}→${m.pantryItem?.name ?? "recipe"}').join(', ');
+      final missingStr = missing.map((m) => m.ingredient.name).join(', ');
+      AppLogger.debugDebounced(
+        'Pantry match $recipeId: ${matched.length}/${matches.matches.length} | matched: [$matchedStr] | missing: [$missingStr]',
+        key: 'pantry_match_$recipeId',
+      );
+
       return matches;
     } catch (e) {
       // Re-throw to let the UI handle the error state

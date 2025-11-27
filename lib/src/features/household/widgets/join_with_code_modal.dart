@@ -9,6 +9,7 @@ import '../../../widgets/success_dialog.dart';
 import '../../../widgets/wolt/text/modal_sheet_title.dart';
 import '../../../widgets/wolt/button/wolt_elevated_button.dart';
 import '../utils/error_messages.dart';
+import '../../../services/logging/app_logger.dart';
 
 void showJoinWithCodeModal(BuildContext context, Function(String inviteCode) onAcceptInvite) {
   WoltModalSheet.show(
@@ -88,6 +89,7 @@ class _JoinWithCodeFormState extends ConsumerState<JoinWithCodeForm> {
         );
       }
     } catch (e) {
+      AppLogger.warning('Join household with code failed', e);
       if (mounted) {
         await ErrorDialog.show(
           context,

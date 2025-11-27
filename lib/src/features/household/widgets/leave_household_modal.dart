@@ -13,6 +13,7 @@ import '../../../widgets/utils/grouped_list_styling.dart';
 import '../../../widgets/error_dialog.dart';
 import '../../../widgets/success_dialog.dart';
 import '../utils/error_messages.dart';
+import '../../../services/logging/app_logger.dart';
 
 void showLeaveHouseholdModal(
   BuildContext context,
@@ -45,6 +46,7 @@ void showLeaveHouseholdModal(
                   );
                 }
               } catch (e) {
+                AppLogger.warning('Leave household failed (non-owner)', e);
                 if (context.mounted) {
                   await ErrorDialog.show(
                     context,
@@ -164,6 +166,7 @@ class _LeaveHouseholdFormState extends ConsumerState<LeaveHouseholdForm> {
         );
       }
     } catch (e) {
+      AppLogger.warning('Transfer ownership and leave household failed', e);
       if (mounted) {
         await ErrorDialog.show(
           context,

@@ -223,7 +223,7 @@ class SupabaseConnector extends PowerSyncBackendConnector {
         /// Note that these errors typically indicate a bug in the application.
         /// If protecting against data loss is important, save the failing records
         /// elsewhere instead of discarding, and/or notify the user.
-        log.severe('Data upload error - discarding $lastOp', e);
+        log.severe('Data upload DISCARDED - table: ${lastOp?.table}, op: ${lastOp?.op}, id: ${lastOp?.id}, code: ${e.code}, message: ${e.message}');
         await transaction.complete();
       } else {
         // Error may be retryable - e.g. network error or temporary server error.

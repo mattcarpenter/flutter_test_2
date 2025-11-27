@@ -5,6 +5,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:wolt_modal_sheet/wolt_modal_sheet.dart';
 import '../../../providers/shopping_list_provider.dart';
 import '../../../services/ingredient_parser_service.dart';
+import '../../../services/logging/app_logger.dart';
 import '../../../theme/colors.dart';
 import '../../../theme/spacing.dart';
 import '../../../theme/typography.dart';
@@ -257,6 +258,7 @@ class AddToShoppingListModalPage {
         Navigator.of(context).pop();
       }
     } catch (e) {
+      AppLogger.error('Failed to add meal plan ingredients to shopping list', e);
       // Handle error
       controller.setLoading(false);
     }

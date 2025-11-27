@@ -152,6 +152,7 @@ class UploadQueueManager {
 
         // If maximum retries exceeded, mark as failed and skip.
         if (entry.retryCount >= maxRetries) {
+          AppLogger.error('Upload max retries exceeded: ${entry.fileName} for recipe ${entry.recipeId}');
           final failedEntry = entry.copyWith(
             status: 'failed',
             lastTryTimestamp: Value(now),

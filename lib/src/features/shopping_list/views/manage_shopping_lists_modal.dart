@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:wolt_modal_sheet/wolt_modal_sheet.dart';
 import '../../../providers/shopping_list_provider.dart';
+import '../../../services/logging/app_logger.dart';
 import '../../../theme/colors.dart';
 import '../../../widgets/wolt/text/modal_sheet_title.dart';
 
@@ -257,7 +258,7 @@ class _AddShoppingListDialogState extends ConsumerState<AddShoppingListDialog> {
       setState(() {
         _isLoading = false;
       });
-      debugPrint('Error creating shopping list: $e');
+      AppLogger.error('Failed to create shopping list', e);
     }
   }
 
