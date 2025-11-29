@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:wolt_modal_sheet/wolt_modal_sheet.dart';
 import 'package:super_context_menu/super_context_menu.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:recipe_app/src/models/ingredient_pantry_match.dart';
 import 'package:recipe_app/database/models/ingredients.dart';
 import 'package:recipe_app/database/models/ingredient_terms.dart';
@@ -12,23 +13,103 @@ import 'package:recipe_app/database/models/pantry_items.dart';
 import 'package:recipe_app/database/database.dart';
 import 'package:recipe_app/src/providers/recipe_provider.dart' show recipeIngredientMatchesProvider, recipeByIdStreamProvider;
 import 'package:recipe_app/src/providers/pantry_provider.dart';
+import 'package:recipe_app/src/providers/shopping_list_provider.dart';
 import 'package:recipe_app/src/repositories/recipe_repository.dart' show recipeRepositoryProvider;
 import 'package:recipe_app/src/theme/colors.dart';
 import 'package:recipe_app/src/theme/spacing.dart';
 import 'package:recipe_app/src/theme/typography.dart';
 import 'package:recipe_app/src/widgets/app_button.dart';
 import 'package:recipe_app/src/widgets/app_circle_button.dart';
+import 'package:recipe_app/src/widgets/app_radio_button.dart';
 import 'package:recipe_app/src/widgets/app_text_field_simple.dart';
 import 'package:recipe_app/src/widgets/ingredient_stock_chip.dart';
 import 'package:recipe_app/src/widgets/stock_chip.dart';
 import 'package:recipe_app/src/widgets/utils/grouped_list_styling.dart';
-import 'package:recipe_app/src/widgets/wolt/text/modal_sheet_title.dart';
 import 'package:recipe_app/src/widgets/adaptive_pull_down/adaptive_pull_down.dart';
 import 'package:recipe_app/src/widgets/adaptive_pull_down/adaptive_menu_item.dart';
 import 'package:recipe_app/src/services/ingredient_parser_service.dart';
-import 'package:recipe_app/src/features/meal_plans/models/aggregated_ingredient.dart';
 import 'package:recipe_app/src/services/logging/app_logger.dart';
-import 'add_recipe_ingredients_to_shopping_list_modal.dart';
+import 'package:recipe_app/src/features/shopping_list/widgets/shopping_lists_content.dart';
+import 'package:recipe_app/src/features/shopping_list/widgets/create_list_content.dart';
+
+// Controller for Add to Shopping List page (no GlobalKey needed)
+final _addToShoppingListController = _AddToShoppingListController();
+
+/// Builds the Add to Shopping List page with controller and sticky action bar
+SliverWoltModalSheetPage _buildAddToShoppingListPage({
+  required BuildContext modalContext,
+  required RecipeIngredientMatches matches,
+  required ValueNotifier<int> pageIndexNotifier,
+}) {
+  return SliverWoltModalSheetPage(
+    navBarHeight: 55,
+    backgroundColor: AppColors.of(modalContext).background,
+    surfaceTintColor: Colors.transparent,
+    hasTopBarLayer: false,
+    hasSabGradient: true,
+    leadingNavBarWidget: Padding(
+      padding: EdgeInsets.only(left: AppSpacing.lg),
+      child: AppCircleButton(
+        icon: AppCircleButtonIcon.back,
+        variant: AppCircleButtonVariant.neutral,
+        size: 32,
+        onPressed: () {
+          pageIndexNotifier.value = 0;
+        },
+      ),
+    ),
+    trailingNavBarWidget: Padding(
+      padding: EdgeInsets.only(right: AppSpacing.lg),
+      child: AppCircleButton(
+        icon: AppCircleButtonIcon.close,
+        variant: AppCircleButtonVariant.neutral,
+        size: 32,
+        onPressed: () => Navigator.of(modalContext).pop(),
+      ),
+    ),
+    stickyActionBar: ListenableBuilder(
+      listenable: _addToShoppingListController,
+      builder: (context, _) {
+        final controller = _addToShoppingListController;
+        final checkedCount = controller.checkedCount;
+        final isLoading = controller.isLoading;
+        final isEnabled = controller.isButtonEnabled;
+
+        return Padding(
+          padding: EdgeInsets.all(AppSpacing.lg),
+          child: SafeArea(
+            top: false,
+            child: AppButtonVariants.primaryFilled(
+              text: isLoading
+                  ? 'Adding...'
+                  : checkedCount > 0
+                      ? 'Add $checkedCount Item${checkedCount == 1 ? '' : 's'}'
+                      : 'Add Items',
+              size: AppButtonSize.large,
+              shape: AppButtonShape.square,
+              fullWidth: true,
+              onPressed: isEnabled
+                  ? () {
+                      // Call the controller's addToShoppingList directly
+                      controller.addToShoppingList(Navigator.of(modalContext));
+                    }
+                  : null,
+            ),
+          ),
+        );
+      },
+    ),
+    mainContentSliversBuilder: (context) => [
+      SliverToBoxAdapter(
+        child: AddToShoppingListPage(
+          matches: matches,
+          pageIndexNotifier: pageIndexNotifier,
+          controller: _addToShoppingListController,
+        ),
+      ),
+    ],
+  );
+}
 
 /// Shows a bottom sheet displaying ingredient-pantry match details
 /// with ability to edit the ingredient terms for better matching
@@ -41,6 +122,9 @@ void showIngredientMatchesBottomSheet(
     debugPrint("Warning: No matches found for recipe ${matches.recipeId}");
   }
 
+  // Reset the controller state for fresh modal
+  _addToShoppingListController.reset();
+
   // Page navigation state
   final pageIndexNotifier = ValueNotifier<int>(0);
 
@@ -50,13 +134,14 @@ void showIngredientMatchesBottomSheet(
     pageIndexNotifier: pageIndexNotifier,
     pageListBuilder: (modalContext) {
       return [
-        // Page 1: Ingredient list
-        WoltModalSheetPage(
+        // Page 0: Ingredient list with navigational button
+        SliverWoltModalSheetPage(
+          navBarHeight: 55,
           backgroundColor: AppColors.of(modalContext).background,
           surfaceTintColor: Colors.transparent,
-          pageTitle: ModalSheetTitle('Recipe Ingredients'),
-          leadingNavBarWidget: Padding(
-            padding: EdgeInsets.only(left: AppSpacing.lg),
+          hasTopBarLayer: false,
+          trailingNavBarWidget: Padding(
+            padding: EdgeInsets.only(right: AppSpacing.lg),
             child: AppCircleButton(
               icon: AppCircleButtonIcon.close,
               variant: AppCircleButtonVariant.neutral,
@@ -66,91 +151,38 @@ void showIngredientMatchesBottomSheet(
               },
             ),
           ),
-          trailingNavBarWidget: Consumer(
-            builder: (context, ref, child) {
-              return Padding(
-                padding: EdgeInsets.only(right: AppSpacing.lg),
-                child: AdaptivePullDownButton(
-                  items: [
-                    AdaptiveMenuItem(
-                      title: 'Add to Shopping List',
-                      icon: const Icon(CupertinoIcons.cart),
-                      onTap: () {
-                        // Get recipe name
-                        final recipeAsync = ref.read(recipeByIdStreamProvider(matches.recipeId));
-                        final recipeName = recipeAsync.valueOrNull?.title ?? 'Recipe';
-
-                        // Convert matches to aggregated ingredients
-                        final parser = IngredientParserService();
-                        final parseResult = parser.parse(recipeName);
-                        final cleanRecipeName = parseResult.cleanName.isNotEmpty
-                            ? parseResult.cleanName
-                            : recipeName;
-
-                        final aggregatedIngredients = matches.matches.map((match) {
-                          final shouldCheck = AggregatedIngredient.shouldBeCheckedByDefault(
-                            pantryItem: match.pantryItem,
-                            existsInShoppingList: false,
-                          );
-
-                          return AggregatedIngredient(
-                            id: match.ingredient.id,
-                            name: match.ingredient.name,
-                            terms: match.ingredient.terms?.map((t) => t.value).toList() ?? [],
-                            sourceRecipeIds: [matches.recipeId],
-                            sourceRecipeTitles: [cleanRecipeName],
-                            matchingPantryItem: match.pantryItem,
-                            existsInShoppingList: false,
-                            isChecked: shouldCheck,
-                          );
-                        }).toList();
-
-                        // Show modal
-                        showAddRecipeIngredientsToShoppingListModal(context, aggregatedIngredients);
-                      },
+          mainContentSliversBuilder: (context) => [
+            SliverToBoxAdapter(
+              child: Padding(
+                padding: EdgeInsets.fromLTRB(AppSpacing.lg, AppSpacing.lg, AppSpacing.lg, AppSpacing.lg),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      'Recipe Ingredients',
+                      style: AppTypography.h4.copyWith(
+                        color: AppColors.of(modalContext).textPrimary,
+                      ),
+                    ),
+                    SizedBox(height: AppSpacing.lg),
+                    IngredientMatchesListPage(
+                      matches: matches,
+                      pageIndexNotifier: pageIndexNotifier,
                     ),
                   ],
-                  child: const AppCircleButton(
-                    icon: AppCircleButtonIcon.ellipsis,
-                    variant: AppCircleButtonVariant.neutral,
-                    size: 32,
-                  ),
                 ),
-              );
-            },
-          ),
-          child: Padding(
-            padding: EdgeInsets.fromLTRB(AppSpacing.lg, AppSpacing.lg, AppSpacing.lg, AppSpacing.lg),
-            child: IngredientMatchesListPage(
-              matches: matches,
-              pageIndexNotifier: pageIndexNotifier,
+              ),
             ),
-          ),
+          ],
         ),
-        // Page 2: Individual ingredient detail
-        WoltModalSheetPage(
-          backgroundColor: AppColors.of(modalContext).background,
-          surfaceTintColor: Colors.transparent,
-          leadingNavBarWidget: Padding(
-            padding: EdgeInsets.only(left: AppSpacing.lg),
-            child: AppCircleButton(
-              icon: AppCircleButtonIcon.back,
-              variant: AppCircleButtonVariant.neutral,
-              size: 32,
-              onPressed: () {
-                pageIndexNotifier.value = 0;
-              },
-            ),
-          ),
-          child: Padding(
-            padding: EdgeInsets.fromLTRB(AppSpacing.lg, AppSpacing.lg, AppSpacing.lg, AppSpacing.lg),
-            child: IngredientDetailPage(
-              matches: matches,
-              pageIndexNotifier: pageIndexNotifier,
-            ),
-          ),
+        // Page 1: Add to Shopping List
+        _buildAddToShoppingListPage(
+          modalContext: modalContext,
+          matches: matches,
+          pageIndexNotifier: pageIndexNotifier,
         ),
-        // Page 3: Add custom term
+        // Page 2: Manage Lists
         WoltModalSheetPage(
           navBarHeight: 55,
           backgroundColor: AppColors.of(modalContext).background,
@@ -176,12 +208,134 @@ void showIngredientMatchesBottomSheet(
               onPressed: () => Navigator.of(modalContext).pop(),
             ),
           ),
+          child: Padding(
+            padding: EdgeInsets.fromLTRB(AppSpacing.lg, AppSpacing.lg, AppSpacing.lg, AppSpacing.lg),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  'Manage Lists',
+                  style: AppTypography.h4.copyWith(
+                    color: AppColors.of(modalContext).textPrimary,
+                  ),
+                ),
+                SizedBox(height: AppSpacing.lg),
+                ShoppingListsContent(
+                  showSelection: false,
+                  showCreateButton: true,
+                  allowDelete: true,
+                  onCreateList: () {
+                    pageIndexNotifier.value = 3;
+                  },
+                ),
+              ],
+            ),
+          ),
+        ),
+        // Page 3: Create New List
+        WoltModalSheetPage(
+          navBarHeight: 55,
+          backgroundColor: AppColors.of(modalContext).background,
+          surfaceTintColor: Colors.transparent,
+          hasTopBarLayer: false,
+          leadingNavBarWidget: Padding(
+            padding: EdgeInsets.only(left: AppSpacing.lg),
+            child: AppCircleButton(
+              icon: AppCircleButtonIcon.back,
+              variant: AppCircleButtonVariant.neutral,
+              size: 32,
+              onPressed: () {
+                pageIndexNotifier.value = 2;
+              },
+            ),
+          ),
+          trailingNavBarWidget: Padding(
+            padding: EdgeInsets.only(right: AppSpacing.lg),
+            child: AppCircleButton(
+              icon: AppCircleButtonIcon.close,
+              variant: AppCircleButtonVariant.neutral,
+              size: 32,
+              onPressed: () => Navigator.of(modalContext).pop(),
+            ),
+          ),
+          child: Padding(
+            padding: EdgeInsets.fromLTRB(AppSpacing.lg, AppSpacing.lg, AppSpacing.lg, AppSpacing.lg),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  'Create New List',
+                  style: AppTypography.h4.copyWith(
+                    color: AppColors.of(modalContext).textPrimary,
+                  ),
+                ),
+                SizedBox(height: AppSpacing.lg),
+                CreateListContent(
+                  onCreated: () {
+                    pageIndexNotifier.value = 2;
+                  },
+                ),
+              ],
+            ),
+          ),
+        ),
+        // Page 4: Individual ingredient detail (was Page 1)
+        WoltModalSheetPage(
+          backgroundColor: AppColors.of(modalContext).background,
+          surfaceTintColor: Colors.transparent,
+          leadingNavBarWidget: Padding(
+            padding: EdgeInsets.only(left: AppSpacing.lg),
+            child: AppCircleButton(
+              icon: AppCircleButtonIcon.back,
+              variant: AppCircleButtonVariant.neutral,
+              size: 32,
+              onPressed: () {
+                pageIndexNotifier.value = 0;
+              },
+            ),
+          ),
+          child: Padding(
+            padding: EdgeInsets.fromLTRB(AppSpacing.lg, AppSpacing.lg, AppSpacing.lg, AppSpacing.lg),
+            child: IngredientDetailPage(
+              matches: matches,
+              pageIndexNotifier: pageIndexNotifier,
+            ),
+          ),
+        ),
+        // Page 5: Add custom term (was Page 2)
+        WoltModalSheetPage(
+          navBarHeight: 55,
+          backgroundColor: AppColors.of(modalContext).background,
+          surfaceTintColor: Colors.transparent,
+          hasTopBarLayer: false,
+          leadingNavBarWidget: Padding(
+            padding: EdgeInsets.only(left: AppSpacing.lg),
+            child: AppCircleButton(
+              icon: AppCircleButtonIcon.back,
+              variant: AppCircleButtonVariant.neutral,
+              size: 32,
+              onPressed: () {
+                pageIndexNotifier.value = 4;
+              },
+            ),
+          ),
+          trailingNavBarWidget: Padding(
+            padding: EdgeInsets.only(right: AppSpacing.lg),
+            child: AppCircleButton(
+              icon: AppCircleButtonIcon.close,
+              variant: AppCircleButtonVariant.neutral,
+              size: 32,
+              onPressed: () => Navigator.of(modalContext).pop(),
+            ),
+          ),
           child: AddCustomTermPage(
             matches: matches,
             pageIndexNotifier: pageIndexNotifier,
           ),
         ),
-        // Page 4: Select from pantry
+        // Page 6: Select from pantry (was Page 3)
         SliverWoltModalSheetPage(
           navBarHeight: 55,
           backgroundColor: AppColors.of(modalContext).background,
@@ -194,7 +348,7 @@ void showIngredientMatchesBottomSheet(
               variant: AppCircleButtonVariant.neutral,
               size: 32,
               onPressed: () {
-                pageIndexNotifier.value = 1;
+                pageIndexNotifier.value = 4;
               },
             ),
           ),
@@ -222,7 +376,7 @@ void showIngredientMatchesBottomSheet(
 }
 
 // ============================================================================
-// Page 1: Ingredient List
+// Page 0: Ingredient List
 // ============================================================================
 
 class IngredientMatchesListPage extends ConsumerWidget {
@@ -287,38 +441,61 @@ class IngredientMatchesListPage extends ConsumerWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           mainAxisSize: MainAxisSize.min,
           children: [
-            // Status message
-            if (statusLines.isNotEmpty)
-              Padding(
-                padding: EdgeInsets.only(bottom: AppSpacing.lg),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: statusLines.map((line) => Padding(
-                    padding: EdgeInsets.only(bottom: 4),
-                    child: Row(
+            // Status message and Add to Shopping List button on same row
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Status lines
+                if (statusLines.isNotEmpty)
+                  Expanded(
+                    child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        // Only show bullet point if there are multiple lines
-                        if (statusLines.length > 1)
-                          Text(
-                            '• ',
-                            style: AppTypography.body.copyWith(
-                              color: AppColors.of(context).textSecondary,
+                      children: statusLines.map((line) => Padding(
+                        padding: const EdgeInsets.only(bottom: 4),
+                        child: Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            // Only show bullet point if there are multiple lines
+                            if (statusLines.length > 1)
+                              Text(
+                                '• ',
+                                style: AppTypography.body.copyWith(
+                                  color: AppColors.of(context).textSecondary,
+                                ),
+                              ),
+                            Expanded(
+                              child: _buildLineWithBoldNumbers(context, line),
                             ),
-                          ),
-                        Expanded(
-                          child: _buildLineWithBoldNumbers(context, line),
+                          ],
                         ),
-                      ],
+                      )).toList(),
                     ),
-                  )).toList(),
+                  )
+                else
+                  const Spacer(),
+
+                // Add to Shopping List button
+                AppButton(
+                  text: 'Add to Shopping List',
+                  onPressed: () {
+                    pageIndexNotifier.value = 1;
+                  },
+                  theme: AppButtonTheme.secondary,
+                  style: AppButtonStyle.outline,
+                  shape: AppButtonShape.square,
+                  size: AppButtonSize.small,
+                  trailingIcon: const Icon(Icons.chevron_right, size: 18),
+                  compactTrailingIcon: true,
                 ),
-              ),
+              ],
+            ),
+            SizedBox(height: AppSpacing.md),
 
             // Ingredient list
             ListView.builder(
               shrinkWrap: true,
               physics: const NeverScrollableScrollPhysics(),
+              padding: EdgeInsets.zero,
               itemCount: sortedMatches.length,
               itemBuilder: (context, index) {
                 final match = sortedMatches[index];
@@ -377,9 +554,9 @@ class IngredientMatchesListPage extends ConsumerWidget {
       ),
       child: InkWell(
         onTap: () {
-          // Store selected ingredient ID for page 2
+          // Store selected ingredient ID for ingredient detail page
           IngredientDetailPage.selectedIngredientId = match.ingredient.id;
-          pageIndexNotifier.value = 1;
+          pageIndexNotifier.value = 4;
         },
         child: Padding(
           padding: const EdgeInsets.all(12),
@@ -522,7 +699,602 @@ class IngredientMatchesListPage extends ConsumerWidget {
 }
 
 // ============================================================================
-// Page 2: Ingredient Detail
+// Page 1: Add to Shopping List
+// ============================================================================
+
+/// Controller for managing Add to Shopping List page state
+class _AddToShoppingListController extends ChangeNotifier {
+  // Track checked state per ingredient
+  final Map<String, bool> checkedState = {};
+
+  // Track selected list per ingredient (list ID, null = default)
+  final Map<String, String?> selectedListIds = {};
+
+  // Addable ingredients (not already in a list)
+  List<IngredientPantryMatch> addableIngredients = [];
+
+  // Reference to WidgetRef for adding items (set by the page widget)
+  WidgetRef? _ref;
+
+  // Parser for ingredient names
+  final _parser = IngredientParserService();
+
+  bool isLoading = false;
+  bool initialized = false;
+
+  void reset() {
+    checkedState.clear();
+    selectedListIds.clear();
+    addableIngredients = [];
+    isLoading = false;
+    initialized = false;
+    _ref = null;
+  }
+
+  void setRef(WidgetRef ref) {
+    _ref = ref;
+  }
+
+  void updateCheckedState(String id, bool value) {
+    checkedState[id] = value;
+    notifyListeners();
+  }
+
+  void updateSelectedList(String id, String? listId) {
+    selectedListIds[id] = listId;
+    notifyListeners();
+  }
+
+  void setLoading(bool value) {
+    isLoading = value;
+    notifyListeners();
+  }
+
+  int get checkedCount => checkedState.entries
+      .where((e) => e.value && addableIngredients.any((m) => m.ingredient.id == e.key))
+      .length;
+
+  bool get isButtonEnabled => checkedCount > 0 && !isLoading;
+
+  String _getCleanName(String name) {
+    final parseResult = _parser.parse(name);
+    return parseResult.cleanName.isNotEmpty ? parseResult.cleanName : name;
+  }
+
+  Future<void> addToShoppingList(NavigatorState navigator) async {
+    if (_ref == null) return;
+    final ref = _ref!;
+
+    setLoading(true);
+
+    try {
+      final userId = Supabase.instance.client.auth.currentUser?.id;
+
+      // Group items by list
+      final itemsByList = <String?, List<String>>{};
+
+      for (final match in addableIngredients) {
+        final id = match.ingredient.id;
+        if (checkedState[id] == true) {
+          final listId = selectedListIds[id];
+          itemsByList.putIfAbsent(listId, () => []);
+          itemsByList[listId]!.add(_getCleanName(match.ingredient.name));
+        }
+      }
+
+      // Add items to each list
+      for (final entry in itemsByList.entries) {
+        final listId = entry.key;
+        final items = entry.value;
+
+        final itemsNotifier = ref.read(shoppingListItemsProvider(listId).notifier);
+
+        for (final itemName in items) {
+          await itemsNotifier.addItem(
+            name: itemName,
+            userId: userId,
+          );
+        }
+      }
+
+      // Close the modal
+      navigator.pop();
+    } catch (e) {
+      AppLogger.error('Error adding items to shopping list', e);
+      setLoading(false);
+    }
+  }
+}
+
+class AddToShoppingListPage extends ConsumerStatefulWidget {
+  final RecipeIngredientMatches matches;
+  final ValueNotifier<int> pageIndexNotifier;
+  final _AddToShoppingListController controller;
+
+  const AddToShoppingListPage({
+    super.key,
+    required this.matches,
+    required this.pageIndexNotifier,
+    required this.controller,
+  });
+
+  @override
+  ConsumerState<AddToShoppingListPage> createState() => _AddToShoppingListPageState();
+}
+
+class _AddToShoppingListPageState extends ConsumerState<AddToShoppingListPage> {
+  // Parser for ingredient text formatting
+  final _parser = IngredientParserService();
+
+  _AddToShoppingListController get controller => widget.controller;
+
+  @override
+  void initState() {
+    super.initState();
+    // Listen to controller changes to rebuild UI
+    controller.addListener(_onControllerChanged);
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    // Set the ref on the controller so it can add items
+    controller.setRef(ref);
+  }
+
+  @override
+  void dispose() {
+    controller.removeListener(_onControllerChanged);
+    super.dispose();
+  }
+
+  void _onControllerChanged() {
+    if (mounted) setState(() {});
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = AppColors.of(context);
+
+    // Watch shopping lists and current selection
+    final listsAsync = ref.watch(shoppingListsProvider);
+    final currentListId = ref.watch(currentShoppingListProvider);
+
+    // Watch the live matches to get fresh data
+    final matchesAsync = ref.watch(recipeIngredientMatchesProvider(widget.matches.recipeId));
+
+    // Watch the duplicate detection map
+    final itemToListMap = ref.watch(itemToListNameMapProvider);
+
+    return listsAsync.when(
+      loading: () => const Center(child: CircularProgressIndicator()),
+      error: (error, stack) => Center(child: Text('Error: $error')),
+      data: (lists) {
+        return matchesAsync.when(
+          loading: () => const Center(child: CircularProgressIndicator()),
+          error: (error, stack) => Center(child: Text('Error: $error')),
+          data: (currentMatches) {
+            // Initialize state on first build
+            if (!controller.initialized) {
+              _initializeState(currentMatches, currentListId, itemToListMap);
+              controller.initialized = true;
+            }
+
+            // Separate ingredients into those that can be added vs already in list
+            final addableIngredients = <IngredientPantryMatch>[];
+            final alreadyInListIngredients = <(IngredientPantryMatch, String)>[]; // (match, listName)
+
+            for (final match in currentMatches.matches) {
+              final ingredientName = _getCleanName(match.ingredient.name);
+              final existingListName = itemToListMap[ingredientName.toLowerCase().trim()];
+
+              if (existingListName != null) {
+                alreadyInListIngredients.add((match, existingListName));
+              } else {
+                addableIngredients.add(match);
+              }
+            }
+
+            // Sort addable ingredients by stock status
+            addableIngredients.sort((a, b) => _getSortPriority(a).compareTo(_getSortPriority(b)));
+
+            // Update controller's addable ingredients for button state
+            controller.addableIngredients = addableIngredients;
+
+            return Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                // Title row with Manage Lists button
+                Padding(
+                  padding: EdgeInsets.fromLTRB(AppSpacing.lg, AppSpacing.lg, AppSpacing.lg, AppSpacing.md),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      Text(
+                        'Add to Shopping List',
+                        style: AppTypography.h4.copyWith(
+                          color: colors.textPrimary,
+                        ),
+                      ),
+                      AppButton(
+                        text: 'Manage Lists',
+                        onPressed: () {
+                          widget.pageIndexNotifier.value = 2;
+                        },
+                        theme: AppButtonTheme.secondary,
+                        style: AppButtonStyle.outline,
+                        shape: AppButtonShape.square,
+                        size: AppButtonSize.small,
+                      ),
+                    ],
+                  ),
+                ),
+
+                // Addable ingredients list
+                if (addableIngredients.isNotEmpty)
+                  Padding(
+                    padding: EdgeInsets.symmetric(horizontal: AppSpacing.lg),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        ListView.builder(
+                          shrinkWrap: true,
+                          physics: const NeverScrollableScrollPhysics(),
+                          padding: EdgeInsets.zero,
+                          itemCount: addableIngredients.length,
+                          itemBuilder: (context, index) {
+                            final match = addableIngredients[index];
+                            final isFirst = index == 0;
+                            final isLast = index == addableIngredients.length - 1 && alreadyInListIngredients.isEmpty;
+
+                            return _buildIngredientRow(
+                              context,
+                              match,
+                              lists,
+                              currentListId,
+                              isFirst: isFirst,
+                              isLast: isLast,
+                            );
+                          },
+                        ),
+                      ],
+                    ),
+                  ),
+
+                // Already in list section
+                if (alreadyInListIngredients.isNotEmpty)
+                  Padding(
+                    padding: EdgeInsets.symmetric(horizontal: AppSpacing.lg),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        ListView.builder(
+                          shrinkWrap: true,
+                          physics: const NeverScrollableScrollPhysics(),
+                          padding: EdgeInsets.zero,
+                          itemCount: alreadyInListIngredients.length,
+                          itemBuilder: (context, index) {
+                            final (match, listName) = alreadyInListIngredients[index];
+                            final isFirst = index == 0 && addableIngredients.isEmpty;
+                            final isLast = index == alreadyInListIngredients.length - 1;
+
+                            return _buildAlreadyInListRow(
+                              context,
+                              match,
+                              listName,
+                              isFirst: isFirst,
+                              isLast: isLast,
+                            );
+                          },
+                        ),
+                      ],
+                    ),
+                  ),
+
+                // Empty state
+                if (addableIngredients.isEmpty && alreadyInListIngredients.isEmpty)
+                  Padding(
+                    padding: EdgeInsets.all(AppSpacing.xl),
+                    child: Center(
+                      child: Text(
+                        'No ingredients to add',
+                        style: AppTypography.body.copyWith(
+                          color: colors.textSecondary,
+                        ),
+                      ),
+                    ),
+                  ),
+
+                // Bottom padding for sticky action bar and gradient
+                const SizedBox(height: 130),
+              ],
+            );
+          },
+        );
+      },
+    );
+  }
+
+  void _initializeState(
+    RecipeIngredientMatches matches,
+    String? defaultListId,
+    Map<String, String> itemToListMap,
+  ) {
+    for (final match in matches.matches) {
+      final id = match.ingredient.id;
+      final ingredientName = _getCleanName(match.ingredient.name);
+      final existingListName = itemToListMap[ingredientName.toLowerCase().trim()];
+
+      // Skip items already in a list
+      if (existingListName != null) continue;
+
+      // Pre-check out of stock and low stock items
+      if (!controller.checkedState.containsKey(id)) {
+        final isOutOrLow = !match.hasMatch ||
+            (match.hasPantryMatch &&
+                (match.pantryItem!.stockStatus == StockStatus.outOfStock ||
+                    match.pantryItem!.stockStatus == StockStatus.lowStock));
+        controller.checkedState[id] = isOutOrLow;
+      }
+
+      // Default list selection
+      if (!controller.selectedListIds.containsKey(id)) {
+        controller.selectedListIds[id] = defaultListId;
+      }
+    }
+  }
+
+  String _getCleanName(String name) {
+    final parseResult = _parser.parse(name);
+    return parseResult.cleanName.isNotEmpty ? parseResult.cleanName : name;
+  }
+
+  int _getSortPriority(IngredientPantryMatch match) {
+    if (match.hasPantryMatch) {
+      final status = match.pantryItem!.stockStatus;
+      if (status == StockStatus.outOfStock) return 1;
+      if (status == StockStatus.lowStock) return 2;
+      if (status == StockStatus.inStock) return 3;
+    } else if (match.hasRecipeMatch) {
+      return 3; // Sub-recipe items at the end with in-stock
+    }
+    return 0; // No match at top (most likely to need)
+  }
+
+  Widget _buildIngredientRow(
+    BuildContext context,
+    IngredientPantryMatch match,
+    List<ShoppingListEntry> lists,
+    String? defaultListId, {
+    required bool isFirst,
+    required bool isLast,
+  }) {
+    final colors = AppColors.of(context);
+    final ingredient = match.ingredient;
+    final displayName = _getCleanName(ingredient.name);
+    final isChecked = controller.checkedState[ingredient.id] ?? false;
+    final selectedListId = controller.selectedListIds[ingredient.id] ?? defaultListId;
+
+    // Get list name for display
+    String listName = 'My Shopping List';
+    if (selectedListId != null) {
+      final list = lists.where((l) => l.id == selectedListId).firstOrNull;
+      listName = list?.name ?? 'My Shopping List';
+    }
+
+    // Get stock status text
+    String? stockText;
+    if (!match.hasMatch) {
+      stockText = 'Not in pantry';
+    } else if (match.hasPantryMatch) {
+      final status = match.pantryItem!.stockStatus;
+      if (status == StockStatus.outOfStock) {
+        stockText = 'Out of stock';
+      } else if (status == StockStatus.lowStock) {
+        stockText = 'Low stock';
+      } else {
+        stockText = 'In stock';
+      }
+    } else if (match.hasRecipeMatch) {
+      stockText = 'Can make';
+    }
+
+    final borderRadius = GroupedListStyling.getBorderRadius(
+      isGrouped: true,
+      isFirstInGroup: isFirst,
+      isLastInGroup: isLast,
+    );
+    final border = GroupedListStyling.getBorder(
+      context: context,
+      isGrouped: true,
+      isFirstInGroup: isFirst,
+      isLastInGroup: isLast,
+      isDragging: false,
+    );
+
+    return Container(
+      decoration: BoxDecoration(
+        color: colors.groupedListBackground,
+        border: border,
+        borderRadius: borderRadius,
+      ),
+      child: Padding(
+        padding: EdgeInsets.all(AppSpacing.md),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            // Checkbox
+            GestureDetector(
+              onTap: () {
+                controller.updateCheckedState(ingredient.id, !isChecked);
+              },
+              child: AppRadioButton(
+                selected: isChecked,
+                onTap: () {
+                  controller.updateCheckedState(ingredient.id, !isChecked);
+                },
+              ),
+            ),
+
+            SizedBox(width: AppSpacing.md),
+
+            // Ingredient info
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    displayName,
+                    style: AppTypography.body.copyWith(
+                      fontWeight: FontWeight.w600,
+                      color: colors.textPrimary,
+                    ),
+                  ),
+                  if (stockText != null) ...[
+                    SizedBox(height: 2),
+                    Text(
+                      stockText,
+                      style: AppTypography.caption.copyWith(
+                        color: colors.textSecondary,
+                      ),
+                    ),
+                  ],
+                ],
+              ),
+            ),
+
+            SizedBox(width: AppSpacing.sm),
+
+            // List dropdown
+            AdaptivePullDownButton(
+              items: [
+                AdaptiveMenuItem(
+                  title: 'My Shopping List',
+                  icon: Icon(selectedListId == null ? CupertinoIcons.checkmark : CupertinoIcons.list_bullet),
+                  onTap: () {
+                    controller.updateSelectedList(ingredient.id, null);
+                    if (!isChecked) {
+                      controller.updateCheckedState(ingredient.id, true);
+                    }
+                  },
+                ),
+                ...lists.map((list) => AdaptiveMenuItem(
+                      title: list.name ?? 'Unnamed',
+                      icon: Icon(selectedListId == list.id ? CupertinoIcons.checkmark : CupertinoIcons.list_bullet),
+                      onTap: () {
+                        controller.updateSelectedList(ingredient.id, list.id);
+                        if (!isChecked) {
+                          controller.updateCheckedState(ingredient.id, true);
+                        }
+                      },
+                    )),
+              ],
+              child: Container(
+                padding: EdgeInsets.symmetric(horizontal: AppSpacing.sm, vertical: AppSpacing.xs),
+                decoration: BoxDecoration(
+                  border: Border.all(color: colors.border),
+                  borderRadius: BorderRadius.circular(6),
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    ConstrainedBox(
+                      constraints: const BoxConstraints(maxWidth: 100),
+                      child: Text(
+                        listName,
+                        style: AppTypography.caption.copyWith(
+                          color: colors.textPrimary,
+                        ),
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+                    SizedBox(width: 2),
+                    Icon(
+                      Icons.arrow_drop_down,
+                      size: 18,
+                      color: colors.textSecondary,
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildAlreadyInListRow(
+    BuildContext context,
+    IngredientPantryMatch match,
+    String listName, {
+    required bool isFirst,
+    required bool isLast,
+  }) {
+    final colors = AppColors.of(context);
+    final ingredient = match.ingredient;
+    final displayName = _getCleanName(ingredient.name);
+
+    final borderRadius = GroupedListStyling.getBorderRadius(
+      isGrouped: true,
+      isFirstInGroup: isFirst,
+      isLastInGroup: isLast,
+    );
+    final border = GroupedListStyling.getBorder(
+      context: context,
+      isGrouped: true,
+      isFirstInGroup: isFirst,
+      isLastInGroup: isLast,
+      isDragging: false,
+    );
+
+    return Container(
+      decoration: BoxDecoration(
+        color: colors.groupedListBackground,
+        border: border,
+        borderRadius: borderRadius,
+      ),
+      child: Padding(
+        padding: EdgeInsets.all(AppSpacing.md),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            // Spacer instead of checkbox (for alignment)
+            SizedBox(width: 24 + AppSpacing.md),
+
+            // Ingredient info
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    displayName,
+                    style: AppTypography.body.copyWith(
+                      fontWeight: FontWeight.w600,
+                      color: colors.textPrimary,
+                    ),
+                  ),
+                  SizedBox(height: 2),
+                  Text(
+                    'In $listName',
+                    style: AppTypography.caption.copyWith(
+                      color: colors.textSecondary,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+// ============================================================================
+// Page 4: Ingredient Detail
 // ============================================================================
 
 class IngredientDetailPage extends ConsumerStatefulWidget {
@@ -1119,16 +1891,16 @@ class _IngredientDetailPageState extends ConsumerState<IngredientDetailPage> {
               child: const Text('Enter Custom Term'),
               onPressed: () {
                 Navigator.pop(context);
-                // Navigate to page 2 (Add Custom Term)
-                widget.pageIndexNotifier.value = 2;
+                // Navigate to page 5 (Add Custom Term)
+                widget.pageIndexNotifier.value = 5;
               },
             ),
             CupertinoActionSheetAction(
               child: const Text('Select from Pantry'),
               onPressed: () {
                 Navigator.pop(context);
-                // Navigate to page 3 (Select from Pantry)
-                widget.pageIndexNotifier.value = 3;
+                // Navigate to page 6 (Select from Pantry)
+                widget.pageIndexNotifier.value = 6;
               },
             ),
           ],
@@ -1162,8 +1934,8 @@ class _IngredientDetailPageState extends ConsumerState<IngredientDetailPage> {
               subtitle: Text('Enter a new term for matching'),
             ),
             onTap: () {
-              // Navigate to page 2 (Add Custom Term)
-              widget.pageIndexNotifier.value = 2;
+              // Navigate to page 5 (Add Custom Term)
+              widget.pageIndexNotifier.value = 5;
             },
           ),
           PopupMenuItem(
@@ -1173,8 +1945,8 @@ class _IngredientDetailPageState extends ConsumerState<IngredientDetailPage> {
               subtitle: Text('Use an existing pantry item name'),
             ),
             onTap: () {
-              // Navigate to page 3 (Select from Pantry)
-              widget.pageIndexNotifier.value = 3;
+              // Navigate to page 6 (Select from Pantry)
+              widget.pageIndexNotifier.value = 6;
             },
           ),
         ],
@@ -1184,7 +1956,7 @@ class _IngredientDetailPageState extends ConsumerState<IngredientDetailPage> {
 }
 
 // ============================================================================
-// Page 3: Add Custom Term
+// Page 5: Add Custom Term
 // ============================================================================
 
 class AddCustomTermPage extends ConsumerStatefulWidget {
@@ -1283,7 +2055,7 @@ class _AddCustomTermPageState extends ConsumerState<AddCustomTermPage> {
       }
 
       // Navigate back to ingredient detail page
-      widget.pageIndexNotifier.value = 1;
+      widget.pageIndexNotifier.value = 4;
     } catch (e) {
       AppLogger.error('Error adding term', e);
     } finally {
@@ -1351,7 +2123,7 @@ class _AddCustomTermPageState extends ConsumerState<AddCustomTermPage> {
 }
 
 // ============================================================================
-// Page 4: Select from Pantry
+// Page 6: Select from Pantry
 // ============================================================================
 
 class SelectFromPantryPage extends ConsumerStatefulWidget {
@@ -1435,7 +2207,7 @@ class _SelectFromPantryPageState extends ConsumerState<SelectFromPantryPage> {
       }
 
       // Navigate back to ingredient detail page
-      widget.pageIndexNotifier.value = 1;
+      widget.pageIndexNotifier.value = 4;
     } catch (e) {
       AppLogger.error('Error adding pantry item term', e);
     }

@@ -49,6 +49,7 @@ class AppButton extends StatefulWidget {
   final Widget? leadingIcon;
   final Widget? trailingIcon;
   final bool fullWidth;
+  final bool compactTrailingIcon;
   final bool iconOnly;
   final Widget? icon;
   final bool visuallyEnabled;
@@ -68,6 +69,7 @@ class AppButton extends StatefulWidget {
     this.leadingIcon,
     this.trailingIcon,
     this.fullWidth = false,
+    this.compactTrailingIcon = false,
     this.iconOnly = false,
     this.icon,
     this.visuallyEnabled = false,
@@ -403,7 +405,7 @@ class _AppButtonState extends State<AppButton> {
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
                     // Leading content (icon + text) - grouped together when trailing icon exists
-                    if (widget.trailingIcon != null && !widget.loading)
+                    if (widget.trailingIcon != null && !widget.loading && !widget.compactTrailingIcon)
                       Expanded(
                         child: Row(
                           mainAxisSize: MainAxisSize.min,

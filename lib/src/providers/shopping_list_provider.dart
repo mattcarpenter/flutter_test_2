@@ -221,3 +221,32 @@ final currentShoppingListItemsProvider = Provider<AsyncValue<List<ShoppingListIt
   final currentListId = ref.watch(currentShoppingListProvider);
   return ref.watch(shoppingListItemsProvider(currentListId));
 });
+
+/// Provider that returns a map of item name (lowercase) -> list name
+/// Used for duplicate detection when adding ingredients to shopping lists
+final itemToListNameMapProvider = Provider<Map<String, String>>((ref) {
+  final listsAsync = ref.watch(shoppingListsProvider);
+  final lists = listsAsync.valueOrNull ?? [];
+
+  final result = <String, String>{};
+
+  // Check default list
+  final defaultItemsAsync = ref.watch(shoppingListItemsProvider(null));
+  final defaultItems = defaultItemsAsync.valueOrNull ?? [];
+  for (final item in defaultItems) {
+    result[item.name.toLowerCase().trim()] = 'My Shopping List';
+  }
+
+  // Check each custom list
+  for (final list in lists) {
+    final itemsAsync = ref.watch(shoppingListItemsProvider(list.id));
+    final items = itemsAsync.valueOrNull ?? [];
+    for (final item in items) {
+      if (!result.containsKey(item.name.toLowerCase().trim())) {
+        result[item.name.toLowerCase().trim()] = list.name ?? 'Unnamed List';
+      }
+    }
+  }
+
+  return result;
+});
