@@ -298,12 +298,14 @@ class IngredientMatchesListPage extends ConsumerWidget {
                     child: Row(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(
-                          '• ',
-                          style: AppTypography.body.copyWith(
-                            color: AppColors.of(context).textSecondary,
+                        // Only show bullet point if there are multiple lines
+                        if (statusLines.length > 1)
+                          Text(
+                            '• ',
+                            style: AppTypography.body.copyWith(
+                              color: AppColors.of(context).textSecondary,
+                            ),
                           ),
-                        ),
                         Expanded(
                           child: _buildLineWithBoldNumbers(context, line),
                         ),
