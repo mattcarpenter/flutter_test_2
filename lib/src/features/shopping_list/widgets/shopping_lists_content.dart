@@ -116,19 +116,59 @@ class ShoppingListsContent extends ConsumerWidget {
                   final isFirst = index == 0;
                   final isLast = index == allLists.length - 1;
 
+                  // Callback for deleting a list (used in both swipe-to-delete and menu)
+                  Future<void> handleDelete() async {
+                    final confirmed = await showCupertinoDialog<bool>(
+                      context: context,
+                      builder: (context) => CupertinoAlertDialog(
+                        title: const Text('Delete List'),
+                        content: Text(
+                            'Are you sure you want to delete "${listItem.name}"? All items in this list will also be deleted.'),
+                        actions: [
+                          CupertinoDialogAction(
+                            child: const Text('Cancel'),
+                            onPressed: () => Navigator.of(context).pop(false),
+                          ),
+                          CupertinoDialogAction(
+                            isDestructiveAction: true,
+                            child: const Text('Delete'),
+                            onPressed: () => Navigator.of(context).pop(true),
+                          ),
+                        ],
+                      ),
+                    ) ?? false;
+
+                    if (confirmed) {
+                      // If deleting the currently selected list, switch to default
+                      if (listItem.id == currentListId) {
+                        ref
+                            .read(currentShoppingListProvider.notifier)
+                            .setCurrentList(null);
+                      }
+
+                      await ref
+                          .read(shoppingListsProvider.notifier)
+                          .deleteList(listItem.id!);
+                    }
+                  }
+
                   Widget row = ShoppingListSelectionRow(
                     listId: listItem.id,
                     label: listItem.name,
                     selected: listItem.isSelected,
                     first: isFirst,
                     last: isLast,
+                    showRadio: showSelection,
                     onTap: onListTap != null
                         ? () => onListTap!(listItem.id, listItem.name)
                         : null,
+                    onDelete: allowDelete && !listItem.isDefault
+                        ? handleDelete
+                        : null,
                   );
 
-                  // Add dismissible for non-default lists if delete is allowed
-                  if (allowDelete && !listItem.isDefault) {
+                  // Add dismissible for non-default lists if delete is allowed (only in selection mode)
+                  if (allowDelete && !listItem.isDefault && showSelection) {
                     final borderRadius = GroupedListStyling.getBorderRadius(
                       isGrouped: true,
                       isFirstInGroup: isFirst,

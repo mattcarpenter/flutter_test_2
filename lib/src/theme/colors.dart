@@ -347,12 +347,12 @@ class AppColors {
 
   // Chip colors (for duration picker, etc.)
   Color get chipBackground => brightness == Brightness.light
-      ? AppColorSwatches.primary[100]!
-      : AppColorSwatches.primary[900]!.withOpacity(0.15);
+      ? AppColorSwatches.neutral[250]!
+      : AppColorSwatches.neutral[800]!;
 
   Color get chipText => brightness == Brightness.light
-      ? AppColorSwatches.primary[800]!
-      : AppColorSwatches.primary[300]!;
+      ? AppColorSwatches.neutral[700]!
+      : AppColorSwatches.neutral[300]!;
 
   // Button specific colors
   Color get buttonPrimary => brightness == Brightness.light

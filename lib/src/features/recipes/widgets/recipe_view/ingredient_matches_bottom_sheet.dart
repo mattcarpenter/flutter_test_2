@@ -1146,7 +1146,7 @@ class _AddToShoppingListPageState extends ConsumerState<AddToShoppingListPage> {
 
             SizedBox(width: AppSpacing.sm),
 
-            // List dropdown
+            // List dropdown (styled like duration picker chips)
             AdaptivePullDownButton(
               items: [
                 AdaptiveMenuItem(
@@ -1171,29 +1171,31 @@ class _AddToShoppingListPageState extends ConsumerState<AddToShoppingListPage> {
                     )),
               ],
               child: Container(
-                padding: EdgeInsets.symmetric(horizontal: AppSpacing.sm, vertical: AppSpacing.xs),
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                 decoration: BoxDecoration(
-                  border: Border.all(color: colors.border),
+                  color: colors.chipBackground,
                   borderRadius: BorderRadius.circular(6),
                 ),
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     ConstrainedBox(
-                      constraints: const BoxConstraints(maxWidth: 100),
+                      constraints: const BoxConstraints(maxWidth: 140),
                       child: Text(
                         listName,
-                        style: AppTypography.caption.copyWith(
-                          color: colors.textPrimary,
+                        style: TextStyle(
+                          color: colors.chipText,
+                          fontSize: 12,
+                          fontWeight: FontWeight.w500,
                         ),
                         overflow: TextOverflow.ellipsis,
                       ),
                     ),
-                    SizedBox(width: 2),
+                    const SizedBox(width: 2),
                     Icon(
                       Icons.arrow_drop_down,
-                      size: 18,
-                      color: colors.textSecondary,
+                      size: 16,
+                      color: colors.chipText,
                     ),
                   ],
                 ),
