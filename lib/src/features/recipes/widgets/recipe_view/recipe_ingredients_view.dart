@@ -3,13 +3,16 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../../database/models/ingredients.dart';
 import '../../../../models/ingredient_pantry_match.dart';
-import '../../../../providers/recipe_provider.dart';
+import '../../../../providers/recipe_provider.dart' show recipeIngredientMatchesProvider, recipeByIdStreamProvider;
+import '../../../../providers/scale_convert_provider.dart';
 import '../../../settings/providers/app_settings_provider.dart';
 import '../../../../theme/typography.dart';
 import '../../../../theme/colors.dart';
 import '../../../../theme/spacing.dart';
 import '../../../../services/ingredient_parser_service.dart';
 import '../../../../widgets/ingredient_stock_chip.dart';
+import '../../models/scale_convert_state.dart';
+import '../scale_convert/scale_convert_panel.dart';
 import 'ingredient_matches_bottom_sheet.dart';
 
 class RecipeIngredientsView extends ConsumerStatefulWidget {
@@ -93,6 +96,16 @@ class _RecipeIngredientsViewState extends ConsumerState<RecipeIngredientsView>
     final baseStyle = AppTypography.body;
     final scaledFontSize = (baseStyle.fontSize ?? 15.0) * fontScale;
 
+    // Watch transformed ingredients for scale/convert
+    final transformedIngredients = widget.recipeId != null
+        ? ref.watch(transformedIngredientsByIdProvider(widget.recipeId!))
+        : <String, TransformedIngredient>{};
+
+    // Watch recipe to get servings for scale panel
+    final recipeServings = widget.recipeId != null
+        ? ref.watch(recipeByIdStreamProvider(widget.recipeId!)).valueOrNull?.servings
+        : null;
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -134,28 +147,21 @@ class _RecipeIngredientsViewState extends ConsumerState<RecipeIngredientsView>
         ),
 
         // Animated accordion panel - expands vertically and fades in/out
-        SizeTransition(
-          sizeFactor: _accordionAnimation,
-          axisAlignment: -1.0,
-          child: FadeTransition(
-            opacity: _accordionAnimation,
-            child: Container(
-              width: double.infinity,
-              margin: EdgeInsets.only(top: AppSpacing.md),
-              padding: EdgeInsets.all(AppSpacing.lg),
-              decoration: BoxDecoration(
-                color: AppColors.of(context).surfaceVariant,
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: const SizedBox(
-                height: 100,
-                child: Center(
-                  child: Text('Scale or Convert options coming soon...'),
+        if (widget.recipeId != null)
+          SizeTransition(
+            sizeFactor: _accordionAnimation,
+            axisAlignment: -1.0,
+            child: FadeTransition(
+              opacity: _accordionAnimation,
+              child: Padding(
+                padding: EdgeInsets.only(top: AppSpacing.md),
+                child: ScaleConvertPanel(
+                  recipeId: widget.recipeId!,
+                  recipeServings: recipeServings,
                 ),
               ),
             ),
           ),
-        ),
 
         SizedBox(height: AppSpacing.md),
 
@@ -213,10 +219,11 @@ class _RecipeIngredientsViewState extends ConsumerState<RecipeIngredientsView>
                     ),
                     const SizedBox(width: 8),
 
-                    // Ingredient name
+                    // Ingredient name (with optional scaling/conversion)
                     Expanded(
-                      child: _buildParsedIngredientText(
-                        ingredient.name,
+                      child: _buildIngredientText(
+                        ingredient: ingredient,
+                        transformed: transformedIngredients[ingredient.id],
                         fontSize: scaledFontSize,
                         isLinkedRecipe: ingredient.recipeId != null,
                       ),
@@ -263,109 +270,153 @@ class _RecipeIngredientsViewState extends ConsumerState<RecipeIngredientsView>
     );
   }
 
-  /// Builds a RichText widget with bold quantities parsed from ingredient text
-  Widget _buildParsedIngredientText(String text, {required double fontSize, bool isLinkedRecipe = false}) {
+  /// Builds ingredient text with bold quantities, supporting transformed ingredients.
+  ///
+  /// If [transformed] is provided, uses the transformed display text and quantity
+  /// positions. Otherwise falls back to parsing the original ingredient name.
+  Widget _buildIngredientText({
+    required Ingredient ingredient,
+    TransformedIngredient? transformed,
+    required double fontSize,
+    bool isLinkedRecipe = false,
+  }) {
     final colors = AppColors.of(context);
-    // Use AppTypography.body as base style for consistency with notes/description
     final baseStyle = AppTypography.body.copyWith(
       fontSize: fontSize,
       color: colors.contentPrimary,
     );
 
-    try {
-      final parseResult = _parser.parse(text);
+    // Determine which text and quantity positions to use
+    String text;
+    List<({int start, int end})> quantityPositions;
+    bool wasTransformed;
 
-      if (parseResult.quantities.isEmpty) {
-        // No quantities found, return plain text
-        return Text(text, style: baseStyle);
+    if (transformed != null && (transformed.wasScaled || transformed.wasConverted)) {
+      // Use transformed text and positions
+      text = transformed.displayText;
+      quantityPositions = transformed.quantities
+          .map((q) => (start: q.start, end: q.end))
+          .toList();
+      wasTransformed = true;
+    } else {
+      // Parse original ingredient name
+      text = ingredient.name;
+      try {
+        final parseResult = _parser.parse(text);
+        quantityPositions = parseResult.quantities
+            .map((q) => (start: q.start, end: q.end))
+            .toList();
+      } catch (_) {
+        quantityPositions = [];
       }
+      wasTransformed = false;
+    }
 
-      final children = <InlineSpan>[];
-      int currentIndex = 0;
+    if (quantityPositions.isEmpty) {
+      // No quantities found, return plain text
+      return _buildPlainText(
+        text: text,
+        baseStyle: baseStyle,
+        isLinkedRecipe: isLinkedRecipe,
+        colors: colors,
+      );
+    }
 
-      // Build TextSpan with bold quantities, normal ingredient names
-      for (final quantity in parseResult.quantities) {
-        // Text before quantity (ingredient name)
-        if (quantity.start > currentIndex) {
-          children.add(TextSpan(
-            text: text.substring(currentIndex, quantity.start),
-            style: baseStyle,
-          ));
-        }
+    // Build rich text with bold quantities
+    final children = <InlineSpan>[];
+    int currentIndex = 0;
 
-        // Quantity with bold formatting
+    for (final quantity in quantityPositions) {
+      // Text before quantity
+      if (quantity.start > currentIndex) {
         children.add(TextSpan(
-          text: text.substring(quantity.start, quantity.end),
-          style: baseStyle.copyWith(fontWeight: FontWeight.bold),
-        ));
-
-        currentIndex = quantity.end;
-      }
-
-      // Remaining text after last quantity
-      if (currentIndex < text.length) {
-        children.add(TextSpan(
-          text: text.substring(currentIndex),
+          text: text.substring(currentIndex, quantity.start),
           style: baseStyle,
         ));
       }
 
-      // Add external link icon inline for linked recipes
-      if (isLinkedRecipe) {
-        children.add(const TextSpan(text: ' ')); // Small space
-        children.add(WidgetSpan(
-          child: Icon(
-            Icons.open_in_new,
-            size: 14,
-            color: colors.contentSecondary,
-          ),
-          alignment: PlaceholderAlignment.middle,
-        ));
-      }
-
-      // Create RichText with underline decoration for linked recipes
-      Widget richText = RichText(
-        text: TextSpan(
-          children: children,
-          style: isLinkedRecipe ? TextStyle(
-            decoration: TextDecoration.underline,
-            decorationStyle: TextDecorationStyle.dotted,
-            decorationColor: colors.contentPrimary,
-          ) : null,
+      // Quantity with bold formatting (and color accent if transformed)
+      children.add(TextSpan(
+        text: text.substring(quantity.start, quantity.end),
+        style: baseStyle.copyWith(
+          fontWeight: FontWeight.bold,
+          color: wasTransformed ? colors.primary : null,
         ),
-      );
+      ));
 
-      return richText;
-    } catch (e) {
-      // Fallback to plain text if parsing fails - use RichText for consistency
-      final fallbackChildren = <InlineSpan>[
-        TextSpan(text: text, style: baseStyle),
-      ];
-
-      // Add external link icon inline for linked recipes
-      if (isLinkedRecipe) {
-        fallbackChildren.add(const TextSpan(text: ' ')); // Small space
-        fallbackChildren.add(WidgetSpan(
-          child: Icon(
-            Icons.open_in_new,
-            size: 14,
-            color: colors.contentSecondary,
-          ),
-          alignment: PlaceholderAlignment.middle,
-        ));
-      }
-
-      return RichText(
-        text: TextSpan(
-          children: fallbackChildren,
-          style: isLinkedRecipe ? TextStyle(
-            decoration: TextDecoration.underline,
-            decorationStyle: TextDecorationStyle.dotted,
-            decorationColor: colors.contentPrimary,
-          ) : null,
-        ),
-      );
+      currentIndex = quantity.end;
     }
+
+    // Remaining text after last quantity
+    if (currentIndex < text.length) {
+      children.add(TextSpan(
+        text: text.substring(currentIndex),
+        style: baseStyle,
+      ));
+    }
+
+    // Add external link icon for linked recipes
+    if (isLinkedRecipe) {
+      children.add(const TextSpan(text: ' '));
+      children.add(WidgetSpan(
+        child: Icon(
+          Icons.open_in_new,
+          size: 14,
+          color: colors.contentSecondary,
+        ),
+        alignment: PlaceholderAlignment.middle,
+      ));
+    }
+
+    return RichText(
+      text: TextSpan(
+        children: children,
+        style: isLinkedRecipe
+            ? TextStyle(
+                decoration: TextDecoration.underline,
+                decorationStyle: TextDecorationStyle.dotted,
+                decorationColor: colors.contentPrimary,
+              )
+            : null,
+      ),
+    );
+  }
+
+  /// Builds plain text with optional link styling
+  Widget _buildPlainText({
+    required String text,
+    required TextStyle baseStyle,
+    required bool isLinkedRecipe,
+    required AppColors colors,
+  }) {
+    final children = <InlineSpan>[
+      TextSpan(text: text, style: baseStyle),
+    ];
+
+    if (isLinkedRecipe) {
+      children.add(const TextSpan(text: ' '));
+      children.add(WidgetSpan(
+        child: Icon(
+          Icons.open_in_new,
+          size: 14,
+          color: colors.contentSecondary,
+        ),
+        alignment: PlaceholderAlignment.middle,
+      ));
+    }
+
+    return RichText(
+      text: TextSpan(
+        children: children,
+        style: isLinkedRecipe
+            ? TextStyle(
+                decoration: TextDecoration.underline,
+                decorationStyle: TextDecorationStyle.dotted,
+                decorationColor: colors.contentPrimary,
+              )
+            : null,
+      ),
+    );
   }
 
   /// Navigates to the linked recipe

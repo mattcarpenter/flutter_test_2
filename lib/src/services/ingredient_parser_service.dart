@@ -1,3 +1,6 @@
+import '../features/recipes/models/scale_convert_state.dart';
+import 'unit_conversion_service.dart';
+
 /// Supported languages for ingredient parsing
 enum Language {
   english,
@@ -108,7 +111,7 @@ class IngredientParserService {
   /// Cleans ingredient name with language-specific rules
   String _cleanIngredientName(String name, Language language) {
     name = name.replaceAll(RegExp(r'\s+'), ' ');
-    
+
     switch (language) {
       case Language.english:
         return name
@@ -123,6 +126,230 @@ class IngredientParserService {
             .replaceAll(RegExp(r'^\s*の\s*'), '') // Japanese possessive particle
             .trim();
     }
+  }
+
+  // ============================================================
+  // ENHANCED PARSING WITH NUMERIC VALUES AND UNIT TYPES
+  // ============================================================
+
+  /// Parses an ingredient string and returns enhanced quantity data with
+  /// numeric values, unit types, and canonical units.
+  EnhancedParseResult parseEnhanced(String input, {UnitConversionService? conversionService}) {
+    final basicResult = parse(input);
+    final converter = conversionService ?? UnitConversionService();
+
+    if (basicResult.quantities.isEmpty) {
+      return EnhancedParseResult(
+        originalText: input,
+        quantities: [],
+        ingredientName: basicResult.cleanName,
+      );
+    }
+
+    final enhancedQuantities = <ParsedQuantity>[];
+
+    for (final span in basicResult.quantities) {
+      final parsed = _parseQuantityText(span.text, converter);
+      if (parsed != null) {
+        enhancedQuantities.add(ParsedQuantity(
+          value: parsed.value,
+          rangeMax: parsed.rangeMax,
+          unit: parsed.unit,
+          canonicalUnit: parsed.canonicalUnit,
+          unitType: parsed.unitType,
+          startIndex: span.start,
+          endIndex: span.end,
+          originalText: span.text,
+        ));
+      }
+    }
+
+    return EnhancedParseResult(
+      originalText: input,
+      quantities: enhancedQuantities,
+      ingredientName: basicResult.cleanName,
+    );
+  }
+
+  /// Parses a quantity text string (e.g., "2 cups", "1/2 tsp") and extracts
+  /// numeric value, unit, and unit type.
+  _ParsedQuantityData? _parseQuantityText(String text, UnitConversionService converter) {
+    // Try to extract the number and unit parts
+
+    // Handle ranges like "2-3 cups"
+    final rangeMatch = RegExp(r'^(\d+(?:\.\d+)?)\s*(?:-|–|to)\s*(\d+(?:\.\d+)?)\s*(.+)$').firstMatch(text);
+    if (rangeMatch != null) {
+      final minValue = double.tryParse(rangeMatch.group(1)!);
+      final maxValue = double.tryParse(rangeMatch.group(2)!);
+      final unitText = rangeMatch.group(3)!.trim();
+      if (minValue != null && maxValue != null) {
+        return _ParsedQuantityData(
+          value: minValue,
+          rangeMax: maxValue,
+          unit: unitText,
+          canonicalUnit: converter.getCanonicalUnit(unitText),
+          unitType: converter.getUnitType(unitText),
+        );
+      }
+    }
+
+    // Handle mixed fractions like "1 1/2 cups"
+    final mixedFractionMatch = RegExp(r'^(\d+)\s+(\d+)/(\d+)\s*(.*)$').firstMatch(text);
+    if (mixedFractionMatch != null) {
+      final whole = int.tryParse(mixedFractionMatch.group(1)!);
+      final numerator = int.tryParse(mixedFractionMatch.group(2)!);
+      final denominator = int.tryParse(mixedFractionMatch.group(3)!);
+      final unitText = mixedFractionMatch.group(4)!.trim();
+      if (whole != null && numerator != null && denominator != null && denominator != 0) {
+        final value = whole + numerator / denominator;
+        return _ParsedQuantityData(
+          value: value,
+          unit: unitText,
+          canonicalUnit: converter.getCanonicalUnit(unitText),
+          unitType: unitText.isEmpty ? UnitType.count : converter.getUnitType(unitText),
+        );
+      }
+    }
+
+    // Handle simple fractions like "1/2 cup"
+    final fractionMatch = RegExp(r'^(\d+)/(\d+)\s*(.*)$').firstMatch(text);
+    if (fractionMatch != null) {
+      final numerator = int.tryParse(fractionMatch.group(1)!);
+      final denominator = int.tryParse(fractionMatch.group(2)!);
+      final unitText = fractionMatch.group(3)!.trim();
+      if (numerator != null && denominator != null && denominator != 0) {
+        final value = numerator / denominator;
+        return _ParsedQuantityData(
+          value: value,
+          unit: unitText,
+          canonicalUnit: converter.getCanonicalUnit(unitText),
+          unitType: unitText.isEmpty ? UnitType.count : converter.getUnitType(unitText),
+        );
+      }
+    }
+
+    // Handle Unicode fractions like "½ cup" or "1½ cups"
+    final unicodeFractionMatch = RegExp(r'^(\d+\s*)?([½⅓⅔¼¾⅕⅖⅗⅘⅙⅚⅛⅜⅝⅞半])\s*(.*)$').firstMatch(text);
+    if (unicodeFractionMatch != null) {
+      final wholeStr = unicodeFractionMatch.group(1)?.trim();
+      final fractionChar = unicodeFractionMatch.group(2)!;
+      final unitText = unicodeFractionMatch.group(3)!.trim();
+
+      final whole = (wholeStr != null && wholeStr.isNotEmpty) ? double.tryParse(wholeStr) ?? 0.0 : 0.0;
+      final fractionValue = _unicodeFractionToDecimal(fractionChar);
+      final value = whole + fractionValue;
+
+      return _ParsedQuantityData(
+        value: value,
+        unit: unitText,
+        canonicalUnit: converter.getCanonicalUnit(unitText),
+        unitType: unitText.isEmpty ? UnitType.count : converter.getUnitType(unitText),
+      );
+    }
+
+    // Handle Japanese numbers with optional half
+    final japaneseNumberMatch = RegExp(r'^([一二三四五六七八九十]+(?:半)?|\d+半|半)\s*(.*)$').firstMatch(text);
+    if (japaneseNumberMatch != null) {
+      final numberPart = japaneseNumberMatch.group(1)!;
+      final unitText = japaneseNumberMatch.group(2)!.trim();
+      final value = _parseJapaneseNumber(numberPart);
+      if (value != null) {
+        return _ParsedQuantityData(
+          value: value,
+          unit: unitText,
+          canonicalUnit: converter.getCanonicalUnit(unitText),
+          unitType: unitText.isEmpty ? UnitType.count : converter.getUnitType(unitText),
+        );
+      }
+    }
+
+    // Handle decimals and whole numbers like "2 cups" or "1.5 tbsp"
+    final numberMatch = RegExp(r'^(\d+(?:\.\d+)?)\s*(.*)$').firstMatch(text);
+    if (numberMatch != null) {
+      final value = double.tryParse(numberMatch.group(1)!);
+      final unitText = numberMatch.group(2)!.trim();
+      if (value != null) {
+        return _ParsedQuantityData(
+          value: value,
+          unit: unitText,
+          canonicalUnit: converter.getCanonicalUnit(unitText),
+          unitType: unitText.isEmpty ? UnitType.count : converter.getUnitType(unitText),
+        );
+      }
+    }
+
+    // Handle bare numbers (no unit) like just "2" at start
+    final bareNumberMatch = RegExp(r'^(\d+)$').firstMatch(text.trim());
+    if (bareNumberMatch != null) {
+      final value = double.tryParse(bareNumberMatch.group(1)!);
+      if (value != null) {
+        return _ParsedQuantityData(
+          value: value,
+          unit: '',
+          canonicalUnit: '',
+          unitType: UnitType.count,
+        );
+      }
+    }
+
+    return null;
+  }
+
+  /// Converts Unicode fraction characters to decimal values
+  static double _unicodeFractionToDecimal(String char) {
+    const fractionMap = {
+      '½': 0.5,
+      '⅓': 1/3,
+      '⅔': 2/3,
+      '¼': 0.25,
+      '¾': 0.75,
+      '⅕': 0.2,
+      '⅖': 0.4,
+      '⅗': 0.6,
+      '⅘': 0.8,
+      '⅙': 1/6,
+      '⅚': 5/6,
+      '⅛': 0.125,
+      '⅜': 0.375,
+      '⅝': 0.625,
+      '⅞': 0.875,
+      '半': 0.5,
+    };
+    return fractionMap[char] ?? 0.0;
+  }
+
+  /// Parses Japanese numbers (Kanji and Arabic) with half support
+  static double? _parseJapaneseNumber(String input) {
+    if (input == '半') return 0.5;
+
+    final arabicHalfMatch = RegExp(r'(\d+(?:\.\d+)?)半').firstMatch(input);
+    if (arabicHalfMatch != null) {
+      final number = double.tryParse(arabicHalfMatch.group(1)!);
+      return number != null ? number + 0.5 : null;
+    }
+
+    final arabicMatch = RegExp(r'^\d+(?:\.\d+)?$').firstMatch(input);
+    if (arabicMatch != null) {
+      return double.tryParse(input);
+    }
+
+    const kanjiMap = {
+      '一': 1, '二': 2, '三': 3, '四': 4, '五': 5,
+      '六': 6, '七': 7, '八': 8, '九': 9, '十': 10,
+    };
+
+    if (kanjiMap.containsKey(input)) {
+      return kanjiMap[input]!.toDouble();
+    }
+
+    final kanjiHalfMatch = RegExp(r'([一二三四五六七八九十]+)半').firstMatch(input);
+    if (kanjiHalfMatch != null) {
+      final kanjiPart = kanjiHalfMatch.group(1)!;
+      final baseNumber = kanjiMap[kanjiPart];
+      return baseNumber != null ? baseNumber + 0.5 : null;
+    }
+
+    return null;
   }
   
   List<_QuantityMatch> _findRanges(String input, RegexBuilder regexBuilder) {
@@ -249,11 +476,28 @@ class _QuantityMatch {
   final int start;
   final int end;
   final String text;
-  
+
   _QuantityMatch({
     required this.start,
     required this.end,
     required this.text,
+  });
+}
+
+/// Helper class for parsed quantity data (internal use)
+class _ParsedQuantityData {
+  final double value;
+  final double? rangeMax;
+  final String unit;
+  final String canonicalUnit;
+  final UnitType unitType;
+
+  _ParsedQuantityData({
+    required this.value,
+    this.rangeMax,
+    required this.unit,
+    required this.canonicalUnit,
+    required this.unitType,
   });
 }
 

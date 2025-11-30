@@ -38,7 +38,11 @@ class CookContentState extends ConsumerState<CookContent> {
   // Public methods that can be called from the parent
   void showIngredientsSheet() {
     if (_ingredients != null) {
-      showIngredientsModal(context, _ingredients!);
+      showIngredientsModal(
+        context,
+        _ingredients!,
+        recipeId: widget.initialRecipeId,
+      );
     }
   }
 
