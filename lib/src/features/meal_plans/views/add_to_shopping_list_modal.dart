@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:wolt_modal_sheet/wolt_modal_sheet.dart';
+import 'package:recipe_app/database/database.dart';
+import 'package:recipe_app/database/models/pantry_items.dart';
 import '../../../providers/shopping_list_provider.dart';
 import '../../../services/ingredient_parser_service.dart';
 import '../../../services/logging/app_logger.dart';
@@ -14,45 +16,270 @@ import '../../../widgets/app_circle_button.dart';
 import '../../../widgets/app_radio_button.dart';
 import '../../../widgets/stock_chip.dart';
 import '../../../widgets/utils/grouped_list_styling.dart';
-import '../../../widgets/wolt/text/modal_sheet_title.dart';
-import '../../shopping_list/views/shopping_list_selection_modal.dart';
+import '../../../widgets/adaptive_pull_down/adaptive_pull_down.dart';
+import '../../../widgets/adaptive_pull_down/adaptive_menu_item.dart';
+import '../../shopping_list/widgets/shopping_lists_content.dart';
+import '../../shopping_list/widgets/create_list_content.dart';
 import '../providers/meal_plan_shopping_list_provider.dart';
 import '../models/aggregated_ingredient.dart';
 
+// Global controller instance (like ingredient_matches_bottom_sheet pattern)
+final _addToShoppingListController = _AddToShoppingListController();
+
 void showAddToShoppingListModal(BuildContext context, String date) {
+  // Reset controller state when opening modal
+  _addToShoppingListController.reset();
+
+  final pageIndexNotifier = ValueNotifier<int>(0);
+
   WoltModalSheet.show(
     useRootNavigator: true,
     context: context,
+    pageIndexNotifier: pageIndexNotifier,
     pageListBuilder: (modalContext) => [
-      AddToShoppingListModalPage.build(
-        context: modalContext,
+      // Page 0: Add to Shopping List
+      _buildAddToShoppingListPage(
+        modalContext: modalContext,
         date: date,
+        pageIndexNotifier: pageIndexNotifier,
+      ),
+      // Page 1: Manage Lists
+      _buildManageListsPage(
+        modalContext: modalContext,
+        pageIndexNotifier: pageIndexNotifier,
+      ),
+      // Page 2: Create New List
+      _buildCreateListPage(
+        modalContext: modalContext,
+        pageIndexNotifier: pageIndexNotifier,
       ),
     ],
   );
 }
 
-// Controller for managing checked state
+// ============================================================================
+// Page 0: Add to Shopping List
+// ============================================================================
+
+SliverWoltModalSheetPage _buildAddToShoppingListPage({
+  required BuildContext modalContext,
+  required String date,
+  required ValueNotifier<int> pageIndexNotifier,
+}) {
+  return SliverWoltModalSheetPage(
+    navBarHeight: 55,
+    backgroundColor: AppColors.of(modalContext).background,
+    surfaceTintColor: Colors.transparent,
+    hasTopBarLayer: false,
+    hasSabGradient: true,
+    trailingNavBarWidget: Padding(
+      padding: EdgeInsets.only(right: AppSpacing.lg),
+      child: AppCircleButton(
+        icon: AppCircleButtonIcon.close,
+        variant: AppCircleButtonVariant.neutral,
+        size: 32,
+        onPressed: () => Navigator.of(modalContext).pop(),
+      ),
+    ),
+    stickyActionBar: Consumer(
+      builder: (consumerContext, ref, child) {
+        return Container(
+          color: AppColors.of(modalContext).background,
+          padding: EdgeInsets.symmetric(horizontal: AppSpacing.lg),
+          child: SafeArea(
+            top: false,
+            child: ListenableBuilder(
+              listenable: _addToShoppingListController,
+              builder: (buttonContext, child) {
+                return AppButtonVariants.primaryFilled(
+                  text: _addToShoppingListController.isLoading
+                      ? 'Adding...'
+                      : 'Add to Shopping List',
+                  size: AppButtonSize.large,
+                  shape: AppButtonShape.square,
+                  fullWidth: true,
+                  onPressed: _addToShoppingListController.isButtonEnabled
+                      ? () async {
+                          await _addToShoppingListController.addToShoppingList(
+                            Navigator.of(consumerContext),
+                            ref,
+                          );
+                        }
+                      : null,
+                );
+              },
+            ),
+          ),
+        );
+      },
+    ),
+    mainContentSliversBuilder: (builderContext) => [
+      Consumer(
+        builder: (consumerContext, ref, child) {
+          return _AddToShoppingListContent(
+            date: date,
+            pageIndexNotifier: pageIndexNotifier,
+            controller: _addToShoppingListController,
+          );
+        },
+      ),
+    ],
+  );
+}
+
+// ============================================================================
+// Page 1: Manage Lists
+// ============================================================================
+
+WoltModalSheetPage _buildManageListsPage({
+  required BuildContext modalContext,
+  required ValueNotifier<int> pageIndexNotifier,
+}) {
+  return WoltModalSheetPage(
+    navBarHeight: 55,
+    backgroundColor: AppColors.of(modalContext).background,
+    surfaceTintColor: Colors.transparent,
+    hasTopBarLayer: false,
+    leadingNavBarWidget: Padding(
+      padding: EdgeInsets.only(left: AppSpacing.lg),
+      child: AppCircleButton(
+        icon: AppCircleButtonIcon.back,
+        variant: AppCircleButtonVariant.neutral,
+        size: 32,
+        onPressed: () {
+          pageIndexNotifier.value = 0;
+        },
+      ),
+    ),
+    trailingNavBarWidget: Padding(
+      padding: EdgeInsets.only(right: AppSpacing.lg),
+      child: AppCircleButton(
+        icon: AppCircleButtonIcon.close,
+        variant: AppCircleButtonVariant.neutral,
+        size: 32,
+        onPressed: () => Navigator.of(modalContext).pop(),
+      ),
+    ),
+    child: Padding(
+      padding: EdgeInsets.fromLTRB(AppSpacing.lg, 0, AppSpacing.lg, AppSpacing.lg),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text(
+            'Manage Lists',
+            style: AppTypography.h4.copyWith(
+              color: AppColors.of(modalContext).textPrimary,
+            ),
+          ),
+          SizedBox(height: AppSpacing.lg),
+          ShoppingListsContent(
+            showSelection: false,
+            showCreateButton: true,
+            allowDelete: true,
+            onCreateList: () {
+              pageIndexNotifier.value = 2;
+            },
+          ),
+        ],
+      ),
+    ),
+  );
+}
+
+// ============================================================================
+// Page 2: Create New List
+// ============================================================================
+
+WoltModalSheetPage _buildCreateListPage({
+  required BuildContext modalContext,
+  required ValueNotifier<int> pageIndexNotifier,
+}) {
+  return WoltModalSheetPage(
+    navBarHeight: 55,
+    backgroundColor: AppColors.of(modalContext).background,
+    surfaceTintColor: Colors.transparent,
+    hasTopBarLayer: false,
+    leadingNavBarWidget: Padding(
+      padding: EdgeInsets.only(left: AppSpacing.lg),
+      child: AppCircleButton(
+        icon: AppCircleButtonIcon.back,
+        variant: AppCircleButtonVariant.neutral,
+        size: 32,
+        onPressed: () {
+          pageIndexNotifier.value = 1;
+        },
+      ),
+    ),
+    trailingNavBarWidget: Padding(
+      padding: EdgeInsets.only(right: AppSpacing.lg),
+      child: AppCircleButton(
+        icon: AppCircleButtonIcon.close,
+        variant: AppCircleButtonVariant.neutral,
+        size: 32,
+        onPressed: () => Navigator.of(modalContext).pop(),
+      ),
+    ),
+    child: Padding(
+      padding: EdgeInsets.fromLTRB(AppSpacing.lg, 0, AppSpacing.lg, AppSpacing.lg),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text(
+            'Create New List',
+            style: AppTypography.h4.copyWith(
+              color: AppColors.of(modalContext).textPrimary,
+            ),
+          ),
+          SizedBox(height: AppSpacing.lg),
+          CreateListContent(
+            onCreated: () {
+              pageIndexNotifier.value = 1;
+            },
+          ),
+        ],
+      ),
+    ),
+  );
+}
+
+// ============================================================================
+// Controller
+// ============================================================================
+
 class _AddToShoppingListController extends ChangeNotifier {
-  Map<String, bool> checkedState = {};
+  // Track checked state per ingredient
+  final Map<String, bool> checkedState = {};
+
+  // Track selected list per ingredient (list ID, null = default)
+  final Map<String, String?> selectedListIds = {};
+
+  // Addable ingredients (not already in a list)
+  List<AggregatedIngredient> addableIngredients = [];
+
+  // Parser for ingredient names
+  final _parser = IngredientParserService();
+
   bool isLoading = false;
+  bool initialized = false;
+
+  void reset() {
+    checkedState.clear();
+    selectedListIds.clear();
+    addableIngredients = [];
+    isLoading = false;
+    initialized = false;
+  }
 
   void updateCheckedState(String id, bool value) {
     checkedState[id] = value;
     notifyListeners();
   }
 
-  void initializeCheckedState(List<AggregatedIngredient> ingredients) {
-    bool stateChanged = false;
-    for (final ingredient in ingredients) {
-      if (!checkedState.containsKey(ingredient.id)) {
-        checkedState[ingredient.id] = ingredient.isChecked;
-        stateChanged = true;
-      }
-    }
-    if (stateChanged) {
-      notifyListeners();
-    }
+  void updateSelectedList(String id, String? listId) {
+    selectedListIds[id] = listId;
+    notifyListeners();
   }
 
   void setLoading(bool value) {
@@ -60,287 +287,273 @@ class _AddToShoppingListController extends ChangeNotifier {
     notifyListeners();
   }
 
-  bool get hasCheckedItems => checkedState.values.any((checked) => checked);
-  bool get isButtonEnabled => hasCheckedItems && !isLoading;
-}
+  int get checkedCount => checkedState.entries
+      .where((e) => e.value && addableIngredients.any((i) => i.id == e.key))
+      .length;
 
-class AddToShoppingListModalPage {
-  AddToShoppingListModalPage._();
+  bool get isButtonEnabled => checkedCount > 0 && !isLoading;
 
-  static SliverWoltModalSheetPage build({
-    required BuildContext context,
-    required String date,
-  }) {
-    final controller = _AddToShoppingListController();
-
-    return SliverWoltModalSheetPage(
-      navBarHeight: 55,
-      backgroundColor: AppColors.of(context).background,
-      surfaceTintColor: Colors.transparent,
-      hasTopBarLayer: true,
-      isTopBarLayerAlwaysVisible: false,
-      hasSabGradient: true,
-      topBarTitle: const ModalSheetTitle('Add to Shopping List'),
-      trailingNavBarWidget: Padding(
-        padding: EdgeInsets.only(right: AppSpacing.lg),
-        child: AppCircleButton(
-          icon: AppCircleButtonIcon.close,
-          variant: AppCircleButtonVariant.neutral,
-          size: 32,
-          onPressed: () => Navigator.of(context).pop(),
-        ),
-      ),
-      stickyActionBar: Consumer(
-        builder: (consumerContext, ref, child) {
-          return Container(
-            color: AppColors.of(context).background,
-            padding: EdgeInsets.symmetric(horizontal: AppSpacing.lg),
-            child: SafeArea(
-              top: false,
-              child: ListenableBuilder(
-                listenable: controller,
-                builder: (buttonContext, child) {
-                  final aggregatedIngredientsAsync = ref.watch(aggregatedIngredientsProvider(date));
-                  final ingredients = aggregatedIngredientsAsync.valueOrNull ?? [];
-
-                  return AppButtonVariants.primaryFilled(
-                    text: controller.isLoading ? 'Adding...' : 'Add to Shopping List',
-                    size: AppButtonSize.large,
-                    shape: AppButtonShape.square,
-                    fullWidth: true,
-                    onPressed: controller.isButtonEnabled
-                        ? () async {
-                            await _addToShoppingList(
-                              context: consumerContext,
-                              ref: ref,
-                              controller: controller,
-                              ingredients: ingredients,
-                            );
-                          }
-                        : null,
-                  );
-                },
-              ),
-            ),
-          );
-        },
-      ),
-      mainContentSliversBuilder: (builderContext) => [
-        Consumer(
-          builder: (consumerContext, ref, child) {
-            final aggregatedIngredientsAsync = ref.watch(aggregatedIngredientsProvider(date));
-
-            return _AddToShoppingListContentSlivers(
-              aggregatedIngredientsAsync: aggregatedIngredientsAsync,
-              controller: controller,
-              date: date,
-            );
-          },
-        ),
-      ],
-    );
+  String _getCleanName(String name) {
+    final parseResult = _parser.parse(name);
+    return parseResult.cleanName.isNotEmpty ? parseResult.cleanName : name;
   }
 
-  static Widget _buildShoppingListSelector(BuildContext context, WidgetRef ref) {
-    final currentListId = ref.watch(currentShoppingListProvider);
-    final shoppingListsAsync = ref.watch(shoppingListsProvider);
-    final shoppingLists = shoppingListsAsync.valueOrNull ?? [];
-
-    // Get current list name
-    String listName = 'My Shopping List';
-    if (currentListId != null) {
-      final list = shoppingLists.where((l) => l.id == currentListId).firstOrNull;
-      listName = list?.name ?? 'My Shopping List';
-    }
-
-    return Container(
-      padding: EdgeInsets.fromLTRB(AppSpacing.lg, AppSpacing.sm, AppSpacing.lg, 0),
-      child: Row(
-        children: [
-          Text(
-            'Add to:',
-            style: AppTypography.body.copyWith(
-              color: AppColors.of(context).textSecondary,
-            ),
-          ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: AppButton(
-              text: listName,
-              trailingIcon: const Icon(Icons.keyboard_arrow_down, size: 24),
-              trailingIconOffset: const Offset(8, -2),
-              style: AppButtonStyle.mutedOutline,
-              shape: AppButtonShape.square,
-              size: AppButtonSize.medium,
-              theme: AppButtonTheme.primary,
-              fullWidth: true,
-              contentAlignment: AppButtonContentAlignment.left,
-              onPressed: () => showShoppingListSelectionModal(context, ref),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  static Widget _buildEmptyState(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.all(48.0),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(
-            CupertinoIcons.cart,
-            size: 64,
-            color: CupertinoColors.secondaryLabel.resolveFrom(context),
-          ),
-          const SizedBox(height: 16),
-          Text(
-            'No ingredients to add',
-            style: CupertinoTheme.of(context).textTheme.textStyle.copyWith(
-              fontSize: 18,
-              fontWeight: FontWeight.w600,
-              color: CupertinoColors.secondaryLabel.resolveFrom(context),
-            ),
-          ),
-          const SizedBox(height: 8),
-          Text(
-            'All ingredients are either in your pantry with sufficient stock or already on a shopping list.',
-            style: CupertinoTheme.of(context).textTheme.textStyle.copyWith(
-              fontSize: 14,
-              color: CupertinoColors.tertiaryLabel.resolveFrom(context),
-            ),
-            textAlign: TextAlign.center,
-          ),
-        ],
-      ),
-    );
-  }
-
-  static Future<void> _addToShoppingList({
-    required BuildContext context,
-    required WidgetRef ref,
-    required _AddToShoppingListController controller,
-    required List<AggregatedIngredient> ingredients,
-  }) async {
-    controller.setLoading(true);
+  Future<void> addToShoppingList(NavigatorState navigator, WidgetRef ref) async {
+    setLoading(true);
 
     try {
-      final shoppingListRepository = ref.read(shoppingListRepositoryProvider);
-      final currentListId = ref.read(currentShoppingListProvider);
-      final parser = IngredientParserService();
       final userId = Supabase.instance.client.auth.currentUser?.id;
 
-      // Add checked ingredients to shopping list
-      for (final ingredient in ingredients) {
-        if (controller.checkedState[ingredient.id] ?? false) {
-          // Parse ingredient name to strip quantities and units
-          final parseResult = parser.parse(ingredient.name);
-          final cleanName = parseResult.cleanName.isNotEmpty
-              ? parseResult.cleanName
-              : ingredient.name;
+      // Group items by list
+      final itemsByList = <String?, List<String>>{};
 
-          await shoppingListRepository.addItem(
-            shoppingListId: currentListId,
-            name: cleanName,
+      for (final ingredient in addableIngredients) {
+        final id = ingredient.id;
+        if (checkedState[id] == true) {
+          final listId = selectedListIds[id];
+          itemsByList.putIfAbsent(listId, () => []);
+          itemsByList[listId]!.add(_getCleanName(ingredient.name));
+        }
+      }
+
+      // Add items to each list
+      for (final entry in itemsByList.entries) {
+        final listId = entry.key;
+        final items = entry.value;
+
+        final itemsNotifier = ref.read(shoppingListItemsProvider(listId).notifier);
+
+        for (final itemName in items) {
+          await itemsNotifier.addItem(
+            name: itemName,
             userId: userId,
-            householdId: null,
-            // Don't pass terms or category - let the canonicalization queue
-            // handle it so we get both terms AND category from the API.
-            // This ensures items are properly categorized instead of ending
-            // up in "Other" category.
           );
         }
       }
 
-      // Close modal
-      if (context.mounted) {
-        Navigator.of(context).pop();
-      }
+      // Close the modal
+      navigator.pop();
     } catch (e) {
-      AppLogger.error('Failed to add meal plan ingredients to shopping list', e);
-      // Handle error
-      controller.setLoading(false);
+      AppLogger.error('Error adding meal plan items to shopping list', e);
+      setLoading(false);
     }
   }
 }
 
-// Content slivers widget - matches pattern from update_pantry_modal.dart
-class _AddToShoppingListContentSlivers extends ConsumerWidget {
-  final AsyncValue<List<AggregatedIngredient>> aggregatedIngredientsAsync;
-  final _AddToShoppingListController controller;
-  final String date;
+// ============================================================================
+// Content Widget
+// ============================================================================
 
-  const _AddToShoppingListContentSlivers({
-    required this.aggregatedIngredientsAsync,
-    required this.controller,
+class _AddToShoppingListContent extends ConsumerStatefulWidget {
+  final String date;
+  final ValueNotifier<int> pageIndexNotifier;
+  final _AddToShoppingListController controller;
+
+  const _AddToShoppingListContent({
     required this.date,
+    required this.pageIndexNotifier,
+    required this.controller,
   });
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    return aggregatedIngredientsAsync.when(
+  ConsumerState<_AddToShoppingListContent> createState() =>
+      _AddToShoppingListContentState();
+}
+
+class _AddToShoppingListContentState
+    extends ConsumerState<_AddToShoppingListContent> {
+  final _parser = IngredientParserService();
+
+  _AddToShoppingListController get controller => widget.controller;
+
+  @override
+  void initState() {
+    super.initState();
+    controller.addListener(_onControllerChanged);
+  }
+
+  @override
+  void dispose() {
+    controller.removeListener(_onControllerChanged);
+    super.dispose();
+  }
+
+  void _onControllerChanged() {
+    if (mounted) setState(() {});
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = AppColors.of(context);
+
+    // Watch shopping lists and current selection
+    final listsAsync = ref.watch(shoppingListsProvider);
+    final currentListId = ref.watch(currentShoppingListProvider);
+
+    // Watch the aggregated ingredients
+    final ingredientsAsync = ref.watch(aggregatedIngredientsProvider(widget.date));
+
+    return listsAsync.when(
       loading: () => const SliverFillRemaining(
         child: Center(child: CupertinoActivityIndicator()),
       ),
       error: (error, stack) => SliverFillRemaining(
-        child: Center(
-          child: Text(
-            'Error loading ingredients: $error',
-            style: TextStyle(
-              color: CupertinoColors.destructiveRed.resolveFrom(context),
-            ),
-          ),
-        ),
+        child: Center(child: Text('Error: $error')),
       ),
-      data: (aggregatedIngredients) {
-        // Initialize checked state for ingredients (notifies listeners if state changed)
-        WidgetsBinding.instance.addPostFrameCallback((_) {
-          controller.initializeCheckedState(aggregatedIngredients);
-        });
+      data: (lists) {
+        return ingredientsAsync.when(
+          loading: () => const SliverFillRemaining(
+            child: Center(child: CupertinoActivityIndicator()),
+          ),
+          error: (error, stack) => SliverFillRemaining(
+            child: Center(child: Text('Error: $error')),
+          ),
+          data: (ingredients) {
+            // Initialize state on first build
+            if (!controller.initialized) {
+              _initializeState(ingredients, currentListId);
+              controller.initialized = true;
+            }
 
-        if (aggregatedIngredients.isEmpty) {
-          return SliverFillRemaining(
-            child: AddToShoppingListModalPage._buildEmptyState(context),
-          );
-        }
+            // Separate ingredients into addable vs already in list
+            final addableIngredients = <AggregatedIngredient>[];
+            final alreadyInListIngredients = <AggregatedIngredient>[];
 
-        // Wrap in ListenableBuilder so content rebuilds when controller state changes
-        return ListenableBuilder(
-          listenable: controller,
-          builder: (context, child) {
-            // Build widgets for the list
+            for (final ingredient in ingredients) {
+              if (ingredient.existsInShoppingList) {
+                alreadyInListIngredients.add(ingredient);
+              } else {
+                addableIngredients.add(ingredient);
+              }
+            }
+
+            // Sort addable by stock status
+            addableIngredients.sort((a, b) =>
+                _getSortPriority(a).compareTo(_getSortPriority(b)));
+
+            // Update controller's addable ingredients for button state
+            controller.addableIngredients = addableIngredients;
+
+            // Build widget list
             final List<Widget> widgets = [];
 
-            // Shopping list selector
-            widgets.add(AddToShoppingListModalPage._buildShoppingListSelector(context, ref));
-            widgets.add(SizedBox(height: AppSpacing.lg));
+            // Title row with Manage Lists button
+            widgets.add(
+              Padding(
+                padding: EdgeInsets.fromLTRB(
+                    AppSpacing.lg, 0, AppSpacing.lg, AppSpacing.md),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    Text(
+                      'Add to Shopping List',
+                      style: AppTypography.h4.copyWith(
+                        color: colors.textPrimary,
+                      ),
+                    ),
+                    AppButton(
+                      text: 'Manage Lists',
+                      onPressed: () {
+                        widget.pageIndexNotifier.value = 1;
+                      },
+                      theme: AppButtonTheme.secondary,
+                      style: AppButtonStyle.outline,
+                      shape: AppButtonShape.square,
+                      size: AppButtonSize.small,
+                    ),
+                  ],
+                ),
+              ),
+            );
 
-            // Ingredient list items
-            for (int index = 0; index < aggregatedIngredients.length; index++) {
-              final ingredient = aggregatedIngredients[index];
-              final isChecked = controller.checkedState[ingredient.id] ?? ingredient.isChecked;
-              final isFirst = index == 0;
-              final isLast = index == aggregatedIngredients.length - 1;
+            widgets.add(SizedBox(height: AppSpacing.sm));
 
+            // Empty state
+            if (addableIngredients.isEmpty && alreadyInListIngredients.isEmpty) {
               widgets.add(
                 Padding(
-                  padding: EdgeInsets.symmetric(horizontal: AppSpacing.lg),
-                  child: _IngredientTile(
-                    ingredient: ingredient,
-                    isChecked: isChecked,
-                    isFirst: isFirst,
-                    isLast: isLast,
-                    onChanged: (value) {
-                      controller.updateCheckedState(ingredient.id, value);
-                    },
+                  padding: EdgeInsets.all(AppSpacing.xl),
+                  child: Center(
+                    child: Column(
+                      children: [
+                        Icon(
+                          CupertinoIcons.cart,
+                          size: 64,
+                          color: colors.textTertiary,
+                        ),
+                        SizedBox(height: AppSpacing.lg),
+                        Text(
+                          'No ingredients to add',
+                          style: AppTypography.body.copyWith(
+                            color: colors.textSecondary,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                        SizedBox(height: AppSpacing.sm),
+                        Text(
+                          'All ingredients are in your pantry or already on a shopping list.',
+                          style: AppTypography.bodySmall.copyWith(
+                            color: colors.textTertiary,
+                          ),
+                          textAlign: TextAlign.center,
+                        ),
+                      ],
+                    ),
                   ),
                 ),
               );
             }
 
+            // Addable ingredients list
+            if (addableIngredients.isNotEmpty) {
+              for (int index = 0; index < addableIngredients.length; index++) {
+                final ingredient = addableIngredients[index];
+                final isFirst = index == 0;
+                final isLast = index == addableIngredients.length - 1 &&
+                    alreadyInListIngredients.isEmpty;
+
+                widgets.add(
+                  Padding(
+                    padding: EdgeInsets.symmetric(horizontal: AppSpacing.lg),
+                    child: _buildIngredientRow(
+                      context,
+                      ingredient,
+                      lists,
+                      currentListId,
+                      isFirst: isFirst,
+                      isLast: isLast,
+                    ),
+                  ),
+                );
+              }
+            }
+
+            // Already in list section
+            if (alreadyInListIngredients.isNotEmpty) {
+              for (int index = 0;
+                  index < alreadyInListIngredients.length;
+                  index++) {
+                final ingredient = alreadyInListIngredients[index];
+                final isFirst = index == 0 && addableIngredients.isEmpty;
+                final isLast = index == alreadyInListIngredients.length - 1;
+
+                widgets.add(
+                  Padding(
+                    padding: EdgeInsets.symmetric(horizontal: AppSpacing.lg),
+                    child: _buildAlreadyInListRow(
+                      context,
+                      ingredient,
+                      isFirst: isFirst,
+                      isLast: isLast,
+                    ),
+                  ),
+                );
+              }
+            }
+
             // Bottom padding for sticky action bar
-            widgets.add(SizedBox(height: 130));
+            widgets.add(const SizedBox(height: 130));
 
             return SliverList(
               delegate: SliverChildListDelegate(widgets),
@@ -350,37 +563,78 @@ class _AddToShoppingListContentSlivers extends ConsumerWidget {
       },
     );
   }
-}
 
-// Ingredient tile widget with grouped list styling
-class _IngredientTile extends StatelessWidget {
-  final AggregatedIngredient ingredient;
-  final bool isChecked;
-  final bool isFirst;
-  final bool isLast;
-  final ValueChanged<bool> onChanged;
+  void _initializeState(
+    List<AggregatedIngredient> ingredients,
+    String? defaultListId,
+  ) {
+    for (final ingredient in ingredients) {
+      final id = ingredient.id;
 
-  static final _parser = IngredientParserService();
+      // Skip items already in a list
+      if (ingredient.existsInShoppingList) continue;
 
-  const _IngredientTile({
-    required this.ingredient,
-    required this.isChecked,
-    required this.isFirst,
-    required this.isLast,
-    required this.onChanged,
-  });
+      // Pre-check out of stock and low stock items
+      if (!controller.checkedState.containsKey(id)) {
+        final pantryItem = ingredient.matchingPantryItem;
+        final isOutOrLow = pantryItem == null ||
+            pantryItem.stockStatus == StockStatus.outOfStock ||
+            pantryItem.stockStatus == StockStatus.lowStock;
+        controller.checkedState[id] = isOutOrLow;
+      }
 
-  @override
-  Widget build(BuildContext context) {
+      // Default list selection
+      if (!controller.selectedListIds.containsKey(id)) {
+        controller.selectedListIds[id] = defaultListId;
+      }
+    }
+  }
+
+  int _getSortPriority(AggregatedIngredient ingredient) {
+    final pantryItem = ingredient.matchingPantryItem;
+    if (pantryItem != null) {
+      final status = pantryItem.stockStatus;
+      if (status == StockStatus.outOfStock) return 1;
+      if (status == StockStatus.lowStock) return 2;
+      if (status == StockStatus.inStock) return 3;
+    }
+    return 0; // No match at top (most likely to need)
+  }
+
+  String _getCleanName(String name) {
+    final parseResult = _parser.parse(name);
+    return parseResult.cleanName.isNotEmpty ? parseResult.cleanName : name;
+  }
+
+  Widget _buildStockChip(AggregatedIngredient ingredient) {
+    final pantryItem = ingredient.matchingPantryItem;
+    if (pantryItem == null) {
+      return StockChip(showNotInPantry: true);
+    }
+    return StockChip(status: pantryItem.stockStatus);
+  }
+
+  Widget _buildIngredientRow(
+    BuildContext context,
+    AggregatedIngredient ingredient,
+    List<ShoppingListEntry> lists,
+    String? defaultListId, {
+    required bool isFirst,
+    required bool isLast,
+  }) {
     final colors = AppColors.of(context);
+    final displayName = _getCleanName(ingredient.name);
+    final isChecked = controller.checkedState[ingredient.id] ?? false;
+    final selectedListId =
+        controller.selectedListIds[ingredient.id] ?? defaultListId;
 
-    // Parse ingredient name to strip quantities and units
-    final parseResult = _parser.parse(ingredient.name);
-    final displayName = parseResult.cleanName.isNotEmpty
-        ? parseResult.cleanName
-        : ingredient.name;
+    // Get list name for display
+    String listName = 'My Shopping List';
+    if (selectedListId != null) {
+      final list = lists.where((l) => l.id == selectedListId).firstOrNull;
+      listName = list?.name ?? 'My Shopping List';
+    }
 
-    // Get grouped styling
     final borderRadius = GroupedListStyling.getBorderRadius(
       isGrouped: true,
       isFirstInGroup: isFirst,
@@ -400,57 +654,170 @@ class _IngredientTile extends StatelessWidget {
         border: border,
         borderRadius: borderRadius,
       ),
-      child: GestureDetector(
-        onTap: () => onChanged(!isChecked),
-        behavior: HitTestBehavior.opaque,
-        child: Padding(
-          padding: EdgeInsets.all(AppSpacing.md),
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              // Circle checkbox (24px)
-              AppRadioButton(
+      child: Padding(
+        padding: EdgeInsets.all(AppSpacing.md),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            // Checkbox
+            GestureDetector(
+              onTap: () {
+                controller.updateCheckedState(ingredient.id, !isChecked);
+              },
+              child: AppRadioButton(
                 selected: isChecked,
-                onTap: () => onChanged(!isChecked),
+                onTap: () {
+                  controller.updateCheckedState(ingredient.id, !isChecked);
+                },
               ),
+            ),
 
-              SizedBox(width: AppSpacing.md),
+            SizedBox(width: AppSpacing.md),
 
-              // Ingredient info (Expanded)
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+            // Ingredient info (name + stock chip below)
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    displayName,
+                    style: AppTypography.body.copyWith(
+                      fontWeight: FontWeight.w600,
+                      color: colors.textPrimary,
+                    ),
+                  ),
+                  SizedBox(height: AppSpacing.xs),
+                  _buildStockChip(ingredient),
+                ],
+              ),
+            ),
+
+            SizedBox(width: AppSpacing.sm),
+
+            // List dropdown (styled like duration picker chips)
+            AdaptivePullDownButton(
+              items: [
+                AdaptiveMenuItem(
+                  title: 'My Shopping List',
+                  icon: Icon(selectedListId == null
+                      ? CupertinoIcons.checkmark
+                      : CupertinoIcons.list_bullet),
+                  onTap: () {
+                    controller.updateSelectedList(ingredient.id, null);
+                    if (!isChecked) {
+                      controller.updateCheckedState(ingredient.id, true);
+                    }
+                  },
+                ),
+                ...lists.map((list) => AdaptiveMenuItem(
+                      title: list.name ?? 'Unnamed',
+                      icon: Icon(selectedListId == list.id
+                          ? CupertinoIcons.checkmark
+                          : CupertinoIcons.list_bullet),
+                      onTap: () {
+                        controller.updateSelectedList(ingredient.id, list.id);
+                        if (!isChecked) {
+                          controller.updateCheckedState(ingredient.id, true);
+                        }
+                      },
+                    )),
+              ],
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                decoration: BoxDecoration(
+                  color: colors.chipBackground,
+                  borderRadius: BorderRadius.circular(6),
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
                   children: [
-                    Text(
-                      displayName,
-                      style: AppTypography.body.copyWith(
-                        fontWeight: FontWeight.w600,
-                        color: colors.textPrimary,
+                    ConstrainedBox(
+                      constraints: const BoxConstraints(maxWidth: 140),
+                      child: Text(
+                        listName,
+                        style: TextStyle(
+                          color: colors.chipText,
+                          fontSize: 12,
+                          fontWeight: FontWeight.w500,
+                        ),
+                        overflow: TextOverflow.ellipsis,
                       ),
                     ),
-                    const SizedBox(height: 2),
-                    Text(
-                      'From ${ingredient.sourcesDisplay}',
-                      style: AppTypography.caption.copyWith(
-                        color: colors.textTertiary,
-                      ),
+                    const SizedBox(width: 2),
+                    Icon(
+                      Icons.arrow_drop_down,
+                      size: 16,
+                      color: colors.chipText,
                     ),
                   ],
                 ),
               ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
 
-              SizedBox(width: AppSpacing.md),
+  Widget _buildAlreadyInListRow(
+    BuildContext context,
+    AggregatedIngredient ingredient, {
+    required bool isFirst,
+    required bool isLast,
+  }) {
+    final colors = AppColors.of(context);
+    final displayName = _getCleanName(ingredient.name);
 
-              // Stock status chip (80px width, right-aligned)
-              SizedBox(
-                width: 80,
-                child: Align(
-                  alignment: Alignment.centerRight,
-                  child: StockChip(status: ingredient.matchingPantryItem?.stockStatus),
-                ),
+    final borderRadius = GroupedListStyling.getBorderRadius(
+      isGrouped: true,
+      isFirstInGroup: isFirst,
+      isLastInGroup: isLast,
+    );
+    final border = GroupedListStyling.getBorder(
+      context: context,
+      isGrouped: true,
+      isFirstInGroup: isFirst,
+      isLastInGroup: isLast,
+      isDragging: false,
+    );
+
+    return Container(
+      decoration: BoxDecoration(
+        color: colors.groupedListBackground,
+        border: border,
+        borderRadius: borderRadius,
+      ),
+      child: Padding(
+        padding: EdgeInsets.all(AppSpacing.md),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            // Spacer instead of checkbox (for alignment)
+            SizedBox(width: 24 + AppSpacing.md),
+
+            // Ingredient info
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    displayName,
+                    style: AppTypography.body.copyWith(
+                      fontWeight: FontWeight.w600,
+                      color: colors.textTertiary,
+                    ),
+                  ),
+                  SizedBox(height: AppSpacing.xs),
+                  Text(
+                    'Already on shopping list',
+                    style: AppTypography.caption.copyWith(
+                      color: colors.textTertiary,
+                    ),
+                  ),
+                ],
               ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );

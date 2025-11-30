@@ -1,4 +1,3 @@
-import 'package:uuid/uuid.dart';
 import '../../../../database/database.dart';
 import '../../../../database/models/ingredients.dart';
 import '../../../repositories/recipe_repository.dart';
@@ -107,7 +106,7 @@ class MealPlanShoppingListService {
       );
 
       aggregatedIngredients.add(AggregatedIngredient(
-        id: const Uuid().v4(),
+        id: _generateStableId(aggregation.terms),
         name: aggregation.name,
         terms: aggregation.terms.toList(),
         sourceRecipeIds: aggregation.sourceRecipeIds.toList(),
@@ -127,6 +126,12 @@ class MealPlanShoppingListService {
     });
 
     return aggregatedIngredients;
+  }
+
+  /// Generate a stable ID from terms for consistent identification across refetches
+  String _generateStableId(Set<String> terms) {
+    final sortedTerms = terms.toList()..sort();
+    return sortedTerms.join('|');
   }
 
   /// Extract terms from an ingredient for matching purposes
