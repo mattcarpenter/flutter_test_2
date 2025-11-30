@@ -923,6 +923,8 @@ class _AddToShoppingListPageState extends ConsumerState<AddToShoppingListPage> {
                         onPressed: () {
                           widget.pageIndexNotifier.value = 2;
                         },
+                        trailingIcon: const Icon(CupertinoIcons.chevron_right, size: 14),
+                        compactTrailingIcon: true,
                         theme: AppButtonTheme.secondary,
                         style: AppButtonStyle.outline,
                         shape: AppButtonShape.square,

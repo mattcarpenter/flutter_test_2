@@ -457,6 +457,8 @@ class _AddToShoppingListContentState
                       onPressed: () {
                         widget.pageIndexNotifier.value = 1;
                       },
+                      trailingIcon: const Icon(CupertinoIcons.chevron_right, size: 14),
+                      compactTrailingIcon: true,
                       theme: AppButtonTheme.secondary,
                       style: AppButtonStyle.outline,
                       shape: AppButtonShape.square,
