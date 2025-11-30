@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:url_launcher/url_launcher.dart';
 import 'package:recipe_app/src/features/recipes/widgets/recipe_view/recipe_image_gallery.dart';
 import 'package:recipe_app/src/features/recipes/widgets/recipe_view/recipe_ingredients_view.dart';
 import 'package:recipe_app/src/features/recipes/widgets/recipe_view/recipe_steps_view.dart';
@@ -171,13 +172,7 @@ class _RecipeViewState extends ConsumerState<RecipeView> {
             // Source (if available)
             if (recipe.source != null && recipe.source!.isNotEmpty) ...[
               const SizedBox(height: 16),
-              Text(
-                'Source: ${recipe.source}',
-                style: AppTypography.body.copyWith(
-                  fontSize: scaledFontSize,
-                  color: AppColors.of(context).textSecondary,
-                ),
-              ),
+              _buildSourceWidget(context, recipe.source!, scaledFontSize),
             ],
 
             const SizedBox(height: 32),
@@ -315,6 +310,66 @@ class _RecipeViewState extends ConsumerState<RecipeView> {
           );
         }
       },
+    );
+  }
+
+  /// Check if a string is a URL
+  bool _isUrl(String text) {
+    final urlPattern = RegExp(
+      r'^https?:\/\/',
+      caseSensitive: false,
+    );
+    return urlPattern.hasMatch(text.trim());
+  }
+
+  /// Build the source widget - linkified if URL, plain text otherwise
+  Widget _buildSourceWidget(BuildContext context, String source, double fontSize) {
+    final colors = AppColors.of(context);
+    final isUrl = _isUrl(source);
+
+    if (!isUrl) {
+      // Plain text source
+      return Text(
+        'Source: $source',
+        style: AppTypography.body.copyWith(
+          fontSize: fontSize,
+          color: colors.textSecondary,
+        ),
+      );
+    }
+
+    // URL source - make it tappable with dotted underline
+    return GestureDetector(
+      onTap: () async {
+        final uri = Uri.tryParse(source.trim());
+        if (uri != null) {
+          await launchUrl(uri, mode: LaunchMode.externalApplication);
+        }
+      },
+      child: Text.rich(
+        TextSpan(
+          children: [
+            TextSpan(
+              text: 'Source: ',
+              style: AppTypography.body.copyWith(
+                fontSize: fontSize,
+                color: colors.textSecondary,
+              ),
+            ),
+            TextSpan(
+              text: source,
+              style: AppTypography.body.copyWith(
+                fontSize: fontSize,
+                color: colors.textSecondary,
+                decoration: TextDecoration.underline,
+                decorationStyle: TextDecorationStyle.dotted,
+                decorationColor: colors.textSecondary,
+              ),
+            ),
+          ],
+        ),
+        overflow: TextOverflow.ellipsis,
+      ),
     );
   }
 }
