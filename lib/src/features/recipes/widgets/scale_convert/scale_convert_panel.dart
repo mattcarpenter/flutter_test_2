@@ -68,7 +68,7 @@ class ScaleConvertPanel extends ConsumerWidget {
           ],
         ),
 
-        SizedBox(height: AppSpacing.xl),
+        SizedBox(height: AppSpacing.lg),
 
         // Convert Group
         AppTextFieldGroup(
@@ -402,8 +402,8 @@ class _ScaleSliderRow extends ConsumerWidget {
       padding: EdgeInsets.only(
         left: AppSpacing.lg,
         right: AppSpacing.sm,
-        top: AppSpacing.sm,
-        bottom: AppSpacing.sm,
+        top: AppSpacing.xs,
+        bottom: AppSpacing.xs,
       ),
       child: Row(
         children: [
@@ -428,6 +428,7 @@ class _ScaleSliderRow extends ConsumerWidget {
                 inactiveTrackColor: colors.border,
                 thumbColor: colors.primary,
                 overlayColor: colors.primary.withValues(alpha: 0.1),
+                overlayShape: const RoundSliderOverlayShape(overlayRadius: 16),
                 trackHeight: 4,
                 thumbShape: const RoundSliderThumbShape(
                   enabledThumbRadius: 8,

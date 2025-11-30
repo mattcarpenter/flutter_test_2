@@ -128,19 +128,36 @@ class _RecipeIngredientsViewState extends ConsumerState<RecipeIngredientsView>
               ),
               child: AnimatedBuilder(
                 animation: _accordionController,
-                builder: (context, child) => Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    const Text('Scale or Convert'),
-                    const SizedBox(width: 4),
-                    Icon(
-                      _accordionController.value > 0.5
-                          ? Icons.keyboard_arrow_up
-                          : Icons.keyboard_arrow_down,
-                      size: 20,
-                    ),
-                  ],
-                ),
+                builder: (context, child) {
+                  // Check if any transform is active
+                  final isTransformActive = widget.recipeId != null &&
+                      ref.watch(scaleConvertProvider(widget.recipeId!)).isTransformActive;
+
+                  return Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      if (isTransformActive) ...[
+                        Container(
+                          width: 6,
+                          height: 6,
+                          decoration: BoxDecoration(
+                            color: AppColors.of(context).error,
+                            shape: BoxShape.circle,
+                          ),
+                        ),
+                        const SizedBox(width: 6),
+                      ],
+                      const Text('Scale or Convert'),
+                      const SizedBox(width: 4),
+                      Icon(
+                        _accordionController.value > 0.5
+                            ? Icons.keyboard_arrow_up
+                            : Icons.keyboard_arrow_down,
+                        size: 20,
+                      ),
+                    ],
+                  );
+                },
               ),
             ),
           ],
@@ -289,7 +306,6 @@ class _RecipeIngredientsViewState extends ConsumerState<RecipeIngredientsView>
     // Determine which text and quantity positions to use
     String text;
     List<({int start, int end})> quantityPositions;
-    bool wasTransformed;
 
     if (transformed != null && (transformed.wasScaled || transformed.wasConverted)) {
       // Use transformed text and positions
@@ -297,7 +313,6 @@ class _RecipeIngredientsViewState extends ConsumerState<RecipeIngredientsView>
       quantityPositions = transformed.quantities
           .map((q) => (start: q.start, end: q.end))
           .toList();
-      wasTransformed = true;
     } else {
       // Parse original ingredient name
       text = ingredient.name;
@@ -309,7 +324,6 @@ class _RecipeIngredientsViewState extends ConsumerState<RecipeIngredientsView>
       } catch (_) {
         quantityPositions = [];
       }
-      wasTransformed = false;
     }
 
     if (quantityPositions.isEmpty) {
@@ -335,12 +349,11 @@ class _RecipeIngredientsViewState extends ConsumerState<RecipeIngredientsView>
         ));
       }
 
-      // Quantity with bold formatting (and color accent if transformed)
+      // Quantity with bold formatting
       children.add(TextSpan(
         text: text.substring(quantity.start, quantity.end),
         style: baseStyle.copyWith(
           fontWeight: FontWeight.bold,
-          color: wasTransformed ? colors.primary : null,
         ),
       ));
 
