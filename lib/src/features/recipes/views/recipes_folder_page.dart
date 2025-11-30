@@ -299,8 +299,9 @@ class _UnifiedHeaderDelegate extends SliverPersistentHeaderDelegate {
 
   @override
   Widget build(BuildContext context, double shrinkOffset, bool overlapsContent) {
-    // Wide screen = landscape on any device (iPhone landscape ~700-930px, iPad landscape ~1024px+)
-    final isWideScreen = MediaQuery.of(context).size.width > 700;
+    final mediaQuery = MediaQuery.of(context);
+    // Use compact layout (content-sized button) only in landscape mode
+    final isLandscape = mediaQuery.size.width > mediaQuery.size.height;
 
     // Filter button with indicator dot
     Widget filterButton({required bool fullWidth}) => Stack(
@@ -361,8 +362,8 @@ class _UnifiedHeaderDelegate extends SliverPersistentHeaderDelegate {
         height: minExtent,
         padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
         constraints: const BoxConstraints(maxWidth: 800),
-        child: isWideScreen
-            // iPad landscape: content-sized filter button, spacer, add recipe button
+        child: isLandscape
+            // Landscape: content-sized filter button, spacer, add recipe button
             ? Row(
                 children: [
                   filterButton(fullWidth: false),
@@ -370,7 +371,7 @@ class _UnifiedHeaderDelegate extends SliverPersistentHeaderDelegate {
                   addRecipeButton(),
                 ],
               )
-            // iPhone / iPad portrait: expanded filter button, add recipe button
+            // Portrait: expanded filter button, add recipe button
             : Row(
                 children: [
                   Expanded(child: filterButton(fullWidth: true)),
