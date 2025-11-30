@@ -425,12 +425,24 @@ void main() {
         expect(range.$3, closeTo(200, 0.1)); // default = original
       });
 
-      test('returns null when no quantity found', () {
+      test('returns null for empty string', () {
+        final range = service.getIngredientSliderRange(
+          sourceIngredientText: '',
+        );
+
+        expect(range, isNull);
+      });
+
+      test('returns default range for bare ingredients without quantities', () {
         final range = service.getIngredientSliderRange(
           sourceIngredientText: 'salt to taste',
         );
 
-        expect(range, isNull);
+        // "salt to taste" has no parseable quantity, so it's treated as bare ingredient
+        expect(range, isNotNull);
+        expect(range!.$1, 0.25);
+        expect(range.$2, 10.0);
+        expect(range.$3, 1.0);
       });
     });
 
@@ -804,6 +816,184 @@ void main() {
         );
         // 0.667 cups rounds to 3/4 (0.75) since cups use 1/4 granularity
         expect(result.displayText, '3/4 cup flour');
+      });
+    });
+
+    group('bare ingredient scaling', () {
+      test('bare ingredient gets scaled by prepending quantity', () {
+        const state = ScaleConvertState(scaleFactor: 2.0);
+        final result = service.transform(
+          originalText: 'Carrot',
+          state: state,
+        );
+
+        expect(result.displayText, '2 Carrot');
+        expect(result.wasScaled, isTrue);
+        expect(result.wasConverted, isFalse);
+      });
+
+      test('bare ingredient with 1x scale does not prepend quantity', () {
+        const state = ScaleConvertState(scaleFactor: 1.0);
+        final result = service.transform(
+          originalText: 'Carrot',
+          state: state,
+        );
+
+        // 1x scale means no scaling is active
+        expect(result.displayText, 'Carrot');
+        expect(result.wasScaled, isFalse);
+      });
+
+      test('bare ingredient with half scale shows fraction', () {
+        const state = ScaleConvertState(scaleFactor: 0.5);
+        final result = service.transform(
+          originalText: 'Carrot',
+          state: state,
+        );
+
+        expect(result.displayText, '1/2 Carrot');
+        expect(result.wasScaled, isTrue);
+      });
+
+      test('bare ingredient with 3x scale shows whole number', () {
+        const state = ScaleConvertState(scaleFactor: 3.0);
+        final result = service.transform(
+          originalText: 'Apple',
+          state: state,
+        );
+
+        expect(result.displayText, '3 Apple');
+        expect(result.wasScaled, isTrue);
+      });
+
+      test('bare ingredient with 1.5x scale shows mixed number', () {
+        const state = ScaleConvertState(scaleFactor: 1.5);
+        final result = service.transform(
+          originalText: 'Lemon',
+          state: state,
+        );
+
+        expect(result.displayText, '1 1/2 Lemon');
+        expect(result.wasScaled, isTrue);
+      });
+
+      test('bare ingredient with quarter scale', () {
+        const state = ScaleConvertState(scaleFactor: 0.25);
+        final result = service.transform(
+          originalText: 'Onion',
+          state: state,
+        );
+
+        expect(result.displayText, '1/4 Onion');
+        expect(result.wasScaled, isTrue);
+      });
+
+      test('bare ingredient quantity position is correct for highlighting', () {
+        const state = ScaleConvertState(scaleFactor: 2.0);
+        final result = service.transform(
+          originalText: 'Carrot',
+          state: state,
+        );
+
+        expect(result.quantities.length, 1);
+        expect(result.quantities[0].start, 0);
+        expect(result.quantities[0].end, 1); // Just "2"
+        expect(result.quantities[0].text, '2');
+      });
+
+      test('bare ingredient with mixed number has correct position', () {
+        const state = ScaleConvertState(scaleFactor: 1.5);
+        final result = service.transform(
+          originalText: 'Carrot',
+          state: state,
+        );
+
+        expect(result.quantities.length, 1);
+        expect(result.quantities[0].start, 0);
+        expect(result.quantities[0].end, 5); // "1 1/2"
+        expect(result.quantities[0].text, '1 1/2');
+      });
+
+      test('approximate terms like "to taste" are not scaled', () {
+        const state = ScaleConvertState(scaleFactor: 2.0);
+        final result = service.transform(
+          originalText: 'salt to taste',
+          state: state,
+        );
+
+        // Contains "to taste" which is an approximate term
+        // The parser doesn't find quantities, so we try bare ingredient scaling
+        // But since this has no numeric quantity, it should not prepend
+        expect(result.displayText, 'salt to taste');
+        expect(result.wasScaled, isFalse);
+      });
+
+      test('conversion mode does not affect bare ingredients', () {
+        const state = ScaleConvertState(
+          scaleFactor: 1.0,
+          conversionMode: ConversionMode.metric,
+        );
+        final result = service.transform(
+          originalText: 'Carrot',
+          state: state,
+        );
+
+        // Only conversion is active, doesn't apply to bare ingredients
+        expect(result.displayText, 'Carrot');
+        expect(result.wasScaled, isFalse);
+        expect(result.wasConverted, isFalse);
+      });
+
+      test('scaling with conversion - bare ingredient only scales', () {
+        const state = ScaleConvertState(
+          scaleFactor: 2.0,
+          conversionMode: ConversionMode.metric,
+        );
+        final result = service.transform(
+          originalText: 'Carrot',
+          state: state,
+        );
+
+        // Scaling applies, conversion doesn't (no unit to convert)
+        expect(result.displayText, '2 Carrot');
+        expect(result.wasScaled, isTrue);
+        expect(result.wasConverted, isFalse);
+      });
+    });
+
+    group('getIngredientSliderRange', () {
+      test('returns default range for bare ingredients', () {
+        final range = service.getIngredientSliderRange(
+          sourceIngredientText: 'Carrot',
+        );
+
+        expect(range, isNotNull);
+        expect(range!.$1, 0.25); // min
+        expect(range.$2, 10.0); // max
+        expect(range.$3, 1.0); // default
+      });
+
+      test('returns calculated range for ingredients with quantities', () {
+        final range = service.getIngredientSliderRange(
+          sourceIngredientText: '2 cups flour',
+        );
+
+        expect(range, isNotNull);
+        expect(range!.$1, closeTo(0.2, 0.01)); // 10% of 2
+        expect(range.$2, closeTo(10.0, 0.01)); // 500% of 2
+        expect(range.$3, closeTo(2.0, 0.01)); // original value
+      });
+
+      test('returns default range for approximate term ingredients', () {
+        final range = service.getIngredientSliderRange(
+          sourceIngredientText: 'salt to taste',
+        );
+
+        // Contains "to taste" - no parseable quantity, so treated as bare
+        expect(range, isNotNull);
+        expect(range!.$1, 0.25);
+        expect(range.$2, 10.0);
+        expect(range.$3, 1.0);
       });
     });
   });

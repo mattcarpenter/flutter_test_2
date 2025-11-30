@@ -252,13 +252,17 @@ final transformedIngredientsByIdProvider =
 
 /// Provider for getting a list of scalable ingredients for the dropdown.
 ///
-/// Returns ingredients that have parseable quantities, suitable for
-/// ingredient-based scaling selection.
+/// Returns ingredients that are suitable for ingredient-based scaling selection.
+/// This includes:
+/// - Ingredients with parseable quantities (e.g., "2 cups flour")
+/// - Bare ingredients without quantities (e.g., "Carrot") - treated as 1 unit
+///
+/// Excludes:
+/// - Approximate terms like "to taste", "pinch", "dash", etc.
 final scalableIngredientsProvider =
     Provider.family<List<({String id, String name, String displayName})>, String>(
         (ref, recipeId) {
   final recipeAsync = ref.watch(recipeByIdStreamProvider(recipeId));
-  final parser = ref.watch(ingredientParserServiceProvider);
   final converter = ref.watch(unitConversionServiceProvider);
 
   final recipe = recipeAsync.valueOrNull;
@@ -275,9 +279,10 @@ final scalableIngredientsProvider =
       continue;
     }
 
-    // Check if this ingredient has a parseable quantity
-    final parsed = parser.parseEnhanced(ingredient.name, conversionService: converter);
-    if (!parsed.hasQuantities) continue;
+    // Exclude ingredients with approximate terms (pinch, to taste, etc.)
+    if (converter.containsApproximateTerm(ingredient.name)) {
+      continue;
+    }
 
     // Build display name with section disambiguation if needed
     final displayName = currentSection != null

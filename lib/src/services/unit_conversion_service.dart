@@ -266,6 +266,24 @@ class UnitConversionService {
     return _canonicalUnits[lowerUnit] ?? _canonicalUnits[unit] ?? unit;
   }
 
+  /// Check if a unit is an approximate term (pinch, dash, to taste, etc.)
+  bool isApproximateTerm(String unit) {
+    final lowerUnit = unit.toLowerCase().trim();
+    return _approximateTerms.contains(lowerUnit) || _approximateTerms.contains(unit);
+  }
+
+  /// Check if text contains any approximate terms.
+  /// This checks for approximate terms anywhere in the text, not just as a unit.
+  bool containsApproximateTerm(String text) {
+    final lowerText = text.toLowerCase();
+    for (final term in _approximateTerms) {
+      if (lowerText.contains(term.toLowerCase())) {
+        return true;
+      }
+    }
+    return false;
+  }
+
   /// Check if two units can be converted between each other
   bool areUnitsConvertible(String unit1, String unit2) {
     final type1 = getUnitType(unit1);

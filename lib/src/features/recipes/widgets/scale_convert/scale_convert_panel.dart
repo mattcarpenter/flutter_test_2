@@ -402,8 +402,8 @@ class _ScaleSliderRow extends ConsumerWidget {
       padding: EdgeInsets.only(
         left: AppSpacing.lg,
         right: AppSpacing.sm,
-        top: AppSpacing.xs,
-        bottom: AppSpacing.xs,
+        top: AppSpacing.md,
+        bottom: AppSpacing.md,
       ),
       child: Row(
         children: [

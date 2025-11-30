@@ -374,5 +374,58 @@ void main() {
         expect(result.format(preferFractions: false), '0.5 cup');
       });
     });
+
+    group('isApproximateTerm', () {
+      test('identifies English approximate terms', () {
+        expect(service.isApproximateTerm('pinch'), isTrue);
+        expect(service.isApproximateTerm('Pinch'), isTrue);
+        expect(service.isApproximateTerm('dash'), isTrue);
+        expect(service.isApproximateTerm('to taste'), isTrue);
+        expect(service.isApproximateTerm('as needed'), isTrue);
+        expect(service.isApproximateTerm('handful'), isTrue);
+        expect(service.isApproximateTerm('splash'), isTrue);
+        expect(service.isApproximateTerm('drop'), isTrue);
+      });
+
+      test('identifies Japanese approximate terms', () {
+        expect(service.isApproximateTerm('適量'), isTrue);
+        expect(service.isApproximateTerm('少々'), isTrue);
+        expect(service.isApproximateTerm('ひとつまみ'), isTrue);
+        expect(service.isApproximateTerm('少量'), isTrue);
+      });
+
+      test('returns false for regular units', () {
+        expect(service.isApproximateTerm('cup'), isFalse);
+        expect(service.isApproximateTerm('tbsp'), isFalse);
+        expect(service.isApproximateTerm('gram'), isFalse);
+      });
+    });
+
+    group('containsApproximateTerm', () {
+      test('finds approximate terms in text', () {
+        expect(service.containsApproximateTerm('salt to taste'), isTrue);
+        expect(service.containsApproximateTerm('a pinch of salt'), isTrue);
+        expect(service.containsApproximateTerm('dash of pepper'), isTrue);
+        expect(service.containsApproximateTerm('parsley as needed'), isTrue);
+      });
+
+      test('finds Japanese approximate terms in text', () {
+        expect(service.containsApproximateTerm('塩 適量'), isTrue);
+        expect(service.containsApproximateTerm('少々 塩'), isTrue);
+        expect(service.containsApproximateTerm('塩ひとつまみ'), isTrue);
+      });
+
+      test('returns false for text without approximate terms', () {
+        expect(service.containsApproximateTerm('2 cups flour'), isFalse);
+        expect(service.containsApproximateTerm('Carrot'), isFalse);
+        expect(service.containsApproximateTerm('1/4 tsp salt'), isFalse);
+        expect(service.containsApproximateTerm('Apple'), isFalse);
+      });
+
+      test('case insensitive matching', () {
+        expect(service.containsApproximateTerm('SALT TO TASTE'), isTrue);
+        expect(service.containsApproximateTerm('A PINCH of salt'), isTrue);
+      });
+    });
   });
 }

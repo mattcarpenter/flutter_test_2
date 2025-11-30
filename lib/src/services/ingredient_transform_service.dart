@@ -30,8 +30,8 @@ class IngredientTransformService {
     final parsed = _parser.parseEnhanced(originalText, conversionService: _converter);
 
     if (!parsed.hasQuantities) {
-      // No quantities to transform - return unchanged
-      return _noTransform(originalText);
+      // No quantities found - handle bare ingredients for scaling
+      return _transformBareIngredient(originalText, state);
     }
 
     // Build the transformed text by processing each quantity
@@ -256,6 +256,61 @@ class IngredientTransformService {
     return TransformedIngredient.unchanged(originalText, quantities);
   }
 
+  /// Transform a bare ingredient (no quantity) by prepending the scale factor.
+  ///
+  /// For ingredients like "Carrot" with no quantity, we treat them as 1 unit.
+  /// When scaled, we prepend the formatted scale factor:
+  /// - "Carrot" × 2x → "2 Carrot"
+  /// - "Carrot" × 0.5x → "1/2 Carrot"
+  ///
+  /// Note: Conversion is not applicable to bare ingredients.
+  /// Note: Ingredients with approximate terms (like "to taste") are not scaled.
+  TransformedIngredient _transformBareIngredient(
+    String originalText,
+    ScaleConvertState state,
+  ) {
+    // Skip empty or whitespace-only text
+    if (originalText.trim().isEmpty) {
+      return TransformedIngredient.unchanged(originalText, []);
+    }
+
+    // Skip ingredients with approximate terms (pinch, to taste, etc.)
+    if (_converter.containsApproximateTerm(originalText)) {
+      return TransformedIngredient.unchanged(originalText, []);
+    }
+
+    // Only scaling applies to bare ingredients (not conversion)
+    if (!state.isScalingActive) {
+      // Only conversion is active, but that doesn't apply to bare ingredients
+      return TransformedIngredient.unchanged(originalText, []);
+    }
+
+    // Format the scale factor as the quantity
+    final scaleFactor = state.scaleFactor;
+    final formattedQuantity = _formatAsFraction(scaleFactor, 0.125);
+
+    // Prepend the formatted quantity to the original text
+    final displayText = '$formattedQuantity $originalText';
+
+    // The quantity spans from the start to just before the space
+    final quantityEnd = formattedQuantity.length;
+    final quantities = [
+      QuantityDisplay(
+        start: 0,
+        end: quantityEnd,
+        text: formattedQuantity,
+      ),
+    ];
+
+    return TransformedIngredient(
+      originalText: originalText,
+      displayText: displayText,
+      quantities: quantities,
+      wasScaled: true,
+      wasConverted: false,
+    );
+  }
+
   /// Transform a list of ingredients.
   ///
   /// Takes a list of ingredient name strings and returns transformed results.
@@ -321,13 +376,25 @@ class IngredientTransformService {
   ///
   /// Returns (min, max, default) values for the slider based on the
   /// source ingredient's quantity.
+  ///
+  /// For bare ingredients without quantities (e.g., "Carrot"), returns a
+  /// default range based on treating the ingredient as 1 unit.
+  ///
+  /// Returns null for empty/whitespace strings.
   (double min, double max, double defaultValue)? getIngredientSliderRange({
     required String sourceIngredientText,
   }) {
+    // Return null for empty or whitespace-only text
+    if (sourceIngredientText.trim().isEmpty) {
+      return null;
+    }
+
     final parsed = _parser.parseEnhanced(sourceIngredientText, conversionService: _converter);
 
     if (!parsed.hasQuantities) {
-      return null;
+      // Bare ingredient - treat as 1 unit
+      // Range: 0.25 to 10, default 1
+      return (0.25, 10.0, 1.0);
     }
 
     final sourceValue = parsed.primaryQuantity!.value;
