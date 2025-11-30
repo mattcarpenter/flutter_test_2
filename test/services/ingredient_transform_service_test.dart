@@ -593,6 +593,54 @@ void main() {
         expect(result.displayText, '7/8 tbsp oil');
       });
 
+      // Teaspoons also use 1/8 granularity
+      test('tsp formats 1/4 correctly', () {
+        const state = ScaleConvertState(scaleFactor: 0.25);
+        final result = service.transform(
+          originalText: '1 tsp salt',
+          state: state,
+        );
+        expect(result.displayText, '1/4 tsp salt');
+      });
+
+      test('tsp formats 1/2 correctly', () {
+        const state = ScaleConvertState(scaleFactor: 0.5);
+        final result = service.transform(
+          originalText: '1 tsp salt',
+          state: state,
+        );
+        expect(result.displayText, '1/2 tsp salt');
+      });
+
+      // Ounces use fractions (1/8 granularity)
+      test('oz formats fractions correctly', () {
+        const state = ScaleConvertState(scaleFactor: 0.5);
+        final result = service.transform(
+          originalText: '4 oz cheese',
+          state: state,
+        );
+        expect(result.displayText, '2 oz cheese');
+      });
+
+      test('oz formats fractional ounces', () {
+        const state = ScaleConvertState(scaleFactor: 0.375);
+        final result = service.transform(
+          originalText: '8 oz cream cheese',
+          state: state,
+        );
+        expect(result.displayText, '3 oz cream cheese');
+      });
+
+      // Pounds use fractions
+      test('lb formats fractions correctly', () {
+        const state = ScaleConvertState(scaleFactor: 0.5);
+        final result = service.transform(
+          originalText: '2 lb beef',
+          state: state,
+        );
+        expect(result.displayText, '1 lb beef');
+      });
+
       // Metric units use decimal formatting
       test('grams use decimal format', () {
         const state = ScaleConvertState(scaleFactor: 1.5);
@@ -622,6 +670,44 @@ void main() {
         expect(result.displayText, '15 ml vanilla');
       });
 
+      test('medium metric values (10-100) show tenths when needed', () {
+        const state = ScaleConvertState(scaleFactor: 1.33);
+        final result = service.transform(
+          originalText: '30 ml oil',
+          state: state,
+        );
+        // 30 * 1.33 = 39.9, rounds to 39.9
+        expect(result.displayText, '39.9 ml oil');
+      });
+
+      test('large metric values (>=100) round to whole numbers', () {
+        const state = ScaleConvertState(scaleFactor: 1.33);
+        final result = service.transform(
+          originalText: '150 g sugar',
+          state: state,
+        );
+        // 150 * 1.33 = 199.5, rounds to 200
+        expect(result.displayText, '200 g sugar');
+      });
+
+      test('liters use decimal format', () {
+        const state = ScaleConvertState(scaleFactor: 1.5);
+        final result = service.transform(
+          originalText: '1 l water',
+          state: state,
+        );
+        expect(result.displayText, '1.5 l water');
+      });
+
+      test('kg uses decimal format', () {
+        const state = ScaleConvertState(scaleFactor: 1.25);
+        final result = service.transform(
+          originalText: '2 kg flour',
+          state: state,
+        );
+        expect(result.displayText, '2.5 kg flour');
+      });
+
       // Count units use fractions
       test('eggs use fractions', () {
         const state = ScaleConvertState(scaleFactor: 1.25);
@@ -631,6 +717,93 @@ void main() {
         );
         // 2.5 eggs = 2 1/2 eggs (using 1/8 granularity, rounds to 2.5)
         expect(result.displayText, '2 1/2 eggs');
+      });
+
+      test('cloves use fractions', () {
+        const state = ScaleConvertState(scaleFactor: 1.5);
+        final result = service.transform(
+          originalText: '3 cloves garlic',
+          state: state,
+        );
+        // 4.5 cloves = 4 1/2 cloves
+        expect(result.displayText, '4 1/2 cloves garlic');
+      });
+    });
+
+    group('scale factor edge cases', () {
+      test('scale factor of exactly 1.0 produces no change', () {
+        const state = ScaleConvertState(scaleFactor: 1.0);
+        final result = service.transform(
+          originalText: '2 cups flour',
+          state: state,
+        );
+        // scaleFactor 1.0 means isScalingActive is false
+        expect(result.displayText, '2 cups flour');
+        expect(result.wasScaled, isFalse);
+      });
+
+      test('very small value does not round to zero', () {
+        const state = ScaleConvertState(scaleFactor: 0.1);
+        final result = service.transform(
+          originalText: '1 cup flour',
+          state: state,
+        );
+        // 0.1 cups would round to 0, but minimum is 1/4 for cups
+        expect(result.displayText, '1/4 cup flour');
+      });
+
+      test('very small tbsp value does not round to zero', () {
+        const state = ScaleConvertState(scaleFactor: 0.05);
+        final result = service.transform(
+          originalText: '1 tbsp oil',
+          state: state,
+        );
+        // 0.05 tbsp would round to 0, but minimum is 1/8
+        expect(result.displayText, '1/8 tbsp oil');
+      });
+    });
+
+    group('third fractions', () {
+      // Note: With 1/8 granularity, 1/3 (0.333) rounds to 3/8 (0.375)
+      // and 2/3 (0.667) rounds to 5/8 (0.625). This is expected behavior.
+      test('1/3 rounds to nearest 1/8 for non-cup units', () {
+        const state = ScaleConvertState(scaleFactor: 0.333);
+        final result = service.transform(
+          originalText: '1 tbsp oil',
+          state: state,
+        );
+        // 0.333 rounds to nearest 1/8, which is 3/8 (0.375)
+        expect(result.displayText, '3/8 tbsp oil');
+      });
+
+      test('2/3 rounds to nearest 1/8 for non-cup units', () {
+        const state = ScaleConvertState(scaleFactor: 0.667);
+        final result = service.transform(
+          originalText: '1 tbsp oil',
+          state: state,
+        );
+        // 0.667 rounds to nearest 1/8, which is 5/8 (0.625)
+        expect(result.displayText, '5/8 tbsp oil');
+      });
+
+      test('cups round 1/3 to nearest 1/4', () {
+        const state = ScaleConvertState(scaleFactor: 0.333);
+        final result = service.transform(
+          originalText: '1 cup flour',
+          state: state,
+        );
+        // 0.333 cups rounds to 1/4 (0.25) since cups use 1/4 granularity
+        expect(result.displayText, '1/4 cup flour');
+      });
+
+      test('cups round 2/3 to nearest 1/4', () {
+        const state = ScaleConvertState(scaleFactor: 0.667);
+        final result = service.transform(
+          originalText: '1 cup flour',
+          state: state,
+        );
+        // 0.667 cups rounds to 3/4 (0.75) since cups use 1/4 granularity
+        expect(result.displayText, '3/4 cup flour');
       });
     });
   });
