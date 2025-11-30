@@ -34,9 +34,10 @@ class Menu extends ConsumerWidget {
         .color ?? Colors.black;
     final Color activeTextColor = isDarkMode ? textColor : primaryColor;
 
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      children: [
+    return SingleChildScrollView(
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
         MenuItem(
           index: 1,
           title: 'Recipes',
@@ -203,7 +204,8 @@ class Menu extends ConsumerWidget {
               onRouteGo('/auth');
             },
           ),
-      ],
+        ],
+      ),
     );
   }
 }
