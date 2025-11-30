@@ -26,12 +26,44 @@ class RecipeIngredientsView extends ConsumerStatefulWidget {
   ConsumerState<RecipeIngredientsView> createState() => _RecipeIngredientsViewState();
 }
 
-class _RecipeIngredientsViewState extends ConsumerState<RecipeIngredientsView> {
+class _RecipeIngredientsViewState extends ConsumerState<RecipeIngredientsView>
+    with SingleTickerProviderStateMixin {
   // Keep previous match data to prevent flashing
   RecipeIngredientMatches? _previousMatches;
 
   // Parser for ingredient text formatting
   final _parser = IngredientParserService();
+
+  // Accordion animation controller
+  late AnimationController _accordionController;
+  late Animation<double> _accordionAnimation;
+
+  @override
+  void initState() {
+    super.initState();
+    _accordionController = AnimationController(
+      duration: const Duration(milliseconds: 200),
+      vsync: this,
+    );
+    _accordionAnimation = CurvedAnimation(
+      parent: _accordionController,
+      curve: Curves.easeInOut,
+    );
+  }
+
+  @override
+  void dispose() {
+    _accordionController.dispose();
+    super.dispose();
+  }
+
+  void _toggleAccordion() {
+    if (_accordionController.isCompleted) {
+      _accordionController.reverse();
+    } else {
+      _accordionController.forward();
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -64,10 +96,64 @@ class _RecipeIngredientsViewState extends ConsumerState<RecipeIngredientsView> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          'Ingredients',
-          style: AppTypography.h3Serif.copyWith(
-            color: AppColors.of(context).headingSecondary,
+        // Title row with "Scale or Convert" button
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text(
+              'Ingredients',
+              style: AppTypography.h3Serif.copyWith(
+                color: AppColors.of(context).headingSecondary,
+              ),
+            ),
+            TextButton(
+              onPressed: _toggleAccordion,
+              style: TextButton.styleFrom(
+                padding: EdgeInsets.zero,
+                minimumSize: Size.zero,
+                tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+              ),
+              child: AnimatedBuilder(
+                animation: _accordionController,
+                builder: (context, child) => Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const Text('Scale or Convert'),
+                    const SizedBox(width: 4),
+                    Icon(
+                      _accordionController.value > 0.5
+                          ? Icons.keyboard_arrow_up
+                          : Icons.keyboard_arrow_down,
+                      size: 20,
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ],
+        ),
+
+        // Animated accordion panel - expands vertically and fades in/out
+        SizeTransition(
+          sizeFactor: _accordionAnimation,
+          axisAlignment: -1.0,
+          child: FadeTransition(
+            opacity: _accordionAnimation,
+            child: Container(
+              width: double.infinity,
+              margin: EdgeInsets.only(top: AppSpacing.md),
+              padding: EdgeInsets.all(AppSpacing.lg),
+              decoration: BoxDecoration(
+                color: AppColors.of(context).surfaceVariant,
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: const SizedBox(
+                height: 100,
+                child: Center(
+                  child: Text('Scale or Convert options coming soon...'),
+                ),
+              ),
+            ),
           ),
         ),
 
