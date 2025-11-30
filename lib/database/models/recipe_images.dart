@@ -19,7 +19,15 @@ class RecipeImage {
     this.isCover,
   });
 
-  factory RecipeImage.fromJson(Map<String, dynamic> json) => _$RecipeImageFromJson(json);
+  factory RecipeImage.fromJson(Map<String, dynamic> json) {
+    // Handle potential null values from imported/synced data
+    return RecipeImage(
+      id: json['id'] as String? ?? '',
+      fileName: json['fileName'] as String? ?? '',
+      publicUrl: json['publicUrl'] as String?,
+      isCover: json['isCover'] as bool?,
+    );
+  }
   Map<String, dynamic> toJson() => _$RecipeImageToJson(this);
 
   RecipeImage copyWith({

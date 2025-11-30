@@ -255,7 +255,7 @@ class RecipeRepository {
             title: row.read<String>('recipe_title'),
             description: row.read<String?>('recipe_description') ?? '',
             rating: row.read<int?>('recipe_rating'),
-            language: row.read<String>('recipe_language'),
+            language: row.read<String?>('recipe_language'),
             servings: row.read<int?>('recipe_servings'),
             prepTime: row.read<int?>('recipe_prep_time'),
             cookTime: row.read<int?>('recipe_cook_time'),
@@ -285,8 +285,10 @@ class RecipeRepository {
                 ? const RecipeImageListConverter().fromSql(row.read<String>('recipe_images'))
                 : [],
 
-            folderIds: List<String>.from(jsonDecode(row.read<String>('recipe_folder_ids'))),
-            
+            folderIds: row.read<String?>('recipe_folder_ids') != null
+                ? List<String>.from(jsonDecode(row.read<String>('recipe_folder_ids')))
+                : [],
+
             tagIds: row.read<String?>('recipe_tag_ids') != null
                 ? List<String>.from(jsonDecode(row.read<String>('recipe_tag_ids')))
                 : [],
@@ -373,7 +375,7 @@ class RecipeRepository {
             title: row.read<String>('recipe_title'),
             description: row.read<String?>('recipe_description') ?? '',
             rating: row.read<int?>('recipe_rating'),
-            language: row.read<String>('recipe_language'),
+            language: row.read<String?>('recipe_language'),
             servings: row.read<int?>('recipe_servings'),
             prepTime: row.read<int?>('recipe_prep_time'),
             cookTime: row.read<int?>('recipe_cook_time'),

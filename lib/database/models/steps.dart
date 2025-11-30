@@ -18,7 +18,16 @@ class Step {
     this.timerDurationSeconds,
   });
 
-  factory Step.fromJson(Map<String, dynamic> json) => _$StepFromJson(json);
+  factory Step.fromJson(Map<String, dynamic> json) {
+    // Handle potential null values from imported/synced data
+    return Step(
+      id: json['id'] as String? ?? '',
+      type: json['type'] as String? ?? 'step',
+      text: json['text'] as String? ?? '',
+      note: json['note'] as String?,
+      timerDurationSeconds: (json['timerDurationSeconds'] as num?)?.toInt(),
+    );
+  }
   Map<String, dynamic> toJson() => _$StepToJson(this);
 
   Step copyWith({

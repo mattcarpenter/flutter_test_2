@@ -15,22 +15,52 @@ class ImportPage extends ConsumerWidget {
   const ImportPage({super.key});
 
   Future<void> _selectFile(BuildContext context, ImportSource source) async {
-    // Determine file extensions based on source
-    final allowedExtensions = switch (source) {
-      ImportSource.stockpot => ['zip'],
-      ImportSource.paprika => ['paprikarecipes'],
-      ImportSource.crouton => ['zip'],
-    };
+    // Paprika uses .paprikarecipes which iOS/macOS don't recognize with FileType.custom
+    // Use FileType.any for Paprika to allow selecting the file
+    final PlatformFile? file;
 
-    final result = await FilePicker.platform.pickFiles(
-      type: FileType.custom,
-      allowedExtensions: allowedExtensions,
-    );
+    if (source == ImportSource.paprika) {
+      final result = await FilePicker.platform.pickFiles(type: FileType.any);
+      file = result?.files.single;
 
-    if (result != null && result.files.single.path != null && context.mounted) {
+      // Validate extension for Paprika
+      if (file != null && !file.path!.toLowerCase().endsWith('.paprikarecipes')) {
+        if (context.mounted) {
+          showCupertinoDialog(
+            context: context,
+            builder: (context) => CupertinoAlertDialog(
+              title: const Text('Invalid File'),
+              content: const Text('Please select a .paprikarecipes file exported from Paprika.'),
+              actions: [
+                CupertinoDialogAction(
+                  isDefaultAction: true,
+                  onPressed: () => Navigator.pop(context),
+                  child: const Text('OK'),
+                ),
+              ],
+            ),
+          );
+        }
+        return;
+      }
+    } else {
+      final allowedExtensions = switch (source) {
+        ImportSource.stockpot => ['zip'],
+        ImportSource.paprika => ['paprikarecipes'], // Not used, handled above
+        ImportSource.crouton => ['zip'],
+      };
+
+      final result = await FilePicker.platform.pickFiles(
+        type: FileType.custom,
+        allowedExtensions: allowedExtensions,
+      );
+      file = result?.files.single;
+    }
+
+    if (file != null && file.path != null && context.mounted) {
       // Navigate to preview page
       context.push('/settings/import/preview', extra: {
-        'filePath': result.files.single.path,
+        'filePath': file.path,
         'source': source.name,
       });
     }

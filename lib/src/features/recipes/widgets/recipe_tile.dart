@@ -125,9 +125,9 @@ class _RecipeTileState extends State<RecipeTile> with SingleTickerProviderStateM
         const double spacingAboveName = 8.0;
         const double spacingBetweenNameAndDetails = 4.0;
         const double bottomSpacing = 8.0;
-        
+
         // Reserve fixed space for text content (2 lines title + 1 line subtitle + spacing)
-        const double reservedTextHeight = 66.0; // 8 + 32 + 4 + 14 + 8
+        const double reservedTextHeight = 80.0;
 
         // Format time display
         String timeDisplay = '';

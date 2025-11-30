@@ -54,7 +54,33 @@ class Ingredient {
     this.recipeId,
   });
 
-  factory Ingredient.fromJson(Map<String, dynamic> json) => _$IngredientFromJson(json);
+  factory Ingredient.fromJson(Map<String, dynamic> json) {
+    // Handle potential null values from imported/synced data
+    return Ingredient(
+      id: json['id'] as String? ?? '',
+      type: json['type'] as String? ?? 'ingredient',
+      name: json['name'] as String? ?? '',
+      note: json['note'] as String?,
+      primaryAmount1Value: json['primaryAmount1Value'] as String?,
+      primaryAmount1Unit: json['primaryAmount1Unit'] as String?,
+      primaryAmount1Type: json['primaryAmount1Type'] as String?,
+      primaryAmount2Value: json['primaryAmount2Value'] as String?,
+      primaryAmount2Unit: json['primaryAmount2Unit'] as String?,
+      primaryAmount2Type: json['primaryAmount2Type'] as String?,
+      secondaryAmount1Value: json['secondaryAmount1Value'] as String?,
+      secondaryAmount1Unit: json['secondaryAmount1Unit'] as String?,
+      secondaryAmount1Type: json['secondaryAmount1Type'] as String?,
+      secondaryAmount2Value: json['secondaryAmount2Value'] as String?,
+      secondaryAmount2Unit: json['secondaryAmount2Unit'] as String?,
+      secondaryAmount2Type: json['secondaryAmount2Type'] as String?,
+      terms: (json['terms'] as List<dynamic>?)
+          ?.map((e) => IngredientTerm.fromJson(e as Map<String, dynamic>))
+          .toList(),
+      isCanonicalised: json['isCanonicalised'] as bool? ?? false,
+      category: json['category'] as String?,
+      recipeId: json['recipeId'] as String?,
+    );
+  }
   Map<String, dynamic> toJson() => _$IngredientToJson(this);
 
   Ingredient copyWith({

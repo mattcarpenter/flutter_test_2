@@ -17,8 +17,14 @@ class IngredientTerm {
     required this.sort,
   });
 
-  factory IngredientTerm.fromJson(Map<String, dynamic> json) =>
-      _$IngredientTermFromJson(json);
+  factory IngredientTerm.fromJson(Map<String, dynamic> json) {
+    // Handle potential null values from imported/synced data
+    return IngredientTerm(
+      value: json['value'] as String? ?? '',
+      source: json['source'] as String? ?? 'user',
+      sort: (json['sort'] as num?)?.toInt() ?? 0,
+    );
+  }
 
   Map<String, dynamic> toJson() => _$IngredientTermToJson(this);
 }
