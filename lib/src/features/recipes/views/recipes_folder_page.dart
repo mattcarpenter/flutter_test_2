@@ -299,73 +299,85 @@ class _UnifiedHeaderDelegate extends SliverPersistentHeaderDelegate {
 
   @override
   Widget build(BuildContext context, double shrinkOffset, bool overlapsContent) {
+    // Wide screen = landscape on any device (iPhone landscape ~700-930px, iPad landscape ~1024px+)
+    final isWideScreen = MediaQuery.of(context).size.width > 700;
+
+    // Filter button with indicator dot
+    Widget filterButton({required bool fullWidth}) => Stack(
+      clipBehavior: Clip.none,
+      children: [
+        AppButton(
+          text: 'Filter and Sort',
+          leadingIcon: const Icon(Icons.tune),
+          style: AppButtonStyle.mutedOutline,
+          shape: AppButtonShape.square,
+          size: AppButtonSize.medium,
+          theme: AppButtonTheme.primary,
+          fullWidth: fullWidth,
+          contentAlignment: AppButtonContentAlignment.left,
+          onPressed: () {
+            showUnifiedSortFilterSheet(
+              context,
+              initialState: filterSortState,
+              onStateChanged: onStateChanged,
+              showPantryMatchOption: true,
+            );
+          },
+        ),
+        if (filterSortState.hasFilters)
+          Positioned(
+            top: -2,
+            right: -2,
+            child: Container(
+              width: 8,
+              height: 8,
+              decoration: const BoxDecoration(
+                color: Colors.red,
+                shape: BoxShape.circle,
+              ),
+            ),
+          ),
+      ],
+    );
+
+    // Add Recipe button
+    Widget addRecipeButton() => AppButton(
+      text: 'Add Recipe',
+      leadingIcon: const Icon(Icons.add),
+      style: AppButtonStyle.outline,
+      shape: AppButtonShape.square,
+      size: AppButtonSize.medium,
+      theme: AppButtonTheme.secondary,
+      onPressed: () {
+        final saveFolderId = folderId == kUncategorizedFolderId ? null : folderId;
+        showRecipeEditorModal(context, folderId: saveFolderId);
+      },
+    );
+
     return Material(
       elevation: overlapsContent ? 1.0 : 0.0,
       color: Colors.transparent,
       child: Container(
         height: minExtent,
         padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
-        constraints: const BoxConstraints(maxWidth: 800), // Max width for wider screens
-        child: Row(
-          children: [
-            // Tune icon button for Sort/Filter (takes all available space)
-            Expanded(
-              child: Stack(
-                clipBehavior: Clip.none,
+        constraints: const BoxConstraints(maxWidth: 800),
+        child: isWideScreen
+            // iPad landscape: content-sized filter button, spacer, add recipe button
+            ? Row(
                 children: [
-                  AppButton(
-                    text: 'Filter and Sort',
-                    leadingIcon: const Icon(Icons.tune),
-                    style: AppButtonStyle.mutedOutline,
-                    shape: AppButtonShape.square,
-                    size: AppButtonSize.medium,
-                    theme: AppButtonTheme.primary,
-                    fullWidth: true,
-                    contentAlignment: AppButtonContentAlignment.left,
-                    onPressed: () {
-                      showUnifiedSortFilterSheet(
-                        context,
-                        initialState: filterSortState,
-                        onStateChanged: onStateChanged,
-                        showPantryMatchOption: true,
-                      );
-                    },
-                  ),
-                  // Active filters indicator
-                  if (filterSortState.hasFilters)
-                    Positioned(
-                      top: -2,
-                      right: -2,
-                      child: Container(
-                        width: 8,
-                        height: 8,
-                        decoration: const BoxDecoration(
-                          color: Colors.red,
-                          shape: BoxShape.circle,
-                        ),
-                      ),
-                    ),
+                  filterButton(fullWidth: false),
+                  const Spacer(),
+                  addRecipeButton(),
+                ],
+              )
+            // iPhone / iPad portrait: expanded filter button, add recipe button
+            : Row(
+                children: [
+                  Expanded(child: filterButton(fullWidth: true)),
+                  const SizedBox(width: 12),
+                  addRecipeButton(),
                 ],
               ),
-            ),
-
-            const SizedBox(width: 12), // Spacing between buttons
-
-            // Add Recipe button (fixed width)
-            AppButton(
-              text: 'Add Recipe',
-              leadingIcon: const Icon(Icons.add),
-              style: AppButtonStyle.outline,
-              shape: AppButtonShape.square,
-              size: AppButtonSize.medium,
-              theme: AppButtonTheme.secondary,
-              onPressed: () {
-                final saveFolderId = folderId == kUncategorizedFolderId ? null : folderId;
-                showRecipeEditorModal(context, folderId: saveFolderId);
-              },
-            ),
-          ],
-        ),
       ),
     );
   }
