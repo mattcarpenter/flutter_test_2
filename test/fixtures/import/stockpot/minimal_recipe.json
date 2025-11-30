@@ -1,0 +1,63 @@
+{
+  "title": "Minimal Test Recipe",
+  "description": "A minimal valid recipe for testing import/export",
+  "rating": 4,
+  "language": "en",
+  "servings": 2,
+  "prepTime": 10,
+  "cookTime": 20,
+  "totalTime": 30,
+  "source": "test.example.com",
+  "nutrition": "Per serving: 200 calories",
+  "generalNotes": "Test notes for the recipe",
+  "createdAt": 1705312200000,
+  "updatedAt": 1705312200000,
+  "pinned": false,
+  "folderNames": ["Test Folder"],
+  "tagNames": ["test-tag"],
+  "ingredients": [
+    {
+      "type": "ingredient",
+      "name": "2 cups flour",
+      "note": "all-purpose",
+      "terms": [
+        {
+          "value": "flour",
+          "source": "ai",
+          "sort": 0
+        }
+      ],
+      "isCanonicalised": true,
+      "category": "baking"
+    },
+    {
+      "type": "ingredient",
+      "name": "1 tsp salt",
+      "note": null,
+      "terms": [
+        {
+          "value": "salt",
+          "source": "ai",
+          "sort": 0
+        }
+      ],
+      "isCanonicalised": true,
+      "category": "spices"
+    }
+  ],
+  "steps": [
+    {
+      "type": "step",
+      "text": "Mix flour and salt together",
+      "note": null,
+      "timerDurationSeconds": null
+    },
+    {
+      "type": "step",
+      "text": "Cook for 20 minutes",
+      "note": "until golden brown",
+      "timerDurationSeconds": 1200
+    }
+  ],
+  "images": []
+}

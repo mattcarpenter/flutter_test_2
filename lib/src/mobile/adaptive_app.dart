@@ -32,6 +32,10 @@ import '../features/settings/views/sort_folders_page.dart';
 import '../features/settings/views/recipe_font_size_page.dart';
 import '../features/settings/views/account_page.dart';
 import '../features/settings/views/placeholder_page.dart';
+import '../features/import_export/views/import_page.dart';
+import '../features/import_export/views/export_page.dart';
+import '../features/import_export/views/import_preview_page.dart';
+import '../features/import_export/services/import_service.dart';
 import '../features/settings/views/legal_pages.dart';
 import '../features/settings/views/support_page.dart';
 import '../features/help/views/help_page.dart';
@@ -365,19 +369,36 @@ class _AdaptiveApp2State extends ConsumerState<AdaptiveApp2> {
                   child: const AccountPage(),
                 ),
               ),
-              // Import/Export placeholders
+              // Import/Export
               GoRoute(
                 path: 'import',
+                routes: [
+                  GoRoute(
+                    path: 'preview',
+                    pageBuilder: (context, state) {
+                      final extra = state.extra as Map<String, dynamic>?;
+                      final filePath = extra?['filePath'] as String? ?? '';
+                      final source = extra?['source'] as String? ?? 'stockpot';
+                      return _platformPage(
+                        state: state,
+                        child: ImportPreviewPage(
+                          filePath: filePath,
+                          source: ImportSource.values.byName(source),
+                        ),
+                      );
+                    },
+                  ),
+                ],
                 pageBuilder: (context, state) => _platformPage(
                   state: state,
-                  child: const ImportRecipesPage(),
+                  child: const ImportPage(),
                 ),
               ),
               GoRoute(
                 path: 'export',
                 pageBuilder: (context, state) => _platformPage(
                   state: state,
-                  child: const ExportRecipesPage(),
+                  child: const ExportPage(),
                 ),
               ),
               // Help/Support placeholders
