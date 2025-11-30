@@ -474,17 +474,36 @@ class ImportedRecipe {
 
 ## 5. Implementation Considerations
 
-### 5.1 File Selection
+### 5.1 File Selection & Import Flow
 
-- Use `file_picker` package for cross-platform file selection
-- Filter by supported extensions (`.zip`, `.paprikarecipes`)
+When user taps an import source (Stockpot/Paprika/Crouton), open file picker to select a single archive file:
+
+| Source | File Extension | Archive Contents |
+|--------|----------------|------------------|
+| Stockpot | `.zip` | Recipe JSON files at root |
+| Paprika | `.paprikarecipes` | ZIP containing gzip-compressed `.paprikarecipe` JSON files |
+| Crouton | `.zip` | ZIP containing plain `.crumb` JSON files |
+
+**Flow:**
+1. User taps import source (e.g., "Paprika")
+2. File picker opens, filtered to appropriate extension(s)
+3. User selects their export file (e.g., `My Recipes.paprikarecipes`)
+4. App parses archive → shows preview screen
+5. User confirms → import begins
+
+**File picker configuration:**
+- Use `file_picker` package
+- Paprika: filter to `.paprikarecipes`
+- Crouton: filter to `.zip`
+- Stockpot: filter to `.zip`
 - Mobile: Also support import from share intent / document picker
 
 ### 5.2 Archive Handling
 
 - Use `archive` package for ZIP reading/writing
-- Paprika: Need to gunzip individual `.paprikarecipe` files within the ZIP
-- Crouton: Direct JSON files within ZIP
+- **Paprika**: ZIP archive → extract `.paprikarecipe` files → gunzip each → parse JSON
+- **Crouton**: ZIP archive → extract `.crumb` files → parse JSON directly
+- **Stockpot**: ZIP archive → extract `.json` files → parse JSON directly
 
 ### 5.3 Image Handling
 
@@ -586,21 +605,19 @@ ParsedIngredient parseIngredientLine(String line) {
 │  Import from:                       │
 │                                     │
 │  ┌─────────────────────────────────┐│
-│  │ 📦  Stockpot Export             ││
-│  │     Import from a previous      ││
-│  │     Stockpot backup             ││
+│  │ Stockpot Export                 ││
+│  │ Import from a previous backup   ││
 │  └─────────────────────────────────┘│
 │                                     │
 │  ┌─────────────────────────────────┐│
-│  │ 🌶️  Paprika                     ││
-│  │     Import from Paprika         ││
-│  │     Recipe Manager              ││
+│  │ Paprika                         ││
+│  │ Import from Paprika Recipe      ││
+│  │ Manager                         ││
 │  └─────────────────────────────────┘│
 │                                     │
 │  ┌─────────────────────────────────┐│
-│  │ 🥐  Crouton                     ││
-│  │     Import from Crouton         ││
-│  │     recipe app                  ││
+│  │ Crouton                         ││
+│  │ Import from Crouton app         ││
 │  └─────────────────────────────────┘│
 │                                     │
 └─────────────────────────────────────┘
@@ -617,9 +634,9 @@ After parsing the archive, show a preview before importing:
 │                                     │
 │  Ready to import from Paprika:      │
 │                                     │
-│  📄 47 recipes                      │
-│  🏷️ 12 tags (8 new, 4 existing)    │
-│  📁 0 folders                       │
+│  47 recipes                         │
+│  12 tags (8 new, 4 existing)        │
+│  0 folders                          │
 │                                     │
 │  ─────────────────────────────────  │
 │                                     │
@@ -654,9 +671,9 @@ After parsing the archive, show a preview before importing:
 │  Export options:                    │
 │                                     │
 │  ┌─────────────────────────────────┐│
-│  │ 📦  Export All Recipes          ││
-│  │     Create a backup of all      ││
-│  │     your recipes                ││
+│  │ Export All Recipes              ││
+│  │ Create a backup of all your     ││
+│  │ recipes                         ││
 │  └─────────────────────────────────┘│
 │                                     │
 │  (Future: Export as HTML, etc.)    │
@@ -774,3 +791,114 @@ After parsing the archive, show a preview before importing:
 2. Error handling
 3. Edge cases
 4. Documentation
+
+---
+
+## 11. Testing Strategy
+
+### 11.1 Test Fixtures
+
+Test fixtures are derived from real export samples in `analysis/exports/`:
+
+**Paprika fixtures** (`test/fixtures/import/paprika/`):
+- Source: `analysis/exports/paprika_export/`
+- `.paprikarecipe` files are gzip-compressed JSON
+- To inspect: `gzcat "filename.paprikarecipe" | jq '.'`
+- Create minimal test fixtures by:
+  1. Decompressing real samples
+  2. Removing/replacing `photo_data` and `photos[].data` with small placeholder base64
+  3. Re-compressing with gzip
+
+**Crouton fixtures** (`test/fixtures/import/crouton/`):
+- Source: `analysis/exports/crouton_export/`
+- `.crumb` files are plain JSON
+- To inspect: `jq '.' "filename.crumb"`
+- Create minimal test fixtures by:
+  1. Copying real samples
+  2. Removing/replacing `images[]` with small placeholder base64 strings
+
+**Stockpot fixtures** (`test/fixtures/import/stockpot/`):
+- Generate by running export on test recipes
+- Or manually create JSON files matching our export schema
+
+### 11.2 Unit Tests
+
+**Parser tests** - test each parser in isolation:
+
+```
+test/features/import_export/
+├── parsers/
+│   ├── paprika_parser_test.dart
+│   ├── crouton_parser_test.dart
+│   └── stockpot_parser_test.dart
+├── converters/
+│   ├── paprika_converter_test.dart
+│   ├── crouton_converter_test.dart
+│   └── stockpot_converter_test.dart
+└── services/
+    ├── export_service_test.dart
+    └── import_service_test.dart
+```
+
+**Parser test cases:**
+- Parse valid archive with multiple recipes
+- Parse archive with single recipe
+- Handle malformed/corrupted files gracefully
+- Handle missing optional fields
+- Parse recipes with images (base64)
+- Parse recipes without images
+
+**Converter test cases:**
+- Convert all fields correctly
+- Handle missing/null fields
+- Parse time strings ("15 mins" → 15)
+- Parse servings strings ("24 servings" → 24)
+- Build ingredient name from Crouton structured data
+- Handle sub-recipe references
+- Handle section headers in ingredients/steps
+
+**Export service test cases:**
+- Export single recipe
+- Export multiple recipes
+- Handle duplicate recipe names (unique filenames)
+- Include images as base64 when no publicUrl
+- Use publicUrl when available (skip base64)
+- Resize/compress images correctly
+
+**Import service test cases:**
+- Import creates new recipes
+- Import matches existing tags by name
+- Import creates new tags when not found
+- Import matches existing folders by name
+- Import creates new folders when not found
+- Handle import errors gracefully (continue on failure)
+
+### 11.3 Creating Test Fixtures
+
+To create minimal fixtures from the sample exports:
+
+```bash
+# Paprika: decompress, strip images, recompress
+gzcat "analysis/exports/paprika_export/Test recipe.paprikarecipe" \
+  | jq '.photo_data = null | .photos = []' \
+  | gzip > "test/fixtures/import/paprika/minimal_recipe.paprikarecipe"
+
+# Crouton: just strip images
+jq '.images = []' "analysis/exports/crouton_export/test.crumb" \
+  > "test/fixtures/import/crouton/minimal_recipe.crumb"
+```
+
+For tests that need images, create tiny placeholder images:
+```bash
+# Create 1x1 pixel JPEG, base64 encode
+echo "/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAgGBgcGBQgHBwcJCQgKDBQNDAsLDBkSEw8UHRofHh0aHBwgJC4nICIsIxwcKDcpLDAxNDQ0Hyc5PTgyPC4zNDL/2wBDAQkJCQwLDBgNDRgyIRwhMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjL/wAARCAABAAEDASIAAhEBAxEB/8QAFQABAQAAAAAAAAAAAAAAAAAAAAn/xAAUEAEAAAAAAAAAAAAAAAAAAAAA/8QAFQEBAQAAAAAAAAAAAAAAAAAAAAX/xAAUEQEAAAAAAAAAAAAAAAAAAAAA/9oADAMBEQCEAwEPwAB//9k="
+```
+
+### 11.4 Integration Tests
+
+Integration tests verify the full flow:
+- Export recipes → Import back → Verify data matches
+- Import Paprika export → Verify recipes created correctly
+- Import Crouton export → Verify recipes created correctly
+
+These can use the real sample files in `analysis/exports/` or the minimal fixtures.
