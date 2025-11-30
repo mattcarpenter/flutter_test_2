@@ -484,8 +484,8 @@ void main() {
           state: state,
         );
 
-        // Should format as decimal since 0.7 isn't a common fraction
-        expect(result.displayText, '1.7 cup flour');
+        // Cups use 1/4 granularity, so 1.7 rounds to 1.75 (1 3/4)
+        expect(result.displayText, '1 3/4 cup flour');
       });
 
       test('updates quantity positions correctly after transformation', () {
@@ -517,45 +517,120 @@ void main() {
       });
     });
 
-    group('number formatting', () {
-      test('formats 1/8 fraction correctly', () {
+    group('unit-based formatting', () {
+      // Cups use 1/4 granularity
+      test('cups round to 1/4 granularity', () {
+        const state = ScaleConvertState(scaleFactor: 0.125); // 1/8
+        final result = service.transform(
+          originalText: '1 cup flour',
+          state: state,
+        );
+        // 0.125 rounds to nearest 1/4, which is 0.25 (but since it's closer to 0, it would round to 0.25 as minimum)
+        expect(result.displayText, '1/4 cup flour');
+      });
+
+      test('cups format 1/4 correctly', () {
+        const state = ScaleConvertState(scaleFactor: 0.25);
+        final result = service.transform(
+          originalText: '1 cup flour',
+          state: state,
+        );
+        expect(result.displayText, '1/4 cup flour');
+      });
+
+      test('cups format 1/2 correctly', () {
+        const state = ScaleConvertState(scaleFactor: 0.5);
+        final result = service.transform(
+          originalText: '1 cup flour',
+          state: state,
+        );
+        expect(result.displayText, '1/2 cup flour');
+      });
+
+      test('cups format 3/4 correctly', () {
+        const state = ScaleConvertState(scaleFactor: 0.75);
+        final result = service.transform(
+          originalText: '1 cup flour',
+          state: state,
+        );
+        expect(result.displayText, '3/4 cup flour');
+      });
+
+      // Tablespoons use 1/8 granularity
+      test('tbsp formats 1/8 correctly', () {
         const state = ScaleConvertState(scaleFactor: 0.125);
         final result = service.transform(
-          originalText: '1 cup flour',
+          originalText: '1 tbsp oil',
           state: state,
         );
-
-        expect(result.displayText, '1/8 cup flour');
+        expect(result.displayText, '1/8 tbsp oil');
       });
 
-      test('formats 3/8 fraction correctly', () {
+      test('tbsp formats 3/8 correctly', () {
         const state = ScaleConvertState(scaleFactor: 0.375);
         final result = service.transform(
-          originalText: '1 cup flour',
+          originalText: '1 tbsp oil',
           state: state,
         );
-
-        expect(result.displayText, '3/8 cup flour');
+        expect(result.displayText, '3/8 tbsp oil');
       });
 
-      test('formats 5/8 fraction correctly', () {
+      test('tbsp formats 5/8 correctly', () {
         const state = ScaleConvertState(scaleFactor: 0.625);
         final result = service.transform(
-          originalText: '1 cup flour',
+          originalText: '1 tbsp oil',
           state: state,
         );
-
-        expect(result.displayText, '5/8 cup flour');
+        expect(result.displayText, '5/8 tbsp oil');
       });
 
-      test('formats 7/8 fraction correctly', () {
+      test('tbsp formats 7/8 correctly', () {
         const state = ScaleConvertState(scaleFactor: 0.875);
         final result = service.transform(
-          originalText: '1 cup flour',
+          originalText: '1 tbsp oil',
           state: state,
         );
+        expect(result.displayText, '7/8 tbsp oil');
+      });
 
-        expect(result.displayText, '7/8 cup flour');
+      // Metric units use decimal formatting
+      test('grams use decimal format', () {
+        const state = ScaleConvertState(scaleFactor: 1.5);
+        final result = service.transform(
+          originalText: '100g flour',
+          state: state,
+        );
+        expect(result.displayText, '150 g flour');
+      });
+
+      test('ml uses decimal format with tenths', () {
+        const state = ScaleConvertState(scaleFactor: 1.33);
+        final result = service.transform(
+          originalText: '100 ml milk',
+          state: state,
+        );
+        // 133.0 rounds to 133
+        expect(result.displayText, '133 ml milk');
+      });
+
+      test('small metric values show tenths', () {
+        const state = ScaleConvertState(scaleFactor: 1.5);
+        final result = service.transform(
+          originalText: '10 ml vanilla',
+          state: state,
+        );
+        expect(result.displayText, '15 ml vanilla');
+      });
+
+      // Count units use fractions
+      test('eggs use fractions', () {
+        const state = ScaleConvertState(scaleFactor: 1.25);
+        final result = service.transform(
+          originalText: '2 eggs',
+          state: state,
+        );
+        // 2.5 eggs = 2 1/2 eggs (using 1/8 granularity, rounds to 2.5)
+        expect(result.displayText, '2 1/2 eggs');
       });
     });
   });

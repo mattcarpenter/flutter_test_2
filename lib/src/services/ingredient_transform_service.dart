@@ -39,21 +39,14 @@ class IngredientTransformService {
     final quantities = <QuantityDisplay>[];
 
     // Process quantities in reverse order to preserve indices
-    int indexOffset = 0;
-
     for (int i = parsed.quantities.length - 1; i >= 0; i--) {
       final quantity = parsed.quantities[i];
       final transformedQuantity = _transformQuantity(quantity, state);
 
       // Replace the original quantity text with transformed text
-      final beforeLength = quantity.endIndex - quantity.startIndex;
-      final afterLength = transformedQuantity.length;
-
       displayText = displayText.substring(0, quantity.startIndex) +
           transformedQuantity +
           displayText.substring(quantity.endIndex);
-
-      indexOffset += (afterLength - beforeLength);
     }
 
     // Build quantity displays for highlighting (process in forward order)
@@ -124,25 +117,108 @@ class IngredientTransformService {
   }
 
   /// Format a quantity as a readable string.
+  /// Uses unit-based formatting: metric units use decimals, others use fractions.
   String _formatQuantity(double value, double? rangeMax, String unit) {
-    final formattedValue = _formatNumber(value);
+    final useDecimal = _isMetricUnit(unit);
+    final granularity = _getFractionGranularity(unit);
+
+    final formattedValue = useDecimal
+        ? _formatAsDecimal(value)
+        : _formatAsFraction(value, granularity);
 
     if (rangeMax != null) {
-      final formattedMax = _formatNumber(rangeMax);
-      return unit.isNotEmpty ? '$formattedValue-$formattedMax $unit' : '$formattedValue-$formattedMax';
+      final formattedMax = useDecimal
+          ? _formatAsDecimal(rangeMax)
+          : _formatAsFraction(rangeMax, granularity);
+      return unit.isNotEmpty
+          ? '$formattedValue-$formattedMax $unit'
+          : '$formattedValue-$formattedMax';
     }
 
     return unit.isNotEmpty ? '$formattedValue $unit' : formattedValue;
   }
 
-  /// Format a number, preferring nice fractions when possible.
-  String _formatNumber(double value) {
-    // Check if it's a whole number
+  /// Check if a unit is metric (should use decimal formatting).
+  bool _isMetricUnit(String unit) {
+    final lower = unit.toLowerCase();
+    const metricUnits = {
+      // Weight
+      'g', 'gram', 'grams',
+      'kg', 'kilogram', 'kilograms',
+      'mg', 'milligram', 'milligrams',
+      // Volume
+      'ml', 'milliliter', 'milliliters', 'millilitre', 'millilitres',
+      'l', 'liter', 'liters', 'litre', 'litres',
+      'cl', 'centiliter', 'centiliters',
+      'dl', 'deciliter', 'deciliters',
+    };
+    return metricUnits.contains(lower);
+  }
+
+  /// Get the fraction granularity for a unit.
+  /// Cups use 1/4, everything else uses 1/8.
+  double _getFractionGranularity(String unit) {
+    final lower = unit.toLowerCase();
+    const cupUnits = {'cup', 'cups', 'c', 'カップ'};
+    return cupUnits.contains(lower) ? 0.25 : 0.125;
+  }
+
+  /// Format a number as decimal, rounded to tenths.
+  /// For large values (>=100), rounds to whole numbers.
+  String _formatAsDecimal(double value) {
+    // Whole numbers
     if (value == value.truncate()) {
       return value.toInt().toString();
     }
 
-    // Check for common fractions
+    // Large values: round to whole
+    if (value >= 100) {
+      return value.round().toString();
+    }
+
+    // Round to tenths
+    final rounded = (value * 10).round() / 10;
+    if (rounded == rounded.truncate()) {
+      return rounded.toInt().toString();
+    }
+    return rounded.toStringAsFixed(1);
+  }
+
+  /// Format a number as a fraction, rounded to the given granularity.
+  String _formatAsFraction(double value, double granularity) {
+    // Round to nearest granularity
+    double rounded = (value / granularity).round() * granularity;
+
+    // Don't round to 0 for small positive values
+    if (rounded == 0 && value > 0) {
+      rounded = granularity;
+    }
+
+    // Whole numbers
+    if (rounded == rounded.truncate()) {
+      return rounded.toInt().toString();
+    }
+
+    final whole = rounded.truncate();
+    final fractional = rounded - whole;
+
+    // Convert fractional part to fraction string
+    final fractionStr = _decimalToFraction(fractional);
+
+    if (whole == 0) {
+      return fractionStr.isNotEmpty ? fractionStr : '0';
+    } else if (fractionStr.isEmpty) {
+      return whole.toString();
+    } else {
+      return '$whole $fractionStr';
+    }
+  }
+
+  /// Convert a decimal (0-1) to its fraction string representation.
+  String _decimalToFraction(double decimal) {
+    if (decimal == 0) return '';
+
+    // Common fractions with tolerance for rounding errors
     const fractions = [
       (0.125, '1/8'),
       (0.25, '1/4'),
@@ -156,30 +232,14 @@ class IngredientTransformService {
       (0.875, '7/8'),
     ];
 
-    // Check for mixed fractions if value > 1
-    if (value > 1) {
-      final whole = value.truncate();
-      final remainder = value - whole;
-
-      for (final (decimal, fraction) in fractions) {
-        if ((remainder - decimal).abs() < 0.02) {
-          return '$whole $fraction';
-        }
-      }
-    }
-
-    // Check for simple fractions
-    for (final (decimal, fraction) in fractions) {
-      if ((value - decimal).abs() < 0.02) {
+    for (final (value, fraction) in fractions) {
+      if ((decimal - value).abs() < 0.02) {
         return fraction;
       }
     }
 
-    // Return as decimal with appropriate precision
-    if (value < 10) {
-      return value.toStringAsFixed(2).replaceAll(RegExp(r'\.?0+$'), '');
-    }
-    return value.toStringAsFixed(1).replaceAll(RegExp(r'\.?0+$'), '');
+    // Fallback: shouldn't happen if rounded to proper granularity
+    return '';
   }
 
   /// Create a no-transform result (passthrough).

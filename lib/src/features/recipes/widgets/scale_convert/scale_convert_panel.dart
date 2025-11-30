@@ -345,6 +345,21 @@ class _ScaleSliderRow extends ConsumerWidget {
     }
   }
 
+  /// Get slider divisions for snapping behavior
+  int? _getSliderDivisions(double min, double max) {
+    switch (state.scaleType) {
+      case ScaleType.amount:
+        // 0.25x steps for fraction-friendly values
+        return ((max - min) / 0.25).round();
+      case ScaleType.servings:
+        // Integer steps for whole servings
+        return (max - min).round();
+      case ScaleType.ingredient:
+        // No snapping for ingredient mode (continuous)
+        return null;
+    }
+  }
+
   String _getSliderLabel() {
     switch (state.scaleType) {
       case ScaleType.amount:
@@ -422,10 +437,10 @@ class _ScaleSliderRow extends ConsumerWidget {
                 value: sliderValue,
                 min: min,
                 max: max,
-                // For servings, use integer divisions to snap to whole servings
-                divisions: state.scaleType == ScaleType.servings
-                    ? (max - min).round()
-                    : null,
+                // Use divisions for snapping:
+                // - Amount mode: 0.25x steps for nice fraction-friendly values
+                // - Servings mode: integer steps for whole servings
+                divisions: _getSliderDivisions(min, max),
                 onChanged: (value) {
                   HapticFeedback.selectionClick();
                   final scaleFactor = _sliderValueToScaleFactor(value);
