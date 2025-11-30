@@ -8,7 +8,6 @@ import '../../../theme/spacing.dart';
 import '../../../theme/colors.dart';
 import '../../../theme/typography.dart';
 import '../../settings/widgets/settings_group_condensed.dart';
-import '../../settings/widgets/settings_row_condensed.dart';
 import '../services/import_service.dart';
 
 /// Page for selecting import source
@@ -68,22 +67,19 @@ class ImportPage extends ConsumerWidget {
               // Import source options
               SettingsGroupCondensed(
                 children: [
-                  SettingsRowCondensed(
-                    title: 'Stockpot Export',
-                    value: 'Import from a previous backup',
-                    showChevron: false,
+                  _ImportSourceRow(
+                    title: 'Stockpot',
+                    subtitle: 'Import from a previous backup',
                     onTap: () => _selectFile(context, ImportSource.stockpot),
                   ),
-                  SettingsRowCondensed(
+                  _ImportSourceRow(
                     title: 'Paprika',
-                    value: 'Import from Paprika Recipe Manager',
-                    showChevron: false,
+                    subtitle: 'Import from Paprika Recipe Manager',
                     onTap: () => _selectFile(context, ImportSource.paprika),
                   ),
-                  SettingsRowCondensed(
+                  _ImportSourceRow(
                     title: 'Crouton',
-                    value: 'Import from Crouton app',
-                    showChevron: false,
+                    subtitle: 'Import from Crouton app',
                     onTap: () => _selectFile(context, ImportSource.crouton),
                   ),
                 ],
@@ -94,6 +90,78 @@ class ImportPage extends ConsumerWidget {
           ),
         ),
       ],
+    );
+  }
+}
+
+/// Custom row widget for import sources with title and subtitle stacked vertically
+class _ImportSourceRow extends StatefulWidget {
+  final String title;
+  final String subtitle;
+  final VoidCallback onTap;
+
+  const _ImportSourceRow({
+    required this.title,
+    required this.subtitle,
+    required this.onTap,
+  });
+
+  @override
+  State<_ImportSourceRow> createState() => _ImportSourceRowState();
+}
+
+class _ImportSourceRowState extends State<_ImportSourceRow> {
+  bool _isPressed = false;
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = AppColors.of(context);
+
+    return GestureDetector(
+      onTap: widget.onTap,
+      onTapDown: (_) => setState(() => _isPressed = true),
+      onTapUp: (_) => setState(() => _isPressed = false),
+      onTapCancel: () => setState(() => _isPressed = false),
+      behavior: HitTestBehavior.opaque,
+      child: Container(
+        padding: EdgeInsets.symmetric(
+          horizontal: AppSpacing.lg,
+          vertical: AppSpacing.md,
+        ),
+        decoration: BoxDecoration(
+          color: _isPressed ? colors.surfaceVariant : colors.input,
+        ),
+        child: Row(
+          children: [
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    widget.title,
+                    style: AppTypography.body.copyWith(
+                      color: colors.textPrimary,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                  SizedBox(height: AppSpacing.xs),
+                  Text(
+                    widget.subtitle,
+                    style: AppTypography.caption.copyWith(
+                      color: colors.textSecondary,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            Icon(
+              CupertinoIcons.chevron_right,
+              color: colors.textSecondary,
+              size: 16,
+            ),
+          ],
+        ),
+      ),
     );
   }
 }

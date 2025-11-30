@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -259,32 +260,46 @@ class _ImportPreviewPageState extends ConsumerState<ImportPreviewPage> {
 
       if (mounted) {
         // Show result and navigate back
+        final title = result.failureCount == 0 ? 'Import Complete' : 'Import Finished';
         final message = result.failureCount == 0
             ? 'Successfully imported ${result.successCount} recipes!'
             : 'Imported ${result.successCount} recipes. ${result.failureCount} failed.';
 
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(message),
-            duration: const Duration(seconds: 3),
-          ),
-        );
+        await _showAlert(context, title: title, message: message);
 
         // Pop back to settings
-        Navigator.of(context).popUntil((route) => route.settings.name == '/settings' || route.isFirst);
+        if (mounted) {
+          Navigator.of(context).popUntil((route) => route.settings.name == '/settings' || route.isFirst);
+        }
       }
     } catch (e, stack) {
       AppLogger.error('Import failed', e, stack);
       if (mounted) {
         setState(() => _isLoading = false);
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Import failed: $e'),
-            backgroundColor: AppColors.of(context).error,
-          ),
-        );
+        _showAlert(context, title: 'Import Failed', message: 'Failed to import recipes: $e');
       }
     }
+  }
+
+  Future<void> _showAlert(
+    BuildContext context, {
+    required String title,
+    required String message,
+  }) {
+    return showCupertinoDialog(
+      context: context,
+      builder: (context) => CupertinoAlertDialog(
+        title: Text(title),
+        content: Text(message),
+        actions: [
+          CupertinoDialogAction(
+            isDefaultAction: true,
+            onPressed: () => Navigator.pop(context),
+            child: const Text('OK'),
+          ),
+        ],
+      ),
+    );
   }
 
   Widget _buildLoadingState() {
@@ -439,15 +454,15 @@ class _ImportPreviewPageState extends ConsumerState<ImportPreviewPage> {
           SizedBox(height: AppSpacing.xl),
         ],
 
-        // Spacer to push button to bottom
-        const Spacer(),
+        // Extra spacing before button
+        SizedBox(height: AppSpacing.xxl),
 
         // Import button
         Padding(
           padding: EdgeInsets.all(AppSpacing.lg),
           child: AppButtonVariants.primaryFilled(
             text: 'Import Recipes',
-            onPressed: _executeImport,
+            onPressed: _isLoading ? null : _executeImport,
             size: AppButtonSize.large,
             shape: AppButtonShape.square,
             fullWidth: true,
@@ -455,7 +470,7 @@ class _ImportPreviewPageState extends ConsumerState<ImportPreviewPage> {
         ),
 
         // Bottom safe area
-        SizedBox(height: AppSpacing.lg),
+        SizedBox(height: AppSpacing.xxl),
       ],
     );
   }

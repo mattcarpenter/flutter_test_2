@@ -73,6 +73,8 @@ class RecipeFolderRepository {
       name: Value(name),
       userId: Value(userId),
       householdId: Value(householdId),
+      folderType: const Value(0), // 0 = normal folder
+      filterLogic: const Value(0), // 0 = OR (default)
     );
 
     await _db.into(_db.recipeFolders).insert(entry);
