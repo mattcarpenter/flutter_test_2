@@ -489,7 +489,7 @@ class IngredientMatchesListPage extends ConsumerWidget {
                 ),
               ],
             ),
-            SizedBox(height: AppSpacing.md),
+            SizedBox(height: AppSpacing.lg),
 
             // Ingredient list
             ListView.builder(
@@ -907,7 +907,7 @@ class _AddToShoppingListPageState extends ConsumerState<AddToShoppingListPage> {
               children: [
                 // Title row with Manage Lists button
                 Padding(
-                  padding: EdgeInsets.fromLTRB(AppSpacing.lg, AppSpacing.lg, AppSpacing.lg, AppSpacing.md),
+                  padding: EdgeInsets.fromLTRB(AppSpacing.lg, 0, AppSpacing.lg, AppSpacing.md),
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     crossAxisAlignment: CrossAxisAlignment.center,
@@ -932,34 +932,31 @@ class _AddToShoppingListPageState extends ConsumerState<AddToShoppingListPage> {
                   ),
                 ),
 
+                SizedBox(height: AppSpacing.sm),
+
                 // Addable ingredients list
                 if (addableIngredients.isNotEmpty)
                   Padding(
                     padding: EdgeInsets.symmetric(horizontal: AppSpacing.lg),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        ListView.builder(
-                          shrinkWrap: true,
-                          physics: const NeverScrollableScrollPhysics(),
-                          padding: EdgeInsets.zero,
-                          itemCount: addableIngredients.length,
-                          itemBuilder: (context, index) {
-                            final match = addableIngredients[index];
-                            final isFirst = index == 0;
-                            final isLast = index == addableIngredients.length - 1 && alreadyInListIngredients.isEmpty;
+                    child: ListView.builder(
+                      shrinkWrap: true,
+                      physics: const NeverScrollableScrollPhysics(),
+                      padding: EdgeInsets.zero,
+                      itemCount: addableIngredients.length,
+                      itemBuilder: (context, index) {
+                        final match = addableIngredients[index];
+                        final isFirst = index == 0;
+                        final isLast = index == addableIngredients.length - 1 && alreadyInListIngredients.isEmpty;
 
-                            return _buildIngredientRow(
-                              context,
-                              match,
-                              lists,
-                              currentListId,
-                              isFirst: isFirst,
-                              isLast: isLast,
-                            );
-                          },
-                        ),
-                      ],
+                        return _buildIngredientRow(
+                          context,
+                          match,
+                          lists,
+                          currentListId,
+                          isFirst: isFirst,
+                          isLast: isLast,
+                        );
+                      },
                     ),
                   ),
 
@@ -967,29 +964,24 @@ class _AddToShoppingListPageState extends ConsumerState<AddToShoppingListPage> {
                 if (alreadyInListIngredients.isNotEmpty)
                   Padding(
                     padding: EdgeInsets.symmetric(horizontal: AppSpacing.lg),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        ListView.builder(
-                          shrinkWrap: true,
-                          physics: const NeverScrollableScrollPhysics(),
-                          padding: EdgeInsets.zero,
-                          itemCount: alreadyInListIngredients.length,
-                          itemBuilder: (context, index) {
-                            final (match, listName) = alreadyInListIngredients[index];
-                            final isFirst = index == 0 && addableIngredients.isEmpty;
-                            final isLast = index == alreadyInListIngredients.length - 1;
+                    child: ListView.builder(
+                      shrinkWrap: true,
+                      physics: const NeverScrollableScrollPhysics(),
+                      padding: EdgeInsets.zero,
+                      itemCount: alreadyInListIngredients.length,
+                      itemBuilder: (context, index) {
+                        final (match, listName) = alreadyInListIngredients[index];
+                        final isFirst = index == 0 && addableIngredients.isEmpty;
+                        final isLast = index == alreadyInListIngredients.length - 1;
 
-                            return _buildAlreadyInListRow(
-                              context,
-                              match,
-                              listName,
-                              isFirst: isFirst,
-                              isLast: isLast,
-                            );
-                          },
-                        ),
-                      ],
+                        return _buildAlreadyInListRow(
+                          context,
+                          match,
+                          listName,
+                          isFirst: isFirst,
+                          isLast: isLast,
+                        );
+                      },
                     ),
                   ),
 
@@ -1015,6 +1007,16 @@ class _AddToShoppingListPageState extends ConsumerState<AddToShoppingListPage> {
         );
       },
     );
+  }
+
+  Widget _buildStockChip(IngredientPantryMatch match) {
+    // If no match, show "Not in Pantry" chip
+    if (!match.hasMatch) {
+      return StockChip(showNotInPantry: true);
+    }
+
+    // Otherwise, use the standard IngredientStockChip
+    return IngredientStockChip(match: match);
   }
 
   void _initializeState(
@@ -1084,22 +1086,6 @@ class _AddToShoppingListPageState extends ConsumerState<AddToShoppingListPage> {
       listName = list?.name ?? 'My Shopping List';
     }
 
-    // Get stock status text
-    String? stockText;
-    if (!match.hasMatch) {
-      stockText = 'Not in pantry';
-    } else if (match.hasPantryMatch) {
-      final status = match.pantryItem!.stockStatus;
-      if (status == StockStatus.outOfStock) {
-        stockText = 'Out of stock';
-      } else if (status == StockStatus.lowStock) {
-        stockText = 'Low stock';
-      } else {
-        stockText = 'In stock';
-      }
-    } else if (match.hasRecipeMatch) {
-      stockText = 'Can make';
-    }
 
     final borderRadius = GroupedListStyling.getBorderRadius(
       isGrouped: true,
@@ -1152,15 +1138,8 @@ class _AddToShoppingListPageState extends ConsumerState<AddToShoppingListPage> {
                       color: colors.textPrimary,
                     ),
                   ),
-                  if (stockText != null) ...[
-                    SizedBox(height: 2),
-                    Text(
-                      stockText,
-                      style: AppTypography.caption.copyWith(
-                        color: colors.textSecondary,
-                      ),
-                    ),
-                  ],
+                  SizedBox(height: AppSpacing.xs),
+                  _buildStockChip(match),
                 ],
               ),
             ),
