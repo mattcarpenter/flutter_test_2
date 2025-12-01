@@ -462,6 +462,13 @@ final recipeByIdStreamProvider = StreamProvider.family<RecipeEntry?, String>((re
   return repository.watchRecipeById(recipeId);
 });
 
+/// Provider for looking up a recipe by exact title match (case-insensitive).
+/// Used for resolving [recipe:Name] links in step text.
+final recipeByTitleProvider = FutureProvider.family<RecipeEntry?, String>((ref, title) async {
+  final repository = ref.read(recipeRepositoryProvider);
+  return repository.getRecipeByTitle(title);
+});
+
 class RecipeSearchState {
   final List<RecipeEntry> results;
   final bool isLoading;

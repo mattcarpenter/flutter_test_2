@@ -1,6 +1,8 @@
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:url_launcher/url_launcher.dart';
 import '../../../../../database/models/ingredients.dart';
 import '../../../../models/ingredient_pantry_match.dart';
 import '../../../../providers/recipe_provider.dart' show recipeIngredientMatchesProvider, recipeByIdStreamProvider;
@@ -37,6 +39,9 @@ class _RecipeIngredientsViewState extends ConsumerState<RecipeIngredientsView>
   // Parser for ingredient text formatting
   final _parser = IngredientParserService();
 
+  // Gesture recognizers for markdown links (need disposal)
+  final List<TapGestureRecognizer> _linkRecognizers = [];
+
   // Accordion animation controller
   late AnimationController _accordionController;
   late Animation<double> _accordionAnimation;
@@ -57,7 +62,18 @@ class _RecipeIngredientsViewState extends ConsumerState<RecipeIngredientsView>
   @override
   void dispose() {
     _accordionController.dispose();
+    for (final recognizer in _linkRecognizers) {
+      recognizer.dispose();
+    }
     super.dispose();
+  }
+
+  /// Clear old recognizers before rebuild
+  void _clearRecognizers() {
+    for (final recognizer in _linkRecognizers) {
+      recognizer.dispose();
+    }
+    _linkRecognizers.clear();
   }
 
   void _toggleAccordion() {
@@ -70,6 +86,9 @@ class _RecipeIngredientsViewState extends ConsumerState<RecipeIngredientsView>
 
   @override
   Widget build(BuildContext context) {
+    // Clear old recognizers before rebuilding
+    _clearRecognizers();
+
     // Only fetch matches if recipeId is provided
     final matchesAsync = widget.recipeId != null
       ? ref.watch(recipeIngredientMatchesProvider(widget.recipeId!))
@@ -287,7 +306,13 @@ class _RecipeIngredientsViewState extends ConsumerState<RecipeIngredientsView>
     );
   }
 
-  /// Builds ingredient text with bold quantities, supporting transformed ingredients.
+  /// Builds ingredient text with bold quantities and markdown support.
+  ///
+  /// Supports:
+  /// - Bold quantities (from ingredient parsing)
+  /// - `[text](url)` - External links
+  /// - `**text**` - Bold formatting
+  /// - `*text*` / `_text_` - Italic formatting
   ///
   /// If [transformed] is provided, uses the transformed display text and quantity
   /// positions. Otherwise falls back to parsing the original ingredient name.
@@ -326,49 +351,16 @@ class _RecipeIngredientsViewState extends ConsumerState<RecipeIngredientsView>
       }
     }
 
-    if (quantityPositions.isEmpty) {
-      // No quantities found, return plain text
-      return _buildPlainText(
-        text: text,
-        baseStyle: baseStyle,
-        isLinkedRecipe: isLinkedRecipe,
-        colors: colors,
-      );
-    }
+    // Parse markdown tokens from the text
+    final markdownTokens = _parseMarkdownTokens(text);
 
-    // Build rich text with bold quantities
-    final children = <InlineSpan>[];
-    int currentIndex = 0;
+    // Build styled ranges by merging quantities and markdown
+    final styledRanges = _buildStyledRanges(text, quantityPositions, markdownTokens);
 
-    for (final quantity in quantityPositions) {
-      // Text before quantity
-      if (quantity.start > currentIndex) {
-        children.add(TextSpan(
-          text: text.substring(currentIndex, quantity.start),
-          style: baseStyle,
-        ));
-      }
+    // Build TextSpan children from styled ranges
+    final children = _buildSpansFromRanges(text, styledRanges, baseStyle, colors);
 
-      // Quantity with bold formatting
-      children.add(TextSpan(
-        text: text.substring(quantity.start, quantity.end),
-        style: baseStyle.copyWith(
-          fontWeight: FontWeight.bold,
-        ),
-      ));
-
-      currentIndex = quantity.end;
-    }
-
-    // Remaining text after last quantity
-    if (currentIndex < text.length) {
-      children.add(TextSpan(
-        text: text.substring(currentIndex),
-        style: baseStyle,
-      ));
-    }
-
-    // Add external link icon for linked recipes
+    // Add external link icon for linked recipes (via ingredient.recipeId)
     if (isLinkedRecipe) {
       children.add(const TextSpan(text: ' '));
       children.add(WidgetSpan(
@@ -395,41 +387,186 @@ class _RecipeIngredientsViewState extends ConsumerState<RecipeIngredientsView>
     );
   }
 
-  /// Builds plain text with optional link styling
-  Widget _buildPlainText({
-    required String text,
-    required TextStyle baseStyle,
-    required bool isLinkedRecipe,
-    required AppColors colors,
-  }) {
-    final children = <InlineSpan>[
-      TextSpan(text: text, style: baseStyle),
-    ];
+  /// Parse markdown tokens from text.
+  List<_MarkdownToken> _parseMarkdownTokens(String text) {
+    final tokens = <_MarkdownToken>[];
 
-    if (isLinkedRecipe) {
-      children.add(const TextSpan(text: ' '));
-      children.add(WidgetSpan(
-        child: Icon(
-          Icons.open_in_new,
-          size: 14,
-          color: colors.contentSecondary,
-        ),
-        alignment: PlaceholderAlignment.middle,
+    // [text](url) - external links
+    final linkPattern = RegExp(r'\[([^\]]+)\]\(([^)]+)\)');
+    for (final match in linkPattern.allMatches(text)) {
+      tokens.add(_MarkdownToken(
+        type: _MarkdownType.link,
+        start: match.start,
+        end: match.end,
+        content: match.group(1)!,
+        url: match.group(2),
       ));
     }
 
-    return RichText(
-      text: TextSpan(
-        children: children,
-        style: isLinkedRecipe
-            ? TextStyle(
-                decoration: TextDecoration.underline,
-                decorationStyle: TextDecorationStyle.dotted,
-                decorationColor: colors.contentPrimary,
-              )
-            : null,
-      ),
-    );
+    // **bold** - must be processed before single *
+    final boldPattern = RegExp(r'\*\*([^*]+)\*\*');
+    for (final match in boldPattern.allMatches(text)) {
+      tokens.add(_MarkdownToken(
+        type: _MarkdownType.bold,
+        start: match.start,
+        end: match.end,
+        content: match.group(1)!,
+      ));
+    }
+
+    // *italic* - single asterisks not part of **
+    final italicAsteriskPattern = RegExp(r'(?<!\*)\*(?!\*)([^*]+)\*(?!\*)');
+    for (final match in italicAsteriskPattern.allMatches(text)) {
+      tokens.add(_MarkdownToken(
+        type: _MarkdownType.italic,
+        start: match.start,
+        end: match.end,
+        content: match.group(1)!,
+      ));
+    }
+
+    // _italic_ - underscore style
+    final italicUnderscorePattern = RegExp(r'_([^_]+)_');
+    for (final match in italicUnderscorePattern.allMatches(text)) {
+      tokens.add(_MarkdownToken(
+        type: _MarkdownType.italic,
+        start: match.start,
+        end: match.end,
+        content: match.group(1)!,
+      ));
+    }
+
+    // Sort by start position
+    tokens.sort((a, b) => a.start.compareTo(b.start));
+
+    // Remove overlapping tokens (keep the one that starts first)
+    final filtered = <_MarkdownToken>[];
+    int lastEnd = 0;
+    for (final token in tokens) {
+      if (token.start >= lastEnd) {
+        filtered.add(token);
+        lastEnd = token.end;
+      }
+    }
+
+    return filtered;
+  }
+
+  /// Build a list of styled ranges by merging quantity positions and markdown tokens.
+  List<_StyledRange> _buildStyledRanges(
+    String text,
+    List<({int start, int end})> quantities,
+    List<_MarkdownToken> markdown,
+  ) {
+    final ranges = <_StyledRange>[];
+
+    // Add quantity ranges (bold)
+    for (final q in quantities) {
+      ranges.add(_StyledRange(
+        start: q.start,
+        end: q.end,
+        isBold: true,
+        isItalic: false,
+        isLink: false,
+        displayText: text.substring(q.start, q.end),
+      ));
+    }
+
+    // Add markdown ranges, checking for overlaps with quantities
+    for (final token in markdown) {
+      // Check if this token overlaps with any quantity range
+      final overlapsQuantity = quantities.any((q) =>
+          !(token.end <= q.start || token.start >= q.end));
+
+      if (overlapsQuantity) {
+        // Skip markdown tokens that overlap with quantities
+        // (quantity formatting takes precedence)
+        continue;
+      }
+
+      ranges.add(_StyledRange(
+        start: token.start,
+        end: token.end,
+        isBold: token.type == _MarkdownType.bold,
+        isItalic: token.type == _MarkdownType.italic,
+        isLink: token.type == _MarkdownType.link,
+        displayText: token.content,
+        url: token.url,
+      ));
+    }
+
+    // Sort by start position
+    ranges.sort((a, b) => a.start.compareTo(b.start));
+
+    return ranges;
+  }
+
+  /// Build TextSpan children from styled ranges.
+  List<InlineSpan> _buildSpansFromRanges(
+    String text,
+    List<_StyledRange> ranges,
+    TextStyle baseStyle,
+    AppColors colors,
+  ) {
+    final children = <InlineSpan>[];
+    int currentIndex = 0;
+
+    for (final range in ranges) {
+      // Add plain text before this range
+      if (range.start > currentIndex) {
+        children.add(TextSpan(
+          text: text.substring(currentIndex, range.start),
+          style: baseStyle,
+        ));
+      }
+
+      // Build styled span for this range
+      if (range.isLink) {
+        // Create link with gesture recognizer
+        final recognizer = TapGestureRecognizer()
+          ..onTap = () => _launchUrl(range.url!);
+        _linkRecognizers.add(recognizer);
+
+        children.add(TextSpan(
+          text: range.displayText,
+          style: baseStyle.copyWith(
+            decoration: TextDecoration.underline,
+            decorationStyle: TextDecorationStyle.dotted,
+            decorationColor: colors.textSecondary,
+          ),
+          recognizer: recognizer,
+        ));
+      } else {
+        // Regular styled text
+        children.add(TextSpan(
+          text: range.displayText,
+          style: baseStyle.copyWith(
+            fontWeight: range.isBold ? FontWeight.bold : null,
+            fontStyle: range.isItalic ? FontStyle.italic : null,
+          ),
+        ));
+      }
+
+      currentIndex = range.end;
+    }
+
+    // Add remaining text after last range
+    if (currentIndex < text.length) {
+      children.add(TextSpan(
+        text: text.substring(currentIndex),
+        style: baseStyle,
+      ));
+    }
+
+    return children;
+  }
+
+  /// Launch a URL in external browser.
+  Future<void> _launchUrl(String url) async {
+    final uri = Uri.tryParse(url);
+    if (uri != null) {
+      await launchUrl(uri, mode: LaunchMode.externalApplication);
+    }
   }
 
   /// Navigates to the linked recipe
@@ -462,4 +599,49 @@ class _RecipeIngredientsViewState extends ConsumerState<RecipeIngredientsView>
       });
     });
   }
+}
+
+/// Types of markdown formatting tokens.
+enum _MarkdownType {
+  bold,
+  italic,
+  link,
+}
+
+/// A parsed markdown token with position and content.
+class _MarkdownToken {
+  final _MarkdownType type;
+  final int start;
+  final int end;
+  final String content;
+  final String? url;
+
+  _MarkdownToken({
+    required this.type,
+    required this.start,
+    required this.end,
+    required this.content,
+    this.url,
+  });
+}
+
+/// A styled range with merged formatting from quantities and markdown.
+class _StyledRange {
+  final int start;
+  final int end;
+  final bool isBold;
+  final bool isItalic;
+  final bool isLink;
+  final String displayText;
+  final String? url;
+
+  _StyledRange({
+    required this.start,
+    required this.end,
+    required this.isBold,
+    required this.isItalic,
+    required this.isLink,
+    required this.displayText,
+    this.url,
+  });
 }

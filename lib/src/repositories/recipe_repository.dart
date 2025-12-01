@@ -99,6 +99,24 @@ class RecipeRepository {
         .getSingleOrNull();
   }
 
+  /// Find a recipe by exact title match (case-insensitive).
+  /// Returns the first matching non-deleted recipe, or null if not found.
+  Future<RecipeEntry?> getRecipeByTitle(String title) async {
+    // Use raw SQL for case-insensitive comparison
+    final results = await _db.customSelect(
+      '''
+      SELECT * FROM recipes
+      WHERE LOWER(title) = LOWER(?) AND deleted_at IS NULL
+      LIMIT 1
+      ''',
+      variables: [Variable(title)],
+      readsFrom: {_db.recipes},
+    ).get();
+
+    if (results.isEmpty) return null;
+    return _rowToRecipe(results.first);
+  }
+
   // lib/repositories/recipe_repository.dart
   Future<bool> updateImageForRecipe({
     required String recipeId,

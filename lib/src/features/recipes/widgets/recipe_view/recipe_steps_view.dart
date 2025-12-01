@@ -6,6 +6,7 @@ import '../../../settings/providers/app_settings_provider.dart';
 import '../../../../theme/typography.dart';
 import '../../../../theme/colors.dart';
 import '../../../../theme/spacing.dart';
+import '../../../../utils/recipe_text_renderer.dart';
 
 class RecipeStepsView extends ConsumerWidget {
   final List<Step> steps;
@@ -102,13 +103,14 @@ class RecipeStepsView extends ConsumerWidget {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        // Step text
-                        Text(
-                          step.text,
-                          style: baseBodyStyle.copyWith(
+                        // Step text with rich formatting support
+                        RecipeTextRenderer(
+                          text: step.text,
+                          baseStyle: baseBodyStyle.copyWith(
                             fontSize: scaledFontSize,
                             color: colors.contentPrimary,
                           ),
+                          enableRecipeLinks: true,
                         ),
 
                         // Note (if available)

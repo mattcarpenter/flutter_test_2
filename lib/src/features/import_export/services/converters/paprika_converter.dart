@@ -94,12 +94,15 @@ class PaprikaConverter extends RecipeConverter<PaprikaRecipe> {
       final trimmed = line.trim();
       if (trimmed.isEmpty) continue;
 
+      // Transform Paprika tokens - flatten [recipe:Name] and [photo:N] in ingredients
+      final transformed = _transformPaprikaTokens(trimmed, keepRecipeLinks: false);
+
       // Check if this is a section header (all caps or ends with colon)
-      final isSection = _isSection(trimmed);
+      final isSection = _isSection(transformed);
 
       result.add(ImportedIngredient(
         type: isSection ? 'section' : 'ingredient',
-        name: trimmed,
+        name: transformed,
         note: null,
         terms: null,
         isCanonicalised: false, // Paprika ingredients need canonicalization
@@ -138,12 +141,15 @@ class PaprikaConverter extends RecipeConverter<PaprikaRecipe> {
       final trimmed = line.trim();
       if (trimmed.isEmpty) continue;
 
+      // Transform Paprika tokens - flatten [photo:N] but keep [recipe:Name] for UI linking
+      final transformed = _transformPaprikaTokens(trimmed, keepRecipeLinks: true);
+
       // Check if this is a section header
-      final isSection = _isSection(trimmed);
+      final isSection = _isSection(transformed);
 
       result.add(ImportedStep(
         type: isSection ? 'section' : 'step',
-        text: trimmed,
+        text: transformed,
         note: null,
         timerDurationSeconds: null,
       ));
@@ -167,6 +173,34 @@ class PaprikaConverter extends RecipeConverter<PaprikaRecipe> {
     }
 
     return false;
+  }
+
+  /// Transform Paprika-specific tokens in text.
+  ///
+  /// Handles:
+  /// - `[photo:N]` → "photo N" (always flattened)
+  /// - `[recipe:Name]` → "Name" (flattened unless keepRecipeLinks is true)
+  ///
+  /// When [keepRecipeLinks] is true, `[recipe:Name]` tokens are preserved
+  /// for UI-side rendering (used in steps where we want to hotlink to recipes).
+  String _transformPaprikaTokens(String text, {bool keepRecipeLinks = false}) {
+    var result = text;
+
+    // [photo:N] → "photo N"
+    result = result.replaceAllMapped(
+      RegExp(r'\[photo:(\d+)\]'),
+      (m) => 'photo ${m.group(1)}',
+    );
+
+    // [recipe:Name] → "Name" (unless keepRecipeLinks is true)
+    if (!keepRecipeLinks) {
+      result = result.replaceAllMapped(
+        RegExp(r'\[recipe:([^\]]+)\]'),
+        (m) => m.group(1)!,
+      );
+    }
+
+    return result;
   }
 
   /// Parse images from photo_data and photos array
