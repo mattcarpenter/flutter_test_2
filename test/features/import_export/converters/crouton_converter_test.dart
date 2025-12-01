@@ -108,7 +108,7 @@ void main() {
       // Check ingredients
       expect(imported.ingredients.length, 3);
       expect(imported.ingredients[0].type, 'ingredient');
-      expect(imported.ingredients[0].name, '2.5 cup flour');
+      expect(imported.ingredients[0].name, '2 1/2 cup flour');
       expect(imported.ingredients[0].isCanonicalised, false);
       expect(imported.ingredients[1].name, '1 cup butter');
       expect(imported.ingredients[2].name, '2 eggs'); // ITEM has no unit
@@ -173,7 +173,7 @@ void main() {
 
       expect(imported.ingredients[0].name, '2 cup flour');
       expect(imported.ingredients[1].name, '1 tbsp vanilla');
-      expect(imported.ingredients[2].name, '0.5 tsp salt');
+      expect(imported.ingredients[2].name, '1/2 tsp salt');
       expect(imported.ingredients[3].name, '200 g sugar');
       expect(imported.ingredients[4].name, '0.5 kg butter');
       expect(imported.ingredients[5].name, '8 oz chocolate');
@@ -200,8 +200,8 @@ void main() {
       final imported = converter.convert(croutonRecipe);
 
       expect(imported.ingredients[0].name, '2 cup flour'); // Not "2.0"
-      expect(imported.ingredients[1].name, '1.5 cup sugar');
-      expect(imported.ingredients[2].name, '0.5 tsp salt');
+      expect(imported.ingredients[1].name, '1 1/2 cup sugar');
+      expect(imported.ingredients[2].name, '1/2 tsp salt');
     });
 
     test('handles ingredients without quantity', () {

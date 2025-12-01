@@ -1,6 +1,20 @@
 import '../../models/crouton_recipe.dart';
 import 'recipe_converter.dart';
 
+/// Common cooking fractions for decimal-to-fraction conversion
+/// Each entry is (decimal value, fraction string)
+const _commonFractions = <(double, String)>[
+  (0.125, '1/8'),
+  (0.25, '1/4'),
+  (0.333, '1/3'),
+  (0.375, '3/8'),
+  (0.5, '1/2'),
+  (0.625, '5/8'),
+  (0.666, '2/3'),
+  (0.75, '3/4'),
+  (0.875, '7/8'),
+];
+
 /// Converts Crouton recipe format (.crumb) to ImportedRecipe
 class CroutonConverter extends RecipeConverter<CroutonRecipe> {
   @override
@@ -70,17 +84,16 @@ class CroutonConverter extends RecipeConverter<CroutonRecipe> {
     }
 
     final parts = <String>[];
-
-    // Add amount (format nicely, remove trailing zeros)
     final amount = quantity.amount!;
-    if (amount == amount.roundToDouble()) {
-      parts.add(amount.round().toString());
-    } else {
-      parts.add(amount.toString());
+    final unit = _mapCroutonUnit(quantity.quantityType);
+
+    // Format the amount based on unit type
+    final formattedAmount = _formatAmount(amount, quantity.quantityType);
+    if (formattedAmount.isNotEmpty) {
+      parts.add(formattedAmount);
     }
 
     // Add unit if available
-    final unit = _mapCroutonUnit(quantity.quantityType);
     if (unit != null) {
       parts.add(unit);
     }
@@ -89,6 +102,89 @@ class CroutonConverter extends RecipeConverter<CroutonRecipe> {
     parts.add(name);
 
     return parts.join(' ');
+  }
+
+  /// Format a numeric amount, converting to fractions where appropriate
+  /// based on the unit type
+  String _formatAmount(double amount, String? quantityType) {
+    if (amount == 0) return '';
+
+    // Check if it's a whole number
+    if (amount == amount.roundToDouble()) {
+      return amount.round().toString();
+    }
+
+    // Determine if we should use fractions based on unit type
+    final useFractions = _shouldUseFractions(quantityType);
+
+    if (useFractions) {
+      return _formatAsFraction(amount);
+    } else {
+      return _formatAsDecimal(amount, quantityType);
+    }
+  }
+
+  /// Determine if fractions are appropriate for this unit type
+  bool _shouldUseFractions(String? quantityType) {
+    if (quantityType == null) return true; // ITEM type - use fractions
+
+    return switch (quantityType) {
+      // Volume units - use fractions
+      'CUP' || 'TABLESPOON' || 'TEASPOON' || 'PINCH' => true,
+      'MILLILITER' || 'LITER' => true,
+      // Items - use fractions (e.g., "1/2 onion")
+      'ITEM' => true,
+      // Weight units - use decimals
+      'GRAM' || 'KILOGRAM' || 'OUNCE' || 'POUND' => false,
+      // Sub-recipes and unknown - use fractions
+      _ => true,
+    };
+  }
+
+  /// Format amount as a fraction (e.g., "1/3", "1 1/2", "2 2/3")
+  String _formatAsFraction(double amount) {
+    final wholeNumber = amount.floor();
+    final fractionalPart = amount - wholeNumber;
+
+    // If there's no fractional part, just return the whole number
+    if (fractionalPart < 0.01) {
+      return wholeNumber.toString();
+    }
+
+    // Try to match the fractional part to a common fraction
+    String? fractionStr;
+    for (final (decimal, fraction) in _commonFractions) {
+      if ((fractionalPart - decimal).abs() < 0.02) {
+        fractionStr = fraction;
+        break;
+      }
+    }
+
+    // If no fraction match, fall back to 2 decimal places
+    if (fractionStr == null) {
+      return amount.toStringAsFixed(2).replaceAll(RegExp(r'\.?0+$'), '');
+    }
+
+    // Build the result
+    if (wholeNumber == 0) {
+      return fractionStr;
+    } else {
+      return '$wholeNumber $fractionStr';
+    }
+  }
+
+  /// Format amount as a decimal based on unit type
+  String _formatAsDecimal(double amount, String? quantityType) {
+    return switch (quantityType) {
+      // Grams - round to whole numbers (e.g., 333g not 333.33g)
+      'GRAM' => amount.round().toString(),
+      // Kilograms - 1-2 decimal places (e.g., 0.5 kg, 1.25 kg)
+      'KILOGRAM' => amount.toStringAsFixed(2).replaceAll(RegExp(r'\.?0+$'), ''),
+      // Ounces/pounds - 1 decimal place
+      'OUNCE' || 'POUND' => amount.toStringAsFixed(1).replaceAll(RegExp(r'\.0$'), ''),
+      // Default - 2 decimal places
+      _ => amount.toStringAsFixed(2).replaceAll(RegExp(r'\.?0+$'), ''),
+    };
   }
 
   /// Map Crouton quantity types to unit abbreviations
