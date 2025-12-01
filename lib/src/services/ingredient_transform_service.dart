@@ -156,11 +156,9 @@ class IngredientTransformService {
   }
 
   /// Get the fraction granularity for a unit.
-  /// Cups use 1/4, everything else uses 1/8.
+  /// All units use 1/8 granularity for finer scaling control.
   double _getFractionGranularity(String unit) {
-    final lower = unit.toLowerCase();
-    const cupUnits = {'cup', 'cups', 'c', 'カップ'};
-    return cupUnits.contains(lower) ? 0.25 : 0.125;
+    return 0.125;
   }
 
   /// Format a number as decimal, rounded to tenths.
@@ -185,7 +183,20 @@ class IngredientTransformService {
   }
 
   /// Format a number as a fraction, rounded to the given granularity.
+  /// Thirds (1/3, 2/3) are preserved before rounding since they don't
+  /// align with 1/8 granularity but are common in cooking.
   String _formatAsFraction(double value, double granularity) {
+    // Check for thirds BEFORE rounding (they don't align with 1/8)
+    final whole = value.truncate();
+    final fractional = value - whole;
+    final thirdsMatch = _matchThirds(fractional);
+    if (thirdsMatch != null) {
+      if (whole == 0) {
+        return thirdsMatch;
+      }
+      return '$whole $thirdsMatch';
+    }
+
     // Round to nearest granularity
     double rounded = (value / granularity).round() * granularity;
 
@@ -199,19 +210,34 @@ class IngredientTransformService {
       return rounded.toInt().toString();
     }
 
-    final whole = rounded.truncate();
-    final fractional = rounded - whole;
+    final roundedWhole = rounded.truncate();
+    final roundedFractional = rounded - roundedWhole;
 
     // Convert fractional part to fraction string
-    final fractionStr = _decimalToFraction(fractional);
+    final fractionStr = _decimalToFraction(roundedFractional);
 
-    if (whole == 0) {
+    if (roundedWhole == 0) {
       return fractionStr.isNotEmpty ? fractionStr : '0';
     } else if (fractionStr.isEmpty) {
-      return whole.toString();
+      return roundedWhole.toString();
     } else {
-      return '$whole $fractionStr';
+      return '$roundedWhole $fractionStr';
     }
+  }
+
+  /// Check if a fractional value is close to 1/3 or 2/3.
+  /// Returns the fraction string if matched, null otherwise.
+  String? _matchThirds(double fractional) {
+    const tolerance = 0.02;
+    if ((fractional - 0.333).abs() < tolerance ||
+        (fractional - 0.334).abs() < tolerance) {
+      return '1/3';
+    }
+    if ((fractional - 0.666).abs() < tolerance ||
+        (fractional - 0.667).abs() < tolerance) {
+      return '2/3';
+    }
+    return null;
   }
 
   /// Convert a decimal (0-1) to its fraction string representation.

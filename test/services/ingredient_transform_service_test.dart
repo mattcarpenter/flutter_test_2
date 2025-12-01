@@ -530,15 +530,14 @@ void main() {
     });
 
     group('unit-based formatting', () {
-      // Cups use 1/4 granularity
-      test('cups round to 1/4 granularity', () {
+      // All units use 1/8 granularity
+      test('cups format 1/8 correctly', () {
         const state = ScaleConvertState(scaleFactor: 0.125); // 1/8
         final result = service.transform(
           originalText: '1 cup flour',
           state: state,
         );
-        // 0.125 rounds to nearest 1/4, which is 0.25 (but since it's closer to 0, it would round to 0.25 as minimum)
-        expect(result.displayText, '1/4 cup flour');
+        expect(result.displayText, '1/8 cup flour');
       });
 
       test('cups format 1/4 correctly', () {
@@ -760,8 +759,8 @@ void main() {
           originalText: '1 cup flour',
           state: state,
         );
-        // 0.1 cups would round to 0, but minimum is 1/4 for cups
-        expect(result.displayText, '1/4 cup flour');
+        // 0.1 cups would round to 0, but minimum is 1/8
+        expect(result.displayText, '1/8 cup flour');
       });
 
       test('very small tbsp value does not round to zero', () {
@@ -776,46 +775,59 @@ void main() {
     });
 
     group('third fractions', () {
-      // Note: With 1/8 granularity, 1/3 (0.333) rounds to 3/8 (0.375)
-      // and 2/3 (0.667) rounds to 5/8 (0.625). This is expected behavior.
-      test('1/3 rounds to nearest 1/8 for non-cup units', () {
+      // Thirds are preserved since they're common in cooking
+      test('1/3 is preserved for tbsp', () {
         const state = ScaleConvertState(scaleFactor: 0.333);
         final result = service.transform(
           originalText: '1 tbsp oil',
           state: state,
         );
-        // 0.333 rounds to nearest 1/8, which is 3/8 (0.375)
-        expect(result.displayText, '3/8 tbsp oil');
+        expect(result.displayText, '1/3 tbsp oil');
       });
 
-      test('2/3 rounds to nearest 1/8 for non-cup units', () {
+      test('2/3 is preserved for tbsp', () {
         const state = ScaleConvertState(scaleFactor: 0.667);
         final result = service.transform(
           originalText: '1 tbsp oil',
           state: state,
         );
-        // 0.667 rounds to nearest 1/8, which is 5/8 (0.625)
-        expect(result.displayText, '5/8 tbsp oil');
+        expect(result.displayText, '2/3 tbsp oil');
       });
 
-      test('cups round 1/3 to nearest 1/4', () {
+      test('1/3 is preserved for cups', () {
         const state = ScaleConvertState(scaleFactor: 0.333);
         final result = service.transform(
           originalText: '1 cup flour',
           state: state,
         );
-        // 0.333 cups rounds to 1/4 (0.25) since cups use 1/4 granularity
-        expect(result.displayText, '1/4 cup flour');
+        expect(result.displayText, '1/3 cup flour');
       });
 
-      test('cups round 2/3 to nearest 1/4', () {
+      test('2/3 is preserved for cups', () {
         const state = ScaleConvertState(scaleFactor: 0.667);
         final result = service.transform(
           originalText: '1 cup flour',
           state: state,
         );
-        // 0.667 cups rounds to 3/4 (0.75) since cups use 1/4 granularity
-        expect(result.displayText, '3/4 cup flour');
+        expect(result.displayText, '2/3 cup flour');
+      });
+
+      test('1/3 scaled by 2x gives 2/3', () {
+        const state = ScaleConvertState(scaleFactor: 2.0);
+        final result = service.transform(
+          originalText: '1/3 cup flour',
+          state: state,
+        );
+        expect(result.displayText, '2/3 cup flour');
+      });
+
+      test('1/3 scaled by 3x gives 1', () {
+        const state = ScaleConvertState(scaleFactor: 3.0);
+        final result = service.transform(
+          originalText: '1/3 cup flour',
+          state: state,
+        );
+        expect(result.displayText, '1 cup flour');
       });
     });
 
