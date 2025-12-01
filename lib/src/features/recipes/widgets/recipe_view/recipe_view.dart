@@ -9,6 +9,7 @@ import '../../../settings/providers/app_settings_provider.dart';
 import '../../../../providers/recipe_provider.dart' as recipe_provider;
 import '../../../../providers/recently_viewed_provider.dart';
 import '../../../../providers/cook_provider.dart';
+import '../../../../providers/scale_convert_provider.dart';
 import '../../../../theme/typography.dart';
 import '../../../../theme/colors.dart';
 import '../../../../utils/duration_formatter.dart';
@@ -137,11 +138,20 @@ class _RecipeViewState extends ConsumerState<RecipeView> {
               runSpacing: 12,
               children: [
                 if (recipe.servings != null)
-                  _buildInfoItem(
-                    context,
-                    label: 'Servings',
-                    value: '${recipe.servings}',
-                    fontScale: fontScale,
+                  Builder(
+                    builder: (context) {
+                      // Watch scale state to update servings display
+                      final scaleState = ref.watch(scaleConvertProvider(widget.recipeId));
+                      final scaledServings = scaleState.isScalingActive
+                          ? (recipe.servings! * scaleState.scaleFactor).round()
+                          : recipe.servings!;
+                      return _buildInfoItem(
+                        context,
+                        label: 'Servings',
+                        value: '$scaledServings',
+                        fontScale: fontScale,
+                      );
+                    },
                   ),
                 if (recipe.prepTime != null)
                   _buildInfoItem(

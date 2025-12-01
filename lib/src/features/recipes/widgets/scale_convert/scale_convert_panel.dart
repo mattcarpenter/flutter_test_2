@@ -292,6 +292,19 @@ class _IngredientSelectorRow extends ConsumerWidget {
 // SCALE SLIDER ROW
 // ============================================================
 
+/// Parsed ingredient info for slider configuration
+class _ParsedIngredientInfo {
+  final double amount;
+  final String unit;
+  final UnitType unitType;
+
+  const _ParsedIngredientInfo({
+    required this.amount,
+    required this.unit,
+    required this.unitType,
+  });
+}
+
 class _ScaleSliderRow extends ConsumerWidget {
   final String recipeId;
   final ScaleConvertState state;
@@ -303,50 +316,144 @@ class _ScaleSliderRow extends ConsumerWidget {
     this.recipeServings,
   });
 
-  (double min, double max) _getSliderRange() {
+  /// Parse the selected ingredient to get amount and unit info
+  _ParsedIngredientInfo? _getSelectedIngredientInfo(WidgetRef ref) {
+    if (state.scaleType != ScaleType.ingredient ||
+        state.selectedIngredientId == null) {
+      return null;
+    }
+
+    // Get the selected ingredient's name
+    final scalableIngredients = ref.read(scalableIngredientsProvider(recipeId));
+    final selected = scalableIngredients.firstWhere(
+      (i) => i.id == state.selectedIngredientId,
+      orElse: () => (id: '', name: '', displayName: ''),
+    );
+
+    if (selected.name.isEmpty) return null;
+
+    // Parse the ingredient
+    final parser = ref.read(ingredientParserServiceProvider);
+    final converter = ref.read(unitConversionServiceProvider);
+    final parsed =
+        parser.parseEnhanced(selected.name, conversionService: converter);
+
+    if (!parsed.hasQuantities) {
+      // Bare ingredient - treat as count with amount 1
+      return const _ParsedIngredientInfo(
+        amount: 1.0,
+        unit: '',
+        unitType: UnitType.count,
+      );
+    }
+
+    final quantity = parsed.primaryQuantity!;
+    final unitType = converter.getUnitType(quantity.unit);
+
+    return _ParsedIngredientInfo(
+      amount: quantity.value,
+      unit: quantity.unit,
+      unitType: unitType,
+    );
+  }
+
+  /// Get slider range based on scale type and ingredient info
+  (double min, double max) _getSliderRange(
+      _ParsedIngredientInfo? ingredientInfo) {
     switch (state.scaleType) {
       case ScaleType.amount:
         return (0.25, 10.0);
       case ScaleType.servings:
-        // Servings slider works in target servings, not scale factor
-        // Range: 1 serving to 4x original servings
         final originalServings = recipeServings?.toDouble() ?? 4.0;
         return (1.0, originalServings * 4);
       case ScaleType.ingredient:
-        // For ingredient mode, scale factor is computed based on target amount
-        // Default range from 0.1x to 5x
-        return (0.1, 5.0);
+        if (ingredientInfo == null) {
+          // Fall back to multiplier mode
+          return (0.25, 10.0);
+        }
+        // Amount-based range depending on unit type
+        final amount = ingredientInfo.amount;
+        return switch (ingredientInfo.unitType) {
+          UnitType.volume => _isMetricVolumeUnit(ingredientInfo.unit)
+              ? (amount * 0.1, amount * 10) // metric: 0.1x to 10x
+              : (amount * 0.125, amount * 8), // imperial: 1/8x to 8x
+          UnitType.weight => _isMetricWeightUnit(ingredientInfo.unit)
+              ? (amount * 0.1, amount * 10) // metric: 0.1x to 10x
+              : (amount * 0.125, amount * 8), // imperial: 1/8x to 8x
+          UnitType.count || UnitType.unknown => (
+              (amount * 0.5).clamp(0.5, double.infinity),
+              amount * 10,
+            ), // count: 0.5x to 10x, min 0.5
+          UnitType.approximate => (0.25, 10.0), // shouldn't happen
+        };
     }
   }
 
-  /// Get the current slider value (may differ from scaleFactor for servings mode)
-  double _getSliderValue() {
+  /// Check if unit is metric volume (ml, l, etc.)
+  bool _isMetricVolumeUnit(String unit) {
+    final lower = unit.toLowerCase();
+    return {
+      'ml',
+      'milliliter',
+      'milliliters',
+      'l',
+      'liter',
+      'liters',
+      'cl',
+      'dl'
+    }.contains(lower);
+  }
+
+  /// Check if unit is metric weight (g, kg, etc.)
+  bool _isMetricWeightUnit(String unit) {
+    final lower = unit.toLowerCase();
+    return {'g', 'gram', 'grams', 'kg', 'kilogram', 'kilograms', 'mg'}
+        .contains(lower);
+  }
+
+  /// Get the current slider value
+  double _getSliderValue(_ParsedIngredientInfo? ingredientInfo) {
     switch (state.scaleType) {
       case ScaleType.amount:
-      case ScaleType.ingredient:
         return state.scaleFactor;
       case ScaleType.servings:
-        // Convert scale factor to target servings for display
         final originalServings = recipeServings ?? 4;
         return state.scaleFactor * originalServings;
+      case ScaleType.ingredient:
+        if (ingredientInfo == null) {
+          return state.scaleFactor;
+        }
+        // Return target amount (original × scale factor)
+        return ingredientInfo.amount * state.scaleFactor;
     }
   }
 
   /// Convert slider value to scale factor
-  double _sliderValueToScaleFactor(double sliderValue) {
+  double _sliderValueToScaleFactor(
+    double sliderValue,
+    _ParsedIngredientInfo? ingredientInfo,
+  ) {
     switch (state.scaleType) {
       case ScaleType.amount:
-      case ScaleType.ingredient:
         return sliderValue;
       case ScaleType.servings:
-        // Convert target servings to scale factor
         final originalServings = recipeServings ?? 4;
         return sliderValue / originalServings;
+      case ScaleType.ingredient:
+        if (ingredientInfo == null) {
+          return sliderValue;
+        }
+        // Convert target amount back to scale factor
+        return sliderValue / ingredientInfo.amount;
     }
   }
 
   /// Get slider divisions for snapping behavior
-  int? _getSliderDivisions(double min, double max) {
+  int? _getSliderDivisions(
+    double min,
+    double max,
+    _ParsedIngredientInfo? ingredientInfo,
+  ) {
     switch (state.scaleType) {
       case ScaleType.amount:
         // 0.25x steps for fraction-friendly values
@@ -355,12 +462,27 @@ class _ScaleSliderRow extends ConsumerWidget {
         // Integer steps for whole servings
         return (max - min).round();
       case ScaleType.ingredient:
-        // No snapping for ingredient mode (continuous)
-        return null;
+        if (ingredientInfo == null) {
+          return ((max - min) / 0.25).round();
+        }
+        // Snapping based on unit type
+        return switch (ingredientInfo.unitType) {
+          UnitType.volume => _isMetricVolumeUnit(ingredientInfo.unit)
+              ? null // metric volume: no snap
+              : ((max - min) / 0.125).round().clamp(1, 200), // imperial: 1/8
+          UnitType.weight => _isMetricWeightUnit(ingredientInfo.unit)
+              ? null // metric weight: no snap
+              : ((max - min) / 0.5).round().clamp(1, 200), // imperial: 0.5
+          UnitType.count ||
+          UnitType.unknown =>
+            ((max - min) / 0.5).round().clamp(1, 200), // count: 0.5
+          UnitType.approximate => null,
+        };
     }
   }
 
-  String _getSliderLabel() {
+  /// Get the slider label
+  String _getSliderLabel(_ParsedIngredientInfo? ingredientInfo) {
     switch (state.scaleType) {
       case ScaleType.amount:
         return 'Amount: ${_formatScale(state.scaleFactor)}x';
@@ -369,10 +491,18 @@ class _ScaleSliderRow extends ConsumerWidget {
             (state.scaleFactor * (recipeServings ?? 4)).round();
         return 'Servings: $targetServings';
       case ScaleType.ingredient:
-        if (state.targetIngredientAmount != null) {
-          return 'Amount: ${_formatAmount(state.targetIngredientAmount!)} ${state.targetIngredientUnit ?? ''}';
+        if (ingredientInfo == null) {
+          return 'Amount: ${_formatScale(state.scaleFactor)}x';
         }
-        return 'Amount: ${_formatScale(state.scaleFactor)}x';
+        final targetAmount = ingredientInfo.amount * state.scaleFactor;
+        final formattedAmount = _formatIngredientAmount(
+          targetAmount,
+          ingredientInfo.unit,
+          ingredientInfo.unitType,
+        );
+        final unitStr =
+            ingredientInfo.unit.isNotEmpty ? ' ${ingredientInfo.unit}' : '';
+        return 'Amount: $formattedAmount$unitStr';
     }
   }
 
@@ -383,20 +513,99 @@ class _ScaleSliderRow extends ConsumerWidget {
     return scale.toStringAsFixed(2).replaceAll(RegExp(r'\.?0+$'), '');
   }
 
-  String _formatAmount(double amount) {
-    if (amount == amount.truncate()) {
-      return amount.toInt().toString();
+  /// Format ingredient amount based on unit type
+  String _formatIngredientAmount(
+      double amount, String unit, UnitType unitType) {
+    // Use fractions for imperial volume/weight, decimals for metric
+    final useDecimal = _isMetricVolumeUnit(unit) || _isMetricWeightUnit(unit);
+
+    if (useDecimal) {
+      return _formatDecimal(amount);
+    } else {
+      return _formatAsFraction(amount);
     }
-    return amount.toStringAsFixed(1).replaceAll(RegExp(r'\.?0+$'), '');
+  }
+
+  String _formatDecimal(double value) {
+    if (value == value.truncate()) {
+      return value.toInt().toString();
+    }
+    if (value >= 100) {
+      return value.round().toString();
+    }
+    final rounded = (value * 10).round() / 10;
+    if (rounded == rounded.truncate()) {
+      return rounded.toInt().toString();
+    }
+    return rounded.toStringAsFixed(1);
+  }
+
+  String _formatAsFraction(double value) {
+    // Check for thirds first
+    final whole = value.truncate();
+    final fractional = value - whole;
+
+    if ((fractional - 0.333).abs() < 0.02) {
+      return whole == 0 ? '1/3' : '$whole 1/3';
+    }
+    if ((fractional - 0.666).abs() < 0.02 ||
+        (fractional - 0.667).abs() < 0.02) {
+      return whole == 0 ? '2/3' : '$whole 2/3';
+    }
+
+    // Round to nearest 1/8
+    const granularity = 0.125;
+    double rounded = (value / granularity).round() * granularity;
+    if (rounded == 0 && value > 0) rounded = granularity;
+
+    if (rounded == rounded.truncate()) {
+      return rounded.toInt().toString();
+    }
+
+    final roundedWhole = rounded.truncate();
+    final roundedFrac = rounded - roundedWhole;
+
+    final fractionStr = _decimalToFraction(roundedFrac);
+
+    if (roundedWhole == 0) {
+      return fractionStr.isNotEmpty ? fractionStr : '0';
+    } else if (fractionStr.isEmpty) {
+      return roundedWhole.toString();
+    }
+    return '$roundedWhole $fractionStr';
+  }
+
+  String _decimalToFraction(double decimal) {
+    if (decimal == 0) return '';
+    const fractions = [
+      (0.125, '1/8'),
+      (0.25, '1/4'),
+      (0.333, '1/3'),
+      (0.375, '3/8'),
+      (0.5, '1/2'),
+      (0.625, '5/8'),
+      (0.666, '2/3'),
+      (0.667, '2/3'),
+      (0.75, '3/4'),
+      (0.875, '7/8'),
+    ];
+    for (final (value, fraction) in fractions) {
+      if ((decimal - value).abs() < 0.02) {
+        return fraction;
+      }
+    }
+    return '';
   }
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final colors = AppColors.of(context);
-    final (min, max) = _getSliderRange();
 
-    // Get slider value (may be different from scaleFactor for servings mode)
-    final sliderValue = _getSliderValue().clamp(min, max);
+    // Get parsed ingredient info for ingredient mode
+    final ingredientInfo = _getSelectedIngredientInfo(ref);
+
+    final (min, max) = _getSliderRange(ingredientInfo);
+    final sliderValue = _getSliderValue(ingredientInfo).clamp(min, max);
 
     return Padding(
       padding: EdgeInsets.only(
@@ -408,10 +617,11 @@ class _ScaleSliderRow extends ConsumerWidget {
       child: Row(
         children: [
           // Label with fixed width to prevent slider jumping
+          // Wide enough for "Amount: 1 1/2 tbsp" without wrapping
           SizedBox(
-            width: 110,
+            width: 145,
             child: Text(
-              _getSliderLabel(),
+              _getSliderLabel(ingredientInfo),
               style: AppTypography.body.copyWith(
                 color: colors.textPrimary,
               ),
@@ -438,13 +648,11 @@ class _ScaleSliderRow extends ConsumerWidget {
                 value: sliderValue,
                 min: min,
                 max: max,
-                // Use divisions for snapping:
-                // - Amount mode: 0.25x steps for nice fraction-friendly values
-                // - Servings mode: integer steps for whole servings
-                divisions: _getSliderDivisions(min, max),
+                divisions: _getSliderDivisions(min, max, ingredientInfo),
                 onChanged: (value) {
                   HapticFeedback.selectionClick();
-                  final scaleFactor = _sliderValueToScaleFactor(value);
+                  final scaleFactor =
+                      _sliderValueToScaleFactor(value, ingredientInfo);
                   ref
                       .read(scaleConvertProvider(recipeId).notifier)
                       .setScaleFactor(scaleFactor);
