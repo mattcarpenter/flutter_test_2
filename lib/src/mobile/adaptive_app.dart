@@ -47,6 +47,7 @@ import '../features/shopping_list/views/shopping_list_root.dart';
 import '../features/shopping_list/views/shopping_list_sub_page.dart';
 import '../features/household/views/household_sharing_page.dart';
 import 'main_page_shell.dart';
+import 'global_status_bar.dart';
 import 'package:sheet/route.dart';
 
 bool isTablet(BuildContext context) {
@@ -116,6 +117,9 @@ class _AdaptiveApp2State extends ConsumerState<AdaptiveApp2> {
         theme: isDarkMode
             ? AppTheme.cupertinoDarkTheme
             : AppTheme.cupertinoLightTheme,
+        builder: (context, child) {
+          return GlobalStatusBarWrapper(child: child ?? const SizedBox.shrink());
+        },
       );
     } else {
       // MaterialApp supports themeMode directly
@@ -126,6 +130,9 @@ class _AdaptiveApp2State extends ConsumerState<AdaptiveApp2> {
         themeMode: themeMode,
         theme: AppTheme.materialLightTheme,
         darkTheme: AppTheme.materialDarkTheme,
+        builder: (context, child) {
+          return GlobalStatusBarWrapper(child: child ?? const SizedBox.shrink());
+        },
       );
     }
   }

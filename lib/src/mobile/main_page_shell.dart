@@ -1,4 +1,4 @@
-import 'dart:io' show Platform, sleep;
+import 'dart:io' show Platform;
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:cupertino_sidebar/cupertino_sidebar.dart';
