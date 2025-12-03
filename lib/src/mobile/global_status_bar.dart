@@ -32,18 +32,28 @@ class GlobalStatusBarWrapper extends ConsumerWidget {
 
     final statusBarHeight = shouldShowStatusBar ? _calculateStatusBarHeight(context) : 0.0;
 
+    final fullStatusBarHeight = _calculateStatusBarHeight(context);
+    final safeAreaTop = MediaQuery.of(context).padding.top;
+
     return Column(
       children: [
-        // Animated status bar
-        ClipRect(
-          child: AnimatedSize(
-            duration: const Duration(milliseconds: 300),
-            curve: Curves.easeOutCubic,
-            alignment: Alignment.topCenter,
-            child: shouldShowStatusBar
-                ? _GlobalStatusBar(activeCookCount: activeCookCount)
-                : const SizedBox.shrink(),
+        // Animated status bar - always render content, animate container height
+        AnimatedContainer(
+          duration: const Duration(milliseconds: 300),
+          curve: Curves.easeOutCubic,
+          height: shouldShowStatusBar ? fullStatusBarHeight : 0,
+          width: double.infinity,
+          clipBehavior: Clip.hardEdge,
+          color: AppColorSwatches.success[500],
+          // Manual padding instead of SafeArea to avoid layout issues
+          padding: EdgeInsets.only(
+            top: safeAreaTop,
+            left: AppSpacing.lg,
+            right: AppSpacing.lg,
+            bottom: AppSpacing.sm,
           ),
+          alignment: Alignment.centerLeft,
+          child: _GlobalStatusBar(activeCookCount: activeCookCount),
         ),
         // Main content (all routes)
         Expanded(
@@ -79,24 +89,12 @@ class _GlobalStatusBar extends StatelessWidget {
         ? 'Active Cook'
         : '$activeCookCount Active Cooks';
 
-    return Container(
-      width: double.infinity,
-      color: AppColorSwatches.success[500],
-      child: SafeArea(
-        bottom: false,
-        child: Padding(
-          padding: EdgeInsets.symmetric(
-            horizontal: AppSpacing.lg,
-            vertical: AppSpacing.sm,
-          ),
-          child: Text(
-            text,
-            style: AppTypography.body.copyWith(
-              color: Colors.white,
-              fontWeight: FontWeight.w600,
-            ),
-          ),
-        ),
+    // Background color and padding handled by parent AnimatedContainer
+    return Text(
+      text,
+      style: AppTypography.body.copyWith(
+        color: Colors.white,
+        fontWeight: FontWeight.w600,
       ),
     );
   }
