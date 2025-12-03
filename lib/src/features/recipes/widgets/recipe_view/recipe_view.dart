@@ -300,16 +300,14 @@ class _RecipeViewState extends ConsumerState<RecipeView> {
         if (isActive) {
           cookId = activeCook.id;
         } else {
-          if (userId != null) {
-            cookId = await cookNotifier.startCook(
-              recipeId: recipe.id,
-              userId: userId,
-              recipeName: recipe.title,
-              householdId: null,
-            );
-          } else {
-            return; // No user ID, can't start cooking
-          }
+          // userId can be null for anonymous users - cooks work locally
+          // and get synced/claimed when user signs in later
+          cookId = await cookNotifier.startCook(
+            recipeId: recipe.id,
+            userId: userId,
+            recipeName: recipe.title,
+            householdId: null,
+          );
         }
 
         if (context.mounted) {
