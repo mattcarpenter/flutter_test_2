@@ -30,49 +30,70 @@ class GlobalStatusBarWrapper extends ConsumerWidget {
     final shouldShowStatusBar = activeCookCount > 0;
     // Future: || ref.watch(activeTimersProvider).isNotEmpty;
 
-    final statusBarHeight = shouldShowStatusBar ? _calculateStatusBarHeight(context) : 0.0;
-
     final fullStatusBarHeight = _calculateStatusBarHeight(context);
     final safeAreaTop = MediaQuery.of(context).padding.top;
+    final targetHeight = shouldShowStatusBar ? fullStatusBarHeight : 0.0;
 
-    return Column(
-      children: [
-        // Animated status bar - always render content, animate container height
-        AnimatedContainer(
-          duration: const Duration(milliseconds: 300),
-          curve: Curves.easeOutCubic,
-          height: shouldShowStatusBar ? fullStatusBarHeight : 0,
-          width: double.infinity,
-          clipBehavior: Clip.hardEdge,
-          color: AppColorSwatches.success[500],
-          // Manual padding instead of SafeArea to avoid layout issues
-          padding: EdgeInsets.only(
-            top: safeAreaTop,
-            left: AppSpacing.lg,
-            right: AppSpacing.lg,
-            bottom: AppSpacing.sm,
-          ),
-          alignment: Alignment.centerLeft,
-          child: _GlobalStatusBar(activeCookCount: activeCookCount),
-        ),
-        // Main content (all routes)
-        Expanded(
-          child: MediaQuery(
-            // Adjust size.height so children using MediaQuery.of(context).size.height
-            // get the correct available height (accounting for status bar)
-            data: MediaQuery.of(context).copyWith(
-              size: Size(
-                MediaQuery.of(context).size.width,
-                MediaQuery.of(context).size.height - statusBarHeight,
+    // Use TweenAnimationBuilder to synchronize the container height animation
+    // with the MediaQuery adjustments - this prevents the "jump then animate" issue
+    // Note: begin is intentionally null so it uses the current animated value for transitions
+    return TweenAnimationBuilder<double>(
+      tween: Tween<double>(end: targetHeight),
+      duration: const Duration(milliseconds: 300),
+      curve: Curves.easeOutCubic,
+      builder: (context, animatedHeight, _) {
+        // Calculate visibility ratio for smooth padding interpolation
+        // When fully visible: 1.0, when hidden: 0.0
+        // This prevents the discrete jump that occurred with a boolean switch
+        final visibilityRatio = fullStatusBarHeight > 0
+            ? (animatedHeight / fullStatusBarHeight).clamp(0.0, 1.0)
+            : 0.0;
+
+        // Smoothly interpolate padding.top:
+        // - When status bar visible (ratio=1): padding.top = 0 (bar handles safe area)
+        // - When status bar hidden (ratio=0): padding.top = original (content needs safe area)
+        final adjustedPaddingTop = safeAreaTop * (1.0 - visibilityRatio);
+
+        return Column(
+          children: [
+            // Status bar container - height driven by animation
+            Container(
+              height: animatedHeight,
+              width: double.infinity,
+              clipBehavior: Clip.hardEdge,
+              decoration: BoxDecoration(
+                color: AppColorSwatches.success[500],
               ),
-              padding: shouldShowStatusBar
-                  ? MediaQuery.of(context).padding.copyWith(top: 0)
-                  : MediaQuery.of(context).padding,
+              padding: EdgeInsets.only(
+                top: safeAreaTop,
+                left: AppSpacing.lg,
+                right: AppSpacing.lg,
+                bottom: AppSpacing.sm,
+              ),
+              alignment: Alignment.centerLeft,
+              child: _GlobalStatusBar(activeCookCount: activeCookCount),
             ),
-            child: child,
-          ),
-        ),
-      ],
+            // Main content (all routes)
+            Expanded(
+              child: MediaQuery(
+                // Use animatedHeight (not target) so MediaQuery changes sync with animation
+                data: MediaQuery.of(context).copyWith(
+                  size: Size(
+                    MediaQuery.of(context).size.width,
+                    MediaQuery.of(context).size.height - animatedHeight,
+                  ),
+                  // Smoothly interpolate padding.top based on visibility ratio
+                  // This prevents content from jumping when animation completes
+                  padding: MediaQuery.of(context).padding.copyWith(
+                    top: adjustedPaddingTop,
+                  ),
+                ),
+                child: child,
+              ),
+            ),
+          ],
+        );
+      },
     );
   }
 }
