@@ -48,9 +48,10 @@ class _RecipePageState extends ConsumerState<RecipePage> {
     if (!hasImages) return;
 
     final heroHeight = _getHeroHeight(hasImages);
-    final headerHeight = MediaQuery.of(context).padding.top + 60;
+    // Use viewPadding.top for consistent snap timing regardless of global status bar
+    final fadeHeaderHeight = MediaQuery.of(context).viewPadding.top + 60;
     final snapStart = heroHeight * 0.5;
-    final snapEnd = heroHeight - (headerHeight / 2);
+    final snapEnd = heroHeight - (fadeHeaderHeight / 2);
     final currentOffset = metrics.pixels;
 
     // Only snap if we're in the snap zone
@@ -97,9 +98,10 @@ class _RecipePageState extends ConsumerState<RecipePage> {
           final heroHeight = _getHeroHeight(hasImages);
 
           // Calculate snap offsets based on fade zone
-          final headerHeight = MediaQuery.of(context).padding.top + 60;
+          // Use viewPadding.top for consistent timing regardless of global status bar
+          final fadeHeaderHeight = MediaQuery.of(context).viewPadding.top + 60;
           final snapStart = heroHeight * 0.5;
-          final snapEnd = heroHeight - (headerHeight / 2);
+          final snapEnd = heroHeight - (fadeHeaderHeight / 2);
 
           return Stack(
             children: [
@@ -136,11 +138,12 @@ class _RecipePageState extends ConsumerState<RecipePage> {
                             animation: _scrollController,
                             builder: (context, child) {
                               final offset = _scrollController.hasClients ? _scrollController.offset : 0;
-                              final headerHeight = MediaQuery.of(context).padding.top + 60;
+                              // Use viewPadding.top for consistent fade timing regardless of global status bar
+                              final fadeHeaderHeight = MediaQuery.of(context).viewPadding.top + 60;
 
                               // Header fade timing (unchanged)
                               final headerFadeStartOffset = heroHeight * 0.5;
-                              final headerFadeEndOffset = heroHeight - (headerHeight/2);
+                              final headerFadeEndOffset = heroHeight - (fadeHeaderHeight/2);
                               final headerFadeDuration = headerFadeEndOffset - headerFadeStartOffset;
                               final headerOpacity = ((offset - headerFadeStartOffset) / headerFadeDuration).clamp(0.0, 1.0);
 
@@ -167,13 +170,14 @@ class _RecipePageState extends ConsumerState<RecipePage> {
                           animation: _scrollController,
                           builder: (context, child) {
                             final offset = _scrollController.hasClients ? _scrollController.offset : 0;
-                            final headerHeight = MediaQuery.of(context).padding.top + 60;
+                            // Use viewPadding.top for consistent fade timing regardless of global status bar
+                            final fadeHeaderHeight = MediaQuery.of(context).viewPadding.top + 60;
 
                             // Using the fade end offset approach (which was close in attempt 3)
                             // but adjusting for the 16px rounded overlay height
-                            // The fadeEndOffset = heroHeight - (headerHeight/2) was ending when
+                            // The fadeEndOffset = heroHeight - (fadeHeaderHeight/2) was ending when
                             // content meets header, so subtract 16px to end when rounded rect meets header
-                            final fadeEndOffset = heroHeight - (headerHeight / 2);
+                            final fadeEndOffset = heroHeight - (fadeHeaderHeight / 2);
                             final meetingPoint = fadeEndOffset - 16;
 
                             // Start animation at 90% of the way to meeting point
@@ -242,14 +246,16 @@ class _RecipePageState extends ConsumerState<RecipePage> {
       builder: (context, child) {
         final offset = _scrollController.hasClients ? _scrollController.offset : 0;
 
-        // Calculate fade timing to complete when rounded rect meets header
-        final headerHeight = MediaQuery.of(context).padding.top + 60;
+        // Use viewPadding.top for consistent fade timing regardless of global status bar
+        final fadeHeaderHeight = MediaQuery.of(context).viewPadding.top + 60;
+        // Use padding.top for overlay sizing (adapts to current layout context)
+        final overlayHeaderHeight = MediaQuery.of(context).padding.top + 60;
 
         // For images: start fade at 50% of hero
         // For no images: start at 0 (shorter hero needs earlier fade start for smooth animation)
         // End offset uses same formula - when rounded rect top reaches header middle
         final fadeStartOffset = hasImages ? heroHeight * 0.5 : 0.0;
-        final fadeEndOffset = heroHeight - (headerHeight / 2) - 16;
+        final fadeEndOffset = heroHeight - (fadeHeaderHeight / 2) - 16;
         final fadeDuration = (fadeEndOffset - fadeStartOffset).clamp(1.0, double.infinity);
 
         final opacity = ((offset - fadeStartOffset) / fadeDuration).clamp(0.0, 1.0);
@@ -258,7 +264,7 @@ class _RecipePageState extends ConsumerState<RecipePage> {
           top: 0,
           left: 0,
           right: 0,
-          height: headerHeight,
+          height: overlayHeaderHeight,
           child: Container(
             decoration: BoxDecoration(
               color: AppColors.of(context).background.withValues(alpha: opacity),
@@ -283,20 +289,21 @@ class _RecipePageState extends ConsumerState<RecipePage> {
       builder: (context, child) {
         final offset = _scrollController.hasClients ? _scrollController.offset : 0;
 
-        // Calculate same fade timing as header overlay
-        final headerHeight = MediaQuery.of(context).padding.top + 60;
+        // Use viewPadding.top for consistent fade timing regardless of global status bar
+        final fadeHeaderHeight = MediaQuery.of(context).viewPadding.top + 60;
 
         // For images: start fade at 50% of hero
         // For no images: start at 0 (shorter hero needs earlier fade start for smooth animation)
         // End offset uses same formula - when rounded rect top reaches header middle
         final fadeStartOffset = hasImages ? heroHeight * 0.5 : 0.0;
-        final fadeEndOffset = heroHeight - (headerHeight / 2) - 16;
+        final fadeEndOffset = heroHeight - (fadeHeaderHeight / 2) - 16;
         final fadeDuration = (fadeEndOffset - fadeStartOffset).clamp(1.0, double.infinity);
 
         final opacity = ((offset - fadeStartOffset) / fadeDuration).clamp(0.0, 1.0);
 
         // Smoothly transition button colors from overlay (light) to neutral (theme-aware)
         // as header becomes opaque during scroll
+        // Use padding.top for button positioning (adapts to current layout context)
         return Positioned(
           top: MediaQuery.of(context).padding.top + 8,
           left: 16,
