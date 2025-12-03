@@ -34,7 +34,18 @@ class GlobalStatusBarWrapper extends ConsumerWidget {
 
     final statusBarColor = AppColorSwatches.primary[500]!;
 
-    return TweenAnimationBuilder<double>(
+    // MediaQuery is OUTSIDE the animation - only changes when shouldShowStatusBar changes.
+    // This prevents expensive per-frame rebuilds of the entire widget tree.
+    // When bar is visible, tell children safe area is handled (padding.top = 0).
+    final adjustedMediaQuery = mediaQuery.copyWith(
+      padding: mediaQuery.padding.copyWith(
+        top: shouldShowStatusBar ? 0 : safeAreaTop,
+      ),
+    );
+
+    return MediaQuery(
+      data: adjustedMediaQuery,
+      child: TweenAnimationBuilder<double>(
       // Animate between "hidden" (0.0) and "visible" (1.0)
       tween: Tween<double>(end: shouldShowStatusBar ? 1.0 : 0.0),
       duration: const Duration(milliseconds: 300),
@@ -47,21 +58,16 @@ class GlobalStatusBarWrapper extends ConsumerWidget {
         // Bottom edge of the status bar from the top of the screen.
         final barHeight = fullStatusBarHeight * t;
 
-        // How much to visually push the content down.
-        // We only move it by the content height; the child still applies its
-        // own safe-area padding internally based on the real MediaQuery.
-        final contentOffset = contentBarHeight * t;
-
-        // Corners should be *under* the status bar: their top meets the bar bottom.
-        // So they travel exactly the same distance as the bar bottom.
-        final cornerTop = barHeight;
-
         return Stack(
           children: [
-            // Main app content. It always gets the real MediaQuery and
-            // full-screen constraints; we only *paint* it lower.
-            Transform.translate(
-              offset: Offset(0, contentOffset),
+            // Main app content, positioned below the status bar.
+            // Using Positioned (not Transform) so the child's LAYOUT
+            // shrinks to fit, keeping bottom nav in the correct position.
+            Positioned(
+              top: barHeight,
+              left: 0,
+              right: 0,
+              bottom: 0,
               child: RepaintBoundary(
                 child: child!,
               ),
@@ -101,7 +107,7 @@ class GlobalStatusBarWrapper extends ConsumerWidget {
             if (t > 0) ...[
               // Top-left inverted corner
               Positioned(
-                top: cornerTop,
+                top: barHeight,
                 left: 0,
                 child: Opacity(
                   opacity: t,
@@ -114,7 +120,7 @@ class GlobalStatusBarWrapper extends ConsumerWidget {
               ),
               // Top-right inverted corner
               Positioned(
-                top: cornerTop,
+                top: barHeight,
                 right: 0,
                 child: Opacity(
                   opacity: t,
@@ -129,6 +135,7 @@ class GlobalStatusBarWrapper extends ConsumerWidget {
           ],
         );
       },
+      ),
     );
   }
 }
