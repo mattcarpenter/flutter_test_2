@@ -16,15 +16,6 @@ class GlobalStatusBarWrapper extends ConsumerWidget {
 
   const GlobalStatusBarWrapper({super.key, required this.child});
 
-  /// Calculate the status bar height when visible.
-  /// This includes SafeArea top padding + content padding + text.
-  double _calculateStatusBarHeight(BuildContext context) {
-    final safeAreaTop = MediaQuery.of(context).padding.top;
-    // Compact bar: just enough for text + small bottom margin
-    const contentHeight = 22.0;
-    return safeAreaTop + contentHeight;
-  }
-
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final activeCooks = ref.watch(inProgressCooksProvider);
@@ -32,105 +23,109 @@ class GlobalStatusBarWrapper extends ConsumerWidget {
     final shouldShowStatusBar = activeCookCount > 0;
     // Future: || ref.watch(activeTimersProvider).isNotEmpty;
 
-    final fullStatusBarHeight = _calculateStatusBarHeight(context);
-    final safeAreaTop = MediaQuery.of(context).padding.top;
-    final targetHeight = shouldShowStatusBar ? fullStatusBarHeight : 0.0;
+    final mediaQuery = MediaQuery.of(context);
+    final safeAreaTop = mediaQuery.padding.top;
+
+    // Compact bar: just enough for text + small bottom margin
+    const contentBarHeight = 22.0;
+
+    // Full height of the bar when fully visible
+    final fullStatusBarHeight = safeAreaTop + contentBarHeight;
+
     final statusBarColor = AppColorSwatches.primary[500]!;
 
-    // Use TweenAnimationBuilder to synchronize the container height animation
-    // with the MediaQuery adjustments - this prevents the "jump then animate" issue
-    // Note: begin is intentionally null so it uses the current animated value for transitions
     return TweenAnimationBuilder<double>(
-      tween: Tween<double>(end: targetHeight),
+      // Animate between "hidden" (0.0) and "visible" (1.0)
+      tween: Tween<double>(end: shouldShowStatusBar ? 1.0 : 0.0),
       duration: const Duration(milliseconds: 300),
       curve: Curves.easeOutCubic,
-      builder: (context, animatedHeight, _) {
-        // Calculate visibility ratio for smooth padding interpolation
-        // When fully visible: 1.0, when hidden: 0.0
-        // This prevents the discrete jump that occurred with a boolean switch
-        final visibilityRatio = fullStatusBarHeight > 0
-            ? (animatedHeight / fullStatusBarHeight).clamp(0.0, 1.0)
-            : 0.0;
+      // Pass child so it doesn't rebuild every animation tick
+      child: child,
+      builder: (context, visibility, child) {
+        final t = visibility.clamp(0.0, 1.0);
 
-        // Smoothly interpolate padding.top:
-        // - When status bar visible (ratio=1): padding.top = 0 (bar handles safe area)
-        // - When status bar hidden (ratio=0): padding.top = original (content needs safe area)
-        final adjustedPaddingTop = safeAreaTop * (1.0 - visibilityRatio);
+        // Bottom edge of the status bar from the top of the screen.
+        final barHeight = fullStatusBarHeight * t;
 
-        return Column(
+        // How much to visually push the content down.
+        // We only move it by the content height; the child still applies its
+        // own safe-area padding internally based on the real MediaQuery.
+        final contentOffset = contentBarHeight * t;
+
+        // Corners should be *under* the status bar: their top meets the bar bottom.
+        // So they travel exactly the same distance as the bar bottom.
+        final cornerTop = barHeight;
+
+        return Stack(
           children: [
-            // Status bar container - height driven by animation
-            Container(
-              height: animatedHeight,
-              width: double.infinity,
-              clipBehavior: Clip.hardEdge,
-              decoration: BoxDecoration(
-                color: statusBarColor,
-              ),
-              padding: EdgeInsets.only(
-                top: safeAreaTop,
-                left: AppSpacing.lg,
-                right: AppSpacing.lg,
-                bottom: 6.0, // Small margin between text and bottom edge
-              ),
-              alignment: Alignment.bottomLeft,
-              child: _GlobalStatusBar(activeCookCount: activeCookCount),
-            ),
-            // Main content (all routes) with inverted corner decorations
-            Expanded(
-              child: MediaQuery(
-                // Use animatedHeight (not target) so MediaQuery changes sync with animation
-                data: MediaQuery.of(context).copyWith(
-                  size: Size(
-                    MediaQuery.of(context).size.width,
-                    MediaQuery.of(context).size.height - animatedHeight,
-                  ),
-                  // Smoothly interpolate padding.top based on visibility ratio
-                  // This prevents content from jumping when animation completes
-                  padding: MediaQuery.of(context).padding.copyWith(
-                    top: adjustedPaddingTop,
-                  ),
-                ),
-                // Stack to overlay the inverted corners on top of content
-                child: Stack(
-                  children: [
-                    // Actual content
-                    child,
-                    // Inverted corners - painted on top of content to create
-                    // the illusion that content has rounded top corners
-                    // sitting on the status bar
-                    if (visibilityRatio > 0) ...[
-                      // Top-left inverted corner
-                      Positioned(
-                        top: 0,
-                        left: 0,
-                        child: Opacity(
-                          opacity: visibilityRatio,
-                          child: _InvertedCorner(
-                            color: statusBarColor,
-                            size: _kCornerRadius,
-                            corner: _Corner.topLeft,
-                          ),
-                        ),
-                      ),
-                      // Top-right inverted corner
-                      Positioned(
-                        top: 0,
-                        right: 0,
-                        child: Opacity(
-                          opacity: visibilityRatio,
-                          child: _InvertedCorner(
-                            color: statusBarColor,
-                            size: _kCornerRadius,
-                            corner: _Corner.topRight,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ],
-                ),
+            // Main app content. It always gets the real MediaQuery and
+            // full-screen constraints; we only *paint* it lower.
+            Transform.translate(
+              offset: Offset(0, contentOffset),
+              child: RepaintBoundary(
+                child: child!,
               ),
             ),
+
+            // Animated status bar drawn over the top.
+            if (t > 0)
+              Positioned(
+                left: 0,
+                right: 0,
+                top: 0,
+                height: barHeight,
+                child: Container(
+                  clipBehavior: Clip.hardEdge,
+                  decoration: BoxDecoration(
+                    color: statusBarColor,
+                  ),
+                  padding: EdgeInsets.only(
+                    // As the bar appears, we gradually grow the safe-area padding
+                    // so that by t=1 the notch / system bar region is fully filled.
+                    top: safeAreaTop * t,
+                    left: AppSpacing.lg,
+                    right: AppSpacing.lg,
+                    bottom: 6.0, // Small margin between text and bottom edge
+                  ),
+                  alignment: Alignment.bottomLeft,
+                  child: Opacity(
+                    opacity: t,
+                    child: _GlobalStatusBar(activeCookCount: activeCookCount),
+                  ),
+                ),
+              ),
+
+            // Inverted corners - painted on top of content to create
+            // the illusion that content has rounded top corners
+            // sitting on the status bar.
+            if (t > 0) ...[
+              // Top-left inverted corner
+              Positioned(
+                top: cornerTop,
+                left: 0,
+                child: Opacity(
+                  opacity: t,
+                  child: _InvertedCorner(
+                    color: statusBarColor,
+                    size: _kCornerRadius,
+                    corner: _Corner.topLeft,
+                  ),
+                ),
+              ),
+              // Top-right inverted corner
+              Positioned(
+                top: cornerTop,
+                right: 0,
+                child: Opacity(
+                  opacity: t,
+                  child: _InvertedCorner(
+                    color: statusBarColor,
+                    size: _kCornerRadius,
+                    corner: _Corner.topRight,
+                  ),
+                ),
+              ),
+            ],
           ],
         );
       },
@@ -150,7 +145,7 @@ class _GlobalStatusBar extends StatelessWidget {
         ? 'Active Cook'
         : '$activeCookCount Active Cooks';
 
-    // Background color and padding handled by parent AnimatedContainer
+    // Background color and padding handled by parent container
     return Text(
       text,
       style: AppTypography.body.copyWith(
@@ -213,8 +208,8 @@ class _InvertedCornerPainter extends CustomPainter {
 
     switch (corner) {
       case _Corner.topLeft:
-        // Fill is in top-left, concave curve bows inward toward corner
-        // Path: top-left → top-right → arc to bottom-left → close
+      // Fill is in top-left, concave curve bows inward toward corner
+      // Path: top-left → top-right → arc to bottom-left → close
         path.moveTo(0, 0);
         path.lineTo(s, 0);
         path.arcToPoint(
@@ -226,8 +221,8 @@ class _InvertedCornerPainter extends CustomPainter {
         break;
 
       case _Corner.topRight:
-        // Fill is in top-right, concave curve bows inward toward corner
-        // Path: top-right → top-left → arc to bottom-right → close
+      // Fill is in top-right, concave curve bows inward toward corner
+      // Path: top-right → top-left → arc to bottom-right → close
         path.moveTo(s, 0);
         path.lineTo(0, 0);
         path.arcToPoint(
