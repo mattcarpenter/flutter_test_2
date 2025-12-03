@@ -20,10 +20,8 @@ class GlobalStatusBarWrapper extends ConsumerWidget {
   /// This includes SafeArea top padding + content padding + text.
   double _calculateStatusBarHeight(BuildContext context) {
     final safeAreaTop = MediaQuery.of(context).padding.top;
-    // Reduced vertical padding for a more compact bar:
-    // top: 0 (safe area handles this) + bottom: 4px = 4px padding
-    // Approximate text height: ~20px for body text
-    const contentHeight = 4.0 + 20.0;
+    // Compact bar: just enough for text + small bottom margin
+    const contentHeight = 22.0;
     return safeAreaTop + contentHeight;
   }
 
@@ -73,9 +71,9 @@ class GlobalStatusBarWrapper extends ConsumerWidget {
                 top: safeAreaTop,
                 left: AppSpacing.lg,
                 right: AppSpacing.lg,
-                bottom: 4.0, // Reduced from AppSpacing.sm (8) for more compact bar
+                bottom: 6.0, // Small margin between text and bottom edge
               ),
-              alignment: Alignment.centerLeft,
+              alignment: Alignment.bottomLeft,
               child: _GlobalStatusBar(activeCookCount: activeCookCount),
             ),
             // Main content (all routes) with inverted corner decorations
