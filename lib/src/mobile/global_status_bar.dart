@@ -11,13 +11,33 @@ const double _kCornerRadius = 12.0;
 
 /// Global status bar shown when there are active cooks (or future: active timers).
 /// This wraps the entire app navigator to be visible on ALL routes.
-class GlobalStatusBarWrapper extends ConsumerWidget {
+class GlobalStatusBarWrapper extends ConsumerStatefulWidget {
   final Widget child;
 
   const GlobalStatusBarWrapper({super.key, required this.child});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<GlobalStatusBarWrapper> createState() =>
+      _GlobalStatusBarWrapperState();
+}
+
+class _GlobalStatusBarWrapperState extends ConsumerState<GlobalStatusBarWrapper> {
+  bool _isExpanded = false;
+
+  void _toggleExpand() {
+    setState(() => _isExpanded = !_isExpanded);
+    // Auto-collapse after delay for demo
+    if (_isExpanded) {
+      Future.delayed(const Duration(seconds: 2), () {
+        if (mounted && _isExpanded) {
+          setState(() => _isExpanded = false);
+        }
+      });
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final activeCooks = ref.watch(inProgressCooksProvider);
     final activeCookCount = activeCooks.length;
     final shouldShowStatusBar = activeCookCount > 0;
@@ -26,8 +46,9 @@ class GlobalStatusBarWrapper extends ConsumerWidget {
     final mediaQuery = MediaQuery.of(context);
     final safeAreaTop = mediaQuery.padding.top;
 
-    // Compact bar: just enough for text + small bottom margin
-    const contentBarHeight = 22.0;
+    // Content heights for collapsed/expanded states
+    const collapsedContentHeight = 22.0;
+    const expandedContentHeight = 80.0;
 
     final statusBarColor = AppColorSwatches.primary[500]!;
 
@@ -37,107 +58,113 @@ class GlobalStatusBarWrapper extends ConsumerWidget {
       duration: const Duration(milliseconds: 300),
       curve: Curves.easeOutCubic,
       // Pass child so it doesn't rebuild every animation tick
-      child: child,
-      builder: (context, visibility, child) {
-        final t = visibility.clamp(0.0, 1.0);
+      child: widget.child,
+      builder: (context, visibility, appChild) {
+        final showT = visibility.clamp(0.0, 1.0);
 
-        // Content is pushed down only by the extra bar content height (22px),
-        // not by the safe area.
-        //
-        // - t = 0 → topOffset = 0        → content top = safeAreaTop
-        // - t = 1 → topOffset = 22       → content top = safeAreaTop + 22
-        final topOffset = contentBarHeight * t;
+        // Nested builder for expand/collapse animation
+        return TweenAnimationBuilder<double>(
+          tween: Tween<double>(
+            end: _isExpanded ? expandedContentHeight : collapsedContentHeight,
+          ),
+          duration: const Duration(milliseconds: 300),
+          curve: Curves.easeOutCubic,
+          builder: (context, contentHeight, _) {
+            // Content is pushed down by the content height (not safe area).
+            // contentHeight animates between 22 (collapsed) and 80 (expanded).
+            final topOffset = contentHeight * showT;
 
-        // Full height of the bar (safe area + content) when fully visible.
-        final fullStatusBarHeight = safeAreaTop + contentBarHeight;
+            // Full height of the bar (safe area + content).
+            final fullStatusBarHeight = safeAreaTop + contentHeight;
+            final barHeight = fullStatusBarHeight * showT;
 
-        // Status bar animates from 0 → fullStatusBarHeight.
-        //
-        // - t = 0 → barHeight = 0        → fully hidden
-        // - t = 1 → barHeight = safeTop + 22
-        //
-        // This is what the original (choppy) version did via `animatedHeight`.
-        final barHeight = fullStatusBarHeight * t;
-
-        return Stack(
-          children: [
-            // Main app content (all routes).
-            //
-            // We change its *layout* top (not a transform) so:
-            // - top moves down as the bar appears
-            // - bottom remains anchored at 0 → SafeArea bottom still respected,
-            //   and the tab bar does NOT get pushed into the home indicator.
-            Positioned(
-              top: topOffset,
-              left: 0,
-              right: 0,
-              bottom: 0,
-              child: RepaintBoundary(
-                child: child!,
-              ),
-            ),
-
-            // Animated status bar drawn over the top.
-            if (t > 0)
-              Positioned(
-                left: 0,
-                right: 0,
-                top: 0,
-                height: barHeight,
-                child: Container(
-                  clipBehavior: Clip.hardEdge,
-                  decoration: BoxDecoration(
-                    color: statusBarColor,
-                  ),
-                  padding: EdgeInsets.only(
-                    // This matches the original behavior: padding.top is always
-                    // the full safeAreaTop; as the container height grows from
-                    // 0 → safeAreaTop + 22, the safe-area region gradually fills.
-                    top: safeAreaTop,
-                    left: AppSpacing.lg,
-                    right: AppSpacing.lg,
-                    bottom: 6.0, // Small margin between text and bottom edge
-                  ),
-                  alignment: Alignment.bottomLeft,
-                  child: Opacity(
-                    opacity: t,
-                    child: _GlobalStatusBar(activeCookCount: activeCookCount),
+            return Stack(
+              children: [
+                // Main app content (all routes).
+                //
+                // We change its *layout* top (not a transform) so:
+                // - top moves down as the bar appears/expands
+                // - bottom remains anchored at 0 → SafeArea bottom still respected,
+                //   and the tab bar does NOT get pushed into the home indicator.
+                Positioned(
+                  top: topOffset,
+                  left: 0,
+                  right: 0,
+                  bottom: 0,
+                  child: RepaintBoundary(
+                    child: appChild!,
                   ),
                 ),
-              ),
 
-            // Inverted corners - painted on top of content to create
-            // the illusion that content has rounded top corners
-            // sitting on the status bar.
-            if (t > 0) ...[
-              // Top-left inverted corner
-              Positioned(
-                top: barHeight,
-                left: 0,
-                child: Opacity(
-                  opacity: t,
-                  child: _InvertedCorner(
-                    color: statusBarColor,
-                    size: _kCornerRadius,
-                    corner: _Corner.topLeft,
+                // Animated status bar drawn over the top.
+                if (showT > 0)
+                  Positioned(
+                    left: 0,
+                    right: 0,
+                    top: 0,
+                    height: barHeight,
+                    child: GestureDetector(
+                      onTap: _toggleExpand,
+                      behavior: HitTestBehavior.opaque,
+                      child: Container(
+                        clipBehavior: Clip.hardEdge,
+                        decoration: BoxDecoration(
+                          color: statusBarColor,
+                        ),
+                        padding: EdgeInsets.only(
+                          // padding.top is always the full safeAreaTop; as the
+                          // container height grows, the safe-area region fills.
+                          top: safeAreaTop,
+                          left: AppSpacing.lg,
+                          right: AppSpacing.lg,
+                          bottom: 6.0,
+                        ),
+                        alignment: Alignment.bottomLeft,
+                        child: Opacity(
+                          opacity: showT,
+                          child: _GlobalStatusBar(
+                            activeCookCount: activeCookCount,
+                            isExpanded: _isExpanded,
+                          ),
+                        ),
+                      ),
+                    ),
                   ),
-                ),
-              ),
-              // Top-right inverted corner
-              Positioned(
-                top: barHeight,
-                right: 0,
-                child: Opacity(
-                  opacity: t,
-                  child: _InvertedCorner(
-                    color: statusBarColor,
-                    size: _kCornerRadius,
-                    corner: _Corner.topRight,
+
+                // Inverted corners - painted on top of content to create
+                // the illusion that content has rounded top corners
+                // sitting on the status bar.
+                if (showT > 0) ...[
+                  // Top-left inverted corner
+                  Positioned(
+                    top: barHeight,
+                    left: 0,
+                    child: Opacity(
+                      opacity: showT,
+                      child: _InvertedCorner(
+                        color: statusBarColor,
+                        size: _kCornerRadius,
+                        corner: _Corner.topLeft,
+                      ),
+                    ),
                   ),
-                ),
-              ),
-            ],
-          ],
+                  // Top-right inverted corner
+                  Positioned(
+                    top: barHeight,
+                    right: 0,
+                    child: Opacity(
+                      opacity: showT,
+                      child: _InvertedCorner(
+                        color: statusBarColor,
+                        size: _kCornerRadius,
+                        corner: _Corner.topRight,
+                      ),
+                    ),
+                  ),
+                ],
+              ],
+            );
+          },
         );
       },
     );
@@ -147,8 +174,12 @@ class GlobalStatusBarWrapper extends ConsumerWidget {
 /// The actual status bar content widget.
 class _GlobalStatusBar extends StatelessWidget {
   final int activeCookCount;
+  final bool isExpanded;
 
-  const _GlobalStatusBar({required this.activeCookCount});
+  const _GlobalStatusBar({
+    required this.activeCookCount,
+    required this.isExpanded,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -157,12 +188,27 @@ class _GlobalStatusBar extends StatelessWidget {
         : '$activeCookCount Active Cooks';
 
     // Background color and padding handled by parent container
-    return Text(
-      text,
-      style: AppTypography.body.copyWith(
-        color: Colors.white,
-        fontWeight: FontWeight.w600,
-      ),
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Text(
+          text,
+          style: AppTypography.body.copyWith(
+            color: Colors.white,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+        if (isExpanded) ...[
+          const SizedBox(height: AppSpacing.sm),
+          Text(
+            'Tap to collapse',
+            style: AppTypography.caption.copyWith(
+              color: Colors.white.withValues(alpha: 0.8),
+            ),
+          ),
+        ],
+      ],
     );
   }
 }
