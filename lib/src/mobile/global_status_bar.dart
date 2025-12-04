@@ -29,24 +29,10 @@ class GlobalStatusBarWrapper extends ConsumerWidget {
     // Compact bar: just enough for text + small bottom margin
     const contentBarHeight = 22.0;
 
-    // Full height of the bar when fully visible
-    final fullStatusBarHeight = safeAreaTop + contentBarHeight;
-
     final statusBarColor = AppColorSwatches.primary[500]!;
 
-    // MediaQuery is OUTSIDE the animation - only changes when shouldShowStatusBar changes.
-    // This prevents expensive per-frame rebuilds of the entire widget tree.
-    // When bar is visible, tell children safe area is handled (padding.top = 0).
-    final adjustedMediaQuery = mediaQuery.copyWith(
-      padding: mediaQuery.padding.copyWith(
-        top: shouldShowStatusBar ? 0 : safeAreaTop,
-      ),
-    );
-
-    return MediaQuery(
-      data: adjustedMediaQuery,
-      child: TweenAnimationBuilder<double>(
-      // Animate between "hidden" (0.0) and "visible" (1.0)
+    return TweenAnimationBuilder<double>(
+      // 0.0 = hidden, 1.0 = fully visible
       tween: Tween<double>(end: shouldShowStatusBar ? 1.0 : 0.0),
       duration: const Duration(milliseconds: 300),
       curve: Curves.easeOutCubic,
@@ -55,16 +41,34 @@ class GlobalStatusBarWrapper extends ConsumerWidget {
       builder: (context, visibility, child) {
         final t = visibility.clamp(0.0, 1.0);
 
-        // Bottom edge of the status bar from the top of the screen.
+        // Content is pushed down only by the extra bar content height (22px),
+        // not by the safe area.
+        //
+        // - t = 0 → topOffset = 0        → content top = safeAreaTop
+        // - t = 1 → topOffset = 22       → content top = safeAreaTop + 22
+        final topOffset = contentBarHeight * t;
+
+        // Full height of the bar (safe area + content) when fully visible.
+        final fullStatusBarHeight = safeAreaTop + contentBarHeight;
+
+        // Status bar animates from 0 → fullStatusBarHeight.
+        //
+        // - t = 0 → barHeight = 0        → fully hidden
+        // - t = 1 → barHeight = safeTop + 22
+        //
+        // This is what the original (choppy) version did via `animatedHeight`.
         final barHeight = fullStatusBarHeight * t;
 
         return Stack(
           children: [
-            // Main app content, positioned below the status bar.
-            // Using Positioned (not Transform) so the child's LAYOUT
-            // shrinks to fit, keeping bottom nav in the correct position.
+            // Main app content (all routes).
+            //
+            // We change its *layout* top (not a transform) so:
+            // - top moves down as the bar appears
+            // - bottom remains anchored at 0 → SafeArea bottom still respected,
+            //   and the tab bar does NOT get pushed into the home indicator.
             Positioned(
-              top: barHeight,
+              top: topOffset,
               left: 0,
               right: 0,
               bottom: 0,
@@ -86,9 +90,10 @@ class GlobalStatusBarWrapper extends ConsumerWidget {
                     color: statusBarColor,
                   ),
                   padding: EdgeInsets.only(
-                    // As the bar appears, we gradually grow the safe-area padding
-                    // so that by t=1 the notch / system bar region is fully filled.
-                    top: safeAreaTop * t,
+                    // This matches the original behavior: padding.top is always
+                    // the full safeAreaTop; as the container height grows from
+                    // 0 → safeAreaTop + 22, the safe-area region gradually fills.
+                    top: safeAreaTop,
                     left: AppSpacing.lg,
                     right: AppSpacing.lg,
                     bottom: 6.0, // Small margin between text and bottom edge
@@ -135,7 +140,6 @@ class GlobalStatusBarWrapper extends ConsumerWidget {
           ],
         );
       },
-      ),
     );
   }
 }
