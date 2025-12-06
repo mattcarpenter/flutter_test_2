@@ -1,6 +1,8 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../database/database.dart';
 import '../providers/cook_provider.dart';
 import '../theme/colors.dart';
 import '../theme/spacing.dart';
@@ -31,8 +33,7 @@ class _GlobalStatusBarWrapperState extends ConsumerState<GlobalStatusBarWrapper>
   @override
   Widget build(BuildContext context) {
     final activeCooks = ref.watch(inProgressCooksProvider);
-    final activeCookCount = activeCooks.length;
-    final shouldShowStatusBar = activeCookCount > 0;
+    final shouldShowStatusBar = activeCooks.isNotEmpty;
     // Future: || ref.watch(activeTimersProvider).isNotEmpty;
 
     final mediaQuery = MediaQuery.of(context);
@@ -115,7 +116,7 @@ class _GlobalStatusBarWrapperState extends ConsumerState<GlobalStatusBarWrapper>
                           child: Opacity(
                             opacity: showT,
                             child: _GlobalStatusBar(
-                              activeCookCount: activeCookCount,
+                              activeCooks: activeCooks,
                               isExpanded: _isExpanded,
                             ),
                           ),
@@ -166,28 +167,67 @@ class _GlobalStatusBarWrapperState extends ConsumerState<GlobalStatusBarWrapper>
 
 /// The actual status bar content widget.
 class _GlobalStatusBar extends StatelessWidget {
-  final int activeCookCount;
+  final List<CookEntry> activeCooks;
   final bool isExpanded;
 
   const _GlobalStatusBar({
-    required this.activeCookCount,
+    required this.activeCooks,
     required this.isExpanded,
   });
 
   @override
   Widget build(BuildContext context) {
-    final text = activeCookCount == 1
-        ? 'Active Cook'
-        : '$activeCookCount Active Cooks';
+    final count = activeCooks.length;
+    final screenWidth = MediaQuery.sizeOf(context).width;
+
+    // Show "Cooking" prefix on wider screens (landscape phone, iPad)
+    // For multiple recipes, always show "Cooking N recipes" since it's short
+    final isWideScreen = screenWidth >= 600;
+    final showCookingPrefix = isWideScreen || count > 1;
+
+    // Build the display text (without "Cooking" prefix)
+    final String mainText;
+    if (count == 1) {
+      mainText = activeCooks.first.recipeName;
+    } else {
+      mainText = '$count recipes';
+    }
+
+    final textStyle = AppTypography.body.copyWith(
+      color: Colors.white,
+      fontWeight: FontWeight.w600,
+    );
 
     // Background color and padding handled by parent container
     // TODO: Use isExpanded to show additional content when expanded
-    return Text(
-      text,
-      style: AppTypography.body.copyWith(
-        color: Colors.white,
-        fontWeight: FontWeight.w600,
-      ),
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Icon(
+          CupertinoIcons.flame_fill,
+          color: Colors.white,
+          size: 16,
+        ),
+        const SizedBox(width: 6),
+        if (showCookingPrefix) ...[
+          Text(
+            'Cooking',
+            // Bold only when followed by recipe name, not "N recipes"
+            style: count == 1
+                ? textStyle.copyWith(fontWeight: FontWeight.w800)
+                : textStyle,
+          ),
+          const SizedBox(width: 4),
+        ],
+        Flexible(
+          child: Text(
+            mainText,
+            overflow: TextOverflow.ellipsis,
+            maxLines: 1,
+            style: textStyle,
+          ),
+        ),
+      ],
     );
   }
 }
