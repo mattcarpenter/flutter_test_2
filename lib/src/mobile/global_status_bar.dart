@@ -44,13 +44,16 @@ class _GlobalStatusBarWrapperState extends ConsumerState<GlobalStatusBarWrapper>
 
     // Content heights for collapsed/expanded states
     const collapsedContentHeight = 22.0;
-    // Expanded height: header(22) + gap(8) + buttons(28) + bottomMargin(16) = 74 for first cook
-    // Each additional cook: gap(12) + header(22) + gap(8) + buttons(28) = 70
-    const firstCookExpandedHeight = 74.0;
+    // Expanded height: header(22) + gap(8) + buttons(28) + bottomMargin(10) = 68 for first cook
+    // Each additional cook: gap(12) + header(22) + gap(8) + buttons(28) = 70, plus extra 6px bottom margin
+    const firstCookExpandedHeight = 68.0;
     const additionalCookHeight = 70.0;
+    const extraBottomMarginForMultipleCooks = 6.0;
     final expandedContentHeight = activeCooks.isEmpty
         ? collapsedContentHeight
-        : firstCookExpandedHeight + (activeCooks.length - 1) * additionalCookHeight;
+        : firstCookExpandedHeight
+            + (activeCooks.length - 1) * additionalCookHeight
+            + (activeCooks.length > 1 ? extraBottomMarginForMultipleCooks : 0);
 
     final statusBarColor = AppColorSwatches.primary[500]!;
 
@@ -232,8 +235,8 @@ class _GlobalStatusBar extends StatelessWidget {
                 const SizedBox(height: 12),
                 _CookItem(cook: cook),
               ],
-              // Bottom margin
-              const SizedBox(height: 16),
+              // Bottom margin - 10px for 1 cook, 16px for multiple
+              SizedBox(height: activeCooks.length > 1 ? 16 : 10),
             ],
           ),
         ),
@@ -446,7 +449,14 @@ class _CookButtonRow extends ConsumerWidget {
               // Use global navigator key for GoRouter navigation
               final navigatorContext = globalRootNavigatorKey.currentContext;
               if (navigatorContext != null) {
-                GoRouter.of(navigatorContext).push('/recipe/${cook.recipeId}');
+                final router = GoRouter.of(navigatorContext);
+                final targetPath = '/recipe/${cook.recipeId}';
+                // Don't push if already on this recipe's page
+                // Check both location and full match list for nested navigators
+                final currentLocation = router.state.uri.toString();
+                if (!currentLocation.contains(targetPath)) {
+                  router.push(targetPath);
+                }
               }
             },
             child: Text('Recipe', style: textStyle.copyWith(
