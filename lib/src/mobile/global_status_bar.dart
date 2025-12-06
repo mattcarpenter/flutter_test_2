@@ -345,14 +345,43 @@ class _CookHeaderRow extends StatelessWidget {
   }
 }
 
-/// Button row for a cook - Instructions and Recipe buttons
-class _CookButtonRow extends StatelessWidget {
+/// Button row for a cook - Instructions, Recipe, and Complete buttons
+class _CookButtonRow extends ConsumerWidget {
   final CookEntry cook;
 
   const _CookButtonRow({required this.cook});
 
+  Future<void> _confirmAndCompleteCook(WidgetRef ref) async {
+    final navigatorContext = globalRootNavigatorKey.currentContext;
+    if (navigatorContext == null) return;
+
+    final confirmed = await showCupertinoDialog<bool>(
+      context: navigatorContext,
+      builder: (context) => CupertinoAlertDialog(
+        title: const Text('Complete Cook?'),
+        content: Text('Mark "${cook.recipeName}" as complete?'),
+        actions: [
+          CupertinoDialogAction(
+            isDestructiveAction: true,
+            onPressed: () => Navigator.of(context).pop(false),
+            child: const Text('Cancel'),
+          ),
+          CupertinoDialogAction(
+            isDefaultAction: true,
+            onPressed: () => Navigator.of(context).pop(true),
+            child: const Text('Complete'),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmed == true) {
+      await ref.read(cookNotifierProvider.notifier).finishCook(cookId: cook.id);
+    }
+  }
+
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     // Shared button properties
     final buttonPadding = WidgetStateProperty.all(
       const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
@@ -395,35 +424,49 @@ class _CookButtonRow extends StatelessWidget {
         children: [
           ElevatedButton(
             style: filledButtonStyle,
-          onPressed: () {
-            // Use global navigator key to get context for modal
-            final navigatorContext = globalRootNavigatorKey.currentContext;
-            if (navigatorContext != null) {
-              showCookModal(
-                navigatorContext,
-                cookId: cook.id,
-                recipeId: cook.recipeId,
-              );
-            }
-          },
-          child: Text('Instructions', style: textStyle.copyWith(
-            color: AppColorSwatches.primary[500],
-          )),
-        ),
-        const SizedBox(width: 8),
-        OutlinedButton(
-          style: outlineButtonStyle,
-          onPressed: () {
-            // Use global navigator key for GoRouter navigation
-            final navigatorContext = globalRootNavigatorKey.currentContext;
-            if (navigatorContext != null) {
-              GoRouter.of(navigatorContext).push('/recipe/${cook.recipeId}');
-            }
-          },
-          child: Text('Recipe', style: textStyle.copyWith(
-            color: Colors.white,
-          )),
-        ),
+            onPressed: () {
+              // Use global navigator key to get context for modal
+              final navigatorContext = globalRootNavigatorKey.currentContext;
+              if (navigatorContext != null) {
+                showCookModal(
+                  navigatorContext,
+                  cookId: cook.id,
+                  recipeId: cook.recipeId,
+                );
+              }
+            },
+            child: Text('Instructions', style: textStyle.copyWith(
+              color: AppColorSwatches.primary[500],
+            )),
+          ),
+          const SizedBox(width: 8),
+          OutlinedButton(
+            style: outlineButtonStyle,
+            onPressed: () {
+              // Use global navigator key for GoRouter navigation
+              final navigatorContext = globalRootNavigatorKey.currentContext;
+              if (navigatorContext != null) {
+                GoRouter.of(navigatorContext).push('/recipe/${cook.recipeId}');
+              }
+            },
+            child: Text('Recipe', style: textStyle.copyWith(
+              color: Colors.white,
+            )),
+          ),
+          const SizedBox(width: 12),
+          // Complete cook button
+          GestureDetector(
+            onTap: () => _confirmAndCompleteCook(ref),
+            behavior: HitTestBehavior.opaque,
+            child: const Padding(
+              padding: EdgeInsets.all(4),
+              child: Icon(
+                CupertinoIcons.xmark,
+                color: Colors.white,
+                size: 16,
+              ),
+            ),
+          ),
         ],
       ),
     );
