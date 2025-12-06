@@ -182,27 +182,13 @@ class _GlobalStatusBar extends StatelessWidget {
         : '$activeCookCount Active Cooks';
 
     // Background color and padding handled by parent container
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Text(
-          text,
-          style: AppTypography.body.copyWith(
-            color: Colors.white,
-            fontWeight: FontWeight.w600,
-          ),
-        ),
-        if (isExpanded) ...[
-          const SizedBox(height: AppSpacing.sm),
-          Text(
-            'Tap to collapse',
-            style: AppTypography.caption.copyWith(
-              color: Colors.white.withValues(alpha: 0.8),
-            ),
-          ),
-        ],
-      ],
+    // TODO: Use isExpanded to show additional content when expanded
+    return Text(
+      text,
+      style: AppTypography.body.copyWith(
+        color: Colors.white,
+        fontWeight: FontWeight.w600,
+      ),
     );
   }
 }
