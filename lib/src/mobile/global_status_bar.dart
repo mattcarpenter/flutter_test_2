@@ -1,12 +1,15 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../database/database.dart';
+import '../features/recipes/widgets/cook_modal/cook_modal.dart';
 import '../providers/cook_provider.dart';
 import '../theme/colors.dart';
 import '../theme/spacing.dart';
 import '../theme/typography.dart';
+import 'adaptive_app.dart' show globalRootNavigatorKey;
 
 /// Corner radius for the inverted corners effect
 const double _kCornerRadius = 12.0;
@@ -41,7 +44,13 @@ class _GlobalStatusBarWrapperState extends ConsumerState<GlobalStatusBarWrapper>
 
     // Content heights for collapsed/expanded states
     const collapsedContentHeight = 22.0;
-    const expandedContentHeight = 80.0;
+    // Expanded height: header(22) + gap(8) + buttons(28) + bottomPadding(8) = 66 for first cook
+    // Each additional cook: gap(12) + header(22) + gap(8) + buttons(28) = 70
+    const firstCookExpandedHeight = 66.0;
+    const additionalCookHeight = 70.0;
+    final expandedContentHeight = activeCooks.isEmpty
+        ? collapsedContentHeight
+        : firstCookExpandedHeight + (activeCooks.length - 1) * additionalCookHeight;
 
     final statusBarColor = AppColorSwatches.primary[500]!;
 
@@ -177,15 +186,68 @@ class _GlobalStatusBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    if (activeCooks.isEmpty) return const SizedBox.shrink();
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        // Header row - crossfades between collapsed text and first cook name
+        AnimatedCrossFade(
+          firstChild: _CollapsedHeader(activeCooks: activeCooks),
+          secondChild: _CookHeaderRow(cook: activeCooks.first),
+          crossFadeState: isExpanded
+              ? CrossFadeState.showSecond
+              : CrossFadeState.showFirst,
+          duration: const Duration(milliseconds: 200),
+          sizeCurve: Curves.easeOutCubic,
+        ),
+
+        // Expanded content - buttons and additional cooks
+        AnimatedSize(
+          duration: const Duration(milliseconds: 300),
+          curve: Curves.easeOutCubic,
+          alignment: Alignment.topLeft,
+          child: AnimatedOpacity(
+            opacity: isExpanded ? 1.0 : 0.0,
+            duration: const Duration(milliseconds: 200),
+            child: isExpanded
+                ? Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      const SizedBox(height: 8),
+                      _CookButtonRow(cook: activeCooks.first),
+                      // Additional cooks
+                      for (final cook in activeCooks.skip(1)) ...[
+                        const SizedBox(height: 12),
+                        _CookItem(cook: cook),
+                      ],
+                    ],
+                  )
+                : const SizedBox.shrink(),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+/// Collapsed header - shows "🔥 Recipe Name" or "🔥 Cooking N recipes"
+class _CollapsedHeader extends StatelessWidget {
+  final List<CookEntry> activeCooks;
+
+  const _CollapsedHeader({required this.activeCooks});
+
+  @override
+  Widget build(BuildContext context) {
     final count = activeCooks.length;
     final screenWidth = MediaQuery.sizeOf(context).width;
 
-    // Show "Cooking" prefix on wider screens (landscape phone, iPad)
-    // For multiple recipes, always show "Cooking N recipes" since it's short
+    // Show "Cooking" prefix on wider screens or for multiple recipes
     final isWideScreen = screenWidth >= 600;
     final showCookingPrefix = isWideScreen || count > 1;
 
-    // Build the display text (without "Cooking" prefix)
     final String mainText;
     if (count == 1) {
       mainText = activeCooks.first.recipeName;
@@ -198,12 +260,10 @@ class _GlobalStatusBar extends StatelessWidget {
       fontWeight: FontWeight.w600,
     );
 
-    // Background color and padding handled by parent container
-    // TODO: Use isExpanded to show additional content when expanded
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
-        Icon(
+        const Icon(
           CupertinoIcons.flame_fill,
           color: Colors.white,
           size: 16,
@@ -212,7 +272,6 @@ class _GlobalStatusBar extends StatelessWidget {
         if (showCookingPrefix) ...[
           Text(
             'Cooking',
-            // Bold only when followed by recipe name, not "N recipes"
             style: count == 1
                 ? textStyle.copyWith(fontWeight: FontWeight.w800)
                 : textStyle,
@@ -227,6 +286,135 @@ class _GlobalStatusBar extends StatelessWidget {
             style: textStyle,
           ),
         ),
+      ],
+    );
+  }
+}
+
+/// Header row for a single cook - shows "🔥 Recipe Name"
+class _CookHeaderRow extends StatelessWidget {
+  final CookEntry cook;
+
+  const _CookHeaderRow({required this.cook});
+
+  @override
+  Widget build(BuildContext context) {
+    final screenWidth = MediaQuery.sizeOf(context).width;
+    final isWideScreen = screenWidth >= 600;
+
+    final textStyle = AppTypography.body.copyWith(
+      color: Colors.white,
+      fontWeight: FontWeight.w600,
+    );
+
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        const Icon(
+          CupertinoIcons.flame_fill,
+          color: Colors.white,
+          size: 16,
+        ),
+        const SizedBox(width: 6),
+        if (isWideScreen) ...[
+          Text(
+            'Cooking',
+            style: textStyle.copyWith(fontWeight: FontWeight.w800),
+          ),
+          const SizedBox(width: 4),
+        ],
+        Flexible(
+          child: Text(
+            cook.recipeName,
+            overflow: TextOverflow.ellipsis,
+            maxLines: 1,
+            style: textStyle,
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+/// Button row for a cook - Instructions and Recipe buttons
+class _CookButtonRow extends StatelessWidget {
+  final CookEntry cook;
+
+  const _CookButtonRow({required this.cook});
+
+  @override
+  Widget build(BuildContext context) {
+    // White buttons for visibility on primary color background
+    final buttonStyle = ButtonStyle(
+      foregroundColor: WidgetStateProperty.all(Colors.white),
+      side: WidgetStateProperty.all(
+        BorderSide(color: Colors.white.withValues(alpha: 0.6)),
+      ),
+      padding: WidgetStateProperty.all(
+        const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+      ),
+      minimumSize: WidgetStateProperty.all(Size.zero),
+      tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+      shape: WidgetStateProperty.all(
+        RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+      ),
+    );
+
+    final textStyle = AppTypography.caption.copyWith(
+      color: Colors.white,
+      fontWeight: FontWeight.w600,
+    );
+
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        OutlinedButton(
+          style: buttonStyle,
+          onPressed: () {
+            // Use global navigator key to get context for modal
+            final navigatorContext = globalRootNavigatorKey.currentContext;
+            if (navigatorContext != null) {
+              showCookModal(
+                navigatorContext,
+                cookId: cook.id,
+                recipeId: cook.recipeId,
+              );
+            }
+          },
+          child: Text('Instructions', style: textStyle),
+        ),
+        const SizedBox(width: 8),
+        OutlinedButton(
+          style: buttonStyle,
+          onPressed: () {
+            // Use global navigator key for GoRouter navigation
+            final navigatorContext = globalRootNavigatorKey.currentContext;
+            if (navigatorContext != null) {
+              GoRouter.of(navigatorContext).push('/recipe/${cook.recipeId}');
+            }
+          },
+          child: Text('Recipe', style: textStyle),
+        ),
+      ],
+    );
+  }
+}
+
+/// Full cook item with header and buttons - for 2nd+ cooks
+class _CookItem extends StatelessWidget {
+  final CookEntry cook;
+
+  const _CookItem({required this.cook});
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        _CookHeaderRow(cook: cook),
+        const SizedBox(height: 8),
+        _CookButtonRow(cook: cook),
       ],
     );
   }

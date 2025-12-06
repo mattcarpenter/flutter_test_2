@@ -50,6 +50,10 @@ import 'main_page_shell.dart';
 import 'global_status_bar.dart';
 import 'package:sheet/route.dart';
 
+/// Global navigator key for accessing Navigator from anywhere in the app.
+/// Used by GlobalStatusBarWrapper to show modals with proper Navigator context.
+final globalRootNavigatorKey = GlobalKey<NavigatorState>(debugLabel: 'globalRootNavKey');
+
 bool isTablet(BuildContext context) {
   return MediaQuery.of(context).size.shortestSide >= 600;
 }
@@ -140,7 +144,7 @@ class _AdaptiveApp2State extends ConsumerState<AdaptiveApp2> {
   /// Create a [GoRouter] instance with shell routing for the bottom tabs.
   GoRouter _createRouter(bool isTablet, String initialLocation) {
     // Navigator keys for each tab's separate shell:
-    final _rootNavKey   = GlobalKey<NavigatorState>(debugLabel: 'rootNavKey');
+    // Note: Using globalRootNavigatorKey (defined at top of file) for root navigator
     final _recipesNavKey   = GlobalKey<NavigatorState>(debugLabel: 'recipesNavKey');
     final _shoppingNavKey  = GlobalKey<NavigatorState>(debugLabel: 'shoppingNavKey');
     final _mealPlansNavKey = GlobalKey<NavigatorState>(debugLabel: 'mealPlansNavKey');
@@ -462,7 +466,7 @@ class _AdaptiveApp2State extends ConsumerState<AdaptiveApp2> {
     return GoRouter(
       debugLogDiagnostics: true,
       initialLocation: initialLocation,
-      navigatorKey: _rootNavKey,
+      navigatorKey: globalRootNavigatorKey,
       routes: [
         GoRoute(
             path: '/add_folder',
