@@ -1,3 +1,5 @@
+import 'dart:math' as math;
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -118,7 +120,8 @@ class _GlobalStatusBarWrapperState extends ConsumerState<GlobalStatusBarWrapper>
                         ),
                         padding: EdgeInsets.only(
                           // Position content slightly into safe area for better centering.
-                          top: safeAreaTop - 8,
+                          // Use max(0, ...) to avoid negative padding in landscape.
+                          top: math.max(0, safeAreaTop - 8),
                           left: AppSpacing.lg,
                           right: AppSpacing.lg,
                         ),
