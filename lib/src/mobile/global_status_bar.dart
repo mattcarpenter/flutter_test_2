@@ -109,14 +109,16 @@ class _GlobalStatusBarWrapperState extends ConsumerState<GlobalStatusBarWrapper>
                           top: safeAreaTop,
                           left: AppSpacing.lg,
                           right: AppSpacing.lg,
-                          bottom: 6.0,
                         ),
-                        alignment: Alignment.bottomLeft,
-                        child: Opacity(
-                          opacity: showT,
-                          child: _GlobalStatusBar(
-                            activeCookCount: activeCookCount,
-                            isExpanded: _isExpanded,
+                        alignment: Alignment.centerLeft,
+                        child: SingleChildScrollView(
+                          physics: const NeverScrollableScrollPhysics(),
+                          child: Opacity(
+                            opacity: showT,
+                            child: _GlobalStatusBar(
+                              activeCookCount: activeCookCount,
+                              isExpanded: _isExpanded,
+                            ),
                           ),
                         ),
                       ),
