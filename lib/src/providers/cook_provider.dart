@@ -133,3 +133,6 @@ final activeCookInModalProvider = StateProvider<String?>((ref) => null);
 
 // Track whether the cook modal is currently open
 final isCookModalOpenProvider = StateProvider<bool>((ref) => false);
+
+// Track whether the global status bar is expanded
+final statusBarExpandedProvider = StateProvider<bool>((ref) => false);

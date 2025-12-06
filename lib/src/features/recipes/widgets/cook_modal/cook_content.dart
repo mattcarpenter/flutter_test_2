@@ -237,7 +237,8 @@ class CookContentState extends ConsumerState<CookContent> {
     // Explicitly using the provider from recipe_provider.dart
     final recipeAsync = ref.watch(recipe_provider.recipeByIdStreamProvider(activeRecipeId));
 
-    // Add fixed height to the entire content to avoid flex/expanded issues
+    // Use 75% of screen height for content
+    // Status bar collapses when modal opens, so we have plenty of room
     return SizedBox(
       height: MediaQuery.of(context).size.height * 0.75,
       child: recipeAsync.when(

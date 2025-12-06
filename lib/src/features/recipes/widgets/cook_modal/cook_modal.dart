@@ -16,6 +16,9 @@ void showCookModal(BuildContext context, {
 }) {
   final container = ProviderScope.containerOf(context);
 
+  // Collapse the status bar to give the modal more room
+  container.read(statusBarExpandedProvider.notifier).state = false;
+
   // Check if modal is already open - just switch to the new cook
   if (container.read(isCookModalOpenProvider)) {
     container.read(activeCookInModalProvider.notifier).state = cookId;

@@ -27,14 +27,14 @@ class GlobalStatusBarWrapper extends ConsumerStatefulWidget {
 }
 
 class _GlobalStatusBarWrapperState extends ConsumerState<GlobalStatusBarWrapper> {
-  bool _isExpanded = false;
-
   void _toggleExpand() {
-    setState(() => _isExpanded = !_isExpanded);
+    ref.read(statusBarExpandedProvider.notifier).state =
+        !ref.read(statusBarExpandedProvider);
   }
 
   @override
   Widget build(BuildContext context) {
+    final isExpanded = ref.watch(statusBarExpandedProvider);
     final activeCooks = ref.watch(inProgressCooksProvider);
     final shouldShowStatusBar = activeCooks.isNotEmpty;
     // Future: || ref.watch(activeTimersProvider).isNotEmpty;
@@ -67,7 +67,7 @@ class _GlobalStatusBarWrapperState extends ConsumerState<GlobalStatusBarWrapper>
         // Nested builder for expand/collapse animation
         return TweenAnimationBuilder<double>(
           tween: Tween<double>(
-            end: _isExpanded ? expandedContentHeight : collapsedContentHeight,
+            end: isExpanded ? expandedContentHeight : collapsedContentHeight,
           ),
           duration: const Duration(milliseconds: 300),
           curve: Curves.easeOutCubic,
@@ -126,7 +126,7 @@ class _GlobalStatusBarWrapperState extends ConsumerState<GlobalStatusBarWrapper>
                             opacity: showT,
                             child: _GlobalStatusBar(
                               activeCooks: activeCooks,
-                              isExpanded: _isExpanded,
+                              isExpanded: isExpanded,
                             ),
                           ),
                         ),
