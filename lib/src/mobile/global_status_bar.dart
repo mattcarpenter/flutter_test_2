@@ -26,14 +26,6 @@ class _GlobalStatusBarWrapperState extends ConsumerState<GlobalStatusBarWrapper>
 
   void _toggleExpand() {
     setState(() => _isExpanded = !_isExpanded);
-    // Auto-collapse after delay for demo
-    if (_isExpanded) {
-      Future.delayed(const Duration(seconds: 2), () {
-        if (mounted && _isExpanded) {
-          setState(() => _isExpanded = false);
-        }
-      });
-    }
   }
 
   @override
