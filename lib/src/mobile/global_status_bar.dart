@@ -104,13 +104,12 @@ class _GlobalStatusBarWrapperState extends ConsumerState<GlobalStatusBarWrapper>
                           color: statusBarColor,
                         ),
                         padding: EdgeInsets.only(
-                          // padding.top is always the full safeAreaTop; as the
-                          // container height grows, the safe-area region fills.
-                          top: safeAreaTop,
+                          // Position content slightly into safe area for better centering.
+                          top: safeAreaTop - 8,
                           left: AppSpacing.lg,
                           right: AppSpacing.lg,
                         ),
-                        alignment: Alignment.centerLeft,
+                        // No alignment - content flows from top, stays fixed on expand
                         child: SingleChildScrollView(
                           physics: const NeverScrollableScrollPhysics(),
                           child: Opacity(
