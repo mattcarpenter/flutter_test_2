@@ -14,10 +14,18 @@ void showCookModal(BuildContext context, {
   required String cookId,
   required String recipeId,
 }) {
-  final GlobalKey<CookContentState> contentKey = GlobalKey<CookContentState>();
-  
-  // Set the initial active cook in our provider
   final container = ProviderScope.containerOf(context);
+
+  // Check if modal is already open - just switch to the new cook
+  if (container.read(isCookModalOpenProvider)) {
+    container.read(activeCookInModalProvider.notifier).state = cookId;
+    return;
+  }
+
+  final GlobalKey<CookContentState> contentKey = GlobalKey<CookContentState>();
+
+  // Mark modal as open and set the active cook
+  container.read(isCookModalOpenProvider.notifier).state = true;
   container.read(activeCookInModalProvider.notifier).state = cookId;
 
   WoltModalSheet.show(
@@ -100,5 +108,9 @@ void showCookModal(BuildContext context, {
         ),
       ];
     },
-  );
+  ).whenComplete(() {
+    // Reset state when modal closes (covers all dismissal methods)
+    container.read(isCookModalOpenProvider.notifier).state = false;
+    container.read(activeCookInModalProvider.notifier).state = null;
+  });
 }

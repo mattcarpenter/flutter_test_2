@@ -130,3 +130,6 @@ final userIdProvider = Provider<String?>((ref) {
 
 // Track which cook ID is currently active in the cook modal
 final activeCookInModalProvider = StateProvider<String?>((ref) => null);
+
+// Track whether the cook modal is currently open
+final isCookModalOpenProvider = StateProvider<bool>((ref) => false);
