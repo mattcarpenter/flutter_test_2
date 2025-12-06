@@ -44,9 +44,9 @@ class _GlobalStatusBarWrapperState extends ConsumerState<GlobalStatusBarWrapper>
 
     // Content heights for collapsed/expanded states
     const collapsedContentHeight = 22.0;
-    // Expanded height: header(22) + gap(8) + buttons(28) + bottomPadding(8) = 66 for first cook
+    // Expanded height: header(22) + gap(8) + buttons(28) + bottomMargin(16) = 74 for first cook
     // Each additional cook: gap(12) + header(22) + gap(8) + buttons(28) = 70
-    const firstCookExpandedHeight = 66.0;
+    const firstCookExpandedHeight = 74.0;
     const additionalCookHeight = 70.0;
     final expandedContentHeight = activeCooks.isEmpty
         ? collapsedContentHeight
@@ -188,44 +188,53 @@ class _GlobalStatusBar extends StatelessWidget {
   Widget build(BuildContext context) {
     if (activeCooks.isEmpty) return const SizedBox.shrink();
 
+    // Only show header transition if multiple cooks (single cook shows same text)
+    final needsHeaderTransition = activeCooks.length > 1;
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       mainAxisSize: MainAxisSize.min,
       children: [
-        // Header row - crossfades between collapsed text and first cook name
-        AnimatedCrossFade(
-          firstChild: _CollapsedHeader(activeCooks: activeCooks),
-          secondChild: _CookHeaderRow(cook: activeCooks.first),
-          crossFadeState: isExpanded
-              ? CrossFadeState.showSecond
-              : CrossFadeState.showFirst,
-          duration: const Duration(milliseconds: 200),
-          sizeCurve: Curves.easeOutCubic,
-        ),
+        // Header row - pure fade transition between collapsed and expanded text
+        if (needsHeaderTransition)
+          Stack(
+            children: [
+              // Collapsed header fades out
+              AnimatedOpacity(
+                opacity: isExpanded ? 0.0 : 1.0,
+                duration: const Duration(milliseconds: 150),
+                child: _CollapsedHeader(activeCooks: activeCooks),
+              ),
+              // Expanded header fades in
+              AnimatedOpacity(
+                opacity: isExpanded ? 1.0 : 0.0,
+                duration: const Duration(milliseconds: 150),
+                child: _CookHeaderRow(cook: activeCooks.first),
+              ),
+            ],
+          )
+        else
+          // Single cook - no transition needed, just show the header
+          _CookHeaderRow(cook: activeCooks.first),
 
-        // Expanded content - buttons and additional cooks
-        AnimatedSize(
-          duration: const Duration(milliseconds: 300),
-          curve: Curves.easeOutCubic,
-          alignment: Alignment.topLeft,
-          child: AnimatedOpacity(
-            opacity: isExpanded ? 1.0 : 0.0,
-            duration: const Duration(milliseconds: 200),
-            child: isExpanded
-                ? Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      const SizedBox(height: 8),
-                      _CookButtonRow(cook: activeCooks.first),
-                      // Additional cooks
-                      for (final cook in activeCooks.skip(1)) ...[
-                        const SizedBox(height: 12),
-                        _CookItem(cook: cook),
-                      ],
-                    ],
-                  )
-                : const SizedBox.shrink(),
+        // Expanded content - buttons and additional cooks (simple fade in/out)
+        AnimatedOpacity(
+          opacity: isExpanded ? 1.0 : 0.0,
+          duration: const Duration(milliseconds: 150),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const SizedBox(height: 8),
+              _CookButtonRow(cook: activeCooks.first),
+              // Additional cooks
+              for (final cook in activeCooks.skip(1)) ...[
+                const SizedBox(height: 12),
+                _CookItem(cook: cook),
+              ],
+              // Bottom margin
+              const SizedBox(height: 16),
+            ],
           ),
         ),
       ],
@@ -344,32 +353,48 @@ class _CookButtonRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // White buttons for visibility on primary color background
-    final buttonStyle = ButtonStyle(
+    // Shared button properties
+    final buttonPadding = WidgetStateProperty.all(
+      const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+    );
+    final buttonShape = WidgetStateProperty.all(
+      RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+    );
+
+    // Filled style for Instructions button
+    final filledButtonStyle = ButtonStyle(
+      backgroundColor: WidgetStateProperty.all(Colors.white),
+      foregroundColor: WidgetStateProperty.all(AppColorSwatches.primary[500]),
+      padding: buttonPadding,
+      minimumSize: WidgetStateProperty.all(Size.zero),
+      tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+      shape: buttonShape,
+    );
+
+    // Outline style for Recipe button
+    final outlineButtonStyle = ButtonStyle(
       foregroundColor: WidgetStateProperty.all(Colors.white),
       side: WidgetStateProperty.all(
         BorderSide(color: Colors.white.withValues(alpha: 0.6)),
       ),
-      padding: WidgetStateProperty.all(
-        const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-      ),
+      padding: buttonPadding,
       minimumSize: WidgetStateProperty.all(Size.zero),
       tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-      shape: WidgetStateProperty.all(
-        RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
-      ),
+      shape: buttonShape,
     );
 
     final textStyle = AppTypography.caption.copyWith(
-      color: Colors.white,
       fontWeight: FontWeight.w600,
     );
 
-    return Row(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        OutlinedButton(
-          style: buttonStyle,
+    // Left padding to align buttons with recipe name text (icon 16px + gap 6px = 22px)
+    return Padding(
+      padding: const EdgeInsets.only(left: 22),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          ElevatedButton(
+            style: filledButtonStyle,
           onPressed: () {
             // Use global navigator key to get context for modal
             final navigatorContext = globalRootNavigatorKey.currentContext;
@@ -381,11 +406,13 @@ class _CookButtonRow extends StatelessWidget {
               );
             }
           },
-          child: Text('Instructions', style: textStyle),
+          child: Text('Instructions', style: textStyle.copyWith(
+            color: AppColorSwatches.primary[500],
+          )),
         ),
         const SizedBox(width: 8),
         OutlinedButton(
-          style: buttonStyle,
+          style: outlineButtonStyle,
           onPressed: () {
             // Use global navigator key for GoRouter navigation
             final navigatorContext = globalRootNavigatorKey.currentContext;
@@ -393,9 +420,12 @@ class _CookButtonRow extends StatelessWidget {
               GoRouter.of(navigatorContext).push('/recipe/${cook.recipeId}');
             }
           },
-          child: Text('Recipe', style: textStyle),
+          child: Text('Recipe', style: textStyle.copyWith(
+            color: Colors.white,
+          )),
         ),
-      ],
+        ],
+      ),
     );
   }
 }
