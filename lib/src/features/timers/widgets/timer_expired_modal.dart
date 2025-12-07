@@ -19,8 +19,9 @@ Future<void> showTimerExpiredModal(
   return WoltModalSheet.show<void>(
     useRootNavigator: true,
     context: context,
-    pageListBuilder: (bottomSheetContext) => [
-      _buildPage(context: bottomSheetContext, timers: timers),
+    modalTypeBuilder: (_) => WoltModalType.alertDialog(),
+    pageListBuilder: (modalContext) => [
+      _buildPage(context: modalContext, timers: timers),
     ],
   );
 }
