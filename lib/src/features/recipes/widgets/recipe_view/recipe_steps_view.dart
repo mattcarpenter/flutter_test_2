@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../../database/models/steps.dart';
 import '../../../settings/providers/app_settings_provider.dart';
+import '../../../timers/widgets/start_timer_dialog.dart';
 import '../../../../theme/typography.dart';
 import '../../../../theme/colors.dart';
 import '../../../../theme/spacing.dart';
@@ -10,8 +11,20 @@ import '../../../../utils/recipe_text_renderer.dart';
 
 class RecipeStepsView extends ConsumerWidget {
   final List<Step> steps;
+  final String recipeId;
+  final String recipeName;
 
-  const RecipeStepsView({Key? key, required this.steps}) : super(key: key);
+  /// When true, duration expressions in step text are rendered as tappable
+  /// links that allow starting timers. Defaults to true.
+  final bool enableTimerLinks;
+
+  const RecipeStepsView({
+    Key? key,
+    required this.steps,
+    required this.recipeId,
+    required this.recipeName,
+    this.enableTimerLinks = true,
+  }) : super(key: key);
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -23,6 +36,9 @@ class RecipeStepsView extends ConsumerWidget {
     final fontScale = ref.watch(recipeFontScaleProvider);
     final baseBodyStyle = AppTypography.body;
     final scaledFontSize = (baseBodyStyle.fontSize ?? 15.0) * fontScale;
+
+    // Calculate total non-section steps for timer display
+    final totalSteps = steps.where((s) => s.type != 'section').length;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -111,6 +127,22 @@ class RecipeStepsView extends ConsumerWidget {
                             color: colors.contentPrimary,
                           ),
                           enableRecipeLinks: true,
+                          enableDurationLinks: enableTimerLinks,
+                          onDurationTap: enableTimerLinks
+                              ? (duration, detectedText) {
+                                  final stepNumber = _getStepNumber(steps, index);
+                                  showStartTimerDialog(
+                                    context,
+                                    recipeId: recipeId,
+                                    recipeName: recipeName,
+                                    stepId: step.id,
+                                    stepNumber: stepNumber,
+                                    totalSteps: totalSteps,
+                                    duration: duration,
+                                    detectedText: detectedText,
+                                  );
+                                }
+                              : null,
                         ),
 
                         // Note (if available)

@@ -124,6 +124,16 @@ class MockRecipeRepository extends _i1.Mock implements _i4.RecipeRepository {
       ) as _i6.Future<_i3.RecipeEntry?>);
 
   @override
+  _i6.Future<_i3.RecipeEntry?> getRecipeByTitle(String? title) =>
+      (super.noSuchMethod(
+        Invocation.method(
+          #getRecipeByTitle,
+          [title],
+        ),
+        returnValue: _i6.Future<_i3.RecipeEntry?>.value(),
+      ) as _i6.Future<_i3.RecipeEntry?>);
+
+  @override
   _i6.Future<bool> updateImageForRecipe({
     required String? recipeId,
     required String? fileName,

@@ -4,10 +4,14 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:pull_down_button/pull_down_button.dart';
 
 import '../../database/database.dart';
+import '../../database/models/timers.dart';
 import '../features/recipes/widgets/cook_modal/cook_modal.dart';
+import '../features/timers/widgets/timer_expiration_listener.dart';
 import '../providers/cook_provider.dart';
+import '../providers/timer_provider.dart';
 import '../theme/colors.dart';
 import '../theme/spacing.dart';
 import '../theme/typography.dart';
@@ -38,8 +42,8 @@ class _GlobalStatusBarWrapperState extends ConsumerState<GlobalStatusBarWrapper>
   Widget build(BuildContext context) {
     final isExpanded = ref.watch(statusBarExpandedProvider);
     final activeCooks = ref.watch(inProgressCooksProvider);
-    final shouldShowStatusBar = activeCooks.isNotEmpty;
-    // Future: || ref.watch(activeTimersProvider).isNotEmpty;
+    final activeTimers = ref.watch(activeTimersProvider);
+    final shouldShowStatusBar = activeCooks.isNotEmpty || activeTimers.isNotEmpty;
 
     final mediaQuery = MediaQuery.of(context);
     final safeAreaTop = mediaQuery.padding.top;
@@ -51,22 +55,42 @@ class _GlobalStatusBarWrapperState extends ConsumerState<GlobalStatusBarWrapper>
     const firstCookExpandedHeight = 68.0;
     const additionalCookHeight = 70.0;
     const extraBottomMarginForMultipleCooks = 6.0;
-    final expandedContentHeight = activeCooks.isEmpty
-        ? collapsedContentHeight
-        : firstCookExpandedHeight
-            + (activeCooks.length - 1) * additionalCookHeight
-            + (activeCooks.length > 1 ? extraBottomMarginForMultipleCooks : 0);
+    // Timer expanded height: header(22) + gap(8) + timer item(28) = 58 for first timer
+    // Each additional timer: gap(8) + timer item(28) = 36
+    const firstTimerExpandedHeight = 58.0;
+    const additionalTimerHeight = 36.0;
+
+    double expandedContentHeight = collapsedContentHeight;
+    if (activeCooks.isNotEmpty) {
+      expandedContentHeight = firstCookExpandedHeight
+          + (activeCooks.length - 1) * additionalCookHeight
+          + (activeCooks.length > 1 ? extraBottomMarginForMultipleCooks : 0);
+    }
+    // Add timer height if there are timers
+    if (activeTimers.isNotEmpty) {
+      // Add separator if we have cooks
+      if (activeCooks.isNotEmpty) {
+        expandedContentHeight += 16; // Gap before timer section
+      } else {
+        expandedContentHeight = 0; // Reset if no cooks
+      }
+      expandedContentHeight += firstTimerExpandedHeight
+          + (activeTimers.length - 1) * additionalTimerHeight
+          + 10; // Bottom margin
+    }
 
     final statusBarColor = AppColorSwatches.primary[500]!;
 
-    return TweenAnimationBuilder<double>(
-      // 0.0 = hidden, 1.0 = fully visible
-      tween: Tween<double>(end: shouldShowStatusBar ? 1.0 : 0.0),
-      duration: const Duration(milliseconds: 300),
-      curve: Curves.easeOutCubic,
-      // Pass child so it doesn't rebuild every animation tick
-      child: widget.child,
-      builder: (context, visibility, appChild) {
+    // Wrap everything with timer expiration listener
+    return TimerExpirationListener(
+      child: TweenAnimationBuilder<double>(
+        // 0.0 = hidden, 1.0 = fully visible
+        tween: Tween<double>(end: shouldShowStatusBar ? 1.0 : 0.0),
+        duration: const Duration(milliseconds: 300),
+        curve: Curves.easeOutCubic,
+        // Pass child so it doesn't rebuild every animation tick
+        child: widget.child,
+        builder: (context, visibility, appChild) {
         final showT = visibility.clamp(0.0, 1.0);
 
         // Nested builder for expand/collapse animation
@@ -132,6 +156,7 @@ class _GlobalStatusBarWrapperState extends ConsumerState<GlobalStatusBarWrapper>
                             opacity: showT,
                             child: _GlobalStatusBar(
                               activeCooks: activeCooks,
+                              activeTimers: activeTimers,
                               isExpanded: isExpanded,
                             ),
                           ),
@@ -176,6 +201,7 @@ class _GlobalStatusBarWrapperState extends ConsumerState<GlobalStatusBarWrapper>
           },
         );
       },
+      ),
     );
   }
 }
@@ -183,16 +209,21 @@ class _GlobalStatusBarWrapperState extends ConsumerState<GlobalStatusBarWrapper>
 /// The actual status bar content widget.
 class _GlobalStatusBar extends StatelessWidget {
   final List<CookEntry> activeCooks;
+  final List<TimerEntry> activeTimers;
   final bool isExpanded;
 
   const _GlobalStatusBar({
     required this.activeCooks,
+    required this.activeTimers,
     required this.isExpanded,
   });
 
   @override
   Widget build(BuildContext context) {
-    if (activeCooks.isEmpty) return const SizedBox.shrink();
+    if (activeCooks.isEmpty && activeTimers.isEmpty) return const SizedBox.shrink();
+
+    final hasCooks = activeCooks.isNotEmpty;
+    final hasTimers = activeTimers.isNotEmpty;
 
     // Only show header transition if multiple cooks (single cook shows same text)
     final needsHeaderTransition = activeCooks.length > 1;
@@ -201,29 +232,45 @@ class _GlobalStatusBar extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       mainAxisSize: MainAxisSize.min,
       children: [
-        // Header row - pure fade transition between collapsed and expanded text
-        if (needsHeaderTransition)
-          Stack(
-            children: [
-              // Collapsed header fades out
-              AnimatedOpacity(
-                opacity: isExpanded ? 0.0 : 1.0,
-                duration: const Duration(milliseconds: 150),
-                child: _CollapsedHeader(activeCooks: activeCooks),
-              ),
-              // Expanded header fades in
-              AnimatedOpacity(
-                opacity: isExpanded ? 1.0 : 0.0,
-                duration: const Duration(milliseconds: 150),
-                child: _CookHeaderRow(cook: activeCooks.first),
-              ),
-            ],
-          )
-        else
-          // Single cook - no transition needed, just show the header
-          _CookHeaderRow(cook: activeCooks.first),
+        // Header row - cooks on left, timers on right
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            // Left side: Cook info
+            if (hasCooks)
+              Flexible(
+                child: needsHeaderTransition
+                    ? Stack(
+                        children: [
+                          // Collapsed header fades out
+                          AnimatedOpacity(
+                            opacity: isExpanded ? 0.0 : 1.0,
+                            duration: const Duration(milliseconds: 150),
+                            child: _CollapsedHeader(activeCooks: activeCooks),
+                          ),
+                          // Expanded header fades in
+                          AnimatedOpacity(
+                            opacity: isExpanded ? 1.0 : 0.0,
+                            duration: const Duration(milliseconds: 150),
+                            child: _CookHeaderRow(cook: activeCooks.first),
+                          ),
+                        ],
+                      )
+                    : _CookHeaderRow(cook: activeCooks.first),
+              )
+            else
+              const Spacer(),
 
-        // Expanded content - buttons and additional cooks (simple fade in/out)
+            // Right side: Timer info
+            if (hasTimers)
+              _TimerStatusDisplay(
+                timer: activeTimers.first,
+                totalTimers: activeTimers.length,
+              ),
+          ],
+        ),
+
+        // Expanded content - buttons and additional items (simple fade in/out)
         AnimatedOpacity(
           opacity: isExpanded ? 1.0 : 0.0,
           duration: const Duration(milliseconds: 150),
@@ -231,15 +278,25 @@ class _GlobalStatusBar extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             mainAxisSize: MainAxisSize.min,
             children: [
-              const SizedBox(height: 8),
-              _CookButtonRow(cook: activeCooks.first),
-              // Additional cooks
-              for (final cook in activeCooks.skip(1)) ...[
-                const SizedBox(height: 12),
-                _CookItem(cook: cook),
+              // Cook buttons and additional cooks
+              if (hasCooks) ...[
+                const SizedBox(height: 8),
+                _CookButtonRow(cook: activeCooks.first),
+                // Additional cooks
+                for (final cook in activeCooks.skip(1)) ...[
+                  const SizedBox(height: 12),
+                  _CookItem(cook: cook),
+                ],
               ],
-              // Bottom margin - 10px for 1 cook, 16px for multiple
-              SizedBox(height: activeCooks.length > 1 ? 16 : 10),
+
+              // Timer section (if there are timers)
+              if (hasTimers) ...[
+                if (hasCooks) const SizedBox(height: 16),
+                _TimerSection(timers: activeTimers),
+              ],
+
+              // Bottom margin
+              const SizedBox(height: 10),
             ],
           ),
         ),
@@ -502,6 +559,258 @@ class _CookItem extends StatelessWidget {
         const SizedBox(height: 8),
         _CookButtonRow(cook: cook),
       ],
+    );
+  }
+}
+
+/// Timer status display for the collapsed header (right side).
+/// Shows countdown and timer count.
+class _TimerStatusDisplay extends StatelessWidget {
+  final TimerEntry timer;
+  final int totalTimers;
+
+  const _TimerStatusDisplay({
+    required this.timer,
+    required this.totalTimers,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final textStyle = AppTypography.body.copyWith(
+      color: Colors.white,
+      fontWeight: FontWeight.w600,
+    );
+
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        const Icon(
+          CupertinoIcons.timer,
+          color: Colors.white,
+          size: 16,
+        ),
+        const SizedBox(width: 6),
+        Text(
+          timer.formattedRemaining,
+          style: textStyle,
+        ),
+        if (totalTimers > 1) ...[
+          const SizedBox(width: 4),
+          Text(
+            '+${totalTimers - 1}',
+            style: textStyle.copyWith(
+              fontWeight: FontWeight.w500,
+              fontSize: 12,
+            ),
+          ),
+        ],
+      ],
+    );
+  }
+}
+
+/// Timer section shown in expanded view.
+class _TimerSection extends ConsumerWidget {
+  final List<TimerEntry> timers;
+
+  const _TimerSection({required this.timers});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final textStyle = AppTypography.body.copyWith(
+      color: Colors.white,
+      fontWeight: FontWeight.w600,
+    );
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        // Section header
+        Row(
+          children: [
+            const Icon(
+              CupertinoIcons.timer,
+              color: Colors.white,
+              size: 16,
+            ),
+            const SizedBox(width: 6),
+            Text(
+              'Timers',
+              style: textStyle.copyWith(fontWeight: FontWeight.w800),
+            ),
+          ],
+        ),
+        const SizedBox(height: 8),
+        // Timer list
+        for (final timer in timers) ...[
+          _TimerItem(timer: timer),
+          if (timer != timers.last) const SizedBox(height: 8),
+        ],
+      ],
+    );
+  }
+}
+
+/// Individual timer item with pull-down menu.
+class _TimerItem extends ConsumerWidget {
+  final TimerEntry timer;
+
+  const _TimerItem({required this.timer});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final textStyle = AppTypography.caption.copyWith(
+      color: Colors.white,
+      fontWeight: FontWeight.w600,
+    );
+
+    return Padding(
+      padding: const EdgeInsets.only(left: 22), // Align with header text
+      child: Row(
+        children: [
+          // Timer countdown
+          Text(
+            timer.formattedRemaining,
+            style: textStyle.copyWith(
+              fontWeight: FontWeight.w700,
+              fontSize: 14,
+            ),
+          ),
+          const SizedBox(width: 8),
+          // Recipe name and step
+          Expanded(
+            child: Text(
+              '${timer.recipeName} · Step ${timer.stepDisplay}',
+              style: textStyle.copyWith(fontWeight: FontWeight.w500),
+              overflow: TextOverflow.ellipsis,
+              maxLines: 1,
+            ),
+          ),
+          const SizedBox(width: 8),
+          // Pull-down menu button
+          _TimerMenuButton(timer: timer),
+        ],
+      ),
+    );
+  }
+}
+
+/// Pull-down menu button for timer actions.
+class _TimerMenuButton extends ConsumerWidget {
+  final TimerEntry timer;
+
+  const _TimerMenuButton({required this.timer});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final timerNotifier = ref.read(timerNotifierProvider.notifier);
+
+    return PullDownButton(
+      buttonAnchor: PullDownMenuAnchor.end,
+      itemBuilder: (context) => [
+        PullDownMenuItem(
+          title: 'Extend 1 min',
+          icon: CupertinoIcons.plus,
+          onTap: () async {
+            await timerNotifier.extendTimer(
+              timer.id,
+              const Duration(minutes: 1),
+            );
+          },
+        ),
+        PullDownMenuItem(
+          title: 'Extend 5 min',
+          icon: CupertinoIcons.plus_circle,
+          onTap: () async {
+            await timerNotifier.extendTimer(
+              timer.id,
+              const Duration(minutes: 5),
+            );
+          },
+        ),
+        const PullDownMenuDivider.large(),
+        PullDownMenuItem(
+          title: 'Instructions',
+          icon: CupertinoIcons.list_bullet,
+          onTap: () {
+            // Get navigator context and show cook modal
+            final navigatorContext = globalRootNavigatorKey.currentContext;
+            if (navigatorContext != null) {
+              // Look for an active cook for this recipe
+              final activeCook = ref.read(activeCookForRecipeProvider(timer.recipeId));
+              if (activeCook != null) {
+                showCookModal(
+                  navigatorContext,
+                  cookId: activeCook.id,
+                  recipeId: timer.recipeId,
+                );
+              } else {
+                // No active cook - just navigate to recipe
+                GoRouter.of(navigatorContext).push('/recipe/${timer.recipeId}');
+              }
+            }
+          },
+        ),
+        PullDownMenuItem(
+          title: 'View Recipe',
+          icon: CupertinoIcons.book,
+          onTap: () {
+            final navigatorContext = globalRootNavigatorKey.currentContext;
+            if (navigatorContext != null) {
+              GoRouter.of(navigatorContext).push('/recipe/${timer.recipeId}');
+            }
+          },
+        ),
+        const PullDownMenuDivider.large(),
+        PullDownMenuItem(
+          title: 'Cancel Timer',
+          icon: CupertinoIcons.xmark_circle,
+          isDestructive: true,
+          onTap: () async {
+            // Show confirmation dialog
+            final navigatorContext = globalRootNavigatorKey.currentContext;
+            if (navigatorContext == null) return;
+
+            final confirmed = await showCupertinoDialog<bool>(
+              context: navigatorContext,
+              builder: (context) => CupertinoAlertDialog(
+                title: const Text('Cancel Timer?'),
+                content: Text(
+                  'Cancel the ${timer.detectedText} timer for "${timer.recipeName}"?',
+                ),
+                actions: [
+                  CupertinoDialogAction(
+                    onPressed: () => Navigator.of(context).pop(false),
+                    child: const Text('Keep'),
+                  ),
+                  CupertinoDialogAction(
+                    isDestructiveAction: true,
+                    onPressed: () => Navigator.of(context).pop(true),
+                    child: const Text('Cancel Timer'),
+                  ),
+                ],
+              ),
+            );
+
+            if (confirmed == true) {
+              await timerNotifier.cancelTimer(timer.id);
+            }
+          },
+        ),
+      ],
+      buttonBuilder: (context, showMenu) => GestureDetector(
+        onTap: showMenu,
+        behavior: HitTestBehavior.opaque,
+        child: const Padding(
+          padding: EdgeInsets.all(4),
+          child: Icon(
+            CupertinoIcons.ellipsis,
+            color: Colors.white,
+            size: 16,
+          ),
+        ),
+      ),
     );
   }
 }

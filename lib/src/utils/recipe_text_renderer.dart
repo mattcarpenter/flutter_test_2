@@ -5,7 +5,13 @@ import 'package:go_router/go_router.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../providers/recipe_provider.dart';
+import '../services/duration_detection_service.dart';
 import '../theme/colors.dart';
+
+/// Callback type for when a duration is tapped.
+/// [duration] is the parsed duration value.
+/// [detectedText] is the original matched text (e.g., "25 minutes").
+typedef DurationTapCallback = void Function(Duration duration, String detectedText);
 
 /// A widget that renders recipe text with rich formatting support.
 ///
@@ -15,6 +21,8 @@ import '../theme/colors.dart';
 /// - `*text*` - Italic formatting
 /// - `_text_` - Italic formatting
 /// - `[recipe:Name]` - Recipe links (only when [enableRecipeLinks] is true)
+/// - Duration expressions - Time expressions like "25 minutes" or "1時間30分"
+///   (only when [enableDurationLinks] is true)
 ///
 /// Recipe links are resolved at render time - if a recipe with matching title
 /// is found, it renders as a tappable link. Otherwise, just the name is shown.
@@ -26,11 +34,22 @@ class RecipeTextRenderer extends ConsumerStatefulWidget {
   /// recipe is found. When false, they're rendered as plain text.
   final bool enableRecipeLinks;
 
+  /// When true, duration expressions (e.g., "25 minutes", "1時間30分") are
+  /// detected and rendered as tappable links. When false, they're rendered
+  /// as plain text.
+  final bool enableDurationLinks;
+
+  /// Callback invoked when a duration is tapped.
+  /// Only called when [enableDurationLinks] is true.
+  final DurationTapCallback? onDurationTap;
+
   const RecipeTextRenderer({
     super.key,
     required this.text,
     required this.baseStyle,
     this.enableRecipeLinks = false,
+    this.enableDurationLinks = false,
+    this.onDurationTap,
   });
 
   @override
@@ -39,6 +58,7 @@ class RecipeTextRenderer extends ConsumerStatefulWidget {
 
 class _RecipeTextRendererState extends ConsumerState<RecipeTextRenderer> {
   final List<TapGestureRecognizer> _recognizers = [];
+  final DurationDetectionService _durationService = DurationDetectionService();
 
   @override
   void dispose() {
@@ -147,7 +167,34 @@ class _RecipeTextRendererState extends ConsumerState<RecipeTextRenderer> {
 
       case _TokenType.recipeLink:
         return _buildRecipeLinkSpan(context, token, colors);
+
+      case _TokenType.duration:
+        return _buildDurationSpan(context, token, colors);
     }
+  }
+
+  InlineSpan _buildDurationSpan(
+    BuildContext context,
+    _ParsedToken token,
+    AppColors colors,
+  ) {
+    if (!widget.enableDurationLinks || widget.onDurationTap == null) {
+      // Duration links disabled - render as plain text
+      return TextSpan(text: token.content, style: widget.baseStyle);
+    }
+
+    final recognizer = TapGestureRecognizer()
+      ..onTap = () => widget.onDurationTap!(token.duration!, token.content);
+    _recognizers.add(recognizer);
+
+    return TextSpan(
+      text: token.content,
+      style: widget.baseStyle.copyWith(
+        color: Theme.of(context).primaryColor,
+        fontWeight: FontWeight.w500,
+      ),
+      recognizer: recognizer,
+    );
   }
 
   InlineSpan _buildRecipeLinkSpan(
@@ -261,6 +308,20 @@ class _RecipeTextRendererState extends ConsumerState<RecipeTextRenderer> {
       ));
     }
 
+    // Detect duration expressions (e.g., "25 minutes", "1時間30分")
+    if (widget.enableDurationLinks) {
+      final detectedDurations = _durationService.detectDurations(text);
+      for (final detected in detectedDurations) {
+        tokens.add(_ParsedToken(
+          type: _TokenType.duration,
+          start: detected.startIndex,
+          end: detected.endIndex,
+          content: detected.matchedText,
+          duration: detected.duration,
+        ));
+      }
+    }
+
     // Sort by start position
     tokens.sort((a, b) => a.start.compareTo(b.start));
 
@@ -284,6 +345,7 @@ enum _TokenType {
   italic,
   link,
   recipeLink,
+  duration,
 }
 
 class _ParsedToken {
@@ -292,6 +354,7 @@ class _ParsedToken {
   final int end;
   final String content;
   final String? url;
+  final Duration? duration;
 
   _ParsedToken({
     required this.type,
@@ -299,5 +362,6 @@ class _ParsedToken {
     required this.end,
     required this.content,
     this.url,
+    this.duration,
   });
 }

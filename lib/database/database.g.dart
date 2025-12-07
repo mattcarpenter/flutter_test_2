@@ -10093,6 +10093,584 @@ class UserSubscriptionsCompanion
   }
 }
 
+class $TimersTable extends Timers with TableInfo<$TimersTable, TimerEntry> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $TimersTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<String> id = GeneratedColumn<String>(
+      'id', aliasedName, false,
+      type: DriftSqlType.string,
+      requiredDuringInsert: false,
+      defaultConstraints: GeneratedColumn.constraintIsAlways('UNIQUE'),
+      clientDefault: () => const Uuid().v4());
+  static const VerificationMeta _recipeIdMeta =
+      const VerificationMeta('recipeId');
+  @override
+  late final GeneratedColumn<String> recipeId = GeneratedColumn<String>(
+      'recipe_id', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _recipeNameMeta =
+      const VerificationMeta('recipeName');
+  @override
+  late final GeneratedColumn<String> recipeName = GeneratedColumn<String>(
+      'recipe_name', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _stepIdMeta = const VerificationMeta('stepId');
+  @override
+  late final GeneratedColumn<String> stepId = GeneratedColumn<String>(
+      'step_id', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _stepNumberMeta =
+      const VerificationMeta('stepNumber');
+  @override
+  late final GeneratedColumn<int> stepNumber = GeneratedColumn<int>(
+      'step_number', aliasedName, false,
+      type: DriftSqlType.int, requiredDuringInsert: true);
+  static const VerificationMeta _totalStepsMeta =
+      const VerificationMeta('totalSteps');
+  @override
+  late final GeneratedColumn<int> totalSteps = GeneratedColumn<int>(
+      'total_steps', aliasedName, false,
+      type: DriftSqlType.int, requiredDuringInsert: true);
+  static const VerificationMeta _detectedTextMeta =
+      const VerificationMeta('detectedText');
+  @override
+  late final GeneratedColumn<String> detectedText = GeneratedColumn<String>(
+      'detected_text', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _durationSecondsMeta =
+      const VerificationMeta('durationSeconds');
+  @override
+  late final GeneratedColumn<int> durationSeconds = GeneratedColumn<int>(
+      'duration_seconds', aliasedName, false,
+      type: DriftSqlType.int, requiredDuringInsert: true);
+  static const VerificationMeta _endTimestampMeta =
+      const VerificationMeta('endTimestamp');
+  @override
+  late final GeneratedColumn<int> endTimestamp = GeneratedColumn<int>(
+      'end_timestamp', aliasedName, false,
+      type: DriftSqlType.int, requiredDuringInsert: true);
+  static const VerificationMeta _createdAtMeta =
+      const VerificationMeta('createdAt');
+  @override
+  late final GeneratedColumn<int> createdAt = GeneratedColumn<int>(
+      'created_at', aliasedName, false,
+      type: DriftSqlType.int, requiredDuringInsert: true);
+  static const VerificationMeta _notificationIdMeta =
+      const VerificationMeta('notificationId');
+  @override
+  late final GeneratedColumn<String> notificationId = GeneratedColumn<String>(
+      'notification_id', aliasedName, true,
+      type: DriftSqlType.string, requiredDuringInsert: false);
+  @override
+  List<GeneratedColumn> get $columns => [
+        id,
+        recipeId,
+        recipeName,
+        stepId,
+        stepNumber,
+        totalSteps,
+        detectedText,
+        durationSeconds,
+        endTimestamp,
+        createdAt,
+        notificationId
+      ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'timers';
+  @override
+  VerificationContext validateIntegrity(Insertable<TimerEntry> instance,
+      {bool isInserting = false}) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    }
+    if (data.containsKey('recipe_id')) {
+      context.handle(_recipeIdMeta,
+          recipeId.isAcceptableOrUnknown(data['recipe_id']!, _recipeIdMeta));
+    } else if (isInserting) {
+      context.missing(_recipeIdMeta);
+    }
+    if (data.containsKey('recipe_name')) {
+      context.handle(
+          _recipeNameMeta,
+          recipeName.isAcceptableOrUnknown(
+              data['recipe_name']!, _recipeNameMeta));
+    } else if (isInserting) {
+      context.missing(_recipeNameMeta);
+    }
+    if (data.containsKey('step_id')) {
+      context.handle(_stepIdMeta,
+          stepId.isAcceptableOrUnknown(data['step_id']!, _stepIdMeta));
+    } else if (isInserting) {
+      context.missing(_stepIdMeta);
+    }
+    if (data.containsKey('step_number')) {
+      context.handle(
+          _stepNumberMeta,
+          stepNumber.isAcceptableOrUnknown(
+              data['step_number']!, _stepNumberMeta));
+    } else if (isInserting) {
+      context.missing(_stepNumberMeta);
+    }
+    if (data.containsKey('total_steps')) {
+      context.handle(
+          _totalStepsMeta,
+          totalSteps.isAcceptableOrUnknown(
+              data['total_steps']!, _totalStepsMeta));
+    } else if (isInserting) {
+      context.missing(_totalStepsMeta);
+    }
+    if (data.containsKey('detected_text')) {
+      context.handle(
+          _detectedTextMeta,
+          detectedText.isAcceptableOrUnknown(
+              data['detected_text']!, _detectedTextMeta));
+    } else if (isInserting) {
+      context.missing(_detectedTextMeta);
+    }
+    if (data.containsKey('duration_seconds')) {
+      context.handle(
+          _durationSecondsMeta,
+          durationSeconds.isAcceptableOrUnknown(
+              data['duration_seconds']!, _durationSecondsMeta));
+    } else if (isInserting) {
+      context.missing(_durationSecondsMeta);
+    }
+    if (data.containsKey('end_timestamp')) {
+      context.handle(
+          _endTimestampMeta,
+          endTimestamp.isAcceptableOrUnknown(
+              data['end_timestamp']!, _endTimestampMeta));
+    } else if (isInserting) {
+      context.missing(_endTimestampMeta);
+    }
+    if (data.containsKey('created_at')) {
+      context.handle(_createdAtMeta,
+          createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta));
+    } else if (isInserting) {
+      context.missing(_createdAtMeta);
+    }
+    if (data.containsKey('notification_id')) {
+      context.handle(
+          _notificationIdMeta,
+          notificationId.isAcceptableOrUnknown(
+              data['notification_id']!, _notificationIdMeta));
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  TimerEntry map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return TimerEntry(
+      id: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}id'])!,
+      recipeId: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}recipe_id'])!,
+      recipeName: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}recipe_name'])!,
+      stepId: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}step_id'])!,
+      stepNumber: attachedDatabase.typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}step_number'])!,
+      totalSteps: attachedDatabase.typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}total_steps'])!,
+      detectedText: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}detected_text'])!,
+      durationSeconds: attachedDatabase.typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}duration_seconds'])!,
+      endTimestamp: attachedDatabase.typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}end_timestamp'])!,
+      createdAt: attachedDatabase.typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}created_at'])!,
+      notificationId: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}notification_id']),
+    );
+  }
+
+  @override
+  $TimersTable createAlias(String alias) {
+    return $TimersTable(attachedDatabase, alias);
+  }
+}
+
+class TimerEntry extends DataClass implements Insertable<TimerEntry> {
+  final String id;
+  final String recipeId;
+  final String recipeName;
+  final String stepId;
+  final int stepNumber;
+  final int totalSteps;
+  final String detectedText;
+  final int durationSeconds;
+  final int endTimestamp;
+  final int createdAt;
+  final String? notificationId;
+  const TimerEntry(
+      {required this.id,
+      required this.recipeId,
+      required this.recipeName,
+      required this.stepId,
+      required this.stepNumber,
+      required this.totalSteps,
+      required this.detectedText,
+      required this.durationSeconds,
+      required this.endTimestamp,
+      required this.createdAt,
+      this.notificationId});
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<String>(id);
+    map['recipe_id'] = Variable<String>(recipeId);
+    map['recipe_name'] = Variable<String>(recipeName);
+    map['step_id'] = Variable<String>(stepId);
+    map['step_number'] = Variable<int>(stepNumber);
+    map['total_steps'] = Variable<int>(totalSteps);
+    map['detected_text'] = Variable<String>(detectedText);
+    map['duration_seconds'] = Variable<int>(durationSeconds);
+    map['end_timestamp'] = Variable<int>(endTimestamp);
+    map['created_at'] = Variable<int>(createdAt);
+    if (!nullToAbsent || notificationId != null) {
+      map['notification_id'] = Variable<String>(notificationId);
+    }
+    return map;
+  }
+
+  TimersCompanion toCompanion(bool nullToAbsent) {
+    return TimersCompanion(
+      id: Value(id),
+      recipeId: Value(recipeId),
+      recipeName: Value(recipeName),
+      stepId: Value(stepId),
+      stepNumber: Value(stepNumber),
+      totalSteps: Value(totalSteps),
+      detectedText: Value(detectedText),
+      durationSeconds: Value(durationSeconds),
+      endTimestamp: Value(endTimestamp),
+      createdAt: Value(createdAt),
+      notificationId: notificationId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(notificationId),
+    );
+  }
+
+  factory TimerEntry.fromJson(Map<String, dynamic> json,
+      {ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return TimerEntry(
+      id: serializer.fromJson<String>(json['id']),
+      recipeId: serializer.fromJson<String>(json['recipeId']),
+      recipeName: serializer.fromJson<String>(json['recipeName']),
+      stepId: serializer.fromJson<String>(json['stepId']),
+      stepNumber: serializer.fromJson<int>(json['stepNumber']),
+      totalSteps: serializer.fromJson<int>(json['totalSteps']),
+      detectedText: serializer.fromJson<String>(json['detectedText']),
+      durationSeconds: serializer.fromJson<int>(json['durationSeconds']),
+      endTimestamp: serializer.fromJson<int>(json['endTimestamp']),
+      createdAt: serializer.fromJson<int>(json['createdAt']),
+      notificationId: serializer.fromJson<String?>(json['notificationId']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<String>(id),
+      'recipeId': serializer.toJson<String>(recipeId),
+      'recipeName': serializer.toJson<String>(recipeName),
+      'stepId': serializer.toJson<String>(stepId),
+      'stepNumber': serializer.toJson<int>(stepNumber),
+      'totalSteps': serializer.toJson<int>(totalSteps),
+      'detectedText': serializer.toJson<String>(detectedText),
+      'durationSeconds': serializer.toJson<int>(durationSeconds),
+      'endTimestamp': serializer.toJson<int>(endTimestamp),
+      'createdAt': serializer.toJson<int>(createdAt),
+      'notificationId': serializer.toJson<String?>(notificationId),
+    };
+  }
+
+  TimerEntry copyWith(
+          {String? id,
+          String? recipeId,
+          String? recipeName,
+          String? stepId,
+          int? stepNumber,
+          int? totalSteps,
+          String? detectedText,
+          int? durationSeconds,
+          int? endTimestamp,
+          int? createdAt,
+          Value<String?> notificationId = const Value.absent()}) =>
+      TimerEntry(
+        id: id ?? this.id,
+        recipeId: recipeId ?? this.recipeId,
+        recipeName: recipeName ?? this.recipeName,
+        stepId: stepId ?? this.stepId,
+        stepNumber: stepNumber ?? this.stepNumber,
+        totalSteps: totalSteps ?? this.totalSteps,
+        detectedText: detectedText ?? this.detectedText,
+        durationSeconds: durationSeconds ?? this.durationSeconds,
+        endTimestamp: endTimestamp ?? this.endTimestamp,
+        createdAt: createdAt ?? this.createdAt,
+        notificationId:
+            notificationId.present ? notificationId.value : this.notificationId,
+      );
+  TimerEntry copyWithCompanion(TimersCompanion data) {
+    return TimerEntry(
+      id: data.id.present ? data.id.value : this.id,
+      recipeId: data.recipeId.present ? data.recipeId.value : this.recipeId,
+      recipeName:
+          data.recipeName.present ? data.recipeName.value : this.recipeName,
+      stepId: data.stepId.present ? data.stepId.value : this.stepId,
+      stepNumber:
+          data.stepNumber.present ? data.stepNumber.value : this.stepNumber,
+      totalSteps:
+          data.totalSteps.present ? data.totalSteps.value : this.totalSteps,
+      detectedText: data.detectedText.present
+          ? data.detectedText.value
+          : this.detectedText,
+      durationSeconds: data.durationSeconds.present
+          ? data.durationSeconds.value
+          : this.durationSeconds,
+      endTimestamp: data.endTimestamp.present
+          ? data.endTimestamp.value
+          : this.endTimestamp,
+      createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
+      notificationId: data.notificationId.present
+          ? data.notificationId.value
+          : this.notificationId,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('TimerEntry(')
+          ..write('id: $id, ')
+          ..write('recipeId: $recipeId, ')
+          ..write('recipeName: $recipeName, ')
+          ..write('stepId: $stepId, ')
+          ..write('stepNumber: $stepNumber, ')
+          ..write('totalSteps: $totalSteps, ')
+          ..write('detectedText: $detectedText, ')
+          ..write('durationSeconds: $durationSeconds, ')
+          ..write('endTimestamp: $endTimestamp, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('notificationId: $notificationId')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(
+      id,
+      recipeId,
+      recipeName,
+      stepId,
+      stepNumber,
+      totalSteps,
+      detectedText,
+      durationSeconds,
+      endTimestamp,
+      createdAt,
+      notificationId);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is TimerEntry &&
+          other.id == this.id &&
+          other.recipeId == this.recipeId &&
+          other.recipeName == this.recipeName &&
+          other.stepId == this.stepId &&
+          other.stepNumber == this.stepNumber &&
+          other.totalSteps == this.totalSteps &&
+          other.detectedText == this.detectedText &&
+          other.durationSeconds == this.durationSeconds &&
+          other.endTimestamp == this.endTimestamp &&
+          other.createdAt == this.createdAt &&
+          other.notificationId == this.notificationId);
+}
+
+class TimersCompanion extends UpdateCompanion<TimerEntry> {
+  final Value<String> id;
+  final Value<String> recipeId;
+  final Value<String> recipeName;
+  final Value<String> stepId;
+  final Value<int> stepNumber;
+  final Value<int> totalSteps;
+  final Value<String> detectedText;
+  final Value<int> durationSeconds;
+  final Value<int> endTimestamp;
+  final Value<int> createdAt;
+  final Value<String?> notificationId;
+  final Value<int> rowid;
+  const TimersCompanion({
+    this.id = const Value.absent(),
+    this.recipeId = const Value.absent(),
+    this.recipeName = const Value.absent(),
+    this.stepId = const Value.absent(),
+    this.stepNumber = const Value.absent(),
+    this.totalSteps = const Value.absent(),
+    this.detectedText = const Value.absent(),
+    this.durationSeconds = const Value.absent(),
+    this.endTimestamp = const Value.absent(),
+    this.createdAt = const Value.absent(),
+    this.notificationId = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  TimersCompanion.insert({
+    this.id = const Value.absent(),
+    required String recipeId,
+    required String recipeName,
+    required String stepId,
+    required int stepNumber,
+    required int totalSteps,
+    required String detectedText,
+    required int durationSeconds,
+    required int endTimestamp,
+    required int createdAt,
+    this.notificationId = const Value.absent(),
+    this.rowid = const Value.absent(),
+  })  : recipeId = Value(recipeId),
+        recipeName = Value(recipeName),
+        stepId = Value(stepId),
+        stepNumber = Value(stepNumber),
+        totalSteps = Value(totalSteps),
+        detectedText = Value(detectedText),
+        durationSeconds = Value(durationSeconds),
+        endTimestamp = Value(endTimestamp),
+        createdAt = Value(createdAt);
+  static Insertable<TimerEntry> custom({
+    Expression<String>? id,
+    Expression<String>? recipeId,
+    Expression<String>? recipeName,
+    Expression<String>? stepId,
+    Expression<int>? stepNumber,
+    Expression<int>? totalSteps,
+    Expression<String>? detectedText,
+    Expression<int>? durationSeconds,
+    Expression<int>? endTimestamp,
+    Expression<int>? createdAt,
+    Expression<String>? notificationId,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (recipeId != null) 'recipe_id': recipeId,
+      if (recipeName != null) 'recipe_name': recipeName,
+      if (stepId != null) 'step_id': stepId,
+      if (stepNumber != null) 'step_number': stepNumber,
+      if (totalSteps != null) 'total_steps': totalSteps,
+      if (detectedText != null) 'detected_text': detectedText,
+      if (durationSeconds != null) 'duration_seconds': durationSeconds,
+      if (endTimestamp != null) 'end_timestamp': endTimestamp,
+      if (createdAt != null) 'created_at': createdAt,
+      if (notificationId != null) 'notification_id': notificationId,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  TimersCompanion copyWith(
+      {Value<String>? id,
+      Value<String>? recipeId,
+      Value<String>? recipeName,
+      Value<String>? stepId,
+      Value<int>? stepNumber,
+      Value<int>? totalSteps,
+      Value<String>? detectedText,
+      Value<int>? durationSeconds,
+      Value<int>? endTimestamp,
+      Value<int>? createdAt,
+      Value<String?>? notificationId,
+      Value<int>? rowid}) {
+    return TimersCompanion(
+      id: id ?? this.id,
+      recipeId: recipeId ?? this.recipeId,
+      recipeName: recipeName ?? this.recipeName,
+      stepId: stepId ?? this.stepId,
+      stepNumber: stepNumber ?? this.stepNumber,
+      totalSteps: totalSteps ?? this.totalSteps,
+      detectedText: detectedText ?? this.detectedText,
+      durationSeconds: durationSeconds ?? this.durationSeconds,
+      endTimestamp: endTimestamp ?? this.endTimestamp,
+      createdAt: createdAt ?? this.createdAt,
+      notificationId: notificationId ?? this.notificationId,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<String>(id.value);
+    }
+    if (recipeId.present) {
+      map['recipe_id'] = Variable<String>(recipeId.value);
+    }
+    if (recipeName.present) {
+      map['recipe_name'] = Variable<String>(recipeName.value);
+    }
+    if (stepId.present) {
+      map['step_id'] = Variable<String>(stepId.value);
+    }
+    if (stepNumber.present) {
+      map['step_number'] = Variable<int>(stepNumber.value);
+    }
+    if (totalSteps.present) {
+      map['total_steps'] = Variable<int>(totalSteps.value);
+    }
+    if (detectedText.present) {
+      map['detected_text'] = Variable<String>(detectedText.value);
+    }
+    if (durationSeconds.present) {
+      map['duration_seconds'] = Variable<int>(durationSeconds.value);
+    }
+    if (endTimestamp.present) {
+      map['end_timestamp'] = Variable<int>(endTimestamp.value);
+    }
+    if (createdAt.present) {
+      map['created_at'] = Variable<int>(createdAt.value);
+    }
+    if (notificationId.present) {
+      map['notification_id'] = Variable<String>(notificationId.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('TimersCompanion(')
+          ..write('id: $id, ')
+          ..write('recipeId: $recipeId, ')
+          ..write('recipeName: $recipeName, ')
+          ..write('stepId: $stepId, ')
+          ..write('stepNumber: $stepNumber, ')
+          ..write('totalSteps: $totalSteps, ')
+          ..write('detectedText: $detectedText, ')
+          ..write('durationSeconds: $durationSeconds, ')
+          ..write('endTimestamp: $endTimestamp, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('notificationId: $notificationId, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
 abstract class _$AppDatabase extends GeneratedDatabase {
   _$AppDatabase(QueryExecutor e) : super(e);
   $AppDatabaseManager get managers => $AppDatabaseManager(this);
@@ -10123,6 +10701,7 @@ abstract class _$AppDatabase extends GeneratedDatabase {
   late final $MealPlansTable mealPlans = $MealPlansTable(this);
   late final $UserSubscriptionsTable userSubscriptions =
       $UserSubscriptionsTable(this);
+  late final $TimersTable timers = $TimersTable(this);
   @override
   Iterable<TableInfo<Table, Object?>> get allTables =>
       allSchemaEntities.whereType<TableInfo<Table, Object?>>();
@@ -10146,7 +10725,8 @@ abstract class _$AppDatabase extends GeneratedDatabase {
         shoppingLists,
         converters,
         mealPlans,
-        userSubscriptions
+        userSubscriptions,
+        timers
       ];
 }
 
@@ -15010,6 +15590,267 @@ typedef $$UserSubscriptionsTableProcessedTableManager = ProcessedTableManager<
     ),
     UserSubscriptionEntry,
     PrefetchHooks Function()>;
+typedef $$TimersTableCreateCompanionBuilder = TimersCompanion Function({
+  Value<String> id,
+  required String recipeId,
+  required String recipeName,
+  required String stepId,
+  required int stepNumber,
+  required int totalSteps,
+  required String detectedText,
+  required int durationSeconds,
+  required int endTimestamp,
+  required int createdAt,
+  Value<String?> notificationId,
+  Value<int> rowid,
+});
+typedef $$TimersTableUpdateCompanionBuilder = TimersCompanion Function({
+  Value<String> id,
+  Value<String> recipeId,
+  Value<String> recipeName,
+  Value<String> stepId,
+  Value<int> stepNumber,
+  Value<int> totalSteps,
+  Value<String> detectedText,
+  Value<int> durationSeconds,
+  Value<int> endTimestamp,
+  Value<int> createdAt,
+  Value<String?> notificationId,
+  Value<int> rowid,
+});
+
+class $$TimersTableFilterComposer
+    extends Composer<_$AppDatabase, $TimersTable> {
+  $$TimersTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get id => $composableBuilder(
+      column: $table.id, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get recipeId => $composableBuilder(
+      column: $table.recipeId, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get recipeName => $composableBuilder(
+      column: $table.recipeName, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get stepId => $composableBuilder(
+      column: $table.stepId, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<int> get stepNumber => $composableBuilder(
+      column: $table.stepNumber, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<int> get totalSteps => $composableBuilder(
+      column: $table.totalSteps, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get detectedText => $composableBuilder(
+      column: $table.detectedText, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<int> get durationSeconds => $composableBuilder(
+      column: $table.durationSeconds,
+      builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<int> get endTimestamp => $composableBuilder(
+      column: $table.endTimestamp, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<int> get createdAt => $composableBuilder(
+      column: $table.createdAt, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get notificationId => $composableBuilder(
+      column: $table.notificationId,
+      builder: (column) => ColumnFilters(column));
+}
+
+class $$TimersTableOrderingComposer
+    extends Composer<_$AppDatabase, $TimersTable> {
+  $$TimersTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get id => $composableBuilder(
+      column: $table.id, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get recipeId => $composableBuilder(
+      column: $table.recipeId, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get recipeName => $composableBuilder(
+      column: $table.recipeName, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get stepId => $composableBuilder(
+      column: $table.stepId, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<int> get stepNumber => $composableBuilder(
+      column: $table.stepNumber, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<int> get totalSteps => $composableBuilder(
+      column: $table.totalSteps, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get detectedText => $composableBuilder(
+      column: $table.detectedText,
+      builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<int> get durationSeconds => $composableBuilder(
+      column: $table.durationSeconds,
+      builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<int> get endTimestamp => $composableBuilder(
+      column: $table.endTimestamp,
+      builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<int> get createdAt => $composableBuilder(
+      column: $table.createdAt, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get notificationId => $composableBuilder(
+      column: $table.notificationId,
+      builder: (column) => ColumnOrderings(column));
+}
+
+class $$TimersTableAnnotationComposer
+    extends Composer<_$AppDatabase, $TimersTable> {
+  $$TimersTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get recipeId =>
+      $composableBuilder(column: $table.recipeId, builder: (column) => column);
+
+  GeneratedColumn<String> get recipeName => $composableBuilder(
+      column: $table.recipeName, builder: (column) => column);
+
+  GeneratedColumn<String> get stepId =>
+      $composableBuilder(column: $table.stepId, builder: (column) => column);
+
+  GeneratedColumn<int> get stepNumber => $composableBuilder(
+      column: $table.stepNumber, builder: (column) => column);
+
+  GeneratedColumn<int> get totalSteps => $composableBuilder(
+      column: $table.totalSteps, builder: (column) => column);
+
+  GeneratedColumn<String> get detectedText => $composableBuilder(
+      column: $table.detectedText, builder: (column) => column);
+
+  GeneratedColumn<int> get durationSeconds => $composableBuilder(
+      column: $table.durationSeconds, builder: (column) => column);
+
+  GeneratedColumn<int> get endTimestamp => $composableBuilder(
+      column: $table.endTimestamp, builder: (column) => column);
+
+  GeneratedColumn<int> get createdAt =>
+      $composableBuilder(column: $table.createdAt, builder: (column) => column);
+
+  GeneratedColumn<String> get notificationId => $composableBuilder(
+      column: $table.notificationId, builder: (column) => column);
+}
+
+class $$TimersTableTableManager extends RootTableManager<
+    _$AppDatabase,
+    $TimersTable,
+    TimerEntry,
+    $$TimersTableFilterComposer,
+    $$TimersTableOrderingComposer,
+    $$TimersTableAnnotationComposer,
+    $$TimersTableCreateCompanionBuilder,
+    $$TimersTableUpdateCompanionBuilder,
+    (TimerEntry, BaseReferences<_$AppDatabase, $TimersTable, TimerEntry>),
+    TimerEntry,
+    PrefetchHooks Function()> {
+  $$TimersTableTableManager(_$AppDatabase db, $TimersTable table)
+      : super(TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$TimersTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$TimersTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$TimersTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback: ({
+            Value<String> id = const Value.absent(),
+            Value<String> recipeId = const Value.absent(),
+            Value<String> recipeName = const Value.absent(),
+            Value<String> stepId = const Value.absent(),
+            Value<int> stepNumber = const Value.absent(),
+            Value<int> totalSteps = const Value.absent(),
+            Value<String> detectedText = const Value.absent(),
+            Value<int> durationSeconds = const Value.absent(),
+            Value<int> endTimestamp = const Value.absent(),
+            Value<int> createdAt = const Value.absent(),
+            Value<String?> notificationId = const Value.absent(),
+            Value<int> rowid = const Value.absent(),
+          }) =>
+              TimersCompanion(
+            id: id,
+            recipeId: recipeId,
+            recipeName: recipeName,
+            stepId: stepId,
+            stepNumber: stepNumber,
+            totalSteps: totalSteps,
+            detectedText: detectedText,
+            durationSeconds: durationSeconds,
+            endTimestamp: endTimestamp,
+            createdAt: createdAt,
+            notificationId: notificationId,
+            rowid: rowid,
+          ),
+          createCompanionCallback: ({
+            Value<String> id = const Value.absent(),
+            required String recipeId,
+            required String recipeName,
+            required String stepId,
+            required int stepNumber,
+            required int totalSteps,
+            required String detectedText,
+            required int durationSeconds,
+            required int endTimestamp,
+            required int createdAt,
+            Value<String?> notificationId = const Value.absent(),
+            Value<int> rowid = const Value.absent(),
+          }) =>
+              TimersCompanion.insert(
+            id: id,
+            recipeId: recipeId,
+            recipeName: recipeName,
+            stepId: stepId,
+            stepNumber: stepNumber,
+            totalSteps: totalSteps,
+            detectedText: detectedText,
+            durationSeconds: durationSeconds,
+            endTimestamp: endTimestamp,
+            createdAt: createdAt,
+            notificationId: notificationId,
+            rowid: rowid,
+          ),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .toList(),
+          prefetchHooksCallback: null,
+        ));
+}
+
+typedef $$TimersTableProcessedTableManager = ProcessedTableManager<
+    _$AppDatabase,
+    $TimersTable,
+    TimerEntry,
+    $$TimersTableFilterComposer,
+    $$TimersTableOrderingComposer,
+    $$TimersTableAnnotationComposer,
+    $$TimersTableCreateCompanionBuilder,
+    $$TimersTableUpdateCompanionBuilder,
+    (TimerEntry, BaseReferences<_$AppDatabase, $TimersTable, TimerEntry>),
+    TimerEntry,
+    PrefetchHooks Function()>;
 
 class $AppDatabaseManager {
   final _$AppDatabase _db;
@@ -15055,4 +15896,6 @@ class $AppDatabaseManager {
       $$MealPlansTableTableManager(_db, _db.mealPlans);
   $$UserSubscriptionsTableTableManager get userSubscriptions =>
       $$UserSubscriptionsTableTableManager(_db, _db.userSubscriptions);
+  $$TimersTableTableManager get timers =>
+      $$TimersTableTableManager(_db, _db.timers);
 }

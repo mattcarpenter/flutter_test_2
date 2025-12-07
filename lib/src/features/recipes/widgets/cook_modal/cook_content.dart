@@ -9,6 +9,8 @@ import '../../../../../database/database.dart';
 import '../../../../../database/models/cooks.dart';
 import '../../../../theme/colors.dart';
 import '../../../../widgets/app_button.dart';
+import '../../../../utils/recipe_text_renderer.dart';
+import '../../../timers/widgets/start_timer_dialog.dart';
 import 'ingredients_sheet.dart';
 import '../add_recipe_modal.dart';
 import 'package:collection/collection.dart';
@@ -474,6 +476,12 @@ class CookContentState extends ConsumerState<CookContent> {
                             letterSpacing: Platform.isIOS ? -0.2 : 0,
                             color: AppColors.of(context).textPrimary,
                           ),
+                          // Recipe context for timer integration
+                          recipeId: recipe.id,
+                          recipeName: recipe.title,
+                          stepId: currentStep.id,
+                          displayStepNumber: displayStepNumber,
+                          totalSteps: totalSteps,
                         ),
                       ),
                     ),
@@ -594,6 +602,13 @@ class CookStepDisplay extends StatefulWidget {
   final int stepIndex;
   final TextStyle style;
 
+  // Recipe context for timer integration
+  final String recipeId;
+  final String recipeName;
+  final String stepId;
+  final int displayStepNumber;
+  final int totalSteps;
+
   const CookStepDisplay({
     super.key,
     required this.availableHeight,
@@ -601,6 +616,11 @@ class CookStepDisplay extends StatefulWidget {
     required this.cookId,
     required this.stepIndex,
     required this.style,
+    required this.recipeId,
+    required this.recipeName,
+    required this.stepId,
+    required this.displayStepNumber,
+    required this.totalSteps,
   });
 
   @override
@@ -679,6 +699,29 @@ class _CookStepDisplayState extends State<CookStepDisplay>
     super.dispose();
   }
 
+  /// Build the step text with duration detection and timer support
+  Widget _buildStepTextContent(String text, Key? key) {
+    return RecipeTextRenderer(
+      key: key,
+      text: text,
+      baseStyle: widget.style,
+      enableRecipeLinks: false, // Don't link recipes in cook modal
+      enableDurationLinks: true,
+      onDurationTap: (duration, detectedText) {
+        showStartTimerDialog(
+          context,
+          recipeId: widget.recipeId,
+          recipeName: widget.recipeName,
+          stepId: widget.stepId,
+          stepNumber: widget.displayStepNumber,
+          totalSteps: widget.totalSteps,
+          duration: duration,
+          detectedText: detectedText,
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     // If animating, use fixed-height container to prevent jumping
@@ -702,10 +745,9 @@ class _CookStepDisplayState extends State<CookStepDisplay>
     }
 
     // Not animating - use natural sizing for scrollability
-    return Text(
+    return _buildStepTextContent(
       widget.stepText,
-      style: widget.style,
-      textAlign: TextAlign.center,
+      ValueKey('${widget.cookId}-${widget.stepIndex}'),
     );
   }
 
@@ -724,11 +766,9 @@ class _CookStepDisplayState extends State<CookStepDisplay>
       return _buildRecipeEnter();
     } else {
       // Initial render - no animation
-      return Text(
+      return _buildStepTextContent(
         widget.stepText,
-        key: ValueKey('${widget.cookId}-${widget.stepIndex}'),
-        style: widget.style,
-        textAlign: TextAlign.center,
+        ValueKey('${widget.cookId}-${widget.stepIndex}'),
       );
     }
   }

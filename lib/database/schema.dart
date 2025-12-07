@@ -22,6 +22,7 @@ const convertersTable = 'converters';
 const shoppingListItemsTable = 'shopping_list_items';
 const mealPlansTable = 'meal_plans';
 const userSubscriptionsTable = 'user_subscriptions';
+const timersTable = 'timers';
 
 Schema schema = const Schema(([
   Table.localOnly(uploadQueuesTable, [
@@ -61,6 +62,19 @@ Schema schema = const Schema(([
     Column.text('error'),
     Column.integer('created_at'),
     Column.integer('updated_at'),
+  ]),
+  // Timers - LOCAL ONLY table for device-specific cooking timers
+  Table.localOnly(timersTable, [
+    Column.text('recipe_id'),
+    Column.text('recipe_name'),
+    Column.text('step_id'),
+    Column.integer('step_number'),
+    Column.integer('total_steps'),
+    Column.text('detected_text'),
+    Column.integer('duration_seconds'),
+    Column.integer('end_timestamp'),
+    Column.integer('created_at'),
+    Column.text('notification_id'),
   ]),
   Table(recipeFoldersTable, [
     Column.text('name'),

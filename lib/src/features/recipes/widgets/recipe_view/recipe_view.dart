@@ -198,7 +198,11 @@ class _RecipeViewState extends ConsumerState<RecipeView> {
             const SizedBox(height: 24),
 
             // Steps
-            RecipeStepsView(steps: recipe.steps ?? []),
+            RecipeStepsView(
+              steps: recipe.steps ?? [],
+              recipeId: recipe.id,
+              recipeName: recipe.title,
+            ),
 
             // Notes (if available)
             if (recipe.generalNotes != null && recipe.generalNotes!.isNotEmpty) ...[
