@@ -9,6 +9,7 @@ list(APPEND FLUTTER_PLUGIN_LIST
   file_selector_windows
   flutter_acrylic
   flutter_inappwebview_windows
+  flutter_timezone
   irondash_engine_context
   mecab_dart
   powersync_flutter_libs
