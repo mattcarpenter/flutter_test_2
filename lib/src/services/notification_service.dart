@@ -133,10 +133,7 @@ class NotificationService {
 
     const initSettings = InitializationSettings(android: androidSettings);
 
-    await _notifications.initialize(
-      initSettings,
-      onDidReceiveNotificationResponse: _handleNotificationResponse,
-    );
+    await _notifications.initialize(initSettings);
 
     AppLogger.debug('Android notification channel created: $_channelId');
   }
@@ -155,25 +152,14 @@ class NotificationService {
       requestSoundPermission: false,
     );
 
-    final initSettings = InitializationSettings(
+    const initSettings = InitializationSettings(
       iOS: iosSettings,
       macOS: macosSettings,
     );
 
-    await _notifications.initialize(
-      initSettings,
-      onDidReceiveNotificationResponse: _handleNotificationResponse,
-    );
+    await _notifications.initialize(initSettings);
 
     AppLogger.debug('Apple notification settings initialized');
-  }
-
-  /// Handle notification tap responses
-  void _handleNotificationResponse(NotificationResponse response) {
-    AppLogger.debug(
-      'Notification tapped: id=${response.id}, payload=${response.payload}',
-    );
-    // Future enhancement: Navigate to cook modal or recipe when notification is tapped
   }
 
   /// Request notification permissions from the user.
@@ -308,6 +294,11 @@ class NotificationService {
   /// Returns the notification ID as a string, which can be used to cancel
   /// the notification later.
   ///
+  /// Parameters:
+  /// - [recipeName]: Display name of the recipe
+  /// - [stepNumber]: Step number in the recipe
+  /// - [duration]: When to show the notification
+  ///
   /// Throws [NotificationApiException] if scheduling fails.
   Future<String> scheduleTimerNotification({
     required String recipeName,
@@ -321,7 +312,8 @@ class NotificationService {
 
     try {
       // Generate unique notification ID from timestamp
-      final notificationId = (DateTime.now().millisecondsSinceEpoch / 1000).floor();
+      final notificationId =
+          (DateTime.now().millisecondsSinceEpoch / 1000).floor();
 
       // Calculate scheduled time
       final scheduledTime = tz.TZDateTime.now(tz.local).add(duration);
@@ -348,7 +340,7 @@ class NotificationService {
       }
 
       final notificationIdStr = notificationId.toString();
-      AppLogger.info(
+      AppLogger.debug(
         'Timer notification scheduled: id=$notificationIdStr, '
         'fires at ${scheduledTime.toIso8601String()}',
       );
@@ -363,7 +355,7 @@ class NotificationService {
     }
   }
 
-  /// Schedule Android-specific notification
+  /// Schedule Android-specific notification with alarm sound
   Future<void> _scheduleAndroidNotification({
     required int notificationId,
     required String recipeName,
@@ -379,6 +371,7 @@ class NotificationService {
       playSound: true,
       enableVibration: true,
       category: AndroidNotificationCategory.alarm,
+      audioAttributesUsage: AudioAttributesUsage.alarm,
     );
 
     const notificationDetails = NotificationDetails(android: androidDetails);

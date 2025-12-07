@@ -42,15 +42,12 @@ class TimerNotifier extends StateNotifier<AsyncValue<List<TimerEntry>>> {
         state = AsyncValue.data([...timers]);
       });
     });
-
-    AppLogger.debug('TimerNotifier initialized');
   }
 
   @override
   void dispose() {
     _subscription.cancel();
     _tickTimer?.cancel();
-    AppLogger.debug('TimerNotifier disposed');
     super.dispose();
   }
 
@@ -76,38 +73,6 @@ class TimerNotifier extends StateNotifier<AsyncValue<List<TimerEntry>>> {
     required Duration duration,
   }) async {
     try {
-      AppLogger.debug(
-        'Starting timer for recipe "$recipeName" step $stepNumber/$totalSteps, '
-        'duration: ${duration.inSeconds}s',
-      );
-
-      // Schedule notification first to get the notification ID
-      String? notificationId;
-      try {
-        final enabled = await _notificationService.areNotificationsEnabled();
-        if (enabled) {
-          notificationId = await _notificationService.scheduleTimerNotification(
-            recipeName: recipeName,
-            stepNumber: stepNumber,
-            duration: duration,
-          );
-          AppLogger.debug(
-            'Scheduled notification for timer: id=$notificationId',
-          );
-        } else {
-          AppLogger.warning(
-            'Notifications not enabled, timer will run without notification',
-          );
-        }
-      } catch (e, stack) {
-        AppLogger.error(
-          'Failed to schedule notification for timer, continuing without it',
-          e,
-          stack,
-        );
-        // Continue without notification - timer will still work in-app
-      }
-
       // Create timer in database
       final timerId = await _repository.createTimer(
         recipeId: recipeId,
@@ -117,12 +82,29 @@ class TimerNotifier extends StateNotifier<AsyncValue<List<TimerEntry>>> {
         totalSteps: totalSteps,
         detectedText: detectedText,
         durationSeconds: duration.inSeconds,
-        notificationId: notificationId,
       );
 
+      // Schedule notification
+      try {
+        final enabled = await _notificationService.areNotificationsEnabled();
+        if (enabled) {
+          final notificationId =
+              await _notificationService.scheduleTimerNotification(
+            recipeName: recipeName,
+            stepNumber: stepNumber,
+            duration: duration,
+          );
+
+          // Update timer with notification ID
+          await _repository.updateNotificationId(timerId, notificationId);
+        }
+      } catch (e, stack) {
+        AppLogger.error('Failed to schedule notification', e, stack);
+        // Continue without notification - timer will still work in-app
+      }
+
       AppLogger.info(
-        'Started timer: id=$timerId, recipe="$recipeName", '
-        'step=$stepNumber/$totalSteps, duration=${duration.inSeconds}s',
+        'Timer started: "$recipeName" step $stepNumber, ${duration.inSeconds}s',
       );
 
       return timerId;
@@ -137,17 +119,8 @@ class TimerNotifier extends StateNotifier<AsyncValue<List<TimerEntry>>> {
   ///
   /// The timer's end timestamp will be extended by [extension] duration.
   /// The notification will be cancelled and rescheduled with the new time.
-  ///
-  /// Parameters:
-  /// - [timerId]: ID of the timer to extend
-  /// - [extension]: How much time to add to the timer
   Future<void> extendTimer(String timerId, Duration extension) async {
     try {
-      AppLogger.debug(
-        'Extending timer $timerId by ${extension.inSeconds}s',
-      );
-
-      // Get the timer to access its details
       final timer = await _repository.getTimer(timerId);
       if (timer == null) {
         AppLogger.warning('Cannot extend timer $timerId: not found');
@@ -156,54 +129,31 @@ class TimerNotifier extends StateNotifier<AsyncValue<List<TimerEntry>>> {
 
       // Cancel existing notification
       if (timer.notificationId != null) {
-        try {
-          await _notificationService.cancelNotification(timer.notificationId!);
-          AppLogger.debug(
-            'Cancelled old notification: id=${timer.notificationId}',
-          );
-        } catch (e, stack) {
-          AppLogger.error(
-            'Failed to cancel old notification, continuing',
-            e,
-            stack,
-          );
-        }
+        await _notificationService.cancelNotification(timer.notificationId!);
       }
 
       // Extend the timer in database
       await _repository.extendTimer(timerId, extension.inSeconds);
 
       // Schedule new notification with extended time
-      String? newNotificationId;
       try {
         final enabled = await _notificationService.areNotificationsEnabled();
         if (enabled) {
           final newRemaining = timer.remaining + extension;
-          newNotificationId = await _notificationService.scheduleTimerNotification(
+          final newNotificationId =
+              await _notificationService.scheduleTimerNotification(
             recipeName: timer.recipeName,
             stepNumber: timer.stepNumber,
             duration: newRemaining,
           );
 
-          // Update timer with new notification ID
           await _repository.updateNotificationId(timerId, newNotificationId);
-
-          AppLogger.debug(
-            'Scheduled new notification for extended timer: id=$newNotificationId',
-          );
         }
       } catch (e, stack) {
-        AppLogger.error(
-          'Failed to reschedule notification for extended timer',
-          e,
-          stack,
-        );
-        // Continue - timer is extended even without notification
+        AppLogger.error('Failed to reschedule notification', e, stack);
       }
 
-      AppLogger.info(
-        'Extended timer $timerId by ${extension.inSeconds}s',
-      );
+      AppLogger.debug('Extended timer by ${extension.inSeconds}s');
     } catch (e, stack) {
       AppLogger.error('Failed to extend timer', e, stack);
       state = AsyncValue.error(e, stack);
@@ -212,16 +162,8 @@ class TimerNotifier extends StateNotifier<AsyncValue<List<TimerEntry>>> {
   }
 
   /// Cancel an active timer and its notification.
-  ///
-  /// Removes the timer from the database and cancels its scheduled notification.
-  ///
-  /// Parameters:
-  /// - [timerId]: ID of the timer to cancel
   Future<void> cancelTimer(String timerId) async {
     try {
-      AppLogger.debug('Cancelling timer $timerId');
-
-      // Get timer to access notification ID
       final timer = await _repository.getTimer(timerId);
       if (timer == null) {
         AppLogger.warning('Cannot cancel timer $timerId: not found');
@@ -230,24 +172,11 @@ class TimerNotifier extends StateNotifier<AsyncValue<List<TimerEntry>>> {
 
       // Cancel notification if it exists
       if (timer.notificationId != null) {
-        try {
-          await _notificationService.cancelNotification(timer.notificationId!);
-          AppLogger.debug(
-            'Cancelled notification: id=${timer.notificationId}',
-          );
-        } catch (e, stack) {
-          AppLogger.error(
-            'Failed to cancel notification, continuing with timer cancellation',
-            e,
-            stack,
-          );
-        }
+        await _notificationService.cancelNotification(timer.notificationId!);
       }
 
       // Delete timer from database
       await _repository.cancelTimer(timerId);
-
-      AppLogger.info('Cancelled timer $timerId');
     } catch (e, stack) {
       AppLogger.error('Failed to cancel timer', e, stack);
       state = AsyncValue.error(e, stack);

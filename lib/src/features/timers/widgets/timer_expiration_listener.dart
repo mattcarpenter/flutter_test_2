@@ -51,8 +51,12 @@ class _TimerExpirationListenerState
     final currentActiveIds =
         timers.where((t) => t.isActive).map((t) => t.id).toSet();
 
+    // Find timers that became active again (extended) - clear from notified set
+    // so they can trigger the modal again when they expire
+    final reactivatedIds = currentActiveIds.difference(_previousActiveIds);
+    _notifiedTimerIds.removeAll(reactivatedIds);
+
     // Find timers that were active but are now expired
-    // (they're in the previous set but not in the current active set)
     final expiredIds = _previousActiveIds.difference(currentActiveIds);
 
     // Get the expired timers that we haven't notified about yet
