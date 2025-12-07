@@ -30,6 +30,9 @@ class _TimerExpirationListenerState
   /// Track previous active timer IDs to detect transitions
   Set<String> _previousActiveIds = {};
 
+  /// Whether a modal is currently being shown
+  bool _isModalShowing = false;
+
   @override
   Widget build(BuildContext context) {
     // Listen for changes and detect expirations
@@ -60,13 +63,17 @@ class _TimerExpirationListenerState
     final expiredIds = _previousActiveIds.difference(currentActiveIds);
 
     // Get the expired timers that we haven't notified about yet
-    final timersToNotify = timers.where(
-        (t) => expiredIds.contains(t.id) && !_notifiedTimerIds.contains(t.id));
+    final timersToNotify = timers
+        .where(
+            (t) => expiredIds.contains(t.id) && !_notifiedTimerIds.contains(t.id))
+        .toList();
 
-    // Show modal for each newly expired timer
-    for (final timer in timersToNotify) {
-      _notifiedTimerIds.add(timer.id);
-      _showExpirationModal(timer);
+    // Show modal for all newly expired timers (batched)
+    if (timersToNotify.isNotEmpty && !_isModalShowing) {
+      for (final timer in timersToNotify) {
+        _notifiedTimerIds.add(timer.id);
+      }
+      _showExpirationModal(timersToNotify);
     }
 
     // Update previous active IDs for next comparison
@@ -77,8 +84,7 @@ class _TimerExpirationListenerState
     _notifiedTimerIds.removeWhere((id) => !allTimerIds.contains(id));
   }
 
-  void _showExpirationModal(TimerEntry timer) {
-    // Get the global navigator context
+  void _showExpirationModal(List<TimerEntry> timers) {
     final navigatorContext = globalRootNavigatorKey.currentContext;
     if (navigatorContext == null) {
       AppLogger.warning(
@@ -88,13 +94,17 @@ class _TimerExpirationListenerState
     }
 
     AppLogger.info(
-      'Timer expired: "${timer.recipeName}" step ${timer.stepNumber}',
+      'Timers expired: ${timers.map((t) => '"${t.recipeName}" step ${t.stepNumber}').join(', ')}',
     );
 
-    // Show the modal
+    _isModalShowing = true;
+
+    // Show the modal with all expired timers
     showTimerExpiredModal(
       navigatorContext,
-      timer: timer,
-    );
+      timers: timers,
+    ).then((_) {
+      _isModalShowing = false;
+    });
   }
 }
