@@ -52,19 +52,23 @@ class _GlobalStatusBarWrapperState extends ConsumerState<GlobalStatusBarWrapper>
 
     // Content heights for collapsed/expanded states
     const collapsedContentHeight = 22.0;
-    // Expanded height: header(22) + gap(8) + buttons(28) + bottomMargin(10) = 68 for first cook
-    // Each additional cook: gap(12) + header(22) + gap(8) + buttons(28) = 70, plus extra 6px bottom margin
-    const firstCookExpandedHeight = 68.0;
+    // Cook heights (without bottom margin - added separately)
+    // First cook: header(22) + gap(8) + buttons(28) = 58
+    // Each additional cook: gap(12) + header(22) + gap(8) + buttons(28) = 70
+    const firstCookHeight = 58.0;
     const additionalCookHeight = 70.0;
     const extraBottomMarginForMultipleCooks = 6.0;
-    // Timer expanded height: header(22) + gap(8) + timer item(28) = 58 for first timer
+    // Timer heights (without bottom margin - added separately)
+    // First timer section: header(22) + gap(8) + timer item(28) = 58
     // Each additional timer: gap(8) + timer item(28) = 36
-    const firstTimerExpandedHeight = 58.0;
+    const firstTimerHeight = 58.0;
     const additionalTimerHeight = 36.0;
+    // Bottom margin (added once at the end)
+    const bottomMargin = 10.0;
 
     double expandedContentHeight = collapsedContentHeight;
     if (activeCooks.isNotEmpty) {
-      expandedContentHeight = firstCookExpandedHeight
+      expandedContentHeight = firstCookHeight
           + (activeCooks.length - 1) * additionalCookHeight
           + (activeCooks.length > 1 ? extraBottomMarginForMultipleCooks : 0);
     }
@@ -75,9 +79,12 @@ class _GlobalStatusBarWrapperState extends ConsumerState<GlobalStatusBarWrapper>
         expandedContentHeight += 16; // Gap before timer section
       }
       // When no cooks, keep the base collapsedContentHeight (22) for the header row
-      expandedContentHeight += firstTimerExpandedHeight
-          + (activeTimers.length - 1) * additionalTimerHeight
-          + 10; // Bottom margin
+      expandedContentHeight += firstTimerHeight
+          + (activeTimers.length - 1) * additionalTimerHeight;
+    }
+    // Add bottom margin once (for any expanded content)
+    if (activeCooks.isNotEmpty || activeTimers.isNotEmpty) {
+      expandedContentHeight += bottomMargin;
     }
 
     final statusBarColor = AppColorSwatches.primary[500]!;
@@ -777,6 +784,8 @@ class _TimerMenuButton extends ConsumerWidget {
             },
             child: const Text('Extend 5 min'),
           ),
+          // Divider
+          const _ActionSheetDivider(),
           CupertinoActionSheetAction(
             onPressed: () {
               Navigator.of(sheetContext).pop();
@@ -802,6 +811,8 @@ class _TimerMenuButton extends ConsumerWidget {
             },
             child: const Text('View Recipe'),
           ),
+          // Divider
+          const _ActionSheetDivider(),
           CupertinoActionSheetAction(
             isDestructiveAction: true,
             onPressed: () async {
@@ -869,6 +880,21 @@ class _TimerMenuButton extends ConsumerWidget {
           ),
         ),
       ),
+    );
+  }
+}
+
+/// A visual divider for CupertinoActionSheet to separate groups of actions.
+/// Uses the same separator color as the built-in action dividers.
+class _ActionSheetDivider extends StatelessWidget {
+  const _ActionSheetDivider();
+
+  @override
+  Widget build(BuildContext context) {
+    // Use opaqueSeparator which is the same color used between action sheet items
+    return Container(
+      height: 8,
+      color: CupertinoColors.opaqueSeparator.resolveFrom(context),
     );
   }
 }
