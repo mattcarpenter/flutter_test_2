@@ -697,29 +697,33 @@ class _TimerItem extends ConsumerWidget {
 
     return Padding(
       padding: const EdgeInsets.only(left: 22), // Align with header text
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: [
-          // Timer countdown
-          Text(
-            timer.formattedRemaining,
-            style: timerTextStyle,
-          ),
-          const SizedBox(width: 8),
-          // Recipe name and step
-          Expanded(
-            child: Text(
-              '${timer.recipeName} · Step ${timer.stepDisplay}',
-              style: textStyle.copyWith(fontWeight: FontWeight.w500),
-              overflow: TextOverflow.ellipsis,
-              maxLines: 1,
+      // Constrain width so button doesn't end up far from content on wide screens (iPad)
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(maxWidth: 450),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            // Timer countdown
+            Text(
+              timer.formattedRemaining,
+              style: timerTextStyle,
             ),
-          ),
-          const SizedBox(width: 8),
-          // Menu button (on RIGHT)
-          _TimerMenuButton(timer: timer),
-          const SizedBox(width: 2),
-        ],
+            const SizedBox(width: 8),
+            // Recipe name and step
+            Expanded(
+              child: Text(
+                '${timer.recipeName} · Step ${timer.stepDisplay}',
+                style: textStyle.copyWith(fontWeight: FontWeight.w500),
+                overflow: TextOverflow.ellipsis,
+                maxLines: 1,
+              ),
+            ),
+            const SizedBox(width: 8),
+            // Menu button (on RIGHT)
+            _TimerMenuButton(timer: timer),
+            const SizedBox(width: 2),
+          ],
+        ),
       ),
     );
   }
