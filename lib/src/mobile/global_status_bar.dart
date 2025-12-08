@@ -4,7 +4,6 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:pull_down_button/pull_down_button.dart';
 
 import '../../database/database.dart';
 import '../../database/models/timers.dart';
@@ -34,6 +33,9 @@ class GlobalStatusBarWrapper extends ConsumerStatefulWidget {
 
 class _GlobalStatusBarWrapperState extends ConsumerState<GlobalStatusBarWrapper> {
   void _toggleExpand() {
+    // Dismiss any open timer action sheet first
+    _TimerMenuButton.dismissSheet();
+
     ref.read(statusBarExpandedProvider.notifier).state =
         !ref.read(statusBarExpandedProvider);
   }
@@ -71,9 +73,8 @@ class _GlobalStatusBarWrapperState extends ConsumerState<GlobalStatusBarWrapper>
       // Add separator if we have cooks
       if (activeCooks.isNotEmpty) {
         expandedContentHeight += 16; // Gap before timer section
-      } else {
-        expandedContentHeight = 0; // Reset if no cooks
       }
+      // When no cooks, keep the base collapsedContentHeight (22) for the header row
       expandedContentHeight += firstTimerExpandedHeight
           + (activeTimers.length - 1) * additionalTimerHeight
           + 10; // Bottom margin
@@ -581,18 +582,28 @@ class _TimerStatusDisplay extends StatelessWidget {
       fontWeight: FontWeight.w600,
     );
 
+    // Tabular figures make all digits equal width, preventing layout shift
+    final timerTextStyle = textStyle.copyWith(
+      fontFeatures: [const FontFeature.tabularFigures()],
+    );
+
     return Row(
       mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.center,
       children: [
-        const Icon(
-          CupertinoIcons.timer,
-          color: Colors.white,
-          size: 16,
+        // Offset icon down slightly to align with text baseline
+        Padding(
+          padding: const EdgeInsets.only(top: 1),
+          child: const Icon(
+            CupertinoIcons.timer,
+            color: Colors.white,
+            size: 16,
+          ),
         ),
         const SizedBox(width: 6),
         Text(
           timer.formattedRemaining,
-          style: textStyle,
+          style: timerTextStyle,
         ),
         if (totalTimers > 1) ...[
           const SizedBox(width: 4),
@@ -628,11 +639,16 @@ class _TimerSection extends ConsumerWidget {
       children: [
         // Section header
         Row(
+          crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            const Icon(
-              CupertinoIcons.timer,
-              color: Colors.white,
-              size: 16,
+            // Offset icon down slightly to align with text baseline
+            Padding(
+              padding: const EdgeInsets.only(top: 1),
+              child: const Icon(
+                CupertinoIcons.timer,
+                color: Colors.white,
+                size: 16,
+              ),
             ),
             const SizedBox(width: 6),
             Text(
@@ -652,7 +668,7 @@ class _TimerSection extends ConsumerWidget {
   }
 }
 
-/// Individual timer item with pull-down menu.
+/// Individual timer item with action menu.
 class _TimerItem extends ConsumerWidget {
   final TimerEntry timer;
 
@@ -665,17 +681,22 @@ class _TimerItem extends ConsumerWidget {
       fontWeight: FontWeight.w600,
     );
 
+    // Tabular figures make all digits equal width, preventing layout shift
+    final timerTextStyle = textStyle.copyWith(
+      fontWeight: FontWeight.w700,
+      fontSize: 14,
+      fontFeatures: [const FontFeature.tabularFigures()],
+    );
+
     return Padding(
       padding: const EdgeInsets.only(left: 22), // Align with header text
       child: Row(
+        crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           // Timer countdown
           Text(
             timer.formattedRemaining,
-            style: textStyle.copyWith(
-              fontWeight: FontWeight.w700,
-              fontSize: 14,
-            ),
+            style: timerTextStyle,
           ),
           const SizedBox(width: 8),
           // Recipe name and step
@@ -688,55 +709,77 @@ class _TimerItem extends ConsumerWidget {
             ),
           ),
           const SizedBox(width: 8),
-          // Pull-down menu button
+          // Menu button (on RIGHT)
           _TimerMenuButton(timer: timer),
+          const SizedBox(width: 2),
         ],
       ),
     );
   }
 }
 
-/// Pull-down menu button for timer actions.
+/// Menu button for timer actions using CupertinoActionSheet.
 class _TimerMenuButton extends ConsumerWidget {
   final TimerEntry timer;
 
   const _TimerMenuButton({required this.timer});
 
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  /// Static flag to track if an action sheet is currently showing.
+  /// Prevents multiple sheets from stacking.
+  static bool _isSheetOpen = false;
+
+  /// Static function to dismiss the currently open sheet.
+  /// Called when status bar is tapped.
+  static void dismissSheet() {
+    if (_isSheetOpen) {
+      final navigatorContext = globalRootNavigatorKey.currentContext;
+      if (navigatorContext != null) {
+        Navigator.of(navigatorContext).pop();
+      }
+      _isSheetOpen = false;
+    }
+  }
+
+  void _showActionSheet(WidgetRef ref) {
+    // Prevent multiple sheets from stacking
+    if (_isSheetOpen) return;
+
+    // Use global navigator context to show the action sheet
+    final navigatorContext = globalRootNavigatorKey.currentContext;
+    if (navigatorContext == null) return;
+
+    _isSheetOpen = true;
     final timerNotifier = ref.read(timerNotifierProvider.notifier);
 
-    return PullDownButton(
-      buttonAnchor: PullDownMenuAnchor.end,
-      itemBuilder: (context) => [
-        PullDownMenuItem(
-          title: 'Extend 1 min',
-          icon: CupertinoIcons.plus,
-          onTap: () async {
-            await timerNotifier.extendTimer(
-              timer.id,
-              const Duration(minutes: 1),
-            );
-          },
-        ),
-        PullDownMenuItem(
-          title: 'Extend 5 min',
-          icon: CupertinoIcons.plus_circle,
-          onTap: () async {
-            await timerNotifier.extendTimer(
-              timer.id,
-              const Duration(minutes: 5),
-            );
-          },
-        ),
-        const PullDownMenuDivider.large(),
-        PullDownMenuItem(
-          title: 'Instructions',
-          icon: CupertinoIcons.list_bullet,
-          onTap: () {
-            // Get navigator context and show cook modal
-            final navigatorContext = globalRootNavigatorKey.currentContext;
-            if (navigatorContext != null) {
+    showCupertinoModalPopup<void>(
+      context: navigatorContext,
+      builder: (sheetContext) => CupertinoActionSheet(
+        title: Text(timer.recipeName),
+        message: Text('Step ${timer.stepDisplay} · ${timer.detectedText}'),
+        actions: [
+          CupertinoActionSheetAction(
+            onPressed: () async {
+              Navigator.of(sheetContext).pop();
+              await timerNotifier.extendTimer(
+                timer.id,
+                const Duration(minutes: 1),
+              );
+            },
+            child: const Text('Extend 1 min'),
+          ),
+          CupertinoActionSheetAction(
+            onPressed: () async {
+              Navigator.of(sheetContext).pop();
+              await timerNotifier.extendTimer(
+                timer.id,
+                const Duration(minutes: 5),
+              );
+            },
+            child: const Text('Extend 5 min'),
+          ),
+          CupertinoActionSheetAction(
+            onPressed: () {
+              Navigator.of(sheetContext).pop();
               // Look for an active cook for this recipe
               final activeCook = ref.read(activeCookForRecipeProvider(timer.recipeId));
               if (activeCook != null) {
@@ -749,65 +792,80 @@ class _TimerMenuButton extends ConsumerWidget {
                 // No active cook - just navigate to recipe
                 GoRouter.of(navigatorContext).push('/recipe/${timer.recipeId}');
               }
-            }
-          },
-        ),
-        PullDownMenuItem(
-          title: 'View Recipe',
-          icon: CupertinoIcons.book,
-          onTap: () {
-            final navigatorContext = globalRootNavigatorKey.currentContext;
-            if (navigatorContext != null) {
+            },
+            child: const Text('Instructions'),
+          ),
+          CupertinoActionSheetAction(
+            onPressed: () {
+              Navigator.of(sheetContext).pop();
               GoRouter.of(navigatorContext).push('/recipe/${timer.recipeId}');
-            }
-          },
-        ),
-        const PullDownMenuDivider.large(),
-        PullDownMenuItem(
-          title: 'Cancel Timer',
-          icon: CupertinoIcons.xmark_circle,
-          isDestructive: true,
-          onTap: () async {
-            // Show confirmation dialog
-            final navigatorContext = globalRootNavigatorKey.currentContext;
-            if (navigatorContext == null) return;
-
-            final confirmed = await showCupertinoDialog<bool>(
-              context: navigatorContext,
-              builder: (context) => CupertinoAlertDialog(
-                title: const Text('Cancel Timer?'),
-                content: Text(
-                  'Cancel the ${timer.detectedText} timer for "${timer.recipeName}"?',
+            },
+            child: const Text('View Recipe'),
+          ),
+          CupertinoActionSheetAction(
+            isDestructiveAction: true,
+            onPressed: () async {
+              Navigator.of(sheetContext).pop();
+              // Show confirmation dialog
+              final confirmed = await showCupertinoDialog<bool>(
+                context: navigatorContext,
+                builder: (dialogContext) => CupertinoAlertDialog(
+                  title: const Text('Cancel Timer?'),
+                  content: Text(
+                    'Cancel the ${timer.detectedText} timer for "${timer.recipeName}"?',
+                  ),
+                  actions: [
+                    CupertinoDialogAction(
+                      onPressed: () => Navigator.of(dialogContext).pop(false),
+                      child: const Text('Keep'),
+                    ),
+                    CupertinoDialogAction(
+                      isDestructiveAction: true,
+                      onPressed: () => Navigator.of(dialogContext).pop(true),
+                      child: const Text('Cancel Timer'),
+                    ),
+                  ],
                 ),
-                actions: [
-                  CupertinoDialogAction(
-                    onPressed: () => Navigator.of(context).pop(false),
-                    child: const Text('Keep'),
-                  ),
-                  CupertinoDialogAction(
-                    isDestructiveAction: true,
-                    onPressed: () => Navigator.of(context).pop(true),
-                    child: const Text('Cancel Timer'),
-                  ),
-                ],
-              ),
-            );
+              );
 
-            if (confirmed == true) {
-              await timerNotifier.cancelTimer(timer.id);
-            }
-          },
+              if (confirmed == true) {
+                await timerNotifier.cancelTimer(timer.id);
+              }
+            },
+            child: const Text('Cancel Timer'),
+          ),
+        ],
+        cancelButton: CupertinoActionSheetAction(
+          onPressed: () => Navigator.of(sheetContext).pop(),
+          child: const Text('Cancel'),
         ),
-      ],
-      buttonBuilder: (context, showMenu) => GestureDetector(
-        onTap: showMenu,
-        behavior: HitTestBehavior.opaque,
-        child: const Padding(
-          padding: EdgeInsets.all(4),
+      ),
+    ).then((_) {
+      _isSheetOpen = false;
+    });
+  }
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    // Outlined style button for use on colored status bar background
+    return GestureDetector(
+      onTap: () => _showActionSheet(ref),
+      behavior: HitTestBehavior.opaque,
+      child: Container(
+        width: 24,
+        height: 24,
+        decoration: BoxDecoration(
+          shape: BoxShape.circle,
+          border: Border.all(
+            color: Colors.white.withValues(alpha: 0.6),
+            width: 1.5,
+          ),
+        ),
+        child: const Center(
           child: Icon(
             CupertinoIcons.ellipsis,
             color: Colors.white,
-            size: 16,
+            size: 14,
           ),
         ),
       ),
