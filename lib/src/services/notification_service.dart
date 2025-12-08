@@ -369,6 +369,7 @@ class NotificationService {
       importance: Importance.high,
       priority: Priority.high,
       playSound: true,
+      sound: RawResourceAndroidNotificationSound('alarm'),
       enableVibration: true,
       category: AndroidNotificationCategory.alarm,
       audioAttributesUsage: AudioAttributesUsage.alarm,
@@ -399,6 +400,7 @@ class NotificationService {
       presentAlert: true,
       presentBadge: true,
       presentSound: true,
+      sound: 'alarm.caf',
       interruptionLevel: InterruptionLevel.timeSensitive,
     );
 
@@ -406,6 +408,7 @@ class NotificationService {
       presentAlert: true,
       presentBadge: true,
       presentSound: true,
+      sound: 'alarm.caf',
       interruptionLevel: InterruptionLevel.timeSensitive,
     );
 

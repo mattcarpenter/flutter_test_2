@@ -95,6 +95,7 @@ dependencies:
   timezone: ^0.9.4
   flutter_timezone: ^3.0.1
   app_settings: ^5.1.1
+  just_audio: ^0.9.42
 
 dev_dependencies:
   flutter_test:
@@ -151,3 +152,4 @@ flutter:
     - assets/docs/quick-questions/
     - assets/docs/learn-more/
     - assets/docs/troubleshooting/
+    - assets/audio/

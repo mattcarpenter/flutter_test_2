@@ -6,16 +6,24 @@ import 'package:wolt_modal_sheet/wolt_modal_sheet.dart';
 import '../../../../database/database.dart';
 import '../../../../database/models/timers.dart';
 import '../../../providers/timer_provider.dart';
+import '../../../services/alarm_audio_service.dart';
 import '../../../theme/colors.dart';
 import '../../../theme/spacing.dart';
 import '../../../theme/typography.dart';
 import '../../../widgets/app_button.dart';
 
 /// Shows a modal when timer(s) expire, offering options to extend or dismiss.
+///
+/// Plays an alarm sound on loop while the modal is displayed.
+/// The sound stops when the modal is dismissed by any means.
 Future<void> showTimerExpiredModal(
   BuildContext context, {
   required List<TimerEntry> timers,
 }) {
+  // Start alarm audio (fire and forget - don't block modal display)
+  AlarmAudioService.instance.playLooping();
+
+  // Show modal and stop audio when it closes (for any reason)
   return WoltModalSheet.show<void>(
     useRootNavigator: true,
     context: context,
@@ -23,7 +31,9 @@ Future<void> showTimerExpiredModal(
     pageListBuilder: (modalContext) => [
       _buildPage(context: modalContext, timers: timers),
     ],
-  );
+  ).then((_) {
+    AlarmAudioService.instance.stop();
+  });
 }
 
 WoltModalSheetPage _buildPage({
@@ -65,8 +75,13 @@ class _TimerExpiredContentState extends ConsumerState<_TimerExpiredContent> {
     });
     // If no timers left, close the modal
     if (_timers.isEmpty && mounted) {
-      Navigator.of(context).pop();
+      _dismissModal();
     }
+  }
+
+  void _dismissModal() {
+    AlarmAudioService.instance.stop();
+    Navigator.of(context).pop();
   }
 
   @override
@@ -113,7 +128,7 @@ class _TimerExpiredContentState extends ConsumerState<_TimerExpiredContent> {
             size: AppButtonSize.large,
             shape: AppButtonShape.square,
             fullWidth: true,
-            onPressed: () => Navigator.of(context).pop(),
+            onPressed: _dismissModal,
           ),
         ],
       ),
