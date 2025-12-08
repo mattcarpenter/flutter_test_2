@@ -12,6 +12,12 @@ import 'timer_expired_modal.dart';
 ///
 /// Place this widget high in the widget tree (e.g., in the app wrapper)
 /// to detect timer expirations globally.
+///
+/// This listener only detects when timers transition from active to expired.
+/// The modal itself watches the timer provider directly and handles:
+/// - Displaying all currently expired timers
+/// - Updating when new timers expire while the modal is open
+/// - Tracking which timers the user has dismissed
 class TimerExpirationListener extends ConsumerStatefulWidget {
   final Widget child;
 
@@ -24,9 +30,6 @@ class TimerExpirationListener extends ConsumerStatefulWidget {
 
 class _TimerExpirationListenerState
     extends ConsumerState<TimerExpirationListener> {
-  /// Track timers we've already shown the modal for
-  final Set<String> _notifiedTimerIds = {};
-
   /// Track previous active timer IDs to detect transitions
   Set<String> _previousActiveIds = {};
 
@@ -54,37 +57,20 @@ class _TimerExpirationListenerState
     final currentActiveIds =
         timers.where((t) => t.isActive).map((t) => t.id).toSet();
 
-    // Find timers that became active again (extended) - clear from notified set
-    // so they can trigger the modal again when they expire
-    final reactivatedIds = currentActiveIds.difference(_previousActiveIds);
-    _notifiedTimerIds.removeAll(reactivatedIds);
-
-    // Find timers that were active but are now expired
-    final expiredIds = _previousActiveIds.difference(currentActiveIds);
-
-    // Get the expired timers that we haven't notified about yet
-    final timersToNotify = timers
-        .where(
-            (t) => expiredIds.contains(t.id) && !_notifiedTimerIds.contains(t.id))
-        .toList();
-
-    // Show modal for all newly expired timers (batched)
-    if (timersToNotify.isNotEmpty && !_isModalShowing) {
-      for (final timer in timersToNotify) {
-        _notifiedTimerIds.add(timer.id);
-      }
-      _showExpirationModal(timersToNotify);
-    }
+    // Find timers that were active but are now expired (just transitioned)
+    final newlyExpiredIds = _previousActiveIds.difference(currentActiveIds);
 
     // Update previous active IDs for next comparison
     _previousActiveIds = currentActiveIds;
 
-    // Clean up old notified IDs (remove IDs that are no longer in the timer list)
-    final allTimerIds = timers.map((t) => t.id).toSet();
-    _notifiedTimerIds.removeWhere((id) => !allTimerIds.contains(id));
+    // If any timer just expired and no modal is showing, open the modal
+    // The modal watches the provider and will show ALL currently expired timers
+    if (newlyExpiredIds.isNotEmpty && !_isModalShowing) {
+      _showExpirationModal();
+    }
   }
 
-  void _showExpirationModal(List<TimerEntry> timers) {
+  void _showExpirationModal() {
     final navigatorContext = globalRootNavigatorKey.currentContext;
     if (navigatorContext == null) {
       AppLogger.warning(
@@ -93,17 +79,12 @@ class _TimerExpirationListenerState
       return;
     }
 
-    AppLogger.info(
-      'Timers expired: ${timers.map((t) => '"${t.recipeName}" step ${t.stepNumber}').join(', ')}',
-    );
+    AppLogger.info('Timer expired, showing expiration modal');
 
     _isModalShowing = true;
 
-    // Show the modal with all expired timers
-    showTimerExpiredModal(
-      navigatorContext,
-      timers: timers,
-    ).then((_) {
+    // Show the modal - it watches the provider directly for all expired timers
+    showTimerExpiredModal(navigatorContext).then((_) {
       _isModalShowing = false;
     });
   }

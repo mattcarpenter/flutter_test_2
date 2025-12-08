@@ -14,12 +14,12 @@ import '../../../widgets/app_button.dart';
 
 /// Shows a modal when timer(s) expire, offering options to extend or dismiss.
 ///
+/// The modal watches the timer provider directly and automatically updates
+/// when new timers expire while the modal is open.
+///
 /// Plays an alarm sound on loop while the modal is displayed.
 /// The sound stops when the modal is dismissed by any means.
-Future<void> showTimerExpiredModal(
-  BuildContext context, {
-  required List<TimerEntry> timers,
-}) {
+Future<void> showTimerExpiredModal(BuildContext context) {
   // Start alarm audio (fire and forget - don't block modal display)
   AlarmAudioService.instance.playLooping();
 
@@ -29,31 +29,28 @@ Future<void> showTimerExpiredModal(
     context: context,
     modalTypeBuilder: (_) => WoltModalType.alertDialog(),
     pageListBuilder: (modalContext) => [
-      _buildPage(context: modalContext, timers: timers),
+      _buildPage(context: modalContext),
     ],
   ).then((_) {
     AlarmAudioService.instance.stop();
   });
 }
 
-WoltModalSheetPage _buildPage({
-  required BuildContext context,
-  required List<TimerEntry> timers,
-}) {
+WoltModalSheetPage _buildPage({required BuildContext context}) {
   return WoltModalSheetPage(
     navBarHeight: 0,
     backgroundColor: AppColors.of(context).background,
     surfaceTintColor: Colors.transparent,
     hasTopBarLayer: false,
     isTopBarLayerAlwaysVisible: false,
-    child: _TimerExpiredContent(timers: timers),
+    child: const _TimerExpiredContent(),
   );
 }
 
+/// Content widget that watches timer provider directly.
+/// Automatically updates when new timers expire.
 class _TimerExpiredContent extends ConsumerStatefulWidget {
-  final List<TimerEntry> timers;
-
-  const _TimerExpiredContent({required this.timers});
+  const _TimerExpiredContent();
 
   @override
   ConsumerState<_TimerExpiredContent> createState() =>
@@ -61,22 +58,14 @@ class _TimerExpiredContent extends ConsumerStatefulWidget {
 }
 
 class _TimerExpiredContentState extends ConsumerState<_TimerExpiredContent> {
-  late List<TimerEntry> _timers;
+  /// Track timer IDs that user has explicitly dismissed.
+  /// These won't reappear even if they're still expired in the provider.
+  final Set<String> _dismissedIds = {};
 
-  @override
-  void initState() {
-    super.initState();
-    _timers = List.from(widget.timers);
-  }
-
-  void _removeTimer(String timerId) {
+  void _dismissTimer(String timerId) {
     setState(() {
-      _timers.removeWhere((t) => t.id == timerId);
+      _dismissedIds.add(timerId);
     });
-    // If no timers left, close the modal
-    if (_timers.isEmpty && mounted) {
-      _dismissModal();
-    }
   }
 
   void _dismissModal() {
@@ -88,7 +77,26 @@ class _TimerExpiredContentState extends ConsumerState<_TimerExpiredContent> {
   Widget build(BuildContext context) {
     final colors = AppColors.of(context);
     final timerNotifier = ref.read(timerNotifierProvider.notifier);
-    final isSingle = _timers.length == 1;
+
+    // Watch all timers and filter for expired ones not dismissed by user
+    final allTimers = ref.watch(timerNotifierProvider).valueOrNull ?? [];
+    final expiredTimers = allTimers
+        .where((t) => t.isExpired && !_dismissedIds.contains(t.id))
+        .toList();
+
+    // If no expired timers to show, close the modal
+    if (expiredTimers.isEmpty) {
+      // Use post-frame callback to avoid calling setState during build
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) {
+          _dismissModal();
+        }
+      });
+      // Return empty container while closing
+      return const SizedBox.shrink();
+    }
+
+    final isSingle = expiredTimers.length == 1;
 
     return Padding(
       padding: EdgeInsets.all(AppSpacing.lg),
@@ -98,7 +106,7 @@ class _TimerExpiredContentState extends ConsumerState<_TimerExpiredContent> {
         children: [
           // Header
           Text(
-            isSingle ? 'Timer Complete' : '${_timers.length} Timers Complete',
+            isSingle ? 'Timer Complete' : '${expiredTimers.length} Timers Complete',
             style: AppTypography.h4.copyWith(
               color: colors.textPrimary,
             ),
@@ -107,16 +115,16 @@ class _TimerExpiredContentState extends ConsumerState<_TimerExpiredContent> {
           SizedBox(height: AppSpacing.lg),
 
           // Timer cards
-          ..._timers.map((timer) => Padding(
+          ...expiredTimers.map((timer) => Padding(
                 padding: EdgeInsets.only(bottom: AppSpacing.md),
                 child: _TimerCard(
                   timer: timer,
                   showDismissButton: !isSingle,
                   onExtend: (duration) async {
+                    // Extending makes timer active again, it will disappear from list
                     await timerNotifier.extendTimer(timer.id, duration);
-                    _removeTimer(timer.id);
                   },
-                  onDismiss: () => _removeTimer(timer.id),
+                  onDismiss: () => _dismissTimer(timer.id),
                 ),
               )),
 
@@ -182,24 +190,26 @@ class _TimerCard extends StatelessWidget {
           SizedBox(height: AppSpacing.md),
 
           // Action buttons
-          Row(
+          Wrap(
+            spacing: AppSpacing.sm,
+            runSpacing: AppSpacing.sm,
+            crossAxisAlignment: WrapCrossAlignment.center,
             children: [
               _ExtendButton(
                 label: '+1 min',
                 onPressed: () => onExtend(const Duration(minutes: 1)),
               ),
-              SizedBox(width: AppSpacing.sm),
               _ExtendButton(
                 label: '+5 min',
                 onPressed: () => onExtend(const Duration(minutes: 5)),
               ),
-              if (showDismissButton) ...[
-                const Spacer(),
+              if (showDismissButton)
                 CupertinoButton(
                   padding: EdgeInsets.symmetric(
                     horizontal: AppSpacing.md,
                     vertical: AppSpacing.sm,
                   ),
+                  minimumSize: Size.zero,
                   onPressed: onDismiss,
                   child: Text(
                     'Dismiss',
@@ -208,7 +218,6 @@ class _TimerCard extends StatelessWidget {
                     ),
                   ),
                 ),
-              ],
             ],
           ),
         ],
