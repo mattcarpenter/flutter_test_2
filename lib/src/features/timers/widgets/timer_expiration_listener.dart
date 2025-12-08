@@ -57,15 +57,22 @@ class _TimerExpirationListenerState
     final currentActiveIds =
         timers.where((t) => t.isActive).map((t) => t.id).toSet();
 
-    // Find timers that were active but are now expired (just transitioned)
-    final newlyExpiredIds = _previousActiveIds.difference(currentActiveIds);
+    // Find timer IDs that were active but are no longer active
+    final noLongerActiveIds = _previousActiveIds.difference(currentActiveIds);
 
     // Update previous active IDs for next comparison
     _previousActiveIds = currentActiveIds;
 
-    // If any timer just expired and no modal is showing, open the modal
-    // The modal watches the provider and will show ALL currently expired timers
-    if (newlyExpiredIds.isNotEmpty && !_isModalShowing) {
+    // Check if any of those timers actually expired (vs being cancelled/deleted)
+    // A cancelled timer is removed from the list entirely
+    // An expired timer still exists but with isExpired = true
+    final actuallyExpired = noLongerActiveIds.any((id) {
+      final timer = timers.where((t) => t.id == id).firstOrNull;
+      return timer != null && timer.isExpired;
+    });
+
+    // Only show modal if at least one timer actually expired
+    if (actuallyExpired && !_isModalShowing) {
       _showExpirationModal();
     }
   }

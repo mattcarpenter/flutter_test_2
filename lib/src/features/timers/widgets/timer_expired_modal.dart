@@ -59,16 +59,35 @@ class _TimerExpiredContent extends ConsumerStatefulWidget {
 
 class _TimerExpiredContentState extends ConsumerState<_TimerExpiredContent> {
   /// Track timer IDs that user has explicitly dismissed.
-  /// These won't reappear even if they're still expired in the provider.
+  /// Used for immediate UI feedback while deletion happens async.
   final Set<String> _dismissedIds = {};
 
+  /// Track IDs of timers currently shown, for deletion on dismiss all.
+  List<String> _currentExpiredIds = [];
+
+  /// Prevent double-pop when dismissing triggers provider update
+  bool _isClosing = false;
+
   void _dismissTimer(String timerId) {
+    // Update UI immediately
     setState(() {
       _dismissedIds.add(timerId);
     });
+    // Delete from database
+    ref.read(timerNotifierProvider.notifier).cancelTimer(timerId);
   }
 
   void _dismissModal() {
+    if (_isClosing) return;
+    _isClosing = true;
+
+    // Delete all currently shown expired timers
+    final timerNotifier = ref.read(timerNotifierProvider.notifier);
+    for (final id in _currentExpiredIds) {
+      if (!_dismissedIds.contains(id)) {
+        timerNotifier.cancelTimer(id);
+      }
+    }
     AlarmAudioService.instance.stop();
     Navigator.of(context).pop();
   }
@@ -83,6 +102,9 @@ class _TimerExpiredContentState extends ConsumerState<_TimerExpiredContent> {
     final expiredTimers = allTimers
         .where((t) => t.isExpired && !_dismissedIds.contains(t.id))
         .toList();
+
+    // Track current expired IDs for dismiss all
+    _currentExpiredIds = expiredTimers.map((t) => t.id).toList();
 
     // If no expired timers to show, close the modal
     if (expiredTimers.isEmpty) {
