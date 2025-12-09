@@ -29,12 +29,51 @@ class TimerExpirationListener extends ConsumerStatefulWidget {
 }
 
 class _TimerExpirationListenerState
-    extends ConsumerState<TimerExpirationListener> {
+    extends ConsumerState<TimerExpirationListener> with WidgetsBindingObserver {
   /// Track previous active timer IDs to detect transitions
   Set<String> _previousActiveIds = {};
 
   /// Whether a modal is currently being shown
   bool _isModalShowing = false;
+
+  /// Track app lifecycle state to avoid playing audio when backgrounded
+  AppLifecycleState _lifecycleState = AppLifecycleState.resumed;
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addObserver(this);
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    final wasBackgrounded = _lifecycleState != AppLifecycleState.resumed;
+    _lifecycleState = state;
+
+    // When app returns to foreground, check for any expired timers
+    // that fired while we were backgrounded
+    if (wasBackgrounded && state == AppLifecycleState.resumed) {
+      _checkForExpiredTimersOnResume();
+    }
+  }
+
+  /// Check for expired timers when app returns to foreground.
+  /// Shows the modal if there are expired timers that weren't shown while backgrounded.
+  void _checkForExpiredTimersOnResume() {
+    final timers = ref.read(timerNotifierProvider).valueOrNull;
+    if (timers == null) return;
+
+    final hasExpiredTimers = timers.any((t) => t.isExpired);
+    if (hasExpiredTimers && !_isModalShowing) {
+      _showExpirationModal();
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -78,6 +117,15 @@ class _TimerExpirationListenerState
   }
 
   void _showExpirationModal() {
+    // Don't show modal or play in-app audio when app is backgrounded.
+    // The system notification handles alerting the user in that case.
+    if (_lifecycleState != AppLifecycleState.resumed) {
+      AppLogger.debug(
+        'Timer expired but app is backgrounded - relying on system notification',
+      );
+      return;
+    }
+
     final navigatorContext = globalRootNavigatorKey.currentContext;
     if (navigatorContext == null) {
       AppLogger.warning(
