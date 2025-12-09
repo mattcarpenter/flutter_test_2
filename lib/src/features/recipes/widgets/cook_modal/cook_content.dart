@@ -700,25 +700,28 @@ class _CookStepDisplayState extends State<CookStepDisplay>
   }
 
   /// Build the step text with duration detection and timer support
-  Widget _buildStepTextContent(String text, Key? key) {
+  Widget _buildStepTextContent(String text, Key? key, {bool enableTap = true}) {
     return RecipeTextRenderer(
       key: key,
       text: text,
       baseStyle: widget.style,
+      textAlign: TextAlign.center,
       enableRecipeLinks: false, // Don't link recipes in cook modal
       enableDurationLinks: true,
-      onDurationTap: (duration, detectedText) {
-        showStartTimerDialog(
-          context,
-          recipeId: widget.recipeId,
-          recipeName: widget.recipeName,
-          stepId: widget.stepId,
-          stepNumber: widget.displayStepNumber,
-          totalSteps: widget.totalSteps,
-          duration: duration,
-          detectedText: detectedText,
-        );
-      },
+      onDurationTap: enableTap
+          ? (duration, detectedText) {
+              showStartTimerDialog(
+                context,
+                recipeId: widget.recipeId,
+                recipeName: widget.recipeName,
+                stepId: widget.stepId,
+                stepNumber: widget.displayStepNumber,
+                totalSteps: widget.totalSteps,
+                duration: duration,
+                detectedText: detectedText,
+              );
+            }
+          : null,
     );
   }
 
@@ -799,11 +802,10 @@ class _CookStepDisplayState extends State<CookStepDisplay>
             curve: const Interval(0.0, 0.5, curve: Curves.easeInCubic),
           ),
         ),
-        child: Text(
+        child: _buildStepTextContent(
           _previousStepText!,
-          key: ValueKey(_previousKey),
-          style: widget.style,
-          textAlign: TextAlign.center,
+          ValueKey(_previousKey),
+          enableTap: false, // Not tappable during exit animation
         ),
       ),
     );
@@ -835,11 +837,10 @@ class _CookStepDisplayState extends State<CookStepDisplay>
             curve: const Interval(0.3, 1.0, curve: Curves.easeOut),
           ),
         ),
-        child: Text(
+        child: _buildStepTextContent(
           widget.stepText,
-          key: ValueKey('${widget.cookId}-${widget.stepIndex}'),
-          style: widget.style,
-          textAlign: TextAlign.center,
+          ValueKey('${widget.cookId}-${widget.stepIndex}'),
+          enableTap: true, // Fully interactive on enter
         ),
       ),
     );
@@ -861,11 +862,10 @@ class _CookStepDisplayState extends State<CookStepDisplay>
             curve: const Interval(0.0, 0.5, curve: Curves.easeOut),
           ),
         ),
-        child: Text(
+        child: _buildStepTextContent(
           _previousStepText!,
-          key: ValueKey(_previousKey),
-          style: widget.style,
-          textAlign: TextAlign.center,
+          ValueKey(_previousKey),
+          enableTap: false, // Not tappable during exit animation
         ),
       ),
     );
@@ -887,11 +887,10 @@ class _CookStepDisplayState extends State<CookStepDisplay>
             curve: const Interval(0.3, 1.0, curve: Curves.easeIn),
           ),
         ),
-        child: Text(
+        child: _buildStepTextContent(
           widget.stepText,
-          key: ValueKey('${widget.cookId}-${widget.stepIndex}'),
-          style: widget.style,
-          textAlign: TextAlign.center,
+          ValueKey('${widget.cookId}-${widget.stepIndex}'),
+          enableTap: true, // Fully interactive on enter
         ),
       ),
     );

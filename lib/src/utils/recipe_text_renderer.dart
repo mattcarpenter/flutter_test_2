@@ -43,6 +43,9 @@ class RecipeTextRenderer extends ConsumerStatefulWidget {
   /// Only called when [enableDurationLinks] is true.
   final DurationTapCallback? onDurationTap;
 
+  /// Text alignment for the rendered text.
+  final TextAlign? textAlign;
+
   const RecipeTextRenderer({
     super.key,
     required this.text,
@@ -50,6 +53,7 @@ class RecipeTextRenderer extends ConsumerStatefulWidget {
     this.enableRecipeLinks = false,
     this.enableDurationLinks = false,
     this.onDurationTap,
+    this.textAlign,
   });
 
   @override
@@ -93,6 +97,7 @@ class _RecipeTextRendererState extends ConsumerState<RecipeTextRenderer> {
 
     return Text.rich(
       TextSpan(children: spans),
+      textAlign: widget.textAlign,
     );
   }
 
@@ -178,21 +183,30 @@ class _RecipeTextRendererState extends ConsumerState<RecipeTextRenderer> {
     _ParsedToken token,
     AppColors colors,
   ) {
-    if (!widget.enableDurationLinks || widget.onDurationTap == null) {
-      // Duration links disabled - render as plain text
+    if (!widget.enableDurationLinks) {
+      // Duration links disabled entirely - render as plain text
       return TextSpan(text: token.content, style: widget.baseStyle);
     }
 
+    // Duration links enabled - render with highlight styling
+    final highlightedStyle = widget.baseStyle.copyWith(
+      color: Theme.of(context).primaryColor,
+      fontWeight: FontWeight.w500,
+    );
+
+    if (widget.onDurationTap == null) {
+      // No tap handler - render styled but not tappable (for animations)
+      return TextSpan(text: token.content, style: highlightedStyle);
+    }
+
+    // Full interactive version
     final recognizer = TapGestureRecognizer()
       ..onTap = () => widget.onDurationTap!(token.duration!, token.content);
     _recognizers.add(recognizer);
 
     return TextSpan(
       text: token.content,
-      style: widget.baseStyle.copyWith(
-        color: Theme.of(context).primaryColor,
-        fontWeight: FontWeight.w500,
-      ),
+      style: highlightedStyle,
       recognizer: recognizer,
     );
   }
