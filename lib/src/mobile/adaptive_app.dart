@@ -31,7 +31,7 @@ import '../features/settings/views/show_folders_page.dart';
 import '../features/settings/views/sort_folders_page.dart';
 import '../features/settings/views/recipe_font_size_page.dart';
 import '../features/settings/views/account_page.dart';
-import '../features/settings/views/placeholder_page.dart';
+import '../features/settings/views/acknowledgements_page.dart';
 import '../features/import_export/views/import_page.dart';
 import '../features/import_export/views/export_page.dart';
 import '../features/import_export/views/import_preview_page.dart';
