@@ -3,8 +3,11 @@ import 'dart:io';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
+import '../../../managers/upload_queue_manager.dart';
 import '../../../mobile/utils/adaptive_sliver_page.dart';
+import '../../../providers/household_provider.dart';
 import '../../../repositories/recipe_folder_repository.dart';
 import '../../../repositories/recipe_repository.dart';
 import '../../../repositories/recipe_tag_repository.dart';
@@ -191,6 +194,10 @@ class _ImportPreviewPageState extends ConsumerState<ImportPreviewPage> {
     try {
       AppLogger.info('Starting import of ${_preview!.recipeCount} recipes');
 
+      // Get auth context for proper data ownership
+      final userId = Supabase.instance.client.auth.currentUser?.id;
+      final householdId = ref.read(householdNotifierProvider).currentHousehold?.id;
+
       final importService = ImportService(
         recipeRepository: ref.read(recipeRepositoryProvider),
         tagRepository: ref.read(recipeTagRepositoryProvider),
@@ -243,14 +250,29 @@ class _ImportPreviewPageState extends ConsumerState<ImportPreviewPage> {
           .toList();
 
       // Create tags and folders, get name -> ID mappings
-      final tagNameToId = await importService.createTagsFromNames(allTagNames);
-      final folderNameToId = await importService.createFoldersFromNames(allFolderNames);
+      final tagNameToId = await importService.createTagsFromNames(
+        allTagNames,
+        userId: userId,
+      );
+      final folderNameToId = await importService.createFoldersFromNames(
+        allFolderNames,
+        userId: userId,
+        householdId: householdId,
+      );
+
+      // Get upload queue manager for image uploads (only if user is logged in)
+      final uploadQueueManager = userId != null
+          ? ref.read(uploadQueueManagerProvider)
+          : null;
 
       // Execute the import
       final result = await importService.executeImport(
         recipes: recipesToImport,
         tagNameToId: tagNameToId,
         folderNameToId: folderNameToId,
+        userId: userId,
+        householdId: householdId,
+        uploadQueueManager: uploadQueueManager,
         onProgress: (current, total) {
           AppLogger.debug('Import progress: $current/$total');
         },

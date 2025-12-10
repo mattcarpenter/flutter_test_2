@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:io';
 import 'package:drift/drift.dart';
+import 'package:flutter_image_compress/flutter_image_compress.dart';
 import 'package:uuid/uuid.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:path/path.dart' as p;
@@ -9,6 +10,7 @@ import '../../../../database/models/ingredient_terms.dart';
 import '../../../../database/models/ingredients.dart';
 import '../../../../database/models/recipe_images.dart';
 import '../../../../database/models/steps.dart';
+import '../../../managers/upload_queue_manager.dart';
 import '../../../repositories/recipe_repository.dart';
 import '../../../repositories/recipe_tag_repository.dart';
 import '../../../repositories/recipe_folder_repository.dart';
@@ -159,6 +161,9 @@ class ImportService {
     required List<ImportedRecipe> recipes,
     required Map<String, String> tagNameToId,
     required Map<String, String> folderNameToId,
+    String? userId,
+    String? householdId,
+    UploadQueueManager? uploadQueueManager,
     void Function(int current, int total)? onProgress,
   }) async {
     AppLogger.info('Starting import of ${recipes.length} recipes');
@@ -174,6 +179,9 @@ class ImportService {
           importedRecipe,
           tagNameToId,
           folderNameToId,
+          userId: userId,
+          householdId: householdId,
+          uploadQueueManager: uploadQueueManager,
         );
         successCount++;
         AppLogger.debug('Successfully imported: ${importedRecipe.recipe.title}');
@@ -227,8 +235,11 @@ class ImportService {
   Future<void> _importSingleRecipe(
     ImportedRecipe importedRecipe,
     Map<String, String> tagNameToId,
-    Map<String, String> folderNameToId,
-  ) async {
+    Map<String, String> folderNameToId, {
+    String? userId,
+    String? householdId,
+    UploadQueueManager? uploadQueueManager,
+  }) async {
     final recipe = importedRecipe.recipe;
     final newRecipeId = const Uuid().v4();
     final now = DateTime.now().millisecondsSinceEpoch;
@@ -302,13 +313,28 @@ class ImportService {
       tagIds: Value(tagIds),
       folderIds: Value(folderIds),
       images: Value(recipeImages),
-      // userId and householdId will be set by the repository/auth layer
+      userId: Value(userId),
+      householdId: Value(householdId),
     );
 
     await _recipeRepository.addRecipe(recipeEntry);
+
+    // Queue images for upload if user is authenticated and upload manager is provided
+    if (uploadQueueManager != null && userId != null) {
+      for (final image in recipeImages) {
+        if (image.publicUrl == null) {
+          await uploadQueueManager.addToQueue(
+            fileName: image.fileName,
+            recipeId: newRecipeId,
+          );
+          AppLogger.debug('Queued image for upload: ${image.fileName}');
+        }
+      }
+    }
   }
 
   /// Process and save images, returning list of RecipeImage objects
+  /// Creates both large (1280px) and small (512px) versions for each image
   Future<List<RecipeImage>> _processImages(String recipeId, List<ImageData> imageDataList) async {
     final recipeImages = <RecipeImage>[];
 
@@ -329,19 +355,67 @@ class ImportService {
           isCover: imageData.isCover,
         ));
       } else if (imageData.base64Data.isNotEmpty) {
-        // We have base64 data, need to decode and save locally
+        // We have base64 data, need to decode, compress, and save locally
         try {
           final bytes = _base64ToBytes(imageData.base64Data);
-          final filename = '${recipeId}_$i.jpg';
-          final filePath = await _saveImageToFile(bytes, filename);
 
-          recipeImages.add(RecipeImage(
-            id: imageId,
-            fileName: filename,
-            isCover: imageData.isCover,
-          ));
+          // Generate filenames for both sizes
+          final baseFilename = '${recipeId}_$i';
+          final fullFilename = '$baseFilename.jpg';
+          final smallFilename = '${baseFilename}_small.jpg';
 
-          AppLogger.debug('Saved image to: $filePath');
+          // Save raw bytes to a temp file for compression
+          final tempDir = await getTemporaryDirectory();
+          final tempFile = File(p.join(tempDir.path, 'import_temp_$i.jpg'));
+          await tempFile.writeAsBytes(bytes);
+
+          // Compress to both sizes and save to documents directory
+          final documentsDir = await getApplicationDocumentsDirectory();
+
+          // Create large version (1280px)
+          final largeFile = await _compressImage(
+            tempFile,
+            p.join(documentsDir.path, fullFilename),
+            size: 1280,
+          );
+
+          // Create small version (512px)
+          final smallFile = await _compressImage(
+            tempFile,
+            p.join(documentsDir.path, smallFilename),
+            size: 512,
+          );
+
+          // Clean up temp file
+          try {
+            await tempFile.delete();
+          } catch (_) {
+            // Ignore temp file cleanup errors
+          }
+
+          if (largeFile != null && smallFile != null) {
+            recipeImages.add(RecipeImage(
+              id: imageId,
+              fileName: fullFilename,
+              isCover: imageData.isCover,
+            ));
+            AppLogger.debug('Saved compressed images: $fullFilename and $smallFilename');
+          } else {
+            // Fallback: save raw bytes if compression fails
+            final fallbackPath = p.join(documentsDir.path, fullFilename);
+            await File(fallbackPath).writeAsBytes(bytes);
+
+            // Also save as small (same file, no compression)
+            final smallFallbackPath = p.join(documentsDir.path, smallFilename);
+            await File(smallFallbackPath).writeAsBytes(bytes);
+
+            recipeImages.add(RecipeImage(
+              id: imageId,
+              fileName: fullFilename,
+              isCover: imageData.isCover,
+            ));
+            AppLogger.warning('Compression failed, saved raw images for recipe $recipeId');
+          }
         } catch (e, stackTrace) {
           AppLogger.error('Failed to save image $i for recipe $recipeId', e, stackTrace);
           // Continue with other images even if one fails
@@ -350,6 +424,28 @@ class ImportService {
     }
 
     return recipeImages;
+  }
+
+  /// Compress an image to the specified size
+  Future<File?> _compressImage(File sourceFile, String targetPath, {required int size}) async {
+    try {
+      final compressedXFile = await FlutterImageCompress.compressAndGetFile(
+        sourceFile.absolute.path,
+        targetPath,
+        quality: 90,
+        minWidth: size,
+        minHeight: size,
+        format: CompressFormat.jpeg,
+      );
+
+      if (compressedXFile == null) {
+        return null;
+      }
+      return File(compressedXFile.path);
+    } catch (e) {
+      AppLogger.error('Image compression failed', e);
+      return null;
+    }
   }
 
   /// Decode base64 string to bytes
@@ -361,15 +457,6 @@ class ImportService {
     }
 
     return base64Decode(cleanBase64);
-  }
-
-  /// Save image bytes to file
-  Future<String> _saveImageToFile(List<int> bytes, String filename) async {
-    final directory = await getApplicationDocumentsDirectory();
-    final filePath = p.join(directory.path, filename);
-    final file = File(filePath);
-    await file.writeAsBytes(bytes);
-    return filePath;
   }
 
   /// Create tags from a list of names, returning a map of name -> ID
