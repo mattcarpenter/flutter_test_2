@@ -334,7 +334,8 @@ class _ClippingEditorPageState extends ConsumerState<ClippingEditorPage>
                               quill.VerticalSpacing.zero,
                               quill.VerticalSpacing.zero,
                               null,
-                              null,
+                              // Custom checkbox builder to match our theme
+                              _ClippingCheckboxBuilder(AppColors.of(context).textPrimary),
                             ),
                             leading: quill.DefaultTextBlockStyle(
                               AppTypography.body.copyWith(
@@ -487,6 +488,35 @@ class _ClippingEditorPageState extends ConsumerState<ClippingEditorPage>
               ),
             ),
           ),
+        ),
+      ),
+    );
+  }
+}
+
+/// Custom checkbox builder that matches our app theme colors
+class _ClippingCheckboxBuilder extends quill.QuillCheckboxBuilder {
+  final Color color;
+
+  _ClippingCheckboxBuilder(this.color);
+
+  @override
+  Widget build({
+    required BuildContext context,
+    required bool isChecked,
+    required ValueChanged<bool> onChanged,
+  }) {
+    return GestureDetector(
+      onTap: () => onChanged(!isChecked),
+      child: Container(
+        alignment: AlignmentDirectional.centerEnd,
+        padding: const EdgeInsetsDirectional.only(end: 8),
+        child: Icon(
+          isChecked
+              ? CupertinoIcons.checkmark_square_fill
+              : CupertinoIcons.square,
+          size: 20,
+          color: color,
         ),
       ),
     );
