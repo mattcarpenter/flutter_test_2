@@ -194,9 +194,11 @@ class _ImportPreviewPageState extends ConsumerState<ImportPreviewPage> {
     try {
       AppLogger.info('Starting import of ${_preview!.recipeCount} recipes');
 
-      // Get auth context for proper data ownership
+      // Get auth context for proper data ownership (both null when logged out)
       final userId = Supabase.instance.client.auth.currentUser?.id;
-      final householdId = ref.read(householdNotifierProvider).currentHousehold?.id;
+      final householdId = userId != null
+          ? ref.read(householdNotifierProvider).currentHousehold?.id
+          : null;
 
       final importService = ImportService(
         recipeRepository: ref.read(recipeRepositoryProvider),
