@@ -281,11 +281,34 @@ class _ClippingEditorPageState extends ConsumerState<ClippingEditorPage>
 
                       SizedBox(height: AppSpacing.md),
 
-                      // Quill editor
-                      quill.QuillEditor.basic(
-                        controller: _contentController,
-                        focusNode: _contentFocusNode,
-                        config: quill.QuillEditorConfig(
+                      // Quill editor - wrap in Theme to override Material defaults
+                      Theme(
+                        data: Theme.of(context).copyWith(
+                          iconTheme: IconThemeData(
+                            color: AppColors.of(context).textPrimary,
+                          ),
+                          checkboxTheme: CheckboxThemeData(
+                            checkColor: WidgetStateProperty.all(AppColors.of(context).background),
+                            fillColor: WidgetStateProperty.resolveWith((states) {
+                              if (states.contains(WidgetState.selected)) {
+                                return AppColors.of(context).textPrimary;
+                              }
+                              return Colors.transparent;
+                            }),
+                            side: BorderSide(
+                              color: AppColors.of(context).textSecondary,
+                              width: 1.5,
+                            ),
+                          ),
+                          textTheme: Theme.of(context).textTheme.copyWith(
+                            bodyMedium: TextStyle(color: AppColors.of(context).textPrimary),
+                            bodyLarge: TextStyle(color: AppColors.of(context).textPrimary),
+                          ),
+                        ),
+                        child: quill.QuillEditor.basic(
+                          controller: _contentController,
+                          focusNode: _contentFocusNode,
+                          config: quill.QuillEditorConfig(
                           placeholder: 'Start typing...',
                           padding: EdgeInsets.zero,
                           autoFocus: false,
@@ -293,6 +316,27 @@ class _ClippingEditorPageState extends ConsumerState<ClippingEditorPage>
                           scrollable: false,
                           customStyles: quill.DefaultStyles(
                             paragraph: quill.DefaultTextBlockStyle(
+                              AppTypography.body.copyWith(
+                                color: AppColors.of(context).textPrimary,
+                                height: 1.5,
+                              ),
+                              quill.HorizontalSpacing.zero,
+                              quill.VerticalSpacing.zero,
+                              quill.VerticalSpacing.zero,
+                              null,
+                            ),
+                            lists: quill.DefaultListBlockStyle(
+                              AppTypography.body.copyWith(
+                                color: AppColors.of(context).textPrimary,
+                                height: 1.5,
+                              ),
+                              quill.HorizontalSpacing.zero,
+                              quill.VerticalSpacing.zero,
+                              quill.VerticalSpacing.zero,
+                              null,
+                              null,
+                            ),
+                            leading: quill.DefaultTextBlockStyle(
                               AppTypography.body.copyWith(
                                 color: AppColors.of(context).textPrimary,
                                 height: 1.5,
@@ -314,6 +358,7 @@ class _ClippingEditorPageState extends ConsumerState<ClippingEditorPage>
                             ),
                           ),
                         ),
+                      ),
                       ),
                     ],
                   ),
@@ -422,9 +467,21 @@ class _ClippingEditorPageState extends ConsumerState<ClippingEditorPage>
                 iconTheme: quill.QuillIconTheme(
                   iconButtonSelectedData: quill.IconButtonData(
                     color: AppColors.of(context).primary,
+                    highlightColor: Colors.transparent,
+                    splashColor: Colors.transparent,
+                    style: ButtonStyle(
+                      backgroundColor: WidgetStateProperty.all(Colors.transparent),
+                      overlayColor: WidgetStateProperty.all(Colors.transparent),
+                    ),
                   ),
                   iconButtonUnselectedData: quill.IconButtonData(
                     color: AppColors.of(context).textSecondary,
+                    highlightColor: Colors.transparent,
+                    splashColor: Colors.transparent,
+                    style: ButtonStyle(
+                      backgroundColor: WidgetStateProperty.all(Colors.transparent),
+                      overlayColor: WidgetStateProperty.all(Colors.transparent),
+                    ),
                   ),
                 ),
               ),
