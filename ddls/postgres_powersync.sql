@@ -459,4 +459,23 @@ CREATE POLICY "Users can view own subscription" ON public.user_subscriptions
 CREATE POLICY "Service role can manage subscriptions" ON public.user_subscriptions
     FOR ALL USING (auth.role() = 'service_role');
 
+-- CLIPPINGS
+CREATE TABLE public.clippings (
+    id uuid NOT NULL DEFAULT extensions.uuid_generate_v4(),
+    title text NULL,
+    content text NULL,
+    user_id uuid NOT NULL,
+    household_id uuid NULL,
+    created_at bigint NULL,
+    updated_at bigint NULL,
+    deleted_at bigint NULL,
+    CONSTRAINT clippings_pkey PRIMARY KEY (id),
+    CONSTRAINT clippings_user_id_fkey FOREIGN KEY (user_id) REFERENCES auth.users (id) ON DELETE CASCADE,
+    CONSTRAINT clippings_household_id_fkey FOREIGN KEY (household_id) REFERENCES public.households (id) ON DELETE CASCADE
+);
+
+CREATE INDEX IF NOT EXISTS clippings_user_idx ON public.clippings (user_id);
+CREATE INDEX IF NOT EXISTS clippings_household_idx ON public.clippings (household_id);
+CREATE INDEX IF NOT EXISTS clippings_updated_at_idx ON public.clippings (updated_at DESC);
+
 CREATE PUBLICATION powersync FOR ALL TABLES;

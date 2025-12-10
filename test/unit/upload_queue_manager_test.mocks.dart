@@ -267,9 +267,20 @@ class _Fake$TimersTable_20 extends _i1.SmartFake implements _i3.$TimersTable {
         );
 }
 
-class _Fake$AppDatabaseManager_21 extends _i1.SmartFake
+class _Fake$ClippingsTable_21 extends _i1.SmartFake
+    implements _i3.$ClippingsTable {
+  _Fake$ClippingsTable_21(
+    Object parent,
+    Invocation parentInvocation,
+  ) : super(
+          parent,
+          parentInvocation,
+        );
+}
+
+class _Fake$AppDatabaseManager_22 extends _i1.SmartFake
     implements _i3.$AppDatabaseManager {
-  _Fake$AppDatabaseManager_21(
+  _Fake$AppDatabaseManager_22(
     Object parent,
     Invocation parentInvocation,
   ) : super(
@@ -278,9 +289,9 @@ class _Fake$AppDatabaseManager_21 extends _i1.SmartFake
         );
 }
 
-class _FakeGeneratedDatabase_22 extends _i1.SmartFake
+class _FakeGeneratedDatabase_23 extends _i1.SmartFake
     implements _i4.GeneratedDatabase {
-  _FakeGeneratedDatabase_22(
+  _FakeGeneratedDatabase_23(
     Object parent,
     Invocation parentInvocation,
   ) : super(
@@ -289,9 +300,9 @@ class _FakeGeneratedDatabase_22 extends _i1.SmartFake
         );
 }
 
-class _FakeDriftDatabaseOptions_23 extends _i1.SmartFake
+class _FakeDriftDatabaseOptions_24 extends _i1.SmartFake
     implements _i4.DriftDatabaseOptions {
-  _FakeDriftDatabaseOptions_23(
+  _FakeDriftDatabaseOptions_24(
     Object parent,
     Invocation parentInvocation,
   ) : super(
@@ -300,9 +311,9 @@ class _FakeDriftDatabaseOptions_23 extends _i1.SmartFake
         );
 }
 
-class _FakeMigrationStrategy_24 extends _i1.SmartFake
+class _FakeMigrationStrategy_25 extends _i1.SmartFake
     implements _i4.MigrationStrategy {
-  _FakeMigrationStrategy_24(
+  _FakeMigrationStrategy_25(
     Object parent,
     Invocation parentInvocation,
   ) : super(
@@ -311,9 +322,9 @@ class _FakeMigrationStrategy_24 extends _i1.SmartFake
         );
 }
 
-class _FakeStreamQueryUpdateRules_25 extends _i1.SmartFake
+class _FakeStreamQueryUpdateRules_26 extends _i1.SmartFake
     implements _i4.StreamQueryUpdateRules {
-  _FakeStreamQueryUpdateRules_25(
+  _FakeStreamQueryUpdateRules_26(
     Object parent,
     Invocation parentInvocation,
   ) : super(
@@ -322,9 +333,9 @@ class _FakeStreamQueryUpdateRules_25 extends _i1.SmartFake
         );
 }
 
-class _FakeDatabaseConnection_26 extends _i1.SmartFake
+class _FakeDatabaseConnection_27 extends _i1.SmartFake
     implements _i4.DatabaseConnection {
-  _FakeDatabaseConnection_26(
+  _FakeDatabaseConnection_27(
     Object parent,
     Invocation parentInvocation,
   ) : super(
@@ -333,8 +344,8 @@ class _FakeDatabaseConnection_26 extends _i1.SmartFake
         );
 }
 
-class _FakeQueryExecutor_27 extends _i1.SmartFake implements _i4.QueryExecutor {
-  _FakeQueryExecutor_27(
+class _FakeQueryExecutor_28 extends _i1.SmartFake implements _i4.QueryExecutor {
+  _FakeQueryExecutor_28(
     Object parent,
     Invocation parentInvocation,
   ) : super(
@@ -343,9 +354,9 @@ class _FakeQueryExecutor_27 extends _i1.SmartFake implements _i4.QueryExecutor {
         );
 }
 
-class _FakeStreamQueryStore_28 extends _i1.SmartFake
+class _FakeStreamQueryStore_29 extends _i1.SmartFake
     implements _i5.StreamQueryStore {
-  _FakeStreamQueryStore_28(
+  _FakeStreamQueryStore_29(
     Object parent,
     Invocation parentInvocation,
   ) : super(
@@ -354,9 +365,9 @@ class _FakeStreamQueryStore_28 extends _i1.SmartFake
         );
 }
 
-class _FakeDatabaseConnectionUser_29 extends _i1.SmartFake
+class _FakeDatabaseConnectionUser_30 extends _i1.SmartFake
     implements _i4.DatabaseConnectionUser {
-  _FakeDatabaseConnectionUser_29(
+  _FakeDatabaseConnectionUser_30(
     Object parent,
     Invocation parentInvocation,
   ) : super(
@@ -365,8 +376,8 @@ class _FakeDatabaseConnectionUser_29 extends _i1.SmartFake
         );
 }
 
-class _FakeMigrator_30 extends _i1.SmartFake implements _i4.Migrator {
-  _FakeMigrator_30(
+class _FakeMigrator_31 extends _i1.SmartFake implements _i4.Migrator {
+  _FakeMigrator_31(
     Object parent,
     Invocation parentInvocation,
   ) : super(
@@ -375,8 +386,8 @@ class _FakeMigrator_30 extends _i1.SmartFake implements _i4.Migrator {
         );
 }
 
-class _FakeFuture_31<T1> extends _i1.SmartFake implements _i6.Future<T1> {
-  _FakeFuture_31(
+class _FakeFuture_32<T1> extends _i1.SmartFake implements _i6.Future<T1> {
+  _FakeFuture_32(
     Object parent,
     Invocation parentInvocation,
   ) : super(
@@ -385,9 +396,9 @@ class _FakeFuture_31<T1> extends _i1.SmartFake implements _i6.Future<T1> {
         );
 }
 
-class _FakeInsertStatement_32<T1 extends _i4.Table, D1> extends _i1.SmartFake
+class _FakeInsertStatement_33<T1 extends _i4.Table, D1> extends _i1.SmartFake
     implements _i4.InsertStatement<T1, D1> {
-  _FakeInsertStatement_32(
+  _FakeInsertStatement_33(
     Object parent,
     Invocation parentInvocation,
   ) : super(
@@ -396,9 +407,9 @@ class _FakeInsertStatement_32<T1 extends _i4.Table, D1> extends _i1.SmartFake
         );
 }
 
-class _FakeUpdateStatement_33<T extends _i4.Table, D> extends _i1.SmartFake
+class _FakeUpdateStatement_34<T extends _i4.Table, D> extends _i1.SmartFake
     implements _i4.UpdateStatement<T, D> {
-  _FakeUpdateStatement_33(
+  _FakeUpdateStatement_34(
     Object parent,
     Invocation parentInvocation,
   ) : super(
@@ -407,9 +418,9 @@ class _FakeUpdateStatement_33<T extends _i4.Table, D> extends _i1.SmartFake
         );
 }
 
-class _FakeSimpleSelectStatement_34<T1 extends _i4.HasResultSet, D>
+class _FakeSimpleSelectStatement_35<T1 extends _i4.HasResultSet, D>
     extends _i1.SmartFake implements _i4.SimpleSelectStatement<T1, D> {
-  _FakeSimpleSelectStatement_34(
+  _FakeSimpleSelectStatement_35(
     Object parent,
     Invocation parentInvocation,
   ) : super(
@@ -418,9 +429,9 @@ class _FakeSimpleSelectStatement_34<T1 extends _i4.HasResultSet, D>
         );
 }
 
-class _FakeJoinedSelectStatement_35<FirstT extends _i4.HasResultSet, FirstD>
+class _FakeJoinedSelectStatement_36<FirstT extends _i4.HasResultSet, FirstD>
     extends _i1.SmartFake implements _i4.JoinedSelectStatement<FirstT, FirstD> {
-  _FakeJoinedSelectStatement_35(
+  _FakeJoinedSelectStatement_36(
     Object parent,
     Invocation parentInvocation,
   ) : super(
@@ -429,9 +440,9 @@ class _FakeJoinedSelectStatement_35<FirstT extends _i4.HasResultSet, FirstD>
         );
 }
 
-class _FakeBaseSelectStatement_36<Row> extends _i1.SmartFake
+class _FakeBaseSelectStatement_37<Row> extends _i1.SmartFake
     implements _i4.BaseSelectStatement<Row> {
-  _FakeBaseSelectStatement_36(
+  _FakeBaseSelectStatement_37(
     Object parent,
     Invocation parentInvocation,
   ) : super(
@@ -440,9 +451,9 @@ class _FakeBaseSelectStatement_36<Row> extends _i1.SmartFake
         );
 }
 
-class _FakeDeleteStatement_37<T1 extends _i4.Table, D1> extends _i1.SmartFake
+class _FakeDeleteStatement_38<T1 extends _i4.Table, D1> extends _i1.SmartFake
     implements _i4.DeleteStatement<T1, D1> {
-  _FakeDeleteStatement_37(
+  _FakeDeleteStatement_38(
     Object parent,
     Invocation parentInvocation,
   ) : super(
@@ -451,8 +462,8 @@ class _FakeDeleteStatement_37<T1 extends _i4.Table, D1> extends _i1.SmartFake
         );
 }
 
-class _FakeSelectable_38<T> extends _i1.SmartFake implements _i4.Selectable<T> {
-  _FakeSelectable_38(
+class _FakeSelectable_39<T> extends _i1.SmartFake implements _i4.Selectable<T> {
+  _FakeSelectable_39(
     Object parent,
     Invocation parentInvocation,
   ) : super(
@@ -461,9 +472,9 @@ class _FakeSelectable_38<T> extends _i1.SmartFake implements _i4.Selectable<T> {
         );
 }
 
-class _FakeGenerationContext_39 extends _i1.SmartFake
+class _FakeGenerationContext_40 extends _i1.SmartFake
     implements _i4.GenerationContext {
-  _FakeGenerationContext_39(
+  _FakeGenerationContext_40(
     Object parent,
     Invocation parentInvocation,
   ) : super(
@@ -472,9 +483,9 @@ class _FakeGenerationContext_39 extends _i1.SmartFake
         );
 }
 
-class _FakeFunctionsClient_40 extends _i1.SmartFake
+class _FakeFunctionsClient_41 extends _i1.SmartFake
     implements _i7.FunctionsClient {
-  _FakeFunctionsClient_40(
+  _FakeFunctionsClient_41(
     Object parent,
     Invocation parentInvocation,
   ) : super(
@@ -483,9 +494,9 @@ class _FakeFunctionsClient_40 extends _i1.SmartFake
         );
 }
 
-class _FakeSupabaseStorageClient_41 extends _i1.SmartFake
+class _FakeSupabaseStorageClient_42 extends _i1.SmartFake
     implements _i7.SupabaseStorageClient {
-  _FakeSupabaseStorageClient_41(
+  _FakeSupabaseStorageClient_42(
     Object parent,
     Invocation parentInvocation,
   ) : super(
@@ -494,9 +505,9 @@ class _FakeSupabaseStorageClient_41 extends _i1.SmartFake
         );
 }
 
-class _FakeRealtimeClient_42 extends _i1.SmartFake
+class _FakeRealtimeClient_43 extends _i1.SmartFake
     implements _i7.RealtimeClient {
-  _FakeRealtimeClient_42(
+  _FakeRealtimeClient_43(
     Object parent,
     Invocation parentInvocation,
   ) : super(
@@ -505,9 +516,9 @@ class _FakeRealtimeClient_42 extends _i1.SmartFake
         );
 }
 
-class _FakePostgrestClient_43 extends _i1.SmartFake
+class _FakePostgrestClient_44 extends _i1.SmartFake
     implements _i7.PostgrestClient {
-  _FakePostgrestClient_43(
+  _FakePostgrestClient_44(
     Object parent,
     Invocation parentInvocation,
   ) : super(
@@ -516,8 +527,8 @@ class _FakePostgrestClient_43 extends _i1.SmartFake
         );
 }
 
-class _FakeGoTrueClient_44 extends _i1.SmartFake implements _i7.GoTrueClient {
-  _FakeGoTrueClient_44(
+class _FakeGoTrueClient_45 extends _i1.SmartFake implements _i7.GoTrueClient {
+  _FakeGoTrueClient_45(
     Object parent,
     Invocation parentInvocation,
   ) : super(
@@ -526,9 +537,9 @@ class _FakeGoTrueClient_44 extends _i1.SmartFake implements _i7.GoTrueClient {
         );
 }
 
-class _FakeSupabaseQueryBuilder_45 extends _i1.SmartFake
+class _FakeSupabaseQueryBuilder_46 extends _i1.SmartFake
     implements _i7.SupabaseQueryBuilder {
-  _FakeSupabaseQueryBuilder_45(
+  _FakeSupabaseQueryBuilder_46(
     Object parent,
     Invocation parentInvocation,
   ) : super(
@@ -537,9 +548,9 @@ class _FakeSupabaseQueryBuilder_45 extends _i1.SmartFake
         );
 }
 
-class _FakeSupabaseQuerySchema_46 extends _i1.SmartFake
+class _FakeSupabaseQuerySchema_47 extends _i1.SmartFake
     implements _i7.SupabaseQuerySchema {
-  _FakeSupabaseQuerySchema_46(
+  _FakeSupabaseQuerySchema_47(
     Object parent,
     Invocation parentInvocation,
   ) : super(
@@ -548,9 +559,9 @@ class _FakeSupabaseQuerySchema_46 extends _i1.SmartFake
         );
 }
 
-class _FakePostgrestFilterBuilder_47<T1> extends _i1.SmartFake
+class _FakePostgrestFilterBuilder_48<T1> extends _i1.SmartFake
     implements _i7.PostgrestFilterBuilder<T1> {
-  _FakePostgrestFilterBuilder_47(
+  _FakePostgrestFilterBuilder_48(
     Object parent,
     Invocation parentInvocation,
   ) : super(
@@ -559,9 +570,9 @@ class _FakePostgrestFilterBuilder_47<T1> extends _i1.SmartFake
         );
 }
 
-class _FakeRealtimeChannel_48 extends _i1.SmartFake
+class _FakeRealtimeChannel_49 extends _i1.SmartFake
     implements _i7.RealtimeChannel {
-  _FakeRealtimeChannel_48(
+  _FakeRealtimeChannel_49(
     Object parent,
     Invocation parentInvocation,
   ) : super(
@@ -570,9 +581,9 @@ class _FakeRealtimeChannel_48 extends _i1.SmartFake
         );
 }
 
-class _FakeGoTrueAdminApi_49 extends _i1.SmartFake
+class _FakeGoTrueAdminApi_50 extends _i1.SmartFake
     implements _i7.GoTrueAdminApi {
-  _FakeGoTrueAdminApi_49(
+  _FakeGoTrueAdminApi_50(
     Object parent,
     Invocation parentInvocation,
   ) : super(
@@ -581,8 +592,8 @@ class _FakeGoTrueAdminApi_49 extends _i1.SmartFake
         );
 }
 
-class _FakeGoTrueMFAApi_50 extends _i1.SmartFake implements _i7.GoTrueMFAApi {
-  _FakeGoTrueMFAApi_50(
+class _FakeGoTrueMFAApi_51 extends _i1.SmartFake implements _i7.GoTrueMFAApi {
+  _FakeGoTrueMFAApi_51(
     Object parent,
     Invocation parentInvocation,
   ) : super(
@@ -591,8 +602,8 @@ class _FakeGoTrueMFAApi_50 extends _i1.SmartFake implements _i7.GoTrueMFAApi {
         );
 }
 
-class _FakeAuthResponse_51 extends _i1.SmartFake implements _i7.AuthResponse {
-  _FakeAuthResponse_51(
+class _FakeAuthResponse_52 extends _i1.SmartFake implements _i7.AuthResponse {
+  _FakeAuthResponse_52(
     Object parent,
     Invocation parentInvocation,
   ) : super(
@@ -601,8 +612,8 @@ class _FakeAuthResponse_51 extends _i1.SmartFake implements _i7.AuthResponse {
         );
 }
 
-class _FakeOAuthResponse_52 extends _i1.SmartFake implements _i7.OAuthResponse {
-  _FakeOAuthResponse_52(
+class _FakeOAuthResponse_53 extends _i1.SmartFake implements _i7.OAuthResponse {
+  _FakeOAuthResponse_53(
     Object parent,
     Invocation parentInvocation,
   ) : super(
@@ -611,9 +622,9 @@ class _FakeOAuthResponse_52 extends _i1.SmartFake implements _i7.OAuthResponse {
         );
 }
 
-class _FakeAuthSessionUrlResponse_53 extends _i1.SmartFake
+class _FakeAuthSessionUrlResponse_54 extends _i1.SmartFake
     implements _i7.AuthSessionUrlResponse {
-  _FakeAuthSessionUrlResponse_53(
+  _FakeAuthSessionUrlResponse_54(
     Object parent,
     Invocation parentInvocation,
   ) : super(
@@ -622,9 +633,9 @@ class _FakeAuthSessionUrlResponse_53 extends _i1.SmartFake
         );
 }
 
-class _FakeResendResponse_54 extends _i1.SmartFake
+class _FakeResendResponse_55 extends _i1.SmartFake
     implements _i7.ResendResponse {
-  _FakeResendResponse_54(
+  _FakeResendResponse_55(
     Object parent,
     Invocation parentInvocation,
   ) : super(
@@ -633,8 +644,8 @@ class _FakeResendResponse_54 extends _i1.SmartFake
         );
 }
 
-class _FakeUserResponse_55 extends _i1.SmartFake implements _i7.UserResponse {
-  _FakeUserResponse_55(
+class _FakeUserResponse_56 extends _i1.SmartFake implements _i7.UserResponse {
+  _FakeUserResponse_56(
     Object parent,
     Invocation parentInvocation,
   ) : super(
@@ -643,8 +654,8 @@ class _FakeUserResponse_55 extends _i1.SmartFake implements _i7.UserResponse {
         );
 }
 
-class _FakeObject_56 extends _i1.SmartFake implements Object {
-  _FakeObject_56(
+class _FakeObject_57 extends _i1.SmartFake implements Object {
+  _FakeObject_57(
     Object parent,
     Invocation parentInvocation,
   ) : super(
@@ -653,8 +664,8 @@ class _FakeObject_56 extends _i1.SmartFake implements Object {
         );
 }
 
-class _FakeFetch_57 extends _i1.SmartFake implements _i8.Fetch {
-  _FakeFetch_57(
+class _FakeFetch_58 extends _i1.SmartFake implements _i8.Fetch {
+  _FakeFetch_58(
     Object parent,
     Invocation parentInvocation,
   ) : super(
@@ -663,9 +674,9 @@ class _FakeFetch_57 extends _i1.SmartFake implements _i8.Fetch {
         );
 }
 
-class _FakeStorageFileApi_58 extends _i1.SmartFake
+class _FakeStorageFileApi_59 extends _i1.SmartFake
     implements _i7.StorageFileApi {
-  _FakeStorageFileApi_58(
+  _FakeStorageFileApi_59(
     Object parent,
     Invocation parentInvocation,
   ) : super(
@@ -674,8 +685,8 @@ class _FakeStorageFileApi_58 extends _i1.SmartFake
         );
 }
 
-class _FakeBucket_59 extends _i1.SmartFake implements _i7.Bucket {
-  _FakeBucket_59(
+class _FakeBucket_60 extends _i1.SmartFake implements _i7.Bucket {
+  _FakeBucket_60(
     Object parent,
     Invocation parentInvocation,
   ) : super(
@@ -684,9 +695,9 @@ class _FakeBucket_59 extends _i1.SmartFake implements _i7.Bucket {
         );
 }
 
-class _FakeSignedUploadURLResponse_60 extends _i1.SmartFake
+class _FakeSignedUploadURLResponse_61 extends _i1.SmartFake
     implements _i7.SignedUploadURLResponse {
-  _FakeSignedUploadURLResponse_60(
+  _FakeSignedUploadURLResponse_61(
     Object parent,
     Invocation parentInvocation,
   ) : super(
@@ -695,8 +706,8 @@ class _FakeSignedUploadURLResponse_60 extends _i1.SmartFake
         );
 }
 
-class _FakeFileObjectV2_61 extends _i1.SmartFake implements _i7.FileObjectV2 {
-  _FakeFileObjectV2_61(
+class _FakeFileObjectV2_62 extends _i1.SmartFake implements _i7.FileObjectV2 {
+  _FakeFileObjectV2_62(
     Object parent,
     Invocation parentInvocation,
   ) : super(
@@ -1301,9 +1312,18 @@ class MockAppDatabase extends _i1.Mock implements _i3.AppDatabase {
       ) as _i3.$TimersTable);
 
   @override
+  _i3.$ClippingsTable get clippings => (super.noSuchMethod(
+        Invocation.getter(#clippings),
+        returnValue: _Fake$ClippingsTable_21(
+          this,
+          Invocation.getter(#clippings),
+        ),
+      ) as _i3.$ClippingsTable);
+
+  @override
   _i3.$AppDatabaseManager get managers => (super.noSuchMethod(
         Invocation.getter(#managers),
-        returnValue: _Fake$AppDatabaseManager_21(
+        returnValue: _Fake$AppDatabaseManager_22(
           this,
           Invocation.getter(#managers),
         ),
@@ -1325,7 +1345,7 @@ class MockAppDatabase extends _i1.Mock implements _i3.AppDatabase {
   @override
   _i4.GeneratedDatabase get attachedDatabase => (super.noSuchMethod(
         Invocation.getter(#attachedDatabase),
-        returnValue: _FakeGeneratedDatabase_22(
+        returnValue: _FakeGeneratedDatabase_23(
           this,
           Invocation.getter(#attachedDatabase),
         ),
@@ -1334,7 +1354,7 @@ class MockAppDatabase extends _i1.Mock implements _i3.AppDatabase {
   @override
   _i4.DriftDatabaseOptions get options => (super.noSuchMethod(
         Invocation.getter(#options),
-        returnValue: _FakeDriftDatabaseOptions_23(
+        returnValue: _FakeDriftDatabaseOptions_24(
           this,
           Invocation.getter(#options),
         ),
@@ -1343,7 +1363,7 @@ class MockAppDatabase extends _i1.Mock implements _i3.AppDatabase {
   @override
   _i4.MigrationStrategy get migration => (super.noSuchMethod(
         Invocation.getter(#migration),
-        returnValue: _FakeMigrationStrategy_24(
+        returnValue: _FakeMigrationStrategy_25(
           this,
           Invocation.getter(#migration),
         ),
@@ -1352,7 +1372,7 @@ class MockAppDatabase extends _i1.Mock implements _i3.AppDatabase {
   @override
   _i4.StreamQueryUpdateRules get streamUpdateRules => (super.noSuchMethod(
         Invocation.getter(#streamUpdateRules),
-        returnValue: _FakeStreamQueryUpdateRules_25(
+        returnValue: _FakeStreamQueryUpdateRules_26(
           this,
           Invocation.getter(#streamUpdateRules),
         ),
@@ -1361,7 +1381,7 @@ class MockAppDatabase extends _i1.Mock implements _i3.AppDatabase {
   @override
   _i4.DatabaseConnection get connection => (super.noSuchMethod(
         Invocation.getter(#connection),
-        returnValue: _FakeDatabaseConnection_26(
+        returnValue: _FakeDatabaseConnection_27(
           this,
           Invocation.getter(#connection),
         ),
@@ -1379,7 +1399,7 @@ class MockAppDatabase extends _i1.Mock implements _i3.AppDatabase {
   @override
   _i4.QueryExecutor get executor => (super.noSuchMethod(
         Invocation.getter(#executor),
-        returnValue: _FakeQueryExecutor_27(
+        returnValue: _FakeQueryExecutor_28(
           this,
           Invocation.getter(#executor),
         ),
@@ -1388,7 +1408,7 @@ class MockAppDatabase extends _i1.Mock implements _i3.AppDatabase {
   @override
   _i5.StreamQueryStore get streamQueries => (super.noSuchMethod(
         Invocation.getter(#streamQueries),
-        returnValue: _FakeStreamQueryStore_28(
+        returnValue: _FakeStreamQueryStore_29(
           this,
           Invocation.getter(#streamQueries),
         ),
@@ -1397,7 +1417,7 @@ class MockAppDatabase extends _i1.Mock implements _i3.AppDatabase {
   @override
   _i4.DatabaseConnectionUser get resolvedEngine => (super.noSuchMethod(
         Invocation.getter(#resolvedEngine),
-        returnValue: _FakeDatabaseConnectionUser_29(
+        returnValue: _FakeDatabaseConnectionUser_30(
           this,
           Invocation.getter(#resolvedEngine),
         ),
@@ -1409,7 +1429,7 @@ class MockAppDatabase extends _i1.Mock implements _i3.AppDatabase {
           #createMigrator,
           [],
         ),
-        returnValue: _FakeMigrator_30(
+        returnValue: _FakeMigrator_31(
           this,
           Invocation.method(
             #createMigrator,
@@ -1529,7 +1549,7 @@ class MockAppDatabase extends _i1.Mock implements _i3.AppDatabase {
               ),
               (T v) => _i6.Future<T>.value(v),
             ) ??
-            _FakeFuture_31<T>(
+            _FakeFuture_32<T>(
               this,
               Invocation.method(
                 #doWhenOpened,
@@ -1546,7 +1566,7 @@ class MockAppDatabase extends _i1.Mock implements _i3.AppDatabase {
           #into,
           [table],
         ),
-        returnValue: _FakeInsertStatement_32<T, D>(
+        returnValue: _FakeInsertStatement_33<T, D>(
           this,
           Invocation.method(
             #into,
@@ -1563,7 +1583,7 @@ class MockAppDatabase extends _i1.Mock implements _i3.AppDatabase {
           #update,
           [table],
         ),
-        returnValue: _FakeUpdateStatement_33<Tbl, R>(
+        returnValue: _FakeUpdateStatement_34<Tbl, R>(
           this,
           Invocation.method(
             #update,
@@ -1583,7 +1603,7 @@ class MockAppDatabase extends _i1.Mock implements _i3.AppDatabase {
           [table],
           {#distinct: distinct},
         ),
-        returnValue: _FakeSimpleSelectStatement_34<T, R>(
+        returnValue: _FakeSimpleSelectStatement_35<T, R>(
           this,
           Invocation.method(
             #select,
@@ -1604,7 +1624,7 @@ class MockAppDatabase extends _i1.Mock implements _i3.AppDatabase {
           [table],
           {#distinct: distinct},
         ),
-        returnValue: _FakeJoinedSelectStatement_35<T, R>(
+        returnValue: _FakeJoinedSelectStatement_36<T, R>(
           this,
           Invocation.method(
             #selectOnly,
@@ -1622,7 +1642,7 @@ class MockAppDatabase extends _i1.Mock implements _i3.AppDatabase {
           #selectExpressions,
           [columns],
         ),
-        returnValue: _FakeBaseSelectStatement_36<_i4.TypedResult>(
+        returnValue: _FakeBaseSelectStatement_37<_i4.TypedResult>(
           this,
           Invocation.method(
             #selectExpressions,
@@ -1639,7 +1659,7 @@ class MockAppDatabase extends _i1.Mock implements _i3.AppDatabase {
           #delete,
           [table],
         ),
-        returnValue: _FakeDeleteStatement_37<T, D>(
+        returnValue: _FakeDeleteStatement_38<T, D>(
           this,
           Invocation.method(
             #delete,
@@ -1721,7 +1741,7 @@ class MockAppDatabase extends _i1.Mock implements _i3.AppDatabase {
             #readsFrom: readsFrom,
           },
         ),
-        returnValue: _FakeSelectable_38<_i4.QueryRow>(
+        returnValue: _FakeSelectable_39<_i4.QueryRow>(
           this,
           Invocation.method(
             #customSelect,
@@ -1749,7 +1769,7 @@ class MockAppDatabase extends _i1.Mock implements _i3.AppDatabase {
             #readsFrom: readsFrom,
           },
         ),
-        returnValue: _FakeSelectable_38<_i4.QueryRow>(
+        returnValue: _FakeSelectable_39<_i4.QueryRow>(
           this,
           Invocation.method(
             #customSelectQuery,
@@ -1801,7 +1821,7 @@ class MockAppDatabase extends _i1.Mock implements _i3.AppDatabase {
               ),
               (T v) => _i6.Future<T>.value(v),
             ) ??
-            _FakeFuture_31<T>(
+            _FakeFuture_32<T>(
               this,
               Invocation.method(
                 #transaction,
@@ -1828,7 +1848,7 @@ class MockAppDatabase extends _i1.Mock implements _i3.AppDatabase {
               ),
               (T v) => _i6.Future<T>.value(v),
             ) ??
-            _FakeFuture_31<T>(
+            _FakeFuture_32<T>(
               this,
               Invocation.method(
                 #exclusively,
@@ -1870,7 +1890,7 @@ class MockAppDatabase extends _i1.Mock implements _i3.AppDatabase {
               ),
               (T v) => _i6.Future<T>.value(v),
             ) ??
-            _FakeFuture_31<T>(
+            _FakeFuture_32<T>(
               this,
               Invocation.method(
                 #runWithInterceptor,
@@ -1895,7 +1915,7 @@ class MockAppDatabase extends _i1.Mock implements _i3.AppDatabase {
             #startIndex: startIndex,
           },
         ),
-        returnValue: _FakeGenerationContext_39(
+        returnValue: _FakeGenerationContext_40(
           this,
           Invocation.method(
             #$write,
@@ -1923,7 +1943,7 @@ class MockAppDatabase extends _i1.Mock implements _i3.AppDatabase {
           ],
           {#startIndex: startIndex},
         ),
-        returnValue: _FakeGenerationContext_39(
+        returnValue: _FakeGenerationContext_40(
           this,
           Invocation.method(
             #$writeInsertable,
@@ -1973,7 +1993,7 @@ class MockSupabaseClient extends _i1.Mock implements _i7.SupabaseClient {
   @override
   _i7.FunctionsClient get functions => (super.noSuchMethod(
         Invocation.getter(#functions),
-        returnValue: _FakeFunctionsClient_40(
+        returnValue: _FakeFunctionsClient_41(
           this,
           Invocation.getter(#functions),
         ),
@@ -1982,7 +2002,7 @@ class MockSupabaseClient extends _i1.Mock implements _i7.SupabaseClient {
   @override
   _i7.SupabaseStorageClient get storage => (super.noSuchMethod(
         Invocation.getter(#storage),
-        returnValue: _FakeSupabaseStorageClient_41(
+        returnValue: _FakeSupabaseStorageClient_42(
           this,
           Invocation.getter(#storage),
         ),
@@ -1991,7 +2011,7 @@ class MockSupabaseClient extends _i1.Mock implements _i7.SupabaseClient {
   @override
   _i7.RealtimeClient get realtime => (super.noSuchMethod(
         Invocation.getter(#realtime),
-        returnValue: _FakeRealtimeClient_42(
+        returnValue: _FakeRealtimeClient_43(
           this,
           Invocation.getter(#realtime),
         ),
@@ -2000,7 +2020,7 @@ class MockSupabaseClient extends _i1.Mock implements _i7.SupabaseClient {
   @override
   _i7.PostgrestClient get rest => (super.noSuchMethod(
         Invocation.getter(#rest),
-        returnValue: _FakePostgrestClient_43(
+        returnValue: _FakePostgrestClient_44(
           this,
           Invocation.getter(#rest),
         ),
@@ -2015,7 +2035,7 @@ class MockSupabaseClient extends _i1.Mock implements _i7.SupabaseClient {
   @override
   _i7.GoTrueClient get auth => (super.noSuchMethod(
         Invocation.getter(#auth),
-        returnValue: _FakeGoTrueClient_44(
+        returnValue: _FakeGoTrueClient_45(
           this,
           Invocation.getter(#auth),
         ),
@@ -2072,7 +2092,7 @@ class MockSupabaseClient extends _i1.Mock implements _i7.SupabaseClient {
           #from,
           [table],
         ),
-        returnValue: _FakeSupabaseQueryBuilder_45(
+        returnValue: _FakeSupabaseQueryBuilder_46(
           this,
           Invocation.method(
             #from,
@@ -2087,7 +2107,7 @@ class MockSupabaseClient extends _i1.Mock implements _i7.SupabaseClient {
           #schema,
           [schema],
         ),
-        returnValue: _FakeSupabaseQuerySchema_46(
+        returnValue: _FakeSupabaseQuerySchema_47(
           this,
           Invocation.method(
             #schema,
@@ -2111,7 +2131,7 @@ class MockSupabaseClient extends _i1.Mock implements _i7.SupabaseClient {
             #get: get,
           },
         ),
-        returnValue: _FakePostgrestFilterBuilder_47<T>(
+        returnValue: _FakePostgrestFilterBuilder_48<T>(
           this,
           Invocation.method(
             #rpc,
@@ -2135,7 +2155,7 @@ class MockSupabaseClient extends _i1.Mock implements _i7.SupabaseClient {
           [name],
           {#opts: opts},
         ),
-        returnValue: _FakeRealtimeChannel_48(
+        returnValue: _FakeRealtimeChannel_49(
           this,
           Invocation.method(
             #channel,
@@ -2201,7 +2221,7 @@ class MockGoTrueClient extends _i1.Mock implements _i7.GoTrueClient {
   @override
   _i7.GoTrueAdminApi get admin => (super.noSuchMethod(
         Invocation.getter(#admin),
-        returnValue: _FakeGoTrueAdminApi_49(
+        returnValue: _FakeGoTrueAdminApi_50(
           this,
           Invocation.getter(#admin),
         ),
@@ -2210,7 +2230,7 @@ class MockGoTrueClient extends _i1.Mock implements _i7.GoTrueClient {
   @override
   _i7.GoTrueMFAApi get mfa => (super.noSuchMethod(
         Invocation.getter(#mfa),
-        returnValue: _FakeGoTrueMFAApi_50(
+        returnValue: _FakeGoTrueMFAApi_51(
           this,
           Invocation.getter(#mfa),
         ),
@@ -2266,7 +2286,7 @@ class MockGoTrueClient extends _i1.Mock implements _i7.GoTrueClient {
             #captchaToken: captchaToken,
           },
         ),
-        returnValue: _i6.Future<_i7.AuthResponse>.value(_FakeAuthResponse_51(
+        returnValue: _i6.Future<_i7.AuthResponse>.value(_FakeAuthResponse_52(
           this,
           Invocation.method(
             #signInAnonymously,
@@ -2303,7 +2323,7 @@ class MockGoTrueClient extends _i1.Mock implements _i7.GoTrueClient {
             #channel: channel,
           },
         ),
-        returnValue: _i6.Future<_i7.AuthResponse>.value(_FakeAuthResponse_51(
+        returnValue: _i6.Future<_i7.AuthResponse>.value(_FakeAuthResponse_52(
           this,
           Invocation.method(
             #signUp,
@@ -2339,7 +2359,7 @@ class MockGoTrueClient extends _i1.Mock implements _i7.GoTrueClient {
             #captchaToken: captchaToken,
           },
         ),
-        returnValue: _i6.Future<_i7.AuthResponse>.value(_FakeAuthResponse_51(
+        returnValue: _i6.Future<_i7.AuthResponse>.value(_FakeAuthResponse_52(
           this,
           Invocation.method(
             #signInWithPassword,
@@ -2372,7 +2392,7 @@ class MockGoTrueClient extends _i1.Mock implements _i7.GoTrueClient {
             #queryParams: queryParams,
           },
         ),
-        returnValue: _i6.Future<_i7.OAuthResponse>.value(_FakeOAuthResponse_52(
+        returnValue: _i6.Future<_i7.OAuthResponse>.value(_FakeOAuthResponse_53(
           this,
           Invocation.method(
             #getOAuthSignInUrl,
@@ -2396,7 +2416,7 @@ class MockGoTrueClient extends _i1.Mock implements _i7.GoTrueClient {
           [authCode],
         ),
         returnValue: _i6.Future<_i7.AuthSessionUrlResponse>.value(
-            _FakeAuthSessionUrlResponse_53(
+            _FakeAuthSessionUrlResponse_54(
           this,
           Invocation.method(
             #exchangeCodeForSession,
@@ -2425,7 +2445,7 @@ class MockGoTrueClient extends _i1.Mock implements _i7.GoTrueClient {
             #captchaToken: captchaToken,
           },
         ),
-        returnValue: _i6.Future<_i7.AuthResponse>.value(_FakeAuthResponse_51(
+        returnValue: _i6.Future<_i7.AuthResponse>.value(_FakeAuthResponse_52(
           this,
           Invocation.method(
             #signInWithIdToken,
@@ -2493,7 +2513,7 @@ class MockGoTrueClient extends _i1.Mock implements _i7.GoTrueClient {
             #tokenHash: tokenHash,
           },
         ),
-        returnValue: _i6.Future<_i7.AuthResponse>.value(_FakeAuthResponse_51(
+        returnValue: _i6.Future<_i7.AuthResponse>.value(_FakeAuthResponse_52(
           this,
           Invocation.method(
             #verifyOTP,
@@ -2551,7 +2571,7 @@ class MockGoTrueClient extends _i1.Mock implements _i7.GoTrueClient {
           #refreshSession,
           [refreshToken],
         ),
-        returnValue: _i6.Future<_i7.AuthResponse>.value(_FakeAuthResponse_51(
+        returnValue: _i6.Future<_i7.AuthResponse>.value(_FakeAuthResponse_52(
           this,
           Invocation.method(
             #refreshSession,
@@ -2591,7 +2611,7 @@ class MockGoTrueClient extends _i1.Mock implements _i7.GoTrueClient {
           },
         ),
         returnValue:
-            _i6.Future<_i7.ResendResponse>.value(_FakeResendResponse_54(
+            _i6.Future<_i7.ResendResponse>.value(_FakeResendResponse_55(
           this,
           Invocation.method(
             #resend,
@@ -2613,7 +2633,7 @@ class MockGoTrueClient extends _i1.Mock implements _i7.GoTrueClient {
           #getUser,
           [jwt],
         ),
-        returnValue: _i6.Future<_i7.UserResponse>.value(_FakeUserResponse_55(
+        returnValue: _i6.Future<_i7.UserResponse>.value(_FakeUserResponse_56(
           this,
           Invocation.method(
             #getUser,
@@ -2633,7 +2653,7 @@ class MockGoTrueClient extends _i1.Mock implements _i7.GoTrueClient {
           [attributes],
           {#emailRedirectTo: emailRedirectTo},
         ),
-        returnValue: _i6.Future<_i7.UserResponse>.value(_FakeUserResponse_55(
+        returnValue: _i6.Future<_i7.UserResponse>.value(_FakeUserResponse_56(
           this,
           Invocation.method(
             #updateUser,
@@ -2650,7 +2670,7 @@ class MockGoTrueClient extends _i1.Mock implements _i7.GoTrueClient {
           #setSession,
           [refreshToken],
         ),
-        returnValue: _i6.Future<_i7.AuthResponse>.value(_FakeAuthResponse_51(
+        returnValue: _i6.Future<_i7.AuthResponse>.value(_FakeAuthResponse_52(
           this,
           Invocation.method(
             #setSession,
@@ -2671,7 +2691,7 @@ class MockGoTrueClient extends _i1.Mock implements _i7.GoTrueClient {
           {#storeSession: storeSession},
         ),
         returnValue: _i6.Future<_i7.AuthSessionUrlResponse>.value(
-            _FakeAuthSessionUrlResponse_53(
+            _FakeAuthSessionUrlResponse_54(
           this,
           Invocation.method(
             #getSessionFromUrl,
@@ -2740,7 +2760,7 @@ class MockGoTrueClient extends _i1.Mock implements _i7.GoTrueClient {
             #queryParams: queryParams,
           },
         ),
-        returnValue: _i6.Future<_i7.OAuthResponse>.value(_FakeOAuthResponse_52(
+        returnValue: _i6.Future<_i7.OAuthResponse>.value(_FakeOAuthResponse_53(
           this,
           Invocation.method(
             #getLinkIdentityUrl,
@@ -2782,7 +2802,7 @@ class MockGoTrueClient extends _i1.Mock implements _i7.GoTrueClient {
           #recoverSession,
           [jsonStr],
         ),
-        returnValue: _i6.Future<_i7.AuthResponse>.value(_FakeAuthResponse_51(
+        returnValue: _i6.Future<_i7.AuthResponse>.value(_FakeAuthResponse_52(
           this,
           Invocation.method(
             #recoverSession,
@@ -2849,7 +2869,7 @@ class MockGoTrueClient extends _i1.Mock implements _i7.GoTrueClient {
             stackTrace,
           ],
         ),
-        returnValue: _FakeObject_56(
+        returnValue: _FakeObject_57(
           this,
           Invocation.method(
             #notifyException,
@@ -2889,7 +2909,7 @@ class MockSupabaseStorageClient extends _i1.Mock
   @override
   _i8.Fetch get storageFetch => (super.noSuchMethod(
         Invocation.getter(#storageFetch),
-        returnValue: _FakeFetch_57(
+        returnValue: _FakeFetch_58(
           this,
           Invocation.getter(#storageFetch),
         ),
@@ -2910,7 +2930,7 @@ class MockSupabaseStorageClient extends _i1.Mock
           #from,
           [id],
         ),
-        returnValue: _FakeStorageFileApi_58(
+        returnValue: _FakeStorageFileApi_59(
           this,
           Invocation.method(
             #from,
@@ -2943,7 +2963,7 @@ class MockSupabaseStorageClient extends _i1.Mock
           #getBucket,
           [id],
         ),
-        returnValue: _i6.Future<_i7.Bucket>.value(_FakeBucket_59(
+        returnValue: _i6.Future<_i7.Bucket>.value(_FakeBucket_60(
           this,
           Invocation.method(
             #getBucket,
@@ -3214,7 +3234,7 @@ class MockStorageFileApi extends _i1.Mock implements _i7.StorageFileApi {
           [path],
         ),
         returnValue: _i6.Future<_i7.SignedUploadURLResponse>.value(
-            _FakeSignedUploadURLResponse_60(
+            _FakeSignedUploadURLResponse_61(
           this,
           Invocation.method(
             #createSignedUploadUrl,
@@ -3419,7 +3439,7 @@ class MockStorageFileApi extends _i1.Mock implements _i7.StorageFileApi {
           #info,
           [path],
         ),
-        returnValue: _i6.Future<_i7.FileObjectV2>.value(_FakeFileObjectV2_61(
+        returnValue: _i6.Future<_i7.FileObjectV2>.value(_FakeFileObjectV2_62(
           this,
           Invocation.method(
             #info,

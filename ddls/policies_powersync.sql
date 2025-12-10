@@ -601,12 +601,50 @@ CREATE POLICY "Users can update own recipe tags"
 
 CREATE POLICY "Users can update household recipe tags"
     ON public.recipe_tags
-    FOR UPDATE 
+    FOR UPDATE
     USING (
         household_id IN (
-            SELECT household_id 
-            FROM household_members 
-            WHERE user_id = auth.uid() 
+            SELECT household_id
+            FROM household_members
+            WHERE user_id = auth.uid()
             AND is_active = 1
         )
+    );
+
+-- CLIPPINGS -------------------------------
+ALTER TABLE clippings ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "Users can view clippings"
+    ON clippings
+    FOR SELECT
+    USING (
+        auth.uid() = user_id
+        OR (household_id IS NOT NULL AND is_household_member(household_id, auth.uid()))
+    );
+
+CREATE POLICY "Users can insert clippings"
+    ON clippings
+    FOR INSERT
+    WITH CHECK (
+        auth.uid() = user_id
+        OR (household_id IS NOT NULL AND is_household_member(household_id, auth.uid()))
+    );
+
+CREATE POLICY "Users can update clippings"
+    ON clippings
+    FOR UPDATE
+    USING (
+        auth.uid() = user_id
+        OR (household_id IS NOT NULL AND is_household_member(household_id, auth.uid()))
+    )
+    WITH CHECK (
+        household_id IS NULL OR is_household_member(household_id, auth.uid())
+    );
+
+CREATE POLICY "Users can delete clippings"
+    ON clippings
+    FOR DELETE
+    USING (
+        auth.uid() = user_id
+        OR (household_id IS NOT NULL AND is_household_member(household_id, auth.uid()))
     );

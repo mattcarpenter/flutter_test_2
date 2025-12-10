@@ -96,6 +96,7 @@ dependencies:
   flutter_timezone: ^3.0.1
   app_settings: ^5.1.1
   just_audio: ^0.9.42
+  flutter_quill: ^11.5.0
 
 dev_dependencies:
   flutter_test:

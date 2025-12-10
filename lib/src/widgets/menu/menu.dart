@@ -84,9 +84,22 @@ class Menu extends ConsumerWidget {
         ),
         MenuItem(
           index: 5,
+          title: 'Clippings',
+          icon: CupertinoIcons.doc_text,
+          isActive: selectedIndex == 5,
+          color: primaryColor,
+          textColor: textColor,
+          activeTextColor: activeTextColor,
+          backgroundColor: backgroundColor,
+          onTap: (_) {
+            onRouteGo('/clippings');
+          },
+        ),
+        MenuItem(
+          index: 6,
           title: '🧪Labs',
           icon: CupertinoIcons.settings,
-          isActive: selectedIndex == 5,
+          isActive: selectedIndex == 6,
           color: primaryColor,
           textColor: textColor,
           activeTextColor: activeTextColor,

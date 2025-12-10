@@ -3,6 +3,7 @@ import 'package:cupertino_sidebar/cupertino_sidebar.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:flutter_quill/flutter_quill.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
@@ -15,6 +16,8 @@ import 'package:recipe_app/src/mobile/utils/adaptive_sheet_page.dart';
 import '../color_theme.dart';
 import '../features/pantry/views/pantry_root.dart';
 import '../features/pantry/views/pantry_sub_page.dart';
+import '../features/clippings/views/clippings_root.dart';
+import '../features/clippings/views/clipping_editor_page.dart';
 import '../features/labs/views/auth_sub_page.dart';
 import '../features/labs/views/labs_root.dart';
 import '../features/labs/views/labs_sub_page.dart';
@@ -114,6 +117,7 @@ class _AdaptiveApp2State extends ConsumerState<AdaptiveApp2> {
           GlobalMaterialLocalizations.delegate,
           GlobalWidgetsLocalizations.delegate,
           GlobalCupertinoLocalizations.delegate,
+          FlutterQuillLocalizations.delegate,
         ],
         supportedLocales: const [
           Locale('en', ''),
@@ -131,6 +135,15 @@ class _AdaptiveApp2State extends ConsumerState<AdaptiveApp2> {
         routeInformationParser: router.routeInformationParser,
         routerDelegate: router.routerDelegate,
         routeInformationProvider: router.routeInformationProvider,
+        localizationsDelegates: const [
+          GlobalMaterialLocalizations.delegate,
+          GlobalWidgetsLocalizations.delegate,
+          GlobalCupertinoLocalizations.delegate,
+          FlutterQuillLocalizations.delegate,
+        ],
+        supportedLocales: const [
+          Locale('en', ''),
+        ],
         themeMode: themeMode,
         theme: AppTheme.materialLightTheme,
         darkTheme: AppTheme.materialDarkTheme,
@@ -453,6 +466,54 @@ class _AdaptiveApp2State extends ConsumerState<AdaptiveApp2> {
             pageBuilder: (context, state) => _platformPage(
               state: state,
               child: SettingsPage(
+                onMenuPressed: () {
+                  _mainPageShellKey.currentState?.toggleDrawer();
+                },
+              ),
+            ),
+          ),
+        ],
+      ),
+      // ─────────────────────────────────────────────────────────────
+      // Clippings (no bottom nav)
+      // ─────────────────────────────────────────────────────────────
+      ShellRoute(
+        pageBuilder: (BuildContext context, GoRouterState state, Widget child) {
+          return CustomTransitionPage<void>(
+            key: state.pageKey,
+            child: child,
+            transitionDuration: const Duration(milliseconds: 400),
+            reverseTransitionDuration: const Duration(milliseconds: 400),
+            transitionsBuilder: (context, animation, secondaryAnimation, child) =>
+                CupertinoTabPageTransition(
+                  animation: animation,
+                  child: isTablet
+                      ? child
+                      : MainPageShell(
+                    key: _mainPageShellKey,
+                    child: child,
+                    showBottomNavBar: false,
+                  ),
+                ),
+          );
+        },
+        routes: [
+          GoRoute(
+            path: '/clippings',
+            routes: [
+              GoRoute(
+                path: ':id',
+                pageBuilder: (context, state) => _platformPage(
+                  state: state,
+                  child: ClippingEditorPage(
+                    clippingId: state.pathParameters['id']!,
+                  ),
+                ),
+              ),
+            ],
+            pageBuilder: (context, state) => _platformPage(
+              state: state,
+              child: ClippingsTab(
                 onMenuPressed: () {
                   _mainPageShellKey.currentState?.toggleDrawer();
                 },

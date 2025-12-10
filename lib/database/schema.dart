@@ -23,6 +23,7 @@ const shoppingListItemsTable = 'shopping_list_items';
 const mealPlansTable = 'meal_plans';
 const userSubscriptionsTable = 'user_subscriptions';
 const timersTable = 'timers';
+const clippingsTable = 'clippings';
 
 Schema schema = const Schema(([
   Table.localOnly(uploadQueuesTable, [
@@ -260,5 +261,14 @@ Schema schema = const Schema(([
     Column.text('revenuecat_customer_id'),
     Column.integer('created_at'),
     Column.integer('updated_at'),
+  ]),
+  Table(clippingsTable, [
+    Column.text('title'),
+    Column.text('content'),
+    Column.text('user_id'),
+    Column.text('household_id'),
+    Column.integer('created_at'),
+    Column.integer('updated_at'),
+    Column.integer('deleted_at'),
   ]),
 ]));
