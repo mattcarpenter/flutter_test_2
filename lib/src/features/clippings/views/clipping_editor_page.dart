@@ -49,6 +49,10 @@ class _ClippingEditorPageState extends ConsumerState<ClippingEditorPage>
     _titleController.addListener(_onTextChanged);
     _contentController.addListener(_onTextChanged);
 
+    // Listen to focus changes to update toolbar visibility
+    _titleFocusNode.addListener(_onFocusChanged);
+    _contentFocusNode.addListener(_onFocusChanged);
+
     _loadClipping();
   }
 
@@ -64,12 +68,19 @@ class _ClippingEditorPageState extends ConsumerState<ClippingEditorPage>
 
     _titleController.removeListener(_onTextChanged);
     _contentController.removeListener(_onTextChanged);
+    _titleFocusNode.removeListener(_onFocusChanged);
+    _contentFocusNode.removeListener(_onFocusChanged);
 
     _titleController.dispose();
     _contentController.dispose();
     _titleFocusNode.dispose();
     _contentFocusNode.dispose();
     super.dispose();
+  }
+
+  void _onFocusChanged() {
+    // Trigger rebuild to update toolbar visibility
+    setState(() {});
   }
 
   @override
@@ -214,6 +225,9 @@ class _ClippingEditorPageState extends ConsumerState<ClippingEditorPage>
     return viewInsets.bottom > 0;
   }
 
+  /// Returns true if any text field is focused
+  bool get _isAnyFieldFocused => _titleFocusNode.hasFocus || _contentFocusNode.hasFocus;
+
   @override
   Widget build(BuildContext context) {
     final keyboardVisible = _isKeyboardVisible(context);
@@ -306,8 +320,8 @@ class _ClippingEditorPageState extends ConsumerState<ClippingEditorPage>
               ),
             ),
 
-            // Toolbar (shown when software keyboard is visible)
-            if (keyboardVisible)
+            // Toolbar (shown when any text field is focused - works with hardware keyboard too)
+            if (_isAnyFieldFocused)
               _buildToolbar(context),
           ],
         ),
