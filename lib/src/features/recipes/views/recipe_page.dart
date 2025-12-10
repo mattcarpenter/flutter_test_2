@@ -366,7 +366,7 @@ class _RecipePageState extends ConsumerState<RecipePage> {
         color: AppColors.of(context).background,
       ),
       child: Padding(
-        padding: const EdgeInsets.fromLTRB(16, 0, 16, 16), // No top padding
+        padding: const EdgeInsets.fromLTRB(16, 0, 16, 40), // Extra bottom padding prevents scroll oscillation on iPad
         child: RecipeView(
           recipeId: widget.recipeId,
           showHeroImage: false, // Tell RecipeView not to show image gallery
