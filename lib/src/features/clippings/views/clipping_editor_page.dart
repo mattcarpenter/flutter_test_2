@@ -205,7 +205,13 @@ class _ClippingEditorPageState extends ConsumerState<ClippingEditorPage>
 
   /// Returns true if the software keyboard is currently visible
   bool _isKeyboardVisible(BuildContext context) {
-    return MediaQuery.of(context).viewInsets.bottom > 0;
+    // Register dependency on MediaQuery to trigger rebuilds when keyboard appears/disappears
+    // (we don't use this value directly because Scaffold sets viewInsets.bottom to 0)
+    MediaQuery.of(context);
+
+    // Get raw system view insets, bypassing Scaffold's MediaQuery modifications
+    final viewInsets = MediaQueryData.fromView(View.of(context)).viewInsets;
+    return viewInsets.bottom > 0;
   }
 
   @override
