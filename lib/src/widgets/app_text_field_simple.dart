@@ -29,6 +29,7 @@ class AppTextFieldSimple extends StatefulWidget {
   final Widget? suffix;
   final Widget? prefix;
   final String? Function(String?)? validator;
+  final bool autocorrect;
 
   const AppTextFieldSimple({
     super.key,
@@ -54,6 +55,7 @@ class AppTextFieldSimple extends StatefulWidget {
     this.suffix,
     this.prefix,
     this.validator,
+    this.autocorrect = true,
   });
 
   @override
@@ -118,6 +120,7 @@ class _AppTextFieldSimpleState extends State<AppTextFieldSimple> {
       enabled: widget.enabled,
       keyboardType: widget.keyboardType,
       obscureText: widget.obscureText,
+      autocorrect: widget.autocorrect,
       maxLines: effectiveMaxLines,
       minLines: widget.multiline ? widget.minLines : 1,
       onChanged: (value) {

@@ -295,6 +295,7 @@ class _CreateInviteFormState extends ConsumerState<CreateInviteForm> {
             controller: _emailController,
             placeholder: 'Email address',
             keyboardType: TextInputType.emailAddress,
+            autocorrect: false,
             autofocus: true,
             enabled: !_isCreating,
             onSubmitted: (_) => _createInvite(),
