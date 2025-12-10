@@ -138,7 +138,7 @@ class _ClippingEditorPageState extends ConsumerState<ClippingEditorPage>
   Future<void> _saveChanges() async {
     if (!_isDirty || _isSaving) return;
 
-    setState(() => _isSaving = true);
+    _isSaving = true;
 
     try {
       final title = _extractTitle();
@@ -156,9 +156,7 @@ class _ClippingEditorPageState extends ConsumerState<ClippingEditorPage>
     } catch (e) {
       AppLogger.error('Failed to auto-save clipping', e);
     } finally {
-      if (mounted) {
-        setState(() => _isSaving = false);
-      }
+      _isSaving = false;
     }
   }
 
@@ -205,16 +203,18 @@ class _ClippingEditorPageState extends ConsumerState<ClippingEditorPage>
     );
   }
 
-  bool get _isAnyFocused => _titleFocusNode.hasFocus || _contentFocusNode.hasFocus;
+  /// Returns true if the software keyboard is currently visible
+  bool _isKeyboardVisible(BuildContext context) {
+    return MediaQuery.of(context).viewInsets.bottom > 0;
+  }
 
   @override
   Widget build(BuildContext context) {
+    final keyboardVisible = _isKeyboardVisible(context);
+
     return CupertinoPageScaffold(
       navigationBar: CupertinoNavigationBar(
-        middle: _isSaving
-            ? const CupertinoActivityIndicator()
-            : null,
-        trailing: _buildTrailingButton(context),
+        trailing: _buildTrailingButton(context, keyboardVisible),
         backgroundColor: AppColors.of(context).background,
         border: null,
       ),
@@ -226,7 +226,7 @@ class _ClippingEditorPageState extends ConsumerState<ClippingEditorPage>
               child: GestureDetector(
                 onTap: () {
                   // Tapping empty area focuses content
-                  if (!_isAnyFocused) {
+                  if (!_contentFocusNode.hasFocus && !_titleFocusNode.hasFocus) {
                     _contentFocusNode.requestFocus();
                   }
                 },
@@ -300,8 +300,8 @@ class _ClippingEditorPageState extends ConsumerState<ClippingEditorPage>
               ),
             ),
 
-            // Toolbar (shown when content is focused)
-            if (_contentFocusNode.hasFocus || _titleFocusNode.hasFocus)
+            // Toolbar (shown when software keyboard is visible)
+            if (keyboardVisible)
               _buildToolbar(context),
           ],
         ),
@@ -309,9 +309,9 @@ class _ClippingEditorPageState extends ConsumerState<ClippingEditorPage>
     );
   }
 
-  Widget _buildTrailingButton(BuildContext context) {
-    if (_isAnyFocused) {
-      // Show "Done" button when focused
+  Widget _buildTrailingButton(BuildContext context, bool keyboardVisible) {
+    if (keyboardVisible) {
+      // Show "Done" button when software keyboard is visible
       return CupertinoButton(
         padding: EdgeInsets.zero,
         onPressed: _dismissKeyboard,
@@ -324,7 +324,7 @@ class _ClippingEditorPageState extends ConsumerState<ClippingEditorPage>
         ),
       );
     } else {
-      // Show overflow menu when not focused
+      // Show overflow menu when no software keyboard
       return ContextMenuWidget(
         menuProvider: (_) => Menu(
           children: [
