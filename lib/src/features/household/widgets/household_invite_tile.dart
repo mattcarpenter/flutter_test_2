@@ -91,46 +91,47 @@ class HouseholdInviteTile extends StatelessWidget {
   Widget _buildInfoRow(BuildContext context) {
     final hasCode = invite.inviteType == HouseholdInviteType.code;
 
-    return Row(
-      children: [
-        if (hasCode) ...[
-          _buildCodeChip(context),
-          SizedBox(width: AppSpacing.sm),
-          GestureDetector(
-            onTap: () => _copyToClipboard(context),
-            child: Icon(
-              CupertinoIcons.doc_on_clipboard,
-              size: 16,
-              color: AppColors.of(context).textTertiary,
-            ),
-          ),
-          SizedBox(width: AppSpacing.md),
-          Text(
-            '•',
-            style: AppTypography.caption.copyWith(
-              color: AppColors.of(context).textTertiary,
-            ),
-          ),
-          SizedBox(width: AppSpacing.md),
-        ],
-        Expanded(
-          child: Text(
-            'Expires: ${_formatDate(invite.expiresAt)}',
-            style: AppTypography.caption.copyWith(
-              color: AppColors.of(context).textTertiary,
-            ),
-          ),
-        ),
-      ],
+    final expiryText = Text(
+      'Expires: ${_formatDate(invite.expiresAt)}',
+      style: AppTypography.caption.copyWith(
+        color: AppColors.of(context).textTertiary,
+      ),
     );
+
+    if (hasCode) {
+      // For code invites, stack vertically to avoid squishing
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Flexible(child: _buildCodeChip(context)),
+              SizedBox(width: AppSpacing.sm),
+              GestureDetector(
+                onTap: () => _copyToClipboard(context),
+                child: Icon(
+                  CupertinoIcons.doc_on_clipboard,
+                  size: 16,
+                  color: AppColors.of(context).textTertiary,
+                ),
+              ),
+            ],
+          ),
+          SizedBox(height: AppSpacing.xs),
+          expiryText,
+        ],
+      );
+    }
+
+    return expiryText;
   }
 
   Widget _buildCodeChip(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 3),
+      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
       decoration: BoxDecoration(
         color: AppColors.of(context).surfaceVariant,
-        borderRadius: BorderRadius.circular(4),
+        borderRadius: BorderRadius.circular(6),
       ),
       child: Text(
         invite.inviteCode,
@@ -242,7 +243,7 @@ class HouseholdInviteTile extends StatelessWidget {
           ),
         if (onRevoke != null)
           CupertinoButton(
-            padding: EdgeInsets.symmetric(horizontal: AppSpacing.sm, vertical: AppSpacing.xs),
+            padding: EdgeInsets.symmetric(vertical: AppSpacing.xs),
             onPressed: invite.isRevoking ? null : onRevoke,
             child: invite.isRevoking
                 ? CupertinoActivityIndicator(color: AppColors.of(context).error)
