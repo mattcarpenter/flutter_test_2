@@ -252,7 +252,6 @@ class _ClippingEditorPageState extends ConsumerState<ClippingEditorPage>
                 },
                 behavior: HitTestBehavior.opaque,
                 child: SingleChildScrollView(
-                  keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
                   padding: EdgeInsets.all(AppSpacing.lg),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
