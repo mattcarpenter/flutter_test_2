@@ -4,6 +4,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../../../database/database.dart';
+import '../../../providers/household_provider.dart';
+import '../../../services/logging/app_logger.dart';
 import '../../../mobile/utils/adaptive_sliver_page.dart';
 import '../../../providers/clippings_provider.dart';
 import '../../../providers/clippings_filter_sort_provider.dart';
@@ -212,9 +214,15 @@ class ClippingsTab extends ConsumerWidget {
     final userId = Supabase.instance.client.auth.currentUser?.id;
     if (userId == null) return;
 
+    // Get the current household ID
+    final householdState = ref.read(householdNotifierProvider);
+    final householdId = householdState.currentHousehold?.id;
+    AppLogger.debug('Creating clipping with householdId: $householdId (household: ${householdState.currentHousehold?.name})');
+
     // Create a new empty clipping
     final newId = await ref.read(clippingsProvider.notifier).addClipping(
           userId: userId,
+          householdId: householdId,
           title: null,
           content: null,
         );

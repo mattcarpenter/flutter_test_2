@@ -240,10 +240,12 @@ class _ClippingEditorPageState extends ConsumerState<ClippingEditorPage>
       ),
       backgroundColor: AppColors.of(context).background,
       child: SafeArea(
-        child: Column(
-          children: [
-            Expanded(
-              child: GestureDetector(
+        child: Material(
+          color: Colors.transparent,
+          child: Column(
+            children: [
+              Expanded(
+                child: GestureDetector(
                 onTap: () {
                   // Tapping empty area focuses content
                   if (!_contentFocusNode.hasFocus && !_titleFocusNode.hasFocus) {
@@ -323,6 +325,7 @@ class _ClippingEditorPageState extends ConsumerState<ClippingEditorPage>
             if (_isAnyFieldFocused)
               _buildToolbar(context),
           ],
+          ),
         ),
       ),
     );
