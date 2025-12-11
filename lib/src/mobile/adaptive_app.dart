@@ -162,8 +162,11 @@ class _AdaptiveApp2State extends ConsumerState<AdaptiveApp2> {
     final _shoppingNavKey  = GlobalKey<NavigatorState>(debugLabel: 'shoppingNavKey');
     final _mealPlansNavKey = GlobalKey<NavigatorState>(debugLabel: 'mealPlansNavKey');
     final _pantryNavKey  = GlobalKey<NavigatorState>(debugLabel: 'pantryNavKey');
-    final _mainPageShellKey = GlobalKey<MainPageShellState>(debugLabel: 'mainPageShellKey');
+    final _labsPageShellKey = GlobalKey<MainPageShellState>(debugLabel: 'labsPageShellKey');
+    final _authPageShellKey = GlobalKey<MainPageShellState>(debugLabel: 'authPageShellKey');
     final _householdPageShellKey = GlobalKey<MainPageShellState>(debugLabel: 'householdPageShellKey');
+    final _settingsPageShellKey = GlobalKey<MainPageShellState>(debugLabel: 'settingsPageShellKey');
+    final _clippingsPageShellKey = GlobalKey<MainPageShellState>(debugLabel: 'clippingsPageShellKey');
 
     final nonTabRoutes = [
       ShellRoute(
@@ -179,7 +182,7 @@ class _AdaptiveApp2State extends ConsumerState<AdaptiveApp2> {
                   child: isTablet
                       ? child
                       : MainPageShell(
-                    key: _mainPageShellKey,
+                    key: _labsPageShellKey,
                     child: child,
                     showBottomNavBar: false,
                   ),
@@ -209,7 +212,7 @@ class _AdaptiveApp2State extends ConsumerState<AdaptiveApp2> {
               state: state,
               child: LabsTab(
                 onMenuPressed: () {
-                  _mainPageShellKey.currentState?.toggleDrawer();
+                  _labsPageShellKey.currentState?.toggleDrawer();
                 },
               ),
             ),
@@ -229,7 +232,7 @@ class _AdaptiveApp2State extends ConsumerState<AdaptiveApp2> {
                   child: isTablet
                       ? child
                       : MainPageShell(
-                    key: _mainPageShellKey,
+                    key: _authPageShellKey,
                     child: child,
                     showBottomNavBar: false,
                   ),
@@ -266,7 +269,7 @@ class _AdaptiveApp2State extends ConsumerState<AdaptiveApp2> {
               state: state,
               child: AuthLandingPage(
                 onMenuPressed: () {
-                  _mainPageShellKey.currentState?.toggleDrawer();
+                  _authPageShellKey.currentState?.toggleDrawer();
                 },
               ),
             ),
@@ -320,7 +323,7 @@ class _AdaptiveApp2State extends ConsumerState<AdaptiveApp2> {
                   child: isTablet
                       ? child
                       : MainPageShell(
-                    key: _mainPageShellKey,
+                    key: _settingsPageShellKey,
                     child: child,
                     showBottomNavBar: false,
                   ),
@@ -467,7 +470,7 @@ class _AdaptiveApp2State extends ConsumerState<AdaptiveApp2> {
               state: state,
               child: SettingsPage(
                 onMenuPressed: () {
-                  _mainPageShellKey.currentState?.toggleDrawer();
+                  _settingsPageShellKey.currentState?.toggleDrawer();
                 },
               ),
             ),
@@ -490,7 +493,7 @@ class _AdaptiveApp2State extends ConsumerState<AdaptiveApp2> {
                   child: isTablet
                       ? child
                       : MainPageShell(
-                    key: _mainPageShellKey,
+                    key: _clippingsPageShellKey,
                     child: child,
                     showBottomNavBar: false,
                   ),
@@ -515,7 +518,7 @@ class _AdaptiveApp2State extends ConsumerState<AdaptiveApp2> {
               state: state,
               child: ClippingsTab(
                 onMenuPressed: () {
-                  _mainPageShellKey.currentState?.toggleDrawer();
+                  _clippingsPageShellKey.currentState?.toggleDrawer();
                 },
               ),
             ),
