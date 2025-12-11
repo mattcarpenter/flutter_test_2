@@ -1,5 +1,6 @@
 import '../../../../database/database.dart';
 import '../../../providers/clippings_filter_sort_provider.dart';
+import '../utils/quill_text_extractor.dart';
 
 extension ClippingsFiltering on List<ClippingEntry> {
   List<ClippingEntry> applySearch(String query) {
@@ -8,7 +9,8 @@ extension ClippingsFiltering on List<ClippingEntry> {
     final lowerQuery = query.toLowerCase();
     return where((clipping) {
       final title = clipping.title?.toLowerCase() ?? '';
-      final content = clipping.content?.toLowerCase() ?? '';
+      // Extract plain text from Quill Delta JSON for searching
+      final content = extractPlainTextFromQuillJson(clipping.content).toLowerCase();
       return title.contains(lowerQuery) || content.contains(lowerQuery);
     }).toList();
   }

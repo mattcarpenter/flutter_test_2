@@ -4,6 +4,7 @@ import '../../../../database/database.dart';
 import '../../../theme/colors.dart';
 import '../../../theme/spacing.dart';
 import '../../../theme/typography.dart';
+import '../utils/quill_text_extractor.dart';
 
 /// A card widget for displaying a clipping in a grid layout.
 /// Shows a preview area on top and the title below.
@@ -20,26 +21,7 @@ class ClippingCard extends StatelessWidget {
   });
 
   String _getPreviewText() {
-    final content = clipping.content;
-    if (content == null || content.isEmpty) return '';
-
-    // Try to extract plain text from Quill Delta JSON
-    try {
-      // Simple extraction - just remove JSON formatting for preview
-      if (content.startsWith('[') || content.startsWith('{')) {
-        // It's JSON, try to extract text
-        final RegExp textPattern = RegExp(r'"insert"\s*:\s*"([^"]*)"');
-        final matches = textPattern.allMatches(content);
-        final buffer = StringBuffer();
-        for (final match in matches) {
-          buffer.write(match.group(1));
-        }
-        return buffer.toString().replaceAll('\\n', '\n').trim();
-      }
-      return content;
-    } catch (_) {
-      return content;
-    }
+    return extractPlainTextFromQuillJson(clipping.content);
   }
 
   String _getDisplayTitle() {
