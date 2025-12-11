@@ -262,12 +262,12 @@ class _ClippingEditorPageState extends ConsumerState<ClippingEditorPage>
                       TextField(
                         controller: _titleController,
                         focusNode: _titleFocusNode,
-                        style: AppTypography.h3.copyWith(
+                        style: AppTypography.h1.copyWith(
                           color: AppColors.of(context).textPrimary,
                         ),
                         decoration: InputDecoration(
                           hintText: 'Title',
-                          hintStyle: AppTypography.h3.copyWith(
+                          hintStyle: AppTypography.h1.copyWith(
                             color: AppColors.of(context).textTertiary,
                           ),
                           border: InputBorder.none,
@@ -317,7 +317,7 @@ class _ClippingEditorPageState extends ConsumerState<ClippingEditorPage>
                           requestKeyboardFocusOnCheckListChanged: false,
                           customStyles: quill.DefaultStyles(
                             paragraph: quill.DefaultTextBlockStyle(
-                              AppTypography.body.copyWith(
+                              AppTypography.bodyLarge.copyWith(
                                 color: AppColors.of(context).textPrimary,
                                 height: 1.5,
                               ),
@@ -327,7 +327,7 @@ class _ClippingEditorPageState extends ConsumerState<ClippingEditorPage>
                               null,
                             ),
                             lists: quill.DefaultListBlockStyle(
-                              AppTypography.body.copyWith(
+                              AppTypography.bodyLarge.copyWith(
                                 color: AppColors.of(context).textPrimary,
                                 height: 1.5,
                               ),
@@ -339,7 +339,7 @@ class _ClippingEditorPageState extends ConsumerState<ClippingEditorPage>
                               _ClippingCheckboxBuilder(AppColors.of(context).textPrimary),
                             ),
                             leading: quill.DefaultTextBlockStyle(
-                              AppTypography.body.copyWith(
+                              AppTypography.bodyLarge.copyWith(
                                 color: AppColors.of(context).textPrimary,
                                 height: 1.5,
                               ),
@@ -349,7 +349,7 @@ class _ClippingEditorPageState extends ConsumerState<ClippingEditorPage>
                               null,
                             ),
                             placeHolder: quill.DefaultTextBlockStyle(
-                              AppTypography.body.copyWith(
+                              AppTypography.bodyLarge.copyWith(
                                 color: AppColors.of(context).textTertiary,
                                 height: 1.5,
                               ),
