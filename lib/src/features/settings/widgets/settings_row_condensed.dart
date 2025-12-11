@@ -57,6 +57,7 @@ class _SettingsRowCondensedState extends State<SettingsRowCondensed> {
       ),
       padding: const EdgeInsets.symmetric(horizontal: 16),
       child: Row(
+        crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           // Optional leading icon
           if (widget.leading != null) ...[

@@ -94,12 +94,11 @@ class SettingsGroupCondensed extends StatelessWidget {
             ),
           ],
 
-          // Container with border and rounded corners
+          // Container with rounded corners
           Container(
             decoration: BoxDecoration(
               color: colors.input,
               borderRadius: BorderRadius.circular(_borderRadius),
-              border: Border.all(color: colors.border, width: 1.0),
             ),
             clipBehavior: Clip.antiAlias,
             child: Column(
