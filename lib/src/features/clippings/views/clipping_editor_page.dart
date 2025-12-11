@@ -314,6 +314,7 @@ class _ClippingEditorPageState extends ConsumerState<ClippingEditorPage>
                           autoFocus: false,
                           expands: false,
                           scrollable: false,
+                          requestKeyboardFocusOnCheckListChanged: false,
                           customStyles: quill.DefaultStyles(
                             paragraph: quill.DefaultTextBlockStyle(
                               AppTypography.body.copyWith(
@@ -443,11 +444,11 @@ class _ClippingEditorPageState extends ConsumerState<ClippingEditorPage>
             showHeaderStyle: false,
             showListBullets: true,
             showListNumbers: true,
-            showListCheck: true,
+            showListCheck: false,
             showCodeBlock: false,
             showQuote: false,
             showIndent: false,
-            showLink: true,
+            showLink: false,
             showSearchButton: false,
             showSubscript: false,
             showSuperscript: false,
@@ -506,17 +507,22 @@ class _ClippingCheckboxBuilder extends quill.QuillCheckboxBuilder {
     required bool isChecked,
     required ValueChanged<bool> onChanged,
   }) {
-    return GestureDetector(
-      onTap: () => onChanged(!isChecked),
-      child: Container(
-        alignment: AlignmentDirectional.centerEnd,
-        padding: const EdgeInsetsDirectional.only(end: 8),
-        child: Icon(
-          isChecked
-              ? CupertinoIcons.checkmark_square_fill
-              : CupertinoIcons.square,
-          size: 20,
-          color: color,
+    return MouseRegion(
+      cursor: SystemMouseCursors.click,
+      child: GestureDetector(
+        behavior: HitTestBehavior.opaque,
+        onTapDown: (_) {}, // Absorb to prevent editor from handling
+        onTap: () => onChanged(!isChecked),
+        child: Container(
+          alignment: AlignmentDirectional.centerEnd,
+          padding: const EdgeInsetsDirectional.only(end: 8),
+          child: Icon(
+            isChecked
+                ? CupertinoIcons.checkmark_square_fill
+                : CupertinoIcons.square,
+            size: 20,
+            color: color,
+          ),
         ),
       ),
     );
