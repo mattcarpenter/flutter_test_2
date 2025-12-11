@@ -12,6 +12,7 @@ import '../../../services/logging/app_logger.dart';
 import '../../../theme/colors.dart';
 import '../../../theme/spacing.dart';
 import '../../../theme/typography.dart';
+import '../widgets/link_modal.dart';
 
 class ClippingEditorPage extends ConsumerStatefulWidget {
   final String clippingId;
@@ -212,6 +213,21 @@ class _ClippingEditorPageState extends ConsumerState<ClippingEditorPage>
         ],
       ),
     );
+  }
+
+  Future<void> _showLinkModal(BuildContext context) async {
+    // Get current selection info
+    final initialTextLink = quill.QuillTextLink.prepare(_contentController);
+
+    final result = await showLinkModal(
+      context,
+      initialText: initialTextLink.text,
+      initialLink: initialTextLink.link,
+    );
+
+    if (result != null) {
+      result.submit(_contentController);
+    }
   }
 
   /// Returns true if the software keyboard is currently visible
@@ -446,7 +462,7 @@ class _ClippingEditorPageState extends ConsumerState<ClippingEditorPage>
             showHeaderStyle: false,
             showListBullets: true,
             showListNumbers: true,
-            showListCheck: false,
+            showListCheck: true,
             showCodeBlock: false,
             showQuote: false,
             showIndent: false,
@@ -466,6 +482,19 @@ class _ClippingEditorPageState extends ConsumerState<ClippingEditorPage>
             showClipboardPaste: false,
             toolbarIconAlignment: WrapAlignment.start,
             toolbarSectionSpacing: AppSpacing.sm,
+            customButtons: [
+              quill.QuillToolbarCustomButtonOptions(
+                icon: Icon(
+                  CupertinoIcons.link,
+                  size: 20,
+                  color: quill.QuillTextLink.isSelected(_contentController)
+                      ? AppColors.of(context).primary
+                      : AppColors.of(context).textSecondary,
+                ),
+                tooltip: 'Add link',
+                onPressed: () => _showLinkModal(context),
+              ),
+            ],
             buttonOptions: quill.QuillSimpleToolbarButtonOptions(
               base: quill.QuillToolbarBaseButtonOptions(
                 iconTheme: quill.QuillIconTheme(
