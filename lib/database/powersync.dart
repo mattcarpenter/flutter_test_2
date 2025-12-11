@@ -438,7 +438,17 @@ Future<void> _claimOrphanedRecords(String userId) async {
     await (appDb.update(appDb.ingredientTermOverrides)
       ..where((i) => i.userId.equals('')))
       .write(IngredientTermOverridesCompanion(userId: Value(userId)));
-    
+
+    // Update clippings - handle NULL userId
+    await (appDb.update(appDb.clippings)
+      ..where((c) => c.userId.isNull()))
+      .write(ClippingsCompanion(userId: Value(userId)));
+
+    // Update clippings - handle empty string userId
+    await (appDb.update(appDb.clippings)
+      ..where((c) => c.userId.equals('')))
+      .write(ClippingsCompanion(userId: Value(userId)));
+
     // Populate upload queue for newly claimed recipes with images
     await _populateUploadQueueForClaimedRecipes(userId);
     
@@ -506,6 +516,7 @@ bool _needsUserId(String tableName) {
     'cooks',
     'ingredient_term_overrides',
     'converters',
+    'clippings',
   };
   
   return tablesRequiringUserId.contains(tableName);
