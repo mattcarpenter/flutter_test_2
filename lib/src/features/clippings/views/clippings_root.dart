@@ -132,13 +132,16 @@ class ClippingsTab extends ConsumerWidget {
   }
 
   Future<void> _createNewClipping(BuildContext context, WidgetRef ref) async {
+    // userId can be null - orphaned clippings will be claimed on sign-in
     final userId = Supabase.instance.client.auth.currentUser?.id;
-    if (userId == null) return;
 
-    // Get the current household ID
-    final householdState = ref.read(householdNotifierProvider);
-    final householdId = householdState.currentHousehold?.id;
-    AppLogger.debug('Creating clipping with householdId: $householdId (household: ${householdState.currentHousehold?.name})');
+    // Get the current household ID (only if logged in)
+    String? householdId;
+    if (userId != null) {
+      final householdState = ref.read(householdNotifierProvider);
+      householdId = householdState.currentHousehold?.id;
+    }
+    AppLogger.debug('Creating clipping with userId: $userId, householdId: $householdId');
 
     // Create a new empty clipping
     final newId = await ref.read(clippingsProvider.notifier).addClipping(

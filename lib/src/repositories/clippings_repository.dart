@@ -28,8 +28,9 @@ class ClippingsRepository {
   }
 
   /// Create a new clipping
+  /// userId can be null for offline-created clippings (will be claimed on sign-in)
   Future<String> addClipping({
-    required String userId,
+    String? userId,
     String? householdId,
     String? title,
     String? content,

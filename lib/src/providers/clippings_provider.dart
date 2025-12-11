@@ -27,7 +27,7 @@ class ClippingsNotifier extends StateNotifier<AsyncValue<List<ClippingEntry>>> {
   }
 
   Future<String> addClipping({
-    required String userId,
+    String? userId,
     String? householdId,
     String? title,
     String? content,
