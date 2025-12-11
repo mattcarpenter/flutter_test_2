@@ -5,6 +5,8 @@ import '../../../theme/colors.dart';
 import '../../../theme/spacing.dart';
 import '../../../theme/typography.dart';
 
+/// A card widget for displaying a clipping in a grid layout.
+/// Shows a preview area on top and the title below.
 class ClippingCard extends StatelessWidget {
   final ClippingEntry clipping;
   final VoidCallback onTap;
@@ -16,30 +18,6 @@ class ClippingCard extends StatelessWidget {
     required this.onTap,
     required this.onDelete,
   });
-
-  String _formatTimeAgo(int? timestamp) {
-    if (timestamp == null) return '';
-
-    final now = DateTime.now();
-    final date = DateTime.fromMillisecondsSinceEpoch(timestamp);
-    final difference = now.difference(date);
-
-    if (difference.inDays > 365) {
-      final years = (difference.inDays / 365).floor();
-      return '$years ${years == 1 ? 'year' : 'years'} ago';
-    } else if (difference.inDays > 30) {
-      final months = (difference.inDays / 30).floor();
-      return '$months ${months == 1 ? 'month' : 'months'} ago';
-    } else if (difference.inDays > 0) {
-      return '${difference.inDays} ${difference.inDays == 1 ? 'day' : 'days'} ago';
-    } else if (difference.inHours > 0) {
-      return '${difference.inHours} ${difference.inHours == 1 ? 'hour' : 'hours'} ago';
-    } else if (difference.inMinutes > 0) {
-      return '${difference.inMinutes} ${difference.inMinutes == 1 ? 'minute' : 'minutes'} ago';
-    } else {
-      return 'Just now';
-    }
-  }
 
   String _getPreviewText() {
     final content = clipping.content;
@@ -76,14 +54,15 @@ class ClippingCard extends StatelessWidget {
 
     final firstLine = preview.split('\n').first;
     final words = firstLine.split(' ').take(6).join(' ');
-    return words.isEmpty ? 'Untitled' : (words.length > 40 ? '${words.substring(0, 40)}...' : words);
+    return words.isEmpty
+        ? 'Untitled'
+        : (words.length > 40 ? '${words.substring(0, 40)}...' : words);
   }
 
   @override
   Widget build(BuildContext context) {
     final displayTitle = _getDisplayTitle();
     final previewText = _getPreviewText();
-    final timeAgo = _formatTimeAgo(clipping.updatedAt);
 
     return ContextMenuWidget(
       menuProvider: (_) {
@@ -106,66 +85,47 @@ class ClippingCard extends StatelessWidget {
             borderRadius: BorderRadius.circular(12),
           ),
           clipBehavior: Clip.hardEdge,
-          child: Row(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              // Preview thumbnail area
-              Container(
-                width: 70,
-                height: 70,
-                margin: EdgeInsets.all(AppSpacing.sm),
-                decoration: BoxDecoration(
-                  color: AppColors.of(context).surface,
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                padding: EdgeInsets.all(AppSpacing.xs),
-                child: Text(
-                  previewText,
-                  style: TextStyle(
-                    fontSize: 7,
-                    height: 1.2,
-                    color: AppColors.of(context).textSecondary,
+              // Preview area - takes most of the space
+              Expanded(
+                child: Container(
+                  margin: EdgeInsets.all(AppSpacing.sm),
+                  decoration: BoxDecoration(
+                    color: AppColors.of(context).surface,
+                    borderRadius: BorderRadius.circular(8),
                   ),
-                  maxLines: 6,
-                  overflow: TextOverflow.clip,
+                  padding: EdgeInsets.all(AppSpacing.sm),
+                  child: Text(
+                    previewText,
+                    style: TextStyle(
+                      fontSize: 8,
+                      height: 1.3,
+                      color: AppColors.of(context).textSecondary,
+                    ),
+                    maxLines: 8,
+                    overflow: TextOverflow.clip,
+                  ),
                 ),
               ),
 
-              // Text content area
-              Expanded(
-                child: Padding(
-                  padding: EdgeInsets.fromLTRB(
-                    AppSpacing.xs,
-                    AppSpacing.sm,
-                    AppSpacing.md,
-                    AppSpacing.sm,
+              // Title area at bottom
+              Padding(
+                padding: EdgeInsets.fromLTRB(
+                  AppSpacing.sm,
+                  0,
+                  AppSpacing.sm,
+                  AppSpacing.sm,
+                ),
+                child: Text(
+                  displayTitle,
+                  style: AppTypography.caption.copyWith(
+                    fontWeight: FontWeight.w600,
+                    color: AppColors.of(context).textPrimary,
                   ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      // Title
-                      Text(
-                        displayTitle,
-                        style: AppTypography.body.copyWith(
-                          fontWeight: FontWeight.w600,
-                          color: AppColors.of(context).textPrimary,
-                        ),
-                        maxLines: 2,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                      if (timeAgo.isNotEmpty) ...[
-                        SizedBox(height: AppSpacing.xs),
-                        Text(
-                          timeAgo,
-                          style: AppTypography.caption.copyWith(
-                            color: AppColors.of(context).textSecondary,
-                          ),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                      ],
-                    ],
-                  ),
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
                 ),
               ),
             ],

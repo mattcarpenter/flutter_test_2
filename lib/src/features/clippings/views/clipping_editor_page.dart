@@ -273,6 +273,8 @@ class _ClippingEditorPageState extends ConsumerState<ClippingEditorPage>
                           border: InputBorder.none,
                           contentPadding: EdgeInsets.zero,
                         ),
+                        maxLines: null,
+                        keyboardType: TextInputType.text,
                         textInputAction: TextInputAction.next,
                         onSubmitted: (_) {
                           _contentFocusNode.requestFocus();
