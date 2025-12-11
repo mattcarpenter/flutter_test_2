@@ -183,6 +183,7 @@ class AppTypography {
     height: Platform.isIOS ? 1.6 : 1.5,
     fontFamily: _fontFamily,
     letterSpacing: -0.31,
+    leadingDistribution: TextLeadingDistribution.even,
   );
 
   static TextStyle get fieldLabel => TextStyle(
