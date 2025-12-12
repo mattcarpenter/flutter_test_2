@@ -265,14 +265,17 @@ class SubscriptionService {
       await _ensureInitialized();
 
       final result = await RevenueCatUI.presentPaywall();
-      final purchased = result == PaywallResult.purchased;
+      AppLogger.info('Paywall result: $result');
 
-      if (purchased) {
+      // Treat both purchased and restored as success
+      final success = result == PaywallResult.purchased || result == PaywallResult.restored;
+
+      if (success) {
         // Immediately refresh RevenueCat state for instant access
         await refreshRevenueCatState();
       }
 
-      return purchased;
+      return success;
     } on PlatformException catch (e) {
       AppLogger.error('Error presenting paywall', e);
 
