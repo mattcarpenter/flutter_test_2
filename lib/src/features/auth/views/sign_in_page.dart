@@ -7,7 +7,6 @@ import 'package:go_router/go_router.dart';
 
 import '../../../mobile/utils/adaptive_sliver_page.dart';
 import '../../../providers/auth_provider.dart';
-import '../../../theme/colors.dart';
 import '../../../widgets/error_dialog.dart';
 import '../widgets/auth_form_field.dart';
 import '../widgets/auth_button.dart';
@@ -26,10 +25,6 @@ class _SignInPageState extends ConsumerState<SignInPage> {
   final _passwordController = TextEditingController();
   final _emailFocusNode = FocusNode();
   final _passwordFocusNode = FocusNode();
-  
-  bool _isEmailSignInLoading = false;
-  bool _isGoogleLoading = false;
-  bool _isAppleLoading = false;
 
   @override
   void dispose() {
@@ -41,7 +36,8 @@ class _SignInPageState extends ConsumerState<SignInPage> {
   }
 
   void _handleEmailSignIn() async {
-    if (_isEmailSignInLoading) return;
+    final authState = ref.read(authNotifierProvider);
+    if (authState.isSigningIn) return;
 
     // No form validation required for sign-in as per requirements
     final email = _emailController.text.trim();
@@ -55,10 +51,6 @@ class _SignInPageState extends ConsumerState<SignInPage> {
       return;
     }
 
-    setState(() {
-      _isEmailSignInLoading = true;
-    });
-
     try {
       await ref.read(authNotifierProvider.notifier).signInWithEmail(email, password);
       if (mounted) {
@@ -71,21 +63,12 @@ class _SignInPageState extends ConsumerState<SignInPage> {
           message: 'Failed to sign in. Please check your credentials and try again.',
         );
       }
-    } finally {
-      if (mounted) {
-        setState(() {
-          _isEmailSignInLoading = false;
-        });
-      }
     }
   }
 
   void _handleGoogleSignIn() async {
-    if (_isGoogleLoading) return;
-
-    setState(() {
-      _isGoogleLoading = true;
-    });
+    final authState = ref.read(authNotifierProvider);
+    if (authState.isSigningInWithGoogle) return;
 
     try {
       await ref.read(authNotifierProvider.notifier).signInWithGoogle();
@@ -99,21 +82,12 @@ class _SignInPageState extends ConsumerState<SignInPage> {
           message: 'Failed to sign in with Google. Please try again.',
         );
       }
-    } finally {
-      if (mounted) {
-        setState(() {
-          _isGoogleLoading = false;
-        });
-      }
     }
   }
 
   void _handleAppleSignIn() async {
-    if (_isAppleLoading) return;
-
-    setState(() {
-      _isAppleLoading = true;
-    });
+    final authState = ref.read(authNotifierProvider);
+    if (authState.isSigningInWithApple) return;
 
     try {
       await ref.read(authNotifierProvider.notifier).signInWithApple();
@@ -131,12 +105,6 @@ class _SignInPageState extends ConsumerState<SignInPage> {
           );
         }
       }
-    } finally {
-      if (mounted) {
-        setState(() {
-          _isAppleLoading = false;
-        });
-      }
     }
   }
 
@@ -145,6 +113,8 @@ class _SignInPageState extends ConsumerState<SignInPage> {
 
   @override
   Widget build(BuildContext context) {
+    final authState = ref.watch(authNotifierProvider);
+
     return AdaptiveSliverPage(
       title: 'Sign In',
       automaticallyImplyLeading: true,
@@ -171,7 +141,7 @@ class _SignInPageState extends ConsumerState<SignInPage> {
                     autocorrect: false,
                     enableSuggestions: false,
                     focusNode: _emailFocusNode,
-                    enabled: !_isEmailSignInLoading && !_isGoogleLoading && !_isAppleLoading,
+                    enabled: !authState.isPerformingAction && !authState.isLoading,
                     onSubmitted: (_) => _passwordFocusNode.requestFocus(),
                   ),
                   const SizedBox(height: 16),
@@ -183,7 +153,7 @@ class _SignInPageState extends ConsumerState<SignInPage> {
                     obscureText: true,
                     textInputAction: TextInputAction.done,
                     focusNode: _passwordFocusNode,
-                    enabled: !_isEmailSignInLoading && !_isGoogleLoading && !_isAppleLoading,
+                    enabled: !authState.isPerformingAction && !authState.isLoading,
                     onSubmitted: (_) => _handleEmailSignIn(),
                   ),
                   const SizedBox(height: 24),
@@ -192,8 +162,8 @@ class _SignInPageState extends ConsumerState<SignInPage> {
                   AuthButton.primary(
                     text: 'Sign In',
                     onPressed: _handleEmailSignIn,
-                    isLoading: _isEmailSignInLoading,
-                    enabled: !_isGoogleLoading && !_isAppleLoading,
+                    isLoading: authState.isSigningIn,
+                    enabled: !authState.isSigningInWithGoogle && !authState.isSigningInWithApple,
                   ),
                   const SizedBox(height: 16),
 
@@ -234,7 +204,7 @@ class _SignInPageState extends ConsumerState<SignInPage> {
                   // Google sign in button
                   GoogleSignInButton(
                     onPressed: _handleGoogleSignIn,
-                    isLoading: _isGoogleLoading,
+                    isLoading: authState.isSigningInWithGoogle,
                   ),
 
                   // Apple sign in button (iOS only)
@@ -242,7 +212,7 @@ class _SignInPageState extends ConsumerState<SignInPage> {
                     const SizedBox(height: 16),
                     AppleSignInButton(
                       onPressed: _handleAppleSignIn,
-                      isLoading: _isAppleLoading,
+                      isLoading: authState.isSigningInWithApple,
                     ),
                   ],
                 ],

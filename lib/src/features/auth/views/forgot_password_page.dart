@@ -21,8 +21,6 @@ class _ForgotPasswordPageState extends ConsumerState<ForgotPasswordPage> {
   final _formKey = GlobalKey<FormState>();
   final _emailController = TextEditingController();
   final _emailFocusNode = FocusNode();
-  
-  bool _isLoading = false;
 
   @override
   void dispose() {
@@ -32,21 +30,18 @@ class _ForgotPasswordPageState extends ConsumerState<ForgotPasswordPage> {
   }
 
   void _handleResetPassword() async {
-    if (_isLoading) return;
+    final authState = ref.read(authNotifierProvider);
+    if (authState.isResettingPassword) return;
 
     if (!_formKey.currentState!.validate()) {
       return;
     }
 
-    setState(() {
-      _isLoading = true;
-    });
-
     try {
       await ref.read(authNotifierProvider.notifier).resetPassword(
         _emailController.text.trim(),
       );
-      
+
       if (mounted) {
         await SuccessDialog.show(
           context,
@@ -63,17 +58,13 @@ class _ForgotPasswordPageState extends ConsumerState<ForgotPasswordPage> {
           message: 'Failed to send reset email. Please check your email address and try again.',
         );
       }
-    } finally {
-      if (mounted) {
-        setState(() {
-          _isLoading = false;
-        });
-      }
     }
   }
 
   @override
   Widget build(BuildContext context) {
+    final authState = ref.watch(authNotifierProvider);
+
     return AdaptiveSliverPage(
       title: 'Reset Password',
       body: Padding(
@@ -99,7 +90,7 @@ class _ForgotPasswordPageState extends ConsumerState<ForgotPasswordPage> {
               EmailFormField(
                 controller: _emailController,
                 focusNode: _emailFocusNode,
-                enabled: !_isLoading,
+                enabled: !authState.isResettingPassword,
                 autofocus: true,
                 onSubmitted: (_) => _handleResetPassword(),
               ),
@@ -108,7 +99,7 @@ class _ForgotPasswordPageState extends ConsumerState<ForgotPasswordPage> {
               // Send reset link button
               ResetPasswordButton(
                 onPressed: _handleResetPassword,
-                isLoading: _isLoading,
+                isLoading: authState.isResettingPassword,
               ),
               const SizedBox(height: 32),
 

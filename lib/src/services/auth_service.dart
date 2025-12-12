@@ -40,21 +40,37 @@ class AuthApiException implements Exception {
   }
 
   static AuthErrorType _mapAuthExceptionToType(AuthException authException) {
-    final message = authException.message.toLowerCase();
+    // Primary: Use HTTP status codes (stable across SDK versions)
+    switch (authException.statusCode) {
+      case '400':
+        // 400 can mean multiple things - use message as secondary filter
+        final message = authException.message.toLowerCase();
+        if (message.contains('user already registered')) {
+          return AuthErrorType.userAlreadyExists;
+        } else if (message.contains('password')) {
+          return AuthErrorType.weakPassword;
+        }
+        return AuthErrorType.invalidCredentials;
 
-    if (message.contains('invalid login credentials')) {
-      return AuthErrorType.invalidCredentials;
-    } else if (message.contains('user already registered')) {
-      return AuthErrorType.userAlreadyExists;
-    } else if (message.contains('password should be at least')) {
-      return AuthErrorType.weakPassword;
-    } else if (message.contains('unable to validate email')) {
-      return AuthErrorType.invalidEmail;
-    } else if (message.contains('rate limit')) {
-      return AuthErrorType.rateLimited;
+      case '401':
+        return AuthErrorType.sessionExpired;
+
+      case '422':
+        return AuthErrorType.invalidEmail;
+
+      case '429':
+        return AuthErrorType.rateLimited;
+
+      default:
+        // Fallback: Check message for network errors
+        final message = authException.message.toLowerCase();
+        if (message.contains('network') ||
+            message.contains('socket') ||
+            message.contains('connection')) {
+          return AuthErrorType.network;
+        }
+        return AuthErrorType.unknown;
     }
-
-    return AuthErrorType.unknown;
   }
 
   @override

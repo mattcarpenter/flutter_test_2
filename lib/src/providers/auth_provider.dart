@@ -133,7 +133,7 @@ class AuthNotifier extends StateNotifier<models.AuthState> {
   /// Sign in with Google using native authentication
   Future<void> signInWithGoogle() async {
     state = state.copyWith(
-      isLoading: true,
+      isSigningInWithGoogle: true,
       error: null,
       successMessage: null,
     );
@@ -142,14 +142,14 @@ class AuthNotifier extends StateNotifier<models.AuthState> {
       final response = await _authService.signInWithGoogle();
       // State will be updated via auth stream listener, but also update here for immediate response
       state = state.copyWith(
-        isLoading: false,
+        isSigningInWithGoogle: false,
         currentUser: response.user,
         successMessage: 'Successfully signed in with Google!',
       );
     } catch (e) {
       final errorMessage = AuthService.getErrorMessage(e as Exception);
       state = state.copyWith(
-        isLoading: false,
+        isSigningInWithGoogle: false,
         error: errorMessage,
       );
       rethrow;
@@ -159,7 +159,7 @@ class AuthNotifier extends StateNotifier<models.AuthState> {
   /// Sign in with Apple (iOS only)
   Future<void> signInWithApple() async {
     state = state.copyWith(
-      isLoading: true,
+      isSigningInWithApple: true,
       error: null,
       successMessage: null,
     );
@@ -167,14 +167,14 @@ class AuthNotifier extends StateNotifier<models.AuthState> {
     try {
       final response = await _authService.signInWithApple();
       state = state.copyWith(
-        isLoading: false,
+        isSigningInWithApple: false,
         currentUser: response.user,
         successMessage: 'Successfully signed in with Apple!',
       );
     } catch (e) {
       final errorMessage = AuthService.getErrorMessage(e as Exception);
       state = state.copyWith(
-        isLoading: false,
+        isSigningInWithApple: false,
         error: errorMessage,
       );
       rethrow;

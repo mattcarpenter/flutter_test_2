@@ -19,6 +19,8 @@ mixin _$AuthState {
   bool get isLoading;
   bool get isSigningIn;
   bool get isSigningUp;
+  bool get isSigningInWithGoogle;
+  bool get isSigningInWithApple;
   bool get isSigningOut;
   bool get isResettingPassword;
   String? get error;
@@ -44,6 +46,10 @@ mixin _$AuthState {
                 other.isSigningIn == isSigningIn) &&
             (identical(other.isSigningUp, isSigningUp) ||
                 other.isSigningUp == isSigningUp) &&
+            (identical(other.isSigningInWithGoogle, isSigningInWithGoogle) ||
+                other.isSigningInWithGoogle == isSigningInWithGoogle) &&
+            (identical(other.isSigningInWithApple, isSigningInWithApple) ||
+                other.isSigningInWithApple == isSigningInWithApple) &&
             (identical(other.isSigningOut, isSigningOut) ||
                 other.isSigningOut == isSigningOut) &&
             (identical(other.isResettingPassword, isResettingPassword) ||
@@ -60,6 +66,8 @@ mixin _$AuthState {
       isLoading,
       isSigningIn,
       isSigningUp,
+      isSigningInWithGoogle,
+      isSigningInWithApple,
       isSigningOut,
       isResettingPassword,
       error,
@@ -67,7 +75,7 @@ mixin _$AuthState {
 
   @override
   String toString() {
-    return 'AuthState(currentUser: $currentUser, isLoading: $isLoading, isSigningIn: $isSigningIn, isSigningUp: $isSigningUp, isSigningOut: $isSigningOut, isResettingPassword: $isResettingPassword, error: $error, successMessage: $successMessage)';
+    return 'AuthState(currentUser: $currentUser, isLoading: $isLoading, isSigningIn: $isSigningIn, isSigningUp: $isSigningUp, isSigningInWithGoogle: $isSigningInWithGoogle, isSigningInWithApple: $isSigningInWithApple, isSigningOut: $isSigningOut, isResettingPassword: $isResettingPassword, error: $error, successMessage: $successMessage)';
   }
 }
 
@@ -81,6 +89,8 @@ abstract mixin class $AuthStateCopyWith<$Res> {
       bool isLoading,
       bool isSigningIn,
       bool isSigningUp,
+      bool isSigningInWithGoogle,
+      bool isSigningInWithApple,
       bool isSigningOut,
       bool isResettingPassword,
       String? error,
@@ -103,6 +113,8 @@ class _$AuthStateCopyWithImpl<$Res> implements $AuthStateCopyWith<$Res> {
     Object? isLoading = null,
     Object? isSigningIn = null,
     Object? isSigningUp = null,
+    Object? isSigningInWithGoogle = null,
+    Object? isSigningInWithApple = null,
     Object? isSigningOut = null,
     Object? isResettingPassword = null,
     Object? error = freezed,
@@ -124,6 +136,14 @@ class _$AuthStateCopyWithImpl<$Res> implements $AuthStateCopyWith<$Res> {
       isSigningUp: null == isSigningUp
           ? _self.isSigningUp
           : isSigningUp // ignore: cast_nullable_to_non_nullable
+              as bool,
+      isSigningInWithGoogle: null == isSigningInWithGoogle
+          ? _self.isSigningInWithGoogle
+          : isSigningInWithGoogle // ignore: cast_nullable_to_non_nullable
+              as bool,
+      isSigningInWithApple: null == isSigningInWithApple
+          ? _self.isSigningInWithApple
+          : isSigningInWithApple // ignore: cast_nullable_to_non_nullable
               as bool,
       isSigningOut: null == isSigningOut
           ? _self.isSigningOut
@@ -153,6 +173,8 @@ class _AuthState extends AuthState {
       this.isLoading = false,
       this.isSigningIn = false,
       this.isSigningUp = false,
+      this.isSigningInWithGoogle = false,
+      this.isSigningInWithApple = false,
       this.isSigningOut = false,
       this.isResettingPassword = false,
       this.error,
@@ -170,6 +192,12 @@ class _AuthState extends AuthState {
   @override
   @JsonKey()
   final bool isSigningUp;
+  @override
+  @JsonKey()
+  final bool isSigningInWithGoogle;
+  @override
+  @JsonKey()
+  final bool isSigningInWithApple;
   @override
   @JsonKey()
   final bool isSigningOut;
@@ -202,6 +230,10 @@ class _AuthState extends AuthState {
                 other.isSigningIn == isSigningIn) &&
             (identical(other.isSigningUp, isSigningUp) ||
                 other.isSigningUp == isSigningUp) &&
+            (identical(other.isSigningInWithGoogle, isSigningInWithGoogle) ||
+                other.isSigningInWithGoogle == isSigningInWithGoogle) &&
+            (identical(other.isSigningInWithApple, isSigningInWithApple) ||
+                other.isSigningInWithApple == isSigningInWithApple) &&
             (identical(other.isSigningOut, isSigningOut) ||
                 other.isSigningOut == isSigningOut) &&
             (identical(other.isResettingPassword, isResettingPassword) ||
@@ -218,6 +250,8 @@ class _AuthState extends AuthState {
       isLoading,
       isSigningIn,
       isSigningUp,
+      isSigningInWithGoogle,
+      isSigningInWithApple,
       isSigningOut,
       isResettingPassword,
       error,
@@ -225,7 +259,7 @@ class _AuthState extends AuthState {
 
   @override
   String toString() {
-    return 'AuthState(currentUser: $currentUser, isLoading: $isLoading, isSigningIn: $isSigningIn, isSigningUp: $isSigningUp, isSigningOut: $isSigningOut, isResettingPassword: $isResettingPassword, error: $error, successMessage: $successMessage)';
+    return 'AuthState(currentUser: $currentUser, isLoading: $isLoading, isSigningIn: $isSigningIn, isSigningUp: $isSigningUp, isSigningInWithGoogle: $isSigningInWithGoogle, isSigningInWithApple: $isSigningInWithApple, isSigningOut: $isSigningOut, isResettingPassword: $isResettingPassword, error: $error, successMessage: $successMessage)';
   }
 }
 
@@ -242,6 +276,8 @@ abstract mixin class _$AuthStateCopyWith<$Res>
       bool isLoading,
       bool isSigningIn,
       bool isSigningUp,
+      bool isSigningInWithGoogle,
+      bool isSigningInWithApple,
       bool isSigningOut,
       bool isResettingPassword,
       String? error,
@@ -264,6 +300,8 @@ class __$AuthStateCopyWithImpl<$Res> implements _$AuthStateCopyWith<$Res> {
     Object? isLoading = null,
     Object? isSigningIn = null,
     Object? isSigningUp = null,
+    Object? isSigningInWithGoogle = null,
+    Object? isSigningInWithApple = null,
     Object? isSigningOut = null,
     Object? isResettingPassword = null,
     Object? error = freezed,
@@ -285,6 +323,14 @@ class __$AuthStateCopyWithImpl<$Res> implements _$AuthStateCopyWith<$Res> {
       isSigningUp: null == isSigningUp
           ? _self.isSigningUp
           : isSigningUp // ignore: cast_nullable_to_non_nullable
+              as bool,
+      isSigningInWithGoogle: null == isSigningInWithGoogle
+          ? _self.isSigningInWithGoogle
+          : isSigningInWithGoogle // ignore: cast_nullable_to_non_nullable
+              as bool,
+      isSigningInWithApple: null == isSigningInWithApple
+          ? _self.isSigningInWithApple
+          : isSigningInWithApple // ignore: cast_nullable_to_non_nullable
               as bool,
       isSigningOut: null == isSigningOut
           ? _self.isSigningOut

@@ -44,14 +44,10 @@ final List<RegExp> fatalResponseCodes = [
 /// Use Supabase for authentication and data upload.
 class SupabaseConnector extends PowerSyncBackendConnector {
   Future<void>? _refreshFuture;
-  Timer? _proactiveRefreshTimer;
   int _refreshRetryCount = 0;
   static const int _maxRefreshRetries = 3;
 
-  SupabaseConnector() {
-    // Start proactive refresh timer
-    _startProactiveRefreshTimer();
-  }
+  SupabaseConnector();
 
   /// Get a Supabase token to authenticate against the PowerSync instance.
   @override
@@ -66,25 +62,12 @@ class SupabaseConnector extends PowerSyncBackendConnector {
       return null;
     }
 
-    // Check if token is about to expire (within 5 minutes)
-    final expiresAt = session.expiresAt;
-    if (expiresAt != null) {
-      final expiryTime = DateTime.fromMillisecondsSinceEpoch(expiresAt * 1000);
-      final now = DateTime.now();
-      final timeUntilExpiry = expiryTime.difference(now);
-      
-      if (timeUntilExpiry.inMinutes < 5) {
-        log.info('Token expires in ${timeUntilExpiry.inMinutes} minutes, triggering refresh');
-        // Don't await here to avoid blocking
-        _triggerTokenRefresh();
-      }
-    }
-
     // Use the access token to authenticate against PowerSync
     final token = session.accessToken;
 
     // userId and expiresAt are for debugging purposes only
     final userId = session.user.id;
+    final expiresAt = session.expiresAt;
     final expiresAtDateTime = expiresAt == null
         ? null
         : DateTime.fromMillisecondsSinceEpoch(expiresAt * 1000);
@@ -150,25 +133,8 @@ class SupabaseConnector extends PowerSyncBackendConnector {
     throw Exception('Token refresh failed after $_maxRefreshRetries attempts');
   }
 
-  void _startProactiveRefreshTimer() {
-    // Cancel any existing timer
-    _proactiveRefreshTimer?.cancel();
-    
-    // Set up timer to refresh token every 45 minutes
-    _proactiveRefreshTimer = Timer.periodic(
-      const Duration(minutes: 45),
-      (timer) async {
-        final session = Supabase.instance.client.auth.currentSession;
-        if (session != null) {
-          log.info('Proactive token refresh triggered');
-          _triggerTokenRefresh();
-        }
-      },
-    );
-  }
-
   void dispose() {
-    _proactiveRefreshTimer?.cancel();
+    // Reserved for future cleanup if needed
   }
 
   // Upload pending changes to Supabase.
@@ -282,6 +248,19 @@ Future<void> openDatabase({bool isTest = false}) async {
   appDb = AppDatabase(db);
 
   await loadSupabase();
+
+  // Validate session on startup - may be expired from storage
+  final initialSession = Supabase.instance.client.auth.currentSession;
+  if (initialSession != null && initialSession.isExpired) {
+    log.info('Session from storage is expired, attempting refresh');
+    try {
+      await Supabase.instance.client.auth.refreshSession();
+      log.info('Session refreshed successfully on startup');
+    } catch (e) {
+      log.warning('Failed to refresh expired session on startup: $e');
+      // Don't block app startup - user will be prompted to sign in
+    }
+  }
 
   SupabaseConnector? currentConnector;
 

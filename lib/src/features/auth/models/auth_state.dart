@@ -10,6 +10,8 @@ abstract class AuthState with _$AuthState {
     @Default(false) bool isLoading,
     @Default(false) bool isSigningIn,
     @Default(false) bool isSigningUp,
+    @Default(false) bool isSigningInWithGoogle,
+    @Default(false) bool isSigningInWithApple,
     @Default(false) bool isSigningOut,
     @Default(false) bool isResettingPassword,
     String? error,
@@ -21,5 +23,11 @@ abstract class AuthState with _$AuthState {
   bool get isAuthenticated => currentUser != null;
   bool get hasError => error != null;
   bool get hasSuccess => successMessage != null;
-  bool get isPerformingAction => isSigningIn || isSigningUp || isSigningOut || isResettingPassword;
+  bool get isPerformingAction =>
+      isSigningIn ||
+      isSigningUp ||
+      isSigningInWithGoogle ||
+      isSigningInWithApple ||
+      isSigningOut ||
+      isResettingPassword;
 }
