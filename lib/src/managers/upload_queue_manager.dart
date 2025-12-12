@@ -127,8 +127,9 @@ class UploadQueueManager {
       return;
     }
 
-    // Check if the user is logged in.
-    if (supabaseClient.auth.currentUser == null) {
+    // Check if the user is logged in with a valid session.
+    final session = supabaseClient.auth.currentSession;
+    if (session == null || session.isExpired) {
       return;
     }
 

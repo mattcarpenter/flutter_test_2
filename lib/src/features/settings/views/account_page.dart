@@ -92,11 +92,7 @@ class AccountPage extends ConsumerWidget {
 
       // Proceed with sign out
       await ref.read(authNotifierProvider.notifier).signOut();
-
-      // Navigate back to settings after sign out
-      if (context.mounted) {
-        Navigator.of(context).pop();
-      }
+      // No navigation needed - the UI will update based on auth state change
     } catch (e) {
       // Show error dialog if sign out fails
       if (context.mounted) {

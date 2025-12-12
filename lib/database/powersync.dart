@@ -29,6 +29,12 @@ import '../src/repositories/recipe_repository.dart';
 
 final log = Logger('powersync-supabase');
 
+// Sync status monitoring for auth error recovery
+StreamSubscription<SyncStatus>? _syncStatusSubscription;
+Timer? _authRetryTimer;
+int _authRetryCount = 0;
+const int _maxSyncAuthRetries = 5;
+
 /// Postgres Response codes that we cannot recover from by retrying.
 final List<RegExp> fatalResponseCodes = [
   // Class 22 — Data Exception
@@ -279,6 +285,7 @@ Future<void> openDatabase({bool isTest = false}) async {
     }
     currentConnector = SupabaseConnector();
     db.connect(connector: currentConnector);
+    _setupSyncStatusMonitor(currentConnector);
   }
 
   Supabase.instance.client.auth.onAuthStateChange.listen((data) async {
@@ -298,13 +305,16 @@ Future<void> openDatabase({bool isTest = false}) async {
       if (userId != null) {
         await _claimOrphanedRecords(userId);
       }
-      // Dispose old connector if exists
+      // Dispose old connector and setup new one
+      _cleanupSyncStatusMonitor();
       currentConnector?.dispose();
       currentConnector = SupabaseConnector();
       db.connect(connector: currentConnector!);
+      _setupSyncStatusMonitor(currentConnector!);
     } else if (event == AuthChangeEvent.signedOut) {
       // Sign out - disconnect and clear local data for privacy
       log.info('User signed out, clearing local data');
+      _cleanupSyncStatusMonitor();
       currentConnector?.dispose();
       currentConnector = null;
       await db.disconnectAndClear();
@@ -497,6 +507,92 @@ bool _needsUserId(String tableName) {
     'converters',
     'clippings',
   };
-  
+
   return tablesRequiringUserId.contains(tableName);
+}
+
+/// Sets up monitoring of PowerSync sync status to detect and recover from auth errors.
+/// When an auth error is detected, triggers exponential backoff token refresh retries.
+void _setupSyncStatusMonitor(SupabaseConnector connector) {
+  _syncStatusSubscription?.cancel();
+  _syncStatusSubscription = db.statusStream.listen((status) {
+    final error = status.anyError;
+
+    if (error != null && _isAuthError(error)) {
+      log.warning('PowerSync sync auth error detected: $error');
+      _scheduleAuthRetry(connector);
+    } else if (status.connected) {
+      // Connected successfully, reset retry state
+      if (_authRetryCount > 0) {
+        log.info('PowerSync connected, resetting auth retry count');
+      }
+      _authRetryCount = 0;
+      _authRetryTimer?.cancel();
+      _authRetryTimer = null;
+    }
+  });
+}
+
+/// Checks if an error appears to be authentication-related.
+bool _isAuthError(Object error) {
+  final errorStr = error.toString().toLowerCase();
+  return errorStr.contains('401') ||
+         errorStr.contains('unauthorized') ||
+         errorStr.contains('jwt') ||
+         errorStr.contains('token') ||
+         errorStr.contains('auth');
+}
+
+/// Schedules a token refresh retry with exponential backoff.
+void _scheduleAuthRetry(SupabaseConnector connector) {
+  // Don't schedule if we've exhausted retries
+  if (_authRetryCount >= _maxSyncAuthRetries) {
+    log.severe('PowerSync auth retry limit reached ($_maxSyncAuthRetries attempts), giving up');
+    return;
+  }
+
+  // Don't schedule if a retry is already pending
+  if (_authRetryTimer?.isActive ?? false) {
+    log.fine('Auth retry already scheduled, skipping');
+    return;
+  }
+
+  // Exponential backoff: 5s, 10s, 20s, 40s, 80s
+  final delay = Duration(seconds: 5 * (1 << _authRetryCount));
+  _authRetryCount++;
+
+  log.info('Scheduling PowerSync auth retry #$_authRetryCount in ${delay.inSeconds}s');
+
+  _authRetryTimer = Timer(delay, () async {
+    try {
+      final session = Supabase.instance.client.auth.currentSession;
+      if (session == null) {
+        log.warning('No session available for auth retry');
+        return;
+      }
+
+      await Supabase.instance.client.auth.refreshSession();
+      log.info('Token refresh successful on retry #$_authRetryCount, updating PowerSync credentials');
+      connector.prefetchCredentials();
+      // Reset count on success - statusStream listener will also reset on connected
+      _authRetryCount = 0;
+    } catch (e) {
+      log.warning('Auth retry #$_authRetryCount failed: $e');
+      // Schedule next retry if we haven't exhausted attempts
+      if (_authRetryCount < _maxSyncAuthRetries) {
+        _scheduleAuthRetry(connector);
+      } else {
+        log.severe('PowerSync auth retry limit reached after failure, giving up');
+      }
+    }
+  });
+}
+
+/// Cleans up the sync status monitor.
+void _cleanupSyncStatusMonitor() {
+  _syncStatusSubscription?.cancel();
+  _syncStatusSubscription = null;
+  _authRetryTimer?.cancel();
+  _authRetryTimer = null;
+  _authRetryCount = 0;
 }
