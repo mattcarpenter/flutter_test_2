@@ -23,8 +23,10 @@ class AuthNotifier extends StateNotifier<models.AuthState> {
     // Set initial state based on current auth status
     final currentUser = _authService.currentUser;
     if (currentUser != null) {
+      final isAnon = AuthService.isUserAnonymous(currentUser);
       state = state.copyWith(
         currentUser: currentUser,
+        isAnonymous: isAnon,
         isLoading: false,
       );
     }
@@ -34,30 +36,36 @@ class AuthNotifier extends StateNotifier<models.AuthState> {
       switch (authState.event) {
         case AuthChangeEvent.signedIn:
           if (authState.session?.user != null) {
+            final user = authState.session!.user;
+            final isAnon = AuthService.isUserAnonymous(user);
             state = state.copyWith(
-              currentUser: authState.session!.user,
+              currentUser: user,
+              isAnonymous: isAnon,
               isLoading: false,
               isSigningIn: false,
               isSigningUp: false,
               error: null,
-              successMessage: 'Successfully signed in!',
+              successMessage: isAnon ? null : 'Successfully signed in!',
             );
           }
           break;
-          
+
         case AuthChangeEvent.signedOut:
           state = const models.AuthState();
           break;
-          
+
         case AuthChangeEvent.userUpdated:
           if (authState.session?.user != null) {
+            final user = authState.session!.user;
+            final isAnon = AuthService.isUserAnonymous(user);
             state = state.copyWith(
-              currentUser: authState.session!.user,
+              currentUser: user,
+              isAnonymous: isAnon,
               error: null,
             );
           }
           break;
-          
+
         case AuthChangeEvent.passwordRecovery:
           state = state.copyWith(
             isResettingPassword: false,
@@ -65,7 +73,7 @@ class AuthNotifier extends StateNotifier<models.AuthState> {
             successMessage: 'Password reset email sent! Check your inbox.',
           );
           break;
-          
+
         default:
           break;
       }
@@ -261,6 +269,16 @@ class AuthNotifier extends StateNotifier<models.AuthState> {
     state = state.copyWith(successMessage: null);
   }
 
+  /// Clear the restore prompt flag
+  void clearRestorePrompt() {
+    state = state.copyWith(shouldPromptRestore: false);
+  }
+
+  /// Set the restore prompt flag (called when anonymous user with subscription signs in)
+  void setShouldPromptRestore(bool value) {
+    state = state.copyWith(shouldPromptRestore: value);
+  }
+
 
   @override
   void dispose() {
@@ -281,15 +299,43 @@ final currentUserProvider = Provider<User?>((ref) {
 });
 
 // Provider for authentication status (convenience provider)
+// NOTE: This now maps to isEffectivelyAuthenticated for backwards compatibility
+// Anonymous users will appear as "not authenticated" in UI contexts
 final isAuthenticatedProvider = Provider<bool>((ref) {
   final authState = ref.watch(authNotifierProvider);
+  return authState.isEffectivelyAuthenticated;
+});
+
+/// True if user has ANY Supabase session (including anonymous)
+/// Use this for system-level checks (PowerSync, RevenueCat, etc.)
+final isSystemAuthenticatedProvider = Provider<bool>((ref) {
+  final authState = ref.watch(authNotifierProvider);
   return authState.isAuthenticated;
+});
+
+/// True only if user has a real account (not anonymous)
+/// Use this for UI display and feature gating
+final isEffectivelyAuthenticatedProvider = Provider<bool>((ref) {
+  final authState = ref.watch(authNotifierProvider);
+  return authState.isEffectivelyAuthenticated;
+});
+
+/// Check if current session is anonymous
+final isAnonymousUserProvider = Provider<bool>((ref) {
+  final authState = ref.watch(authNotifierProvider);
+  return authState.isAnonymous;
+});
+
+/// Check if user should be prompted to restore purchases
+final shouldPromptRestoreProvider = Provider<bool>((ref) {
+  final authState = ref.watch(authNotifierProvider);
+  return authState.shouldPromptRestore;
 });
 
 // Main auth state provider
 final authNotifierProvider = StateNotifierProvider<AuthNotifier, models.AuthState>((ref) {
   final authService = ref.watch(authServiceProvider);
-  
+
   return AuthNotifier(
     authService: authService,
     ref: ref,

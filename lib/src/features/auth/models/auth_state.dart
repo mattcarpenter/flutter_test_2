@@ -14,13 +14,22 @@ abstract class AuthState with _$AuthState {
     @Default(false) bool isSigningInWithApple,
     @Default(false) bool isSigningOut,
     @Default(false) bool isResettingPassword,
+    /// True if the current user is an anonymous Supabase user (no linked identity)
+    @Default(false) bool isAnonymous,
+    /// True if user should be prompted to restore purchases after signing in
+    @Default(false) bool shouldPromptRestore,
     String? error,
     String? successMessage,
   }) = _AuthState;
 
   const AuthState._();
 
+  /// True if user has any Supabase session (including anonymous)
   bool get isAuthenticated => currentUser != null;
+
+  /// True only if user has a real account (not anonymous)
+  bool get isEffectivelyAuthenticated => currentUser != null && !isAnonymous;
+
   bool get hasError => error != null;
   bool get hasSuccess => successMessage != null;
   bool get isPerformingAction =>

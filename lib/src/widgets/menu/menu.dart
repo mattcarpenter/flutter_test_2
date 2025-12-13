@@ -22,7 +22,8 @@ class Menu extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final isDarkMode = CupertinoTheme.of(context).brightness == Brightness.dark;
-    final isAuthenticated = ref.watch(isAuthenticatedProvider);
+    final isEffectivelyAuthenticated = ref.watch(isAuthenticatedProvider); // Returns false for anonymous users
+    final isAnonymous = ref.watch(isAnonymousUserProvider);
     final hasPlus = ref.watch(hasPlusProvider); // Watch for reactive updates
 
     // Theme Colors
@@ -185,7 +186,13 @@ class Menu extends ConsumerWidget {
           activeTextColor: activeTextColor,
           backgroundColor: backgroundColor,
           onTap: (_) {
-            onRouteGo('/household');
+            // Household features require full registration (not anonymous)
+            if (isEffectivelyAuthenticated) {
+              onRouteGo('/household');
+            } else {
+              // Anonymous or logged out - redirect to auth
+              onRouteGo('/auth');
+            }
           },
         ),
         MenuItem(
@@ -201,9 +208,9 @@ class Menu extends ConsumerWidget {
             onRouteGo('/settings');
           },
         ),
-        // Sign in menu item - only show when not authenticated
+        // Sign in menu item - show when not effectively authenticated (including anonymous users)
         // Sign out is now in Settings > Account
-        if (!isAuthenticated)
+        if (!isEffectivelyAuthenticated)
           MenuItem(
             index: 9,
             title: 'Sign In',

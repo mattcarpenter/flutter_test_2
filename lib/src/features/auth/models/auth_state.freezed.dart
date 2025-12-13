@@ -23,6 +23,12 @@ mixin _$AuthState {
   bool get isSigningInWithApple;
   bool get isSigningOut;
   bool get isResettingPassword;
+
+  /// True if the current user is an anonymous Supabase user (no linked identity)
+  bool get isAnonymous;
+
+  /// True if user should be prompted to restore purchases after signing in
+  bool get shouldPromptRestore;
   String? get error;
   String? get successMessage;
 
@@ -54,6 +60,10 @@ mixin _$AuthState {
                 other.isSigningOut == isSigningOut) &&
             (identical(other.isResettingPassword, isResettingPassword) ||
                 other.isResettingPassword == isResettingPassword) &&
+            (identical(other.isAnonymous, isAnonymous) ||
+                other.isAnonymous == isAnonymous) &&
+            (identical(other.shouldPromptRestore, shouldPromptRestore) ||
+                other.shouldPromptRestore == shouldPromptRestore) &&
             (identical(other.error, error) || other.error == error) &&
             (identical(other.successMessage, successMessage) ||
                 other.successMessage == successMessage));
@@ -70,12 +80,14 @@ mixin _$AuthState {
       isSigningInWithApple,
       isSigningOut,
       isResettingPassword,
+      isAnonymous,
+      shouldPromptRestore,
       error,
       successMessage);
 
   @override
   String toString() {
-    return 'AuthState(currentUser: $currentUser, isLoading: $isLoading, isSigningIn: $isSigningIn, isSigningUp: $isSigningUp, isSigningInWithGoogle: $isSigningInWithGoogle, isSigningInWithApple: $isSigningInWithApple, isSigningOut: $isSigningOut, isResettingPassword: $isResettingPassword, error: $error, successMessage: $successMessage)';
+    return 'AuthState(currentUser: $currentUser, isLoading: $isLoading, isSigningIn: $isSigningIn, isSigningUp: $isSigningUp, isSigningInWithGoogle: $isSigningInWithGoogle, isSigningInWithApple: $isSigningInWithApple, isSigningOut: $isSigningOut, isResettingPassword: $isResettingPassword, isAnonymous: $isAnonymous, shouldPromptRestore: $shouldPromptRestore, error: $error, successMessage: $successMessage)';
   }
 }
 
@@ -93,6 +105,8 @@ abstract mixin class $AuthStateCopyWith<$Res> {
       bool isSigningInWithApple,
       bool isSigningOut,
       bool isResettingPassword,
+      bool isAnonymous,
+      bool shouldPromptRestore,
       String? error,
       String? successMessage});
 }
@@ -117,6 +131,8 @@ class _$AuthStateCopyWithImpl<$Res> implements $AuthStateCopyWith<$Res> {
     Object? isSigningInWithApple = null,
     Object? isSigningOut = null,
     Object? isResettingPassword = null,
+    Object? isAnonymous = null,
+    Object? shouldPromptRestore = null,
     Object? error = freezed,
     Object? successMessage = freezed,
   }) {
@@ -153,6 +169,14 @@ class _$AuthStateCopyWithImpl<$Res> implements $AuthStateCopyWith<$Res> {
           ? _self.isResettingPassword
           : isResettingPassword // ignore: cast_nullable_to_non_nullable
               as bool,
+      isAnonymous: null == isAnonymous
+          ? _self.isAnonymous
+          : isAnonymous // ignore: cast_nullable_to_non_nullable
+              as bool,
+      shouldPromptRestore: null == shouldPromptRestore
+          ? _self.shouldPromptRestore
+          : shouldPromptRestore // ignore: cast_nullable_to_non_nullable
+              as bool,
       error: freezed == error
           ? _self.error
           : error // ignore: cast_nullable_to_non_nullable
@@ -177,6 +201,8 @@ class _AuthState extends AuthState {
       this.isSigningInWithApple = false,
       this.isSigningOut = false,
       this.isResettingPassword = false,
+      this.isAnonymous = false,
+      this.shouldPromptRestore = false,
       this.error,
       this.successMessage})
       : super._();
@@ -204,6 +230,16 @@ class _AuthState extends AuthState {
   @override
   @JsonKey()
   final bool isResettingPassword;
+
+  /// True if the current user is an anonymous Supabase user (no linked identity)
+  @override
+  @JsonKey()
+  final bool isAnonymous;
+
+  /// True if user should be prompted to restore purchases after signing in
+  @override
+  @JsonKey()
+  final bool shouldPromptRestore;
   @override
   final String? error;
   @override
@@ -238,6 +274,10 @@ class _AuthState extends AuthState {
                 other.isSigningOut == isSigningOut) &&
             (identical(other.isResettingPassword, isResettingPassword) ||
                 other.isResettingPassword == isResettingPassword) &&
+            (identical(other.isAnonymous, isAnonymous) ||
+                other.isAnonymous == isAnonymous) &&
+            (identical(other.shouldPromptRestore, shouldPromptRestore) ||
+                other.shouldPromptRestore == shouldPromptRestore) &&
             (identical(other.error, error) || other.error == error) &&
             (identical(other.successMessage, successMessage) ||
                 other.successMessage == successMessage));
@@ -254,12 +294,14 @@ class _AuthState extends AuthState {
       isSigningInWithApple,
       isSigningOut,
       isResettingPassword,
+      isAnonymous,
+      shouldPromptRestore,
       error,
       successMessage);
 
   @override
   String toString() {
-    return 'AuthState(currentUser: $currentUser, isLoading: $isLoading, isSigningIn: $isSigningIn, isSigningUp: $isSigningUp, isSigningInWithGoogle: $isSigningInWithGoogle, isSigningInWithApple: $isSigningInWithApple, isSigningOut: $isSigningOut, isResettingPassword: $isResettingPassword, error: $error, successMessage: $successMessage)';
+    return 'AuthState(currentUser: $currentUser, isLoading: $isLoading, isSigningIn: $isSigningIn, isSigningUp: $isSigningUp, isSigningInWithGoogle: $isSigningInWithGoogle, isSigningInWithApple: $isSigningInWithApple, isSigningOut: $isSigningOut, isResettingPassword: $isResettingPassword, isAnonymous: $isAnonymous, shouldPromptRestore: $shouldPromptRestore, error: $error, successMessage: $successMessage)';
   }
 }
 
@@ -280,6 +322,8 @@ abstract mixin class _$AuthStateCopyWith<$Res>
       bool isSigningInWithApple,
       bool isSigningOut,
       bool isResettingPassword,
+      bool isAnonymous,
+      bool shouldPromptRestore,
       String? error,
       String? successMessage});
 }
@@ -304,6 +348,8 @@ class __$AuthStateCopyWithImpl<$Res> implements _$AuthStateCopyWith<$Res> {
     Object? isSigningInWithApple = null,
     Object? isSigningOut = null,
     Object? isResettingPassword = null,
+    Object? isAnonymous = null,
+    Object? shouldPromptRestore = null,
     Object? error = freezed,
     Object? successMessage = freezed,
   }) {
@@ -339,6 +385,14 @@ class __$AuthStateCopyWithImpl<$Res> implements _$AuthStateCopyWith<$Res> {
       isResettingPassword: null == isResettingPassword
           ? _self.isResettingPassword
           : isResettingPassword // ignore: cast_nullable_to_non_nullable
+              as bool,
+      isAnonymous: null == isAnonymous
+          ? _self.isAnonymous
+          : isAnonymous // ignore: cast_nullable_to_non_nullable
+              as bool,
+      shouldPromptRestore: null == shouldPromptRestore
+          ? _self.shouldPromptRestore
+          : shouldPromptRestore // ignore: cast_nullable_to_non_nullable
               as bool,
       error: freezed == error
           ? _self.error

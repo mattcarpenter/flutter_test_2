@@ -260,10 +260,29 @@ class SubscriptionService {
   }
 
   /// Present paywall using RevenueCat's built-in UI
+  /// Creates an anonymous Supabase user if needed (for IAP without registration)
   Future<bool> presentPaywall() async {
     try {
+      // STEP 1: Ensure we have a Supabase user (anonymous or real)
+      String? userId = _supabase.auth.currentUser?.id;
+
+      if (userId == null) {
+        // Create anonymous user for IAP
+        AppLogger.info('No user session, creating anonymous user for IAP');
+        userId = await _createAnonymousUserForPurchase();
+      }
+
+      // STEP 2: Ensure RevenueCat is initialized
       await _ensureInitialized();
 
+      // STEP 3: Ensure RevenueCat knows about this user
+      final currentRevenueCatUser = await Purchases.appUserID;
+      if (currentRevenueCatUser != userId) {
+        AppLogger.info('Syncing RevenueCat user ID: $userId');
+        await Purchases.logIn(userId);
+      }
+
+      // STEP 4: Present paywall
       final result = await RevenueCatUI.presentPaywall();
       AppLogger.info('Paywall result: $result');
 
@@ -293,6 +312,29 @@ class SubscriptionService {
     }
   }
 
+  /// Create anonymous Supabase user specifically for purchase
+  Future<String> _createAnonymousUserForPurchase() async {
+    try {
+      final response = await _supabase.auth.signInAnonymously();
+
+      if (response.user == null) {
+        throw SubscriptionApiException(
+          message: 'Failed to create anonymous user for purchase',
+          type: SubscriptionErrorType.unknown,
+        );
+      }
+
+      final userId = response.user!.id;
+      AppLogger.info('Created anonymous user for IAP: $userId');
+
+      return userId;
+    } catch (e) {
+      AppLogger.error('Failed to create anonymous user for IAP', e);
+      if (e is SubscriptionApiException) rethrow;
+      throw SubscriptionApiException.fromException(Exception(e.toString()));
+    }
+  }
+
   /// Present paywall only if user doesn't have Plus subscription
   Future<bool> presentPaywallIfNeeded() async {
     try {
@@ -308,14 +350,33 @@ class SubscriptionService {
   }
 
   /// Restore purchases
+  /// Creates an anonymous Supabase user if needed (for restore without registration)
   Future<void> restorePurchases() async {
     try {
+      // Ensure we have a user (anonymous or real)
+      String? userId = _supabase.auth.currentUser?.id;
+
+      if (userId == null) {
+        // Create anonymous user for restore
+        AppLogger.info('Creating anonymous user for purchase restoration');
+        userId = await _createAnonymousUserForPurchase();
+      }
+
       await _ensureInitialized();
 
+      // Ensure RevenueCat has correct user
+      // This triggers RevenueCat's automatic purchase transfer from previous anonymous IDs
+      final currentRevenueCatUser = await Purchases.appUserID;
+      if (currentRevenueCatUser != userId) {
+        await Purchases.logIn(userId);
+      }
+
+      // Restore purchases
       final customerInfo = await Purchases.restorePurchases();
       final hasActiveEntitlements = customerInfo.entitlements.active.isNotEmpty;
 
       if (hasActiveEntitlements) {
+        AppLogger.info('Purchases restored successfully');
         await refreshRevenueCatState();
       } else {
         throw SubscriptionApiException(

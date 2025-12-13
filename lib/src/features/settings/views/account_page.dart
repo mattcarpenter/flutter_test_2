@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import '../../../../database/powersync.dart';
 import '../../../mobile/utils/adaptive_sliver_page.dart';
 import '../../../providers/auth_provider.dart';
+import '../../../providers/subscription_provider.dart';
 import '../../../repositories/upload_queue_repository.dart';
 import '../../../theme/colors.dart';
 import '../../../theme/spacing.dart';
@@ -19,7 +20,9 @@ class AccountPage extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final colors = AppColors.of(context);
-    final isAuthenticated = ref.watch(isAuthenticatedProvider);
+    final isEffectivelyAuthenticated = ref.watch(isAuthenticatedProvider); // Returns false for anonymous
+    final isAnonymous = ref.watch(isAnonymousUserProvider);
+    final hasPlus = ref.watch(hasPlusProvider);
     final user = ref.watch(currentUserProvider);
 
     return AdaptiveSliverPage(
@@ -32,8 +35,8 @@ class AccountPage extends ConsumerWidget {
             children: [
               SizedBox(height: AppSpacing.xl),
 
-              if (isAuthenticated && user != null) ...[
-                // User info section
+              if (isEffectivelyAuthenticated && user != null) ...[
+                // Fully authenticated user - show email and sign out
                 SettingsGroupCondensed(
                   children: [
                     _UserInfoRow(
@@ -53,7 +56,15 @@ class AccountPage extends ConsumerWidget {
                   ],
                 ),
               ] else ...[
-                // Not signed in
+                // Not fully authenticated (anonymous or logged out)
+
+                // Show notice if anonymous user with subscription
+                if (isAnonymous && hasPlus) ...[
+                  _AnonymousUserNotice(),
+                  SizedBox(height: AppSpacing.lg),
+                ],
+
+                // Sign in/sign up options
                 SettingsGroupCondensed(
                   children: [
                     SettingsRowCondensed(
@@ -252,6 +263,57 @@ class _SignOutRowState extends State<_SignOutRow> {
             ),
           ],
         ),
+      ),
+    );
+  }
+}
+
+/// Notice shown to anonymous users with a subscription
+class _AnonymousUserNotice extends StatelessWidget {
+  const _AnonymousUserNotice();
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = AppColors.of(context);
+
+    return Container(
+      margin: EdgeInsets.symmetric(horizontal: AppSpacing.lg),
+      padding: EdgeInsets.all(AppSpacing.md),
+      decoration: BoxDecoration(
+        color: colors.warning.withValues(alpha: 0.1),
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(color: colors.warning.withValues(alpha: 0.3)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(
+                CupertinoIcons.exclamationmark_triangle,
+                color: colors.warning,
+                size: 20,
+              ),
+              SizedBox(width: AppSpacing.sm),
+              Expanded(
+                child: Text(
+                  'Account Not Linked',
+                  style: AppTypography.body.copyWith(
+                    color: colors.warning,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          SizedBox(height: AppSpacing.sm),
+          Text(
+            'You have Stockpot Plus but no account. Create an account to '
+            'access your subscription on other devices and enable features '
+            'like household sharing.',
+            style: AppTypography.bodySmall.copyWith(color: colors.textSecondary),
+          ),
+        ],
       ),
     );
   }

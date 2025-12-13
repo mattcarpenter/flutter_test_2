@@ -1,5 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../providers/auth_provider.dart';
 import '../providers/subscription_provider.dart';
 import '../models/subscription_state.dart';
 
@@ -97,8 +98,40 @@ class FeatureFlags {
     'basic_search',
     'recipe_creation',
     'recipe_sharing',
-    'basic_household',
   ];
+
+  /// Features that require full registration (not available to anonymous users)
+  static List<String> get registrationRequiredFeatures => [
+    'household',
+    'household_sharing',
+    'household_invites',
+    'recipe_sharing', // Sharing recipes requires registration to link ownership
+  ];
+
+  /// Check if a feature requires full registration (not anonymous)
+  static bool requiresRegistration(String feature) {
+    return registrationRequiredFeatures.contains(feature);
+  }
+
+  /// Check if user has access to a feature considering both subscription and registration
+  /// Returns a tuple of (hasAccess, blockedReason)
+  static ({bool hasAccess, String? blockedReason}) checkFeatureAccess({
+    required String feature,
+    required bool hasPlus,
+    required bool isEffectivelyAuthenticated,
+  }) {
+    // First check registration requirement
+    if (requiresRegistration(feature) && !isEffectivelyAuthenticated) {
+      return (hasAccess: false, blockedReason: 'registration_required');
+    }
+
+    // Then check subscription requirement
+    if (!hasFeatureSync(feature, SubscriptionState(hasPlus: hasPlus))) {
+      return (hasAccess: false, blockedReason: 'subscription_required');
+    }
+
+    return (hasAccess: true, blockedReason: null);
+  }
 }
 
 /// Feature gate widget for easy premium feature protection
@@ -108,7 +141,7 @@ class FeatureGate extends ConsumerWidget {
   final Widget? fallback;
   final bool showUpgradeButton;
   final String? customUpgradeText;
-  
+
   const FeatureGate({
     super.key,
     required this.feature,
@@ -117,17 +150,23 @@ class FeatureGate extends ConsumerWidget {
     this.showUpgradeButton = true,
     this.customUpgradeText,
   });
-  
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final hasPlusAsync = ref.watch(hasPlusHybridProvider);
+    final isEffectivelyAuthenticated = ref.watch(isAuthenticatedProvider);
     final error = ref.watch(subscriptionErrorProvider);
-    
+
     // Show error widget if there's an error
     if (error != null) {
       return _buildErrorWidget(context, ref, error);
     }
-    
+
+    // First check registration requirement (synchronous check)
+    if (FeatureFlags.requiresRegistration(feature) && !isEffectivelyAuthenticated) {
+      return fallback ?? _buildRegistrationPrompt(context, ref);
+    }
+
     return hasPlusAsync.when(
       data: (hasPlus) {
         // Check feature access using hybrid provider result
@@ -148,12 +187,65 @@ class FeatureGate extends ConsumerWidget {
       },
     );
   }
-  
+
+  Widget _buildRegistrationPrompt(BuildContext context, WidgetRef ref) {
+    if (!showUpgradeButton) {
+      return const SizedBox.shrink();
+    }
+
+    return Container(
+      padding: const EdgeInsets.all(16),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(
+            CupertinoIcons.person_circle,
+            size: 48,
+            color: CupertinoColors.systemBlue.resolveFrom(context),
+          ),
+          const SizedBox(height: 16),
+          Text(
+            'Account Required',
+            style: CupertinoTheme.of(context).textTheme.navLargeTitleTextStyle,
+            textAlign: TextAlign.center,
+          ),
+          const SizedBox(height: 8),
+          Text(
+            'Create an account to access ${_getFeatureDisplayName(feature)} and sync your data across devices.',
+            style: CupertinoTheme.of(context).textTheme.textStyle,
+            textAlign: TextAlign.center,
+          ),
+          const SizedBox(height: 24),
+          CupertinoButton.filled(
+            onPressed: () {
+              // Navigate to auth flow
+              Navigator.of(context).pushNamed('/auth');
+            },
+            child: const Text('Create Account'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  String _getFeatureDisplayName(String feature) {
+    switch (feature) {
+      case 'household':
+      case 'household_sharing':
+      case 'household_invites':
+        return 'Household features';
+      case 'recipe_sharing':
+        return 'recipe sharing';
+      default:
+        return feature.replaceAll('_', ' ');
+    }
+  }
+
   Widget _buildUpgradePrompt(BuildContext context, WidgetRef ref) {
     if (!showUpgradeButton) {
       return const SizedBox.shrink();
     }
-    
+
     return Container(
       padding: const EdgeInsets.all(16),
       child: Column(

@@ -7,6 +7,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../../mobile/utils/adaptive_sliver_page.dart';
 import '../../../providers/auth_provider.dart';
+import '../../../providers/subscription_provider.dart';
 import '../../../widgets/error_dialog.dart';
 import '../widgets/auth_form_field.dart';
 import '../widgets/auth_button.dart';
@@ -51,9 +52,24 @@ class _SignInPageState extends ConsumerState<SignInPage> {
       return;
     }
 
+    // Check if anonymous user with subscription - warn about data loss
+    final isAnonymous = ref.read(isAnonymousUserProvider);
+    final hasPlus = ref.read(hasPlusProvider);
+
+    if (isAnonymous) {
+      final shouldContinue = hasPlus
+          ? await _showAnonymousSubscriptionWarning()
+          : await _showDataLossWarning();
+      if (!shouldContinue) return;
+    }
+
     try {
       await ref.read(authNotifierProvider.notifier).signInWithEmail(email, password);
       if (mounted) {
+        // If user was anonymous with subscription, set flag for restore prompt
+        if (isAnonymous && hasPlus) {
+          ref.read(authNotifierProvider.notifier).setShouldPromptRestore(true);
+        }
         context.go('/recipes');
       }
     } catch (e) {
@@ -70,9 +86,24 @@ class _SignInPageState extends ConsumerState<SignInPage> {
     final authState = ref.read(authNotifierProvider);
     if (authState.isSigningInWithGoogle) return;
 
+    // Check if anonymous user with subscription - warn about data loss
+    final isAnonymous = ref.read(isAnonymousUserProvider);
+    final hasPlus = ref.read(hasPlusProvider);
+
+    if (isAnonymous) {
+      final shouldContinue = hasPlus
+          ? await _showAnonymousSubscriptionWarning()
+          : await _showDataLossWarning();
+      if (!shouldContinue) return;
+    }
+
     try {
       await ref.read(authNotifierProvider.notifier).signInWithGoogle();
       if (mounted) {
+        // If user was anonymous with subscription, set flag for restore prompt
+        if (isAnonymous && hasPlus) {
+          ref.read(authNotifierProvider.notifier).setShouldPromptRestore(true);
+        }
         context.go('/recipes');
       }
     } catch (e) {
@@ -89,9 +120,24 @@ class _SignInPageState extends ConsumerState<SignInPage> {
     final authState = ref.read(authNotifierProvider);
     if (authState.isSigningInWithApple) return;
 
+    // Check if anonymous user with subscription - warn about data loss
+    final isAnonymous = ref.read(isAnonymousUserProvider);
+    final hasPlus = ref.read(hasPlusProvider);
+
+    if (isAnonymous) {
+      final shouldContinue = hasPlus
+          ? await _showAnonymousSubscriptionWarning()
+          : await _showDataLossWarning();
+      if (!shouldContinue) return;
+    }
+
     try {
       await ref.read(authNotifierProvider.notifier).signInWithApple();
       if (mounted) {
+        // If user was anonymous with subscription, set flag for restore prompt
+        if (isAnonymous && hasPlus) {
+          ref.read(authNotifierProvider.notifier).setShouldPromptRestore(true);
+        }
         context.go('/recipes');
       }
     } catch (e) {
@@ -106,6 +152,63 @@ class _SignInPageState extends ConsumerState<SignInPage> {
         }
       }
     }
+  }
+
+  /// Show warning dialog for anonymous user with subscription signing into existing account
+  Future<bool> _showAnonymousSubscriptionWarning() async {
+    return await showCupertinoDialog<bool>(
+          context: context,
+          barrierDismissible: false,
+          builder: (context) => CupertinoAlertDialog(
+            title: const Text('Sign In Warning'),
+            content: const Text(
+              'You currently have a Stockpot Plus subscription tied to this device. '
+              'If you sign in to an existing account:\n\n'
+              '\u2022 Your local recipes will be replaced with the account\'s data\n'
+              '\u2022 You\'ll need to restore your purchase after signing in\n\n'
+              'We recommend exporting your recipes first.',
+            ),
+            actions: [
+              CupertinoDialogAction(
+                child: const Text('Cancel'),
+                onPressed: () => Navigator.of(context).pop(false),
+              ),
+              CupertinoDialogAction(
+                isDestructiveAction: true,
+                child: const Text('Sign In Anyway'),
+                onPressed: () => Navigator.of(context).pop(true),
+              ),
+            ],
+          ),
+        ) ??
+        false;
+  }
+
+  /// Show warning dialog for anonymous user about data loss
+  Future<bool> _showDataLossWarning() async {
+    return await showCupertinoDialog<bool>(
+          context: context,
+          barrierDismissible: false,
+          builder: (context) => CupertinoAlertDialog(
+            title: const Text('Replace Local Data?'),
+            content: const Text(
+              'Signing in will replace your local recipes with the account\'s data. '
+              'We recommend exporting your recipes first.',
+            ),
+            actions: [
+              CupertinoDialogAction(
+                child: const Text('Cancel'),
+                onPressed: () => Navigator.of(context).pop(false),
+              ),
+              CupertinoDialogAction(
+                isDestructiveAction: true,
+                child: const Text('Sign In'),
+                onPressed: () => Navigator.of(context).pop(true),
+              ),
+            ],
+          ),
+        ) ??
+        false;
   }
 
   // Max width for form on larger screens (iPad landscape)

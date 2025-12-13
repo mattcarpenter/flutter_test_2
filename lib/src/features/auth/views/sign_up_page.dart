@@ -7,6 +7,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../../mobile/utils/adaptive_sliver_page.dart';
 import '../../../providers/auth_provider.dart';
+import '../../../providers/subscription_provider.dart';
 import '../../../theme/colors.dart';
 import '../../../widgets/error_dialog.dart';
 import '../widgets/auth_form_field.dart';
@@ -81,28 +82,25 @@ class _SignUpPageState extends ConsumerState<SignUpPage> {
     final authState = ref.read(authNotifierProvider);
     if (authState.isSigningInWithGoogle) return;
 
+    // Capture anonymous state BEFORE OAuth (native OAuth can't link to anonymous user)
+    final wasAnonymous = ref.read(isAnonymousUserProvider);
+    final hadPlus = ref.read(hasPlusProvider);
+
     try {
       await ref.read(authNotifierProvider.notifier).signInWithGoogle();
       if (mounted) {
-        context.go('/recipes');
-      }
-    } catch (e) {
-      if (mounted) {
-        await ErrorDialog.show(
-          context,
-          message: 'Failed to sign in with Google. Please try again.',
-        );
-      }
-    }
-  }
-
-  void _handleAppleSignIn() async {
-    final authState = ref.read(authNotifierProvider);
-    if (authState.isSigningInWithApple) return;
-
-    try {
-      await ref.read(authNotifierProvider.notifier).signInWithApple();
-      if (mounted) {
+        // If user was anonymous, show post-OAuth notification
+        // Native OAuth always creates/signs into separate account (can't upgrade anonymous)
+        if (wasAnonymous) {
+          if (hadPlus) {
+            // Had subscription - prompt to restore
+            ref.read(authNotifierProvider.notifier).setShouldPromptRestore(true);
+            await _showPostOAuthSubscriptionNotice();
+          } else {
+            // No subscription - just inform about data replacement
+            await _showPostOAuthDataNotice();
+          }
+        }
         context.go('/recipes');
       }
     } catch (e) {
@@ -112,11 +110,97 @@ class _SignUpPageState extends ConsumerState<SignUpPage> {
         if (!errorMessage.contains('cancel')) {
           await ErrorDialog.show(
             context,
-            message: 'Failed to sign in with Apple. Please try again.',
+            message: 'Failed to sign up with Google. Please try again.',
           );
         }
       }
     }
+  }
+
+  void _handleAppleSignIn() async {
+    final authState = ref.read(authNotifierProvider);
+    if (authState.isSigningInWithApple) return;
+
+    // Capture anonymous state BEFORE OAuth (native OAuth can't link to anonymous user)
+    final wasAnonymous = ref.read(isAnonymousUserProvider);
+    final hadPlus = ref.read(hasPlusProvider);
+
+    try {
+      await ref.read(authNotifierProvider.notifier).signInWithApple();
+      if (mounted) {
+        // If user was anonymous, show post-OAuth notification
+        // Native OAuth always creates/signs into separate account (can't upgrade anonymous)
+        if (wasAnonymous) {
+          if (hadPlus) {
+            // Had subscription - prompt to restore
+            ref.read(authNotifierProvider.notifier).setShouldPromptRestore(true);
+            await _showPostOAuthSubscriptionNotice();
+          } else {
+            // No subscription - just inform about data replacement
+            await _showPostOAuthDataNotice();
+          }
+        }
+        context.go('/recipes');
+      }
+    } catch (e) {
+      if (mounted) {
+        // Don't show error for user cancellation
+        final errorMessage = e.toString().toLowerCase();
+        if (!errorMessage.contains('cancel')) {
+          await ErrorDialog.show(
+            context,
+            message: 'Failed to sign up with Apple. Please try again.',
+          );
+        }
+      }
+    }
+  }
+
+  /// Show post-OAuth notice for anonymous user who had a subscription
+  /// Informs them they need to restore their purchase
+  Future<void> _showPostOAuthSubscriptionNotice() async {
+    await showCupertinoDialog<void>(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => CupertinoAlertDialog(
+        title: const Text('Account Created'),
+        content: const Text(
+          'Your new account has been created successfully.\n\n'
+          'Your previous Stockpot Plus subscription was tied to your device. '
+          'You\'ll be prompted to restore your purchase shortly.',
+        ),
+        actions: [
+          CupertinoDialogAction(
+            isDefaultAction: true,
+            child: const Text('OK'),
+            onPressed: () => Navigator.of(context).pop(),
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// Show post-OAuth notice for anonymous user without subscription
+  /// Just informs them about the new account
+  Future<void> _showPostOAuthDataNotice() async {
+    await showCupertinoDialog<void>(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => CupertinoAlertDialog(
+        title: const Text('Account Created'),
+        content: const Text(
+          'Your new account has been created successfully.\n\n'
+          'Your recipes and data are now synced to this account.',
+        ),
+        actions: [
+          CupertinoDialogAction(
+            isDefaultAction: true,
+            child: const Text('OK'),
+            onPressed: () => Navigator.of(context).pop(),
+          ),
+        ],
+      ),
+    );
   }
 
   @override

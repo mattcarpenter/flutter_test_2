@@ -52,6 +52,7 @@ import '../features/household/views/household_sharing_page.dart';
 import 'main_page_shell.dart';
 import 'global_status_bar.dart';
 import 'package:sheet/route.dart';
+import '../widgets/restore_prompt_listener.dart';
 
 /// Global navigator key for accessing Navigator from anywhere in the app.
 /// Used by GlobalStatusBarWrapper to show modals with proper Navigator context.
@@ -126,7 +127,9 @@ class _AdaptiveApp2State extends ConsumerState<AdaptiveApp2> {
             ? AppTheme.cupertinoDarkTheme
             : AppTheme.cupertinoLightTheme,
         builder: (context, child) {
-          return GlobalStatusBarWrapper(child: child ?? const SizedBox.shrink());
+          return RestorePromptListener(
+            child: GlobalStatusBarWrapper(child: child ?? const SizedBox.shrink()),
+          );
         },
       );
     } else {
@@ -148,7 +151,9 @@ class _AdaptiveApp2State extends ConsumerState<AdaptiveApp2> {
         theme: AppTheme.materialLightTheme,
         darkTheme: AppTheme.materialDarkTheme,
         builder: (context, child) {
-          return GlobalStatusBarWrapper(child: child ?? const SizedBox.shrink());
+          return RestorePromptListener(
+            child: GlobalStatusBarWrapper(child: child ?? const SizedBox.shrink()),
+          );
         },
       );
     }

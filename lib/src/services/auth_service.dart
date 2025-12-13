@@ -119,12 +119,43 @@ class AuthService {
   bool get isAuthenticated => currentUser != null;
 
   /// Sign up with email and password
+  /// If user is currently anonymous, this upgrades their account by linking email identity
+  /// (preserving user ID and any associated subscriptions)
   Future<AuthResponse> signUpWithEmail({
     required String email,
     required String password,
     Map<String, dynamic>? metadata,
   }) async {
     try {
+      final currentUser = _supabase.auth.currentUser;
+
+      // Check if current user is anonymous - if so, upgrade their account
+      if (currentUser != null && isAnonymousUser) {
+        AppLogger.info('Upgrading anonymous user ${currentUser.id} to email account');
+
+        // Link email identity to anonymous account
+        // This preserves the user ID, so all subscriptions stay linked
+        final response = await _supabase.auth.updateUser(
+          UserAttributes(
+            email: email,
+            password: password,
+            data: metadata,
+          ),
+        );
+
+        if (response.user != null) {
+          AppLogger.info('Anonymous user upgraded to email account: ${response.user!.id}');
+        }
+
+        // Return an AuthResponse-like structure
+        // Note: updateUser returns UserResponse, we need to construct AuthResponse
+        return AuthResponse(
+          session: _supabase.auth.currentSession,
+          user: response.user,
+        );
+      }
+
+      // Standard sign-up for non-anonymous users
       final response = await _supabase.auth.signUp(
         email: email,
         password: password,
@@ -355,6 +386,47 @@ class AuthService {
       AppLogger.error('Sign out failed', e);
       throw AuthApiException.fromException(Exception(e.toString()));
     }
+  }
+
+  /// Create an anonymous Supabase user (for IAP without registration)
+  /// Returns the AuthResponse with the anonymous user
+  Future<AuthResponse> signInAnonymously() async {
+    try {
+      final response = await _supabase.auth.signInAnonymously();
+
+      if (response.user == null) {
+        throw AuthApiException(
+          message: 'Failed to create anonymous user',
+          type: AuthErrorType.unknown,
+        );
+      }
+
+      AppLogger.info('Created anonymous user: ${response.user!.id}');
+      return response;
+    } on AuthException catch (e) {
+      AppLogger.error('Anonymous sign-in failed', e);
+      throw AuthApiException.fromAuthException(e);
+    } catch (e) {
+      if (e is AuthApiException) rethrow;
+      AppLogger.error('Anonymous sign-in failed', e);
+      throw AuthApiException.fromException(Exception(e.toString()));
+    }
+  }
+
+  /// Check if current user is anonymous (no linked identity)
+  bool get isAnonymousUser {
+    final user = _supabase.auth.currentUser;
+    if (user == null) return false;
+
+    // Supabase anonymous users have no identities linked
+    // The identities list will be empty or null for anonymous users
+    return user.identities?.isEmpty ?? true;
+  }
+
+  /// Check if a specific user is anonymous
+  static bool isUserAnonymous(User? user) {
+    if (user == null) return false;
+    return user.identities?.isEmpty ?? true;
   }
 
   /// Update user metadata
