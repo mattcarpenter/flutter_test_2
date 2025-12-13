@@ -228,7 +228,10 @@ class AuthService {
       // (unless forceNativeOAuth is true, which means we want to switch accounts)
       if (!forceNativeOAuth && isAnonymousUser) {
         AppLogger.info('Anonymous user detected, upgrading with Google identity');
-        return await _linkIdentity(OAuthProvider.google);
+        await _linkIdentity(OAuthProvider.google);
+        // linkIdentity launches Safari and returns immediately
+        // Return current session - auth state listener will update when complete
+        return AuthResponse(session: currentSession, user: currentUser);
       }
 
       // Non-anonymous user (or forced): use native OAuth
@@ -317,7 +320,10 @@ class AuthService {
       // (unless forceNativeOAuth is true, which means we want to switch accounts)
       if (!forceNativeOAuth && isAnonymousUser) {
         AppLogger.info('Anonymous user detected, upgrading with Apple identity');
-        return await _linkIdentity(OAuthProvider.apple);
+        await _linkIdentity(OAuthProvider.apple);
+        // linkIdentity launches Safari and returns immediately
+        // Return current session - auth state listener will update when complete
+        return AuthResponse(session: currentSession, user: currentUser);
       }
 
       // Non-anonymous user (or forced): use native OAuth
@@ -398,41 +404,25 @@ class AuthService {
   /// Link an OAuth identity to the current anonymous user.
   /// Uses Supabase's built-in linkIdentity() which handles the browser OAuth flow.
   /// The deep link callback is handled automatically by supabase_flutter.
-  Future<AuthResponse> _linkIdentity(OAuthProvider provider) async {
-    final completer = Completer<AuthResponse>();
-    StreamSubscription<AuthState>? subscription;
-    Timer? timeoutTimer;
-
+  ///
+  /// This method launches Safari and returns immediately - it does NOT wait for
+  /// the user to complete the OAuth flow. The auth state listener in AuthNotifier
+  /// will handle the success case when the user completes authentication.
+  Future<void> _linkIdentity(OAuthProvider provider) async {
     final currentUserId = _supabase.auth.currentUser?.id;
     AppLogger.info('Starting identity linking for ${provider.name} (user: $currentUserId)');
-
-    // Set up listener for auth state changes - completes when identity is linked
-    subscription = _supabase.auth.onAuthStateChange.listen((state) {
-      if (state.session != null && state.session!.user != null) {
-        final user = state.session!.user;
-        // Verify same user ID (identity was linked, not switched)
-        // and user is no longer anonymous (has identities)
-        if (user.id == currentUserId && !isUserAnonymous(user)) {
-          timeoutTimer?.cancel();
-          subscription?.cancel();
-          if (!completer.isCompleted) {
-            AppLogger.info('Identity linked successfully for user ${user.id}');
-            completer.complete(AuthResponse(session: state.session, user: user));
-          }
-        }
-      }
-    });
 
     try {
       // Use Supabase's linkIdentity - handles browser launch and deep link
       // Use externalApplication to open Safari instead of in-app webview
+      // This returns after launching Safari, it doesn't wait for completion
       await _supabase.auth.linkIdentity(
         provider,
         redirectTo: _getRedirectUrl(),
         authScreenLaunchMode: LaunchMode.externalApplication,
       );
+      AppLogger.info('Safari launched for identity linking');
     } on AuthException catch (e) {
-      subscription.cancel();
       AppLogger.error('Failed to start identity linking', e);
       // Check for "identity already linked" error
       if (e.message.toLowerCase().contains('already') ||
@@ -446,25 +436,10 @@ class AuthService {
       }
       throw AuthApiException.fromAuthException(e);
     } catch (e) {
-      subscription.cancel();
       if (e is AuthApiException) rethrow;
       AppLogger.error('Failed to start identity linking', e);
       throw AuthApiException.fromException(Exception(e.toString()));
     }
-
-    // Set up timeout (user might cancel or take too long)
-    timeoutTimer = Timer(const Duration(minutes: 10), () {
-      subscription?.cancel();
-      if (!completer.isCompleted) {
-        AppLogger.warning('Identity linking timed out');
-        completer.completeError(AuthApiException(
-          message: 'Authentication timed out. Please try again.',
-          type: AuthErrorType.unknown,
-        ));
-      }
-    });
-
-    return completer.future;
   }
 
   /// Reset password

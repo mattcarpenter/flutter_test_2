@@ -103,6 +103,9 @@ class _SignInPageState extends ConsumerState<SignInPage> {
       }
     } catch (e) {
       if (mounted) {
+        // Don't show error for user cancellation
+        if (e is AuthApiException && e.type == AuthErrorType.cancelled) return;
+
         // Check for "identity already linked" error - means Google account exists elsewhere
         if (e is AuthApiException && e.type == AuthErrorType.identityAlreadyLinked) {
           // This Google account is linked to another user - offer to sign in to that account
@@ -144,6 +147,7 @@ class _SignInPageState extends ConsumerState<SignInPage> {
     } catch (e) {
       if (mounted) {
         // Don't show error for user cancellation
+        if (e is AuthApiException && e.type == AuthErrorType.cancelled) return;
         final errorMessage = e.toString().toLowerCase();
         if (errorMessage.contains('cancel')) return;
 

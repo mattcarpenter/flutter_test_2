@@ -164,7 +164,6 @@ class GoogleSignInButton extends StatelessWidget {
     final enabled = onPressed != null && !isLoading;
     
     if (isLoading) {
-      // Show loading state with same styling as the actual button
       return Container(
         height: 50,
         width: double.infinity,

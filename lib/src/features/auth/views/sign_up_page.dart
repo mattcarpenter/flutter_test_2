@@ -94,6 +94,7 @@ class _SignUpPageState extends ConsumerState<SignUpPage> {
     } catch (e) {
       if (mounted) {
         // Don't show error for user cancellation
+        if (e is AuthApiException && e.type == AuthErrorType.cancelled) return;
         final errorMessage = e.toString().toLowerCase();
         if (errorMessage.contains('cancel')) return;
 
@@ -125,6 +126,7 @@ class _SignUpPageState extends ConsumerState<SignUpPage> {
     } catch (e) {
       if (mounted) {
         // Don't show error for user cancellation
+        if (e is AuthApiException && e.type == AuthErrorType.cancelled) return;
         final errorMessage = e.toString().toLowerCase();
         if (errorMessage.contains('cancel')) return;
 

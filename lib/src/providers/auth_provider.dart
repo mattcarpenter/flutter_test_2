@@ -288,6 +288,7 @@ class AuthNotifier extends StateNotifier<models.AuthState> {
     state = state.copyWith(shouldPromptRestore: false);
   }
 
+
   /// Set the restore prompt flag (called when anonymous user with subscription signs in)
   void setShouldPromptRestore(bool value) {
     state = state.copyWith(shouldPromptRestore: value);
