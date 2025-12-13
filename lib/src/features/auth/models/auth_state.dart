@@ -18,6 +18,12 @@ abstract class AuthState with _$AuthState {
     @Default(false) bool isAnonymous,
     /// True if user should be prompted to restore purchases after signing in
     @Default(false) bool shouldPromptRestore,
+    /// The OAuth provider for a pending linkIdentity operation.
+    /// Used to retry with native OAuth if linkIdentity fails with identity_already_exists.
+    OAuthProvider? pendingLinkIdentityProvider,
+    /// True when linkIdentity fails because the identity is already linked to another account.
+    /// The UI should show a dialog offering to sign in to the existing account.
+    @Default(false) bool identityAlreadyExistsError,
     String? error,
     String? successMessage,
   }) = _AuthState;

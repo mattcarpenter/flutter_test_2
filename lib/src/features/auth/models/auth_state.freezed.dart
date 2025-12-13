@@ -29,6 +29,14 @@ mixin _$AuthState {
 
   /// True if user should be prompted to restore purchases after signing in
   bool get shouldPromptRestore;
+
+  /// The OAuth provider for a pending linkIdentity operation.
+  /// Used to retry with native OAuth if linkIdentity fails with identity_already_exists.
+  OAuthProvider? get pendingLinkIdentityProvider;
+
+  /// True when linkIdentity fails because the identity is already linked to another account.
+  /// The UI should show a dialog offering to sign in to the existing account.
+  bool get identityAlreadyExistsError;
   String? get error;
   String? get successMessage;
 
@@ -64,6 +72,14 @@ mixin _$AuthState {
                 other.isAnonymous == isAnonymous) &&
             (identical(other.shouldPromptRestore, shouldPromptRestore) ||
                 other.shouldPromptRestore == shouldPromptRestore) &&
+            (identical(other.pendingLinkIdentityProvider,
+                    pendingLinkIdentityProvider) ||
+                other.pendingLinkIdentityProvider ==
+                    pendingLinkIdentityProvider) &&
+            (identical(other.identityAlreadyExistsError,
+                    identityAlreadyExistsError) ||
+                other.identityAlreadyExistsError ==
+                    identityAlreadyExistsError) &&
             (identical(other.error, error) || other.error == error) &&
             (identical(other.successMessage, successMessage) ||
                 other.successMessage == successMessage));
@@ -82,12 +98,14 @@ mixin _$AuthState {
       isResettingPassword,
       isAnonymous,
       shouldPromptRestore,
+      pendingLinkIdentityProvider,
+      identityAlreadyExistsError,
       error,
       successMessage);
 
   @override
   String toString() {
-    return 'AuthState(currentUser: $currentUser, isLoading: $isLoading, isSigningIn: $isSigningIn, isSigningUp: $isSigningUp, isSigningInWithGoogle: $isSigningInWithGoogle, isSigningInWithApple: $isSigningInWithApple, isSigningOut: $isSigningOut, isResettingPassword: $isResettingPassword, isAnonymous: $isAnonymous, shouldPromptRestore: $shouldPromptRestore, error: $error, successMessage: $successMessage)';
+    return 'AuthState(currentUser: $currentUser, isLoading: $isLoading, isSigningIn: $isSigningIn, isSigningUp: $isSigningUp, isSigningInWithGoogle: $isSigningInWithGoogle, isSigningInWithApple: $isSigningInWithApple, isSigningOut: $isSigningOut, isResettingPassword: $isResettingPassword, isAnonymous: $isAnonymous, shouldPromptRestore: $shouldPromptRestore, pendingLinkIdentityProvider: $pendingLinkIdentityProvider, identityAlreadyExistsError: $identityAlreadyExistsError, error: $error, successMessage: $successMessage)';
   }
 }
 
@@ -107,6 +125,8 @@ abstract mixin class $AuthStateCopyWith<$Res> {
       bool isResettingPassword,
       bool isAnonymous,
       bool shouldPromptRestore,
+      OAuthProvider? pendingLinkIdentityProvider,
+      bool identityAlreadyExistsError,
       String? error,
       String? successMessage});
 }
@@ -133,6 +153,8 @@ class _$AuthStateCopyWithImpl<$Res> implements $AuthStateCopyWith<$Res> {
     Object? isResettingPassword = null,
     Object? isAnonymous = null,
     Object? shouldPromptRestore = null,
+    Object? pendingLinkIdentityProvider = freezed,
+    Object? identityAlreadyExistsError = null,
     Object? error = freezed,
     Object? successMessage = freezed,
   }) {
@@ -177,6 +199,14 @@ class _$AuthStateCopyWithImpl<$Res> implements $AuthStateCopyWith<$Res> {
           ? _self.shouldPromptRestore
           : shouldPromptRestore // ignore: cast_nullable_to_non_nullable
               as bool,
+      pendingLinkIdentityProvider: freezed == pendingLinkIdentityProvider
+          ? _self.pendingLinkIdentityProvider
+          : pendingLinkIdentityProvider // ignore: cast_nullable_to_non_nullable
+              as OAuthProvider?,
+      identityAlreadyExistsError: null == identityAlreadyExistsError
+          ? _self.identityAlreadyExistsError
+          : identityAlreadyExistsError // ignore: cast_nullable_to_non_nullable
+              as bool,
       error: freezed == error
           ? _self.error
           : error // ignore: cast_nullable_to_non_nullable
@@ -203,6 +233,8 @@ class _AuthState extends AuthState {
       this.isResettingPassword = false,
       this.isAnonymous = false,
       this.shouldPromptRestore = false,
+      this.pendingLinkIdentityProvider,
+      this.identityAlreadyExistsError = false,
       this.error,
       this.successMessage})
       : super._();
@@ -240,6 +272,17 @@ class _AuthState extends AuthState {
   @override
   @JsonKey()
   final bool shouldPromptRestore;
+
+  /// The OAuth provider for a pending linkIdentity operation.
+  /// Used to retry with native OAuth if linkIdentity fails with identity_already_exists.
+  @override
+  final OAuthProvider? pendingLinkIdentityProvider;
+
+  /// True when linkIdentity fails because the identity is already linked to another account.
+  /// The UI should show a dialog offering to sign in to the existing account.
+  @override
+  @JsonKey()
+  final bool identityAlreadyExistsError;
   @override
   final String? error;
   @override
@@ -278,6 +321,14 @@ class _AuthState extends AuthState {
                 other.isAnonymous == isAnonymous) &&
             (identical(other.shouldPromptRestore, shouldPromptRestore) ||
                 other.shouldPromptRestore == shouldPromptRestore) &&
+            (identical(other.pendingLinkIdentityProvider,
+                    pendingLinkIdentityProvider) ||
+                other.pendingLinkIdentityProvider ==
+                    pendingLinkIdentityProvider) &&
+            (identical(other.identityAlreadyExistsError,
+                    identityAlreadyExistsError) ||
+                other.identityAlreadyExistsError ==
+                    identityAlreadyExistsError) &&
             (identical(other.error, error) || other.error == error) &&
             (identical(other.successMessage, successMessage) ||
                 other.successMessage == successMessage));
@@ -296,12 +347,14 @@ class _AuthState extends AuthState {
       isResettingPassword,
       isAnonymous,
       shouldPromptRestore,
+      pendingLinkIdentityProvider,
+      identityAlreadyExistsError,
       error,
       successMessage);
 
   @override
   String toString() {
-    return 'AuthState(currentUser: $currentUser, isLoading: $isLoading, isSigningIn: $isSigningIn, isSigningUp: $isSigningUp, isSigningInWithGoogle: $isSigningInWithGoogle, isSigningInWithApple: $isSigningInWithApple, isSigningOut: $isSigningOut, isResettingPassword: $isResettingPassword, isAnonymous: $isAnonymous, shouldPromptRestore: $shouldPromptRestore, error: $error, successMessage: $successMessage)';
+    return 'AuthState(currentUser: $currentUser, isLoading: $isLoading, isSigningIn: $isSigningIn, isSigningUp: $isSigningUp, isSigningInWithGoogle: $isSigningInWithGoogle, isSigningInWithApple: $isSigningInWithApple, isSigningOut: $isSigningOut, isResettingPassword: $isResettingPassword, isAnonymous: $isAnonymous, shouldPromptRestore: $shouldPromptRestore, pendingLinkIdentityProvider: $pendingLinkIdentityProvider, identityAlreadyExistsError: $identityAlreadyExistsError, error: $error, successMessage: $successMessage)';
   }
 }
 
@@ -324,6 +377,8 @@ abstract mixin class _$AuthStateCopyWith<$Res>
       bool isResettingPassword,
       bool isAnonymous,
       bool shouldPromptRestore,
+      OAuthProvider? pendingLinkIdentityProvider,
+      bool identityAlreadyExistsError,
       String? error,
       String? successMessage});
 }
@@ -350,6 +405,8 @@ class __$AuthStateCopyWithImpl<$Res> implements _$AuthStateCopyWith<$Res> {
     Object? isResettingPassword = null,
     Object? isAnonymous = null,
     Object? shouldPromptRestore = null,
+    Object? pendingLinkIdentityProvider = freezed,
+    Object? identityAlreadyExistsError = null,
     Object? error = freezed,
     Object? successMessage = freezed,
   }) {
@@ -393,6 +450,14 @@ class __$AuthStateCopyWithImpl<$Res> implements _$AuthStateCopyWith<$Res> {
       shouldPromptRestore: null == shouldPromptRestore
           ? _self.shouldPromptRestore
           : shouldPromptRestore // ignore: cast_nullable_to_non_nullable
+              as bool,
+      pendingLinkIdentityProvider: freezed == pendingLinkIdentityProvider
+          ? _self.pendingLinkIdentityProvider
+          : pendingLinkIdentityProvider // ignore: cast_nullable_to_non_nullable
+              as OAuthProvider?,
+      identityAlreadyExistsError: null == identityAlreadyExistsError
+          ? _self.identityAlreadyExistsError
+          : identityAlreadyExistsError // ignore: cast_nullable_to_non_nullable
               as bool,
       error: freezed == error
           ? _self.error

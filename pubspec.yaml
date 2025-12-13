@@ -10,6 +10,7 @@ environment:
   sdk: '>=3.4.3 <4.0.0'
 
 dependencies:
+  app_links: ^6.3.3
   appkit_ui_element_colors: ^1.0.0
   bitsdojo_window: ^0.1.6
   fluent_ui: ^4.9.2

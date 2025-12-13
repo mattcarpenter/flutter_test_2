@@ -32,51 +32,75 @@ class AuthNotifier extends StateNotifier<models.AuthState> {
     }
 
     // Listen to auth state changes
-    _authSubscription = _authService.authStateChangesWithSession.listen((authState) {
-      switch (authState.event) {
-        case AuthChangeEvent.signedIn:
-          if (authState.session?.user != null) {
-            final user = authState.session!.user;
-            final isAnon = AuthService.isUserAnonymous(user);
+    _authSubscription = _authService.authStateChangesWithSession.listen(
+      (authState) {
+        switch (authState.event) {
+          case AuthChangeEvent.signedIn:
+            if (authState.session?.user != null) {
+              final user = authState.session!.user;
+              final isAnon = AuthService.isUserAnonymous(user);
+              state = state.copyWith(
+                currentUser: user,
+                isAnonymous: isAnon,
+                isLoading: false,
+                isSigningIn: false,
+                isSigningUp: false,
+                isSigningInWithGoogle: false,
+                isSigningInWithApple: false,
+                // Clear pending provider on successful auth (non-anonymous)
+                pendingLinkIdentityProvider: isAnon ? state.pendingLinkIdentityProvider : null,
+                error: null,
+                successMessage: isAnon ? null : 'Successfully signed in!',
+              );
+            }
+            break;
+
+          case AuthChangeEvent.signedOut:
+            state = const models.AuthState();
+            break;
+
+          case AuthChangeEvent.userUpdated:
+            if (authState.session?.user != null) {
+              final user = authState.session!.user;
+              final isAnon = AuthService.isUserAnonymous(user);
+              state = state.copyWith(
+                currentUser: user,
+                isAnonymous: isAnon,
+                error: null,
+              );
+            }
+            break;
+
+          case AuthChangeEvent.passwordRecovery:
             state = state.copyWith(
-              currentUser: user,
-              isAnonymous: isAnon,
-              isLoading: false,
-              isSigningIn: false,
-              isSigningUp: false,
+              isResettingPassword: false,
               error: null,
-              successMessage: isAnon ? null : 'Successfully signed in!',
+              successMessage: 'Password reset email sent! Check your inbox.',
             );
-          }
-          break;
+            break;
 
-        case AuthChangeEvent.signedOut:
-          state = const models.AuthState();
-          break;
+          default:
+            break;
+        }
+      },
+      onError: (error, stackTrace) {
+        // Handle errors from Supabase auth stream
+        // Clear loading state on any auth error
+        state = state.copyWith(
+          isSigningInWithGoogle: false,
+          isSigningInWithApple: false,
+        );
+      },
+    );
 
-        case AuthChangeEvent.userUpdated:
-          if (authState.session?.user != null) {
-            final user = authState.session!.user;
-            final isAnon = AuthService.isUserAnonymous(user);
-            state = state.copyWith(
-              currentUser: user,
-              isAnonymous: isAnon,
-              error: null,
-            );
-          }
-          break;
-
-        case AuthChangeEvent.passwordRecovery:
-          state = state.copyWith(
-            isResettingPassword: false,
-            error: null,
-            successMessage: 'Password reset email sent! Check your inbox.',
-          );
-          break;
-
-        default:
-          break;
-      }
+    // Listen for identity_already_exists errors from deep links
+    // This stream is emitted by AuthService when it detects the error in the deep link URL
+    _authService.onIdentityAlreadyExistsError.listen((_) {
+      state = state.copyWith(
+        isSigningInWithGoogle: false,
+        isSigningInWithApple: false,
+        identityAlreadyExistsError: true,
+      );
     });
   }
 
@@ -145,8 +169,15 @@ class AuthNotifier extends StateNotifier<models.AuthState> {
   /// native OAuth directly. This is used on the sign-in page when linkIdentity
   /// fails because the identity is already linked to another account.
   Future<void> signInWithGoogle({bool forceNativeOAuth = false}) async {
+    // Track pending provider for anonymous users using linkIdentity
+    // This allows us to retry with native OAuth if linkIdentity fails
+    final pendingProvider = (!forceNativeOAuth && _authService.isAnonymousUser)
+        ? OAuthProvider.google
+        : null;
+
     state = state.copyWith(
       isSigningInWithGoogle: true,
+      pendingLinkIdentityProvider: pendingProvider,
       error: null,
       successMessage: null,
     );
@@ -178,8 +209,15 @@ class AuthNotifier extends StateNotifier<models.AuthState> {
   /// native OAuth directly. This is used on the sign-in page when linkIdentity
   /// fails because the identity is already linked to another account.
   Future<void> signInWithApple({bool forceNativeOAuth = false}) async {
+    // Track pending provider for anonymous users using linkIdentity
+    // This allows us to retry with native OAuth if linkIdentity fails
+    final pendingProvider = (!forceNativeOAuth && _authService.isAnonymousUser)
+        ? OAuthProvider.apple
+        : null;
+
     state = state.copyWith(
       isSigningInWithApple: true,
+      pendingLinkIdentityProvider: pendingProvider,
       error: null,
       successMessage: null,
     );
@@ -294,6 +332,17 @@ class AuthNotifier extends StateNotifier<models.AuthState> {
     state = state.copyWith(shouldPromptRestore: value);
   }
 
+  /// Clear the pending linkIdentity provider
+  /// Called after handling identity_already_exists error
+  void clearPendingLinkIdentityProvider() {
+    state = state.copyWith(pendingLinkIdentityProvider: null);
+  }
+
+  /// Clear the identity already exists error flag
+  /// Called after the UI has shown the dialog
+  void clearIdentityAlreadyExistsError() {
+    state = state.copyWith(identityAlreadyExistsError: false);
+  }
 
   @override
   void dispose() {

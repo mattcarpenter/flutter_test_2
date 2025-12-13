@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:app_links/app_links.dart';
 import 'package:crypto/crypto.dart';
 import 'package:flutter/foundation.dart';
 import 'package:google_sign_in/google_sign_in.dart';
@@ -92,7 +93,51 @@ class AuthService {
   final GoogleSignIn _googleSignIn = GoogleSignIn.instance;
   bool _isInitialized = false;
 
-  AuthService() : _supabase = Supabase.instance.client;
+  // Deep link monitoring for auth errors
+  final _appLinks = AppLinks();
+  StreamSubscription<Uri>? _deepLinkSubscription;
+  final _identityExistsErrorController = StreamController<void>.broadcast();
+
+  /// Stream that emits when an identity_already_exists error is detected from a deep link.
+  /// Listen to this to show the "account already exists" dialog.
+  Stream<void> get onIdentityAlreadyExistsError => _identityExistsErrorController.stream;
+
+  AuthService() : _supabase = Supabase.instance.client {
+    _startDeepLinkMonitoring();
+  }
+
+  /// Start monitoring deep links for auth errors.
+  /// This runs BEFORE Supabase's internal handler processes the link.
+  void _startDeepLinkMonitoring() {
+    if (kIsWeb) return; // Web doesn't use deep links
+
+    _deepLinkSubscription = _appLinks.uriLinkStream.listen((uri) {
+      _checkForAuthError(uri);
+    });
+  }
+
+  /// Check if a deep link URL contains an auth error.
+  void _checkForAuthError(Uri uri) {
+    // Auth callback URLs have error info in the fragment
+    // Example: app.stockpot.app://auth-callback#error_code=identity_already_exists&error_description=...
+    final fragment = uri.fragment;
+    if (fragment.isEmpty) return;
+
+    // Parse the fragment as query parameters
+    final params = Uri.splitQueryString(fragment);
+    final errorCode = params['error_code'];
+
+    if (errorCode == 'identity_already_exists') {
+      AppLogger.info('Detected identity_already_exists error from deep link');
+      _identityExistsErrorController.add(null);
+    }
+  }
+
+  /// Dispose resources. Call this when the service is no longer needed.
+  void dispose() {
+    _deepLinkSubscription?.cancel();
+    _identityExistsErrorController.close();
+  }
 
   Future<void> _ensureInitialized() async {
     if (!_isInitialized) {
