@@ -7,7 +7,6 @@ import 'package:flutter/foundation.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:sign_in_with_apple/sign_in_with_apple.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-import 'package:url_launcher/url_launcher.dart';
 
 import '../features/auth/models/auth_error.dart';
 import 'logging/app_logger.dart';
@@ -225,11 +224,11 @@ class AuthService {
   /// fails because the identity is already linked to another account.
   Future<AuthResponse> signInWithGoogle({bool forceNativeOAuth = false}) async {
     try {
-      // Check if current user is anonymous - use PKCE linkIdentity to upgrade
+      // Check if current user is anonymous - use linkIdentity to upgrade
       // (unless forceNativeOAuth is true, which means we want to switch accounts)
       if (!forceNativeOAuth && isAnonymousUser) {
-        AppLogger.info('Anonymous user detected, upgrading with Google identity via PKCE');
-        return await _linkIdentityWithPKCE(OAuthProvider.google);
+        AppLogger.info('Anonymous user detected, upgrading with Google identity');
+        return await _linkIdentity(OAuthProvider.google);
       }
 
       // Non-anonymous user (or forced): use native OAuth
@@ -314,11 +313,11 @@ class AuthService {
         );
       }
 
-      // Check if current user is anonymous - use PKCE linkIdentity to upgrade
+      // Check if current user is anonymous - use linkIdentity to upgrade
       // (unless forceNativeOAuth is true, which means we want to switch accounts)
       if (!forceNativeOAuth && isAnonymousUser) {
-        AppLogger.info('Anonymous user detected, upgrading with Apple identity via PKCE');
-        return await _linkIdentityWithPKCE(OAuthProvider.apple);
+        AppLogger.info('Anonymous user detected, upgrading with Apple identity');
+        return await _linkIdentity(OAuthProvider.apple);
       }
 
       // Non-anonymous user (or forced): use native OAuth
@@ -396,20 +395,19 @@ class AuthService {
     }
   }
 
-  /// Link an OAuth identity to the current user using PKCE flow.
-  /// This opens Safari for authentication and waits for the redirect callback.
-  /// Used to upgrade anonymous users to full accounts while preserving user ID.
-  Future<AuthResponse> _linkIdentityWithPKCE(OAuthProvider provider) async {
+  /// Link an OAuth identity to the current anonymous user.
+  /// Uses Supabase's built-in linkIdentity() which handles the browser OAuth flow.
+  /// The deep link callback is handled automatically by supabase_flutter.
+  Future<AuthResponse> _linkIdentity(OAuthProvider provider) async {
     final completer = Completer<AuthResponse>();
     StreamSubscription<AuthState>? subscription;
     Timer? timeoutTimer;
 
     final currentUserId = _supabase.auth.currentUser?.id;
-    AppLogger.info('Starting PKCE identity linking for ${provider.name} (user: $currentUserId)');
+    AppLogger.info('Starting identity linking for ${provider.name} (user: $currentUserId)');
 
-    // Set up listener for auth state changes
+    // Set up listener for auth state changes - completes when identity is linked
     subscription = _supabase.auth.onAuthStateChange.listen((state) {
-      // Check for successful identity link - user should no longer be anonymous
       if (state.session != null && state.session!.user != null) {
         final user = state.session!.user;
         // Verify same user ID (identity was linked, not switched)
@@ -425,30 +423,14 @@ class AuthService {
       }
     });
 
-    // Launch the PKCE OAuth flow using GoTrueClient's getLinkIdentityUrl
     try {
-      final response = await _supabase.auth.getLinkIdentityUrl(
+      // Use Supabase's linkIdentity - handles browser launch and deep link
+      // Use externalApplication to open Safari instead of in-app webview
+      await _supabase.auth.linkIdentity(
         provider,
         redirectTo: _getRedirectUrl(),
+        authScreenLaunchMode: LaunchMode.externalApplication,
       );
-
-      final uri = Uri.parse(response.url);
-      AppLogger.info('LinkIdentity URL: ${response.url}');
-
-      // Use externalApplication to open in Safari (not in-app webview)
-      // This ensures proper deep link handling back to the app
-      final launched = await launchUrl(
-        uri,
-        mode: LaunchMode.externalApplication,
-      );
-
-      if (!launched) {
-        subscription.cancel();
-        throw AuthApiException(
-          message: 'Failed to launch authentication',
-          type: AuthErrorType.unknown,
-        );
-      }
     } on AuthException catch (e) {
       subscription.cancel();
       AppLogger.error('Failed to start identity linking', e);
@@ -470,7 +452,7 @@ class AuthService {
       throw AuthApiException.fromException(Exception(e.toString()));
     }
 
-    // Set up timeout (user might cancel or take too long in Safari)
+    // Set up timeout (user might cancel or take too long)
     timeoutTimer = Timer(const Duration(minutes: 10), () {
       subscription?.cancel();
       if (!completer.isCompleted) {

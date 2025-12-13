@@ -223,3 +223,5 @@ lib/database/*.db-wal
 
 **/.claude/settings.local.json
 .idea/misc.xml
+
+*.p8
