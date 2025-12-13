@@ -8,7 +8,9 @@ import 'package:go_router/go_router.dart';
 import '../../../mobile/utils/adaptive_sliver_page.dart';
 import '../../../providers/auth_provider.dart';
 import '../../../providers/subscription_provider.dart';
+import '../../../services/auth_service.dart';
 import '../../../widgets/error_dialog.dart';
+import '../models/auth_error.dart';
 import '../widgets/auth_form_field.dart';
 import '../widgets/auth_button.dart';
 import '../widgets/social_auth_button.dart';
@@ -86,32 +88,38 @@ class _SignInPageState extends ConsumerState<SignInPage> {
     final authState = ref.read(authNotifierProvider);
     if (authState.isSigningInWithGoogle) return;
 
-    // Check if anonymous user with subscription - warn about data loss
+    // Capture state before attempting sign-in
     final isAnonymous = ref.read(isAnonymousUserProvider);
     final hasPlus = ref.read(hasPlusProvider);
 
-    if (isAnonymous) {
-      final shouldContinue = hasPlus
-          ? await _showAnonymousSubscriptionWarning()
-          : await _showDataLossWarning();
-      if (!shouldContinue) return;
-    }
-
     try {
+      // For anonymous users, this will try linkIdentity first (upgrades account)
       await ref.read(authNotifierProvider.notifier).signInWithGoogle();
+      // Small delay to let any pending deep link processing complete
+      // This prevents GlobalKey collisions during the page transition
+      await Future.delayed(const Duration(milliseconds: 100));
       if (mounted) {
-        // If user was anonymous with subscription, set flag for restore prompt
-        if (isAnonymous && hasPlus) {
-          ref.read(authNotifierProvider.notifier).setShouldPromptRestore(true);
-        }
         context.go('/recipes');
       }
     } catch (e) {
       if (mounted) {
-        await ErrorDialog.show(
-          context,
-          message: 'Failed to sign in with Google. Please try again.',
-        );
+        // Check for "identity already linked" error - means Google account exists elsewhere
+        if (e is AuthApiException && e.type == AuthErrorType.identityAlreadyLinked) {
+          // This Google account is linked to another user - offer to sign in to that account
+          await _handleIdentityAlreadyLinkedOnSignIn(
+            provider: 'Google',
+            isAnonymous: isAnonymous,
+            hasPlus: hasPlus,
+            signInWithForce: () => ref.read(authNotifierProvider.notifier).signInWithGoogle(
+              forceNativeOAuth: true,
+            ),
+          );
+        } else {
+          await ErrorDialog.show(
+            context,
+            message: 'Failed to sign in with Google. Please try again.',
+          );
+        }
       }
     }
   }
@@ -120,31 +128,37 @@ class _SignInPageState extends ConsumerState<SignInPage> {
     final authState = ref.read(authNotifierProvider);
     if (authState.isSigningInWithApple) return;
 
-    // Check if anonymous user with subscription - warn about data loss
+    // Capture state before attempting sign-in
     final isAnonymous = ref.read(isAnonymousUserProvider);
     final hasPlus = ref.read(hasPlusProvider);
 
-    if (isAnonymous) {
-      final shouldContinue = hasPlus
-          ? await _showAnonymousSubscriptionWarning()
-          : await _showDataLossWarning();
-      if (!shouldContinue) return;
-    }
-
     try {
+      // For anonymous users, this will try linkIdentity first (upgrades account)
       await ref.read(authNotifierProvider.notifier).signInWithApple();
+      // Small delay to let any pending deep link processing complete
+      // This prevents GlobalKey collisions during the page transition
+      await Future.delayed(const Duration(milliseconds: 100));
       if (mounted) {
-        // If user was anonymous with subscription, set flag for restore prompt
-        if (isAnonymous && hasPlus) {
-          ref.read(authNotifierProvider.notifier).setShouldPromptRestore(true);
-        }
         context.go('/recipes');
       }
     } catch (e) {
       if (mounted) {
         // Don't show error for user cancellation
         final errorMessage = e.toString().toLowerCase();
-        if (!errorMessage.contains('cancel')) {
+        if (errorMessage.contains('cancel')) return;
+
+        // Check for "identity already linked" error - means Apple account exists elsewhere
+        if (e is AuthApiException && e.type == AuthErrorType.identityAlreadyLinked) {
+          // This Apple account is linked to another user - offer to sign in to that account
+          await _handleIdentityAlreadyLinkedOnSignIn(
+            provider: 'Apple',
+            isAnonymous: isAnonymous,
+            hasPlus: hasPlus,
+            signInWithForce: () => ref.read(authNotifierProvider.notifier).signInWithApple(
+              forceNativeOAuth: true,
+            ),
+          );
+        } else {
           await ErrorDialog.show(
             context,
             message: 'Failed to sign in with Apple. Please try again.',
@@ -209,6 +223,49 @@ class _SignInPageState extends ConsumerState<SignInPage> {
           ),
         ) ??
         false;
+  }
+
+  /// Handle the case where linkIdentity fails because the OAuth identity
+  /// is already linked to another account. Show warning and offer to sign in.
+  Future<void> _handleIdentityAlreadyLinkedOnSignIn({
+    required String provider,
+    required bool isAnonymous,
+    required bool hasPlus,
+    required Future<void> Function() signInWithForce,
+  }) async {
+    // Show appropriate warning dialog
+    final shouldContinue = isAnonymous
+        ? (hasPlus
+            ? await _showAnonymousSubscriptionWarning()
+            : await _showDataLossWarning())
+        : true; // Non-anonymous users don't need warning
+
+    if (!shouldContinue) return;
+
+    try {
+      // Sign in using native OAuth (this will switch to the other account)
+      await signInWithForce();
+      // Small delay to let any pending auth processing complete
+      await Future.delayed(const Duration(milliseconds: 100));
+      if (mounted) {
+        // If user was anonymous with subscription, prompt restore
+        if (isAnonymous && hasPlus) {
+          ref.read(authNotifierProvider.notifier).setShouldPromptRestore(true);
+        }
+        context.go('/recipes');
+      }
+    } catch (e) {
+      if (mounted) {
+        // Don't show error for cancellation
+        final errorMessage = e.toString().toLowerCase();
+        if (!errorMessage.contains('cancel')) {
+          await ErrorDialog.show(
+            context,
+            message: 'Failed to sign in with $provider. Please try again.',
+          );
+        }
+      }
+    }
   }
 
   // Max width for form on larger screens (iPad landscape)

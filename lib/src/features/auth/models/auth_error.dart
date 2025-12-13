@@ -69,6 +69,8 @@ abstract class AuthError with _$AuthError {
         return 'Sign-in was cancelled.';
       case AuthErrorType.notSupported:
         return 'This sign-in method is not supported on your device.';
+      case AuthErrorType.identityAlreadyLinked:
+        return 'This account is already linked to another user. Please sign in instead.';
       case AuthErrorType.unknown:
         return message.isNotEmpty ? message : 'An unexpected error occurred. Please try again.';
     }
@@ -86,5 +88,6 @@ enum AuthErrorType {
   userCancelled,
   cancelled,
   notSupported,
+  identityAlreadyLinked,
   unknown,
 }

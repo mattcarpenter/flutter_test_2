@@ -7,9 +7,10 @@ import 'package:go_router/go_router.dart';
 
 import '../../../mobile/utils/adaptive_sliver_page.dart';
 import '../../../providers/auth_provider.dart';
-import '../../../providers/subscription_provider.dart';
+import '../../../services/auth_service.dart';
 import '../../../theme/colors.dart';
 import '../../../widgets/error_dialog.dart';
+import '../models/auth_error.dart';
 import '../widgets/auth_form_field.dart';
 import '../widgets/auth_button.dart';
 import '../widgets/social_auth_button.dart';
@@ -82,32 +83,24 @@ class _SignUpPageState extends ConsumerState<SignUpPage> {
     final authState = ref.read(authNotifierProvider);
     if (authState.isSigningInWithGoogle) return;
 
-    // Capture anonymous state BEFORE OAuth (native OAuth can't link to anonymous user)
-    final wasAnonymous = ref.read(isAnonymousUserProvider);
-    final hadPlus = ref.read(hasPlusProvider);
-
     try {
       await ref.read(authNotifierProvider.notifier).signInWithGoogle();
+      // Small delay to let any pending deep link processing complete
+      // This prevents GlobalKey collisions during the page transition
+      await Future.delayed(const Duration(milliseconds: 100));
       if (mounted) {
-        // If user was anonymous, show post-OAuth notification
-        // Native OAuth always creates/signs into separate account (can't upgrade anonymous)
-        if (wasAnonymous) {
-          if (hadPlus) {
-            // Had subscription - prompt to restore
-            ref.read(authNotifierProvider.notifier).setShouldPromptRestore(true);
-            await _showPostOAuthSubscriptionNotice();
-          } else {
-            // No subscription - just inform about data replacement
-            await _showPostOAuthDataNotice();
-          }
-        }
         context.go('/recipes');
       }
     } catch (e) {
       if (mounted) {
         // Don't show error for user cancellation
         final errorMessage = e.toString().toLowerCase();
-        if (!errorMessage.contains('cancel')) {
+        if (errorMessage.contains('cancel')) return;
+
+        // Check for "identity already linked" error
+        if (e is AuthApiException && e.type == AuthErrorType.identityAlreadyLinked) {
+          await _showIdentityAlreadyLinkedError('Google');
+        } else {
           await ErrorDialog.show(
             context,
             message: 'Failed to sign up with Google. Please try again.',
@@ -121,32 +114,24 @@ class _SignUpPageState extends ConsumerState<SignUpPage> {
     final authState = ref.read(authNotifierProvider);
     if (authState.isSigningInWithApple) return;
 
-    // Capture anonymous state BEFORE OAuth (native OAuth can't link to anonymous user)
-    final wasAnonymous = ref.read(isAnonymousUserProvider);
-    final hadPlus = ref.read(hasPlusProvider);
-
     try {
       await ref.read(authNotifierProvider.notifier).signInWithApple();
+      // Small delay to let any pending deep link processing complete
+      // This prevents GlobalKey collisions during the page transition
+      await Future.delayed(const Duration(milliseconds: 100));
       if (mounted) {
-        // If user was anonymous, show post-OAuth notification
-        // Native OAuth always creates/signs into separate account (can't upgrade anonymous)
-        if (wasAnonymous) {
-          if (hadPlus) {
-            // Had subscription - prompt to restore
-            ref.read(authNotifierProvider.notifier).setShouldPromptRestore(true);
-            await _showPostOAuthSubscriptionNotice();
-          } else {
-            // No subscription - just inform about data replacement
-            await _showPostOAuthDataNotice();
-          }
-        }
         context.go('/recipes');
       }
     } catch (e) {
       if (mounted) {
         // Don't show error for user cancellation
         final errorMessage = e.toString().toLowerCase();
-        if (!errorMessage.contains('cancel')) {
+        if (errorMessage.contains('cancel')) return;
+
+        // Check for "identity already linked" error
+        if (e is AuthApiException && e.type == AuthErrorType.identityAlreadyLinked) {
+          await _showIdentityAlreadyLinkedError('Apple');
+        } else {
           await ErrorDialog.show(
             context,
             message: 'Failed to sign up with Apple. Please try again.',
@@ -156,47 +141,29 @@ class _SignUpPageState extends ConsumerState<SignUpPage> {
     }
   }
 
-  /// Show post-OAuth notice for anonymous user who had a subscription
-  /// Informs them they need to restore their purchase
-  Future<void> _showPostOAuthSubscriptionNotice() async {
+  /// Show error when the OAuth identity is already linked to another account
+  Future<void> _showIdentityAlreadyLinkedError(String provider) async {
     await showCupertinoDialog<void>(
       context: context,
       barrierDismissible: false,
       builder: (context) => CupertinoAlertDialog(
-        title: const Text('Account Created'),
-        content: const Text(
-          'Your new account has been created successfully.\n\n'
-          'Your previous Stockpot Plus subscription was tied to your device. '
-          'You\'ll be prompted to restore your purchase shortly.',
+        title: const Text('Account Already Exists'),
+        content: Text(
+          'This $provider account is already linked to another user. '
+          'Please go to Sign In to access that account.',
         ),
         actions: [
           CupertinoDialogAction(
-            isDefaultAction: true,
-            child: const Text('OK'),
+            child: const Text('Cancel'),
             onPressed: () => Navigator.of(context).pop(),
           ),
-        ],
-      ),
-    );
-  }
-
-  /// Show post-OAuth notice for anonymous user without subscription
-  /// Just informs them about the new account
-  Future<void> _showPostOAuthDataNotice() async {
-    await showCupertinoDialog<void>(
-      context: context,
-      barrierDismissible: false,
-      builder: (context) => CupertinoAlertDialog(
-        title: const Text('Account Created'),
-        content: const Text(
-          'Your new account has been created successfully.\n\n'
-          'Your recipes and data are now synced to this account.',
-        ),
-        actions: [
           CupertinoDialogAction(
             isDefaultAction: true,
-            child: const Text('OK'),
-            onPressed: () => Navigator.of(context).pop(),
+            child: const Text('Go to Sign In'),
+            onPressed: () {
+              Navigator.of(context).pop();
+              context.go('/auth/signin');
+            },
           ),
         ],
       ),

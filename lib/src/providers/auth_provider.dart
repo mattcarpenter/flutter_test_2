@@ -138,8 +138,13 @@ class AuthNotifier extends StateNotifier<models.AuthState> {
     }
   }
 
-  /// Sign in with Google using native authentication
-  Future<void> signInWithGoogle() async {
+  /// Sign in with Google using native authentication.
+  /// For anonymous users, uses PKCE linkIdentity to upgrade the account.
+  ///
+  /// Set [forceNativeOAuth] to true to skip the anonymous upgrade check and use
+  /// native OAuth directly. This is used on the sign-in page when linkIdentity
+  /// fails because the identity is already linked to another account.
+  Future<void> signInWithGoogle({bool forceNativeOAuth = false}) async {
     state = state.copyWith(
       isSigningInWithGoogle: true,
       error: null,
@@ -147,7 +152,9 @@ class AuthNotifier extends StateNotifier<models.AuthState> {
     );
 
     try {
-      final response = await _authService.signInWithGoogle();
+      final response = await _authService.signInWithGoogle(
+        forceNativeOAuth: forceNativeOAuth,
+      );
       // State will be updated via auth stream listener, but also update here for immediate response
       state = state.copyWith(
         isSigningInWithGoogle: false,
@@ -164,8 +171,13 @@ class AuthNotifier extends StateNotifier<models.AuthState> {
     }
   }
 
-  /// Sign in with Apple (iOS only)
-  Future<void> signInWithApple() async {
+  /// Sign in with Apple (iOS only).
+  /// For anonymous users, uses PKCE linkIdentity to upgrade the account.
+  ///
+  /// Set [forceNativeOAuth] to true to skip the anonymous upgrade check and use
+  /// native OAuth directly. This is used on the sign-in page when linkIdentity
+  /// fails because the identity is already linked to another account.
+  Future<void> signInWithApple({bool forceNativeOAuth = false}) async {
     state = state.copyWith(
       isSigningInWithApple: true,
       error: null,
@@ -173,7 +185,9 @@ class AuthNotifier extends StateNotifier<models.AuthState> {
     );
 
     try {
-      final response = await _authService.signInWithApple();
+      final response = await _authService.signInWithApple(
+        forceNativeOAuth: forceNativeOAuth,
+      );
       state = state.copyWith(
         isSigningInWithApple: false,
         currentUser: response.user,

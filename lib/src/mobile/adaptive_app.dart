@@ -536,7 +536,33 @@ class _AdaptiveApp2State extends ConsumerState<AdaptiveApp2> {
       debugLogDiagnostics: true,
       initialLocation: initialLocation,
       navigatorKey: globalRootNavigatorKey,
+      // Handle auth callback deep links - Supabase processes the token internally
+      // We just need to prevent GoRouter from throwing a "no route" error
+      redirect: (context, state) {
+        final path = state.uri.path;
+        // Ignore auth callback URLs - Supabase handles these via app_links
+        if (path == '/auth-callback' || path == '/auth-callback/') {
+          return null; // Stay on current page, don't navigate
+        }
+        return null;
+      },
+      onException: (context, state, router) {
+        // If the exception is for an auth callback URL, ignore it
+        final path = state.uri.path;
+        if (path == '/auth-callback' || path == '/auth-callback/') {
+          return; // Supabase handles this internally
+        }
+        // For other exceptions, navigate to home
+        router.go('/recipes');
+      },
       routes: [
+        // Auth callback route - Supabase handles the token via app_links
+        // This route exists just to prevent "no route found" errors
+        // It immediately redirects back to recipes (Supabase already processed the token)
+        GoRoute(
+          path: '/auth-callback',
+          redirect: (context, state) => '/recipes',
+        ),
         GoRoute(
             path: '/add_folder',
             pageBuilder: (context, state) => buildAdaptiveSheetPage<void>(

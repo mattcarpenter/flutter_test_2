@@ -50,10 +50,10 @@
 		<dict>
 			<key>CFBundleURLSchemes</key>
 			<array>
-				<string>io.supabase.flutterrecipeapp</string>
+				<string>app.stockpot.app</string>
 			</array>
 			<key>CFBundleURLName</key>
-			<string>io.supabase.flutterrecipeapp</string>
+			<string>app.stockpot.app</string>
 		</dict>
 		<dict>
 			<key>CFBundleURLName</key>

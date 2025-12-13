@@ -7,9 +7,18 @@ import 'package:flutter/foundation.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:sign_in_with_apple/sign_in_with_apple.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import '../features/auth/models/auth_error.dart';
 import 'logging/app_logger.dart';
+
+/// Indicates the type of sign-in that was performed
+enum SignInMethod {
+  /// Native OAuth (ID token exchange) - used for non-anonymous users
+  native,
+  /// PKCE flow (browser redirect) - used to upgrade anonymous users
+  pkce,
+}
 
 class AuthApiException implements Exception {
   final String message;
@@ -208,8 +217,22 @@ class AuthService {
   }
 
   /// Sign in with Google using native authentication (v7.x compatible with Supabase)
-  Future<AuthResponse> signInWithGoogle() async {
+  /// For anonymous users, uses PKCE linkIdentity to upgrade the account while
+  /// preserving user ID and data.
+  ///
+  /// Set [forceNativeOAuth] to true to skip the anonymous upgrade check and use
+  /// native OAuth directly. This is used on the sign-in page when linkIdentity
+  /// fails because the identity is already linked to another account.
+  Future<AuthResponse> signInWithGoogle({bool forceNativeOAuth = false}) async {
     try {
+      // Check if current user is anonymous - use PKCE linkIdentity to upgrade
+      // (unless forceNativeOAuth is true, which means we want to switch accounts)
+      if (!forceNativeOAuth && isAnonymousUser) {
+        AppLogger.info('Anonymous user detected, upgrading with Google identity via PKCE');
+        return await _linkIdentityWithPKCE(OAuthProvider.google);
+      }
+
+      // Non-anonymous user (or forced): use native OAuth
       await _ensureInitialized();
 
       // Try lightweight authentication first (no UI if already signed in)
@@ -274,8 +297,14 @@ class AuthService {
   }
 
   /// Sign in with Apple (iOS only)
-  /// Uses native Sign in with Apple with proper nonce for Supabase authentication
-  Future<AuthResponse> signInWithApple() async {
+  /// Uses native Sign in with Apple with proper nonce for Supabase authentication.
+  /// For anonymous users, uses PKCE linkIdentity to upgrade the account while
+  /// preserving user ID and data.
+  ///
+  /// Set [forceNativeOAuth] to true to skip the anonymous upgrade check and use
+  /// native OAuth directly. This is used on the sign-in page when linkIdentity
+  /// fails because the identity is already linked to another account.
+  Future<AuthResponse> signInWithApple({bool forceNativeOAuth = false}) async {
     try {
       // Check if Apple Sign-In is available
       if (!await SignInWithApple.isAvailable()) {
@@ -285,6 +314,14 @@ class AuthService {
         );
       }
 
+      // Check if current user is anonymous - use PKCE linkIdentity to upgrade
+      // (unless forceNativeOAuth is true, which means we want to switch accounts)
+      if (!forceNativeOAuth && isAnonymousUser) {
+        AppLogger.info('Anonymous user detected, upgrading with Apple identity via PKCE');
+        return await _linkIdentityWithPKCE(OAuthProvider.apple);
+      }
+
+      // Non-anonymous user (or forced): use native OAuth
       // Generate a secure random nonce using Supabase's built-in method
       final rawNonce = _supabase.auth.generateRawNonce();
       // Hash the nonce with SHA-256 for Apple
@@ -357,6 +394,95 @@ class AuthService {
       AppLogger.error('Apple sign in failed', e);
       throw AuthApiException.fromException(Exception(e.toString()));
     }
+  }
+
+  /// Link an OAuth identity to the current user using PKCE flow.
+  /// This opens Safari for authentication and waits for the redirect callback.
+  /// Used to upgrade anonymous users to full accounts while preserving user ID.
+  Future<AuthResponse> _linkIdentityWithPKCE(OAuthProvider provider) async {
+    final completer = Completer<AuthResponse>();
+    StreamSubscription<AuthState>? subscription;
+    Timer? timeoutTimer;
+
+    final currentUserId = _supabase.auth.currentUser?.id;
+    AppLogger.info('Starting PKCE identity linking for ${provider.name} (user: $currentUserId)');
+
+    // Set up listener for auth state changes
+    subscription = _supabase.auth.onAuthStateChange.listen((state) {
+      // Check for successful identity link - user should no longer be anonymous
+      if (state.session != null && state.session!.user != null) {
+        final user = state.session!.user;
+        // Verify same user ID (identity was linked, not switched)
+        // and user is no longer anonymous (has identities)
+        if (user.id == currentUserId && !isUserAnonymous(user)) {
+          timeoutTimer?.cancel();
+          subscription?.cancel();
+          if (!completer.isCompleted) {
+            AppLogger.info('Identity linked successfully for user ${user.id}');
+            completer.complete(AuthResponse(session: state.session, user: user));
+          }
+        }
+      }
+    });
+
+    // Launch the PKCE OAuth flow using GoTrueClient's getLinkIdentityUrl
+    try {
+      final response = await _supabase.auth.getLinkIdentityUrl(
+        provider,
+        redirectTo: _getRedirectUrl(),
+      );
+
+      final uri = Uri.parse(response.url);
+      AppLogger.info('LinkIdentity URL: ${response.url}');
+
+      // Use externalApplication to open in Safari (not in-app webview)
+      // This ensures proper deep link handling back to the app
+      final launched = await launchUrl(
+        uri,
+        mode: LaunchMode.externalApplication,
+      );
+
+      if (!launched) {
+        subscription.cancel();
+        throw AuthApiException(
+          message: 'Failed to launch authentication',
+          type: AuthErrorType.unknown,
+        );
+      }
+    } on AuthException catch (e) {
+      subscription.cancel();
+      AppLogger.error('Failed to start identity linking', e);
+      // Check for "identity already linked" error
+      if (e.message.toLowerCase().contains('already') ||
+          e.message.toLowerCase().contains('identity') ||
+          e.statusCode == '422') {
+        throw AuthApiException(
+          message: 'This account is already linked to another user',
+          code: e.statusCode,
+          type: AuthErrorType.identityAlreadyLinked,
+        );
+      }
+      throw AuthApiException.fromAuthException(e);
+    } catch (e) {
+      subscription.cancel();
+      if (e is AuthApiException) rethrow;
+      AppLogger.error('Failed to start identity linking', e);
+      throw AuthApiException.fromException(Exception(e.toString()));
+    }
+
+    // Set up timeout (user might cancel or take too long in Safari)
+    timeoutTimer = Timer(const Duration(minutes: 10), () {
+      subscription?.cancel();
+      if (!completer.isCompleted) {
+        AppLogger.warning('Identity linking timed out');
+        completer.completeError(AuthApiException(
+          message: 'Authentication timed out. Please try again.',
+          type: AuthErrorType.unknown,
+        ));
+      }
+    });
+
+    return completer.future;
   }
 
   /// Reset password
@@ -458,7 +584,7 @@ class AuthService {
     if (kIsWeb) {
       return '${Uri.base.origin}/auth/callback';
     } else if (Platform.isIOS || Platform.isAndroid) {
-      return 'io.supabase.flutterrecipeapp://login-callback/';
+      return 'app.stockpot.app://auth-callback';
     } else {
       // Desktop
       return 'http://localhost:3000/auth/callback';
@@ -470,7 +596,7 @@ class AuthService {
     if (kIsWeb) {
       return '${Uri.base.origin}/auth/reset-password';
     } else if (Platform.isIOS || Platform.isAndroid) {
-      return 'io.supabase.flutterrecipeapp://reset-callback/';
+      return 'app.stockpot.app://reset-callback';
     } else {
       // Desktop
       return 'http://localhost:3000/auth/reset-password';
