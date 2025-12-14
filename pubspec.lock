@@ -1878,18 +1878,18 @@ packages:
     dependency: "direct main"
     description:
       name: purchases_flutter
-      sha256: "4f1252889958695744c3d024abd2b233530fde63c75307bc0a3607bf66ea4476"
+      sha256: f2e58a6c40af341d296ee305c168c7ca7a8289fe54bce6af880a24080d43192a
       url: "https://pub.dev"
     source: hosted
-    version: "9.1.0"
+    version: "9.10.0"
   purchases_ui_flutter:
     dependency: "direct main"
     description:
       name: purchases_ui_flutter
-      sha256: "0d988d44f55ed05d3f39379842f401037b5eb21f9476e3fb4bb48b7d3d9601a5"
+      sha256: d92ae8068d7820f73e1f666e6151ffb8e7a9d0c099b9289ec8f0925d64742d48
       url: "https://pub.dev"
     source: hosted
-    version: "9.1.0"
+    version: "9.10.0"
   quill_native_bridge:
     dependency: transitive
     description:

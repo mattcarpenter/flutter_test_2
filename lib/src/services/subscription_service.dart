@@ -41,7 +41,7 @@ class SubscriptionApiException implements Exception {
   static SubscriptionErrorType _mapPurchasesErrorToType(PurchasesError error) {
     final code = error.code;
     final message = error.message.toLowerCase();
-    
+
     // Map based on error code names since enum values may differ
     if (code.toString().contains('userCancelled') || message.contains('cancelled')) {
       return SubscriptionErrorType.userCancelled;
@@ -61,14 +61,14 @@ class SubscriptionApiException implements Exception {
       return SubscriptionErrorType.missingReceipt;
     } else if (code.toString().contains('paymentPending') || message.contains('pending')) {
       return SubscriptionErrorType.paymentPending;
-    } else if (code.toString().contains('configuration') || 
+    } else if (code.toString().contains('configuration') ||
                code.toString().contains('invalidKey') ||
                code.toString().contains('ineligible') ||
                code.toString().contains('permissions') ||
                code.toString().contains('invalidAppUserId')) {
       return SubscriptionErrorType.configuration;
     }
-    
+
     return SubscriptionErrorType.unknown;
   }
 
@@ -92,20 +92,30 @@ enum SubscriptionErrorType {
   unknown,
 }
 
+/// Result of a restore purchases operation
+enum RestoreResult {
+  /// Subscription restored successfully with immediate access
+  success,
+  /// No subscriptions found to restore
+  noSubscriptionsFound,
+  /// Transactions found but transfer is pending (webhook processing)
+  transferPending,
+}
+
 /// Service for managing subscription state and operations via RevenueCat
 class SubscriptionService {
   static const String _apiKey = 'appl_SPuDBCvjoalGuumyxdYEfRZKEXt';
   static const String _entitlementId = 'plus';
-  
+
   final SupabaseClient _supabase;
-  
+
   bool _isInitialized = false;
   Completer<void>? _initCompleter;
-  
+
   // Cache for ALL subscriptions (not just user's own)
   List<UserSubscriptionEntry> _cachedSubscriptions = [];
   String? _lastUserId;
-  
+
   // RevenueCat CustomerInfo cache for immediate access
   CustomerInfo? _cachedCustomerInfo;
   String? _customerInfoUserId; // Track which user this info belongs to
@@ -196,7 +206,7 @@ class SubscriptionService {
       return false; // Fail closed
     }
   }
-  
+
   /// Check if user has Plus subscription synchronously from database only
   bool hasPlusSync() {
     try {
@@ -216,7 +226,7 @@ class SubscriptionService {
       return false; // Fail closed
     }
   }
-  
+
   /// Helper to check if subscription is active
   bool _isSubscriptionActive(UserSubscriptionEntry subscription) {
     // Simply check if the required entitlement is present
@@ -229,15 +239,15 @@ class SubscriptionService {
     try {
       final user = _supabase.auth.currentUser;
       if (user == null) return null;
-      
+
       // Find any active subscription with plus entitlement
       if (_lastUserId == user.id && _cachedSubscriptions.isNotEmpty) {
-        final activeSubscription = _cachedSubscriptions.firstWhereOrNull((subscription) => 
-          subscription.entitlements.contains(_entitlementId) && 
+        final activeSubscription = _cachedSubscriptions.firstWhereOrNull((subscription) =>
+          subscription.entitlements.contains(_entitlementId) &&
           subscription.status == SubscriptionStatus.active);
-        
+
         if (activeSubscription == null) return null;
-        
+
         return {
           'status': activeSubscription.status.name,
           'entitlements': activeSubscription.entitlements,
@@ -252,7 +262,7 @@ class SubscriptionService {
           'subscription_owner': activeSubscription.userId,
         };
       }
-      
+
       return null;
     } catch (e) {
       return null;
@@ -283,7 +293,9 @@ class SubscriptionService {
       }
 
       // STEP 4: Present paywall
+      AppLogger.info('------------- LAUNCHING PAYWALL');
       final result = await RevenueCatUI.presentPaywall();
+      AppLogger.info('-------------- PAYWALL RESULT:');
       AppLogger.info('Paywall result: $result');
 
       // Treat both purchased and restored as success
@@ -351,7 +363,10 @@ class SubscriptionService {
 
   /// Restore purchases
   /// Creates an anonymous Supabase user if needed (for restore without registration)
-  Future<void> restorePurchases() async {
+  ///
+  /// Note: If this triggers a subscription transfer (from another RevenueCat user),
+  /// there will be a delay while the TRANSFER webhook is processed by the backend.
+  Future<RestoreResult> restorePurchases() async {
     try {
       // Ensure we have a user (anonymous or real)
       String? userId = _supabase.auth.currentUser?.id;
@@ -365,25 +380,41 @@ class SubscriptionService {
       await _ensureInitialized();
 
       // Ensure RevenueCat has correct user
-      // This triggers RevenueCat's automatic purchase transfer from previous anonymous IDs
       final currentRevenueCatUser = await Purchases.appUserID;
       if (currentRevenueCatUser != userId) {
+        AppLogger.info('Syncing RevenueCat user to: $userId');
         await Purchases.logIn(userId);
       }
 
-      // Restore purchases
+      // Restore purchases - this may trigger a TRANSFER webhook
       final customerInfo = await Purchases.restorePurchases();
       final hasActiveEntitlements = customerInfo.entitlements.active.isNotEmpty;
 
       if (hasActiveEntitlements) {
-        AppLogger.info('Purchases restored successfully');
+        // Immediate entitlements found
+        AppLogger.info('Purchases restored successfully with immediate entitlements');
         await refreshRevenueCatState();
-      } else {
-        throw SubscriptionApiException(
-          message: 'No active purchases found to restore',
-          type: SubscriptionErrorType.missingReceipt,
-        );
+        return RestoreResult.success;
       }
+
+      // No immediate entitlements - could be:
+      // 1. No purchases to restore
+      // 2. Transfer in progress (webhook not yet processed)
+      // 3. Subscription expired
+
+      // Check if we had any transactions restored (indicates transfer may be happening)
+      final hasTransactions = customerInfo.nonSubscriptionTransactions.isNotEmpty ||
+          customerInfo.allPurchasedProductIdentifiers.isNotEmpty;
+
+      if (hasTransactions) {
+        // Transactions exist but no entitlements - likely a transfer in progress
+        AppLogger.info('Restore found transactions but no immediate entitlements - transfer may be in progress');
+        return RestoreResult.transferPending;
+      }
+
+      // No transactions found at all
+      AppLogger.info('Restored purchases but no subscriptions found');
+      return RestoreResult.noSubscriptionsFound;
     } on PlatformException catch (e) {
       AppLogger.error('Error restoring purchases', e);
 
@@ -488,7 +519,7 @@ class SubscriptionService {
           return 'An unexpected error occurred. Please try again.';
       }
     }
-    
+
     return 'An unexpected error occurred. Please try again.';
   }
 

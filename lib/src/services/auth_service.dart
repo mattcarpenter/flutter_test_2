@@ -6,6 +6,7 @@ import 'package:app_links/app_links.dart';
 import 'package:crypto/crypto.dart';
 import 'package:flutter/foundation.dart';
 import 'package:google_sign_in/google_sign_in.dart';
+import 'package:purchases_flutter/purchases_flutter.dart';
 import 'package:sign_in_with_apple/sign_in_with_apple.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
@@ -503,10 +504,20 @@ class AuthService {
     }
   }
 
-  /// Sign out
+  /// Sign out from both Supabase and RevenueCat
   Future<void> signOut() async {
     try {
+      // Sign out from Supabase
       await _supabase.auth.signOut();
+
+      // Also log out from RevenueCat to keep them in sync
+      try {
+        await Purchases.logOut();
+        AppLogger.debug('Logged out from RevenueCat');
+      } catch (e) {
+        // Don't fail sign out if RevenueCat logout fails
+        AppLogger.warning('Failed to log out from RevenueCat', e);
+      }
     } on AuthException catch (e) {
       AppLogger.error('Sign out failed', e);
       throw AuthApiException.fromAuthException(e);

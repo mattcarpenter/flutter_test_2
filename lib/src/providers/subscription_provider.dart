@@ -132,23 +132,81 @@ class SubscriptionNotifier extends StateNotifier<SubscriptionState> {
   Map<String, dynamic>? get subscriptionMetadata => state.subscriptionMetadata;
 
   /// Restore purchases
-  Future<void> restorePurchases() async {
+  /// Returns the result of the restore operation
+  Future<RestoreResult> restorePurchases() async {
     try {
-      state = state.copyWith(isRestoring: true);
+      state = state.copyWith(isRestoring: true, error: null);
 
-      await _subscriptionService.restorePurchases();
+      final result = await _subscriptionService.restorePurchases();
 
-      // Invalidate hybrid provider to refresh with new RevenueCat state
-      _ref.invalidate(hasPlusHybridProvider);
+      switch (result) {
+        case RestoreResult.success:
+          // Immediate success - invalidate provider to refresh state
+          _ref.invalidate(hasPlusHybridProvider);
+          state = state.copyWith(
+            isRestoring: false,
+            hasPlus: true,
+          );
+          break;
 
-      // Update local state (database may take time to sync)
-      _updateSubscriptionState();
+        case RestoreResult.transferPending:
+          // Transfer in progress - wait for webhook, then poll for update
+          state = state.copyWith(isRestoring: false);
+          // Start polling for subscription update
+          _pollForSubscriptionUpdate();
+          break;
+
+        case RestoreResult.noSubscriptionsFound:
+          state = state.copyWith(
+            isRestoring: false,
+            error: 'No purchases found to restore',
+          );
+          break;
+      }
+
+      return result;
     } catch (e) {
-      AppLogger.error('Restore purchases error', e);
-      state = state.copyWith(error: e.toString());
-    } finally {
-      state = state.copyWith(isRestoring: false);
+      final errorMessage = SubscriptionService.getErrorMessage(e as Exception);
+      state = state.copyWith(
+        isRestoring: false,
+        error: errorMessage,
+      );
+      rethrow;
     }
+  }
+
+  /// Poll for subscription update after a transfer
+  /// Called when restore indicates a transfer may be pending
+  void _pollForSubscriptionUpdate() {
+    int attempts = 0;
+    const maxAttempts = 6; // 30 seconds total
+    const pollInterval = Duration(seconds: 5);
+
+    Future<void> poll() async {
+      attempts++;
+      AppLogger.debug('Polling for subscription update (attempt $attempts/$maxAttempts)');
+
+      // Refresh from database
+      await _subscriptionService.refreshSubscriptionStatus();
+      final hasPlus = _subscriptionService.hasPlusSync();
+
+      if (hasPlus) {
+        AppLogger.info('Subscription transfer completed');
+        _ref.invalidate(hasPlusHybridProvider);
+        state = state.copyWith(hasPlus: true);
+        return;
+      }
+
+      if (attempts < maxAttempts) {
+        await Future.delayed(pollInterval);
+        await poll();
+      } else {
+        AppLogger.warning('Subscription transfer polling timed out');
+        // Don't set error - the transfer might still complete
+      }
+    }
+
+    poll();
   }
 
   /// Manual refresh

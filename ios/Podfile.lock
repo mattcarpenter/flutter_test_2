@@ -135,31 +135,31 @@ PODS:
     - FlutterMacOS
   - pointer_interceptor_ios (0.0.1):
     - Flutter
-  - powersync-sqlite-core (0.4.2)
+  - powersync-sqlite-core (0.4.10)
   - powersync_flutter_libs (0.0.1):
     - Flutter
     - powersync-sqlite-core (~> 0.4.2)
   - PromisesObjC (2.4.0)
-  - purchases_flutter (9.1.0):
+  - purchases_flutter (9.10.0):
     - Flutter
-    - PurchasesHybridCommon (= 16.0.2)
-  - purchases_ui_flutter (9.1.0):
+    - PurchasesHybridCommon (= 17.23.0)
+  - purchases_ui_flutter (9.10.0):
     - Flutter
-    - PurchasesHybridCommonUI (= 16.0.2)
-  - PurchasesHybridCommon (16.0.2):
-    - RevenueCat (= 5.33.1)
-  - PurchasesHybridCommonUI (16.0.2):
-    - PurchasesHybridCommon (= 16.0.2)
-    - RevenueCatUI (= 5.33.1)
+    - PurchasesHybridCommonUI (= 17.23.0)
+  - PurchasesHybridCommon (17.23.0):
+    - RevenueCat (= 5.50.0)
+  - PurchasesHybridCommonUI (17.23.0):
+    - PurchasesHybridCommon (= 17.23.0)
+    - RevenueCatUI (= 5.50.0)
   - quill_native_bridge_ios (0.0.1):
     - Flutter
-  - RevenueCat (5.33.1)
-  - RevenueCatUI (5.33.1):
-    - RevenueCat (= 5.33.1)
-  - SDWebImage (5.21.1):
-    - SDWebImage/Core (= 5.21.1)
-  - SDWebImage/Core (5.21.1)
-  - SDWebImageWebPCoder (0.14.6):
+  - RevenueCat (5.50.0)
+  - RevenueCatUI (5.50.0):
+    - RevenueCat (= 5.50.0)
+  - SDWebImage (5.21.5):
+    - SDWebImage/Core (= 5.21.5)
+  - SDWebImage/Core (5.21.5)
+  - SDWebImageWebPCoder (0.15.0):
     - libwebp (~> 1.0)
     - SDWebImage/Core (~> 5.17)
   - share_plus (0.0.1):
@@ -172,20 +172,20 @@ PODS:
   - sqflite_darwin (0.0.4):
     - Flutter
     - FlutterMacOS
-  - sqlite3 (3.50.3):
-    - sqlite3/common (= 3.50.3)
-  - sqlite3/common (3.50.3)
-  - sqlite3/dbstatvtab (3.50.3):
+  - sqlite3 (3.50.4):
+    - sqlite3/common (= 3.50.4)
+  - sqlite3/common (3.50.4)
+  - sqlite3/dbstatvtab (3.50.4):
     - sqlite3/common
-  - sqlite3/fts5 (3.50.3):
+  - sqlite3/fts5 (3.50.4):
     - sqlite3/common
-  - sqlite3/math (3.50.3):
+  - sqlite3/math (3.50.4):
     - sqlite3/common
-  - sqlite3/perf-threadsafe (3.50.3):
+  - sqlite3/perf-threadsafe (3.50.4):
     - sqlite3/common
-  - sqlite3/rtree (3.50.3):
+  - sqlite3/rtree (3.50.4):
     - sqlite3/common
-  - sqlite3/session (3.50.3):
+  - sqlite3/session (3.50.4):
     - sqlite3/common
   - sqlite3_flutter_libs (0.0.1):
     - Flutter
@@ -369,23 +369,23 @@ SPEC CHECKSUMS:
   package_info_plus: af8e2ca6888548050f16fa2f1938db7b5a5df499
   path_provider_foundation: 080d55be775b7414fd5a5ef3ac137b97b097e564
   pointer_interceptor_ios: ec847ef8b0915778bed2b2cef636f4d177fa8eed
-  powersync-sqlite-core: a58efd88833861f0a8bb636c171bdf0ed55c9801
+  powersync-sqlite-core: b30017e077c91915d53faebc5f7245384df78275
   powersync_flutter_libs: 881187a07f70ecabaf802fce45b186485464d618
   PromisesObjC: f5707f49cb48b9636751c5b2e7d227e43fba9f47
-  purchases_flutter: 818eabac676b9037ac7692d4bc48a52a10b276be
-  purchases_ui_flutter: bf93f63c042fdcd043c2f3254d340aa2383df10e
-  PurchasesHybridCommon: ae7a0a6e105ecdde3e8816a004e57f0a2a7b9261
-  PurchasesHybridCommonUI: f94430070f5ec1cc9513666402871dc70f42ec36
+  purchases_flutter: d097f27cc8431ba7cf95c3859f58524eb79d6e22
+  purchases_ui_flutter: 2e6ce7f7fd03706973cf2f549bb8d7ff9a42e863
+  PurchasesHybridCommon: e95a0b9bb01f6e9101d44f411343fb91030e26ae
+  PurchasesHybridCommonUI: 476200612e1f5be556ef20327d5da8886d657a3d
   quill_native_bridge_ios: f47af4b14e7757968486641656c5d23250cee521
-  RevenueCat: b0ed01125b05a45b8264a2951ad68acb61942038
-  RevenueCatUI: e6fad6a8bec67d910da78cd171328f1104afea77
-  SDWebImage: f29024626962457f3470184232766516dee8dfea
-  SDWebImageWebPCoder: e38c0a70396191361d60c092933e22c20d5b1380
+  RevenueCat: a5fcd0a12b5ec9bbddc0cf0dd20c14b7e6213df6
+  RevenueCatUI: d470454494ecc734ca9b416fea0704613c4cd7a2
+  SDWebImage: e9c98383c7572d713c1a0d7dd2783b10599b9838
+  SDWebImageWebPCoder: 0e06e365080397465cc73a7a9b472d8a3bd0f377
   share_plus: 50da8cb520a8f0f65671c6c6a99b3617ed10a58a
   shared_preferences_foundation: 9e1978ff2562383bd5676f64ec4e9aa8fa06a6f7
   sign_in_with_apple: c5dcc141574c8c54d5ac99dd2163c0c72ad22418
   sqflite_darwin: 20b2a3a3b70e43edae938624ce550a3cbf66a3d0
-  sqlite3: 83105acd294c9137c026e2da1931c30b4588ab81
+  sqlite3: 73513155ec6979715d3904ef53a8d68892d4032b
   sqlite3_flutter_libs: 616267f2fca40e9c6af8c5d82324e05667040b6e
   super_native_extensions: b763c02dc3a8fd078389f410bf15149179020cb4
   SwiftyGif: 706c60cf65fa2bc5ee0313beece843c8eb8194d4

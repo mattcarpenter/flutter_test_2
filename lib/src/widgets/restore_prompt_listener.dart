@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../providers/auth_provider.dart';
 import '../providers/subscription_provider.dart';
+import '../services/subscription_service.dart' show RestoreResult;
 
 /// A widget that listens for the shouldPromptRestore flag and shows
 /// a dialog prompting the user to restore their purchases after signing in.
@@ -72,9 +73,19 @@ class _RestorePromptListenerState extends ConsumerState<RestorePromptListener> {
     // If user chose to restore, trigger the restore flow
     if (shouldRestore == true && mounted) {
       try {
-        await ref.read(subscriptionProvider.notifier).restorePurchases();
+        final result = await ref.read(subscriptionProvider.notifier).restorePurchases();
         if (mounted) {
-          _showRestoreSuccessDialog(context);
+          switch (result) {
+            case RestoreResult.success:
+              _showRestoreSuccessDialog(context);
+              break;
+            case RestoreResult.transferPending:
+              _showTransferPendingDialog(context);
+              break;
+            case RestoreResult.noSubscriptionsFound:
+              _showNoSubscriptionsDialog(context);
+              break;
+          }
         }
       } catch (e) {
         if (mounted) {
@@ -94,6 +105,46 @@ class _RestorePromptListenerState extends ConsumerState<RestorePromptListener> {
         title: const Text('Purchase Restored'),
         content: const Text(
           'Your Stockpot Plus subscription has been restored successfully.',
+        ),
+        actions: [
+          CupertinoDialogAction(
+            isDefaultAction: true,
+            child: const Text('OK'),
+            onPressed: () => Navigator.of(context).pop(),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showTransferPendingDialog(BuildContext context) {
+    showCupertinoDialog(
+      context: context,
+      builder: (context) => CupertinoAlertDialog(
+        title: const Text('Restoring Subscription'),
+        content: const Text(
+          'Your subscription is being transferred to this account. '
+          'This may take a few moments. The app will update automatically.',
+        ),
+        actions: [
+          CupertinoDialogAction(
+            isDefaultAction: true,
+            child: const Text('OK'),
+            onPressed: () => Navigator.of(context).pop(),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showNoSubscriptionsDialog(BuildContext context) {
+    showCupertinoDialog(
+      context: context,
+      builder: (context) => CupertinoAlertDialog(
+        title: const Text('No Subscriptions Found'),
+        content: const Text(
+          'We couldn\'t find any subscriptions to restore. '
+          'Make sure you\'re using the same Apple ID that was used for the original purchase.',
         ),
         actions: [
           CupertinoDialogAction(
