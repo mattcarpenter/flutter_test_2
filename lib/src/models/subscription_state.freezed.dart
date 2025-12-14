@@ -19,6 +19,10 @@ mixin _$SubscriptionState {
   bool get isLoading;
   bool get isRestoring;
   bool get isShowingPaywall;
+
+  /// Temporary optimistic access granted immediately after purchase/restore,
+  /// before the database has synced. Cleared when database confirms.
+  bool get optimisticHasPlus;
   String? get error;
   DateTime? get lastChecked;
   Map<String, bool>? get entitlements;
@@ -44,6 +48,8 @@ mixin _$SubscriptionState {
                 other.isRestoring == isRestoring) &&
             (identical(other.isShowingPaywall, isShowingPaywall) ||
                 other.isShowingPaywall == isShowingPaywall) &&
+            (identical(other.optimisticHasPlus, optimisticHasPlus) ||
+                other.optimisticHasPlus == optimisticHasPlus) &&
             (identical(other.error, error) || other.error == error) &&
             (identical(other.lastChecked, lastChecked) ||
                 other.lastChecked == lastChecked) &&
@@ -60,6 +66,7 @@ mixin _$SubscriptionState {
       isLoading,
       isRestoring,
       isShowingPaywall,
+      optimisticHasPlus,
       error,
       lastChecked,
       const DeepCollectionEquality().hash(entitlements),
@@ -67,7 +74,7 @@ mixin _$SubscriptionState {
 
   @override
   String toString() {
-    return 'SubscriptionState(hasPlus: $hasPlus, isLoading: $isLoading, isRestoring: $isRestoring, isShowingPaywall: $isShowingPaywall, error: $error, lastChecked: $lastChecked, entitlements: $entitlements, subscriptionMetadata: $subscriptionMetadata)';
+    return 'SubscriptionState(hasPlus: $hasPlus, isLoading: $isLoading, isRestoring: $isRestoring, isShowingPaywall: $isShowingPaywall, optimisticHasPlus: $optimisticHasPlus, error: $error, lastChecked: $lastChecked, entitlements: $entitlements, subscriptionMetadata: $subscriptionMetadata)';
   }
 }
 
@@ -82,6 +89,7 @@ abstract mixin class $SubscriptionStateCopyWith<$Res> {
       bool isLoading,
       bool isRestoring,
       bool isShowingPaywall,
+      bool optimisticHasPlus,
       String? error,
       DateTime? lastChecked,
       Map<String, bool>? entitlements,
@@ -105,6 +113,7 @@ class _$SubscriptionStateCopyWithImpl<$Res>
     Object? isLoading = null,
     Object? isRestoring = null,
     Object? isShowingPaywall = null,
+    Object? optimisticHasPlus = null,
     Object? error = freezed,
     Object? lastChecked = freezed,
     Object? entitlements = freezed,
@@ -126,6 +135,10 @@ class _$SubscriptionStateCopyWithImpl<$Res>
       isShowingPaywall: null == isShowingPaywall
           ? _self.isShowingPaywall
           : isShowingPaywall // ignore: cast_nullable_to_non_nullable
+              as bool,
+      optimisticHasPlus: null == optimisticHasPlus
+          ? _self.optimisticHasPlus
+          : optimisticHasPlus // ignore: cast_nullable_to_non_nullable
               as bool,
       error: freezed == error
           ? _self.error
@@ -155,6 +168,7 @@ class _SubscriptionState extends SubscriptionState {
       this.isLoading = false,
       this.isRestoring = false,
       this.isShowingPaywall = false,
+      this.optimisticHasPlus = false,
       this.error,
       this.lastChecked,
       final Map<String, bool>? entitlements,
@@ -175,6 +189,12 @@ class _SubscriptionState extends SubscriptionState {
   @override
   @JsonKey()
   final bool isShowingPaywall;
+
+  /// Temporary optimistic access granted immediately after purchase/restore,
+  /// before the database has synced. Cleared when database confirms.
+  @override
+  @JsonKey()
+  final bool optimisticHasPlus;
   @override
   final String? error;
   @override
@@ -220,6 +240,8 @@ class _SubscriptionState extends SubscriptionState {
                 other.isRestoring == isRestoring) &&
             (identical(other.isShowingPaywall, isShowingPaywall) ||
                 other.isShowingPaywall == isShowingPaywall) &&
+            (identical(other.optimisticHasPlus, optimisticHasPlus) ||
+                other.optimisticHasPlus == optimisticHasPlus) &&
             (identical(other.error, error) || other.error == error) &&
             (identical(other.lastChecked, lastChecked) ||
                 other.lastChecked == lastChecked) &&
@@ -236,6 +258,7 @@ class _SubscriptionState extends SubscriptionState {
       isLoading,
       isRestoring,
       isShowingPaywall,
+      optimisticHasPlus,
       error,
       lastChecked,
       const DeepCollectionEquality().hash(_entitlements),
@@ -243,7 +266,7 @@ class _SubscriptionState extends SubscriptionState {
 
   @override
   String toString() {
-    return 'SubscriptionState(hasPlus: $hasPlus, isLoading: $isLoading, isRestoring: $isRestoring, isShowingPaywall: $isShowingPaywall, error: $error, lastChecked: $lastChecked, entitlements: $entitlements, subscriptionMetadata: $subscriptionMetadata)';
+    return 'SubscriptionState(hasPlus: $hasPlus, isLoading: $isLoading, isRestoring: $isRestoring, isShowingPaywall: $isShowingPaywall, optimisticHasPlus: $optimisticHasPlus, error: $error, lastChecked: $lastChecked, entitlements: $entitlements, subscriptionMetadata: $subscriptionMetadata)';
   }
 }
 
@@ -260,6 +283,7 @@ abstract mixin class _$SubscriptionStateCopyWith<$Res>
       bool isLoading,
       bool isRestoring,
       bool isShowingPaywall,
+      bool optimisticHasPlus,
       String? error,
       DateTime? lastChecked,
       Map<String, bool>? entitlements,
@@ -283,6 +307,7 @@ class __$SubscriptionStateCopyWithImpl<$Res>
     Object? isLoading = null,
     Object? isRestoring = null,
     Object? isShowingPaywall = null,
+    Object? optimisticHasPlus = null,
     Object? error = freezed,
     Object? lastChecked = freezed,
     Object? entitlements = freezed,
@@ -304,6 +329,10 @@ class __$SubscriptionStateCopyWithImpl<$Res>
       isShowingPaywall: null == isShowingPaywall
           ? _self.isShowingPaywall
           : isShowingPaywall // ignore: cast_nullable_to_non_nullable
+              as bool,
+      optimisticHasPlus: null == optimisticHasPlus
+          ? _self.optimisticHasPlus
+          : optimisticHasPlus // ignore: cast_nullable_to_non_nullable
               as bool,
       error: freezed == error
           ? _self.error

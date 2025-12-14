@@ -24,7 +24,7 @@ class Menu extends ConsumerWidget {
     final isDarkMode = CupertinoTheme.of(context).brightness == Brightness.dark;
     final isEffectivelyAuthenticated = ref.watch(isAuthenticatedProvider); // Returns false for anonymous users
     final isAnonymous = ref.watch(isAnonymousUserProvider);
-    final hasPlus = ref.watch(hasPlusProvider); // Watch for reactive updates
+    final hasPlus = ref.watch(effectiveHasPlusProvider); // Includes optimistic access after purchase
 
     // Theme Colors
     final Color backgroundColor = isDarkMode ? CupertinoTheme.of(context).barBackgroundColor : CupertinoTheme.of(context).scaffoldBackgroundColor;

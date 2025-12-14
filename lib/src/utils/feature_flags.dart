@@ -10,7 +10,7 @@ class FeatureFlags {
   /// NOTE: This method uses ref.watch and should only be used in build methods
   /// For non-reactive checks, use hasFeatureSync directly with subscription state
   static bool hasFeature(String feature, WidgetRef ref) {
-    final hasPlus = ref.watch(hasPlusProvider);
+    final hasPlus = ref.watch(effectiveHasPlusProvider);
     return hasFeatureSync(feature, SubscriptionState(hasPlus: hasPlus));
   }
   
@@ -153,8 +153,8 @@ class FeatureGate extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    // Use hasPlusProvider (database stream) for consistent behavior with menu badge
-    final hasPlus = ref.watch(hasPlusProvider);
+    // Use effectiveHasPlusProvider for immediate access after purchase (includes optimistic state)
+    final hasPlus = ref.watch(effectiveHasPlusProvider);
     final isEffectivelyAuthenticated = ref.watch(isAuthenticatedProvider);
     final error = ref.watch(subscriptionErrorProvider);
 
@@ -306,17 +306,17 @@ class PremiumBadge extends ConsumerWidget {
   final String? feature;
   final Widget? child;
   final bool showWhenFree;
-  
+
   const PremiumBadge({
     super.key,
     this.feature,
     this.child,
     this.showWhenFree = false,
   });
-  
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final hasPlus = ref.watch(hasPlusProvider);
+    final hasPlus = ref.watch(effectiveHasPlusProvider);
     
     // If user has plus, show premium badge or custom child
     if (hasPlus) {

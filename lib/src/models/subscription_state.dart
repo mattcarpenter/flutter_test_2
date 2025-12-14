@@ -9,6 +9,9 @@ abstract class SubscriptionState with _$SubscriptionState {
     @Default(false) bool isLoading,
     @Default(false) bool isRestoring,
     @Default(false) bool isShowingPaywall,
+    /// Temporary optimistic access granted immediately after purchase/restore,
+    /// before the database has synced. Cleared when database confirms.
+    @Default(false) bool optimisticHasPlus,
     String? error,
     DateTime? lastChecked,
     Map<String, bool>? entitlements,
@@ -43,6 +46,7 @@ abstract class SubscriptionState with _$SubscriptionState {
   );
 
   /// Update subscription status
+  /// If database confirms hasPlus, clears the optimistic flag (no longer needed)
   SubscriptionState updateAccess({
     required bool hasPlus,
     Map<String, bool>? entitlements,
@@ -56,6 +60,8 @@ abstract class SubscriptionState with _$SubscriptionState {
     isRestoring: false,
     isShowingPaywall: false,
     error: null,
+    // Clear optimistic flag when database confirms subscription
+    optimisticHasPlus: hasPlus ? false : optimisticHasPlus,
   );
 
   /// Get subscription status from metadata

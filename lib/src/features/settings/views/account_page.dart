@@ -22,7 +22,7 @@ class AccountPage extends ConsumerWidget {
     final colors = AppColors.of(context);
     final isEffectivelyAuthenticated = ref.watch(isAuthenticatedProvider); // Returns false for anonymous
     final isAnonymous = ref.watch(isAnonymousUserProvider);
-    final hasPlus = ref.watch(hasPlusProvider);
+    final hasPlus = ref.watch(effectiveHasPlusProvider);
     final user = ref.watch(currentUserProvider);
 
     return AdaptiveSliverPage(

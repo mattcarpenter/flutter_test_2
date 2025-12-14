@@ -100,6 +100,9 @@ class SubscriptionNotifier extends StateNotifier<SubscriptionState> {
       final purchased = await _subscriptionService.presentPaywall(context);
 
       if (purchased) {
+        // Grant immediate optimistic access (before database syncs)
+        state = state.copyWith(optimisticHasPlus: true);
+
         // Invalidate hybrid provider to refresh with new RevenueCat state
         _ref.invalidate(hasPlusHybridProvider);
 
@@ -142,17 +145,21 @@ class SubscriptionNotifier extends StateNotifier<SubscriptionState> {
 
       switch (result) {
         case RestoreResult.success:
-          // Immediate success - invalidate provider to refresh state
+          // Immediate success - grant optimistic access and invalidate provider
           _ref.invalidate(hasPlusHybridProvider);
           state = state.copyWith(
             isRestoring: false,
             hasPlus: true,
+            optimisticHasPlus: true,
           );
           break;
 
         case RestoreResult.transferPending:
-          // Transfer in progress - wait for webhook, then poll for update
-          state = state.copyWith(isRestoring: false);
+          // Transfer in progress - grant optimistic access while waiting for webhook
+          state = state.copyWith(
+            isRestoring: false,
+            optimisticHasPlus: true,
+          );
           // Start polling for subscription update
           _pollForSubscriptionUpdate();
           break;
@@ -281,7 +288,7 @@ final subscriptionProvider = StateNotifierProvider<SubscriptionNotifier, Subscri
   );
 });
 
-// Reactive provider for checking Plus access - checks ALL subscriptions
+// Reactive provider for checking Plus access - checks ALL subscriptions (database only)
 final hasPlusProvider = Provider<bool>((ref) {
   final subscriptionsAsync = ref.watch(allSubscriptionsStreamProvider);
 
@@ -295,6 +302,14 @@ final hasPlusProvider = Provider<bool>((ref) {
     loading: () => false, // Default to no access while loading
     error: (error, _) => false, // Default to no access on error
   );
+});
+
+// Effective provider that combines database truth with optimistic access
+// Use this for UI gating - provides immediate access after purchase while database syncs
+final effectiveHasPlusProvider = Provider<bool>((ref) {
+  final dbHasPlus = ref.watch(hasPlusProvider);
+  final optimisticHasPlus = ref.watch(subscriptionProvider).optimisticHasPlus;
+  return dbHasPlus || optimisticHasPlus;
 });
 
 // Hybrid provider that combines database and RevenueCat for immediate access
@@ -397,7 +412,7 @@ final subscriptionExpiresAtProvider = Provider<DateTime?>((ref) {
 
 // Provider for determining if paywall should be shown for feature access
 final shouldShowPaywallProvider = Provider.family<bool, String>((ref, feature) {
-  final hasPlus = ref.watch(hasPlusProvider);
+  final hasPlus = ref.watch(effectiveHasPlusProvider);
   final isLoading = ref.watch(subscriptionLoadingProvider);
   
   // Don't show paywall while loading to avoid flickering
