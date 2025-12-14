@@ -1,14 +1,15 @@
 import 'dart:async';
 
 import 'package:collection/collection.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:purchases_flutter/purchases_flutter.dart';
-import 'package:purchases_ui_flutter/purchases_ui_flutter.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../../database/powersync.dart';
 import '../../database/database.dart';
 import '../../database/models/user_subscriptions.dart';
+import '../features/subscription/views/paywall_page.dart';
 import 'logging/app_logger.dart';
 
 /// Exception thrown when subscription operations fail
@@ -269,9 +270,12 @@ class SubscriptionService {
     }
   }
 
-  /// Present paywall using RevenueCat's built-in UI
-  /// Creates an anonymous Supabase user if needed (for IAP without registration)
-  Future<bool> presentPaywall() async {
+  /// Present paywall using our custom PaywallPage with PaywallView widget.
+  /// This gives us full control over dismissal and navigation.
+  /// Creates an anonymous Supabase user if needed (for IAP without registration).
+  ///
+  /// Returns true if a purchase or restore was successful, false otherwise.
+  Future<bool> presentPaywall(BuildContext context) async {
     try {
       // STEP 1: Ensure we have a Supabase user (anonymous or real)
       String? userId = _supabase.auth.currentUser?.id;
@@ -292,14 +296,17 @@ class SubscriptionService {
         await Purchases.logIn(userId);
       }
 
-      // STEP 4: Present paywall
-      AppLogger.info('------------- LAUNCHING PAYWALL');
-      final result = await RevenueCatUI.presentPaywall();
-      AppLogger.info('-------------- PAYWALL RESULT:');
-      AppLogger.info('Paywall result: $result');
+      // STEP 4: Navigate to PaywallPage and await result
+      AppLogger.info('Navigating to PaywallPage');
+      final result = await Navigator.of(context).push<bool>(
+        MaterialPageRoute(
+          fullscreenDialog: true,
+          builder: (context) => const PaywallPage(),
+        ),
+      );
 
-      // Treat both purchased and restored as success
-      final success = result == PaywallResult.purchased || result == PaywallResult.restored;
+      final success = result == true;
+      AppLogger.info('PaywallPage returned: success=$success');
 
       if (success) {
         // Immediately refresh RevenueCat state for instant access
@@ -307,17 +314,6 @@ class SubscriptionService {
       }
 
       return success;
-    } on PlatformException catch (e) {
-      AppLogger.error('Error presenting paywall', e);
-
-      final purchasesError = PurchasesError(
-        PurchasesErrorCode.unknownError,
-        e.message ?? 'Unknown error',
-        '',
-        e.details?.toString() ?? '',
-      );
-
-      throw SubscriptionApiException.fromPurchasesError(purchasesError);
     } catch (e) {
       AppLogger.error('Error presenting paywall', e);
       throw SubscriptionApiException.fromException(Exception(e.toString()));
@@ -348,14 +344,14 @@ class SubscriptionService {
   }
 
   /// Present paywall only if user doesn't have Plus subscription
-  Future<bool> presentPaywallIfNeeded() async {
+  Future<bool> presentPaywallIfNeeded(BuildContext context) async {
     try {
       await _ensureInitialized();
 
       final hasActivePlus = await hasPlus();
       if (hasActivePlus) return true;
 
-      return await presentPaywall();
+      return await presentPaywall(context);
     } catch (e) {
       rethrow;
     }

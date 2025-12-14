@@ -112,7 +112,7 @@ class Menu extends ConsumerWidget {
             } else {
               // Show paywall first, only navigate if user purchases
               try {
-                final purchased = await ref.read(subscriptionProvider.notifier).presentPaywall();
+                final purchased = await ref.read(subscriptionProvider.notifier).presentPaywall(context);
                 if (purchased) {
                   onRouteGo('/labs');
                 }
@@ -139,7 +139,7 @@ class Menu extends ConsumerWidget {
             } else {
               // Show paywall first, only navigate if user purchases
               try {
-                final purchased = await ref.read(subscriptionProvider.notifier).presentPaywall();
+                final purchased = await ref.read(subscriptionProvider.notifier).presentPaywall(context);
                 if (purchased) {
                   onRouteGo('/labs/sub');
                 }
@@ -165,7 +165,7 @@ class Menu extends ConsumerWidget {
             } else {
               // Show paywall first, only navigate if user purchases
               try {
-                final purchased = await ref.read(subscriptionProvider.notifier).presentPaywall();
+                final purchased = await ref.read(subscriptionProvider.notifier).presentPaywall(context);
                 if (purchased) {
                   onRouteGo('/labs/auth');
                 }

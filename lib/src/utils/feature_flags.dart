@@ -153,7 +153,8 @@ class FeatureGate extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final hasPlusAsync = ref.watch(hasPlusHybridProvider);
+    // Use hasPlusProvider (database stream) for consistent behavior with menu badge
+    final hasPlus = ref.watch(hasPlusProvider);
     final isEffectivelyAuthenticated = ref.watch(isAuthenticatedProvider);
     final error = ref.watch(subscriptionErrorProvider);
 
@@ -167,25 +168,15 @@ class FeatureGate extends ConsumerWidget {
       return fallback ?? _buildRegistrationPrompt(context, ref);
     }
 
-    return hasPlusAsync.when(
-      data: (hasPlus) {
-        // Check feature access using hybrid provider result
-        final hasAccess = FeatureFlags.hasFeatureSync(feature, SubscriptionState(hasPlus: hasPlus));
+    // Check feature access using reactive provider
+    final hasAccess = FeatureFlags.hasFeatureSync(feature, SubscriptionState(hasPlus: hasPlus));
 
-        if (hasAccess) {
-          return child;
-        }
+    if (hasAccess) {
+      return child;
+    }
 
-        // User doesn't have access, show fallback or upgrade prompt
-        return fallback ?? _buildUpgradePrompt(context, ref);
-      },
-      loading: () {
-        return const Center(child: CupertinoActivityIndicator());
-      },
-      error: (e, _) {
-        return _buildErrorWidget(context, ref, e.toString());
-      },
-    );
+    // User doesn't have access, show fallback or upgrade prompt
+    return fallback ?? _buildUpgradePrompt(context, ref);
   }
 
   Widget _buildRegistrationPrompt(BuildContext context, WidgetRef ref) {
@@ -271,7 +262,7 @@ class FeatureGate extends ConsumerWidget {
           const SizedBox(height: 24),
           CupertinoButton.filled(
             onPressed: () async {
-              await ref.read(subscriptionProvider.notifier).presentPaywall();
+              await ref.read(subscriptionProvider.notifier).presentPaywall(context);
             },
             child: Text(customUpgradeText ?? 'Upgrade to Stockpot Plus'),
           ),

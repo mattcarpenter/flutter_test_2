@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../database/database.dart';
@@ -92,11 +93,11 @@ class SubscriptionNotifier extends StateNotifier<SubscriptionState> {
   }
 
   /// Present paywall
-  Future<bool> presentPaywall() async {
+  Future<bool> presentPaywall(BuildContext context) async {
     try {
       state = state.copyWith(isShowingPaywall: true);
 
-      final purchased = await _subscriptionService.presentPaywall();
+      final purchased = await _subscriptionService.presentPaywall(context);
 
       if (purchased) {
         // Invalidate hybrid provider to refresh with new RevenueCat state
@@ -117,15 +118,15 @@ class SubscriptionNotifier extends StateNotifier<SubscriptionState> {
   }
 
   /// Present paywall only if user doesn't have Plus subscription
-  Future<bool> presentPaywallIfNeeded() async {
+  Future<bool> presentPaywallIfNeeded(BuildContext context) async {
     // Check hybrid state to ensure we have the most current status
     final hasPlus = await _subscriptionService.hasPlus();
-    
+
     if (hasPlus) {
       return true;
     }
-    
-    return await presentPaywall();
+
+    return await presentPaywall(context);
   }
 
   /// Get current subscription metadata
