@@ -153,6 +153,51 @@ Logs are written to `app_logs.txt` in the app's documents directory with:
 
 Users can export logs from Settings > Support > Share Logs.
 
+## Subscriptions & Feature Gating
+
+**When working on subscription-related features, feature gating, or paywall presentation, reference the detailed guide:**
+
+📄 **`analysis/subscription_feature_gating_guide.md`**
+
+### Quick Reference
+
+```dart
+// Check if user has Plus subscription (use this for UI gating)
+final hasPlus = ref.watch(effectiveHasPlusProvider);
+
+// Present paywall
+final purchased = await ref.read(subscriptionProvider.notifier).presentPaywall(context);
+
+// Gate content with widget
+FeatureGate(
+  feature: 'labs',
+  child: PremiumContent(),
+)
+```
+
+### Key Files
+
+| File | Purpose |
+|------|---------|
+| `lib/src/providers/subscription_provider.dart` | All subscription providers |
+| `lib/src/services/subscription_service.dart` | RevenueCat integration |
+| `lib/src/utils/feature_flags.dart` | `FeatureGate` widget, feature definitions |
+| `lib/src/features/subscription/views/paywall_page.dart` | Paywall presentation |
+
+### Common Patterns
+
+1. **Gate a page**: Check `effectiveHasPlusProvider` before navigation, show paywall if false
+2. **Gate an action**: Check subscription in button handler, show paywall if needed
+3. **Gate inline content**: Wrap with `FeatureGate` widget
+4. **Show premium badge**: Use `PremiumBadge(feature: 'feature_name')`
+
+### Adding New Premium Features
+
+1. Add feature to `feature_flags.dart` in `hasFeatureSync()`, `getRequiredTier()`, and `premiumFeatures`
+2. Gate the feature using patterns above
+
+See the full guide for detailed examples, optimistic access handling, and architecture details.
+
 ## Bottom Sheet (Wolt Modal) Design Guidelines
 
 We use two types of Wolt modal sheets depending on content requirements:
