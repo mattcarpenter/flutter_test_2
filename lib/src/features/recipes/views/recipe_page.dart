@@ -9,6 +9,7 @@ import '../../../providers/recipe_provider.dart' as recipe_provider;
 import '../widgets/recipe_view/recipe_view.dart';
 import '../widgets/recipe_view/recipe_hero_image.dart';
 import '../widgets/recipe_view/ingredient_matches_bottom_sheet.dart';
+import 'add_recipe_modal.dart';
 import 'locked_recipe_page.dart';
 
 class RecipePage extends ConsumerStatefulWidget {
@@ -349,7 +350,14 @@ class _RecipePageState extends ConsumerState<RecipePage> {
                     title: 'Edit Recipe',
                     icon: const Icon(CupertinoIcons.pencil),
                     onTap: () {
-                      // TODO: Implement edit functionality
+                      final recipeAsync = ref.read(recipe_provider.recipeByIdStreamProvider(widget.recipeId));
+                      recipeAsync.whenOrNull(
+                        data: (recipe) {
+                          if (recipe != null) {
+                            showRecipeEditorModal(context, recipe: recipe, isEditing: true);
+                          }
+                        },
+                      );
                     },
                   ),
                 ],
