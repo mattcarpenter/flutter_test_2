@@ -89,12 +89,19 @@ class LockedRecipePage extends ConsumerWidget {
 
                       SizedBox(height: AppSpacing.lg),
 
-                      // Message
+                      // Message - explain why it's locked
                       Text(
-                        lockedCount > 1
-                            ? 'This recipe and ${lockedCount - 1} others require Stockpot Plus'
-                            : 'This recipe requires Stockpot Plus',
+                        'Your first 6 recipes are free',
                         style: AppTypography.body.copyWith(color: colors.textSecondary),
+                        textAlign: TextAlign.center,
+                      ),
+
+                      SizedBox(height: AppSpacing.sm),
+
+                      // Value prop
+                      Text(
+                        'Upgrade to save unlimited recipes',
+                        style: AppTypography.body.copyWith(color: colors.textPrimary),
                         textAlign: TextAlign.center,
                       ),
 

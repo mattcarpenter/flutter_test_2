@@ -308,8 +308,9 @@ class SubscriptionService {
       }
 
       // STEP 4: Navigate to PaywallPage and await result
+      // Use rootNavigator to ensure full screen display over bottom nav
       AppLogger.info('Navigating to PaywallPage');
-      final result = await Navigator.of(context).push<bool>(
+      final result = await Navigator.of(context, rootNavigator: true).push<bool>(
         MaterialPageRoute(
           fullscreenDialog: true,
           builder: (context) => const PaywallPage(),
