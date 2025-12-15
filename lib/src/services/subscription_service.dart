@@ -212,18 +212,29 @@ class SubscriptionService {
   bool hasPlusSync() {
     try {
       final user = _supabase.auth.currentUser;
-      if (user == null) return false;
+      if (user == null) {
+        AppLogger.debug('[hasPlusSync] No user, returning false');
+        return false;
+      }
 
       // Check if ANY cached subscription has plus entitlement and is active
       if (_lastUserId == user.id && _cachedSubscriptions.isNotEmpty) {
-        return _cachedSubscriptions.any((subscription) =>
+        AppLogger.debug('[hasPlusSync] Cache for user ${user.id}: ${_cachedSubscriptions.length} subscriptions');
+        for (final sub in _cachedSubscriptions) {
+          AppLogger.debug('[hasPlusSync] Sub: userId=${sub.userId}, status=${sub.status}, entitlements=${sub.entitlements}, householdId=${sub.householdId}');
+        }
+        final hasPlus = _cachedSubscriptions.any((subscription) =>
             subscription.entitlements.contains(_entitlementId) &&
             subscription.status == SubscriptionStatus.active);
+        AppLogger.debug('[hasPlusSync] Result: $hasPlus');
+        return hasPlus;
       }
 
       // No cached data available - refresh needed
+      AppLogger.debug('[hasPlusSync] No cache (lastUserId=$_lastUserId, currentUserId=${user.id}, cacheSize=${_cachedSubscriptions.length}), returning false');
       return false;
     } catch (e) {
+      AppLogger.debug('[hasPlusSync] Error: $e, returning false');
       return false; // Fail closed
     }
   }
@@ -462,10 +473,17 @@ class SubscriptionService {
   Future<void> refreshSubscriptionStatus() async {
     try {
       final user = _supabase.auth.currentUser;
-      if (user == null) return;
+      if (user == null) {
+        AppLogger.debug('[refreshSubscriptionStatus] No user, skipping');
+        return;
+      }
 
       // Get ALL subscriptions that PowerSync synced down
       final subscriptions = await appDb.select(appDb.userSubscriptions).get();
+      AppLogger.debug('[refreshSubscriptionStatus] Loaded ${subscriptions.length} subscriptions from DB for user ${user.id}');
+      for (final sub in subscriptions) {
+        AppLogger.debug('[refreshSubscriptionStatus] DB Sub: id=${sub.id}, userId=${sub.userId}, status=${sub.status}, entitlements=${sub.entitlements}');
+      }
 
       // Update cache
       _cachedSubscriptions = subscriptions;

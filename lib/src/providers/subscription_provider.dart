@@ -294,13 +294,25 @@ final hasPlusProvider = Provider<bool>((ref) {
 
   return subscriptionsAsync.when(
     data: (subscriptions) {
+      AppLogger.debug('[hasPlusProvider] Stream data: ${subscriptions.length} subscriptions');
+      for (final sub in subscriptions) {
+        AppLogger.debug('[hasPlusProvider] Sub: userId=${sub.userId}, status=${sub.status}, entitlements=${sub.entitlements}');
+      }
       // Check if ANY subscription has plus entitlement and is active
-      return subscriptions.any((subscription) =>
+      final hasPlus = subscriptions.any((subscription) =>
           subscription.entitlements.contains('plus') &&
           subscription.status == SubscriptionStatus.active);
+      AppLogger.debug('[hasPlusProvider] Result: $hasPlus');
+      return hasPlus;
     },
-    loading: () => false, // Default to no access while loading
-    error: (error, _) => false, // Default to no access on error
+    loading: () {
+      AppLogger.debug('[hasPlusProvider] Loading, returning false');
+      return false;
+    },
+    error: (error, _) {
+      AppLogger.debug('[hasPlusProvider] Error: $error, returning false');
+      return false;
+    },
   );
 });
 
@@ -309,7 +321,9 @@ final hasPlusProvider = Provider<bool>((ref) {
 final effectiveHasPlusProvider = Provider<bool>((ref) {
   final dbHasPlus = ref.watch(hasPlusProvider);
   final optimisticHasPlus = ref.watch(subscriptionProvider).optimisticHasPlus;
-  return dbHasPlus || optimisticHasPlus;
+  final result = dbHasPlus || optimisticHasPlus;
+  AppLogger.debug('[effectiveHasPlusProvider] dbHasPlus=$dbHasPlus, optimisticHasPlus=$optimisticHasPlus, result=$result');
+  return result;
 });
 
 // Hybrid provider that combines database and RevenueCat for immediate access

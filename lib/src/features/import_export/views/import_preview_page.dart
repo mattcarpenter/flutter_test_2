@@ -8,6 +8,8 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../../managers/upload_queue_manager.dart';
 import '../../../mobile/utils/adaptive_sliver_page.dart';
 import '../../../providers/household_provider.dart';
+import '../../../providers/recipe_provider.dart';
+import '../../../providers/subscription_provider.dart';
 import '../../../repositories/recipe_folder_repository.dart';
 import '../../../repositories/recipe_repository.dart';
 import '../../../repositories/recipe_tag_repository.dart';
@@ -283,11 +285,37 @@ class _ImportPreviewPageState extends ConsumerState<ImportPreviewPage> {
       AppLogger.info('Import complete: ${result.successCount} succeeded, ${result.failureCount} failed');
 
       if (mounted) {
+        // Check subscription status to determine messaging
+        final hasPlus = ref.read(effectiveHasPlusProvider);
+        final totalUserRecipes = ref.read(userRecipeCountProvider);
+
+        // Calculate how many recipes will be locked after this import
+        final willBeLocked = !hasPlus && totalUserRecipes > kFreeRecipeLimit
+            ? totalUserRecipes - kFreeRecipeLimit
+            : 0;
+
         // Show result and navigate back
-        final title = result.failureCount == 0 ? 'Import Complete' : 'Import Finished';
-        final message = result.failureCount == 0
-            ? 'Successfully imported ${result.successCount} recipes!'
-            : 'Imported ${result.successCount} recipes. ${result.failureCount} failed.';
+        String title;
+        String message;
+
+        if (result.failureCount == 0) {
+          title = 'Import Complete';
+          if (willBeLocked > 0) {
+            // User has more recipes than the limit - show upgrade messaging
+            final accessibleCount = totalUserRecipes - willBeLocked;
+            message = 'Successfully imported all ${result.successCount} recipes! '
+                '$accessibleCount are ready to use. '
+                'Upgrade to Stockpot Plus to access all of them.';
+          } else {
+            message = 'Successfully imported ${result.successCount} recipes!';
+          }
+        } else {
+          title = 'Import Finished';
+          message = 'Imported ${result.successCount} recipes. ${result.failureCount} failed.';
+          if (willBeLocked > 0) {
+            message += ' Some recipes may require Stockpot Plus to access.';
+          }
+        }
 
         await _showAlert(context, title: title, message: message);
 

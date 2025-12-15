@@ -26,6 +26,7 @@ class FeatureFlags {
       case 'advanced_meal_planning':
       case 'premium_export':
       case 'priority_support':
+      case 'unlimited_recipes':
         return subscription.hasPlus;
       default:
         return true; // Free features - allow access by default
@@ -44,6 +45,7 @@ class FeatureFlags {
       case 'advanced_meal_planning':
       case 'premium_export':
       case 'priority_support':
+      case 'unlimited_recipes':
         return 'plus';
       default:
         return 'free';
@@ -71,11 +73,13 @@ class FeatureFlags {
         return 'Export recipes and meal plans in multiple formats';
       case 'priority_support':
         return 'Priority customer support and direct feedback channel';
+      case 'unlimited_recipes':
+        return 'Unlimited recipe storage with no restrictions';
       default:
         return 'Premium feature';
     }
   }
-  
+
   /// Get all available premium features
   static List<String> get premiumFeatures => [
     'labs',
@@ -87,6 +91,7 @@ class FeatureFlags {
     'advanced_meal_planning',
     'premium_export',
     'priority_support',
+    'unlimited_recipes',
   ];
   
   /// Get all free features (for documentation purposes)

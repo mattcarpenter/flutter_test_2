@@ -9,6 +9,7 @@ import '../../../providers/recipe_provider.dart' as recipe_provider;
 import '../widgets/recipe_view/recipe_view.dart';
 import '../widgets/recipe_view/recipe_hero_image.dart';
 import '../widgets/recipe_view/ingredient_matches_bottom_sheet.dart';
+import 'locked_recipe_page.dart';
 
 class RecipePage extends ConsumerStatefulWidget {
   final String recipeId;
@@ -91,6 +92,12 @@ class _RecipePageState extends ConsumerState<RecipePage> {
         data: (recipe) {
           if (recipe == null) {
             return const Center(child: Text('Recipe not found'));
+          }
+
+          // Check if this recipe is locked BEFORE building content
+          final isLocked = ref.watch(recipe_provider.isRecipeLockedProvider(recipe.id));
+          if (isLocked) {
+            return LockedRecipePage(recipe: recipe);
           }
 
           // Determine if recipe has images

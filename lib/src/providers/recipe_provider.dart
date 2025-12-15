@@ -19,6 +19,10 @@ import '../models/recipe_pantry_match.dart';
 import '../models/recipe_with_folders.dart';
 import '../repositories/recipe_repository.dart';
 import '../services/logging/app_logger.dart';
+import 'subscription_provider.dart';
+
+/// Maximum number of accessible recipes for free users
+const int kFreeRecipeLimit = 6;
 
 class RecipeNotifier extends StateNotifier<AsyncValue<List<RecipeWithFolders>>> {
   final RecipeRepository _repository;
@@ -665,4 +669,79 @@ final pinnedRecipesProvider = StreamProvider<List<RecipeEntry>>((ref) {
   return repository.watchPinnedRecipes();
 });
 
+// ============================================================================
+// Recipe Limit Providers (for free user gating)
+// ============================================================================
 
+/// Count of all accessible recipes (includes household member recipes if in a household)
+/// The free tier limit applies to the combined pool of recipes
+final userRecipeCountProvider = Provider<int>((ref) {
+  final recipesAsync = ref.watch(recipeNotifierProvider);
+
+  return recipesAsync.maybeWhen(
+    data: (recipesWithFolders) => recipesWithFolders.length,
+    orElse: () => 0,
+  );
+});
+
+/// Set of recipe IDs that are unlocked (first 6 by createdAt for free users)
+/// Plus users get all recipes unlocked
+/// For households, the limit applies to the combined pool of recipes
+final unlockedRecipeIdsProvider = Provider<Set<String>>((ref) {
+  final recipesAsync = ref.watch(recipeNotifierProvider);
+  final hasPlus = ref.watch(effectiveHasPlusProvider);
+
+  return recipesAsync.maybeWhen(
+    data: (recipesWithFolders) {
+      // Plus users: all recipes are unlocked
+      if (hasPlus) {
+        return recipesWithFolders.map((r) => r.recipe.id).toSet();
+      }
+
+      // Sort all recipes by createdAt (oldest first)
+      final sortedRecipes = List<RecipeWithFolders>.from(recipesWithFolders);
+      sortedRecipes.sort((a, b) {
+        final aCreated = a.recipe.createdAt ?? 0;
+        final bCreated = b.recipe.createdAt ?? 0;
+        return aCreated.compareTo(bCreated);
+      });
+
+      // First 6 recipes are unlocked
+      return sortedRecipes
+          .take(kFreeRecipeLimit)
+          .map((r) => r.recipe.id)
+          .toSet();
+    },
+    orElse: () => <String>{},
+  );
+});
+
+/// Check if a specific recipe is locked
+/// Family provider that takes recipeId as parameter
+final isRecipeLockedProvider = Provider.family<bool, String>((ref, recipeId) {
+  final unlockedIds = ref.watch(unlockedRecipeIdsProvider);
+  return !unlockedIds.contains(recipeId);
+});
+
+/// Count of locked recipes (for paywall messaging)
+/// Shows how many of the user's own recipes are locked
+final lockedRecipeCountProvider = Provider<int>((ref) {
+  final totalCount = ref.watch(userRecipeCountProvider);
+  final hasPlus = ref.watch(effectiveHasPlusProvider);
+
+  if (hasPlus) return 0;
+
+  // Locked count is total minus the limit (but never negative)
+  return (totalCount - kFreeRecipeLimit).clamp(0, totalCount);
+});
+
+/// Remaining recipe slots for free users
+/// Returns -1 for Plus users (unlimited)
+/// Returns 0-6 for free users based on current count
+final remainingRecipeSlotsProvider = Provider<int>((ref) {
+  final hasPlus = ref.watch(effectiveHasPlusProvider);
+  if (hasPlus) return -1; // -1 = unlimited
+
+  final count = ref.watch(userRecipeCountProvider);
+  return (kFreeRecipeLimit - count).clamp(0, kFreeRecipeLimit);
+});

@@ -122,6 +122,10 @@ class RecipesFolderPage extends ConsumerWidget {
                 notifier.updateFilter(entry.key, entry.value);
               }
             },
+            onAddRecipe: () {
+              final saveFolderId = folderId == kUncategorizedFolderId ? null : folderId;
+              showRecipeEditorModal(context, ref: ref, folderId: saveFolderId);
+            },
           ),
         ),
 
@@ -211,7 +215,7 @@ class RecipesFolderPage extends ConsumerWidget {
             onTap: () {
               // Don't pass folderId for uncategorized folder
               final saveFolderId = folderId == kUncategorizedFolderId ? null : folderId;
-              showRecipeEditorModal(context, folderId: saveFolderId);
+              showRecipeEditorModal(context, ref: ref, folderId: saveFolderId);
             },
           )
         ],
@@ -290,11 +294,13 @@ class _UnifiedHeaderDelegate extends SliverPersistentHeaderDelegate {
   final RecipeFilterSortState filterSortState;
   final String? folderId;
   final Function(RecipeFilterSortState) onStateChanged;
+  final VoidCallback onAddRecipe;
 
   _UnifiedHeaderDelegate({
     required this.filterSortState,
     required this.folderId,
     required this.onStateChanged,
+    required this.onAddRecipe,
   });
 
   @override
@@ -349,10 +355,7 @@ class _UnifiedHeaderDelegate extends SliverPersistentHeaderDelegate {
       shape: AppButtonShape.square,
       size: AppButtonSize.medium,
       theme: AppButtonTheme.secondary,
-      onPressed: () {
-        final saveFolderId = folderId == kUncategorizedFolderId ? null : folderId;
-        showRecipeEditorModal(context, folderId: saveFolderId);
-      },
+      onPressed: onAddRecipe,
     );
 
     return Material(
@@ -392,7 +395,8 @@ class _UnifiedHeaderDelegate extends SliverPersistentHeaderDelegate {
   @override
   bool shouldRebuild(covariant _UnifiedHeaderDelegate oldDelegate) {
     return oldDelegate.filterSortState != filterSortState ||
-           oldDelegate.folderId != folderId;
+           oldDelegate.folderId != folderId ||
+           oldDelegate.onAddRecipe != onAddRecipe;
   }
 
   @override

@@ -1,18 +1,42 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:wolt_modal_sheet/wolt_modal_sheet.dart';
 
 import '../../../../database/database.dart';
+import '../../../providers/recipe_provider.dart';
+import '../../../providers/subscription_provider.dart';
+import '../../../services/logging/app_logger.dart';
 import '../widgets/recipe_editor_form/recipe_editor_form.dart';
 import '../../../widgets/wolt/text/modal_sheet_title.dart';
 import '../../../theme/colors.dart';
 
-void showRecipeEditorModal(
+/// Shows the recipe editor modal.
+/// For new recipes (recipe == null), checks if user has remaining recipe slots.
+/// If no slots remaining, shows paywall instead.
+Future<void> showRecipeEditorModal(
     BuildContext context, {
+      WidgetRef? ref, // Required for new recipes to check limit
       RecipeEntry? recipe, // Null for new recipe, non-null for editing
       bool isEditing = false,
       String? folderId
-    }) {
+    }) async {
+  // Only check limit for NEW recipes (not editing existing)
+  if (recipe == null && ref != null) {
+    final remainingSlots = ref.read(remainingRecipeSlotsProvider);
+    final recipeCount = ref.read(userRecipeCountProvider);
+    final hasPlus = ref.read(effectiveHasPlusProvider);
+    AppLogger.debug('[showRecipeEditorModal] Checking recipe limit: remainingSlots=$remainingSlots, recipeCount=$recipeCount, hasPlus=$hasPlus');
+
+    // If no remaining slots (and not unlimited), show paywall
+    if (remainingSlots == 0) {
+      AppLogger.debug('[showRecipeEditorModal] No slots remaining, showing paywall');
+      await ref.read(subscriptionProvider.notifier).presentPaywall(context);
+      return;
+    }
+    AppLogger.debug('[showRecipeEditorModal] Has slots, showing form');
+  }
+
   final pageTitle = isEditing ? 'Edit Recipe' : 'New Recipe';
 
   WoltModalSheet.show(

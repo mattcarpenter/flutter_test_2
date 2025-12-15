@@ -1,16 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:super_context_menu/super_context_menu.dart';
 
 import '../../../../database/database.dart';
 import '../../../../database/models/recipe_images.dart';
+import '../../../providers/recipe_provider.dart';
 import '../../../widgets/local_or_network_image.dart';
 import '../../../widgets/recipe_placeholder_image.dart';
 import '../../../theme/colors.dart';
 import '../../../utils/duration_formatter.dart';
 import '../views/add_recipe_modal.dart';
 
-class RecipeTile extends StatefulWidget {
+class RecipeTile extends ConsumerStatefulWidget {
   final RecipeEntry recipe;
   final VoidCallback? onTap;
   final VoidCallback? onDelete;
@@ -23,10 +25,10 @@ class RecipeTile extends StatefulWidget {
   }) : super(key: key);
 
   @override
-  _RecipeTileState createState() => _RecipeTileState();
+  ConsumerState<RecipeTile> createState() => _RecipeTileState();
 }
 
-class _RecipeTileState extends State<RecipeTile> with SingleTickerProviderStateMixin {
+class _RecipeTileState extends ConsumerState<RecipeTile> with SingleTickerProviderStateMixin {
   late final AnimationController _controller;
   late final Animation<double> _opacityAnimation;
   late final Animation<double> _scaleAnimation;
@@ -76,6 +78,9 @@ class _RecipeTileState extends State<RecipeTile> with SingleTickerProviderStateM
 
   @override
   Widget build(BuildContext context) {
+    final colors = AppColors.of(context);
+    final isLocked = ref.watch(isRecipeLockedProvider(widget.recipe.id));
+
     return FadeTransition(
       opacity: _opacityAnimation,
       child: ScaleTransition(
@@ -108,7 +113,34 @@ class _RecipeTileState extends State<RecipeTile> with SingleTickerProviderStateM
                 ],
               );
             },
-            child: _buildRecipeContent(context),
+            child: Stack(
+              children: [
+                // Recipe content with slight opacity reduction when locked
+                Opacity(
+                  opacity: isLocked ? 0.7 : 1.0,
+                  child: _buildRecipeContent(context),
+                ),
+
+                // Lock icon overlay for locked recipes
+                if (isLocked)
+                  Positioned(
+                    top: 8,
+                    right: 8,
+                    child: Container(
+                      padding: const EdgeInsets.all(4),
+                      decoration: BoxDecoration(
+                        color: colors.background.withValues(alpha: 0.9),
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: Icon(
+                        CupertinoIcons.lock_fill,
+                        size: 16,
+                        color: colors.textSecondary,
+                      ),
+                    ),
+                  ),
+              ],
+            ),
           ),
         ),
       ),

@@ -113,7 +113,7 @@ class RecipesTab extends ConsumerWidget {
             icon: const Icon(CupertinoIcons.book),
             onTap: () {
               // Don't pass folderId for uncategorized folder
-              showRecipeEditorModal(context, folderId: null);
+              showRecipeEditorModal(context, ref: ref, folderId: null);
             },
           )
         ],
