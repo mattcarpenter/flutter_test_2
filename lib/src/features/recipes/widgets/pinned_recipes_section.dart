@@ -65,6 +65,7 @@ class PinnedRecipesSection extends ConsumerWidget {
                   final isFirst = index == 0;
                   final isLast = index == pinnedRecipes.length - 1;
 
+                  final isLocked = ref.watch(isRecipeLockedProvider(recipe.id));
                   return Container(
                     margin: EdgeInsets.only(
                       left: isFirst ? 16.0 : 0.0,  // First card aligns with headers
@@ -72,6 +73,7 @@ class PinnedRecipesSection extends ConsumerWidget {
                     ),
                     child: PinnedRecipeCard(
                       recipe: recipe,
+                      isLocked: isLocked,
                       onTap: () {
                         context.push('/recipe/${recipe.id}', extra: {
                           'previousPageTitle': 'Recipes',

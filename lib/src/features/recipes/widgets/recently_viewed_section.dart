@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../../providers/recently_viewed_provider.dart';
+import '../../../providers/recipe_provider.dart';
 import '../../../theme/colors.dart';
 import '../../../theme/spacing.dart';
 import '../../../theme/typography.dart';
@@ -56,6 +57,7 @@ class RecentlyViewedSection extends ConsumerWidget {
 
             // Single column list using RecipeListItem
             ...recentlyViewedRecipes.map((recipe) {
+              final isLocked = ref.watch(isRecipeLockedProvider(recipe.id));
               return GestureDetector(
                 onTap: () {
                   context.push('/recipe/${recipe.id}', extra: {
@@ -66,6 +68,13 @@ class RecentlyViewedSection extends ConsumerWidget {
                   child: RecipeListItem(
                     recipe: recipe,
                     onTap: null, // Disable internal tap to prevent gesture conflicts
+                    trailing: isLocked
+                        ? Icon(
+                            CupertinoIcons.lock_fill,
+                            size: 16,
+                            color: AppColors.of(context).textSecondary,
+                          )
+                        : null,
                   ),
                 ),
               );

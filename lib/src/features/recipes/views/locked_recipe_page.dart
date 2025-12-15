@@ -46,6 +46,7 @@ class LockedRecipePage extends ConsumerWidget {
                   AppCircleButton(
                     icon: AppCircleButtonIcon.close,
                     variant: AppCircleButtonVariant.neutral,
+                    size: 36,
                     onPressed: () => Navigator.of(context).pop(),
                   ),
                 ],
@@ -74,7 +75,7 @@ class LockedRecipePage extends ConsumerWidget {
                       // Recipe title
                       Text(
                         recipe.title,
-                        style: AppTypography.h4.copyWith(color: colors.textPrimary),
+                        style: AppTypography.body.copyWith(color: colors.textPrimary),
                         textAlign: TextAlign.center,
                       ),
 

@@ -302,10 +302,8 @@ class _ImportPreviewPageState extends ConsumerState<ImportPreviewPage> {
           title = 'Import Complete';
           if (willBeLocked > 0) {
             // User has more recipes than the limit - show upgrade messaging
-            final accessibleCount = totalUserRecipes - willBeLocked;
-            message = 'Successfully imported all ${result.successCount} recipes! '
-                '$accessibleCount are ready to use. '
-                'Upgrade to Stockpot Plus to access all of them.';
+            message = 'Imported ${result.successCount} recipes. '
+                'Upgrade to unlock your full collection.';
           } else {
             message = 'Successfully imported ${result.successCount} recipes!';
           }
@@ -313,7 +311,7 @@ class _ImportPreviewPageState extends ConsumerState<ImportPreviewPage> {
           title = 'Import Finished';
           message = 'Imported ${result.successCount} recipes. ${result.failureCount} failed.';
           if (willBeLocked > 0) {
-            message += ' Some recipes may require Stockpot Plus to access.';
+            message += ' Upgrade to unlock your full collection.';
           }
         }
 

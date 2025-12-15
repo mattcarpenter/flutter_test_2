@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import '../../../../database/database.dart';
 import '../../../../database/models/recipe_images.dart';
@@ -9,11 +10,13 @@ import '../../../widgets/recipe_placeholder_image.dart';
 class PinnedRecipeCard extends StatelessWidget {
   final RecipeEntry recipe;
   final VoidCallback? onTap;
+  final bool isLocked;
 
   const PinnedRecipeCard({
     super.key,
     required this.recipe,
     this.onTap,
+    this.isLocked = false,
   });
 
   @override
@@ -69,33 +72,54 @@ class PinnedRecipeCard extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Image
+            // Image with optional lock overlay
             SizedBox(
               width: cardWidth,
               height: imageHeight,
-              child: FutureBuilder<String>(
-                future: coverImage?.getFullPath() ?? Future.value(''),
-                builder: (context, snapshot) {
-                  final coverImageFilePath = snapshot.data ?? '';
-                  final hasImage = coverImageFilePath.isNotEmpty || coverImageUrl.isNotEmpty;
-                  
-                  return ClipRRect(
-                    borderRadius: BorderRadius.circular(12),
-                    child: hasImage
-                        ? LocalOrNetworkImage(
-                            filePath: coverImageFilePath,
-                            url: coverImageUrl,
-                            width: cardWidth,
-                            height: imageHeight,
-                            fit: BoxFit.cover,
-                          )
-                        : RecipePlaceholderImage(
-                            width: cardWidth,
-                            height: imageHeight,
-                            fit: BoxFit.cover,
-                          ),
-                  );
-                },
+              child: Stack(
+                children: [
+                  FutureBuilder<String>(
+                    future: coverImage?.getFullPath() ?? Future.value(''),
+                    builder: (context, snapshot) {
+                      final coverImageFilePath = snapshot.data ?? '';
+                      final hasImage = coverImageFilePath.isNotEmpty || coverImageUrl.isNotEmpty;
+
+                      return ClipRRect(
+                        borderRadius: BorderRadius.circular(12),
+                        child: hasImage
+                            ? LocalOrNetworkImage(
+                                filePath: coverImageFilePath,
+                                url: coverImageUrl,
+                                width: cardWidth,
+                                height: imageHeight,
+                                fit: BoxFit.cover,
+                              )
+                            : RecipePlaceholderImage(
+                                width: cardWidth,
+                                height: imageHeight,
+                                fit: BoxFit.cover,
+                              ),
+                      );
+                    },
+                  ),
+                  if (isLocked)
+                    Positioned(
+                      top: 6,
+                      right: 6,
+                      child: Container(
+                        padding: const EdgeInsets.all(4),
+                        decoration: BoxDecoration(
+                          color: Colors.black.withOpacity(0.6),
+                          borderRadius: BorderRadius.circular(6),
+                        ),
+                        child: const Icon(
+                          CupertinoIcons.lock_fill,
+                          size: 14,
+                          color: Colors.white,
+                        ),
+                      ),
+                    ),
+                ],
               ),
             ),
             
