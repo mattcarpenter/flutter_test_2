@@ -31,8 +31,8 @@ class SubscriptionNotifier extends StateNotifier<SubscriptionState> {
     // Listen to auth state changes
     _ref.listen(authNotifierProvider, (previous, next) {
       // Check if user signed out (had user before, no user now)
-      final previousUser = previous?.user;
-      final currentUser = next.user;
+      final previousUser = previous?.currentUser;
+      final currentUser = next.currentUser;
 
       if (previousUser != null && currentUser == null) {
         // User signed out - reset all subscription state including optimisticHasPlus
