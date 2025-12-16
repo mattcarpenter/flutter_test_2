@@ -30,6 +30,17 @@ class SubscriptionNotifier extends StateNotifier<SubscriptionState> {
   void _initializeSubscriptionState() {
     // Listen to auth state changes
     _ref.listen(authNotifierProvider, (previous, next) {
+      // Check if user signed out (had user before, no user now)
+      final previousUser = previous?.user;
+      final currentUser = next.user;
+
+      if (previousUser != null && currentUser == null) {
+        // User signed out - reset all subscription state including optimisticHasPlus
+        AppLogger.debug('[SubscriptionNotifier] User signed out, resetting subscription state');
+        state = const SubscriptionState();
+        return;
+      }
+
       _updateSubscriptionState();
     });
 
