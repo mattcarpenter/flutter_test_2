@@ -30,9 +30,11 @@ class RecipeRepository {
     _ingredientTermQueueManager = manager;
   }
 
-  // Watch all recipes.
+  // Watch all recipes (excludes soft-deleted).
   Stream<List<RecipeEntry>> watchAllRecipes() {
-    return _db.select(_db.recipes).watch();
+    return (_db.select(_db.recipes)
+      ..where((t) => t.deletedAt.isNull()))
+      .watch();
   }
 
   // Insert a new recipe.

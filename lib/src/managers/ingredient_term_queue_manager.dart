@@ -202,12 +202,6 @@ class IngredientTermQueueManager {
       }
     }
 
-    // Check if the user has a valid session before processing
-    final session = Supabase.instance.client.auth.currentSession;
-    if (session == null || session.isExpired) {
-      return;
-    }
-
     if (_isProcessing) return;
     _isProcessing = true;
 
