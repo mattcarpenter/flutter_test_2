@@ -1,11 +1,9 @@
 import 'dart:convert';
-import 'package:http/http.dart' as http;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:uuid/uuid.dart';
-import '../../app_config.dart';
 import '../../database/database.dart';
 import '../../database/models/ingredient_terms.dart';
-import 'api_signer.dart';
+import '../clients/recipe_api_client.dart';
 import 'logging/app_logger.dart';
 
 /// Class representing a converter returned from the API
@@ -74,32 +72,17 @@ class CanonicalizeResult {
 }
 
 class IngredientCanonicalizer {
-  final String apiBaseUrl;
+  final RecipeApiClient apiClient;
 
-  IngredientCanonicalizer({required this.apiBaseUrl});
+  IngredientCanonicalizer({required this.apiClient});
 
   /// Analyzes a list of ingredients and returns canonicalized terms and converters
   Future<CanonicalizeResult> canonicalizeIngredients(
       List<Map<String, dynamic>> ingredients) async {
     try {
-      const path = '/v1/ingredients/analyze';
-      final url = Uri.parse('$apiBaseUrl$path');
-
-      // Create body string ONCE - used for both signing and request
-      final bodyString = json.encode({
-        'ingredients': ingredients,
-      });
-
-      // Sign the request
-      final signatureHeaders = ApiSigner.sign('POST', path, bodyString);
-
-      final response = await http.post(
-        url,
-        headers: {
-          'Content-Type': 'application/json',
-          ...signatureHeaders,
-        },
-        body: bodyString,
+      final response = await apiClient.post(
+        '/v1/ingredients/analyze',
+        {'ingredients': ingredients},
       );
 
       if (response.statusCode != 200) {
@@ -196,6 +179,6 @@ class IngredientCanonicalizer {
 }
 
 final ingredientCanonicalizerProvider = Provider<IngredientCanonicalizer>((ref) {
-  final apiUrl = AppConfig.ingredientApiUrl;
-  return IngredientCanonicalizer(apiBaseUrl: apiUrl);
+  final apiClient = ref.watch(recipeApiClientProvider);
+  return IngredientCanonicalizer(apiClient: apiClient);
 });
