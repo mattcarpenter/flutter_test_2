@@ -5,6 +5,7 @@ import 'package:uuid/uuid.dart';
 import '../../app_config.dart';
 import '../../database/database.dart';
 import '../../database/models/ingredient_terms.dart';
+import 'api_signer.dart';
 import 'logging/app_logger.dart';
 
 /// Class representing a converter returned from the API
@@ -81,16 +82,24 @@ class IngredientCanonicalizer {
   Future<CanonicalizeResult> canonicalizeIngredients(
       List<Map<String, dynamic>> ingredients) async {
     try {
-      final url = Uri.parse('$apiBaseUrl/v1/ingredients/analyze');
+      const path = '/v1/ingredients/analyze';
+      final url = Uri.parse('$apiBaseUrl$path');
+
+      // Create body string ONCE - used for both signing and request
+      final bodyString = json.encode({
+        'ingredients': ingredients,
+      });
+
+      // Sign the request
+      final signatureHeaders = ApiSigner.sign('POST', path, bodyString);
 
       final response = await http.post(
         url,
         headers: {
           'Content-Type': 'application/json',
+          ...signatureHeaders,
         },
-        body: json.encode({
-          'ingredients': ingredients,
-        }),
+        body: bodyString,
       );
 
       if (response.statusCode != 200) {
