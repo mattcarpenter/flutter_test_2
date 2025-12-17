@@ -368,37 +368,37 @@ CREATE INDEX IF NOT EXISTS meal_plans_household_idx ON public.meal_plans (househ
 CREATE TABLE public.subscription_events (
     id uuid NOT NULL DEFAULT extensions.uuid_generate_v4(),
     user_id uuid NULL,
-    
+
     -- Event details
     event_type text NOT NULL, -- 'purchase', 'renewal', 'cancellation', 'expiration', etc.
     event_source text NOT NULL DEFAULT 'revenuecat_webhook',
     event_data jsonb NOT NULL DEFAULT '{}', -- Structured event data
-    
+
     -- RevenueCat data
     revenuecat_event_id text NULL,
     product_id text NULL,
     transaction_id text NULL,
     original_transaction_id text NULL,
-    
+
     -- Financial
     price_in_cents integer NULL,
     currency text NULL,
-    
+
     -- Platform
     platform text NULL, -- 'ios', 'android', 'web'
     store text NULL,
-    
+
     -- Timing
     expires_at timestamp with time zone NULL,
     purchased_at timestamp with time zone NULL,
-    
+
     -- Raw data for debugging
     raw_webhook_data jsonb NULL,
-    
+
     -- Metadata
     processed_at timestamp with time zone NULL,
     created_at timestamp with time zone NOT NULL DEFAULT now(),
-    
+
     CONSTRAINT subscription_events_pkey PRIMARY KEY (id),
     CONSTRAINT subscription_events_user_id_fkey FOREIGN KEY (user_id) REFERENCES auth.users (id) ON DELETE CASCADE
 ) TABLESPACE pg_default;
@@ -414,30 +414,30 @@ CREATE TABLE public.user_subscriptions (
     id uuid NOT NULL DEFAULT extensions.uuid_generate_v4(),
     user_id uuid NOT NULL,
     household_id uuid NULL, -- For household-level subscriptions
-    
+
     -- Subscription status
     status text NOT NULL DEFAULT 'none', -- none, active, cancelled, expired
     entitlements jsonb NOT NULL DEFAULT '[]', -- Array of entitlement IDs ["plus"]
-    
+
     -- Timing (Unix timestamps in milliseconds)
     expires_at bigint NULL,
     trial_ends_at bigint NULL,
     cancelled_at bigint NULL,
-    
+
     -- RevenueCat integration
     product_id text NULL,
     store text NULL, -- app_store, play_store, stripe
     revenuecat_customer_id text NULL,
-    
+
     -- Metadata (Unix timestamps in milliseconds)
     created_at bigint NULL,
     updated_at bigint NULL,
-    
+
     CONSTRAINT user_subscriptions_pkey PRIMARY KEY (id),
     CONSTRAINT user_subscriptions_user_id_fkey FOREIGN KEY (user_id) REFERENCES auth.users (id) ON DELETE CASCADE,
     CONSTRAINT user_subscriptions_household_id_fkey FOREIGN KEY (household_id) REFERENCES public.households (id) ON DELETE CASCADE,
     CONSTRAINT user_subscriptions_status_check CHECK (status IN ('none', 'active', 'cancelled', 'expired')),
-    
+
     -- Ensure one subscription record per user
     CONSTRAINT user_subscriptions_user_id_unique UNIQUE (user_id)
 ) TABLESPACE pg_default;
@@ -477,5 +477,24 @@ CREATE TABLE public.clippings (
 CREATE INDEX IF NOT EXISTS clippings_user_idx ON public.clippings (user_id);
 CREATE INDEX IF NOT EXISTS clippings_household_idx ON public.clippings (household_id);
 CREATE INDEX IF NOT EXISTS clippings_updated_at_idx ON public.clippings (updated_at DESC);
+
+-- Table to track processed webhook events for idempotency
+CREATE TABLE processed_webhooks (
+                                    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+                                    revenuecat_event_id TEXT NOT NULL UNIQUE,
+                                    event_type TEXT NOT NULL,
+                                    processed_at TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+
+-- Index for fast lookups (UNIQUE constraint creates one, but being explicit)
+CREATE INDEX idx_processed_webhooks_event_id ON processed_webhooks(revenuecat_event_id);
+
+-- Enable RLS (no policies = service role only access)
+ALTER TABLE processed_webhooks ENABLE ROW LEVEL SECURITY;
+
+-- Policy: Service role can manage all processed webhooks
+CREATE POLICY "Service role can manage processed webhooks" ON processed_webhooks
+    FOR ALL USING (auth.role() = 'service_role');
+
 
 CREATE PUBLICATION powersync FOR ALL TABLES;
