@@ -32,11 +32,15 @@ class _ClippingEditorPageState extends ConsumerState<ClippingEditorPage>
   late quill.QuillController _contentController;
   late FocusNode _titleFocusNode;
   late FocusNode _contentFocusNode;
+  late ScrollController _scrollController;
 
   Timer? _saveDebounceTimer;
   bool _isDirty = false;
   bool _isSaving = false;
   bool _isLoaded = false;
+
+  // Key for the editor to find its render box for scroll calculations
+  final GlobalKey _editorKey = GlobalKey();
 
   @override
   void initState() {
@@ -46,9 +50,11 @@ class _ClippingEditorPageState extends ConsumerState<ClippingEditorPage>
     _contentController = quill.QuillController.basic();
     _titleFocusNode = FocusNode();
     _contentFocusNode = FocusNode();
+    _scrollController = ScrollController();
 
     _titleController.addListener(_onTextChanged);
     _contentController.addListener(_onTextChanged);
+    _contentController.onSelectionChanged = _onSelectionChanged;
 
     // Listen to focus changes to update toolbar visibility
     _titleFocusNode.addListener(_onFocusChanged);
@@ -76,12 +82,105 @@ class _ClippingEditorPageState extends ConsumerState<ClippingEditorPage>
     _contentController.dispose();
     _titleFocusNode.dispose();
     _contentFocusNode.dispose();
+    _scrollController.dispose();
     super.dispose();
   }
 
   void _onFocusChanged() {
     // Trigger rebuild to update toolbar visibility
     setState(() {});
+  }
+
+  void _onSelectionChanged(TextSelection selection) {
+    // Scroll to keep cursor visible when selection changes
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _scrollToCursor();
+    });
+  }
+
+  void _scrollToCursor() {
+    final editorContext = _editorKey.currentContext;
+    if (editorContext == null) return;
+
+    final scrollableState = Scrollable.maybeOf(editorContext);
+    if (scrollableState == null) return;
+
+    // Find the editor's render box
+    final renderBox = editorContext.findRenderObject() as RenderBox?;
+    if (renderBox == null) return;
+
+    // Get cursor rectangle from Quill
+    final cursorRect = _contentController.selection.isCollapsed
+        ? _getCursorRect()
+        : null;
+
+    if (cursorRect != null) {
+      // Convert cursor position to scroll view coordinates
+      final scrollPosition = _scrollController.position;
+      final viewportHeight = scrollPosition.viewportDimension;
+      final editorOffset = renderBox.localToGlobal(Offset.zero);
+
+      // Calculate cursor position relative to scroll view
+      final cursorGlobalY = editorOffset.dy + cursorRect.bottom;
+      final scrollViewRenderBox = _scrollController.position.context.storageContext
+          .findRenderObject() as RenderBox?;
+
+      if (scrollViewRenderBox != null) {
+        final scrollViewOffset = scrollViewRenderBox.localToGlobal(Offset.zero);
+        final cursorRelativeY = cursorGlobalY - scrollViewOffset.dy;
+
+        // Add some padding so cursor isn't right at the edge
+        const padding = 60.0;
+
+        // Check if cursor is below visible area
+        if (cursorRelativeY > viewportHeight - padding) {
+          final scrollAmount = cursorRelativeY - (viewportHeight - padding);
+          final newOffset = (_scrollController.offset + scrollAmount)
+              .clamp(0.0, scrollPosition.maxScrollExtent);
+          _scrollController.animateTo(
+            newOffset,
+            duration: const Duration(milliseconds: 100),
+            curve: Curves.easeOut,
+          );
+        }
+        // Check if cursor is above visible area
+        else if (cursorRelativeY < padding) {
+          final scrollAmount = padding - cursorRelativeY;
+          final newOffset = (_scrollController.offset - scrollAmount)
+              .clamp(0.0, scrollPosition.maxScrollExtent);
+          _scrollController.animateTo(
+            newOffset,
+            duration: const Duration(milliseconds: 100),
+            curve: Curves.easeOut,
+          );
+        }
+      }
+    }
+  }
+
+  Rect? _getCursorRect() {
+    // Estimate cursor position based on document length and line height
+    // This is a simplified calculation - Quill doesn't expose exact cursor rect easily
+    final selection = _contentController.selection;
+    if (!selection.isValid || !selection.isCollapsed) return null;
+
+    // Rough estimate: count newlines before cursor to estimate vertical position
+    final plainText = _contentController.document.toPlainText();
+    final textBeforeCursor = plainText.substring(
+      0,
+      selection.baseOffset.clamp(0, plainText.length),
+    );
+    final lineCount = '\n'.allMatches(textBeforeCursor).length;
+
+    // Estimate line height (this should match the editor's line height)
+    const estimatedLineHeight = 24.0; // bodyLarge with height 1.5
+
+    return Rect.fromLTWH(
+      0,
+      lineCount * estimatedLineHeight,
+      1,
+      estimatedLineHeight,
+    );
   }
 
   @override
@@ -117,12 +216,14 @@ class _ClippingEditorPageState extends ConsumerState<ClippingEditorPage>
           selection: const TextSelection.collapsed(offset: 0),
         );
         _contentController.addListener(_onTextChanged);
+        _contentController.onSelectionChanged = _onSelectionChanged;
       } catch (e) {
         AppLogger.debug('Failed to parse Quill delta, treating as plain text: $e');
         // If parsing fails, treat as plain text
         _contentController = quill.QuillController.basic();
         _contentController.document.insert(0, content);
         _contentController.addListener(_onTextChanged);
+        _contentController.onSelectionChanged = _onSelectionChanged;
       }
     }
   }
@@ -270,6 +371,7 @@ class _ClippingEditorPageState extends ConsumerState<ClippingEditorPage>
                 },
                 behavior: HitTestBehavior.opaque,
                 child: SingleChildScrollView(
+                  controller: _scrollController,
                   padding: EdgeInsets.all(AppSpacing.lg),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -301,6 +403,7 @@ class _ClippingEditorPageState extends ConsumerState<ClippingEditorPage>
 
                       // Quill editor - wrap in Theme to override Material defaults
                       Theme(
+                        key: _editorKey,
                         data: Theme.of(context).copyWith(
                           iconTheme: IconThemeData(
                             color: AppColors.of(context).textPrimary,
