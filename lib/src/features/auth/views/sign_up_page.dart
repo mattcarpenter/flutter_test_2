@@ -222,7 +222,7 @@ class _SignUpPageState extends ConsumerState<SignUpPage> {
               Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Checkbox(
+                  CupertinoCheckbox(
                     value: _acceptTerms,
                     onChanged: isAnyActionInProgress
                         ? null
@@ -235,24 +235,26 @@ class _SignUpPageState extends ConsumerState<SignUpPage> {
                   Expanded(
                     child: Padding(
                       padding: const EdgeInsets.only(top: 12.0),
-                      child: RichText(
-                        text: TextSpan(
-                          style: Theme.of(context).textTheme.bodyMedium,
+                      child: Text.rich(
+                        TextSpan(
+                          style: TextStyle(
+                            color: AppColors.of(context).textSecondary,
+                          ),
                           children: [
                             const TextSpan(text: 'I agree to the '),
                             TextSpan(
                               text: 'Terms of Service',
                               style: TextStyle(
-                                color: Theme.of(context).primaryColor,
-                                fontWeight: FontWeight.w500,
+                                color: AppColors.of(context).primary,
+                                fontWeight: FontWeight.w600,
                               ),
                             ),
                             const TextSpan(text: ' and '),
                             TextSpan(
                               text: 'Privacy Policy',
                               style: TextStyle(
-                                color: Theme.of(context).primaryColor,
-                                fontWeight: FontWeight.w500,
+                                color: AppColors.of(context).primary,
+                                fontWeight: FontWeight.w600,
                               ),
                             ),
                           ],
