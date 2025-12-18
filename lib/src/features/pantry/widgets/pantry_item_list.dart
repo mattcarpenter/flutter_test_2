@@ -10,7 +10,6 @@ import '../../../theme/colors.dart';
 import '../../../theme/spacing.dart';
 import '../../../theme/typography.dart';
 import '../../../widgets/app_radio_button.dart';
-import '../../../widgets/app_circle_button.dart';
 import '../../../widgets/utils/grouped_list_styling.dart';
 import '../../../widgets/stock_chip.dart';
 import '../../../widgets/adaptive_pull_down/adaptive_menu_item.dart';
@@ -40,7 +39,20 @@ class _PantryItemListState extends ConsumerState<PantryItemList> {
   void initState() {
     super.initState();
     // Initialize all categories as expanded
-    for (final item in widget.pantryItems) {
+    _addAllCategoriesToExpanded(widget.pantryItems);
+  }
+
+  @override
+  void didUpdateWidget(PantryItemList oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    // Auto-expand any new categories that appear (e.g., after categorization)
+    _addAllCategoriesToExpanded(widget.pantryItems);
+  }
+
+  /// Adds all categories from the given items to _expandedCategories.
+  /// New categories will automatically be expanded.
+  void _addAllCategoriesToExpanded(List<PantryItemEntry> items) {
+    for (final item in items) {
       final category = item.category ?? 'Other';
       _expandedCategories.add(category);
     }
@@ -102,16 +114,7 @@ class _PantryItemListState extends ConsumerState<PantryItemList> {
                   _expandedCategories.remove(category);
                 });
               },
-              header: Theme(
-                data: Theme.of(context).copyWith(
-                  splashColor: Colors.transparent,
-                  highlightColor: Colors.transparent,
-                  hoverColor: Colors.transparent,
-                ),
-                child: DisclosureButton(
-                  child: _buildCategoryHeader(context, category, categoryItems.length),
-                ),
-              ),
+              header: _buildCategoryHeader(context, category, categoryItems.length),
               child: DisclosureView(
                 padding: EdgeInsets.zero,
                 child: Column(
@@ -203,9 +206,14 @@ class _PantryItemListState extends ConsumerState<PantryItemList> {
             ),
           ),
           const Spacer(),
-          // Animated chevron icon
-          DisclosureIcon(
-            color: AppColors.of(context).textSecondary,
+          // Only the chevron is tappable to toggle the accordion
+          DisclosureButton.basic(
+            child: Padding(
+              padding: EdgeInsets.all(AppSpacing.sm),
+              child: DisclosureIcon(
+                color: AppColors.of(context).textSecondary,
+              ),
+            ),
           ),
         ],
       ),
@@ -237,138 +245,147 @@ class _PantryItemListState extends ConsumerState<PantryItemList> {
 
     final colors = AppColors.of(context);
 
-    return Container(
-      decoration: BoxDecoration(
-        color: isSelected
-            ? colors.primary.withValues(alpha: 0.1)
-            : colors.groupedListBackground,
-        border: border,
-        borderRadius: borderRadius,
-      ),
-      child: Padding(
-        padding: EdgeInsets.symmetric(
-          horizontal: AppSpacing.lg,
-          vertical: AppSpacing.md,
+    // Wrap in GestureDetector to absorb taps and prevent them from
+    // propagating to parent widgets (like the Disclosure accordion)
+    return GestureDetector(
+      behavior: HitTestBehavior.opaque,
+      onTap: () {
+        // Tapping the row toggles selection
+        ref.read(pantrySelectionProvider.notifier).toggleSelection(item.id);
+      },
+      child: Container(
+        decoration: BoxDecoration(
+          color: isSelected
+              ? colors.primary.withValues(alpha: 0.1)
+              : colors.groupedListBackground,
+          border: border,
+          borderRadius: borderRadius,
         ),
-        child: Row(
-          children: [
-            // Checkbox for selection - using AppRadioButton
-            AppRadioButton(
-              selected: isSelected,
-              onTap: () {
-                ref.read(pantrySelectionProvider.notifier).toggleSelection(item.id);
-              },
-            ),
-
-            SizedBox(width: AppSpacing.md),
-
-            // Column 1: Pantry item name (grows to fill space)
-            Expanded(
-              child: Text(
-                item.name,
-                style: TextStyle(
-                  color: colors.textPrimary,
-                  fontWeight: FontWeight.w500,
-                  fontSize: 17,
-                ),
-                overflow: TextOverflow.ellipsis,
-                maxLines: 1,
+        child: Padding(
+          padding: EdgeInsets.symmetric(
+            horizontal: AppSpacing.lg,
+            vertical: AppSpacing.md,
+          ),
+          child: Row(
+            children: [
+              // Checkbox for selection - using AppRadioButton
+              AppRadioButton(
+                selected: isSelected,
+                onTap: () {
+                  ref.read(pantrySelectionProvider.notifier).toggleSelection(item.id);
+                },
               ),
-            ),
 
-            SizedBox(width: AppSpacing.md),
+              SizedBox(width: AppSpacing.md),
 
-            // Column 2: Stock status chip (only show for Low/Out of Stock)
-            if (item.stockStatus != StockStatus.inStock)
-              SizedBox(
-                width: 85, // Wide enough for "Out of Stock"
-                child: Align(
-                  alignment: Alignment.centerRight,
-                  child: Padding(
-                    padding: EdgeInsets.only(right: AppSpacing.sm),
-                    child: StockChip(status: item.stockStatus),
+              // Column 1: Pantry item name (grows to fill space)
+              Expanded(
+                child: Text(
+                  item.name,
+                  style: TextStyle(
+                    color: colors.textPrimary,
+                    fontWeight: FontWeight.w500,
+                    fontSize: 17,
                   ),
+                  overflow: TextOverflow.ellipsis,
+                  maxLines: 1,
                 ),
-              )
-            else
-              SizedBox(width: AppSpacing.md), // Gap when no chip
-
-            // Column 3: Overflow menu button (shrinks to content)
-            AdaptivePullDownButton(
-              items: [
-                AdaptiveMenuItem(
-                  title: 'Set to Out of Stock',
-                  icon: Icon(
-                    item.stockStatus == StockStatus.outOfStock
-                        ? CupertinoIcons.checkmark_circle_fill
-                        : CupertinoIcons.circle,
-                    color: const Color(0xFFEF5350), // Red
-                  ),
-                  onTap: () {
-                    ref.read(pantryNotifierProvider.notifier).updateItem(
-                      id: item.id,
-                      stockStatus: StockStatus.outOfStock,
-                    );
-                  },
-                ),
-                AdaptiveMenuItem(
-                  title: 'Set to Low Stock',
-                  icon: Icon(
-                    item.stockStatus == StockStatus.lowStock
-                        ? CupertinoIcons.checkmark_circle_fill
-                        : CupertinoIcons.circle,
-                    color: const Color(0xFFFFA726), // Orange
-                  ),
-                  onTap: () {
-                    ref.read(pantryNotifierProvider.notifier).updateItem(
-                      id: item.id,
-                      stockStatus: StockStatus.lowStock,
-                    );
-                  },
-                ),
-                AdaptiveMenuItem(
-                  title: 'Set to In Stock',
-                  icon: Icon(
-                    item.stockStatus == StockStatus.inStock
-                        ? CupertinoIcons.checkmark_circle_fill
-                        : CupertinoIcons.circle,
-                    color: const Color(0xFF66BB6A), // Green
-                  ),
-                  onTap: () {
-                    ref.read(pantryNotifierProvider.notifier).updateItem(
-                      id: item.id,
-                      stockStatus: StockStatus.inStock,
-                    );
-                  },
-                ),
-                AdaptiveMenuItem.divider(),
-                AdaptiveMenuItem(
-                  title: 'Edit',
-                  icon: const Icon(CupertinoIcons.pencil),
-                  onTap: () {
-                    showUpdatePantryItemModal(
-                      context,
-                      pantryItem: item,
-                    );
-                  },
-                ),
-                AdaptiveMenuItem.divider(),
-                AdaptiveMenuItem(
-                  title: 'Delete',
-                  icon: const Icon(CupertinoIcons.trash),
-                  isDestructive: true,
-                  onTap: () {
-                    _showDeleteConfirmation(context, ref, item);
-                  },
-                ),
-              ],
-              child: Icon(
-                Icons.more_horiz,
-                color: colors.textSecondary,
-                size: 24,
               ),
-            ),
-          ],
+
+              SizedBox(width: AppSpacing.md),
+
+              // Column 2: Stock status chip (only show for Low/Out of Stock)
+              if (item.stockStatus != StockStatus.inStock)
+                SizedBox(
+                  width: 85, // Wide enough for "Out of Stock"
+                  child: Align(
+                    alignment: Alignment.centerRight,
+                    child: Padding(
+                      padding: EdgeInsets.only(right: AppSpacing.sm),
+                      child: StockChip(status: item.stockStatus),
+                    ),
+                  ),
+                )
+              else
+                SizedBox(width: AppSpacing.md), // Gap when no chip
+
+              // Column 3: Overflow menu button (shrinks to content)
+              AdaptivePullDownButton(
+                items: [
+                  AdaptiveMenuItem(
+                    title: 'Set to Out of Stock',
+                    icon: Icon(
+                      item.stockStatus == StockStatus.outOfStock
+                          ? CupertinoIcons.checkmark_circle_fill
+                          : CupertinoIcons.circle,
+                      color: const Color(0xFFEF5350), // Red
+                    ),
+                    onTap: () {
+                      ref.read(pantryNotifierProvider.notifier).updateItem(
+                        id: item.id,
+                        stockStatus: StockStatus.outOfStock,
+                      );
+                    },
+                  ),
+                  AdaptiveMenuItem(
+                    title: 'Set to Low Stock',
+                    icon: Icon(
+                      item.stockStatus == StockStatus.lowStock
+                          ? CupertinoIcons.checkmark_circle_fill
+                          : CupertinoIcons.circle,
+                      color: const Color(0xFFFFA726), // Orange
+                    ),
+                    onTap: () {
+                      ref.read(pantryNotifierProvider.notifier).updateItem(
+                        id: item.id,
+                        stockStatus: StockStatus.lowStock,
+                      );
+                    },
+                  ),
+                  AdaptiveMenuItem(
+                    title: 'Set to In Stock',
+                    icon: Icon(
+                      item.stockStatus == StockStatus.inStock
+                          ? CupertinoIcons.checkmark_circle_fill
+                          : CupertinoIcons.circle,
+                      color: const Color(0xFF66BB6A), // Green
+                    ),
+                    onTap: () {
+                      ref.read(pantryNotifierProvider.notifier).updateItem(
+                        id: item.id,
+                        stockStatus: StockStatus.inStock,
+                      );
+                    },
+                  ),
+                  AdaptiveMenuItem.divider(),
+                  AdaptiveMenuItem(
+                    title: 'Edit',
+                    icon: const Icon(CupertinoIcons.pencil),
+                    onTap: () {
+                      showUpdatePantryItemModal(
+                        context,
+                        pantryItem: item,
+                      );
+                    },
+                  ),
+                  AdaptiveMenuItem.divider(),
+                  AdaptiveMenuItem(
+                    title: 'Delete',
+                    icon: const Icon(CupertinoIcons.trash),
+                    isDestructive: true,
+                    onTap: () {
+                      _showDeleteConfirmation(context, ref, item);
+                    },
+                  ),
+                ],
+                child: Icon(
+                  Icons.more_horiz,
+                  color: colors.textSecondary,
+                  size: 24,
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
