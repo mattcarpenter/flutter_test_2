@@ -7,6 +7,9 @@ part 'household_state.freezed.dart';
 
 @freezed
 abstract class HouseholdState with _$HouseholdState {
+  /// Maximum number of members allowed in a household (including pending invites)
+  static const int maxMembers = 10;
+
   const factory HouseholdState({
     HouseholdEntry? currentHousehold,
     @Default([]) List<HouseholdMember> members,
@@ -22,6 +25,12 @@ abstract class HouseholdState with _$HouseholdState {
 
   bool get hasHousehold => currentHousehold != null;
   bool get hasPendingInvites => incomingInvites.isNotEmpty;
+
+  /// Total slots used (current members + pending invites)
+  int get totalMemberSlots => members.length + outgoingInvites.length;
+
+  /// Whether more members can be invited (under the limit)
+  bool get canInviteMoreMembers => totalMemberSlots < maxMembers;
 
   // Helper to get current user's membership
   HouseholdMember? getCurrentUserMembership(String currentUserId) {

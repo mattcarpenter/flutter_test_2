@@ -264,6 +264,7 @@ class HouseholdSharingPage extends ConsumerWidget {
           HouseholdInvitesSection(
             invites: householdState.outgoingInvites,
             isCreatingInvite: householdState.isCreatingInvite,
+            canInviteMoreMembers: householdState.canInviteMoreMembers,
             onCreateEmailInvite: (email) => ref.read(householdNotifierProvider.notifier)
                 .createEmailInvite(email),
             onCreateCodeInvite: (displayName) => ref.read(householdNotifierProvider.notifier)

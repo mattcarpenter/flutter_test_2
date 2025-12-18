@@ -10,6 +10,7 @@ import 'create_invite_modal.dart';
 class HouseholdInvitesSection extends StatelessWidget {
   final List<HouseholdInvite> invites;
   final bool isCreatingInvite;
+  final bool canInviteMoreMembers;
   final Future<String?> Function(String email) onCreateEmailInvite;
   final Future<String?> Function(String displayName) onCreateCodeInvite;
   final Function(String inviteId) onResendInvite;
@@ -19,6 +20,7 @@ class HouseholdInvitesSection extends StatelessWidget {
     super.key,
     required this.invites,
     required this.isCreatingInvite,
+    required this.canInviteMoreMembers,
     required this.onCreateEmailInvite,
     required this.onCreateCodeInvite,
     required this.onResendInvite,
@@ -87,10 +89,33 @@ class HouseholdInvitesSection extends StatelessWidget {
   }
 
   void _showCreateInviteModal(BuildContext context) {
+    if (!canInviteMoreMembers) {
+      _showMemberLimitDialog(context);
+      return;
+    }
+
     showCreateInviteModal(
       context,
       onCreateEmailInvite,
       onCreateCodeInvite,
+    );
+  }
+
+  void _showMemberLimitDialog(BuildContext context) {
+    showCupertinoDialog(
+      context: context,
+      builder: (context) => CupertinoAlertDialog(
+        title: const Text('Member Limit Reached'),
+        content: const Text(
+          'Households can have a maximum of 10 members. Remove a member or revoke a pending invite to add someone new.',
+        ),
+        actions: [
+          CupertinoDialogAction(
+            child: const Text('OK'),
+            onPressed: () => Navigator.pop(context),
+          ),
+        ],
+      ),
     );
   }
 }
