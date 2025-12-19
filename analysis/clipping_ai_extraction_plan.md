@@ -760,6 +760,233 @@ Future<void> _handleConvertToRecipe() async {
 
 ---
 
+## HMAC Signing Implementation Details
+
+The clipping extraction endpoints use the same HMAC-SHA256 signing pattern established by the ingredient canonicalization endpoints. This section documents the exact implementation to ensure correct integration.
+
+### Overview
+
+The signing provides lightweight security to prevent casual API abuse. It's not cryptographically secure (the key is embedded in the app binary) but adds friction for attackers.
+
+### Flutter Client Implementation
+
+#### 1. ApiSigner (`lib/src/services/api_signer.dart`)
+
+The `ApiSigner` class provides static methods for signing requests:
+
+```dart
+class ApiSigner {
+  // Signing key - embedded in app binary (same key on backend via env var)
+  static const String _signingKey = 'rcp_sk_7f3a9b2c4d5e6f8g1h2i3j4k5l6m7n8o';
+
+  // Public API key - identifies the app (not secret)
+  static const String apiKey = 'rcp_live_flutter_v1';
+
+  static Map<String, String> sign(String method, String path, String bodyString) {
+    // Get current timestamp in Unix seconds
+    final timestamp = DateTime.now().millisecondsSinceEpoch ~/ 1000;
+
+    // Hash the body (SHA256, lowercase hex)
+    final bodyHash = sha256.convert(utf8.encode(bodyString)).toString();
+
+    // Build canonical string: METHOD\nPATH\nTIMESTAMP\nBODY_HASH
+    final canonical = '$method\n$path\n$timestamp\n$bodyHash';
+
+    // Compute HMAC-SHA256
+    final hmacSha256 = Hmac(sha256, utf8.encode(_signingKey));
+    final signature = hmacSha256.convert(utf8.encode(canonical)).toString();
+
+    return {
+      'X-Api-Key': apiKey,
+      'X-Timestamp': timestamp.toString(),
+      'X-Signature': signature,
+    };
+  }
+}
+```
+
+#### 2. RecipeApiClient (`lib/src/clients/recipe_api_client.dart`)
+
+**CRITICAL**: The body string must be created ONCE and used for both signing and sending. This ensures the exact bytes signed match the bytes sent:
+
+```dart
+Future<http.Response> post(String path, Map<String, dynamic> body) async {
+  // Create body string ONCE - used for both signing and sending
+  // This ensures the exact bytes signed match the bytes sent
+  final bodyString = json.encode(body);
+
+  // Sign the request
+  final signatureHeaders = ApiSigner.sign('POST', path, bodyString);
+
+  return await http.post(
+    Uri.parse('$baseUrl$path'),
+    headers: {
+      'Content-Type': 'application/json',
+      ...signatureHeaders,
+    },
+    body: bodyString,  // Same string used for signing
+  );
+}
+```
+
+**Warning**: Do NOT call `json.encode()` twice - different calls could produce different byte orderings.
+
+#### 3. Usage in ClippingExtractionService
+
+The service layer simply uses RecipeApiClient which handles all signing:
+
+```dart
+class ClippingExtractionService {
+  final RecipeApiClient _apiClient;
+
+  Future<ExtractedRecipe?> extractRecipe({
+    required String title,
+    required String body,
+  }) async {
+    // RecipeApiClient.post() handles HMAC signing automatically
+    final response = await _apiClient.post(
+      '/v1/clippings/extract-recipe',
+      {'title': title, 'body': body},
+    );
+    // ...
+  }
+}
+```
+
+### Backend Server Implementation
+
+#### 1. Raw Body Capture (`src/index.ts`)
+
+**CRITICAL**: The raw request body must be captured BEFORE JSON parsing. Express.json's `verify` callback is used:
+
+```typescript
+app.use(express.json({
+  limit: '100kb',
+  // Capture raw body for signature verification
+  // This runs before JSON parsing, storing the exact bytes received
+  verify: (req, res, buf) => {
+    (req as any).rawBody = buf;
+  }
+}));
+```
+
+**Warning**: Without this, the parsed JSON would be re-serialized, potentially with different byte ordering than the original request.
+
+#### 2. Signature Verification Middleware (`src/middleware/apiSignature.ts`)
+
+```typescript
+export function verifyApiSignature(req: Request, res: Response, next: NextFunction): void {
+  const SIGNING_KEY = process.env.API_SIGNING_KEY;
+  const TIMESTAMP_TOLERANCE_SECONDS = 60;
+
+  // Extract required headers
+  const apiKey = req.header('X-Api-Key');
+  const timestampStr = req.header('X-Timestamp');
+  const signature = req.header('X-Signature');
+
+  // Validate all required headers are present
+  if (!apiKey || !timestampStr || !signature) {
+    res.status(401).json({ error: 'Missing required authentication headers' });
+    return;
+  }
+
+  // Check timestamp is within acceptable window (±60 seconds)
+  const timestamp = parseInt(timestampStr, 10);
+  const now = Math.floor(Date.now() / 1000);
+  if (Math.abs(now - timestamp) > TIMESTAMP_TOLERANCE_SECONDS) {
+    res.status(401).json({ error: 'Request expired' });
+    return;
+  }
+
+  // Get raw body captured by express.json verify function
+  const rawBody = req.rawBody;
+  if (!rawBody) {
+    res.status(500).json({ error: 'Server configuration error' });
+    return;
+  }
+
+  // Compute body hash (SHA256, lowercase hex)
+  const bodyHash = crypto.createHash('sha256').update(rawBody).digest('hex');
+
+  // Build canonical string: METHOD\nPATH\nTIMESTAMP\nBODY_HASH
+  // Use req.originalUrl to get the full path (req.path is relative to router mount)
+  const fullPath = req.originalUrl.split('?')[0];
+  const canonical = `${req.method}\n${fullPath}\n${timestamp}\n${bodyHash}`;
+
+  // Compute expected signature
+  const expectedSignature = crypto
+    .createHmac('sha256', SIGNING_KEY)
+    .update(canonical)
+    .digest('hex');
+
+  // Constant-time comparison to prevent timing attacks
+  const signatureBuffer = Buffer.from(signature, 'hex');
+  const expectedBuffer = Buffer.from(expectedSignature, 'hex');
+
+  if (signatureBuffer.length !== expectedBuffer.length ||
+      !crypto.timingSafeEqual(signatureBuffer, expectedBuffer)) {
+    res.status(401).json({ error: 'Invalid signature' });
+    return;
+  }
+
+  next();
+}
+```
+
+#### 3. Apply Middleware to Routes
+
+The middleware is applied to routes that require signature verification:
+
+```typescript
+// clippingRoutes.ts
+router.post(
+  '/extract-recipe',
+  verifyApiSignature,  // HMAC verification first
+  minuteLimiter,
+  dailyLimiter,
+  validateExtractRequest,
+  extractRecipe
+);
+```
+
+### Potential Pitfalls & Solutions
+
+| Issue | Cause | Solution |
+|-------|-------|----------|
+| "Invalid signature" | Body bytes don't match | Use same `bodyString` for signing AND sending |
+| "Invalid signature" | Path mismatch | Flutter must sign with exact path including `/v1/` prefix |
+| "Request expired" | Clock skew > 60s | Ensure device time is synced; timestamp tolerance is ±60s |
+| "Server configuration error" | rawBody not captured | Ensure `express.json` has `verify` callback configured |
+| "Invalid signature" | Wrong signing key | Ensure `API_SIGNING_KEY` env var matches Flutter's embedded key |
+
+### Canonical String Format
+
+The HMAC signature is computed over a canonical string with this exact format:
+
+```
+{METHOD}\n{PATH}\n{TIMESTAMP}\n{BODY_HASH}
+```
+
+Example:
+```
+POST
+/v1/clippings/extract-recipe
+1703123456
+a5b9d7e2f3c1...  (SHA256 hash of request body)
+```
+
+### Environment Variable
+
+The backend requires the signing key in an environment variable:
+
+```bash
+API_SIGNING_KEY=rcp_sk_7f3a9b2c4d5e6f8g1h2i3j4k5l6m7n8o
+```
+
+This must match the `_signingKey` constant in Flutter's `ApiSigner` class
+
+---
+
 ## Logging Strategy
 
 Use Winston logging in the backend for monitoring and debugging. No external analytics service (New Relic to be added in a later phase).
