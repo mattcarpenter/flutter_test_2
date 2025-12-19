@@ -30,12 +30,17 @@ class RecipeEditorForm extends ConsumerStatefulWidget {
   final RecipeEntry? initialRecipe; // null for new recipe, non-null for editing
   final VoidCallback? onSave;
   final String? folderId;
+  /// Explicitly controls whether this is a new recipe (uses addRecipe) or
+  /// editing existing (uses updateRecipe). Defaults to `initialRecipe == null`.
+  /// Set to true when pre-populating a new recipe (e.g., from AI extraction).
+  final bool? isNewRecipe;
 
   const RecipeEditorForm({
     super.key,
     this.initialRecipe,
     this.onSave,
     this.folderId,
+    this.isNewRecipe,
   });
 
   @override
@@ -91,10 +96,14 @@ class RecipeEditorFormState extends ConsumerState<RecipeEditorForm> {
   }
 
   void _initializeRecipe() {
+    // Determine if this is a new recipe:
+    // - Use explicit isNewRecipe parameter if provided
+    // - Otherwise, infer from initialRecipe == null (backwards compatible)
+    _isNewRecipe = widget.isNewRecipe ?? (widget.initialRecipe == null);
+
     if (widget.initialRecipe != null) {
-      // Update scenario: pre-populate fields.
+      // Pre-populate fields from provided recipe
       _recipe = widget.initialRecipe!;
-      _isNewRecipe = false;
       _titleController.text = _recipe.title;
       _descriptionController.text = _recipe.description ?? '';
       _servingsController.text = _recipe.servings?.toString() ?? '';
@@ -105,7 +114,7 @@ class RecipeEditorFormState extends ConsumerState<RecipeEditorForm> {
       _ingredients = List<Ingredient>.from(_recipe.ingredients ?? []);
       _steps = List<Step>.from(_recipe.steps ?? []);
     } else {
-      // New recipe: initialize local state.
+      // New recipe: initialize empty state
       final List<String> folderIds = widget.folderId != null ? [widget.folderId!] : [];
       final userId = supabase_flutter.Supabase.instance.client.auth.currentUser?.id ?? '';
       _recipe = RecipeEntry(
@@ -119,7 +128,6 @@ class RecipeEditorFormState extends ConsumerState<RecipeEditorForm> {
         pinned: 0,
         pinnedAt: null,
       );
-      _isNewRecipe = true;
       _titleController.text = _recipe.title;
     }
     setState(() {

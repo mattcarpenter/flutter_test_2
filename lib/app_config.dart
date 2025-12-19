@@ -11,8 +11,8 @@ class AppConfig {
   static const String _prodSupabaseAnonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVrb2RoZm5ydmRvdmVqaWJsbndlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzgyMjQ1ODcsImV4cCI6MjA1MzgwMDU4N30.ZlLSvOd4fgmGCmUqxwsFwA7ceSH80slwtf17Zq2fas0';
   static const String _prodPowersyncUrl = 'https://67b91959ee50386f3169557f.powersync.journeyapps.com';
   static const String _prodSupabaseStorageBucket = '';
-  //static const String _prodIngredientApiUrl = 'http://192.168.2.150:3000';
-  static const String _prodIngredientApiUrl = 'http://localhost:3000';
+  static const String _prodIngredientApiUrl = 'https://f02ba6e7defe.ngrok-free.app';
+  //static const String _prodIngredientApiUrl = 'http://localhost:3000';
 
   static bool _isInitialized = false;
 

@@ -316,6 +316,9 @@ class _ClippingShoppingListController extends ChangeNotifier {
 
   bool get isButtonEnabled => checkedCount > 0 && !isLoading;
 
+  /// Triggers a rebuild of listeners (used after initialization)
+  void triggerRebuild() => notifyListeners();
+
   Future<void> addToShoppingList(NavigatorState navigator, WidgetRef ref) async {
     setLoading(true);
 
@@ -470,6 +473,11 @@ class _ClippingShoppingListContentState
             if (!controller.initialized) {
               _initializeState(enrichedItems, currentListId);
               controller.initialized = true;
+
+              // Schedule notification after frame completes to update button state
+              WidgetsBinding.instance.addPostFrameCallback((_) {
+                if (mounted) controller.triggerRebuild();
+              });
             }
 
             // Separate items into addable vs already in list

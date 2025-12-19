@@ -49,6 +49,7 @@ Future<void> showRecipeExtractionModal(
     context: context,
     useRootNavigator: true,
     barrierDismissible: false,
+    modalTypeBuilder: (_) => WoltModalType.alertDialog(),
     pageListBuilder: (modalContext) => [
       WoltModalSheetPage(
         navBarHeight: 0,
@@ -123,6 +124,7 @@ Future<void> showShoppingListExtractionModal(
     context: context,
     useRootNavigator: true,
     barrierDismissible: false,
+    modalTypeBuilder: (_) => WoltModalType.alertDialog(),
     pageListBuilder: (modalContext) => [
       WoltModalSheetPage(
         navBarHeight: 0,

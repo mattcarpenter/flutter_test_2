@@ -47,7 +47,8 @@ Future<void> showRecipeEditorModal(
         context: bottomSheetContext, // using bottom sheet context
         recipe: recipe,
         pageTitle: pageTitle,
-        folderId: folderId
+        folderId: folderId,
+        isEditing: isEditing,
       ),
     ],
   );
@@ -61,6 +62,7 @@ class RecipeEditorModalPage {
     RecipeEntry? recipe,
     required String pageTitle,
     String? folderId,
+    bool isEditing = false,
   }) {
     final colors = AppColors.of(context);
 
@@ -85,7 +87,7 @@ class RecipeEditorModalPage {
           await formKey.currentState?.saveRecipe();
           Navigator.of(context).pop();
         },
-        child: Text(recipe == null ? 'Create' : 'Update'),
+        child: Text(isEditing ? 'Update' : 'Create'),
       ),
       pageTitle: ModalSheetTitle(pageTitle),
       child: Padding(
@@ -93,8 +95,8 @@ class RecipeEditorModalPage {
         child: RecipeEditorForm(
           key: formKey,
           initialRecipe: recipe,
-          folderId: folderId
-          // onSave is handled by the nav bar button.
+          folderId: folderId,
+          isNewRecipe: !isEditing,
         ),
       ),
     );
