@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -223,6 +225,9 @@ class _RecipeExtractionContentState
             'Extracting recipe...',
             style: AppTypography.body.copyWith(
               color: AppColors.of(context).textSecondary,
+              fontFamily: Platform.isIOS ? 'SF Pro Rounded' : null,
+              fontSize: 17,
+              fontWeight: FontWeight.w500,
             ),
             textAlign: TextAlign.center,
           ),
@@ -288,6 +293,9 @@ class _ShoppingListExtractionContentState
             'Extracting items...',
             style: AppTypography.body.copyWith(
               color: AppColors.of(context).textSecondary,
+              fontFamily: Platform.isIOS ? 'SF Pro Rounded' : null,
+              fontSize: 17,
+              fontWeight: FontWeight.w500,
             ),
             textAlign: TextAlign.center,
           ),
