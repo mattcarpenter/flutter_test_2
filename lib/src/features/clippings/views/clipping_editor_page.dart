@@ -586,8 +586,8 @@ class _ClippingEditorPageState extends ConsumerState<ClippingEditorPage>
     final borderColor = colors.textPrimary.withValues(alpha: 0.20);
     final contentColor = colors.textPrimary.withValues(alpha: 0.85);
 
-    return GestureDetector(
-      onTap: onPressed,
+    return _PressableButton(
+      onPressed: onPressed,
       child: Container(
         height: 48,
         padding: const EdgeInsets.symmetric(horizontal: 12),
@@ -783,6 +783,38 @@ class _ClippingCheckboxBuilder extends quill.QuillCheckboxBuilder {
             color: color,
           ),
         ),
+      ),
+    );
+  }
+}
+
+/// Simple pressable wrapper that reduces opacity when pressed
+class _PressableButton extends StatefulWidget {
+  final Widget child;
+  final VoidCallback onPressed;
+
+  const _PressableButton({
+    required this.child,
+    required this.onPressed,
+  });
+
+  @override
+  State<_PressableButton> createState() => _PressableButtonState();
+}
+
+class _PressableButtonState extends State<_PressableButton> {
+  bool _isPressed = false;
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: widget.onPressed,
+      onTapDown: (_) => setState(() => _isPressed = true),
+      onTapUp: (_) => setState(() => _isPressed = false),
+      onTapCancel: () => setState(() => _isPressed = false),
+      child: Opacity(
+        opacity: _isPressed ? 0.5 : 1.0,
+        child: widget.child,
       ),
     );
   }
