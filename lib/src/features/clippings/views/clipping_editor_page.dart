@@ -362,140 +362,165 @@ class _ClippingEditorPageState extends ConsumerState<ClippingEditorPage>
           child: Column(
             children: [
               Expanded(
-                child: GestureDetector(
-                onTap: () {
-                  // Tapping empty area focuses content
-                  if (!_contentFocusNode.hasFocus && !_titleFocusNode.hasFocus) {
-                    _contentFocusNode.requestFocus();
-                  }
-                },
-                behavior: HitTestBehavior.opaque,
-                child: SingleChildScrollView(
-                  controller: _scrollController,
-                  padding: EdgeInsets.all(AppSpacing.lg),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      // Title field
-                      TextField(
-                        controller: _titleController,
-                        focusNode: _titleFocusNode,
-                        style: AppTypography.h1.copyWith(
-                          color: AppColors.of(context).textPrimary,
-                        ),
-                        decoration: InputDecoration(
-                          hintText: 'Title',
-                          hintStyle: AppTypography.h1.copyWith(
-                            color: AppColors.of(context).textTertiary,
-                          ),
-                          border: InputBorder.none,
-                          contentPadding: EdgeInsets.zero,
-                        ),
-                        maxLines: null,
-                        keyboardType: TextInputType.text,
-                        textInputAction: TextInputAction.next,
-                        onSubmitted: (_) {
+                child: Stack(
+                  children: [
+                    GestureDetector(
+                      onTap: () {
+                        // Tapping empty area focuses content
+                        if (!_contentFocusNode.hasFocus && !_titleFocusNode.hasFocus) {
                           _contentFocusNode.requestFocus();
-                        },
-                      ),
-
-                      SizedBox(height: AppSpacing.md),
-
-                      // Quill editor - wrap in Theme to override Material defaults
-                      Theme(
-                        key: _editorKey,
-                        data: Theme.of(context).copyWith(
-                          iconTheme: IconThemeData(
-                            color: AppColors.of(context).textPrimary,
-                          ),
-                          checkboxTheme: CheckboxThemeData(
-                            checkColor: WidgetStateProperty.all(AppColors.of(context).background),
-                            fillColor: WidgetStateProperty.resolveWith((states) {
-                              if (states.contains(WidgetState.selected)) {
-                                return AppColors.of(context).textPrimary;
-                              }
-                              return Colors.transparent;
-                            }),
-                            side: BorderSide(
-                              color: AppColors.of(context).textSecondary,
-                              width: 1.5,
+                        }
+                      },
+                      behavior: HitTestBehavior.opaque,
+                      child: SingleChildScrollView(
+                        controller: _scrollController,
+                        padding: EdgeInsets.all(AppSpacing.lg),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            // Title field
+                            TextField(
+                              controller: _titleController,
+                              focusNode: _titleFocusNode,
+                              style: AppTypography.h1.copyWith(
+                                color: AppColors.of(context).textPrimary,
+                              ),
+                              decoration: InputDecoration(
+                                hintText: 'Title',
+                                hintStyle: AppTypography.h1.copyWith(
+                                  color: AppColors.of(context).textTertiary,
+                                ),
+                                border: InputBorder.none,
+                                contentPadding: EdgeInsets.zero,
+                              ),
+                              maxLines: null,
+                              keyboardType: TextInputType.text,
+                              textInputAction: TextInputAction.next,
+                              onSubmitted: (_) {
+                                _contentFocusNode.requestFocus();
+                              },
                             ),
-                          ),
-                          textTheme: Theme.of(context).textTheme.copyWith(
-                            bodyMedium: TextStyle(color: AppColors.of(context).textPrimary),
-                            bodyLarge: TextStyle(color: AppColors.of(context).textPrimary),
+
+                            SizedBox(height: AppSpacing.md),
+
+                            // Quill editor - wrap in Theme to override Material defaults
+                            Theme(
+                              key: _editorKey,
+                              data: Theme.of(context).copyWith(
+                                iconTheme: IconThemeData(
+                                  color: AppColors.of(context).textPrimary,
+                                ),
+                                checkboxTheme: CheckboxThemeData(
+                                  checkColor: WidgetStateProperty.all(AppColors.of(context).background),
+                                  fillColor: WidgetStateProperty.resolveWith((states) {
+                                    if (states.contains(WidgetState.selected)) {
+                                      return AppColors.of(context).textPrimary;
+                                    }
+                                    return Colors.transparent;
+                                  }),
+                                  side: BorderSide(
+                                    color: AppColors.of(context).textSecondary,
+                                    width: 1.5,
+                                  ),
+                                ),
+                                textTheme: Theme.of(context).textTheme.copyWith(
+                                  bodyMedium: TextStyle(color: AppColors.of(context).textPrimary),
+                                  bodyLarge: TextStyle(color: AppColors.of(context).textPrimary),
+                                ),
+                              ),
+                              child: quill.QuillEditor.basic(
+                                controller: _contentController,
+                                focusNode: _contentFocusNode,
+                                config: quill.QuillEditorConfig(
+                                  placeholder: 'Start typing...',
+                                  padding: EdgeInsets.zero,
+                                  autoFocus: false,
+                                  expands: false,
+                                  scrollable: false,
+                                  requestKeyboardFocusOnCheckListChanged: false,
+                                  customStyles: quill.DefaultStyles(
+                                    paragraph: quill.DefaultTextBlockStyle(
+                                      AppTypography.bodyLarge.copyWith(
+                                        color: AppColors.of(context).textPrimary,
+                                        height: 1.5,
+                                      ),
+                                      quill.HorizontalSpacing.zero,
+                                      quill.VerticalSpacing.zero,
+                                      quill.VerticalSpacing.zero,
+                                      null,
+                                    ),
+                                    lists: quill.DefaultListBlockStyle(
+                                      AppTypography.bodyLarge.copyWith(
+                                        color: AppColors.of(context).textPrimary,
+                                        height: 1.5,
+                                      ),
+                                      quill.HorizontalSpacing.zero,
+                                      quill.VerticalSpacing.zero,
+                                      quill.VerticalSpacing.zero,
+                                      null,
+                                      // Custom checkbox builder to match our theme
+                                      _ClippingCheckboxBuilder(AppColors.of(context).textPrimary),
+                                    ),
+                                    leading: quill.DefaultTextBlockStyle(
+                                      AppTypography.bodyLarge.copyWith(
+                                        color: AppColors.of(context).textPrimary,
+                                        height: 1.5,
+                                      ),
+                                      quill.HorizontalSpacing.zero,
+                                      quill.VerticalSpacing.zero,
+                                      quill.VerticalSpacing.zero,
+                                      null,
+                                    ),
+                                    placeHolder: quill.DefaultTextBlockStyle(
+                                      AppTypography.bodyLarge.copyWith(
+                                        color: AppColors.of(context).textTertiary,
+                                        height: 1.5,
+                                      ),
+                                      quill.HorizontalSpacing.zero,
+                                      quill.VerticalSpacing.zero,
+                                      quill.VerticalSpacing.zero,
+                                      null,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                    // Fade gradient at bottom
+                    Positioned(
+                      left: 0,
+                      right: 0,
+                      bottom: 0,
+                      child: IgnorePointer(
+                        child: Container(
+                          height: 32,
+                          decoration: BoxDecoration(
+                            gradient: LinearGradient(
+                              begin: Alignment.topCenter,
+                              end: Alignment.bottomCenter,
+                              colors: [
+                                AppColors.of(context).background.withValues(alpha: 0),
+                                AppColors.of(context).background,
+                              ],
+                            ),
                           ),
                         ),
-                        child: quill.QuillEditor.basic(
-                          controller: _contentController,
-                          focusNode: _contentFocusNode,
-                          config: quill.QuillEditorConfig(
-                          placeholder: 'Start typing...',
-                          padding: EdgeInsets.zero,
-                          autoFocus: false,
-                          expands: false,
-                          scrollable: false,
-                          requestKeyboardFocusOnCheckListChanged: false,
-                          customStyles: quill.DefaultStyles(
-                            paragraph: quill.DefaultTextBlockStyle(
-                              AppTypography.bodyLarge.copyWith(
-                                color: AppColors.of(context).textPrimary,
-                                height: 1.5,
-                              ),
-                              quill.HorizontalSpacing.zero,
-                              quill.VerticalSpacing.zero,
-                              quill.VerticalSpacing.zero,
-                              null,
-                            ),
-                            lists: quill.DefaultListBlockStyle(
-                              AppTypography.bodyLarge.copyWith(
-                                color: AppColors.of(context).textPrimary,
-                                height: 1.5,
-                              ),
-                              quill.HorizontalSpacing.zero,
-                              quill.VerticalSpacing.zero,
-                              quill.VerticalSpacing.zero,
-                              null,
-                              // Custom checkbox builder to match our theme
-                              _ClippingCheckboxBuilder(AppColors.of(context).textPrimary),
-                            ),
-                            leading: quill.DefaultTextBlockStyle(
-                              AppTypography.bodyLarge.copyWith(
-                                color: AppColors.of(context).textPrimary,
-                                height: 1.5,
-                              ),
-                              quill.HorizontalSpacing.zero,
-                              quill.VerticalSpacing.zero,
-                              quill.VerticalSpacing.zero,
-                              null,
-                            ),
-                            placeHolder: quill.DefaultTextBlockStyle(
-                              AppTypography.bodyLarge.copyWith(
-                                color: AppColors.of(context).textTertiary,
-                                height: 1.5,
-                              ),
-                              quill.HorizontalSpacing.zero,
-                              quill.VerticalSpacing.zero,
-                              quill.VerticalSpacing.zero,
-                              null,
-                            ),
-                          ),
-                        ),
                       ),
-                      ),
-                    ],
-                  ),
+                    ),
+                  ],
                 ),
               ),
-            ),
 
-            // Conversion buttons
-            _buildConversionButtons(context),
+              // Conversion buttons
+              _buildConversionButtons(context),
 
-            // Toolbar (shown when any text field is focused - works with hardware keyboard too)
-            if (_isAnyFieldFocused)
-              _buildToolbar(context),
-          ],
+              // Toolbar (shown when any text field is focused - works with hardware keyboard too)
+              if (_isAnyFieldFocused)
+                _buildToolbar(context),
+            ],
           ),
         ),
       ),
@@ -540,18 +565,12 @@ class _ClippingEditorPageState extends ConsumerState<ClippingEditorPage>
       );
     }
 
-    return Container(
-      decoration: BoxDecoration(
-        border: Border(
-          top: BorderSide(
-            color: AppColors.of(context).border,
-            width: 0.5,
-          ),
-        ),
-      ),
-      padding: EdgeInsets.symmetric(
-        horizontal: AppSpacing.lg,
-        vertical: AppSpacing.md,
+    return Padding(
+      padding: EdgeInsets.only(
+        left: AppSpacing.lg,
+        right: AppSpacing.lg,
+        bottom: AppSpacing.md,
+        top: AppSpacing.sm,
       ),
       child: buttonRow,
     );
