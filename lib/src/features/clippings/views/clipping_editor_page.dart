@@ -13,6 +13,7 @@ import '../../../theme/colors.dart';
 import '../../../theme/spacing.dart';
 import '../../../theme/typography.dart';
 import '../widgets/link_modal.dart';
+import 'clipping_extraction_modal.dart';
 
 class ClippingEditorPage extends ConsumerStatefulWidget {
   final String clippingId;
@@ -514,8 +515,11 @@ class _ClippingEditorPageState extends ConsumerState<ClippingEditorPage>
                 ),
               ),
 
-              // Conversion buttons
-              _buildConversionButtons(context),
+              // Conversion buttons - wrapped in ListenableBuilder to rebuild when content changes
+              ListenableBuilder(
+                listenable: _contentController,
+                builder: (context, child) => _buildConversionButtons(context),
+              ),
 
               // Toolbar (shown when any text field is focused - works with hardware keyboard too)
               if (_isAnyFieldFocused)
@@ -527,8 +531,45 @@ class _ClippingEditorPageState extends ConsumerState<ClippingEditorPage>
     );
   }
 
+  /// Extracts plain text from the Quill content
+  String _getContentAsPlainText() {
+    return _contentController.document.toPlainText().trim();
+  }
+
+  /// Returns true if the content has meaningful text
+  bool _hasContent() {
+    return _getContentAsPlainText().isNotEmpty;
+  }
+
+  /// Handles the Convert to Recipe button tap
+  void _handleConvertToRecipe() {
+    final title = _titleController.text;
+    final body = _getContentAsPlainText();
+
+    showRecipeExtractionModal(
+      context,
+      ref,
+      title: title,
+      body: body,
+    );
+  }
+
+  /// Handles the To Shopping List button tap
+  void _handleAddToShoppingList() {
+    final title = _titleController.text;
+    final body = _getContentAsPlainText();
+
+    showShoppingListExtractionModal(
+      context,
+      ref,
+      title: title,
+      body: body,
+    );
+  }
+
   Widget _buildConversionButtons(BuildContext context) {
     final isTablet = MediaQuery.of(context).size.shortestSide >= 600;
+    final hasContent = _hasContent();
 
     Widget buttonRow = Row(
       children: [
@@ -537,9 +578,8 @@ class _ClippingEditorPageState extends ConsumerState<ClippingEditorPage>
             context: context,
             text: 'Convert to Recipe',
             icon: CupertinoIcons.sparkles,
-            onPressed: () {
-              // TODO: implement
-            },
+            onPressed: hasContent ? _handleConvertToRecipe : null,
+            enabled: hasContent,
           ),
         ),
         SizedBox(width: AppSpacing.md),
@@ -548,9 +588,8 @@ class _ClippingEditorPageState extends ConsumerState<ClippingEditorPage>
             context: context,
             text: 'To Shopping List',
             icon: CupertinoIcons.list_bullet,
-            onPressed: () {
-              // TODO: implement
-            },
+            onPressed: hasContent ? _handleAddToShoppingList : null,
+            enabled: hasContent,
           ),
         ),
       ],
@@ -580,47 +619,58 @@ class _ClippingEditorPageState extends ConsumerState<ClippingEditorPage>
     required BuildContext context,
     required String text,
     required IconData icon,
-    required VoidCallback onPressed,
+    VoidCallback? onPressed,
+    bool enabled = true,
   }) {
     final colors = AppColors.of(context);
-    final borderColor = colors.textPrimary.withValues(alpha: 0.20);
-    final contentColor = colors.textPrimary.withValues(alpha: 0.85);
+    final borderColor = enabled
+        ? colors.textPrimary.withValues(alpha: 0.20)
+        : colors.textPrimary.withValues(alpha: 0.10);
+    final contentColor = enabled
+        ? colors.textPrimary.withValues(alpha: 0.85)
+        : colors.textPrimary.withValues(alpha: 0.35);
+
+    final button = Container(
+      height: 48,
+      padding: const EdgeInsets.symmetric(horizontal: 12),
+      decoration: BoxDecoration(
+        color: Colors.transparent,
+        border: Border.all(color: borderColor, width: 1),
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(
+            icon,
+            size: 16,
+            color: contentColor,
+          ),
+          const SizedBox(width: 6),
+          Flexible(
+            child: Text(
+              text,
+              style: TextStyle(
+                color: contentColor,
+                fontSize: 13,
+                fontWeight: FontWeight.w600,
+              ),
+              maxLines: 2,
+              textAlign: TextAlign.center,
+              overflow: TextOverflow.ellipsis,
+            ),
+          ),
+        ],
+      ),
+    );
+
+    if (!enabled || onPressed == null) {
+      return button;
+    }
 
     return _PressableButton(
       onPressed: onPressed,
-      child: Container(
-        height: 48,
-        padding: const EdgeInsets.symmetric(horizontal: 12),
-        decoration: BoxDecoration(
-          color: Colors.transparent,
-          border: Border.all(color: borderColor, width: 1),
-          borderRadius: BorderRadius.circular(8),
-        ),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(
-              icon,
-              size: 16,
-              color: contentColor,
-            ),
-            const SizedBox(width: 6),
-            Flexible(
-              child: Text(
-                text,
-                style: TextStyle(
-                  color: contentColor,
-                  fontSize: 13,
-                  fontWeight: FontWeight.w600,
-                ),
-                maxLines: 2,
-                textAlign: TextAlign.center,
-                overflow: TextOverflow.ellipsis,
-              ),
-            ),
-          ],
-        ),
-      ),
+      child: button,
     );
   }
 
