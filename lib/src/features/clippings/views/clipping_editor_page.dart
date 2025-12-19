@@ -489,11 +489,117 @@ class _ClippingEditorPageState extends ConsumerState<ClippingEditorPage>
               ),
             ),
 
+            // Conversion buttons
+            _buildConversionButtons(context),
+
             // Toolbar (shown when any text field is focused - works with hardware keyboard too)
             if (_isAnyFieldFocused)
               _buildToolbar(context),
           ],
           ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildConversionButtons(BuildContext context) {
+    final isTablet = MediaQuery.of(context).size.shortestSide >= 600;
+
+    Widget buttonRow = Row(
+      children: [
+        Expanded(
+          child: _buildConversionButton(
+            context: context,
+            text: 'Convert to Recipe',
+            icon: CupertinoIcons.sparkles,
+            onPressed: () {
+              // TODO: implement
+            },
+          ),
+        ),
+        SizedBox(width: AppSpacing.md),
+        Expanded(
+          child: _buildConversionButton(
+            context: context,
+            text: 'To Shopping List',
+            icon: CupertinoIcons.list_bullet,
+            onPressed: () {
+              // TODO: implement
+            },
+          ),
+        ),
+      ],
+    );
+
+    if (isTablet) {
+      buttonRow = Center(
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 400),
+          child: buttonRow,
+        ),
+      );
+    }
+
+    return Container(
+      decoration: BoxDecoration(
+        border: Border(
+          top: BorderSide(
+            color: AppColors.of(context).border,
+            width: 0.5,
+          ),
+        ),
+      ),
+      padding: EdgeInsets.symmetric(
+        horizontal: AppSpacing.lg,
+        vertical: AppSpacing.md,
+      ),
+      child: buttonRow,
+    );
+  }
+
+  Widget _buildConversionButton({
+    required BuildContext context,
+    required String text,
+    required IconData icon,
+    required VoidCallback onPressed,
+  }) {
+    final colors = AppColors.of(context);
+    final borderColor = colors.textPrimary.withValues(alpha: 0.20);
+    final contentColor = colors.textPrimary.withValues(alpha: 0.85);
+
+    return GestureDetector(
+      onTap: onPressed,
+      child: Container(
+        height: 48,
+        padding: const EdgeInsets.symmetric(horizontal: 12),
+        decoration: BoxDecoration(
+          color: Colors.transparent,
+          border: Border.all(color: borderColor, width: 1),
+          borderRadius: BorderRadius.circular(8),
+        ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              icon,
+              size: 16,
+              color: contentColor,
+            ),
+            const SizedBox(width: 6),
+            Flexible(
+              child: Text(
+                text,
+                style: TextStyle(
+                  color: contentColor,
+                  fontSize: 13,
+                  fontWeight: FontWeight.w600,
+                ),
+                maxLines: 2,
+                textAlign: TextAlign.center,
+                overflow: TextOverflow.ellipsis,
+              ),
+            ),
+          ],
         ),
       ),
     );
