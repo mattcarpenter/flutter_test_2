@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:io';
 
 import 'package:connectivity_plus/connectivity_plus.dart';
@@ -169,6 +170,86 @@ Future<void> showShoppingListExtractionModal(
   );
 }
 
+/// Animated loading text that cycles through messages with sequential fade animation
+class _AnimatedLoadingText extends StatefulWidget {
+  final List<String> messages;
+
+  const _AnimatedLoadingText({required this.messages});
+
+  @override
+  State<_AnimatedLoadingText> createState() => _AnimatedLoadingTextState();
+}
+
+class _AnimatedLoadingTextState extends State<_AnimatedLoadingText>
+    with SingleTickerProviderStateMixin {
+  int _currentIndex = 0;
+  Timer? _timer;
+  late AnimationController _fadeController;
+  late Animation<double> _fadeAnimation;
+
+  @override
+  void initState() {
+    super.initState();
+    _fadeController = AnimationController(
+      duration: const Duration(milliseconds: 150),
+      vsync: this,
+      value: 1.0, // Start fully visible
+    );
+    _fadeAnimation = CurvedAnimation(
+      parent: _fadeController,
+      curve: Curves.easeInOut,
+    );
+    _startTimer();
+  }
+
+  @override
+  void dispose() {
+    _timer?.cancel();
+    _fadeController.dispose();
+    super.dispose();
+  }
+
+  void _startTimer() {
+    _timer = Timer.periodic(const Duration(seconds: 4), (timer) {
+      if (_currentIndex < widget.messages.length - 1) {
+        _transitionToNext();
+      } else {
+        timer.cancel();
+      }
+    });
+  }
+
+  Future<void> _transitionToNext() async {
+    // Fade out
+    await _fadeController.reverse();
+    // Change text
+    if (mounted) {
+      setState(() {
+        _currentIndex++;
+      });
+      // Fade in
+      await _fadeController.forward();
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return FadeTransition(
+      opacity: _fadeAnimation,
+      child: Text(
+        widget.messages[_currentIndex],
+        style: AppTypography.body.copyWith(
+          color: AppColors.of(context).textSecondary,
+          fontFamily: Platform.isIOS ? 'SF Pro Rounded' : null,
+          fontSize: 17,
+          fontWeight: FontWeight.w600,
+        ),
+        textAlign: TextAlign.center,
+      ),
+    );
+  }
+}
+
 /// Content widget that performs recipe extraction on init
 class _RecipeExtractionContent extends ConsumerStatefulWidget {
   final String title;
@@ -221,15 +302,12 @@ class _RecipeExtractionContentState
         children: [
           const CupertinoActivityIndicator(radius: 16),
           SizedBox(height: AppSpacing.lg),
-          Text(
-            'Extracting recipe...',
-            style: AppTypography.body.copyWith(
-              color: AppColors.of(context).textSecondary,
-              fontFamily: Platform.isIOS ? 'SF Pro Rounded' : null,
-              fontSize: 17,
-              fontWeight: FontWeight.w500,
-            ),
-            textAlign: TextAlign.center,
+          const _AnimatedLoadingText(
+            messages: [
+              'Extracting recipe...',
+              'Finding the details...',
+              'Wrapping up...',
+            ],
           ),
         ],
       ),
@@ -289,15 +367,12 @@ class _ShoppingListExtractionContentState
         children: [
           const CupertinoActivityIndicator(radius: 16),
           SizedBox(height: AppSpacing.lg),
-          Text(
-            'Extracting items...',
-            style: AppTypography.body.copyWith(
-              color: AppColors.of(context).textSecondary,
-              fontFamily: Platform.isIOS ? 'SF Pro Rounded' : null,
-              fontSize: 17,
-              fontWeight: FontWeight.w500,
-            ),
-            textAlign: TextAlign.center,
+          const _AnimatedLoadingText(
+            messages: [
+              'Extracting items...',
+              'Finding the details...',
+              'Wrapping up...',
+            ],
           ),
         ],
       ),
