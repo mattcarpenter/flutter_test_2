@@ -43,8 +43,9 @@ class _EnrichedShoppingItem {
 }
 
 /// Provider that enriches extracted shopping items with pantry/shopping list context
-final _enrichedClippingItemsProvider = FutureProvider.autoDispose
-    .family<List<_EnrichedShoppingItem>, List<ExtractedShoppingItem>>(
+/// Note: Not using autoDispose so data persists during page navigation within modal
+final _enrichedClippingItemsProvider =
+    FutureProvider.family<List<_EnrichedShoppingItem>, List<ExtractedShoppingItem>>(
   (ref, items) async {
     final pantryRepository = ref.read(pantryRepositoryProvider);
     final shoppingListRepository = ref.read(shoppingListRepositoryProvider);
