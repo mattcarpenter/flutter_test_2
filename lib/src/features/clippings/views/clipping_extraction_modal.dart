@@ -148,9 +148,9 @@ Future<void> showShoppingListExtractionModal(
               return;
             }
 
-            // Show the shopping list modal with extracted items
+            // Show the shopping list modal
             if (context.mounted) {
-              showClippingShoppingListModal(context, ref, items);
+              showClippingShoppingListModal(context, items);
             }
           },
           onError: (message) {

@@ -42,13 +42,46 @@ class _EnrichedShoppingItem {
   String get category => item.category;
 }
 
+/// Provider that enriches extracted shopping items with pantry/shopping list context
+final _enrichedClippingItemsProvider = FutureProvider.autoDispose
+    .family<List<_EnrichedShoppingItem>, List<ExtractedShoppingItem>>(
+  (ref, items) async {
+    final pantryRepository = ref.read(pantryRepositoryProvider);
+    final shoppingListRepository = ref.read(shoppingListRepositoryProvider);
+
+    final enrichedItems = <_EnrichedShoppingItem>[];
+
+    for (int i = 0; i < items.length; i++) {
+      final item = items[i];
+
+      // Check pantry for matching items using terms
+      final pantryMatches = await pantryRepository.findItemsByTerms(item.terms);
+      final matchingPantryItem =
+          pantryMatches.isNotEmpty ? pantryMatches.first : null;
+
+      // Check shopping lists for existing items
+      final shoppingListMatches =
+          await shoppingListRepository.findItemsByTerms(item.terms);
+      final existsInShoppingList = shoppingListMatches.isNotEmpty;
+
+      enrichedItems.add(_EnrichedShoppingItem(
+        id: '${item.name}_$i',
+        item: item,
+        matchingPantryItem: matchingPantryItem,
+        existsInShoppingList: existsInShoppingList,
+      ));
+    }
+
+    return enrichedItems;
+  },
+);
+
 // Global controller instance
 final _clippingShoppingListController = _ClippingShoppingListController();
 
 /// Shows the shopping list modal with extracted items
 void showClippingShoppingListModal(
   BuildContext context,
-  WidgetRef ref,
   List<ExtractedShoppingItem> items,
 ) {
   // Reset controller state when opening modal
@@ -60,12 +93,12 @@ void showClippingShoppingListModal(
     useRootNavigator: true,
     context: context,
     pageIndexNotifier: pageIndexNotifier,
+    //modalTypeBuilder: (_) => WoltModalType.bottomSheet(),
     pageListBuilder: (modalContext) => [
       // Page 0: Add to Shopping List
       _buildAddToShoppingListPage(
         modalContext: modalContext,
         items: items,
-        ref: ref,
         pageIndexNotifier: pageIndexNotifier,
       ),
       // Page 1: Manage Lists
@@ -89,7 +122,6 @@ void showClippingShoppingListModal(
 SliverWoltModalSheetPage _buildAddToShoppingListPage({
   required BuildContext modalContext,
   required List<ExtractedShoppingItem> items,
-  required WidgetRef ref,
   required ValueNotifier<int> pageIndexNotifier,
 }) {
   return SliverWoltModalSheetPage(
@@ -128,7 +160,6 @@ SliverWoltModalSheetPage _buildAddToShoppingListPage({
                       ? () async {
                           await _clippingShoppingListController.addToShoppingList(
                             Navigator.of(consumerContext),
-                            ref,
                           );
                         }
                       : null,
@@ -284,6 +315,9 @@ class _ClippingShoppingListController extends ChangeNotifier {
   // Addable items (not already in a list)
   List<_EnrichedShoppingItem> addableItems = [];
 
+  // Reference to WidgetRef for adding items (set by the content widget)
+  WidgetRef? _ref;
+
   bool isLoading = false;
   bool initialized = false;
 
@@ -293,6 +327,11 @@ class _ClippingShoppingListController extends ChangeNotifier {
     addableItems = [];
     isLoading = false;
     initialized = false;
+    _ref = null;
+  }
+
+  void setRef(WidgetRef ref) {
+    _ref = ref;
   }
 
   void updateCheckedState(String id, bool value) {
@@ -319,7 +358,10 @@ class _ClippingShoppingListController extends ChangeNotifier {
   /// Triggers a rebuild of listeners (used after initialization)
   void triggerRebuild() => notifyListeners();
 
-  Future<void> addToShoppingList(NavigatorState navigator, WidgetRef ref) async {
+  Future<void> addToShoppingList(NavigatorState navigator) async {
+    if (_ref == null) return;
+    final ref = _ref!;
+
     setLoading(true);
 
     try {
@@ -388,14 +430,17 @@ class _ClippingShoppingListContentState
     extends ConsumerState<_ClippingShoppingListContent> {
   _ClippingShoppingListController get controller => widget.controller;
 
-  // Future for enriching items with pantry/shopping list data
-  Future<List<_EnrichedShoppingItem>>? _enrichedItemsFuture;
-
   @override
   void initState() {
     super.initState();
     controller.addListener(_onControllerChanged);
-    _enrichedItemsFuture = _enrichItems();
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    // Set the ref on the controller so it can add items
+    controller.setRef(ref);
   }
 
   @override
@@ -408,34 +453,6 @@ class _ClippingShoppingListContentState
     if (mounted) setState(() {});
   }
 
-  Future<List<_EnrichedShoppingItem>> _enrichItems() async {
-    final pantryRepository = ref.read(pantryRepositoryProvider);
-    final shoppingListRepository = ref.read(shoppingListRepositoryProvider);
-
-    final enrichedItems = <_EnrichedShoppingItem>[];
-
-    for (int i = 0; i < widget.items.length; i++) {
-      final item = widget.items[i];
-
-      // Check pantry for matching items using terms
-      final pantryMatches = await pantryRepository.findItemsByTerms(item.terms);
-      final matchingPantryItem = pantryMatches.isNotEmpty ? pantryMatches.first : null;
-
-      // Check shopping lists for existing items
-      final shoppingListMatches = await shoppingListRepository.findItemsByTerms(item.terms);
-      final existsInShoppingList = shoppingListMatches.isNotEmpty;
-
-      enrichedItems.add(_EnrichedShoppingItem(
-        id: '${item.name}_$i', // Stable ID
-        item: item,
-        matchingPantryItem: matchingPantryItem,
-        existsInShoppingList: existsInShoppingList,
-      ));
-    }
-
-    return enrichedItems;
-  }
-
   @override
   Widget build(BuildContext context) {
     final colors = AppColors.of(context);
@@ -443,6 +460,10 @@ class _ClippingShoppingListContentState
     // Watch shopping lists and current selection
     final listsAsync = ref.watch(shoppingListsProvider);
     final currentListId = ref.watch(currentShoppingListProvider);
+
+    // Watch the enriched items (like aggregatedIngredientsProvider pattern)
+    final enrichedItemsAsync =
+        ref.watch(_enrichedClippingItemsProvider(widget.items));
 
     return listsAsync.when(
       loading: () => const SliverFillRemaining(
@@ -452,32 +473,18 @@ class _ClippingShoppingListContentState
         child: Center(child: Text('Error: $error')),
       ),
       data: (lists) {
-        return FutureBuilder<List<_EnrichedShoppingItem>>(
-          future: _enrichedItemsFuture,
-          builder: (context, snapshot) {
-            if (snapshot.connectionState == ConnectionState.waiting) {
-              return const SliverFillRemaining(
-                child: Center(child: CupertinoActivityIndicator()),
-              );
-            }
-
-            if (snapshot.hasError) {
-              return SliverFillRemaining(
-                child: Center(child: Text('Error: ${snapshot.error}')),
-              );
-            }
-
-            final enrichedItems = snapshot.data ?? [];
-
+        return enrichedItemsAsync.when(
+          loading: () => const SliverFillRemaining(
+            child: Center(child: CupertinoActivityIndicator()),
+          ),
+          error: (error, stack) => SliverFillRemaining(
+            child: Center(child: Text('Error: $error')),
+          ),
+          data: (enrichedItems) {
             // Initialize state on first build
             if (!controller.initialized) {
               _initializeState(enrichedItems, currentListId);
               controller.initialized = true;
-
-              // Schedule notification after frame completes to update button state
-              WidgetsBinding.instance.addPostFrameCallback((_) {
-                if (mounted) controller.triggerRebuild();
-              });
             }
 
             // Separate items into addable vs already in list
@@ -493,17 +500,17 @@ class _ClippingShoppingListContentState
             }
 
             // Sort addable by stock status
-            addableItems.sort((a, b) =>
-                _getSortPriority(a).compareTo(_getSortPriority(b)));
+            addableItems.sort(
+                (a, b) => _getSortPriority(a).compareTo(_getSortPriority(b)));
 
             // Update controller's addable items for button state
             controller.addableItems = addableItems;
 
-            // Build widget list
-            final List<Widget> widgets = [];
+            // Build list of widgets for SliverList
+            final List<Widget> sliverChildren = [];
 
             // Title row with Manage Lists button
-            widgets.add(
+            sliverChildren.add(
               Padding(
                 padding: EdgeInsets.fromLTRB(
                     AppSpacing.lg, 0, AppSpacing.lg, AppSpacing.md),
@@ -522,7 +529,8 @@ class _ClippingShoppingListContentState
                       onPressed: () {
                         widget.pageIndexNotifier.value = 1;
                       },
-                      trailingIcon: const Icon(CupertinoIcons.chevron_right, size: 14),
+                      trailingIcon:
+                          const Icon(CupertinoIcons.chevron_right, size: 14),
                       compactTrailingIcon: true,
                       theme: AppButtonTheme.secondary,
                       style: AppButtonStyle.outline,
@@ -534,11 +542,11 @@ class _ClippingShoppingListContentState
               ),
             );
 
-            widgets.add(SizedBox(height: AppSpacing.sm));
+            sliverChildren.add(SizedBox(height: AppSpacing.sm));
 
             // Empty state
             if (addableItems.isEmpty && alreadyInListItems.isEmpty) {
-              widgets.add(
+              sliverChildren.add(
                 Padding(
                   padding: EdgeInsets.all(AppSpacing.xl),
                   child: Center(
@@ -572,56 +580,52 @@ class _ClippingShoppingListContentState
               );
             }
 
-            // Addable items list
-            if (addableItems.isNotEmpty) {
-              for (int index = 0; index < addableItems.length; index++) {
-                final item = addableItems[index];
-                final isFirst = index == 0;
-                final isLast = index == addableItems.length - 1 &&
-                    alreadyInListItems.isEmpty;
+            // Addable items
+            for (int i = 0; i < addableItems.length; i++) {
+              final item = addableItems[i];
+              final isFirst = i == 0;
+              final isLast =
+                  i == addableItems.length - 1 && alreadyInListItems.isEmpty;
 
-                widgets.add(
-                  Padding(
-                    padding: EdgeInsets.symmetric(horizontal: AppSpacing.lg),
-                    child: _buildItemRow(
-                      context,
-                      item,
-                      lists,
-                      currentListId,
-                      isFirst: isFirst,
-                      isLast: isLast,
-                    ),
+              sliverChildren.add(
+                Padding(
+                  padding: EdgeInsets.symmetric(horizontal: AppSpacing.lg),
+                  child: _buildItemRow(
+                    context,
+                    item,
+                    lists,
+                    currentListId,
+                    isFirst: isFirst,
+                    isLast: isLast,
                   ),
-                );
-              }
+                ),
+              );
             }
 
-            // Already in list section
-            if (alreadyInListItems.isNotEmpty) {
-              for (int index = 0; index < alreadyInListItems.length; index++) {
-                final item = alreadyInListItems[index];
-                final isFirst = index == 0 && addableItems.isEmpty;
-                final isLast = index == alreadyInListItems.length - 1;
+            // Already in list items
+            for (int i = 0; i < alreadyInListItems.length; i++) {
+              final item = alreadyInListItems[i];
+              final isFirst = i == 0 && addableItems.isEmpty;
+              final isLast = i == alreadyInListItems.length - 1;
 
-                widgets.add(
-                  Padding(
-                    padding: EdgeInsets.symmetric(horizontal: AppSpacing.lg),
-                    child: _buildAlreadyInListRow(
-                      context,
-                      item,
-                      isFirst: isFirst,
-                      isLast: isLast,
-                    ),
+              sliverChildren.add(
+                Padding(
+                  padding: EdgeInsets.symmetric(horizontal: AppSpacing.lg),
+                  child: _buildAlreadyInListRow(
+                    context,
+                    item,
+                    isFirst: isFirst,
+                    isLast: isLast,
                   ),
-                );
-              }
+                ),
+              );
             }
 
             // Bottom padding for sticky action bar
-            widgets.add(const SizedBox(height: 130));
+            sliverChildren.add(const SizedBox(height: 130));
 
             return SliverList(
-              delegate: SliverChildListDelegate(widgets),
+              delegate: SliverChildListDelegate(sliverChildren),
             );
           },
         );
