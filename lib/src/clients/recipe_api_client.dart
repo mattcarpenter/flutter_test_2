@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../app_config.dart';
 import '../services/api_signer.dart';
 
@@ -22,6 +23,7 @@ class RecipeApiClient {
   ///
   /// [path] - Full path starting with '/' (e.g., '/v1/ingredients/analyze')
   /// [body] - Request body as Map (will be JSON encoded)
+  /// [requiresAuth] - If true, includes Authorization header with Supabase JWT
   ///
   /// Returns the raw [http.Response] for the caller to handle parsing and errors.
   ///
@@ -29,7 +31,11 @@ class RecipeApiClient {
   /// - X-Api-Key: Public API key identifier
   /// - X-Timestamp: Unix timestamp in seconds
   /// - X-Signature: HMAC signature of canonical request string
-  Future<http.Response> post(String path, Map<String, dynamic> body) async {
+  Future<http.Response> post(
+    String path,
+    Map<String, dynamic> body, {
+    bool requiresAuth = false,
+  }) async {
     // Create body string ONCE - used for both signing and sending
     // This ensures the exact bytes signed match the bytes sent
     final bodyString = json.encode(body);
@@ -37,14 +43,31 @@ class RecipeApiClient {
     // Sign the request
     final signatureHeaders = ApiSigner.sign('POST', path, bodyString);
 
+    // Build headers
+    final headers = <String, String>{
+      'Content-Type': 'application/json',
+      ...signatureHeaders,
+    };
+
+    // Add auth header if required
+    if (requiresAuth) {
+      final token = _getAuthToken();
+      if (token != null) {
+        headers['Authorization'] = 'Bearer $token';
+      }
+    }
+
     return await http.post(
       Uri.parse('$baseUrl$path'),
-      headers: {
-        'Content-Type': 'application/json',
-        ...signatureHeaders,
-      },
+      headers: headers,
       body: bodyString,
     );
+  }
+
+  /// Gets the current Supabase session token.
+  String? _getAuthToken() {
+    final session = Supabase.instance.client.auth.currentSession;
+    return session?.accessToken;
   }
 }
 

@@ -1,0 +1,99 @@
+import 'package:shared_preferences/shared_preferences.dart';
+
+/// Tracks daily preview usage for NON-ENTITLED USERS ONLY.
+///
+/// This is a client-side optimization to skip the loading modal and go straight
+/// to the paywall when a non-entitled user has used their daily preview quota.
+///
+/// IMPORTANT: This service is NEVER consulted for Plus users. The entitlement
+/// check (effectiveHasPlusProvider) happens FIRST, and entitled users bypass
+/// this tracking entirely - they always get full extraction.
+///
+/// The usage counter persists across app launches and resets at midnight.
+/// Old entries are cleaned up after 7 days.
+class PreviewUsageService {
+  static const _recipeKeyPrefix = 'recipe_preview_usage_';
+  static const _shoppingListKeyPrefix = 'shopping_list_preview_usage_';
+  static const int dailyLimit = 5;
+
+  final SharedPreferences _prefs;
+
+  PreviewUsageService(this._prefs);
+
+  /// Returns the current date as YYYY-MM-DD string.
+  String _today() => DateTime.now().toIso8601String().substring(0, 10);
+
+  // ============================================================================
+  // Recipe Preview Usage
+  // ============================================================================
+
+  /// Gets the number of recipe previews used today.
+  int getRecipeUsageToday() {
+    final key = '$_recipeKeyPrefix${_today()}';
+    return _prefs.getInt(key) ?? 0;
+  }
+
+  /// Returns true if user has remaining recipe previews today.
+  bool hasRecipePreviewsRemaining() {
+    return getRecipeUsageToday() < dailyLimit;
+  }
+
+  /// Increments the recipe usage count for today.
+  Future<void> incrementRecipeUsage() async {
+    final key = '$_recipeKeyPrefix${_today()}';
+    final current = _prefs.getInt(key) ?? 0;
+    await _prefs.setInt(key, current + 1);
+
+    // Clean up old entries (keep only last 7 days)
+    await _cleanupOldEntries(_recipeKeyPrefix);
+  }
+
+  // ============================================================================
+  // Shopping List Preview Usage
+  // ============================================================================
+
+  /// Gets the number of shopping list previews used today.
+  int getShoppingListUsageToday() {
+    final key = '$_shoppingListKeyPrefix${_today()}';
+    return _prefs.getInt(key) ?? 0;
+  }
+
+  /// Returns true if user has remaining shopping list previews today.
+  bool hasShoppingListPreviewsRemaining() {
+    return getShoppingListUsageToday() < dailyLimit;
+  }
+
+  /// Increments the shopping list usage count for today.
+  Future<void> incrementShoppingListUsage() async {
+    final key = '$_shoppingListKeyPrefix${_today()}';
+    final current = _prefs.getInt(key) ?? 0;
+    await _prefs.setInt(key, current + 1);
+
+    // Clean up old entries (keep only last 7 days)
+    await _cleanupOldEntries(_shoppingListKeyPrefix);
+  }
+
+  // ============================================================================
+  // Cleanup
+  // ============================================================================
+
+  /// Removes entries older than 7 days for a given prefix.
+  Future<void> _cleanupOldEntries(String prefix) async {
+    final keys = _prefs.getKeys().where((k) => k.startsWith(prefix)).toList();
+
+    final sevenDaysAgo = DateTime.now().subtract(const Duration(days: 7));
+
+    for (final key in keys) {
+      final dateStr = key.replaceFirst(prefix, '');
+      try {
+        final date = DateTime.parse(dateStr);
+        if (date.isBefore(sevenDaysAgo)) {
+          await _prefs.remove(key);
+        }
+      } catch (_) {
+        // Invalid date format, remove the key
+        await _prefs.remove(key);
+      }
+    }
+  }
+}
