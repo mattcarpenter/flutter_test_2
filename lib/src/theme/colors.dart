@@ -266,6 +266,14 @@ class AppColors {
       ? AppColorSwatches.neutral[500]!
       : AppColorSwatches.neutral[400]!;
 
+  Color get textPop => brightness == Brightness.light
+      ? AppColorSwatches.primary[600]!
+      : AppColorSwatches.primary[50]!;
+
+  Color get textPopMuted => brightness == Brightness.light
+      ? AppColorSwatches.primary[900]!
+      : AppColorSwatches.primary[50]!;
+
   Color get textDisabled => brightness == Brightness.light
       ? AppColorSwatches.neutral[400]!
       : AppColorSwatches.neutral[600]!;

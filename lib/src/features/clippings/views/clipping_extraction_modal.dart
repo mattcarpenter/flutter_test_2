@@ -19,7 +19,6 @@ import '../../../theme/colors.dart';
 import '../../../theme/spacing.dart';
 import '../../../theme/typography.dart';
 import '../../../widgets/app_circle_button.dart';
-import '../../../widgets/wolt/text/modal_sheet_title.dart';
 import '../../recipes/views/add_recipe_modal.dart';
 import '../models/extracted_recipe.dart';
 import '../models/extracted_shopping_item.dart';
@@ -209,9 +208,8 @@ void _showRecipePreviewResult(
         navBarHeight: 55,
         backgroundColor: AppColors.of(modalContext).background,
         surfaceTintColor: Colors.transparent,
-        hasTopBarLayer: true,
+        hasTopBarLayer: false,
         isTopBarLayerAlwaysVisible: false,
-        topBarTitle: const ModalSheetTitle('Recipe Found'),
         trailingNavBarWidget: Padding(
           padding: EdgeInsets.only(right: AppSpacing.lg),
           child: AppCircleButton(
@@ -423,9 +421,8 @@ void _showShoppingListPreviewResult(
         navBarHeight: 55,
         backgroundColor: AppColors.of(modalContext).background,
         surfaceTintColor: Colors.transparent,
-        hasTopBarLayer: true,
+        hasTopBarLayer: false,
         isTopBarLayerAlwaysVisible: false,
-        topBarTitle: const ModalSheetTitle('Shopping Items Found'),
         trailingNavBarWidget: Padding(
           padding: EdgeInsets.only(right: AppSpacing.lg),
           child: AppCircleButton(
