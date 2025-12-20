@@ -54,6 +54,7 @@ import 'global_status_bar.dart';
 import 'package:sheet/route.dart';
 import '../widgets/identity_exists_error_listener.dart';
 import '../widgets/restore_prompt_listener.dart';
+import '../widgets/share_session_listener.dart';
 
 /// Global navigator key for accessing Navigator from anywhere in the app.
 /// Used by GlobalStatusBarWrapper to show modals with proper Navigator context.
@@ -128,9 +129,11 @@ class _AdaptiveApp2State extends ConsumerState<AdaptiveApp2> {
             ? AppTheme.cupertinoDarkTheme
             : AppTheme.cupertinoLightTheme,
         builder: (context, child) {
-          return IdentityExistsErrorListener(
-            child: RestorePromptListener(
-              child: GlobalStatusBarWrapper(child: child ?? const SizedBox.shrink()),
+          return ShareSessionListener(
+            child: IdentityExistsErrorListener(
+              child: RestorePromptListener(
+                child: GlobalStatusBarWrapper(child: child ?? const SizedBox.shrink()),
+              ),
             ),
           );
         },
@@ -154,9 +157,11 @@ class _AdaptiveApp2State extends ConsumerState<AdaptiveApp2> {
         theme: AppTheme.materialLightTheme,
         darkTheme: AppTheme.materialDarkTheme,
         builder: (context, child) {
-          return IdentityExistsErrorListener(
-            child: RestorePromptListener(
-              child: GlobalStatusBarWrapper(child: child ?? const SizedBox.shrink()),
+          return ShareSessionListener(
+            child: IdentityExistsErrorListener(
+              child: RestorePromptListener(
+                child: GlobalStatusBarWrapper(child: child ?? const SizedBox.shrink()),
+              ),
             ),
           );
         },
