@@ -15,6 +15,7 @@ import '../../../widgets/adaptive_pull_down/adaptive_pull_down.dart';
 import '../../../widgets/app_circle_button.dart';
 import '../models/clippings_filter_sort.dart';
 import '../widgets/clipping_grid.dart';
+import 'clipping_help_modal.dart';
 
 class ClippingsTab extends ConsumerWidget {
   final VoidCallback? onMenuPressed;
@@ -116,17 +117,28 @@ class ClippingsTab extends ConsumerWidget {
           },
         ),
       ],
-      trailing: AdaptivePullDownButton(
-        items: [
-          AdaptiveMenuItem(
-            title: 'New Clipping',
-            icon: const Icon(CupertinoIcons.doc_text_fill),
-            onTap: () => _createNewClipping(context, ref),
+      trailing: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          AppCircleButton(
+            icon: AppCircleButtonIcon.info,
+            variant: AppCircleButtonVariant.neutral,
+            onPressed: () => showClippingHelpModal(context),
+          ),
+          SizedBox(width: AppSpacing.sm),
+          AdaptivePullDownButton(
+            items: [
+              AdaptiveMenuItem(
+                title: 'New Clipping',
+                icon: const Icon(CupertinoIcons.doc_text_fill),
+                onTap: () => _createNewClipping(context, ref),
+              ),
+            ],
+            child: const AppCircleButton(
+              icon: AppCircleButtonIcon.plus,
+            ),
           ),
         ],
-        child: const AppCircleButton(
-          icon: AppCircleButtonIcon.plus,
-        ),
       ),
     );
   }

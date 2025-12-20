@@ -8,6 +8,7 @@ enum AppCircleButtonIcon {
   close,
   back,
   list,
+  info,
 }
 
 enum AppCircleButtonVariant {
@@ -36,7 +37,7 @@ class AppCircleButton extends StatelessWidget {
     this.colorTransitionProgress,
   }) : super(key: key);
 
-  IconData get _iconData {
+  IconData? get _iconData {
     switch (icon) {
       case AppCircleButtonIcon.plus:
         return Icons.add;
@@ -50,6 +51,8 @@ class AppCircleButton extends StatelessWidget {
         return Icons.arrow_back_rounded;
       case AppCircleButtonIcon.list:
         return Icons.format_list_bulleted;
+      case AppCircleButtonIcon.info:
+        return null; // Special case - rendered as text "i"
     }
   }
 
@@ -125,17 +128,28 @@ class AppCircleButton extends StatelessWidget {
           color: backgroundColor,
         ),
         child: Center(
-          child: Text(
-            String.fromCharCode(_iconData.codePoint),
-            style: TextStyle(
-              inherit: false,
-              fontSize: size * 0.6, // Icon is 60% of button size for better visibility
-              fontWeight: FontWeight.w900, // Maximum boldness
-              fontFamily: _iconData.fontFamily,
-              package: _iconData.fontPackage,
-              color: iconColor,
-            ),
-          ),
+          child: _iconData != null
+              ? Text(
+                  String.fromCharCode(_iconData!.codePoint),
+                  style: TextStyle(
+                    inherit: false,
+                    fontSize: size * 0.6, // Icon is 60% of button size for better visibility
+                    fontWeight: FontWeight.w900, // Maximum boldness
+                    fontFamily: _iconData!.fontFamily,
+                    package: _iconData!.fontPackage,
+                    color: iconColor,
+                  ),
+                )
+              : Text(
+                  'i',
+                  style: TextStyle(
+                    inherit: false,
+                    fontSize: size * 0.5,
+                    fontWeight: FontWeight.w700,
+                    fontStyle: FontStyle.italic,
+                    color: iconColor,
+                  ),
+                ),
         ),
       ),
     );

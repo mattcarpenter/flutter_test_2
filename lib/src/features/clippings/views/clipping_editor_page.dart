@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_quill/flutter_quill.dart' as quill;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:wolt_modal_sheet/wolt_modal_sheet.dart';
 import '../../../providers/clippings_provider.dart';
 import '../../../repositories/clippings_repository.dart';
 import '../../../services/logging/app_logger.dart';
@@ -16,6 +17,7 @@ import '../../../widgets/adaptive_pull_down/adaptive_pull_down.dart';
 import '../../../widgets/app_circle_button.dart';
 import '../widgets/link_modal.dart';
 import 'clipping_extraction_modal.dart';
+import 'clipping_help_modal.dart';
 
 class ClippingEditorPage extends ConsumerStatefulWidget {
   final String clippingId;
@@ -695,32 +697,45 @@ class _ClippingEditorPageState extends ConsumerState<ClippingEditorPage>
         ),
       );
     } else {
-      // Show overflow menu when no software keyboard
+      // Show help button and overflow menu when no software keyboard
       final hasContent = _hasContent();
-      return AdaptivePullDownButton(
-        items: [
-          AdaptiveMenuItem(
-            title: 'Convert to Recipe',
-            icon: const Icon(CupertinoIcons.sparkles),
-            onTap: hasContent ? _handleConvertToRecipe : null,
+      return Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          // Help button
+          AppCircleButton(
+            icon: AppCircleButtonIcon.info,
+            variant: AppCircleButtonVariant.neutral,
+            onPressed: () => showClippingHelpModal(context),
           ),
-          AdaptiveMenuItem(
-            title: 'To Shopping List',
-            icon: const Icon(CupertinoIcons.list_bullet),
-            onTap: hasContent ? _handleAddToShoppingList : null,
-          ),
-          AdaptiveMenuItem.divider(),
-          AdaptiveMenuItem(
-            title: 'Delete Clipping',
-            icon: const Icon(CupertinoIcons.trash),
-            onTap: _deleteClipping,
-            isDestructive: true,
+          SizedBox(width: AppSpacing.sm),
+          // Overflow menu
+          AdaptivePullDownButton(
+            items: [
+              AdaptiveMenuItem(
+                title: 'Convert to Recipe',
+                icon: const Icon(CupertinoIcons.sparkles),
+                onTap: hasContent ? _handleConvertToRecipe : null,
+              ),
+              AdaptiveMenuItem(
+                title: 'To Shopping List',
+                icon: const Icon(CupertinoIcons.list_bullet),
+                onTap: hasContent ? _handleAddToShoppingList : null,
+              ),
+              AdaptiveMenuItem.divider(),
+              AdaptiveMenuItem(
+                title: 'Delete Clipping',
+                icon: const Icon(CupertinoIcons.trash),
+                onTap: _deleteClipping,
+                isDestructive: true,
+              ),
+            ],
+            child: const AppCircleButton(
+              icon: AppCircleButtonIcon.ellipsis,
+              variant: AppCircleButtonVariant.neutral,
+            ),
           ),
         ],
-        child: const AppCircleButton(
-          icon: AppCircleButtonIcon.ellipsis,
-          variant: AppCircleButtonVariant.neutral,
-        ),
       );
     }
   }
