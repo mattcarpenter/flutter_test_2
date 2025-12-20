@@ -5,13 +5,15 @@ import 'package:flutter/material.dart';
 import 'package:flutter_quill/flutter_quill.dart' as quill;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:super_context_menu/super_context_menu.dart';
 import '../../../providers/clippings_provider.dart';
 import '../../../repositories/clippings_repository.dart';
 import '../../../services/logging/app_logger.dart';
 import '../../../theme/colors.dart';
 import '../../../theme/spacing.dart';
 import '../../../theme/typography.dart';
+import '../../../widgets/adaptive_pull_down/adaptive_menu_item.dart';
+import '../../../widgets/adaptive_pull_down/adaptive_pull_down.dart';
+import '../../../widgets/app_circle_button.dart';
 import '../widgets/link_modal.dart';
 import 'clipping_extraction_modal.dart';
 
@@ -352,7 +354,11 @@ class _ClippingEditorPageState extends ConsumerState<ClippingEditorPage>
 
     return CupertinoPageScaffold(
       navigationBar: CupertinoNavigationBar(
-        trailing: _buildTrailingButton(context, keyboardVisible),
+        // Wrap in ListenableBuilder to rebuild when content changes
+        trailing: ListenableBuilder(
+          listenable: _contentController,
+          builder: (context, _) => _buildTrailingButton(context, keyboardVisible),
+        ),
         backgroundColor: AppColors.of(context).background,
         border: null,
       ),
@@ -690,24 +696,30 @@ class _ClippingEditorPageState extends ConsumerState<ClippingEditorPage>
       );
     } else {
       // Show overflow menu when no software keyboard
-      return ContextMenuWidget(
-        menuProvider: (_) => Menu(
-          children: [
-            MenuAction(
-              title: 'Delete',
-              image: MenuImage.icon(CupertinoIcons.trash),
-              attributes: const MenuActionAttributes(destructive: true),
-              callback: _deleteClipping,
-            ),
-          ],
-        ),
-        child: CupertinoButton(
-          padding: EdgeInsets.zero,
-          onPressed: null,
-          child: Icon(
-            CupertinoIcons.ellipsis,
-            color: AppColors.of(context).textPrimary,
+      final hasContent = _hasContent();
+      return AdaptivePullDownButton(
+        items: [
+          AdaptiveMenuItem(
+            title: 'Convert to Recipe',
+            icon: const Icon(CupertinoIcons.sparkles),
+            onTap: hasContent ? _handleConvertToRecipe : null,
           ),
+          AdaptiveMenuItem(
+            title: 'To Shopping List',
+            icon: const Icon(CupertinoIcons.list_bullet),
+            onTap: hasContent ? _handleAddToShoppingList : null,
+          ),
+          AdaptiveMenuItem.divider(),
+          AdaptiveMenuItem(
+            title: 'Delete Clipping',
+            icon: const Icon(CupertinoIcons.trash),
+            onTap: _deleteClipping,
+            isDestructive: true,
+          ),
+        ],
+        child: const AppCircleButton(
+          icon: AppCircleButtonIcon.ellipsis,
+          variant: AppCircleButtonVariant.neutral,
         ),
       );
     }
