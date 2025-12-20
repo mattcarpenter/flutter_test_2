@@ -215,6 +215,7 @@ void _showRecipePreviewResult(
           child: AppCircleButton(
             icon: AppCircleButtonIcon.close,
             variant: AppCircleButtonVariant.neutral,
+            size: 32,
             onPressed: () => Navigator.of(modalContext, rootNavigator: true).pop(),
           ),
         ),
@@ -224,19 +225,10 @@ void _showRecipePreviewResult(
             Navigator.of(modalContext, rootNavigator: true).pop();
             if (!context.mounted) return;
 
-            final purchased = await ref
-                .read(subscriptionProvider.notifier)
-                .presentPaywall(context);
-
-            if (purchased && context.mounted) {
-              // User subscribed - do full extraction
-              await _showFullRecipeExtraction(
-                context,
-                ref,
-                title: originalTitle,
-                body: originalBody,
-              );
-            }
+            // Present paywall - don't retry extraction after purchase
+            // RevenueCat webhook takes a few seconds to update backend entitlement
+            // User can tap the convert button again from the clipping view
+            await ref.read(subscriptionProvider.notifier).presentPaywall(context);
           },
         ),
       ),
@@ -428,6 +420,7 @@ void _showShoppingListPreviewResult(
           child: AppCircleButton(
             icon: AppCircleButtonIcon.close,
             variant: AppCircleButtonVariant.neutral,
+            size: 32,
             onPressed: () =>
                 Navigator.of(modalContext, rootNavigator: true).pop(),
           ),
@@ -438,19 +431,10 @@ void _showShoppingListPreviewResult(
             Navigator.of(modalContext, rootNavigator: true).pop();
             if (!context.mounted) return;
 
-            final purchased = await ref
-                .read(subscriptionProvider.notifier)
-                .presentPaywall(context);
-
-            if (purchased && context.mounted) {
-              // User subscribed - do full extraction
-              await _showFullShoppingListExtraction(
-                context,
-                ref,
-                title: originalTitle,
-                body: originalBody,
-              );
-            }
+            // Present paywall - don't retry extraction after purchase
+            // RevenueCat webhook takes a few seconds to update backend entitlement
+            // User can tap the convert button again from the clipping view
+            await ref.read(subscriptionProvider.notifier).presentPaywall(context);
           },
         ),
       ),
