@@ -4,13 +4,18 @@ import 'dart:io';
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_image_compress/flutter_image_compress.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:http/http.dart' as http;
+import 'package:nanoid/nanoid.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:uuid/uuid.dart';
 import 'package:wolt_modal_sheet/wolt_modal_sheet.dart';
 
 import '../../../../database/database.dart';
 import '../../../../database/models/ingredients.dart';
+import '../../../../database/models/recipe_images.dart';
 import '../../../../database/models/steps.dart' as db;
 import '../../../providers/subscription_provider.dart';
 import '../../../services/content_extraction/content_extractor.dart';
@@ -529,11 +534,34 @@ class _ShareSessionLoadedState extends ConsumerState<_ShareSessionLoaded>
         return;
       }
 
+      // Download OG image if available (non-blocking - recipe still created on failure)
+      RecipeImage? coverImage;
+      final imageUrl = _extractedContent?.imageUrl;
+      AppLogger.info(
+        'OG image URL from extracted content: '
+        '${imageUrl != null ? "${imageUrl.substring(0, imageUrl.length.clamp(0, 100))}..." : "null"}',
+      );
+
+      if (imageUrl != null && imageUrl.isNotEmpty) {
+        coverImage = await _downloadAndSaveImage(imageUrl);
+        AppLogger.info(
+          'Cover image download result: '
+          '${coverImage != null ? "success (${coverImage.fileName})" : "failed"}',
+        );
+      } else {
+        AppLogger.info('No OG image URL available to download');
+      }
+
+      if (!mounted) return;
+
       // Success - close modal and open recipe editor
       widget.onClose();
 
       if (context.mounted) {
-        final recipeEntry = _convertToRecipeEntry(recipe);
+        final recipeEntry = _convertToRecipeEntry(recipe, coverImage: coverImage);
+        AppLogger.info(
+          'Recipe entry created with ${recipeEntry.images?.length ?? 0} images',
+        );
         showRecipeEditorModal(
           context,
           ref: ref,
@@ -666,8 +694,125 @@ class _ShareSessionLoadedState extends ConsumerState<_ShareSessionLoaded>
     );
   }
 
+  /// Compress an image file to the specified size
+  Future<File> _compressImage(File file, String fileName, {int size = 1280}) async {
+    final directory = await getTemporaryDirectory();
+    // Use 'compressed_' prefix to avoid source/target path conflict
+    final targetPath = '${directory.path}/compressed_$fileName';
+
+    final compressedFile = await FlutterImageCompress.compressAndGetFile(
+      file.absolute.path,
+      targetPath,
+      quality: 90,
+      minWidth: size,
+      minHeight: size,
+      format: CompressFormat.jpeg,
+    );
+
+    return compressedFile != null ? File(compressedFile.path) : file;
+  }
+
+  /// Download an image from URL, compress it, and save locally
+  /// Returns a RecipeImage ready to be added to upload queue, or null on failure
+  Future<RecipeImage?> _downloadAndSaveImage(String imageUrl) async {
+    try {
+      final uri = Uri.parse(imageUrl);
+      AppLogger.info('Downloading OG image from ${uri.host}');
+
+      // 1. Download image from URL with timeout
+      final response = await http.get(uri).timeout(
+        const Duration(seconds: 30),
+        onTimeout: () {
+          throw TimeoutException('Image download timed out');
+        },
+      );
+      if (response.statusCode != 200) {
+        AppLogger.warning(
+          'Failed to download OG image: HTTP ${response.statusCode}',
+        );
+        return null;
+      }
+
+      AppLogger.info(
+        'OG image download: HTTP ${response.statusCode}, '
+        '${response.bodyBytes.length} bytes',
+      );
+
+      // Validate we got image data
+      final contentType = response.headers['content-type'] ?? '';
+      AppLogger.info('OG image content-type: $contentType');
+      if (!contentType.startsWith('image/')) {
+        AppLogger.warning('OG image URL returned non-image content: $contentType');
+        return null;
+      }
+
+      // Validate response has content
+      if (response.bodyBytes.isEmpty) {
+        AppLogger.warning('OG image URL returned empty response');
+        return null;
+      }
+
+      // 2. Save to temp file
+      final tempDir = await getTemporaryDirectory();
+      final imageUuid = const Uuid().v4();
+      final tempFile = File('${tempDir.path}/$imageUuid.jpg');
+      await tempFile.writeAsBytes(response.bodyBytes);
+
+      AppLogger.info('OG image saved to temp: ${tempFile.path}');
+
+      // 3. Compress (full size + small thumbnail)
+      final fullFileName = '$imageUuid.jpg';
+      final smallFileName = '${imageUuid}_small.jpg';
+
+      final compressedFull = await _compressImage(tempFile, fullFileName);
+      final compressedSmall = await _compressImage(
+        tempFile,
+        smallFileName,
+        size: 512,
+      );
+      AppLogger.info('OG image compressed: full=${compressedFull.path}, small=${compressedSmall.path}');
+
+      // 4. Save to documents directory
+      final docsDir = await getApplicationDocumentsDirectory();
+      final fullPath = '${docsDir.path}/$fullFileName';
+      final smallPath = '${docsDir.path}/$smallFileName';
+      await compressedFull.copy(fullPath);
+      await compressedSmall.copy(smallPath);
+      AppLogger.info('OG image copied to docs: $fullPath');
+
+      // Verify files exist
+      final fullExists = await File(fullPath).exists();
+      final smallExists = await File(smallPath).exists();
+      AppLogger.info('OG image files exist: full=$fullExists, small=$smallExists');
+
+      // 5. Clean up temp files
+      try {
+        if (await tempFile.exists()) await tempFile.delete();
+        if (await compressedFull.exists()) await compressedFull.delete();
+        if (await compressedSmall.exists()) await compressedSmall.delete();
+      } catch (e) {
+        // Ignore cleanup errors
+      }
+
+      AppLogger.info('OG image saved locally: $fullFileName');
+
+      // 6. Return RecipeImage (no publicUrl - will be uploaded by queue)
+      return RecipeImage(
+        id: nanoid(10),
+        fileName: fullFileName,
+        isCover: true,
+      );
+    } catch (e, stack) {
+      AppLogger.warning('Failed to download OG image: $e', e, stack);
+      return null;
+    }
+  }
+
   /// Convert ExtractedRecipe to RecipeEntry for the editor
-  RecipeEntry _convertToRecipeEntry(ExtractedRecipe extracted) {
+  RecipeEntry _convertToRecipeEntry(
+    ExtractedRecipe extracted, {
+    RecipeImage? coverImage,
+  }) {
     final userId = Supabase.instance.client.auth.currentUser?.id ?? '';
     const uuid = Uuid();
 
@@ -702,6 +847,7 @@ class _ShareSessionLoadedState extends ConsumerState<_ShareSessionLoaded>
       source: extracted.source,
       ingredients: ingredients,
       steps: steps,
+      images: coverImage != null ? [coverImage] : null,
       folderIds: [],
       pinned: 0,
       pinnedAt: null,
