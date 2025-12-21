@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:connectivity_plus/connectivity_plus.dart';
@@ -7,11 +8,15 @@ import 'package:flutter/material.dart';
 import 'package:flutter_image_compress/flutter_image_compress.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:http/http.dart' as http;
+import 'package:intl/intl.dart';
 import 'package:nanoid/nanoid.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:uuid/uuid.dart';
 import 'package:wolt_modal_sheet/wolt_modal_sheet.dart';
+
+import '../../../providers/clippings_provider.dart';
+import '../../../providers/household_provider.dart';
 
 import '../../../../database/database.dart';
 import '../../../../database/models/ingredients.dart';
@@ -185,6 +190,28 @@ enum _ModalState {
   // Recipe extraction states
   extractingRecipe, // Calling backend AI to structure recipe
   showingRecipePreview, // Non-Plus users see preview with paywall
+  // Clipping states
+  savingClipping, // Saving clipping to database
+}
+
+/// Helper class for gathered clipping content
+class _ClippingContent {
+  final String? title;
+  final String? bodyText;
+  final String? sourceUrl;
+  final String? sourcePlatform;
+
+  const _ClippingContent({
+    this.title,
+    this.bodyText,
+    this.sourceUrl,
+    this.sourcePlatform,
+  });
+
+  bool get hasContent =>
+      (title != null && title!.isNotEmpty) ||
+      (bodyText != null && bodyText!.isNotEmpty) ||
+      (sourceUrl != null && sourceUrl!.isNotEmpty);
 }
 
 /// The action the user chose
@@ -353,11 +380,14 @@ class _ShareSessionLoadedState extends ConsumerState<_ShareSessionLoaded>
   Future<void> _onActionTap(_ModalAction action) async {
     setState(() {
       _chosenAction = action;
-      // For Import Recipe, show the final "Importing Recipe" spinner immediately
-      // For other actions, show the content extraction spinner
-      _modalState = action == _ModalAction.importRecipe
-          ? _ModalState.extractingRecipe
-          : _ModalState.extractingContent;
+      // Show appropriate spinner based on action
+      if (action == _ModalAction.importRecipe) {
+        _modalState = _ModalState.extractingRecipe;
+      } else if (action == _ModalAction.saveAsClipping) {
+        _modalState = _ModalState.savingClipping;
+      } else {
+        _modalState = _ModalState.extractingContent;
+      }
     });
 
     await _processContent();
@@ -398,14 +428,18 @@ class _ShareSessionLoadedState extends ConsumerState<_ShareSessionLoaded>
 
       // Step 2: Handle result based on chosen action
       // _extractedContent is set by the extraction future's .then() callback
-      if (_extractedContent != null && _extractedContent!.hasContent) {
+      if (_chosenAction == _ModalAction.saveAsClipping) {
+        // For clippings, save directly with whatever content we have
+        // (OG extraction is optional - we can save just the URL if that's all we got)
+        await _saveAsClipping();
+      } else if (_extractedContent != null && _extractedContent!.hasContent) {
         AppLogger.info('OG extraction successful');
 
         // For Import Recipe, proceed to API call (spinner already showing)
         if (_chosenAction == _ModalAction.importRecipe) {
           await _handleImportRecipe();
         } else {
-          // For clippings, show the preview state
+          // Other actions - show the preview state
           setState(() {
             _modalState = _ModalState.showingPreview;
           });
@@ -445,11 +479,9 @@ class _ShareSessionLoadedState extends ConsumerState<_ShareSessionLoaded>
   Future<void> _proceedWithAction() async {
     if (_chosenAction == _ModalAction.importRecipe) {
       await _handleImportRecipe();
+    } else if (_chosenAction == _ModalAction.saveAsClipping) {
+      await _saveAsClipping();
     } else {
-      // TODO: Implement clipping save
-      AppLogger.info(
-        'Proceeding with clipping save: ${_extractedContent?.title}',
-      );
       widget.onClose();
     }
   }
@@ -854,6 +886,208 @@ class _ShareSessionLoadedState extends ConsumerState<_ShareSessionLoaded>
     );
   }
 
+  /// Gather content from share session and OG extraction for clipping creation.
+  /// Concatenates title and description if different, then extracts a short title
+  /// (first line, max 50 chars) with the remainder in the body.
+  _ClippingContent? _gatherClippingContent() {
+    if (_session == null) return null;
+
+    String? sourceUrl;
+    String? sourcePlatform;
+
+    // 1. Get URL from share session items
+    for (final item in _session!.items) {
+      if (item.isUrl && item.url != null && item.url!.isNotEmpty) {
+        sourceUrl = item.url;
+        break;
+      }
+    }
+
+    // 2. Detect platform from URL
+    if (sourceUrl != null) {
+      final uri = Uri.tryParse(sourceUrl);
+      if (uri != null) {
+        final host = uri.host.toLowerCase();
+        if (host.contains('instagram')) {
+          sourcePlatform = 'Instagram';
+        } else if (host.contains('tiktok')) {
+          sourcePlatform = 'TikTok';
+        } else if (host.contains('youtube')) {
+          sourcePlatform = 'YouTube';
+        } else if (host.contains('facebook')) {
+          sourcePlatform = 'Facebook';
+        } else if (host.contains('twitter') || host.contains('x.com')) {
+          sourcePlatform = 'X';
+        }
+      }
+    }
+
+    // 3. Gather all text content
+    String fullText = '';
+
+    // Get OG title and description
+    final ogTitle = _extractedContent?.title?.trim();
+    final ogDescription = _extractedContent?.description?.trim();
+
+    if (ogTitle != null && ogTitle.isNotEmpty) {
+      fullText = ogTitle;
+    }
+
+    // Concat description if different from title
+    if (ogDescription != null &&
+        ogDescription.isNotEmpty &&
+        ogDescription.toLowerCase() != ogTitle?.toLowerCase() &&
+        ogDescription != sourceUrl) {
+      if (fullText.isNotEmpty) {
+        fullText = '$fullText\n\n$ogDescription';
+      } else {
+        fullText = ogDescription;
+      }
+    }
+
+    // Fallback to session metadata if no OG content
+    if (fullText.isEmpty) {
+      final attributed = _session!.attributedTitle?.trim();
+      if (attributed != null && attributed.isNotEmpty) {
+        fullText = attributed;
+      }
+    }
+
+    // Add text from session items if still empty
+    if (fullText.isEmpty) {
+      for (final item in _session!.items) {
+        if (item.isText && item.text != null && item.text!.isNotEmpty) {
+          final text = item.text!.trim();
+          if (text != sourceUrl) {
+            fullText = text;
+            break;
+          }
+        }
+      }
+    }
+
+    // Fallback to attributedContentText
+    if (fullText.isEmpty) {
+      final attributed = _session!.attributedContentText?.trim();
+      if (attributed != null && attributed.isNotEmpty && attributed != sourceUrl) {
+        fullText = attributed;
+      }
+    }
+
+    // 4. Split into title (first line, max 50 chars) and body
+    String? title;
+    String? bodyText;
+
+    if (fullText.isNotEmpty) {
+      // Find first line break
+      final firstLineBreak = fullText.indexOf('\n');
+      String firstLine;
+      String remainder;
+
+      if (firstLineBreak != -1) {
+        firstLine = fullText.substring(0, firstLineBreak).trim();
+        remainder = fullText.substring(firstLineBreak + 1).trim();
+      } else {
+        firstLine = fullText;
+        remainder = '';
+      }
+
+      // Limit title to 50 chars
+      const maxTitleLength = 50;
+      if (firstLine.length > maxTitleLength) {
+        title = firstLine.substring(0, maxTitleLength);
+        // Body starts with continuation of truncated title
+        final truncatedPart = firstLine.substring(maxTitleLength);
+        if (remainder.isNotEmpty) {
+          bodyText = '...$truncatedPart\n\n$remainder';
+        } else {
+          bodyText = '...$truncatedPart';
+        }
+      } else {
+        title = firstLine.isNotEmpty ? firstLine : null;
+        bodyText = remainder.isNotEmpty ? remainder : null;
+      }
+    }
+
+    return _ClippingContent(
+      title: title,
+      bodyText: bodyText,
+      sourceUrl: sourceUrl,
+      sourcePlatform: sourcePlatform,
+    );
+  }
+
+  /// Build Quill Delta JSON from clipping content
+  String _buildQuillDelta(_ClippingContent content) {
+    final ops = <Map<String, dynamic>>[];
+
+    // Body text (if any)
+    if (content.bodyText != null && content.bodyText!.isNotEmpty) {
+      ops.add({'insert': '${content.bodyText}\n\n'});
+    }
+
+    // Source URL as clickable link
+    if (content.sourceUrl != null && content.sourceUrl!.isNotEmpty) {
+      ops.add({
+        'insert': content.sourceUrl,
+        'attributes': {'link': content.sourceUrl},
+      });
+      ops.add({'insert': '\n\n'});
+    }
+
+    // Import metadata
+    final platform = content.sourcePlatform ?? 'shared content';
+    final date = DateFormat.yMMMd().format(DateTime.now());
+    ops.add({'insert': 'Imported from $platform on $date\n'});
+
+    return jsonEncode(ops);
+  }
+
+  /// Save content as a clipping
+  Future<void> _saveAsClipping() async {
+    final content = _gatherClippingContent();
+
+    // Check if we have any content to save
+    if (content == null || !content.hasContent) {
+      AppLogger.info('No clippable content found, closing modal');
+      widget.onClose();
+      return;
+    }
+
+    try {
+      final userId = Supabase.instance.client.auth.currentUser?.id;
+      final householdState = ref.read(householdNotifierProvider);
+      final householdId = householdState.currentHousehold?.id;
+
+      final quillContent = _buildQuillDelta(content);
+
+      await ref.read(clippingsProvider.notifier).addClipping(
+        userId: userId,
+        householdId: householdId,
+        title: content.title,
+        content: quillContent,
+      );
+
+      AppLogger.info(
+        'Clipping saved: title=${content.title}, '
+        'hasBody=${content.bodyText != null}, '
+        'hasUrl=${content.sourceUrl != null}',
+      );
+
+      if (mounted) {
+        widget.onClose();
+      }
+    } catch (e, stack) {
+      AppLogger.error('Failed to save clipping', e, stack);
+      if (mounted) {
+        setState(() {
+          _extractionError = 'Failed to save clipping. Please try again.';
+          _modalState = _ModalState.extractionError;
+        });
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     // Show buttons immediately - don't wait for session to load
@@ -873,6 +1107,8 @@ class _ShareSessionLoadedState extends ConsumerState<_ShareSessionLoaded>
         // This state is no longer used - we show a bottom sheet instead
         // Keep case to satisfy exhaustiveness check
         return const SizedBox.shrink();
+      case _ModalState.savingClipping:
+        return _buildSavingClippingState(context);
     }
   }
 
@@ -1146,6 +1382,43 @@ class _ShareSessionLoadedState extends ConsumerState<_ShareSessionLoaded>
     );
   }
 
+  Widget _buildSavingClippingState(BuildContext context) {
+    return Padding(
+      padding: EdgeInsets.all(AppSpacing.xl),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                'Saving Clipping',
+                style: AppTypography.h4.copyWith(
+                  color: AppColors.of(context).textPrimary,
+                ),
+              ),
+              AppCircleButton(
+                icon: AppCircleButtonIcon.close,
+                variant: AppCircleButtonVariant.neutral,
+                size: 32,
+                onPressed: widget.onClose,
+              ),
+            ],
+          ),
+          SizedBox(height: AppSpacing.xxl),
+          const CupertinoActivityIndicator(radius: 16),
+          SizedBox(height: AppSpacing.lg),
+          Text(
+            'Saving to clippings...',
+            style: AppTypography.body.copyWith(
+              color: AppColors.of(context).textSecondary,
+            ),
+          ),
+          SizedBox(height: AppSpacing.lg),
+        ],
+      ),
+    );
+  }
 }
 
 /// Animated loading text that cycles through messages with sequential fade animation
