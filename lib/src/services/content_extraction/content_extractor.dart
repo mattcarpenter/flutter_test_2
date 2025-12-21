@@ -1,5 +1,6 @@
 import '../../features/share/models/og_extracted_content.dart';
 import '../logging/app_logger.dart';
+import 'extractors/instagram_extractor.dart';
 import 'extractors/site_extractor.dart';
 import 'extractors/tiktok_extractor.dart';
 import 'extractors/webview_og_extractor.dart';
@@ -7,11 +8,12 @@ import 'extractors/webview_og_extractor.dart';
 /// Main service for extracting content from shared URLs.
 ///
 /// Orchestrates multiple site-specific extractors, dispatching to the
-/// appropriate one based on the URL's domain.
+/// appropriate one based on the URL's domain. If an extractor returns null,
+/// the next matching extractor is tried (fallback behavior).
 ///
 /// Currently supports:
 /// - TikTok (via HTTP fetch + HTML parsing)
-/// - Instagram (via WebView + OG meta tags)
+/// - Instagram (via HTTP fetch, with WebView fallback)
 ///
 /// Usage:
 /// ```dart
@@ -20,10 +22,12 @@ import 'extractors/webview_og_extractor.dart';
 /// ```
 class ContentExtractor {
   /// Ordered list of extractors to try.
-  /// More specific extractors should come first.
+  /// More specific/faster extractors should come first.
+  /// If an extractor returns null, the next matching one is tried.
   final List<SiteExtractor> _extractors = [
     TikTokExtractor(),
-    WebViewOGExtractor(),
+    InstagramExtractor(), // Try HTTP first
+    WebViewOGExtractor(), // Fallback for Instagram if HTTP fails
   ];
 
   /// Check if a URI is from a supported domain.
@@ -33,19 +37,30 @@ class ContentExtractor {
 
   /// Extract content from a URL.
   ///
-  /// Returns [OGExtractedContent] on success, or null if no extractor
-  /// can handle the URL or extraction fails.
+  /// Tries each matching extractor in order. If an extractor returns null
+  /// (extraction failed), the next matching extractor is tried.
+  ///
+  /// Returns [OGExtractedContent] on success, or null if all extractors fail.
   Future<OGExtractedContent?> extract(Uri uri) async {
     for (final extractor in _extractors) {
       if (extractor.canHandle(uri)) {
         AppLogger.debug(
-          'ContentExtractor: Using ${extractor.runtimeType} for $uri',
+          'ContentExtractor: Trying ${extractor.runtimeType} for $uri',
         );
-        return extractor.extract(uri);
+        final result = await extractor.extract(uri);
+
+        if (result != null && result.hasContent) {
+          return result;
+        }
+
+        // Extractor returned null or empty content, try next one
+        AppLogger.debug(
+          'ContentExtractor: ${extractor.runtimeType} returned no content, trying next',
+        );
       }
     }
 
-    AppLogger.debug('ContentExtractor: No extractor found for $uri');
+    AppLogger.debug('ContentExtractor: All extractors failed for $uri');
     return null;
   }
 
