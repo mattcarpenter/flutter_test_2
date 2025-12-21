@@ -76,6 +76,7 @@ dependencies:
   super_cupertino_navigation_bar: ^2.1.2
   disclosure: ^2.2.0
   freezed_annotation: ^3.1.0
+  html: ^0.15.5
   http: ^1.1.0
   google_sign_in: ^7.1.1
   sign_in_with_apple: ^7.0.1

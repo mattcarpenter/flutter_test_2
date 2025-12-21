@@ -2,8 +2,8 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:wolt_modal_sheet/wolt_modal_sheet.dart';
+import '../../../services/content_extraction/content_extractor.dart';
 import '../../../services/logging/app_logger.dart';
-import '../../../services/og_content_extractor.dart';
 import '../../../services/share_session_service.dart';
 import '../../../theme/colors.dart';
 import '../../../theme/spacing.dart';
@@ -195,7 +195,10 @@ class _ShareSessionLoadedState extends State<_ShareSessionLoaded> {
   String? _extractionError;
 
   // Extractor instance
-  final _extractor = OGContentExtractor();
+  final _extractor = ContentExtractor();
+
+  // Preemptive extraction future - started when session loads if Instagram URL found
+  Future<OGExtractedContent?>? _extractionFuture;
 
   @override
   void initState() {
@@ -214,6 +217,9 @@ class _ShareSessionLoadedState extends State<_ShareSessionLoaded> {
           _session = session;
           _isLoadingSession = false;
         });
+
+        // Start preemptive extraction if we have an extractable URL
+        _startPreemptiveExtraction();
       }
     } catch (e, stack) {
       AppLogger.error('Failed to load share session', e, stack);
@@ -222,6 +228,15 @@ class _ShareSessionLoadedState extends State<_ShareSessionLoaded> {
           _isLoadingSession = false;
         });
       }
+    }
+  }
+
+  /// Start OG extraction in the background (preemptive)
+  void _startPreemptiveExtraction() {
+    final extractableUrl = _findExtractableUrl();
+    if (extractableUrl != null) {
+      AppLogger.info('Starting preemptive OG extraction for: $extractableUrl');
+      _extractionFuture = _extractor.extract(extractableUrl);
     }
   }
 
@@ -266,20 +281,21 @@ class _ShareSessionLoadedState extends State<_ShareSessionLoaded> {
 
   /// Returns true if clipping option should be shown.
   /// Hidden when only images or videos (files) are shared.
+  /// Optimistically shows the option while session is loading.
   bool get _showClippingOption {
-    if (_session == null) return false;
+    if (_session == null) return true; // Optimistic: show while loading
     // Show clipping option if there's at least one item that's not an image/movie file
     return _session!.items.any((item) => !item.isImage && !item.isMovie);
   }
 
-  /// Find a URL in the session that we can extract OG content from
+  /// Find a URL in the session that we can extract content from
   Uri? _findExtractableUrl() {
     if (_session == null) return null;
 
     for (final item in _session!.items) {
       if (item.isUrl && item.url != null) {
         final uri = Uri.tryParse(item.url!);
-        if (uri != null && OGContentExtractor.isSupported(uri)) {
+        if (uri != null && _extractor.isSupported(uri)) {
           return uri;
         }
       }
@@ -291,48 +307,68 @@ class _ShareSessionLoadedState extends State<_ShareSessionLoaded> {
   Future<void> _onActionTap(_ModalAction action) async {
     setState(() {
       _chosenAction = action;
+      // Always show spinner first - keeps UX consistent
+      _modalState = _ModalState.extractingContent;
     });
 
-    final extractableUrl = _findExtractableUrl();
-
-    if (extractableUrl != null) {
-      // Start extraction
-      await _startExtraction(extractableUrl);
-    } else {
-      // No extractable URL, proceed directly
-      // For now, just show a message (future: proceed to next step)
-      _proceedWithAction();
-    }
+    await _processContent();
   }
 
-  /// Start OG content extraction
-  Future<void> _startExtraction(Uri uri) async {
-    setState(() {
-      _modalState = _ModalState.extractingContent;
-      _extractedContent = null;
-      _extractionError = null;
-    });
-
+  /// Process content after user taps an action button.
+  /// Awaits preemptive extraction (instant if already done) and handles result.
+  /// This method is designed to be extended with additional async steps (e.g., OpenAI).
+  Future<void> _processContent() async {
     try {
-      final content = await _extractor.extract(uri);
+      // Step 0: Wait for session to load if user tapped before it was ready
+      if (_isLoadingSession) {
+        // Poll until session is loaded (should be very fast - just a file read)
+        while (_isLoadingSession && mounted) {
+          await Future.delayed(const Duration(milliseconds: 50));
+        }
+        if (!mounted) return;
+      }
+
+      // Check if session failed to load
+      if (_session == null) {
+        setState(() {
+          _extractionError = 'Failed to load shared content.';
+          _modalState = _ModalState.extractionError;
+        });
+        return;
+      }
+
+      // Step 1: Await OG extraction if we started one
+      // If extraction completed before button tap, this returns immediately
+      OGExtractedContent? content;
+      if (_extractionFuture != null) {
+        content = await _extractionFuture;
+      }
 
       if (!mounted) return;
 
+      // Step 2: (Future) Additional processing like OpenAI structuring would go here
+      // e.g., final recipe = await _structureWithAI(content);
+
+      // Step 3: Handle result
       if (content != null && content.hasContent) {
         AppLogger.info('OG extraction successful: ${content.title}');
         setState(() {
           _extractedContent = content;
           _modalState = _ModalState.showingPreview;
         });
-      } else {
+      } else if (_extractionFuture != null) {
+        // Had an extractable URL but extraction failed/returned empty
         AppLogger.warning('OG extraction returned no content');
         setState(() {
           _extractionError = 'No content could be extracted from this link.';
           _modalState = _ModalState.extractionError;
         });
+      } else {
+        // No extractable URL, proceed directly
+        _proceedWithAction();
       }
     } catch (e, stack) {
-      AppLogger.error('OG extraction failed', e, stack);
+      AppLogger.error('Content processing failed', e, stack);
       if (!mounted) return;
       setState(() {
         _extractionError = 'Failed to extract content. Please try again.';
@@ -362,17 +398,8 @@ class _ShareSessionLoadedState extends State<_ShareSessionLoaded> {
 
   @override
   Widget build(BuildContext context) {
-    if (_isLoadingSession) {
-      return _LoadingState(onClose: widget.onClose);
-    }
-
-    if (_session == null) {
-      return _ErrorState(
-        error: 'Session not found',
-        onClose: widget.onClose,
-      );
-    }
-
+    // Show buttons immediately - don't wait for session to load
+    // If session fails to load after user taps, we'll show error then
     switch (_modalState) {
       case _ModalState.choosingAction:
         return _buildChoosingActionState(context);
@@ -441,7 +468,7 @@ class _ShareSessionLoadedState extends State<_ShareSessionLoaded> {
   Widget _buildExtractingState(BuildContext context) {
     final extractableUrl = _findExtractableUrl();
     final domainName = extractableUrl != null
-        ? OGContentExtractor.getDomainDisplayName(extractableUrl) ?? 'website'
+        ? _extractor.getDisplayName(extractableUrl) ?? 'website'
         : 'website';
 
     return Padding(
