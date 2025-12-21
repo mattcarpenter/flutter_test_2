@@ -3,11 +3,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:wolt_modal_sheet/wolt_modal_sheet.dart';
 import '../../../services/logging/app_logger.dart';
+import '../../../services/og_content_extractor.dart';
 import '../../../services/share_session_service.dart';
 import '../../../theme/colors.dart';
 import '../../../theme/spacing.dart';
 import '../../../theme/typography.dart';
 import '../../../widgets/app_circle_button.dart';
+import '../models/og_extracted_content.dart';
 
 /// Shows the share session modal for a given session ID
 Future<void> showShareSessionModal(
@@ -152,6 +154,20 @@ class _ErrorState extends StatelessWidget {
   }
 }
 
+/// Modal state machine states
+enum _ModalState {
+  choosingAction,
+  extractingContent,
+  showingPreview,
+  extractionError,
+}
+
+/// The action the user chose
+enum _ModalAction {
+  importRecipe,
+  saveAsClipping,
+}
+
 /// Main content when session is loaded
 class _ShareSessionLoaded extends StatefulWidget {
   final String sessionId;
@@ -170,7 +186,16 @@ class _ShareSessionLoaded extends StatefulWidget {
 
 class _ShareSessionLoadedState extends State<_ShareSessionLoaded> {
   ShareSession? _session;
-  bool _isLoading = true;
+  bool _isLoadingSession = true;
+
+  // State machine
+  _ModalState _modalState = _ModalState.choosingAction;
+  _ModalAction? _chosenAction;
+  OGExtractedContent? _extractedContent;
+  String? _extractionError;
+
+  // Extractor instance
+  final _extractor = OGContentExtractor();
 
   @override
   void initState() {
@@ -187,14 +212,14 @@ class _ShareSessionLoadedState extends State<_ShareSessionLoaded> {
       if (mounted) {
         setState(() {
           _session = session;
-          _isLoading = false;
+          _isLoadingSession = false;
         });
       }
     } catch (e, stack) {
       AppLogger.error('Failed to load share session', e, stack);
       if (mounted) {
         setState(() {
-          _isLoading = false;
+          _isLoadingSession = false;
         });
       }
     }
@@ -227,10 +252,14 @@ class _ShareSessionLoadedState extends State<_ShareSessionLoaded> {
         AppLogger.info('  Text: $preview');
       }
       if (item.fileName != null) AppLogger.info('  File Name: ${item.fileName}');
-      if (item.originalFileName != null) AppLogger.info('  Original File Name: ${item.originalFileName}');
+      if (item.originalFileName != null) {
+        AppLogger.info('  Original File Name: ${item.originalFileName}');
+      }
       if (item.mimeType != null) AppLogger.info('  MIME Type: ${item.mimeType}');
       if (item.sizeBytes != null) AppLogger.info('  Size: ${item.sizeBytes} bytes');
-      if (item.uniformTypeIdentifier != null) AppLogger.info('  UTI: ${item.uniformTypeIdentifier}');
+      if (item.uniformTypeIdentifier != null) {
+        AppLogger.info('  UTI: ${item.uniformTypeIdentifier}');
+      }
     }
     AppLogger.info('=== END SHARE SESSION ===');
   }
@@ -243,9 +272,97 @@ class _ShareSessionLoadedState extends State<_ShareSessionLoaded> {
     return _session!.items.any((item) => !item.isImage && !item.isMovie);
   }
 
+  /// Find a URL in the session that we can extract OG content from
+  Uri? _findExtractableUrl() {
+    if (_session == null) return null;
+
+    for (final item in _session!.items) {
+      if (item.isUrl && item.url != null) {
+        final uri = Uri.tryParse(item.url!);
+        if (uri != null && OGContentExtractor.isSupported(uri)) {
+          return uri;
+        }
+      }
+    }
+    return null;
+  }
+
+  /// Handle action button tap
+  Future<void> _onActionTap(_ModalAction action) async {
+    setState(() {
+      _chosenAction = action;
+    });
+
+    final extractableUrl = _findExtractableUrl();
+
+    if (extractableUrl != null) {
+      // Start extraction
+      await _startExtraction(extractableUrl);
+    } else {
+      // No extractable URL, proceed directly
+      // For now, just show a message (future: proceed to next step)
+      _proceedWithAction();
+    }
+  }
+
+  /// Start OG content extraction
+  Future<void> _startExtraction(Uri uri) async {
+    setState(() {
+      _modalState = _ModalState.extractingContent;
+      _extractedContent = null;
+      _extractionError = null;
+    });
+
+    try {
+      final content = await _extractor.extract(uri);
+
+      if (!mounted) return;
+
+      if (content != null && content.hasContent) {
+        AppLogger.info('OG extraction successful: ${content.title}');
+        setState(() {
+          _extractedContent = content;
+          _modalState = _ModalState.showingPreview;
+        });
+      } else {
+        AppLogger.warning('OG extraction returned no content');
+        setState(() {
+          _extractionError = 'No content could be extracted from this link.';
+          _modalState = _ModalState.extractionError;
+        });
+      }
+    } catch (e, stack) {
+      AppLogger.error('OG extraction failed', e, stack);
+      if (!mounted) return;
+      setState(() {
+        _extractionError = 'Failed to extract content. Please try again.';
+        _modalState = _ModalState.extractionError;
+      });
+    }
+  }
+
+  /// Go back to action selection
+  void _goBack() {
+    setState(() {
+      _modalState = _ModalState.choosingAction;
+      _chosenAction = null;
+      _extractedContent = null;
+      _extractionError = null;
+    });
+  }
+
+  /// Proceed with the chosen action (future implementation)
+  void _proceedWithAction() {
+    // TODO: Implement actual recipe import or clipping save
+    AppLogger.info(
+      'Proceeding with action: $_chosenAction, extracted: ${_extractedContent?.title}',
+    );
+    widget.onClose();
+  }
+
   @override
   Widget build(BuildContext context) {
-    if (_isLoading) {
+    if (_isLoadingSession) {
       return _LoadingState(onClose: widget.onClose);
     }
 
@@ -256,6 +373,19 @@ class _ShareSessionLoadedState extends State<_ShareSessionLoaded> {
       );
     }
 
+    switch (_modalState) {
+      case _ModalState.choosingAction:
+        return _buildChoosingActionState(context);
+      case _ModalState.extractingContent:
+        return _buildExtractingState(context);
+      case _ModalState.showingPreview:
+        return _buildPreviewState(context);
+      case _ModalState.extractionError:
+        return _buildExtractionErrorState(context);
+    }
+  }
+
+  Widget _buildChoosingActionState(BuildContext context) {
     return Padding(
       padding: EdgeInsets.all(AppSpacing.xl),
       child: Column(
@@ -290,10 +420,7 @@ class _ShareSessionLoadedState extends State<_ShareSessionLoaded> {
             title: 'Import Recipe',
             description: 'Extract ingredients and steps to create a new recipe',
             emphasized: true,
-            onTap: () {
-              // TODO: Implement recipe import flow
-              widget.onClose();
-            },
+            onTap: () => _onActionTap(_ModalAction.importRecipe),
           ),
 
           // Save as Clipping button (hidden for image/video only shares)
@@ -303,12 +430,187 @@ class _ShareSessionLoadedState extends State<_ShareSessionLoaded> {
               icon: Icons.note_add_outlined,
               title: 'Save as Clipping',
               description: 'Save for later and convert to a recipe when ready',
-              onTap: () {
-                // TODO: Implement clipping save flow
-                widget.onClose();
-              },
+              onTap: () => _onActionTap(_ModalAction.saveAsClipping),
             ),
           ],
+        ],
+      ),
+    );
+  }
+
+  Widget _buildExtractingState(BuildContext context) {
+    final extractableUrl = _findExtractableUrl();
+    final domainName = extractableUrl != null
+        ? OGContentExtractor.getDomainDisplayName(extractableUrl) ?? 'website'
+        : 'website';
+
+    return Padding(
+      padding: EdgeInsets.all(AppSpacing.xl),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                'Extracting Content',
+                style: AppTypography.h4.copyWith(
+                  color: AppColors.of(context).textPrimary,
+                ),
+              ),
+              AppCircleButton(
+                icon: AppCircleButtonIcon.close,
+                variant: AppCircleButtonVariant.neutral,
+                size: 32,
+                onPressed: widget.onClose,
+              ),
+            ],
+          ),
+          SizedBox(height: AppSpacing.xxl),
+          const CupertinoActivityIndicator(radius: 16),
+          SizedBox(height: AppSpacing.lg),
+          Text(
+            'Fetching from $domainName...',
+            style: AppTypography.body.copyWith(
+              color: AppColors.of(context).textSecondary,
+            ),
+          ),
+          SizedBox(height: AppSpacing.lg),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildPreviewState(BuildContext context) {
+    final preview = _extractedContent?.getPreview(maxLength: 300) ?? '';
+    final actionLabel = _chosenAction == _ModalAction.importRecipe
+        ? 'Import Recipe'
+        : 'Save as Clipping';
+
+    return Padding(
+      padding: EdgeInsets.all(AppSpacing.xl),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                'Extracted Content',
+                style: AppTypography.h4.copyWith(
+                  color: AppColors.of(context).textPrimary,
+                ),
+              ),
+              AppCircleButton(
+                icon: AppCircleButtonIcon.close,
+                variant: AppCircleButtonVariant.neutral,
+                size: 32,
+                onPressed: widget.onClose,
+              ),
+            ],
+          ),
+          SizedBox(height: AppSpacing.lg),
+
+          // Content preview
+          Container(
+            width: double.infinity,
+            padding: EdgeInsets.all(AppSpacing.lg),
+            decoration: BoxDecoration(
+              color: AppColors.of(context).surface,
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(
+                color: AppColors.of(context).border,
+                width: 1,
+              ),
+            ),
+            child: Text(
+              preview.isNotEmpty ? preview : 'No preview available',
+              style: AppTypography.body.copyWith(
+                color: AppColors.of(context).textPrimary,
+              ),
+              maxLines: 6,
+              overflow: TextOverflow.ellipsis,
+            ),
+          ),
+          SizedBox(height: AppSpacing.xl),
+
+          // Action buttons
+          Row(
+            children: [
+              Expanded(
+                child: _SecondaryButton(
+                  label: 'Back',
+                  onTap: _goBack,
+                ),
+              ),
+              SizedBox(width: AppSpacing.md),
+              Expanded(
+                flex: 2,
+                child: _PrimaryButton(
+                  label: actionLabel,
+                  onTap: _proceedWithAction,
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildExtractionErrorState(BuildContext context) {
+    return Padding(
+      padding: EdgeInsets.all(AppSpacing.xl),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                'Extraction Failed',
+                style: AppTypography.h4.copyWith(
+                  color: AppColors.of(context).textPrimary,
+                ),
+              ),
+              AppCircleButton(
+                icon: AppCircleButtonIcon.close,
+                variant: AppCircleButtonVariant.neutral,
+                size: 32,
+                onPressed: widget.onClose,
+              ),
+            ],
+          ),
+          SizedBox(height: AppSpacing.lg),
+          Text(
+            _extractionError ?? 'An error occurred while extracting content.',
+            style: AppTypography.body.copyWith(
+              color: AppColors.of(context).textSecondary,
+            ),
+          ),
+          SizedBox(height: AppSpacing.xl),
+
+          // Action buttons
+          Row(
+            children: [
+              Expanded(
+                child: _SecondaryButton(
+                  label: 'Back',
+                  onTap: _goBack,
+                ),
+              ),
+              SizedBox(width: AppSpacing.md),
+              Expanded(
+                flex: 2,
+                child: _PrimaryButton(
+                  label: 'Continue Anyway',
+                  onTap: _proceedWithAction,
+                ),
+              ),
+            ],
+          ),
         ],
       ),
     );
@@ -416,6 +718,90 @@ class _ActionButton extends StatelessWidget {
                 color: colors.textSecondary,
               ),
             ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// Primary action button
+class _PrimaryButton extends StatelessWidget {
+  final String label;
+  final VoidCallback onTap;
+
+  const _PrimaryButton({
+    required this.label,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = AppColors.of(context);
+
+    return Material(
+      color: colors.primary,
+      borderRadius: BorderRadius.circular(8),
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(8),
+        child: Container(
+          padding: EdgeInsets.symmetric(
+            horizontal: AppSpacing.lg,
+            vertical: AppSpacing.md,
+          ),
+          alignment: Alignment.center,
+          child: Text(
+            label,
+            style: AppTypography.body.copyWith(
+              color: colors.onPrimary,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// Secondary action button
+class _SecondaryButton extends StatelessWidget {
+  final String label;
+  final VoidCallback onTap;
+
+  const _SecondaryButton({
+    required this.label,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = AppColors.of(context);
+
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(8),
+        child: Container(
+          padding: EdgeInsets.symmetric(
+            horizontal: AppSpacing.lg,
+            vertical: AppSpacing.md,
+          ),
+          alignment: Alignment.center,
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(8),
+            border: Border.all(
+              color: colors.border,
+              width: 1,
+            ),
+          ),
+          child: Text(
+            label,
+            style: AppTypography.body.copyWith(
+              color: colors.textSecondary,
+              fontWeight: FontWeight.w500,
+            ),
           ),
         ),
       ),
