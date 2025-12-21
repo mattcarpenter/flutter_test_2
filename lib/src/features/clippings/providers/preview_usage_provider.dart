@@ -29,3 +29,13 @@ final hasShoppingListPreviewsRemainingProvider =
   final service = await ref.watch(previewUsageServiceProvider.future);
   return service.hasShoppingListPreviewsRemaining();
 });
+
+/// Whether the user has remaining share recipe previews today.
+///
+/// Only checked for non-entitled users.
+/// Note: This is a SEPARATE quota from clipping recipe previews.
+final hasShareRecipePreviewsRemainingProvider =
+    FutureProvider<bool>((ref) async {
+  final service = await ref.watch(previewUsageServiceProvider.future);
+  return service.hasShareRecipePreviewsRemaining();
+});

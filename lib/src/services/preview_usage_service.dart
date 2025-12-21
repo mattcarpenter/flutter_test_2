@@ -11,9 +11,13 @@ import 'package:shared_preferences/shared_preferences.dart';
 ///
 /// The usage counter persists across app launches and resets at midnight.
 /// Old entries are cleaned up after 7 days.
+///
+/// Note: Share previews and clipping previews have SEPARATE quotas.
+/// Users get 5/day for each, independently.
 class PreviewUsageService {
   static const _recipeKeyPrefix = 'recipe_preview_usage_';
   static const _shoppingListKeyPrefix = 'shopping_list_preview_usage_';
+  static const _shareRecipeKeyPrefix = 'share_recipe_preview_usage_';
   static const int dailyLimit = 5;
 
   final SharedPreferences _prefs;
@@ -71,6 +75,31 @@ class PreviewUsageService {
 
     // Clean up old entries (keep only last 7 days)
     await _cleanupOldEntries(_shoppingListKeyPrefix);
+  }
+
+  // ============================================================================
+  // Share Recipe Preview Usage (separate quota from clipping previews)
+  // ============================================================================
+
+  /// Gets the number of share recipe previews used today.
+  int getShareRecipeUsageToday() {
+    final key = '$_shareRecipeKeyPrefix${_today()}';
+    return _prefs.getInt(key) ?? 0;
+  }
+
+  /// Returns true if user has remaining share recipe previews today.
+  bool hasShareRecipePreviewsRemaining() {
+    return getShareRecipeUsageToday() < dailyLimit;
+  }
+
+  /// Increments the share recipe usage count for today.
+  Future<void> incrementShareRecipeUsage() async {
+    final key = '$_shareRecipeKeyPrefix${_today()}';
+    final current = _prefs.getInt(key) ?? 0;
+    await _prefs.setInt(key, current + 1);
+
+    // Clean up old entries (keep only last 7 days)
+    await _cleanupOldEntries(_shareRecipeKeyPrefix);
   }
 
   // ============================================================================
