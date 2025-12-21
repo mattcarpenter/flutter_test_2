@@ -81,6 +81,21 @@ class ShareViewController: UIViewController {
         var hasLargeFiles = false
         var fileIndex = 0
 
+        // Extract attributedContentText and attributedTitle from extension items (free metadata)
+        var attributedContentText: String?
+        var attributedTitle: String?
+
+        for extensionItem in extensionItems {
+            if attributedContentText == nil, let content = extensionItem.attributedContentText?.string, !content.isEmpty {
+                attributedContentText = content
+                print("=== Extension Item attributedContentText: \(content)")
+            }
+            if attributedTitle == nil, let title = extensionItem.attributedTitle?.string, !title.isEmpty {
+                attributedTitle = title
+                print("=== Extension Item attributedTitle: \(title)")
+            }
+        }
+
         // First pass: detect if we need progress UI
         for extensionItem in extensionItems {
             guard let attachments = extensionItem.attachments else { continue }
@@ -126,12 +141,20 @@ class ShareViewController: UIViewController {
             guard let self = self else { return }
 
             // Write manifest
-            let manifest: [String: Any] = [
+            var manifest: [String: Any] = [
                 "sessionId": sessionId,
                 "createdAt": ISO8601DateFormatter().string(from: Date()),
                 "sourceApp": self.sourceAppBundleId() ?? "unknown",
                 "items": manifestItems
             ]
+
+            // Add extension item metadata if available
+            if let contentText = attributedContentText {
+                manifest["attributedContentText"] = contentText
+            }
+            if let title = attributedTitle {
+                manifest["attributedTitle"] = title
+            }
 
             if self.writeManifest(manifest, sessionId: sessionId) {
                 self.openMainApp(sessionId: sessionId)
@@ -147,9 +170,19 @@ class ShareViewController: UIViewController {
         fileIndex: Int,
         completion: @escaping ([String: Any]?) -> Void
     ) {
+        // DEBUG: Log all available types for experimentation
+        print("=== Share Provider Debug ===")
+        print("Registered types: \(provider.registeredTypeIdentifiers)")
+        print("Suggested name: \(provider.suggestedName ?? "nil")")
+
         // Check for URL first (most common for web sharing)
         if provider.hasItemConformingToTypeIdentifier(UTType.url.identifier) {
-            provider.loadItem(forTypeIdentifier: UTType.url.identifier, options: nil) { (data, error) in
+            provider.loadItem(forTypeIdentifier: UTType.url.identifier, options: nil) { [weak self] (data, error) in
+                guard let self = self else {
+                    completion(nil)
+                    return
+                }
+
                 if let url = data as? URL {
                     // Check if it's a file URL or web URL
                     if url.isFileURL {
@@ -162,12 +195,20 @@ class ShareViewController: UIViewController {
                             completion: completion
                         )
                     } else {
-                        // It's a web URL
-                        completion([
+                        // It's a web URL - also try to get associated text
+                        var item: [String: Any] = [
                             "type": "url",
                             "url": url.absoluteString,
                             "title": provider.suggestedName ?? ""
-                        ])
+                        ]
+
+                        // Also extract text if available (for captions, descriptions, etc.)
+                        self.extractText(from: provider) { text in
+                            if let text = text, !text.isEmpty {
+                                item["text"] = text
+                            }
+                            completion(item)
+                        }
                     }
                 } else {
                     completion(nil)
@@ -176,9 +217,9 @@ class ShareViewController: UIViewController {
             return
         }
 
-        // Check for plain text
-        if provider.hasItemConformingToTypeIdentifier(UTType.plainText.identifier) {
-            provider.loadItem(forTypeIdentifier: UTType.plainText.identifier, options: nil) { (data, error) in
+        // Check for text using multiple UTTypes
+        if let textType = self.findTextType(in: provider) {
+            provider.loadItem(forTypeIdentifier: textType, options: nil) { (data, error) in
                 if let text = data as? String {
                     completion([
                         "type": "text",
@@ -501,6 +542,37 @@ class ShareViewController: UIViewController {
         // Try to get source app bundle ID from extension context
         // This may not always be available
         return nil
+    }
+
+    /// Text UTTypes to check, in priority order
+    private var textTypeIdentifiers: [String] {
+        [
+            UTType.plainText.identifier,       // public.plain-text
+            UTType.utf8PlainText.identifier,   // public.utf8-plain-text
+            UTType.text.identifier,            // public.text (parent type)
+        ]
+    }
+
+    /// Find the first matching text type in the provider
+    private func findTextType(in provider: NSItemProvider) -> String? {
+        for textType in textTypeIdentifiers {
+            if provider.hasItemConformingToTypeIdentifier(textType) {
+                return textType
+            }
+        }
+        return nil
+    }
+
+    /// Extract text from a provider, checking multiple UTTypes
+    private func extractText(from provider: NSItemProvider, completion: @escaping (String?) -> Void) {
+        guard let textType = findTextType(in: provider) else {
+            completion(nil)
+            return
+        }
+
+        provider.loadItem(forTypeIdentifier: textType, options: nil) { (data, error) in
+            completion(data as? String)
+        }
     }
 
     private func completeWithError(_ message: String) {

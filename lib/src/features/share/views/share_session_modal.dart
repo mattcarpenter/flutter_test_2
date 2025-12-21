@@ -181,6 +181,9 @@ class _ShareSessionLoadedState extends State<_ShareSessionLoaded> {
   Future<void> _loadSession() async {
     try {
       final session = await widget.service.readSession(widget.sessionId);
+      if (session != null) {
+        _logSessionData(session);
+      }
       if (mounted) {
         setState(() {
           _session = session;
@@ -195,6 +198,49 @@ class _ShareSessionLoadedState extends State<_ShareSessionLoaded> {
         });
       }
     }
+  }
+
+  void _logSessionData(ShareSession session) {
+    AppLogger.info('=== SHARE SESSION DATA ===');
+    AppLogger.info('Session ID: ${session.sessionId}');
+    AppLogger.info('Created At: ${session.createdAt}');
+    AppLogger.info('Source App: ${session.sourceApp}');
+    AppLogger.info('Item Count: ${session.items.length}');
+    AppLogger.info('Session Path: ${session.sessionPath}');
+    if (session.attributedContentText != null) {
+      AppLogger.info('Attributed Content Text: ${session.attributedContentText}');
+    }
+    if (session.attributedTitle != null) {
+      AppLogger.info('Attributed Title: ${session.attributedTitle}');
+    }
+
+    for (var i = 0; i < session.items.length; i++) {
+      final item = session.items[i];
+      AppLogger.info('--- Item $i ---');
+      AppLogger.info('  Type: ${item.type}');
+      if (item.url != null) AppLogger.info('  URL: ${item.url}');
+      if (item.title != null) AppLogger.info('  Title: ${item.title}');
+      if (item.text != null) {
+        final preview = item.text!.length > 200
+            ? '${item.text!.substring(0, 200)}...'
+            : item.text!;
+        AppLogger.info('  Text: $preview');
+      }
+      if (item.fileName != null) AppLogger.info('  File Name: ${item.fileName}');
+      if (item.originalFileName != null) AppLogger.info('  Original File Name: ${item.originalFileName}');
+      if (item.mimeType != null) AppLogger.info('  MIME Type: ${item.mimeType}');
+      if (item.sizeBytes != null) AppLogger.info('  Size: ${item.sizeBytes} bytes');
+      if (item.uniformTypeIdentifier != null) AppLogger.info('  UTI: ${item.uniformTypeIdentifier}');
+    }
+    AppLogger.info('=== END SHARE SESSION ===');
+  }
+
+  /// Returns true if clipping option should be shown.
+  /// Hidden when only images or videos (files) are shared.
+  bool get _showClippingOption {
+    if (_session == null) return false;
+    // Show clipping option if there's at least one item that's not an image/movie file
+    return _session!.items.any((item) => !item.isImage && !item.isMovie);
   }
 
   @override
@@ -236,181 +282,142 @@ class _ShareSessionLoadedState extends State<_ShareSessionLoaded> {
               ),
             ],
           ),
-          SizedBox(height: AppSpacing.lg),
+          SizedBox(height: AppSpacing.xl),
 
-          // Session summary
-          _SessionSummary(session: _session!),
-          SizedBox(height: AppSpacing.lg),
+          // Import Recipe button
+          _ActionButton(
+            icon: Icons.restaurant_menu,
+            title: 'Import Recipe',
+            description: 'Extract ingredients and steps to create a new recipe',
+            emphasized: true,
+            onTap: () {
+              // TODO: Implement recipe import flow
+              widget.onClose();
+            },
+          ),
 
-          // Items list
-          _ItemsList(session: _session!),
+          // Save as Clipping button (hidden for image/video only shares)
+          if (_showClippingOption) ...[
+            SizedBox(height: AppSpacing.md),
+            _ActionButton(
+              icon: Icons.note_add_outlined,
+              title: 'Save as Clipping',
+              description: 'Save for later and convert to a recipe when ready',
+              onTap: () {
+                // TODO: Implement clipping save flow
+                widget.onClose();
+              },
+            ),
+          ],
         ],
       ),
     );
   }
 }
 
-/// Session summary widget
-class _SessionSummary extends StatelessWidget {
-  final ShareSession session;
+/// Action button with icon, title, and description
+class _ActionButton extends StatelessWidget {
+  final IconData icon;
+  final String title;
+  final String description;
+  final VoidCallback onTap;
+  final bool emphasized;
 
-  const _SessionSummary({required this.session});
+  const _ActionButton({
+    required this.icon,
+    required this.title,
+    required this.description,
+    required this.onTap,
+    this.emphasized = false,
+  });
 
   @override
   Widget build(BuildContext context) {
-    final itemCount = session.items.length;
-    final sourceApp = session.sourceApp ?? 'Unknown';
+    final colors = AppColors.of(context);
+    final isLight = colors.brightness == Brightness.light;
 
-    return Container(
-      padding: EdgeInsets.all(AppSpacing.md),
-      decoration: BoxDecoration(
-        color: AppColors.of(context).surface,
-        borderRadius: BorderRadius.circular(8),
-        border: Border.all(
-          color: AppColors.of(context).border,
-          width: 1,
-        ),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            'Shared from $sourceApp',
-            style: AppTypography.bodySmall.copyWith(
-              color: AppColors.of(context).textSecondary,
+    // Emphasized style: subtle glow effect
+    final boxShadow = emphasized
+        ? [
+            BoxShadow(
+              color: colors.primary.withValues(alpha: isLight ? 0.15 : 0.25),
+              blurRadius: 8,
+              spreadRadius: 0,
+              offset: const Offset(0, 1),
             ),
+          ]
+        : <BoxShadow>[];
+
+    final borderColor = emphasized
+        ? colors.primary.withValues(alpha: isLight ? 0.2 : 0.3)
+        : colors.border;
+
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(12),
+        child: Container(
+          padding: EdgeInsets.fromLTRB(
+            AppSpacing.lg,
+            AppSpacing.lg,
+            AppSpacing.md, // Less padding on right so chevron is closer to edge
+            AppSpacing.lg,
           ),
-          SizedBox(height: AppSpacing.xs),
-          Text(
-            '$itemCount ${itemCount == 1 ? 'item' : 'items'}',
-            style: AppTypography.body.copyWith(
-              color: AppColors.of(context).textPrimary,
-              fontWeight: FontWeight.w600,
+          decoration: BoxDecoration(
+            color: colors.surface,
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(
+              color: borderColor,
+              width: 1,
             ),
+            boxShadow: boxShadow,
           ),
-        ],
-      ),
-    );
-  }
-}
-
-/// List of shared items
-class _ItemsList extends StatelessWidget {
-  final ShareSession session;
-
-  const _ItemsList({required this.session});
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          'Items',
-          style: AppTypography.label.copyWith(
-            color: AppColors.of(context).textSecondary,
-          ),
-        ),
-        SizedBox(height: AppSpacing.sm),
-        ...session.items.map((item) => _ShareItemTile(item: item)),
-      ],
-    );
-  }
-}
-
-/// Individual share item tile
-class _ShareItemTile extends StatelessWidget {
-  final ShareSessionItem item;
-
-  const _ShareItemTile({required this.item});
-
-  IconData _getIcon() {
-    if (item.isUrl) return Icons.link;
-    if (item.isText) return Icons.text_fields;
-    if (item.isImage) return Icons.image;
-    if (item.isMovie) return Icons.movie;
-    if (item.isData) return Icons.insert_drive_file;
-    return Icons.help_outline;
-  }
-
-  String _getTitle() {
-    if (item.title != null && item.title!.isNotEmpty) {
-      return item.title!;
-    }
-    if (item.originalFileName != null) {
-      return item.originalFileName!;
-    }
-    if (item.url != null) {
-      return item.url!;
-    }
-    if (item.text != null && item.text!.isNotEmpty) {
-      return item.text!.length > 50
-          ? '${item.text!.substring(0, 50)}...'
-          : item.text!;
-    }
-    return item.type;
-  }
-
-  String? _getSubtitle() {
-    if (item.isFile && item.mimeType != null) {
-      return item.mimeType;
-    }
-    if (item.isUrl && item.url != null) {
-      return item.url;
-    }
-    return null;
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final subtitle = _getSubtitle();
-
-    return Container(
-      margin: EdgeInsets.only(bottom: AppSpacing.sm),
-      padding: EdgeInsets.all(AppSpacing.md),
-      decoration: BoxDecoration(
-        color: AppColors.of(context).surface,
-        borderRadius: BorderRadius.circular(8),
-        border: Border.all(
-          color: AppColors.of(context).border,
-          width: 1,
-        ),
-      ),
-      child: Row(
-        children: [
-          Icon(
-            _getIcon(),
-            size: 24,
-            color: AppColors.of(context).textSecondary,
-          ),
-          SizedBox(width: AppSpacing.md),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  _getTitle(),
-                  style: AppTypography.body.copyWith(
-                    color: AppColors.of(context).textPrimary,
-                  ),
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
+          child: Row(
+            children: [
+              Container(
+                width: 44,
+                height: 44,
+                decoration: BoxDecoration(
+                  color: colors.primary.withValues(alpha: 0.1),
+                  borderRadius: BorderRadius.circular(10),
                 ),
-                if (subtitle != null) ...[
-                  SizedBox(height: AppSpacing.xs),
-                  Text(
-                    subtitle,
-                    style: AppTypography.bodySmall.copyWith(
-                      color: AppColors.of(context).textSecondary,
+                child: Icon(
+                  icon,
+                  size: 24,
+                  color: colors.primary,
+                ),
+              ),
+              SizedBox(width: AppSpacing.md),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      title,
+                      style: AppTypography.body.copyWith(
+                        color: colors.textPrimary,
+                        fontWeight: FontWeight.w600,
+                      ),
                     ),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                ],
-              ],
-            ),
+                    SizedBox(height: AppSpacing.xs),
+                    Text(
+                      description,
+                      style: AppTypography.bodySmall.copyWith(
+                        color: colors.textSecondary,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              Icon(
+                Icons.chevron_right,
+                size: 20,
+                color: colors.textSecondary,
+              ),
+            ],
           ),
-        ],
+        ),
       ),
     );
   }

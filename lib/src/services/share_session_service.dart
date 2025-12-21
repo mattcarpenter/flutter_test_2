@@ -72,12 +72,20 @@ class ShareSession {
   final List<ShareSessionItem> items;
   final String sessionPath;
 
+  /// Attributed content text from NSExtensionItem (free metadata from share sheet)
+  final String? attributedContentText;
+
+  /// Attributed title from NSExtensionItem (free metadata from share sheet)
+  final String? attributedTitle;
+
   ShareSession({
     required this.sessionId,
     required this.createdAt,
     this.sourceApp,
     required this.items,
     required this.sessionPath,
+    this.attributedContentText,
+    this.attributedTitle,
   });
 
   factory ShareSession.fromJson(
@@ -92,6 +100,8 @@ class ShareSession {
           .map((item) => ShareSessionItem.fromJson(item as Map<String, dynamic>))
           .toList(),
       sessionPath: sessionPath,
+      attributedContentText: json['attributedContentText'] as String?,
+      attributedTitle: json['attributedTitle'] as String?,
     );
   }
 
@@ -101,6 +111,8 @@ class ShareSession {
       'createdAt': createdAt.toIso8601String(),
       if (sourceApp != null) 'sourceApp': sourceApp,
       'items': items.map((item) => item.toJson()).toList(),
+      if (attributedContentText != null) 'attributedContentText': attributedContentText,
+      if (attributedTitle != null) 'attributedTitle': attributedTitle,
     };
   }
 
