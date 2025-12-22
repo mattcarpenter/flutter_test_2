@@ -1015,16 +1015,43 @@ class _ShareSessionLoadedState extends ConsumerState<_ShareSessionLoaded>
         remainder = '';
       }
 
-      // Limit title to 50 chars
+      // Limit title to 50 chars, preferring word boundaries when possible
       const maxTitleLength = 50;
+      const minTitleLength = 25;
+
       if (firstLine.length > maxTitleLength) {
-        title = firstLine.substring(0, maxTitleLength);
-        // Body starts with continuation of truncated title
-        final truncatedPart = firstLine.substring(maxTitleLength);
-        if (remainder.isNotEmpty) {
-          bodyText = '...$truncatedPart\n\n$remainder';
+        String titleResult;
+        String truncatedPart;
+        bool truncatedMidWord;
+
+        // Find last space at or before max length position
+        final lastSpaceIndex = firstLine.lastIndexOf(' ', maxTitleLength - 1);
+
+        if (lastSpaceIndex >= minTitleLength) {
+          // Good word boundary found - truncate there
+          titleResult = firstLine.substring(0, lastSpaceIndex).trimRight();
+          truncatedPart = firstLine.substring(lastSpaceIndex + 1).trimLeft();
+          truncatedMidWord = false;
         } else {
-          bodyText = '...$truncatedPart';
+          // No good boundary (CJK text, very long first word, or would be too short)
+          // Fall back to character truncation at max length
+          titleResult = firstLine.substring(0, maxTitleLength);
+          truncatedPart = firstLine.substring(maxTitleLength);
+          truncatedMidWord = true;
+        }
+
+        title = titleResult.isNotEmpty ? titleResult : null;
+
+        // Build body - ellipsis prefix only if we cut mid-word
+        final prefix = truncatedMidWord ? '...' : '';
+        if (truncatedPart.isNotEmpty) {
+          if (remainder.isNotEmpty) {
+            bodyText = '$prefix$truncatedPart\n\n$remainder';
+          } else {
+            bodyText = '$prefix$truncatedPart';
+          }
+        } else {
+          bodyText = remainder.isNotEmpty ? remainder : null;
         }
       } else {
         title = firstLine.isNotEmpty ? firstLine : null;
