@@ -7,7 +7,9 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_image_compress/flutter_image_compress.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:http/http.dart' as http;
+import '../../../mobile/adaptive_app.dart' show globalRootNavigatorKey;
 import 'package:intl/intl.dart';
 import 'package:nanoid/nanoid.dart';
 import 'package:path_provider/path_provider.dart';
@@ -548,9 +550,12 @@ class _ShareSessionLoadedState extends ConsumerState<_ShareSessionLoaded>
       final extractableUrl = _findExtractableUrl();
       final sourcePlatform = _detectPlatform(extractableUrl);
 
+      // Skip og:description for Instagram - often AI-generated or duplicated
+      final isInstagram = sourcePlatform == 'instagram';
+
       final recipe = await service.extractRecipe(
         ogTitle: _extractedContent!.title,
-        ogDescription: _extractedContent!.description,
+        ogDescription: isInstagram ? null : _extractedContent!.description,
         sourceUrl: extractableUrl?.toString(),
         sourcePlatform: sourcePlatform,
       );
@@ -635,9 +640,12 @@ class _ShareSessionLoadedState extends ConsumerState<_ShareSessionLoaded>
       final extractableUrl = _findExtractableUrl();
       final sourcePlatform = _detectPlatform(extractableUrl);
 
+      // Skip og:description for Instagram - often AI-generated or duplicated
+      final isInstagram = sourcePlatform == 'instagram';
+
       final preview = await service.previewRecipe(
         ogTitle: _extractedContent!.title,
-        ogDescription: _extractedContent!.description,
+        ogDescription: isInstagram ? null : _extractedContent!.description,
         sourceUrl: extractableUrl?.toString(),
         sourcePlatform: sourcePlatform,
       );
@@ -926,15 +934,30 @@ class _ShareSessionLoadedState extends ConsumerState<_ShareSessionLoaded>
     String fullText = '';
 
     // Get OG title and description
-    final ogTitle = _extractedContent?.title?.trim();
+    String? ogTitle = _extractedContent?.title?.trim();
     final ogDescription = _extractedContent?.description?.trim();
+
+    // Strip Instagram attribution prefix (e.g., "John Doe on Instagram: \"...")
+    if (ogTitle != null && ogTitle.contains(' on Instagram:')) {
+      final parts = ogTitle.split(' on Instagram:');
+      if (parts.length > 1) {
+        String remainder = parts.sublist(1).join(' on Instagram:').trim();
+        // Strip surrounding quotes
+        if (remainder.startsWith('"') && remainder.endsWith('"')) {
+          remainder = remainder.substring(1, remainder.length - 1).trim();
+        }
+        ogTitle = remainder.isNotEmpty ? remainder : null;
+      }
+    }
 
     if (ogTitle != null && ogTitle.isNotEmpty) {
       fullText = ogTitle;
     }
 
     // Concat description if different from title
-    if (ogDescription != null &&
+    // Skip for Instagram - og:description is often AI-generated or duplicated
+    if (sourcePlatform != 'Instagram' &&
+        ogDescription != null &&
         ogDescription.isNotEmpty &&
         ogDescription.toLowerCase() != ogTitle?.toLowerCase() &&
         ogDescription != sourceUrl) {
@@ -1061,7 +1084,7 @@ class _ShareSessionLoadedState extends ConsumerState<_ShareSessionLoaded>
 
       final quillContent = _buildQuillDelta(content);
 
-      await ref.read(clippingsProvider.notifier).addClipping(
+      final newClippingId = await ref.read(clippingsProvider.notifier).addClipping(
         userId: userId,
         householdId: householdId,
         title: content.title,
@@ -1069,14 +1092,28 @@ class _ShareSessionLoadedState extends ConsumerState<_ShareSessionLoaded>
       );
 
       AppLogger.info(
-        'Clipping saved: title=${content.title}, '
+        'Clipping saved: id=$newClippingId, title=${content.title}, '
         'hasBody=${content.bodyText != null}, '
         'hasUrl=${content.sourceUrl != null}',
       );
 
-      if (mounted) {
-        widget.onClose();
-      }
+      if (!mounted) return;
+
+      // Capture ID for closure before closing modal
+      final clippingId = newClippingId;
+
+      // Close modal first
+      widget.onClose();
+
+      // Navigate in next frame from stable context (modal context is being disposed)
+      // Use go() instead of push() so GoRouter builds the proper page stack
+      // with /clippings as parent - this enables the back button
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        final navContext = globalRootNavigatorKey.currentContext;
+        if (navContext != null) {
+          GoRouter.of(navContext).go('/clippings/$clippingId');
+        }
+      });
     } catch (e, stack) {
       AppLogger.error('Failed to save clipping', e, stack);
       if (mounted) {
