@@ -106,7 +106,7 @@ class _ValuePropItem extends StatelessWidget {
 ///
 /// Used for non-subscribed users to show a teaser of the extracted recipe from
 /// social media shares (Instagram, TikTok).
-class ShareRecipePreviewResultContent extends StatelessWidget {
+class ShareRecipePreviewResultContent extends StatefulWidget {
   final RecipePreview preview;
   final VoidCallback onSubscribe;
 
@@ -117,7 +117,35 @@ class ShareRecipePreviewResultContent extends StatelessWidget {
   });
 
   @override
+  State<ShareRecipePreviewResultContent> createState() =>
+      _ShareRecipePreviewResultContentState();
+}
+
+class _ShareRecipePreviewResultContentState
+    extends State<ShareRecipePreviewResultContent> {
+  bool _isLoading = false;
+
+  void _handleSubscribeTap() {
+    setState(() {
+      _isLoading = true;
+    });
+
+    // Call the subscribe callback
+    widget.onSubscribe();
+
+    // Reset loading state after 3 seconds (paywall should be visible by then)
+    Future.delayed(const Duration(seconds: 3), () {
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+      }
+    });
+  }
+
+  @override
   Widget build(BuildContext context) {
+    final preview = widget.preview;
     final colors = AppColors.of(context);
 
     return SingleChildScrollView(
@@ -334,13 +362,15 @@ class ShareRecipePreviewResultContent extends StatelessWidget {
               offset: const Offset(0, -64),
               child: AppButton(
                 text: 'Unlock with Plus',
-                onPressed: onSubscribe,
+                onPressed: _isLoading ? null : _handleSubscribeTap,
                 theme: AppButtonTheme.secondary,
                 style: AppButtonStyle.fill,
                 size: AppButtonSize.large,
                 shape: AppButtonShape.square,
                 fullWidth: true,
-                leadingIcon: const Icon(CupertinoIcons.sparkles, size: 18),
+                loading: _isLoading,
+                leadingIcon:
+                    _isLoading ? null : const Icon(CupertinoIcons.sparkles, size: 18),
               ),
             ),
 
