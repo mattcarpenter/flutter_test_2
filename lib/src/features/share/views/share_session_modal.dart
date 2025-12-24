@@ -677,9 +677,8 @@ class _ShareSessionLoadedState extends ConsumerState<_ShareSessionLoaded>
       final usageService = await ref.read(previewUsageServiceProvider.future);
       await usageService.incrementShareRecipeUsage();
 
-      // Close modal and show preview as bottom sheet (more screen space)
-      widget.onClose();
-
+      // Show preview as bottom sheet (keep original modal open for valid context chain)
+      // The original modal stays hidden behind the preview sheet
       if (mounted) {
         _showPreviewBottomSheet(context, preview);
       }
@@ -735,11 +734,213 @@ class _ShareSessionLoadedState extends ConsumerState<_ShareSessionLoaded>
           child: ShareRecipePreviewResultContent(
             preview: preview,
             onSubscribe: () async {
+              // Close the preview sheet
               Navigator.of(sheetContext, rootNavigator: true).pop();
+
+              // Use the widget's context (share modal is still open behind the preview sheet)
               if (!context.mounted) return;
-              await ref
+
+              // Present paywall using the share modal's context
+              final purchased = await ref
                   .read(subscriptionProvider.notifier)
                   .presentPaywall(context);
+
+              if (purchased && context.mounted) {
+                // Close the share modal now
+                widget.onClose();
+
+                // Perform full extraction
+                final rootContext = globalRootNavigatorKey.currentContext;
+                if (rootContext != null && rootContext.mounted) {
+                  await _performPostSubscriptionExtraction(rootContext);
+                }
+              }
+            },
+          ),
+        ),
+      ],
+    );
+  }
+
+  /// Perform full recipe extraction after user subscribes from preview sheet.
+  ///
+  /// Shows its own modal for progress/errors since the original share modal
+  /// was already closed when we showed the preview sheet.
+  Future<void> _performPostSubscriptionExtraction(BuildContext context) async {
+    // Capture the extracted content before showing modal
+    final extractedContent = _extractedContent;
+    if (extractedContent == null || !extractedContent.hasContent) {
+      // No content - show error briefly
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('No content available to extract.')),
+        );
+      }
+      return;
+    }
+
+    // State for the extraction modal
+    var isExtracting = true;
+    String? errorMessage;
+
+    // Show extraction progress modal
+    if (!context.mounted) return;
+
+    await WoltModalSheet.show<void>(
+      context: context,
+      useRootNavigator: true,
+      barrierDismissible: false,
+      modalTypeBuilder: (_) => WoltModalType.alertDialog(),
+      pageListBuilder: (modalContext) => [
+        WoltModalSheetPage(
+          navBarHeight: 0,
+          hasTopBarLayer: false,
+          backgroundColor: AppColors.of(modalContext).background,
+          surfaceTintColor: Colors.transparent,
+          child: StatefulBuilder(
+            builder: (builderContext, setModalState) {
+              // Start extraction on first build
+              if (isExtracting && errorMessage == null) {
+                // Use Future.microtask to avoid calling setState during build
+                Future.microtask(() async {
+                  try {
+                    final service = ref.read(shareExtractionServiceProvider);
+                    final extractableUrl = _findExtractableUrl();
+                    final sourcePlatform = _detectPlatform(extractableUrl);
+
+                    final isInstagram = sourcePlatform == 'instagram';
+
+                    final recipe = await service.extractRecipe(
+                      ogTitle: extractedContent.title,
+                      ogDescription:
+                          isInstagram ? null : extractedContent.description,
+                      sourceUrl: extractableUrl?.toString(),
+                      sourcePlatform: sourcePlatform,
+                    );
+
+                    if (!modalContext.mounted) return;
+
+                    if (recipe == null) {
+                      setModalState(() {
+                        isExtracting = false;
+                        errorMessage =
+                            'Unable to extract a recipe from this post.';
+                      });
+                      return;
+                    }
+
+                    // Download OG image if available
+                    RecipeImage? coverImage;
+                    final imageUrl = extractedContent.imageUrl;
+                    if (imageUrl != null && imageUrl.isNotEmpty) {
+                      coverImage = await _downloadAndSaveImage(imageUrl);
+                    }
+
+                    if (!modalContext.mounted) return;
+
+                    // Success - close modal and open recipe editor
+                    Navigator.of(modalContext, rootNavigator: true).pop();
+
+                    if (context.mounted) {
+                      final recipeEntry =
+                          _convertToRecipeEntry(recipe, coverImage: coverImage);
+                      showRecipeEditorModal(
+                        context,
+                        ref: ref,
+                        recipe: recipeEntry,
+                        isEditing: false,
+                      );
+                    }
+                  } on ShareExtractionException catch (e) {
+                    if (modalContext.mounted) {
+                      setModalState(() {
+                        isExtracting = false;
+                        errorMessage = e.message;
+                      });
+                    }
+                  } catch (e) {
+                    AppLogger.error('Post-subscription extraction failed', e);
+                    if (modalContext.mounted) {
+                      setModalState(() {
+                        isExtracting = false;
+                        errorMessage = 'Failed to extract recipe. Please try again.';
+                      });
+                    }
+                  }
+                });
+              }
+
+              // Build UI based on state
+              if (isExtracting && errorMessage == null) {
+                return Padding(
+                  padding: EdgeInsets.all(AppSpacing.xl),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text(
+                            'Importing Recipe',
+                            style: AppTypography.h4.copyWith(
+                              color: AppColors.of(builderContext).textPrimary,
+                            ),
+                          ),
+                        ],
+                      ),
+                      SizedBox(height: AppSpacing.xxl),
+                      const CupertinoActivityIndicator(radius: 16),
+                      SizedBox(height: AppSpacing.lg),
+                      Text(
+                        'Extracting recipe...',
+                        style: AppTypography.body.copyWith(
+                          color: AppColors.of(builderContext).textSecondary,
+                        ),
+                      ),
+                      SizedBox(height: AppSpacing.lg),
+                    ],
+                  ),
+                );
+              } else {
+                // Error state
+                return Padding(
+                  padding: EdgeInsets.all(AppSpacing.xl),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text(
+                            'Extraction Failed',
+                            style: AppTypography.h4.copyWith(
+                              color: AppColors.of(builderContext).textPrimary,
+                            ),
+                          ),
+                          AppCircleButton(
+                            icon: AppCircleButtonIcon.close,
+                            variant: AppCircleButtonVariant.neutral,
+                            size: 32,
+                            onPressed: () => Navigator.of(
+                              modalContext,
+                              rootNavigator: true,
+                            ).pop(),
+                          ),
+                        ],
+                      ),
+                      SizedBox(height: AppSpacing.lg),
+                      Text(
+                        errorMessage ?? 'An error occurred.',
+                        style: AppTypography.body.copyWith(
+                          color: AppColors.of(builderContext).textSecondary,
+                        ),
+                      ),
+                      SizedBox(height: AppSpacing.lg),
+                    ],
+                  ),
+                );
+              }
             },
           ),
         ),

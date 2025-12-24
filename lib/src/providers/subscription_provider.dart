@@ -131,6 +131,15 @@ class SubscriptionNotifier extends StateNotifier<SubscriptionState> {
     }
   }
 
+  /// Grant optimistic Plus access (before database syncs)
+  ///
+  /// Call this after a successful purchase when bypassing presentPaywall().
+  void grantOptimisticAccess() {
+    state = state.copyWith(optimisticHasPlus: true);
+    _ref.invalidate(hasPlusHybridProvider);
+    _updateSubscriptionState();
+  }
+
   /// Present paywall only if user doesn't have Plus subscription
   Future<bool> presentPaywallIfNeeded(BuildContext context) async {
     // Check hybrid state to ensure we have the most current status
