@@ -368,10 +368,22 @@ class _ShareSessionLoadedState extends ConsumerState<_ShareSessionLoaded>
     if (_session == null) return null;
 
     for (final item in _session!.items) {
+      // Check explicit URL items (existing behavior)
       if (item.isUrl && item.url != null) {
         final uri = Uri.tryParse(item.url!);
         if (uri != null && _extractor.isSupported(uri)) {
           return uri;
+        }
+      }
+
+      // Check text items that contain URLs (YouTube shares come as text)
+      if (item.isText && item.text != null) {
+        final text = item.text!.trim();
+        if (text.startsWith('http://') || text.startsWith('https://')) {
+          final uri = Uri.tryParse(text);
+          if (uri != null && _extractor.isSupported(uri)) {
+            return uri;
+          }
         }
       }
     }
@@ -693,6 +705,7 @@ class _ShareSessionLoadedState extends ConsumerState<_ShareSessionLoaded>
     final host = uri.host.toLowerCase();
     if (host.contains('instagram')) return 'instagram';
     if (host.contains('tiktok')) return 'tiktok';
+    if (host.contains('youtube') || host.contains('youtu.be')) return 'youtube';
     return 'other';
   }
 
@@ -909,6 +922,14 @@ class _ShareSessionLoadedState extends ConsumerState<_ShareSessionLoaded>
         sourceUrl = item.url;
         break;
       }
+      // Also check text items for URLs (YouTube shares come as text)
+      if (item.isText && item.text != null) {
+        final text = item.text!.trim();
+        if (text.startsWith('http://') || text.startsWith('https://')) {
+          sourceUrl = text;
+          break;
+        }
+      }
     }
 
     // 2. Detect platform from URL
@@ -920,7 +941,7 @@ class _ShareSessionLoadedState extends ConsumerState<_ShareSessionLoaded>
           sourcePlatform = 'Instagram';
         } else if (host.contains('tiktok')) {
           sourcePlatform = 'TikTok';
-        } else if (host.contains('youtube')) {
+        } else if (host.contains('youtube') || host.contains('youtu.be')) {
           sourcePlatform = 'YouTube';
         } else if (host.contains('facebook')) {
           sourcePlatform = 'Facebook';

@@ -4,6 +4,7 @@ import 'extractors/instagram_extractor.dart';
 import 'extractors/site_extractor.dart';
 import 'extractors/tiktok_extractor.dart';
 import 'extractors/webview_og_extractor.dart';
+import 'extractors/youtube_extractor.dart';
 
 /// Main service for extracting content from shared URLs.
 ///
@@ -25,6 +26,7 @@ class ContentExtractor {
   /// More specific/faster extractors should come first.
   /// If an extractor returns null, the next matching one is tried.
   final List<SiteExtractor> _extractors = [
+    YouTubeExtractor(),
     TikTokExtractor(),
     InstagramExtractor(), // Try HTTP first
     WebViewOGExtractor(), // Fallback for Instagram if HTTP fails
