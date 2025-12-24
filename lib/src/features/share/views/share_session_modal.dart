@@ -1386,6 +1386,39 @@ class _ShareSessionLoadedState extends ConsumerState<_ShareSessionLoaded>
   Widget build(BuildContext context) {
     // Show buttons immediately - don't wait for session to load
     // If session fails to load after user taps, we'll show error then
+
+    // Wrap in AnimatedSize for smooth modal size changes,
+    // and AnimatedSwitcher for sequential fade transition (no overlap)
+    return AnimatedSize(
+      duration: const Duration(milliseconds: 300),
+      curve: Curves.easeOutCubic,
+      alignment: Alignment.topCenter,
+      child: AnimatedSwitcher(
+        duration: const Duration(milliseconds: 400),
+        transitionBuilder: (child, animation) {
+          // Sequential fade: outgoing fades out in first half, incoming fades in second half
+          // This avoids the cross-fade overlap where both are partially visible
+          return FadeTransition(
+            opacity: CurvedAnimation(
+              parent: animation,
+              // Interval(0.5, 1.0) means:
+              // - Incoming (0→1): invisible until 0.5, then fades in 0.5→1.0
+              // - Outgoing (1→0): fades out 1.0→0.5, then stays invisible
+              curve: const Interval(0.5, 1.0, curve: Curves.easeOut),
+            ),
+            child: child,
+          );
+        },
+        child: KeyedSubtree(
+          key: ValueKey(_modalState),
+          child: _buildStateContent(context),
+        ),
+      ),
+    );
+  }
+
+  /// Build the content for the current modal state
+  Widget _buildStateContent(BuildContext context) {
     switch (_modalState) {
       case _ModalState.choosingAction:
         return _buildChoosingActionState(context);
