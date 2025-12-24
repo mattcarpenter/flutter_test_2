@@ -677,8 +677,14 @@ class _ShareSessionLoadedState extends ConsumerState<_ShareSessionLoaded>
       final usageService = await ref.read(previewUsageServiceProvider.future);
       await usageService.incrementShareRecipeUsage();
 
+      // Update modal state to empty (preview sheet covers it, but prevents flash of spinner if sheet moves)
+      if (mounted) {
+        setState(() {
+          _modalState = _ModalState.showingRecipePreview;
+        });
+      }
+
       // Show preview as bottom sheet (keep original modal open for valid context chain)
-      // The original modal stays hidden behind the preview sheet
       if (mounted) {
         _showPreviewBottomSheet(context, preview);
       }
@@ -734,9 +740,7 @@ class _ShareSessionLoadedState extends ConsumerState<_ShareSessionLoaded>
           child: ShareRecipePreviewResultContent(
             preview: preview,
             onSubscribe: () async {
-              // Close the preview sheet
-              Navigator.of(sheetContext, rootNavigator: true).pop();
-
+              // Don't close the preview sheet - paywall will cover it
               // Use the widget's context (share modal is still open behind the preview sheet)
               if (!context.mounted) return;
 
@@ -746,7 +750,10 @@ class _ShareSessionLoadedState extends ConsumerState<_ShareSessionLoaded>
                   .presentPaywall(context);
 
               if (purchased && context.mounted) {
-                // Close the share modal now
+                // Close preview sheet and share modal
+                if (sheetContext.mounted) {
+                  Navigator.of(sheetContext, rootNavigator: true).pop();
+                }
                 widget.onClose();
 
                 // Perform full extraction
@@ -755,6 +762,7 @@ class _ShareSessionLoadedState extends ConsumerState<_ShareSessionLoaded>
                   await _performPostSubscriptionExtraction(rootContext);
                 }
               }
+              // If not purchased, preview sheet stays visible (user can try again or close)
             },
           ),
         ),
