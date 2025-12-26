@@ -763,8 +763,12 @@ class _ShareSessionLoadedState extends ConsumerState<_ShareSessionLoaded>
               icon: AppCircleButtonIcon.close,
               variant: AppCircleButtonVariant.neutral,
               size: 32,
-              onPressed: () =>
-                  Navigator.of(sheetContext, rootNavigator: true).pop(),
+              onPressed: () {
+                // Close preview sheet
+                Navigator.of(sheetContext, rootNavigator: true).pop();
+                // Also close the share modal behind it
+                widget.onClose();
+              },
             ),
           ),
           child: ShareRecipePreviewResultContent(
