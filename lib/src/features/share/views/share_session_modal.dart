@@ -250,6 +250,9 @@ class _ShareSessionLoadedState extends ConsumerState<_ShareSessionLoaded>
   OGExtractedContent? _extractedContent;
   String? _extractionError;
 
+  // Animation state for smooth transitions
+  bool _isTransitioningOut = false;
+
   // Extractor instance
   final _extractor = ContentExtractor();
 
@@ -391,19 +394,45 @@ class _ShareSessionLoadedState extends ConsumerState<_ShareSessionLoaded>
   }
 
   /// Handle action button tap
+  /// Smoothly transition to a new modal state with staged animation:
+  /// 1. Fade out current content (200ms)
+  /// 2. Change state (triggers size animation + fade in)
+  Future<void> _transitionToState(_ModalState newState) async {
+    // Prevent double-transitions or no-op transitions
+    if (_isTransitioningOut || _modalState == newState) return;
+
+    // Start fade-out
+    setState(() {
+      _isTransitioningOut = true;
+    });
+
+    // Wait for fade-out to complete
+    await Future.delayed(const Duration(milliseconds: 200));
+
+    if (!mounted) return;
+
+    // Change state and start fade-in
+    setState(() {
+      _modalState = newState;
+      _isTransitioningOut = false;
+    });
+  }
+
   Future<void> _onActionTap(_ModalAction action) async {
     setState(() {
       _chosenAction = action;
-      // Show appropriate spinner based on action
-      if (action == _ModalAction.importRecipe) {
-        _modalState = _ModalState.extractingRecipe;
-      } else if (action == _ModalAction.saveAsClipping) {
-        _modalState = _ModalState.savingClipping;
-      } else {
-        _modalState = _ModalState.extractingContent;
-      }
     });
 
+    // Determine target state based on action
+    final newState = switch (action) {
+      _ModalAction.importRecipe => _ModalState.extractingRecipe,
+      _ModalAction.saveAsClipping => _ModalState.savingClipping,
+    };
+
+    // Animate to new state
+    await _transitionToState(newState);
+
+    // Process the content
     await _processContent();
   }
 
@@ -480,9 +509,10 @@ class _ShareSessionLoadedState extends ConsumerState<_ShareSessionLoaded>
   }
 
   /// Go back to action selection
-  void _goBack() {
+  void _goBack() async {
+    await _transitionToState(_ModalState.choosingAction);
+    if (!mounted) return;
     setState(() {
-      _modalState = _ModalState.choosingAction;
       _chosenAction = null;
       _extractedContent = null;
       _extractionError = null;
@@ -1387,32 +1417,21 @@ class _ShareSessionLoadedState extends ConsumerState<_ShareSessionLoaded>
     // Show buttons immediately - don't wait for session to load
     // If session fails to load after user taps, we'll show error then
 
-    // Wrap in AnimatedSize for smooth modal size changes,
-    // and AnimatedSwitcher for sequential fade transition (no overlap)
+    // Staged animation approach:
+    // 1. AnimatedOpacity handles fade out/in (controlled by _isTransitioningOut)
+    // 2. AnimatedSize handles modal size changes (triggered when _modalState changes)
+    //
+    // The key insight: we delay _modalState change until AFTER fade-out completes,
+    // so AnimatedSize only sees the new size after content is invisible.
     return AnimatedSize(
       duration: const Duration(milliseconds: 300),
       curve: Curves.easeOutCubic,
       alignment: Alignment.topCenter,
-      child: AnimatedSwitcher(
-        duration: const Duration(milliseconds: 400),
-        transitionBuilder: (child, animation) {
-          // Sequential fade: outgoing fades out in first half, incoming fades in second half
-          // This avoids the cross-fade overlap where both are partially visible
-          return FadeTransition(
-            opacity: CurvedAnimation(
-              parent: animation,
-              // Interval(0.5, 1.0) means:
-              // - Incoming (0→1): invisible until 0.5, then fades in 0.5→1.0
-              // - Outgoing (1→0): fades out 1.0→0.5, then stays invisible
-              curve: const Interval(0.5, 1.0, curve: Curves.easeOut),
-            ),
-            child: child,
-          );
-        },
-        child: KeyedSubtree(
-          key: ValueKey(_modalState),
-          child: _buildStateContent(context),
-        ),
+      child: AnimatedOpacity(
+        opacity: _isTransitioningOut ? 0.0 : 1.0,
+        duration: const Duration(milliseconds: 200),
+        curve: Curves.easeOut,
+        child: _buildStateContent(context),
       ),
     );
   }
