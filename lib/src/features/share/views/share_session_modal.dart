@@ -187,13 +187,22 @@ class _ErrorState extends StatelessWidget {
 enum _ModalState {
   choosingAction,
   extractingContent,
-  showingPreview,
   extractionError,
   // Recipe extraction states
   extractingRecipe, // Calling backend AI to structure recipe
   showingRecipePreview, // Non-Plus users see preview with paywall
   // Clipping states
   savingClipping, // Saving clipping to database
+}
+
+/// Types of extraction errors for context-aware error messages
+enum _ExtractionErrorType {
+  noRecipeDetected, // AI couldn't find recipe content in the post
+  noContentExtracted, // URL extraction failed or returned empty
+  noConnectivity, // User is offline
+  sessionFailed, // Share session load failed
+  clippingSaveFailed, // Clipping save failed - don't offer to save again
+  generic, // Catch-all for other errors
 }
 
 /// Helper class for gathered clipping content
@@ -249,6 +258,7 @@ class _ShareSessionLoadedState extends ConsumerState<_ShareSessionLoaded>
   _ModalAction? _chosenAction;
   OGExtractedContent? _extractedContent;
   String? _extractionError;
+  _ExtractionErrorType _errorType = _ExtractionErrorType.generic;
 
   // Animation state for smooth transitions
   bool _isTransitioningOut = false;
@@ -453,7 +463,8 @@ class _ShareSessionLoadedState extends ConsumerState<_ShareSessionLoaded>
       // Check if session failed to load
       if (_session == null) {
         setState(() {
-          _extractionError = 'Failed to load shared content.';
+          _extractionError = 'We couldn\'t load the shared content. Please try sharing again.';
+          _errorType = _ExtractionErrorType.sessionFailed;
           _modalState = _ModalState.extractionError;
         });
         return;
@@ -477,21 +488,14 @@ class _ShareSessionLoadedState extends ConsumerState<_ShareSessionLoaded>
         await _saveAsClipping();
       } else if (_extractedContent != null && _extractedContent!.hasContent) {
         AppLogger.info('OG extraction successful');
-
         // For Import Recipe, proceed to API call (spinner already showing)
-        if (_chosenAction == _ModalAction.importRecipe) {
-          await _handleImportRecipe();
-        } else {
-          // Other actions - show the preview state
-          setState(() {
-            _modalState = _ModalState.showingPreview;
-          });
-        }
+        await _handleImportRecipe();
       } else if (_extractionFuture != null) {
         // Had an extractable URL but extraction failed/returned empty
         AppLogger.warning('OG extraction returned no content');
         setState(() {
-          _extractionError = 'No content could be extracted from this link.';
+          _extractionError = 'We couldn\'t read this post. It may be private or unavailable.';
+          _errorType = _ExtractionErrorType.noContentExtracted;
           _modalState = _ModalState.extractionError;
         });
       } else {
@@ -502,21 +506,11 @@ class _ShareSessionLoadedState extends ConsumerState<_ShareSessionLoaded>
       AppLogger.error('Content processing failed', e, stack);
       if (!mounted) return;
       setState(() {
-        _extractionError = 'Failed to extract content. Please try again.';
+        _extractionError = 'Something went wrong while processing.';
+        _errorType = _ExtractionErrorType.generic;
         _modalState = _ModalState.extractionError;
       });
     }
-  }
-
-  /// Go back to action selection
-  void _goBack() async {
-    await _transitionToState(_ModalState.choosingAction);
-    if (!mounted) return;
-    setState(() {
-      _chosenAction = null;
-      _extractedContent = null;
-      _extractionError = null;
-    });
   }
 
   /// Proceed with the chosen action
@@ -537,8 +531,8 @@ class _ShareSessionLoadedState extends ConsumerState<_ShareSessionLoaded>
     if (connectivityResult.contains(ConnectivityResult.none)) {
       if (mounted) {
         setState(() {
-          _extractionError =
-              'No internet connection. Please check your network and try again.';
+          _extractionError = 'You\'re offline. Please check your internet connection and try again.';
+          _errorType = _ExtractionErrorType.noConnectivity;
           _modalState = _ModalState.extractionError;
         });
       }
@@ -578,8 +572,8 @@ class _ShareSessionLoadedState extends ConsumerState<_ShareSessionLoaded>
   Future<void> _performFullRecipeExtraction() async {
     if (_extractedContent == null || !_extractedContent!.hasContent) {
       setState(() {
-        _extractionError =
-            'No content available to extract. Please try again.';
+        _extractionError = 'We couldn\'t find any content to extract from this post.';
+        _errorType = _ExtractionErrorType.noContentExtracted;
         _modalState = _ModalState.extractionError;
       });
       return;
@@ -606,8 +600,8 @@ class _ShareSessionLoadedState extends ConsumerState<_ShareSessionLoaded>
 
       if (recipe == null) {
         setState(() {
-          _extractionError =
-              'Unable to extract a recipe from this post. It may not contain recipe information.';
+          _extractionError = 'This post doesn\'t appear to contain recipe information.\n\nTry sharing a post that includes ingredients or cooking steps in the caption.';
+          _errorType = _ExtractionErrorType.noRecipeDetected;
           _modalState = _ModalState.extractionError;
         });
         return;
@@ -652,13 +646,15 @@ class _ShareSessionLoadedState extends ConsumerState<_ShareSessionLoaded>
       if (!mounted) return;
       setState(() {
         _extractionError = e.message;
+        _errorType = _ExtractionErrorType.generic;
         _modalState = _ModalState.extractionError;
       });
     } catch (e) {
       AppLogger.error('Recipe extraction failed', e);
       if (!mounted) return;
       setState(() {
-        _extractionError = 'Failed to process. Please try again.';
+        _extractionError = 'Something went wrong while importing.';
+        _errorType = _ExtractionErrorType.generic;
         _modalState = _ModalState.extractionError;
       });
     }
@@ -668,8 +664,8 @@ class _ShareSessionLoadedState extends ConsumerState<_ShareSessionLoaded>
   Future<void> _performRecipePreviewExtraction() async {
     if (_extractedContent == null || !_extractedContent!.hasContent) {
       setState(() {
-        _extractionError =
-            'No content available to extract. Please try again.';
+        _extractionError = 'We couldn\'t find any content to extract from this post.';
+        _errorType = _ExtractionErrorType.noContentExtracted;
         _modalState = _ModalState.extractionError;
       });
       return;
@@ -696,8 +692,8 @@ class _ShareSessionLoadedState extends ConsumerState<_ShareSessionLoaded>
 
       if (preview == null) {
         setState(() {
-          _extractionError =
-              'Unable to detect a recipe in this post.';
+          _extractionError = 'This post doesn\'t appear to contain recipe information.\n\nTry sharing a post that includes ingredients or cooking steps in the caption.';
+          _errorType = _ExtractionErrorType.noRecipeDetected;
           _modalState = _ModalState.extractionError;
         });
         return;
@@ -722,13 +718,15 @@ class _ShareSessionLoadedState extends ConsumerState<_ShareSessionLoaded>
       if (!mounted) return;
       setState(() {
         _extractionError = e.message;
+        _errorType = _ExtractionErrorType.generic;
         _modalState = _ModalState.extractionError;
       });
     } catch (e) {
       AppLogger.error('Recipe preview failed', e);
       if (!mounted) return;
       setState(() {
-        _extractionError = 'Failed to process. Please try again.';
+        _extractionError = 'Something went wrong while importing.';
+        _errorType = _ExtractionErrorType.generic;
         _modalState = _ModalState.extractionError;
       });
     }
@@ -1370,8 +1368,16 @@ class _ShareSessionLoadedState extends ConsumerState<_ShareSessionLoaded>
 
     try {
       final userId = Supabase.instance.client.auth.currentUser?.id;
-      final householdState = ref.read(householdNotifierProvider);
-      final householdId = householdState.currentHousehold?.id;
+
+      // Get household ID if available (user may not be authenticated or in a household)
+      String? householdId;
+      try {
+        final householdState = ref.read(householdNotifierProvider);
+        householdId = householdState.currentHousehold?.id;
+      } catch (_) {
+        // User not authenticated or no household - that's fine, clippings don't require it
+        householdId = null;
+      }
 
       final quillContent = _buildQuillDelta(content);
 
@@ -1409,7 +1415,8 @@ class _ShareSessionLoadedState extends ConsumerState<_ShareSessionLoaded>
       AppLogger.error('Failed to save clipping', e, stack);
       if (mounted) {
         setState(() {
-          _extractionError = 'Failed to save clipping. Please try again.';
+          _extractionError = 'We couldn\'t save this clipping. Please try again.';
+          _errorType = _ExtractionErrorType.clippingSaveFailed;
           _modalState = _ModalState.extractionError;
         });
       }
@@ -1447,8 +1454,6 @@ class _ShareSessionLoadedState extends ConsumerState<_ShareSessionLoaded>
         return _buildChoosingActionState(context);
       case _ModalState.extractingContent:
         return _buildExtractingState(context);
-      case _ModalState.showingPreview:
-        return _buildPreviewState(context);
       case _ModalState.extractionError:
         return _buildExtractionErrorState(context);
       case _ModalState.extractingRecipe:
@@ -1558,98 +1563,39 @@ class _ShareSessionLoadedState extends ConsumerState<_ShareSessionLoaded>
     );
   }
 
-  Widget _buildPreviewState(BuildContext context) {
-    final preview = _extractedContent?.getPreview(maxLength: 300) ?? '';
-    final actionLabel = _chosenAction == _ModalAction.importRecipe
-        ? 'Import Recipe'
-        : 'Save as Clipping';
-
-    return Padding(
-      padding: EdgeInsets.all(AppSpacing.xl),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(
-                'Extracted Content',
-                style: AppTypography.h4.copyWith(
-                  color: AppColors.of(context).textPrimary,
-                ),
-              ),
-              AppCircleButton(
-                icon: AppCircleButtonIcon.close,
-                variant: AppCircleButtonVariant.neutral,
-                size: 32,
-                onPressed: widget.onClose,
-              ),
-            ],
-          ),
-          SizedBox(height: AppSpacing.lg),
-
-          // Content preview
-          Container(
-            width: double.infinity,
-            padding: EdgeInsets.all(AppSpacing.lg),
-            decoration: BoxDecoration(
-              color: AppColors.of(context).surface,
-              borderRadius: BorderRadius.circular(12),
-              border: Border.all(
-                color: AppColors.of(context).border,
-                width: 1,
-              ),
-            ),
-            child: Text(
-              preview.isNotEmpty ? preview : 'No preview available',
-              style: AppTypography.body.copyWith(
-                color: AppColors.of(context).textPrimary,
-              ),
-              maxLines: 6,
-              overflow: TextOverflow.ellipsis,
-            ),
-          ),
-          SizedBox(height: AppSpacing.xl),
-
-          // Action buttons
-          Row(
-            children: [
-              Expanded(
-                child: _SecondaryButton(
-                  label: 'Back',
-                  onTap: _goBack,
-                ),
-              ),
-              SizedBox(width: AppSpacing.md),
-              Expanded(
-                flex: 2,
-                child: _PrimaryButton(
-                  label: actionLabel,
-                  onTap: _proceedWithAction,
-                ),
-              ),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
-
   Widget _buildExtractionErrorState(BuildContext context) {
+    final colors = AppColors.of(context);
+
+    // Determine title based on error type
+    final title = switch (_errorType) {
+      _ExtractionErrorType.noRecipeDetected => 'No Recipe Found',
+      _ExtractionErrorType.noContentExtracted => 'Couldn\'t Read Post',
+      _ExtractionErrorType.noConnectivity => 'No Connection',
+      _ExtractionErrorType.sessionFailed => 'Something Went Wrong',
+      _ExtractionErrorType.clippingSaveFailed => 'Couldn\'t Save',
+      _ExtractionErrorType.generic => 'Import Failed',
+    };
+
+    // Only offer "Save as Clipping" for noRecipeDetected (when we got content but no recipe)
+    final canSaveAsClipping = _errorType == _ExtractionErrorType.noRecipeDetected &&
+        (_gatherClippingContent()?.hasContent ?? false);
+
     return Padding(
       padding: EdgeInsets.all(AppSpacing.xl),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          // Header with close button
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text(
-                'Extraction Failed',
-                style: AppTypography.h4.copyWith(
-                  color: AppColors.of(context).textPrimary,
+              Expanded(
+                child: Text(
+                  title,
+                  style: AppTypography.h4.copyWith(
+                    color: colors.textPrimary,
+                  ),
                 ),
               ),
               AppCircleButton(
@@ -1661,33 +1607,43 @@ class _ShareSessionLoadedState extends ConsumerState<_ShareSessionLoaded>
             ],
           ),
           SizedBox(height: AppSpacing.lg),
+
+          // Error message
           Text(
-            _extractionError ?? 'An error occurred while extracting content.',
+            _extractionError ?? 'Something went wrong.',
             style: AppTypography.body.copyWith(
-              color: AppColors.of(context).textSecondary,
+              color: colors.textSecondary,
             ),
           ),
+
           SizedBox(height: AppSpacing.xl),
 
-          // Action buttons
-          Row(
-            children: [
-              Expanded(
-                child: _SecondaryButton(
-                  label: 'Back',
-                  onTap: _goBack,
+          // For noRecipeDetected: offer Save as Clipping
+          // For all other errors: show Close button
+          if (canSaveAsClipping)
+            _ActionButton(
+              icon: Icons.note_add_outlined,
+              title: 'Save as Clipping',
+              description: 'Save the link for later',
+              onTap: _saveAsClipping,
+            )
+          else
+            SizedBox(
+              width: double.infinity,
+              child: CupertinoButton(
+                padding: EdgeInsets.symmetric(vertical: AppSpacing.md),
+                color: colors.surface,
+                borderRadius: BorderRadius.circular(8),
+                onPressed: widget.onClose,
+                child: Text(
+                  'Close',
+                  style: AppTypography.body.copyWith(
+                    color: colors.textPrimary,
+                    fontWeight: FontWeight.w600,
+                  ),
                 ),
               ),
-              SizedBox(width: AppSpacing.md),
-              Expanded(
-                flex: 2,
-                child: _PrimaryButton(
-                  label: 'Continue Anyway',
-                  onTap: _proceedWithAction,
-                ),
-              ),
-            ],
-          ),
+            ),
         ],
       ),
     );
@@ -1949,90 +1905,6 @@ class _ActionButton extends StatelessWidget {
                 color: colors.textSecondary,
               ),
             ],
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-/// Primary action button
-class _PrimaryButton extends StatelessWidget {
-  final String label;
-  final VoidCallback onTap;
-
-  const _PrimaryButton({
-    required this.label,
-    required this.onTap,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final colors = AppColors.of(context);
-
-    return Material(
-      color: colors.primary,
-      borderRadius: BorderRadius.circular(8),
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(8),
-        child: Container(
-          padding: EdgeInsets.symmetric(
-            horizontal: AppSpacing.lg,
-            vertical: AppSpacing.md,
-          ),
-          alignment: Alignment.center,
-          child: Text(
-            label,
-            style: AppTypography.body.copyWith(
-              color: colors.onPrimary,
-              fontWeight: FontWeight.w600,
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-/// Secondary action button
-class _SecondaryButton extends StatelessWidget {
-  final String label;
-  final VoidCallback onTap;
-
-  const _SecondaryButton({
-    required this.label,
-    required this.onTap,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final colors = AppColors.of(context);
-
-    return Material(
-      color: Colors.transparent,
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(8),
-        child: Container(
-          padding: EdgeInsets.symmetric(
-            horizontal: AppSpacing.lg,
-            vertical: AppSpacing.md,
-          ),
-          alignment: Alignment.center,
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(8),
-            border: Border.all(
-              color: colors.border,
-              width: 1,
-            ),
-          ),
-          child: Text(
-            label,
-            style: AppTypography.body.copyWith(
-              color: colors.textSecondary,
-              fontWeight: FontWeight.w500,
-            ),
           ),
         ),
       ),
