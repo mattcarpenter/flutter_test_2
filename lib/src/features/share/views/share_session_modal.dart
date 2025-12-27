@@ -1652,12 +1652,46 @@ class _ShareSessionLoadedState extends ConsumerState<_ShareSessionLoaded>
   }
 
   /// Build Quill Delta JSON from clipping content
-  String _buildQuillDelta(_ClippingContent content) {
+  ///
+  /// If [recipe] is provided (from JSON-LD extraction), formats the
+  /// ingredients and steps as readable text in the clipping body.
+  String _buildQuillDelta(_ClippingContent content, {ExtractedRecipe? recipe}) {
     final ops = <Map<String, dynamic>>[];
 
     // Body text (if any)
     if (content.bodyText != null && content.bodyText!.isNotEmpty) {
       ops.add({'insert': '${content.bodyText}\n\n'});
+    }
+
+    // If we have JSON-LD recipe data, format ingredients and steps
+    if (recipe != null) {
+      // Ingredients section
+      final ingredients = recipe.ingredients.where((i) => i.isIngredient).toList();
+      if (ingredients.isNotEmpty) {
+        ops.add({
+          'insert': 'Ingredients',
+          'attributes': {'bold': true},
+        });
+        ops.add({'insert': '\n'});
+        for (final ingredient in ingredients) {
+          ops.add({'insert': '• ${ingredient.name}\n'});
+        }
+        ops.add({'insert': '\n'});
+      }
+
+      // Instructions section
+      final steps = recipe.steps.where((s) => s.isStep).toList();
+      if (steps.isNotEmpty) {
+        ops.add({
+          'insert': 'Instructions',
+          'attributes': {'bold': true},
+        });
+        ops.add({'insert': '\n'});
+        for (var i = 0; i < steps.length; i++) {
+          ops.add({'insert': '${i + 1}. ${steps[i].text}\n'});
+        }
+        ops.add({'insert': '\n'});
+      }
     }
 
     // Source URL as clickable link
@@ -1701,7 +1735,9 @@ class _ShareSessionLoadedState extends ConsumerState<_ShareSessionLoaded>
         householdId = null;
       }
 
-      final quillContent = _buildQuillDelta(content);
+      // Pass JSON-LD recipe data if available for richer clipping content
+      final jsonLdRecipe = _webExtractionResult?.recipe;
+      final quillContent = _buildQuillDelta(content, recipe: jsonLdRecipe);
 
       final newClippingId = await ref.read(clippingsProvider.notifier).addClipping(
         userId: userId,

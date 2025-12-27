@@ -217,14 +217,91 @@ class JsonLdRecipeParser {
   }
 
   /// Extracts a string from a value that might be a string, object, or null.
+  /// Decodes HTML entities that may be present in JSON-LD content.
   String? _extractString(dynamic value) {
     if (value == null) return null;
-    if (value is String) return value.trim().isEmpty ? null : value.trim();
+    if (value is String) {
+      final decoded = _decodeHtmlEntities(value.trim());
+      return decoded.isEmpty ? null : decoded;
+    }
     if (value is Map) {
       // Some schemas use {"@id": "url"} or {"@value": "text"}
       return _extractString(value['@value'] ?? value['@id'] ?? value['name']);
     }
-    return value.toString();
+    return _decodeHtmlEntities(value.toString());
+  }
+
+  /// Decodes HTML entities in a string.
+  ///
+  /// Handles:
+  /// - Common named entities (&nbsp;, &amp;, &lt;, &gt;, &quot;, &apos;, etc.)
+  /// - Decimal numeric entities (&#160;, &#8217;, etc.)
+  /// - Hexadecimal numeric entities (&#x00A0;, &#xA0;, etc.)
+  String _decodeHtmlEntities(String input) {
+    if (!input.contains('&')) return input;
+
+    // Common named entities
+    const namedEntities = {
+      '&nbsp;': '\u00A0', // Non-breaking space
+      '&amp;': '&',
+      '&lt;': '<',
+      '&gt;': '>',
+      '&quot;': '"',
+      '&apos;': "'",
+      '&#39;': "'", // Alternative apostrophe
+      '&mdash;': '—',
+      '&ndash;': '–',
+      '&ldquo;': '"',
+      '&rdquo;': '"',
+      '&lsquo;': ''',
+      '&rsquo;': ''',
+      '&hellip;': '…',
+      '&deg;': '°',
+      '&frac12;': '½',
+      '&frac14;': '¼',
+      '&frac34;': '¾',
+      '&times;': '×',
+      '&divide;': '÷',
+      '&copy;': '©',
+      '&reg;': '®',
+      '&trade;': '™',
+    };
+
+    var result = input;
+
+    // Replace named entities
+    namedEntities.forEach((entity, char) {
+      result = result.replaceAll(entity, char);
+    });
+
+    // Replace decimal numeric entities (&#123;)
+    result = result.replaceAllMapped(
+      RegExp(r'&#(\d+);'),
+      (match) {
+        final code = int.tryParse(match.group(1)!);
+        if (code != null && code > 0 && code <= 0x10FFFF) {
+          return String.fromCharCode(code);
+        }
+        return match.group(0)!;
+      },
+    );
+
+    // Replace hexadecimal numeric entities (&#x7B; or &#X7B;)
+    result = result.replaceAllMapped(
+      RegExp(r'&#[xX]([0-9a-fA-F]+);'),
+      (match) {
+        final code = int.tryParse(match.group(1)!, radix: 16);
+        if (code != null && code > 0 && code <= 0x10FFFF) {
+          return String.fromCharCode(code);
+        }
+        return match.group(0)!;
+      },
+    );
+
+    // Normalize non-breaking spaces to regular spaces for readability
+    result = result.replaceAll('\u00A0', ' ');
+
+    return result;
   }
 
   /// Extracts servings from recipeYield which can be various formats.
