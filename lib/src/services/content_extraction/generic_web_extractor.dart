@@ -37,6 +37,9 @@ class WebExtractionResult {
   /// The source URL
   final String? sourceUrl;
 
+  /// The recipe image URL (from JSON-LD or og:image fallback)
+  final String? imageUrl;
+
   const WebExtractionResult({
     this.recipe,
     this.preview,
@@ -44,6 +47,7 @@ class WebExtractionResult {
     this.error,
     this.html,
     this.sourceUrl,
+    this.imageUrl,
   });
 
   /// Whether extraction produced a usable result
@@ -127,6 +131,7 @@ class GenericWebExtractor {
   /// 1. Try to parse JSON-LD schema (free, instant)
   /// 2. If found, return the recipe immediately
   /// 3. If not found, return result with HTML for backend fallback
+  /// 4. Always try to extract image (JSON-LD first, then og:image fallback)
   Future<WebExtractionResult> extractFromHtml(
     String html, {
     String? sourceUrl,
@@ -138,10 +143,18 @@ class GenericWebExtractor {
 
     // Step 1: Try JSON-LD schema parsing (free, local)
     final recipe = _jsonLdParser.parse(html);
+
+    // Step 2: Extract image URL (JSON-LD image takes priority, fallback to og:image)
+    String? imageUrl = recipe?.imageUrl;
+    if (imageUrl == null || imageUrl.isEmpty) {
+      imageUrl = _extractOgImage(html);
+    }
+
     if (recipe != null) {
       AppLogger.info(
         'GenericWebExtractor: Found recipe in JSON-LD schema '
-        '(title=${recipe.title}, ingredients=${recipe.ingredients.length})',
+        '(title=${recipe.title}, ingredients=${recipe.ingredients.length}, '
+        'hasImage=${imageUrl != null})',
       );
 
       return WebExtractionResult(
@@ -149,20 +162,88 @@ class GenericWebExtractor {
         source: WebExtractionSource.jsonLdSchema,
         html: html,
         sourceUrl: sourceUrl,
+        imageUrl: imageUrl,
       );
     }
 
-    // Step 2: No JSON-LD found - return HTML for backend extraction
+    // Step 3: No JSON-LD found - return HTML for backend extraction
     AppLogger.info(
       'GenericWebExtractor: No JSON-LD schema found, '
-      'HTML available for backend extraction',
+      'HTML available for backend extraction '
+      '(hasImage=${imageUrl != null})',
     );
 
     return WebExtractionResult(
       html: html,
       sourceUrl: sourceUrl,
+      imageUrl: imageUrl, // og:image for use after backend extraction
       // No recipe yet - caller should use WebExtractionService for backend
     );
+  }
+
+  /// Extracts og:image URL from HTML meta tags.
+  ///
+  /// Checks for:
+  /// 1. og:image meta tag
+  /// 2. twitter:image meta tag (fallback)
+  String? _extractOgImage(String html) {
+    // Try og:image first
+    final ogPattern = RegExp(
+      '<meta[^>]*property=["\']og:image["\'][^>]*content=["\']([^"\']+)["\']',
+      caseSensitive: false,
+    );
+    var match = ogPattern.firstMatch(html);
+    if (match != null) {
+      final url = match.group(1)?.trim();
+      if (url != null && url.isNotEmpty) {
+        AppLogger.debug('GenericWebExtractor: Found og:image');
+        return url;
+      }
+    }
+
+    // Also try content before property (some sites have reversed order)
+    final ogPatternReversed = RegExp(
+      '<meta[^>]*content=["\']([^"\']+)["\'][^>]*property=["\']og:image["\']',
+      caseSensitive: false,
+    );
+    match = ogPatternReversed.firstMatch(html);
+    if (match != null) {
+      final url = match.group(1)?.trim();
+      if (url != null && url.isNotEmpty) {
+        AppLogger.debug('GenericWebExtractor: Found og:image (reversed)');
+        return url;
+      }
+    }
+
+    // Fallback to twitter:image
+    final twitterPattern = RegExp(
+      '<meta[^>]*name=["\']twitter:image["\'][^>]*content=["\']([^"\']+)["\']',
+      caseSensitive: false,
+    );
+    match = twitterPattern.firstMatch(html);
+    if (match != null) {
+      final url = match.group(1)?.trim();
+      if (url != null && url.isNotEmpty) {
+        AppLogger.debug('GenericWebExtractor: Found twitter:image');
+        return url;
+      }
+    }
+
+    // Also try reversed for twitter
+    final twitterPatternReversed = RegExp(
+      '<meta[^>]*content=["\']([^"\']+)["\'][^>]*name=["\']twitter:image["\']',
+      caseSensitive: false,
+    );
+    match = twitterPatternReversed.firstMatch(html);
+    if (match != null) {
+      final url = match.group(1)?.trim();
+      if (url != null && url.isNotEmpty) {
+        AppLogger.debug('GenericWebExtractor: Found twitter:image (reversed)');
+        return url;
+      }
+    }
+
+    return null;
   }
 
   /// Extracts just a preview from the HTML using JSON-LD.

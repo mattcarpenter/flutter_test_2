@@ -688,11 +688,23 @@ class _ShareSessionLoadedState extends ConsumerState<_ShareSessionLoaded>
     // Case 1: JSON-LD recipe found (free for everyone!)
     if (result.recipe != null && result.isFromJsonLd) {
       AppLogger.info('JSON-LD recipe found - proceeding with free import');
+
+      // Download image if available (JSON-LD image or og:image fallback)
+      RecipeImage? coverImage;
+      final imageUrl = result.imageUrl;
+      if (imageUrl != null && imageUrl.isNotEmpty) {
+        AppLogger.info('Downloading recipe image from: ${imageUrl.substring(0, imageUrl.length.clamp(0, 80))}...');
+        coverImage = await _downloadAndSaveImage(imageUrl);
+        AppLogger.info('Image download result: ${coverImage != null ? "success" : "failed"}');
+      }
+
+      if (!mounted) return;
+
       // Recipe already extracted from structured data - open editor directly
       widget.onClose();
 
       if (context.mounted) {
-        final recipeEntry = _convertToRecipeEntry(result.recipe!);
+        final recipeEntry = _convertToRecipeEntry(result.recipe!, coverImage: coverImage);
         showRecipeEditorModal(
           context,
           ref: ref,
@@ -775,11 +787,22 @@ class _ShareSessionLoadedState extends ConsumerState<_ShareSessionLoaded>
         return;
       }
 
+      // Download image if available (og:image extracted before backend call)
+      RecipeImage? coverImage;
+      final imageUrl = webResult.imageUrl;
+      if (imageUrl != null && imageUrl.isNotEmpty) {
+        AppLogger.info('Downloading recipe image from: ${imageUrl.substring(0, imageUrl.length.clamp(0, 80))}...');
+        coverImage = await _downloadAndSaveImage(imageUrl);
+        AppLogger.info('Image download result: ${coverImage != null ? "success" : "failed"}');
+      }
+
+      if (!mounted) return;
+
       // Success - close modal and open recipe editor
       widget.onClose();
 
       if (context.mounted) {
-        final recipeEntry = _convertToRecipeEntry(recipe);
+        final recipeEntry = _convertToRecipeEntry(recipe, coverImage: coverImage);
         showRecipeEditorModal(
           context,
           ref: ref,

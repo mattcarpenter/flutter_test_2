@@ -50,6 +50,7 @@ class ExtractedRecipe {
   final List<ExtractedIngredient> ingredients;
   final List<ExtractedStep> steps;
   final String? source;
+  final String? imageUrl;
 
   const ExtractedRecipe({
     required this.title,
@@ -60,6 +61,7 @@ class ExtractedRecipe {
     required this.ingredients,
     required this.steps,
     this.source,
+    this.imageUrl,
   });
 
   factory ExtractedRecipe.fromJson(Map<String, dynamic> json) {
@@ -78,6 +80,7 @@ class ExtractedRecipe {
               .toList() ??
           [],
       source: json['source'] as String?,
+      imageUrl: json['imageUrl'] as String?,
     );
   }
 

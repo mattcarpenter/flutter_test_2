@@ -141,12 +141,14 @@ class JsonLdRecipeParser {
     final ingredients = _parseIngredients(data['recipeIngredient']);
     final steps = _parseInstructions(data['recipeInstructions']);
     final source = _extractString(data['url']) ?? _extractString(data['mainEntityOfPage']);
+    final imageUrl = _extractImageUrl(data['image']);
 
     AppLogger.debug(
       'Parsed Recipe from JSON-LD: '
       'title=$title, '
       'ingredients=${ingredients.length}, '
-      'steps=${steps.length}',
+      'steps=${steps.length}, '
+      'hasImage=${imageUrl != null}',
     );
 
     return ExtractedRecipe(
@@ -158,7 +160,44 @@ class JsonLdRecipeParser {
       ingredients: ingredients,
       steps: steps,
       source: source,
+      imageUrl: imageUrl,
     );
+  }
+
+  /// Extracts image URL from JSON-LD image property.
+  ///
+  /// Handles multiple formats:
+  /// - Simple URL string: "https://example.com/image.jpg"
+  /// - Array of URLs: ["https://...", "https://..."]
+  /// - ImageObject: {"@type": "ImageObject", "url": "https://..."}
+  /// - Array of ImageObjects: [{"@type": "ImageObject", "url": "..."}]
+  String? _extractImageUrl(dynamic value) {
+    if (value == null) return null;
+
+    // Simple string URL
+    if (value is String) {
+      return value.trim().isNotEmpty ? value.trim() : null;
+    }
+
+    // Array - take the first valid URL
+    if (value is List && value.isNotEmpty) {
+      for (final item in value) {
+        final url = _extractImageUrl(item);
+        if (url != null) return url;
+      }
+      return null;
+    }
+
+    // ImageObject or similar object with url property
+    if (value is Map<String, dynamic>) {
+      // Try common URL properties
+      final url = value['url'] ?? value['contentUrl'] ?? value['@id'];
+      if (url is String && url.trim().isNotEmpty) {
+        return url.trim();
+      }
+    }
+
+    return null;
   }
 
   /// Parses Recipe schema data into RecipePreview.
