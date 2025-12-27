@@ -26,8 +26,10 @@ import '../../../../database/models/recipe_images.dart';
 import '../../../../database/models/steps.dart' as db;
 import '../../../providers/subscription_provider.dart';
 import '../../../services/content_extraction/content_extractor.dart';
+import '../../../services/content_extraction/generic_web_extractor.dart';
 import '../../../services/logging/app_logger.dart';
 import '../../../services/share_extraction_service.dart';
+import '../../../services/web_extraction_service.dart';
 import '../../../services/share_session_service.dart';
 import '../../../theme/colors.dart';
 import '../../../theme/spacing.dart';
@@ -263,14 +265,20 @@ class _ShareSessionLoadedState extends ConsumerState<_ShareSessionLoaded>
   // Animation state for smooth transitions
   bool _isTransitioningOut = false;
 
-  // Extractor instance
+  // Extractor instances
   final _extractor = ContentExtractor();
+  final _genericWebExtractor = GenericWebExtractor();
 
   // Preemptive extraction future - started when session loads if Instagram URL found
   Future<OGExtractedContent?>? _extractionFuture;
 
   // Completer to signal when OG extraction is done (allows early button tap)
   Completer<void>? _ogExtractionCompleter;
+
+  // Generic web extraction result (for non-platform URLs)
+  WebExtractionResult? _webExtractionResult;
+  Future<WebExtractionResult?>? _webExtractionFuture;
+  Completer<void>? _webExtractionCompleter;
 
   @override
   void initState() {
@@ -307,6 +315,7 @@ class _ShareSessionLoadedState extends ConsumerState<_ShareSessionLoaded>
   void _startPreemptiveExtraction() {
     final extractableUrl = _findExtractableUrl();
     if (extractableUrl != null) {
+      // Known platform (Instagram, TikTok, YouTube) - use OG extraction
       AppLogger.info('Starting preemptive OG extraction for: $extractableUrl');
       _ogExtractionCompleter = Completer<void>();
       _extractionFuture = _extractor.extract(extractableUrl).then((content) {
@@ -322,9 +331,46 @@ class _ShareSessionLoadedState extends ConsumerState<_ShareSessionLoaded>
         }
         return null;
       });
+      // No web extraction for known platforms
+      _webExtractionCompleter = Completer<void>()..complete();
     } else {
-      // No extractable URL - complete immediately
+      // No known platform URL - check for generic URL
       _ogExtractionCompleter = Completer<void>()..complete();
+
+      final genericUrl = _findGenericUrl();
+      if (genericUrl != null) {
+        // Generic website - start web extraction (JSON-LD parsing)
+        AppLogger.info('Starting preemptive web extraction for: $genericUrl');
+        _webExtractionCompleter = Completer<void>();
+        _webExtractionFuture = _genericWebExtractor.extractFromUrl(genericUrl).then((result) {
+          _webExtractionResult = result;
+          AppLogger.info(
+            'Web extraction completed: '
+            'success=${result.success}, '
+            'isFromJsonLd=${result.isFromJsonLd}, '
+            'hasHtml=${result.hasHtml}, '
+            'error=${result.error}',
+          );
+          if (!_webExtractionCompleter!.isCompleted) {
+            _webExtractionCompleter!.complete();
+          }
+          return result;
+        }).catchError((Object error) {
+          AppLogger.error('Web extraction failed', error);
+          // Store the error result so we can show an appropriate message
+          _webExtractionResult = WebExtractionResult(
+            error: 'Could not load the page. Please try again.',
+            sourceUrl: genericUrl.toString(),
+          );
+          if (!_webExtractionCompleter!.isCompleted) {
+            _webExtractionCompleter!.complete();
+          }
+          return _webExtractionResult!;
+        });
+      } else {
+        // No URL at all
+        _webExtractionCompleter = Completer<void>()..complete();
+      }
     }
   }
 
@@ -376,7 +422,7 @@ class _ShareSessionLoadedState extends ConsumerState<_ShareSessionLoaded>
     return _session!.items.any((item) => !item.isImage && !item.isMovie);
   }
 
-  /// Find a URL in the session that we can extract content from
+  /// Find a URL in the session that we can extract content from (known platforms)
   Uri? _findExtractableUrl() {
     if (_session == null) return null;
 
@@ -395,6 +441,36 @@ class _ShareSessionLoadedState extends ConsumerState<_ShareSessionLoaded>
         if (text.startsWith('http://') || text.startsWith('https://')) {
           final uri = Uri.tryParse(text);
           if (uri != null && _extractor.isSupported(uri)) {
+            return uri;
+          }
+        }
+      }
+    }
+    return null;
+  }
+
+  /// Find a generic URL in the session (not supported by known platform extractors)
+  Uri? _findGenericUrl() {
+    if (_session == null) return null;
+
+    for (final item in _session!.items) {
+      // Check explicit URL items
+      if (item.isUrl && item.url != null) {
+        final uri = Uri.tryParse(item.url!);
+        if (uri != null && !_extractor.isSupported(uri)) {
+          // Ensure it's a valid HTTP(S) URL
+          if (uri.scheme == 'http' || uri.scheme == 'https') {
+            return uri;
+          }
+        }
+      }
+
+      // Check text items that contain URLs
+      if (item.isText && item.text != null) {
+        final text = item.text!.trim();
+        if (text.startsWith('http://') || text.startsWith('https://')) {
+          final uri = Uri.tryParse(text);
+          if (uri != null && !_extractor.isSupported(uri)) {
             return uri;
           }
         }
@@ -470,26 +546,31 @@ class _ShareSessionLoadedState extends ConsumerState<_ShareSessionLoaded>
         return;
       }
 
-      // Step 1: Wait for OG extraction to complete (if started)
-      // This uses the completer which is more reliable than awaiting the future
-      // The completer is always created (either with extraction or completed immediately)
+      // Step 1: Wait for extractions to complete (if started)
+      // Wait for both OG extraction and web extraction completers
       if (_ogExtractionCompleter != null &&
           !_ogExtractionCompleter!.isCompleted) {
         await _ogExtractionCompleter!.future;
+      }
+      if (_webExtractionCompleter != null &&
+          !_webExtractionCompleter!.isCompleted) {
+        await _webExtractionCompleter!.future;
       }
 
       if (!mounted) return;
 
       // Step 2: Handle result based on chosen action
-      // _extractedContent is set by the extraction future's .then() callback
       if (_chosenAction == _ModalAction.saveAsClipping) {
         // For clippings, save directly with whatever content we have
         // (OG extraction is optional - we can save just the URL if that's all we got)
         await _saveAsClipping();
       } else if (_extractedContent != null && _extractedContent!.hasContent) {
-        AppLogger.info('OG extraction successful');
-        // For Import Recipe, proceed to API call (spinner already showing)
+        // Known platform with OG content (Instagram, TikTok, YouTube)
+        AppLogger.info('OG extraction successful, proceeding with recipe import');
         await _handleImportRecipe();
+      } else if (_webExtractionResult != null) {
+        // Generic website - handle web extraction result
+        await _handleGenericWebImport();
       } else if (_extractionFuture != null) {
         // Had an extractable URL but extraction failed/returned empty
         AppLogger.warning('OG extraction returned no content');
@@ -498,8 +579,17 @@ class _ShareSessionLoadedState extends ConsumerState<_ShareSessionLoaded>
           _errorType = _ExtractionErrorType.noContentExtracted;
           _modalState = _ModalState.extractionError;
         });
+      } else if (_webExtractionFuture != null) {
+        // Had a generic URL but web extraction failed
+        AppLogger.warning('Web extraction returned no result');
+        setState(() {
+          _extractionError = 'We couldn\'t read this page. Please try again.';
+          _errorType = _ExtractionErrorType.noContentExtracted;
+          _modalState = _ModalState.extractionError;
+        });
       } else {
-        // No extractable URL, proceed directly
+        // No URL at all - this shouldn't happen for recipe import
+        // but handle gracefully
         await _proceedWithAction();
       }
     } catch (e, stack) {
@@ -565,6 +655,215 @@ class _ShareSessionLoadedState extends ConsumerState<_ShareSessionLoaded>
 
       // Show preview extraction
       await _performRecipePreviewExtraction();
+    }
+  }
+
+  /// Handle generic web import (non-platform URLs like recipe blogs)
+  ///
+  /// This handles URLs that aren't from Instagram/TikTok/YouTube.
+  /// Uses a two-tier strategy:
+  /// 1. JSON-LD schema parsing (free, local) - if the site has structured data
+  /// 2. Backend Readability + OpenAI extraction (requires Plus) - fallback
+  Future<void> _handleGenericWebImport() async {
+    final result = _webExtractionResult;
+    if (result == null) {
+      setState(() {
+        _extractionError = 'No content available to extract.';
+        _errorType = _ExtractionErrorType.noContentExtracted;
+        _modalState = _ModalState.extractionError;
+      });
+      return;
+    }
+
+    // Check for extraction error
+    if (result.error != null && !result.success) {
+      setState(() {
+        _extractionError = result.error!;
+        _errorType = _ExtractionErrorType.noContentExtracted;
+        _modalState = _ModalState.extractionError;
+      });
+      return;
+    }
+
+    // Case 1: JSON-LD recipe found (free for everyone!)
+    if (result.recipe != null && result.isFromJsonLd) {
+      AppLogger.info('JSON-LD recipe found - proceeding with free import');
+      // Recipe already extracted from structured data - open editor directly
+      widget.onClose();
+
+      if (context.mounted) {
+        final recipeEntry = _convertToRecipeEntry(result.recipe!);
+        showRecipeEditorModal(
+          context,
+          ref: ref,
+          recipe: recipeEntry,
+          isEditing: false,
+        );
+      }
+      return;
+    }
+
+    // Case 2: No JSON-LD - need backend extraction (requires Plus)
+    // Check connectivity first (backend call required)
+    final connectivityResult = await Connectivity().checkConnectivity();
+    if (connectivityResult.contains(ConnectivityResult.none)) {
+      if (mounted) {
+        setState(() {
+          _extractionError = 'You\'re offline. Please check your internet connection and try again.';
+          _errorType = _ExtractionErrorType.noConnectivity;
+          _modalState = _ModalState.extractionError;
+        });
+      }
+      return;
+    }
+
+    if (!mounted) return;
+
+    // Check Plus subscription
+    final hasPlus = ref.read(effectiveHasPlusProvider);
+
+    if (hasPlus) {
+      // Plus user - perform backend extraction
+      await _performWebBackendExtraction(result);
+    } else {
+      // Non-Plus user - check preview limit
+      final usageService = await ref.read(previewUsageServiceProvider.future);
+
+      if (!usageService.hasShareRecipePreviewsRemaining()) {
+        // Limit exceeded - go straight to paywall
+        if (!mounted) return;
+        final purchased =
+            await ref.read(subscriptionProvider.notifier).presentPaywall(context);
+        if (purchased && mounted) {
+          // User subscribed - now do backend extraction
+          await _performWebBackendExtraction(result);
+        }
+        return;
+      }
+
+      // Show preview extraction
+      await _performWebPreviewExtraction(result);
+    }
+  }
+
+  /// Perform backend extraction for generic websites (Plus users)
+  Future<void> _performWebBackendExtraction(WebExtractionResult webResult) async {
+    if (!webResult.hasHtml) {
+      setState(() {
+        _extractionError = 'No content available to extract.';
+        _errorType = _ExtractionErrorType.noContentExtracted;
+        _modalState = _ModalState.extractionError;
+      });
+      return;
+    }
+
+    try {
+      final service = ref.read(webExtractionServiceProvider);
+      final recipe = await service.extractRecipe(
+        html: webResult.html!,
+        sourceUrl: webResult.sourceUrl,
+      );
+
+      if (!mounted) return;
+
+      if (recipe == null) {
+        setState(() {
+          _extractionError = 'This page doesn\'t appear to contain recipe information.\n\nTry sharing a page that includes a recipe.';
+          _errorType = _ExtractionErrorType.noRecipeDetected;
+          _modalState = _ModalState.extractionError;
+        });
+        return;
+      }
+
+      // Success - close modal and open recipe editor
+      widget.onClose();
+
+      if (context.mounted) {
+        final recipeEntry = _convertToRecipeEntry(recipe);
+        showRecipeEditorModal(
+          context,
+          ref: ref,
+          recipe: recipeEntry,
+          isEditing: false,
+        );
+      }
+    } on WebExtractionException catch (e) {
+      if (!mounted) return;
+      setState(() {
+        _extractionError = e.message;
+        _errorType = _ExtractionErrorType.generic;
+        _modalState = _ModalState.extractionError;
+      });
+    } catch (e) {
+      AppLogger.error('Web backend extraction failed', e);
+      if (!mounted) return;
+      setState(() {
+        _extractionError = 'Something went wrong while importing.';
+        _errorType = _ExtractionErrorType.generic;
+        _modalState = _ModalState.extractionError;
+      });
+    }
+  }
+
+  /// Perform preview extraction for generic websites (non-Plus users)
+  Future<void> _performWebPreviewExtraction(WebExtractionResult webResult) async {
+    if (!webResult.hasHtml) {
+      setState(() {
+        _extractionError = 'This site requires Plus subscription for recipe extraction.';
+        _errorType = _ExtractionErrorType.noContentExtracted;
+        _modalState = _ModalState.extractionError;
+      });
+      return;
+    }
+
+    try {
+      final service = ref.read(webExtractionServiceProvider);
+      final preview = await service.previewRecipe(
+        html: webResult.html!,
+        sourceUrl: webResult.sourceUrl,
+      );
+
+      if (!mounted) return;
+
+      if (preview == null) {
+        setState(() {
+          _extractionError = 'This page doesn\'t appear to contain recipe information.\n\nTry sharing a page that includes a recipe.';
+          _errorType = _ExtractionErrorType.noRecipeDetected;
+          _modalState = _ModalState.extractionError;
+        });
+        return;
+      }
+
+      // Increment usage counter
+      final usageService = await ref.read(previewUsageServiceProvider.future);
+      await usageService.incrementShareRecipeUsage();
+
+      // Update modal state
+      if (mounted) {
+        setState(() {
+          _modalState = _ModalState.showingRecipePreview;
+        });
+      }
+
+      // Show preview as bottom sheet
+      if (mounted) {
+        _showPreviewBottomSheet(context, preview);
+      }
+    } on WebExtractionException catch (e) {
+      if (!mounted) return;
+      setState(() {
+        _extractionError = e.message;
+        _errorType = _ExtractionErrorType.generic;
+        _modalState = _ModalState.extractionError;
+      });
+    } catch (e) {
+      AppLogger.error('Web preview extraction failed', e);
+      if (!mounted) return;
+      setState(() {
+        _extractionError = 'Something went wrong while importing.';
+        _errorType = _ExtractionErrorType.generic;
+        _modalState = _ModalState.extractionError;
+      });
     }
   }
 
