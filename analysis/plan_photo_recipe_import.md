@@ -8,7 +8,8 @@ Add the ability to import recipes from photos via two paths:
 
 ### Key Requirements
 - Max 2 photos per extraction (for cookbook multi-page scenarios)
-- 2 extractions per day limit (separate from 5/day web preview quota)
+- **Free users**: 2 photo previews per day (separate from 5/day web preview quota)
+- **Plus users**: Unlimited extractions (soft cap of 50/day to prevent abuse)
 - Always requires API call (no local fallback like JSON-LD)
 - Supports two use cases:
   - Extract/structure a photo of an actual recipe
