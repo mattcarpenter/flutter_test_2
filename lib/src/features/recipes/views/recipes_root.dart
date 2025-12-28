@@ -111,8 +111,9 @@ class RecipesTab extends ConsumerWidget {
               showAddSmartFolderModal(context);
             },
           ),
+          AdaptiveMenuItem.divider(),
           AdaptiveMenuItem(
-            title: 'Add Recipe',
+            title: 'New Recipe',
             icon: const Icon(CupertinoIcons.book),
             onTap: () {
               // Don't pass folderId for uncategorized folder
@@ -120,14 +121,14 @@ class RecipesTab extends ConsumerWidget {
             },
           ),
           AdaptiveMenuItem(
-            title: 'Take Photo',
+            title: 'Import from Camera',
             icon: const Icon(CupertinoIcons.camera),
             onTap: () {
               showPhotoCaptureReviewModal(context, ref: ref);
             },
           ),
           AdaptiveMenuItem(
-            title: 'Choose Photo',
+            title: 'Import from Photos',
             icon: const Icon(CupertinoIcons.photo),
             onTap: () {
               showPhotoImportModal(context, ref: ref, source: ImageSource.gallery);

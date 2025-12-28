@@ -213,7 +213,7 @@ class RecipesFolderPage extends ConsumerWidget {
       trailing: AdaptivePullDownButton(
         items: [
           AdaptiveMenuItem(
-            title: 'Add Recipe',
+            title: 'New Recipe',
             icon: const Icon(CupertinoIcons.book),
             onTap: () {
               // Don't pass folderId for uncategorized folder
@@ -222,7 +222,7 @@ class RecipesFolderPage extends ConsumerWidget {
             },
           ),
           AdaptiveMenuItem(
-            title: 'Take Photo',
+            title: 'Import from Camera',
             icon: const Icon(CupertinoIcons.camera),
             onTap: () {
               final saveFolderId = folderId == kUncategorizedFolderId ? null : folderId;
@@ -230,7 +230,7 @@ class RecipesFolderPage extends ConsumerWidget {
             },
           ),
           AdaptiveMenuItem(
-            title: 'Choose Photo',
+            title: 'Import from Photos',
             icon: const Icon(CupertinoIcons.photo),
             onTap: () {
               final saveFolderId = folderId == kUncategorizedFolderId ? null : folderId;
