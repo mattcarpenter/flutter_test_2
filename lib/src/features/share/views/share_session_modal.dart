@@ -28,9 +28,11 @@ import '../../../providers/subscription_provider.dart';
 import '../../../services/content_extraction/content_extractor.dart';
 import '../../../services/content_extraction/generic_web_extractor.dart';
 import '../../../services/logging/app_logger.dart';
+import '../../../services/photo_extraction_service.dart';
 import '../../../services/share_extraction_service.dart';
 import '../../../services/web_extraction_service.dart';
 import '../../../services/share_session_service.dart';
+import '../../../utils/image_utils.dart';
 import '../../../theme/colors.dart';
 import '../../../theme/spacing.dart';
 import '../../../theme/typography.dart';
@@ -193,6 +195,8 @@ enum _ModalState {
   // Recipe extraction states
   extractingRecipe, // Calling backend AI to structure recipe
   showingRecipePreview, // Non-Plus users see preview with paywall
+  // Photo extraction states
+  extractingPhotoRecipe, // Processing photo(s) with AI vision
   // Clipping states
   savingClipping, // Saving clipping to database
 }
@@ -479,6 +483,32 @@ class _ShareSessionLoadedState extends ConsumerState<_ShareSessionLoaded>
     return null;
   }
 
+  /// Find image file paths in the session (for photo import).
+  /// Returns up to 2 image paths (max allowed for photo extraction).
+  List<String> _findImagePaths() {
+    if (_session == null) return [];
+
+    final paths = <String>[];
+    final sessionPath = _session!.sessionPath;
+
+    for (final item in _session!.items) {
+      if (item.isImage && item.fileName != null) {
+        // Build full path from session path + file name
+        final fullPath = '$sessionPath/${item.fileName}';
+        paths.add(fullPath);
+        if (paths.length >= 2) break; // Max 2 images
+      }
+    }
+
+    return paths;
+  }
+
+  /// Returns true if session contains images that can be processed for photo import.
+  bool get _hasImagesForPhotoImport {
+    if (_session == null) return false;
+    return _session!.items.any((item) => item.isImage && item.fileName != null);
+  }
+
   /// Handle action button tap
   /// Smoothly transition to a new modal state with staged animation:
   /// 1. Fade out current content (200ms)
@@ -655,6 +685,469 @@ class _ShareSessionLoadedState extends ConsumerState<_ShareSessionLoaded>
 
       // Show preview extraction
       await _performRecipePreviewExtraction();
+    }
+  }
+
+  /// Handle "Import from Photo" action with subscription check
+  Future<void> _handlePhotoImport() async {
+    // Check connectivity first
+    final connectivityResult = await Connectivity().checkConnectivity();
+    if (connectivityResult.contains(ConnectivityResult.none)) {
+      if (mounted) {
+        setState(() {
+          _extractionError = 'You\'re offline. Please check your internet connection and try again.';
+          _errorType = _ExtractionErrorType.noConnectivity;
+          _modalState = _ModalState.extractionError;
+        });
+      }
+      return;
+    }
+
+    if (!mounted) return;
+
+    // Get image paths
+    final imagePaths = _findImagePaths();
+    if (imagePaths.isEmpty) {
+      setState(() {
+        _extractionError = 'No images found to process.';
+        _errorType = _ExtractionErrorType.noContentExtracted;
+        _modalState = _ModalState.extractionError;
+      });
+      return;
+    }
+
+    // Check subscription status
+    final hasPlus = ref.read(effectiveHasPlusProvider);
+
+    if (hasPlus) {
+      // Entitled user - full extraction
+      await _performFullPhotoExtraction(imagePaths);
+    } else {
+      // Non-entitled user - check preview limit first
+      final usageService = await ref.read(previewUsageServiceProvider.future);
+
+      if (!usageService.hasPhotoRecipePreviewsRemaining()) {
+        // Limit exceeded - go straight to paywall
+        if (!mounted) return;
+        final purchased =
+            await ref.read(subscriptionProvider.notifier).presentPaywall(context);
+        if (purchased && mounted) {
+          // User subscribed - now do full extraction
+          await _performFullPhotoExtraction(imagePaths);
+        }
+        return;
+      }
+
+      // Show preview extraction
+      await _performPhotoPreviewExtraction(imagePaths);
+    }
+  }
+
+  /// Perform full photo recipe extraction for Plus users
+  Future<void> _performFullPhotoExtraction(List<String> imagePaths) async {
+    try {
+      // Prepare images for upload (compress and convert to bytes)
+      final images = await ImageUtils.prepareImagesFromPaths(imagePaths, maxImages: 2);
+
+      if (images.isEmpty) {
+        setState(() {
+          _extractionError = 'Failed to process the image(s). Please try again.';
+          _errorType = _ExtractionErrorType.noContentExtracted;
+          _modalState = _ModalState.extractionError;
+        });
+        return;
+      }
+
+      // Call photo extraction API
+      final service = ref.read(photoExtractionServiceProvider);
+      final recipe = await service.extractRecipe(images: images);
+
+      if (!mounted) return;
+
+      if (recipe == null) {
+        setState(() {
+          _extractionError = 'No recipe found in the photo.\n\nTry sharing a photo of a recipe card or cookbook page.';
+          _errorType = _ExtractionErrorType.noRecipeDetected;
+          _modalState = _ModalState.extractionError;
+        });
+        return;
+      }
+
+      // Save first image as cover if available
+      RecipeImage? coverImage;
+      if (imagePaths.isNotEmpty) {
+        coverImage = await _savePhotoAsCover(imagePaths.first);
+      }
+
+      if (!mounted) return;
+
+      // Success - close modal and open recipe editor
+      widget.onClose();
+
+      if (context.mounted) {
+        final recipeEntry = _convertToRecipeEntry(recipe, coverImage: coverImage);
+        showRecipeEditorModal(
+          context,
+          ref: ref,
+          recipe: recipeEntry,
+          isEditing: false,
+        );
+      }
+    } on PhotoExtractionException catch (e) {
+      if (!mounted) return;
+      setState(() {
+        _extractionError = e.message;
+        _errorType = _ExtractionErrorType.generic;
+        _modalState = _ModalState.extractionError;
+      });
+    } catch (e) {
+      AppLogger.error('Photo recipe extraction failed', e);
+      if (!mounted) return;
+      setState(() {
+        _extractionError = 'Something went wrong while processing the photo.';
+        _errorType = _ExtractionErrorType.generic;
+        _modalState = _ModalState.extractionError;
+      });
+    }
+  }
+
+  /// Perform photo preview extraction for non-Plus users
+  Future<void> _performPhotoPreviewExtraction(List<String> imagePaths) async {
+    try {
+      // Prepare images for upload
+      final images = await ImageUtils.prepareImagesFromPaths(imagePaths, maxImages: 2);
+
+      if (images.isEmpty) {
+        setState(() {
+          _extractionError = 'Failed to process the image(s). Please try again.';
+          _errorType = _ExtractionErrorType.noContentExtracted;
+          _modalState = _ModalState.extractionError;
+        });
+        return;
+      }
+
+      // Call photo preview API
+      final service = ref.read(photoExtractionServiceProvider);
+      final preview = await service.previewRecipe(images: images);
+
+      if (!mounted) return;
+
+      if (preview == null) {
+        setState(() {
+          _extractionError = 'No recipe found in the photo.\n\nTry sharing a photo of a recipe card or cookbook page.';
+          _errorType = _ExtractionErrorType.noRecipeDetected;
+          _modalState = _ModalState.extractionError;
+        });
+        return;
+      }
+
+      // Increment usage counter
+      final usageService = await ref.read(previewUsageServiceProvider.future);
+      await usageService.incrementPhotoRecipeUsage();
+
+      // Update modal state
+      if (mounted) {
+        setState(() {
+          _modalState = _ModalState.showingRecipePreview;
+        });
+      }
+
+      // Show preview as bottom sheet
+      if (mounted) {
+        _showPhotoPreviewBottomSheet(context, preview, imagePaths);
+      }
+    } on PhotoExtractionException catch (e) {
+      if (!mounted) return;
+      setState(() {
+        _extractionError = e.message;
+        _errorType = _ExtractionErrorType.generic;
+        _modalState = _ModalState.extractionError;
+      });
+    } catch (e) {
+      AppLogger.error('Photo recipe preview failed', e);
+      if (!mounted) return;
+      setState(() {
+        _extractionError = 'Something went wrong while processing the photo.';
+        _errorType = _ExtractionErrorType.generic;
+        _modalState = _ModalState.extractionError;
+      });
+    }
+  }
+
+  /// Show the photo preview as a bottom sheet
+  void _showPhotoPreviewBottomSheet(
+    BuildContext context,
+    RecipePreview preview,
+    List<String> imagePaths,
+  ) {
+    WoltModalSheet.show<void>(
+      context: context,
+      useRootNavigator: true,
+      useSafeArea: false,
+      pageListBuilder: (sheetContext) => [
+        WoltModalSheetPage(
+          navBarHeight: 55,
+          backgroundColor: AppColors.of(sheetContext).background,
+          surfaceTintColor: Colors.transparent,
+          hasTopBarLayer: false,
+          isTopBarLayerAlwaysVisible: false,
+          trailingNavBarWidget: Padding(
+            padding: EdgeInsets.only(right: AppSpacing.lg),
+            child: AppCircleButton(
+              icon: AppCircleButtonIcon.close,
+              variant: AppCircleButtonVariant.neutral,
+              size: 32,
+              onPressed: () {
+                Navigator.of(sheetContext, rootNavigator: true).pop();
+                widget.onClose();
+              },
+            ),
+          ),
+          child: ShareRecipePreviewResultContent(
+            preview: preview,
+            onSubscribe: () async {
+              if (!context.mounted) return;
+
+              final purchased = await ref
+                  .read(subscriptionProvider.notifier)
+                  .presentPaywall(context);
+
+              if (purchased && context.mounted) {
+                // Close preview sheet and share modal
+                if (sheetContext.mounted) {
+                  Navigator.of(sheetContext, rootNavigator: true).pop();
+                }
+                widget.onClose();
+
+                // Perform full extraction
+                final rootContext = globalRootNavigatorKey.currentContext;
+                if (rootContext != null && rootContext.mounted) {
+                  await _performPostPhotoSubscriptionExtraction(rootContext, imagePaths);
+                }
+              }
+            },
+          ),
+        ),
+      ],
+    );
+  }
+
+  /// Perform full photo extraction after user subscribes from preview
+  Future<void> _performPostPhotoSubscriptionExtraction(
+    BuildContext context,
+    List<String> imagePaths,
+  ) async {
+    // State for the extraction modal
+    var isExtracting = true;
+    String? errorMessage;
+
+    if (!context.mounted) return;
+
+    await WoltModalSheet.show<void>(
+      context: context,
+      useRootNavigator: true,
+      barrierDismissible: false,
+      modalTypeBuilder: (_) => WoltModalType.alertDialog(),
+      pageListBuilder: (modalContext) => [
+        WoltModalSheetPage(
+          navBarHeight: 0,
+          hasTopBarLayer: false,
+          backgroundColor: AppColors.of(modalContext).background,
+          surfaceTintColor: Colors.transparent,
+          child: StatefulBuilder(
+            builder: (builderContext, setModalState) {
+              if (isExtracting && errorMessage == null) {
+                Future.microtask(() async {
+                  try {
+                    // Prepare images
+                    final images = await ImageUtils.prepareImagesFromPaths(
+                      imagePaths,
+                      maxImages: 2,
+                    );
+
+                    if (images.isEmpty) {
+                      setModalState(() {
+                        isExtracting = false;
+                        errorMessage = 'Failed to process the image(s).';
+                      });
+                      return;
+                    }
+
+                    final service = ref.read(photoExtractionServiceProvider);
+                    final recipe = await service.extractRecipe(images: images);
+
+                    if (!modalContext.mounted) return;
+
+                    if (recipe == null) {
+                      setModalState(() {
+                        isExtracting = false;
+                        errorMessage = 'No recipe found in the photo.';
+                      });
+                      return;
+                    }
+
+                    // Save first image as cover
+                    RecipeImage? coverImage;
+                    if (imagePaths.isNotEmpty) {
+                      coverImage = await _savePhotoAsCover(imagePaths.first);
+                    }
+
+                    if (!modalContext.mounted) return;
+
+                    Navigator.of(modalContext, rootNavigator: true).pop();
+
+                    if (context.mounted) {
+                      final recipeEntry = _convertToRecipeEntry(
+                        recipe,
+                        coverImage: coverImage,
+                      );
+                      showRecipeEditorModal(
+                        context,
+                        ref: ref,
+                        recipe: recipeEntry,
+                        isEditing: false,
+                      );
+                    }
+                  } on PhotoExtractionException catch (e) {
+                    if (modalContext.mounted) {
+                      setModalState(() {
+                        isExtracting = false;
+                        errorMessage = e.message;
+                      });
+                    }
+                  } catch (e) {
+                    AppLogger.error('Post-subscription photo extraction failed', e);
+                    if (modalContext.mounted) {
+                      setModalState(() {
+                        isExtracting = false;
+                        errorMessage = 'Failed to extract recipe. Please try again.';
+                      });
+                    }
+                  }
+                });
+              }
+
+              // Build UI based on state
+              if (isExtracting && errorMessage == null) {
+                return Padding(
+                  padding: EdgeInsets.all(AppSpacing.xl),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text(
+                            'Importing Recipe',
+                            style: AppTypography.h4.copyWith(
+                              color: AppColors.of(builderContext).textPrimary,
+                            ),
+                          ),
+                        ],
+                      ),
+                      SizedBox(height: AppSpacing.xxl),
+                      const CupertinoActivityIndicator(radius: 16),
+                      SizedBox(height: AppSpacing.lg),
+                      Text(
+                        'Processing photo...',
+                        style: AppTypography.body.copyWith(
+                          color: AppColors.of(builderContext).textSecondary,
+                        ),
+                      ),
+                      SizedBox(height: AppSpacing.lg),
+                    ],
+                  ),
+                );
+              } else {
+                // Error state
+                return Padding(
+                  padding: EdgeInsets.all(AppSpacing.xl),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text(
+                            'Extraction Failed',
+                            style: AppTypography.h4.copyWith(
+                              color: AppColors.of(builderContext).textPrimary,
+                            ),
+                          ),
+                          AppCircleButton(
+                            icon: AppCircleButtonIcon.close,
+                            variant: AppCircleButtonVariant.neutral,
+                            size: 32,
+                            onPressed: () => Navigator.of(
+                              modalContext,
+                              rootNavigator: true,
+                            ).pop(),
+                          ),
+                        ],
+                      ),
+                      SizedBox(height: AppSpacing.lg),
+                      Text(
+                        errorMessage ?? 'An error occurred.',
+                        style: AppTypography.body.copyWith(
+                          color: AppColors.of(builderContext).textSecondary,
+                        ),
+                      ),
+                      SizedBox(height: AppSpacing.lg),
+                    ],
+                  ),
+                );
+              }
+            },
+          ),
+        ),
+      ],
+    );
+  }
+
+  /// Save a photo file as recipe cover image
+  Future<RecipeImage?> _savePhotoAsCover(String imagePath) async {
+    try {
+      final file = File(imagePath);
+      if (!await file.exists()) {
+        AppLogger.warning('Photo file does not exist: $imagePath');
+        return null;
+      }
+
+      // Generate unique file names
+      final imageUuid = const Uuid().v4();
+      final fullFileName = '$imageUuid.jpg';
+      final smallFileName = '${imageUuid}_small.jpg';
+
+      // Compress full size and thumbnail
+      final compressedFull = await _compressImage(file, fullFileName);
+      final compressedSmall = await _compressImage(file, smallFileName, size: 512);
+
+      // Save to documents directory
+      final docsDir = await getApplicationDocumentsDirectory();
+      final fullPath = '${docsDir.path}/$fullFileName';
+      final smallPath = '${docsDir.path}/$smallFileName';
+      await compressedFull.copy(fullPath);
+      await compressedSmall.copy(smallPath);
+
+      // Clean up temp files
+      try {
+        if (await compressedFull.exists()) await compressedFull.delete();
+        if (await compressedSmall.exists()) await compressedSmall.delete();
+      } catch (_) {
+        // Ignore cleanup errors
+      }
+
+      AppLogger.info('Photo saved as cover: $fullFileName');
+
+      return RecipeImage(
+        id: nanoid(10),
+        fileName: fullFileName,
+        isCover: true,
+      );
+    } catch (e, stack) {
+      AppLogger.warning('Failed to save photo as cover', e, stack);
+      return null;
     }
   }
 
@@ -2150,6 +2643,8 @@ class _ShareSessionLoadedState extends ConsumerState<_ShareSessionLoaded>
         return _buildExtractionErrorState(context);
       case _ModalState.extractingRecipe:
         return _buildExtractingRecipeState(context);
+      case _ModalState.extractingPhotoRecipe:
+        return _buildExtractingPhotoRecipeState(context);
       case _ModalState.showingRecipePreview:
         // This state is no longer used - we show a bottom sheet instead
         // Keep case to satisfy exhaustiveness check
@@ -2160,6 +2655,8 @@ class _ShareSessionLoadedState extends ConsumerState<_ShareSessionLoaded>
   }
 
   Widget _buildChoosingActionState(BuildContext context) {
+    final hasImages = _hasImagesForPhotoImport;
+
     return Padding(
       padding: EdgeInsets.all(AppSpacing.xl),
       child: Column(
@@ -2188,18 +2685,31 @@ class _ShareSessionLoadedState extends ConsumerState<_ShareSessionLoaded>
           ),
           SizedBox(height: AppSpacing.xl),
 
-          // Import Recipe button
-          _ActionButton(
-            icon: Icons.restaurant_menu,
-            title: 'Import Recipe',
-            description: 'Extract ingredients and steps to create a new recipe',
-            emphasized: true,
-            onTap: () => _onActionTap(_ModalAction.importRecipe),
-          ),
+          // Photo import button (shown when images are shared)
+          if (hasImages) ...[
+            _ActionButton(
+              icon: Icons.photo_camera_outlined,
+              title: 'Import from Photo',
+              description: 'Extract recipe from cookbook or food photo',
+              emphasized: true,
+              onTap: _onPhotoImportTap,
+            ),
+            SizedBox(height: AppSpacing.md),
+          ],
+
+          // Import Recipe button (for URL-based extraction)
+          if (!hasImages)
+            _ActionButton(
+              icon: Icons.restaurant_menu,
+              title: 'Import Recipe',
+              description: 'Extract ingredients and steps to create a new recipe',
+              emphasized: true,
+              onTap: () => _onActionTap(_ModalAction.importRecipe),
+            ),
 
           // Save as Clipping button (hidden for image/video only shares)
           if (_showClippingOption) ...[
-            SizedBox(height: AppSpacing.md),
+            if (!hasImages) SizedBox(height: AppSpacing.md),
             _ActionButton(
               icon: Icons.note_add_outlined,
               title: 'Save as Clipping',
@@ -2210,6 +2720,15 @@ class _ShareSessionLoadedState extends ConsumerState<_ShareSessionLoaded>
         ],
       ),
     );
+  }
+
+  /// Handle photo import button tap
+  Future<void> _onPhotoImportTap() async {
+    // Transition to photo extraction state
+    await _transitionToState(_ModalState.extractingPhotoRecipe);
+
+    // Process photo import
+    await _handlePhotoImport();
   }
 
   Widget _buildExtractingState(BuildContext context) {
@@ -2372,6 +2891,45 @@ class _ShareSessionLoadedState extends ConsumerState<_ShareSessionLoaded>
               'Extracting recipe...',
               'Finding ingredients...',
               'Organizing steps...',
+            ],
+          ),
+          SizedBox(height: AppSpacing.lg),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildExtractingPhotoRecipeState(BuildContext context) {
+    return Padding(
+      padding: EdgeInsets.all(AppSpacing.xl),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                'Processing Photo',
+                style: AppTypography.h4.copyWith(
+                  color: AppColors.of(context).textPrimary,
+                ),
+              ),
+              AppCircleButton(
+                icon: AppCircleButtonIcon.close,
+                variant: AppCircleButtonVariant.neutral,
+                size: 32,
+                onPressed: widget.onClose,
+              ),
+            ],
+          ),
+          SizedBox(height: AppSpacing.xxl),
+          const CupertinoActivityIndicator(radius: 16),
+          SizedBox(height: AppSpacing.lg),
+          _AnimatedLoadingText(
+            messages: const [
+              'Reading photo...',
+              'Finding recipe...',
+              'Extracting ingredients...',
             ],
           ),
           SizedBox(height: AppSpacing.lg),

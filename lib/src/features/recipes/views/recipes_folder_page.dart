@@ -1,6 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:image_picker/image_picker.dart';
 import '../../../../database/database.dart';
 import '../../../constants/folder_constants.dart';
 import '../../../mobile/utils/adaptive_sliver_page.dart';
@@ -20,6 +21,7 @@ import '../widgets/recipe_search_results.dart';
 import '../widgets/smart_folder_search_results.dart';
 import 'add_recipe_modal.dart';
 import 'edit_smart_folder_modal.dart';
+import 'photo_import_modal.dart';
 
 class RecipesFolderPage extends ConsumerWidget {
   final String? folderId;
@@ -217,7 +219,23 @@ class RecipesFolderPage extends ConsumerWidget {
               final saveFolderId = folderId == kUncategorizedFolderId ? null : folderId;
               showRecipeEditorModal(context, ref: ref, folderId: saveFolderId);
             },
-          )
+          ),
+          AdaptiveMenuItem(
+            title: 'Take Photo',
+            icon: const Icon(CupertinoIcons.camera),
+            onTap: () {
+              final saveFolderId = folderId == kUncategorizedFolderId ? null : folderId;
+              showPhotoImportModal(context, ref: ref, source: ImageSource.camera, folderId: saveFolderId);
+            },
+          ),
+          AdaptiveMenuItem(
+            title: 'Choose Photo',
+            icon: const Icon(CupertinoIcons.photo),
+            onTap: () {
+              final saveFolderId = folderId == kUncategorizedFolderId ? null : folderId;
+              showPhotoImportModal(context, ref: ref, source: ImageSource.gallery, folderId: saveFolderId);
+            },
+          ),
         ],
         child: const AppCircleButton(
           icon: AppCircleButtonIcon.plus,

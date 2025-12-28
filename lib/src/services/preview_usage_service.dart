@@ -12,13 +12,15 @@ import 'package:shared_preferences/shared_preferences.dart';
 /// The usage counter persists across app launches and resets at midnight.
 /// Old entries are cleaned up after 7 days.
 ///
-/// Note: Share previews and clipping previews have SEPARATE quotas.
-/// Users get 5/day for each, independently.
+/// Note: Share previews, clipping previews, and photo previews have SEPARATE quotas.
+/// Users get 5/day for text-based previews (share, clipping) and 2/day for photos.
 class PreviewUsageService {
   static const _recipeKeyPrefix = 'recipe_preview_usage_';
   static const _shoppingListKeyPrefix = 'shopping_list_preview_usage_';
   static const _shareRecipeKeyPrefix = 'share_recipe_preview_usage_';
+  static const _photoRecipeKeyPrefix = 'photo_recipe_preview_usage_';
   static const int dailyLimit = 5;
+  static const int photoDailyLimit = 2; // Stricter limit for photos (more expensive)
 
   final SharedPreferences _prefs;
 
@@ -100,6 +102,31 @@ class PreviewUsageService {
 
     // Clean up old entries (keep only last 7 days)
     await _cleanupOldEntries(_shareRecipeKeyPrefix);
+  }
+
+  // ============================================================================
+  // Photo Recipe Preview Usage (stricter quota - 2/day vs 5/day for text)
+  // ============================================================================
+
+  /// Gets the number of photo recipe previews used today.
+  int getPhotoRecipeUsageToday() {
+    final key = '$_photoRecipeKeyPrefix${_today()}';
+    return _prefs.getInt(key) ?? 0;
+  }
+
+  /// Returns true if user has remaining photo recipe previews today.
+  bool hasPhotoRecipePreviewsRemaining() {
+    return getPhotoRecipeUsageToday() < photoDailyLimit;
+  }
+
+  /// Increments the photo recipe usage count for today.
+  Future<void> incrementPhotoRecipeUsage() async {
+    final key = '$_photoRecipeKeyPrefix${_today()}';
+    final current = _prefs.getInt(key) ?? 0;
+    await _prefs.setInt(key, current + 1);
+
+    // Clean up old entries (keep only last 7 days)
+    await _cleanupOldEntries(_photoRecipeKeyPrefix);
   }
 
   // ============================================================================

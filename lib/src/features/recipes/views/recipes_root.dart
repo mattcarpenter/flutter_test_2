@@ -4,6 +4,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
 import 'package:wolt_modal_sheet/wolt_modal_sheet.dart';
 import '../../../mobile/utils/adaptive_sliver_page.dart';
@@ -21,6 +22,7 @@ import '../widgets/recipe_list.dart';
 import '../widgets/pinned_recipes_section.dart';
 import '../widgets/recently_viewed_section.dart';
 import 'add_recipe_modal.dart';
+import 'photo_import_modal.dart';
 
 class RecipesTab extends ConsumerWidget {
   const RecipesTab({super.key});
@@ -115,7 +117,21 @@ class RecipesTab extends ConsumerWidget {
               // Don't pass folderId for uncategorized folder
               showRecipeEditorModal(context, ref: ref, folderId: null);
             },
-          )
+          ),
+          AdaptiveMenuItem(
+            title: 'Take Photo',
+            icon: const Icon(CupertinoIcons.camera),
+            onTap: () {
+              showPhotoImportModal(context, ref: ref, source: ImageSource.camera);
+            },
+          ),
+          AdaptiveMenuItem(
+            title: 'Choose Photo',
+            icon: const Icon(CupertinoIcons.photo),
+            onTap: () {
+              showPhotoImportModal(context, ref: ref, source: ImageSource.gallery);
+            },
+          ),
         ],
         child: const AppCircleButton(
           icon: AppCircleButtonIcon.ellipsis,

@@ -48,4 +48,35 @@ class ApiSigner {
       'X-Signature': signature,
     };
   }
+
+  /// Signs a multipart API request and returns headers to include.
+  ///
+  /// For multipart requests (like image uploads), we use a fixed 'MULTIPART'
+  /// placeholder instead of a body hash since the body is streamed as form data.
+  ///
+  /// [method] - HTTP method (e.g., 'POST')
+  /// [path] - Request path starting with '/' (e.g., '/v1/photo/extract-recipe')
+  ///
+  /// Returns a map of headers to include in the request:
+  /// - X-Api-Key: Public identifier
+  /// - X-Timestamp: Unix seconds when request was signed
+  /// - X-Signature: HMAC-SHA256 signature (hex)
+  static Map<String, String> signMultipart(String method, String path) {
+    // Get current timestamp in Unix seconds
+    final timestamp = DateTime.now().millisecondsSinceEpoch ~/ 1000;
+
+    // For multipart, use fixed placeholder instead of body hash
+    // Canonical format: METHOD\nPATH\nTIMESTAMP\nMULTIPART
+    final canonical = '$method\n$path\n$timestamp\nMULTIPART';
+
+    // Compute HMAC-SHA256
+    final hmacSha256 = Hmac(sha256, utf8.encode(_signingKey));
+    final signature = hmacSha256.convert(utf8.encode(canonical)).toString();
+
+    return {
+      'X-Api-Key': apiKey,
+      'X-Timestamp': timestamp.toString(),
+      'X-Signature': signature,
+    };
+  }
 }
