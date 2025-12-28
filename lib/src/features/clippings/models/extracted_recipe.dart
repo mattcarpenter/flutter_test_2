@@ -1,3 +1,5 @@
+import 'recipe_preview.dart';
+
 /// Represents an ingredient extracted from recipe text
 class ExtractedIngredient {
   final String name;
@@ -109,5 +111,22 @@ class ExtractedRecipe {
         'text': e.text,
       };
     }).toList();
+  }
+
+  /// Converts this full recipe to a preview (for display before purchase).
+  ///
+  /// The preview contains title, truncated description, and first 4 ingredients
+  /// (excluding section headers).
+  RecipePreview toPreview() {
+    final desc = description ?? '';
+    return RecipePreview(
+      title: title,
+      description: desc.length > 100 ? '${desc.substring(0, 97)}...' : desc,
+      previewIngredients: ingredients
+          .where((ing) => ing.isIngredient) // Exclude section headers
+          .take(4)
+          .map((ing) => ing.name)
+          .toList(),
+    );
   }
 }

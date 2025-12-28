@@ -685,32 +685,19 @@ class _ShareSessionLoadedState extends ConsumerState<_ShareSessionLoaded>
       return;
     }
 
-    // Case 1: JSON-LD recipe found (free for everyone!)
+    // Case 1: JSON-LD recipe found
     if (result.recipe != null && result.isFromJsonLd) {
-      AppLogger.info('JSON-LD recipe found - proceeding with free import');
+      AppLogger.info('JSON-LD recipe found - checking subscription');
 
-      // Download image if available (JSON-LD image or og:image fallback)
-      RecipeImage? coverImage;
-      final imageUrl = result.imageUrl;
-      if (imageUrl != null && imageUrl.isNotEmpty) {
-        AppLogger.info('Downloading recipe image from: ${imageUrl.substring(0, imageUrl.length.clamp(0, 80))}...');
-        coverImage = await _downloadAndSaveImage(imageUrl);
-        AppLogger.info('Image download result: ${coverImage != null ? "success" : "failed"}');
-      }
+      // Check subscription first
+      final hasPlus = ref.read(effectiveHasPlusProvider);
 
-      if (!mounted) return;
-
-      // Recipe already extracted from structured data - open editor directly
-      widget.onClose();
-
-      if (context.mounted) {
-        final recipeEntry = _convertToRecipeEntry(result.recipe!, coverImage: coverImage);
-        showRecipeEditorModal(
-          context,
-          ref: ref,
-          recipe: recipeEntry,
-          isEditing: false,
-        );
+      if (hasPlus) {
+        // Plus user - skip preview, go straight to editor
+        await _performJsonLdFullExtraction(result);
+      } else {
+        // Free user - show preview (no usage limit for JSON-LD - it's local/free)
+        await _showJsonLdPreview(result);
       }
       return;
     }
@@ -755,6 +742,72 @@ class _ShareSessionLoadedState extends ConsumerState<_ShareSessionLoaded>
 
       // Show preview extraction
       await _performWebPreviewExtraction(result);
+    }
+  }
+
+  /// Shows preview for JSON-LD extracted recipe (no API call, unlimited).
+  ///
+  /// Since JSON-LD parsing is local and free, we don't enforce usage limits.
+  /// The preview is generated from the stored recipe data.
+  Future<void> _showJsonLdPreview(WebExtractionResult result) async {
+    if (result.recipe == null) return;
+
+    // Convert full recipe to preview format
+    final preview = result.recipe!.toPreview();
+
+    // Update modal state
+    if (mounted) {
+      setState(() {
+        _modalState = _ModalState.showingRecipePreview;
+      });
+    }
+
+    // Show preview bottom sheet (same UI as backend previews)
+    if (mounted) {
+      _showWebPreviewBottomSheet(
+        context,
+        preview,
+        isFromJsonLd: true, // Flag to use stored recipe on subscribe
+      );
+    }
+  }
+
+  /// Performs full extraction for JSON-LD recipe (Plus users only).
+  ///
+  /// Downloads the image and opens the recipe editor directly.
+  Future<void> _performJsonLdFullExtraction(WebExtractionResult result) async {
+    if (result.recipe == null) return;
+
+    // Download image if available (JSON-LD image or og:image fallback)
+    RecipeImage? coverImage;
+    final imageUrl = result.imageUrl;
+    if (imageUrl != null && imageUrl.isNotEmpty) {
+      AppLogger.info(
+        'Downloading recipe image from: '
+        '${imageUrl.substring(0, imageUrl.length.clamp(0, 80))}...',
+      );
+      coverImage = await _downloadAndSaveImage(imageUrl);
+      AppLogger.info(
+        'Image download result: ${coverImage != null ? "success" : "failed"}',
+      );
+    }
+
+    if (!mounted) return;
+
+    // Close modal and open recipe editor
+    widget.onClose();
+
+    if (context.mounted) {
+      final recipeEntry = _convertToRecipeEntry(
+        result.recipe!,
+        coverImage: coverImage,
+      );
+      showRecipeEditorModal(
+        context,
+        ref: ref,
+        recipe: recipeEntry,
+        isEditing: false,
+      );
     }
   }
 
@@ -868,9 +921,9 @@ class _ShareSessionLoadedState extends ConsumerState<_ShareSessionLoaded>
         });
       }
 
-      // Show preview as bottom sheet
+      // Show preview as bottom sheet (isFromJsonLd: false means backend extraction after subscribe)
       if (mounted) {
-        _showPreviewBottomSheet(context, preview);
+        _showWebPreviewBottomSheet(context, preview, isFromJsonLd: false);
       }
     } on WebExtractionException catch (e) {
       if (!mounted) return;
@@ -1124,6 +1177,113 @@ class _ShareSessionLoadedState extends ConsumerState<_ShareSessionLoaded>
     );
   }
 
+  /// Shows preview bottom sheet for web extractions.
+  ///
+  /// [isFromJsonLd] - If true, uses stored JSON-LD data on subscribe.
+  /// If false, calls backend for full extraction on subscribe.
+  void _showWebPreviewBottomSheet(
+    BuildContext context,
+    RecipePreview preview, {
+    required bool isFromJsonLd,
+  }) {
+    WoltModalSheet.show<void>(
+      context: context,
+      useRootNavigator: true,
+      useSafeArea: false,
+      pageListBuilder: (sheetContext) => [
+        WoltModalSheetPage(
+          navBarHeight: 55,
+          backgroundColor: AppColors.of(sheetContext).background,
+          surfaceTintColor: Colors.transparent,
+          hasTopBarLayer: false,
+          isTopBarLayerAlwaysVisible: false,
+          trailingNavBarWidget: Padding(
+            padding: EdgeInsets.only(right: AppSpacing.lg),
+            child: AppCircleButton(
+              icon: AppCircleButtonIcon.close,
+              variant: AppCircleButtonVariant.neutral,
+              size: 32,
+              onPressed: () {
+                // Close preview sheet
+                Navigator.of(sheetContext, rootNavigator: true).pop();
+                // Also close the share modal behind it
+                widget.onClose();
+              },
+            ),
+          ),
+          child: ShareRecipePreviewResultContent(
+            preview: preview,
+            onSubscribe: () async {
+              if (!context.mounted) return;
+
+              final purchased = await ref
+                  .read(subscriptionProvider.notifier)
+                  .presentPaywall(context);
+
+              if (purchased && context.mounted) {
+                if (isFromJsonLd) {
+                  // JSON-LD: Do extraction work BEFORE closing modals
+                  // (because widget methods need mounted state)
+                  final webResult = _webExtractionResult;
+                  final recipe = webResult?.recipe;
+                  if (recipe == null) {
+                    if (sheetContext.mounted) {
+                      Navigator.of(sheetContext, rootNavigator: true).pop();
+                    }
+                    widget.onClose();
+                    return;
+                  }
+
+                  // Download image while widget is still mounted
+                  RecipeImage? coverImage;
+                  final imageUrl = webResult?.imageUrl;
+                  if (imageUrl != null && imageUrl.isNotEmpty) {
+                    coverImage = await _downloadAndSaveImage(imageUrl);
+                  }
+
+                  // Convert recipe while widget is still mounted
+                  final recipeEntry = _convertToRecipeEntry(
+                    recipe,
+                    coverImage: coverImage,
+                  );
+
+                  // Now close modals
+                  if (sheetContext.mounted) {
+                    Navigator.of(sheetContext, rootNavigator: true).pop();
+                  }
+                  widget.onClose();
+
+                  // Open recipe editor using rootContext
+                  final rootContext = globalRootNavigatorKey.currentContext;
+                  if (rootContext != null && rootContext.mounted) {
+                    showRecipeEditorModal(
+                      rootContext,
+                      ref: ref,
+                      recipe: recipeEntry,
+                      isEditing: false,
+                    );
+                  }
+                } else {
+                  // Non-JSON-LD: Close modals first, then extract via backend
+                  if (sheetContext.mounted) {
+                    Navigator.of(sheetContext, rootNavigator: true).pop();
+                  }
+                  widget.onClose();
+
+                  final rootContext = globalRootNavigatorKey.currentContext;
+                  if (rootContext != null && rootContext.mounted) {
+                    await _performPostWebSubscriptionExtraction(rootContext);
+                  }
+                }
+              }
+              // If not purchased, preview sheet stays visible (user can try again or close)
+            },
+          ),
+        ),
+      ],
+    );
+  }
+
   /// Perform full recipe extraction after user subscribes from preview sheet.
   ///
   /// Shows its own modal for progress/errors since the original share modal
@@ -1222,6 +1382,180 @@ class _ShareSessionLoadedState extends ConsumerState<_ShareSessionLoaded>
                     }
                   } catch (e) {
                     AppLogger.error('Post-subscription extraction failed', e);
+                    if (modalContext.mounted) {
+                      setModalState(() {
+                        isExtracting = false;
+                        errorMessage = 'Failed to extract recipe. Please try again.';
+                      });
+                    }
+                  }
+                });
+              }
+
+              // Build UI based on state
+              if (isExtracting && errorMessage == null) {
+                return Padding(
+                  padding: EdgeInsets.all(AppSpacing.xl),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text(
+                            'Importing Recipe',
+                            style: AppTypography.h4.copyWith(
+                              color: AppColors.of(builderContext).textPrimary,
+                            ),
+                          ),
+                        ],
+                      ),
+                      SizedBox(height: AppSpacing.xxl),
+                      const CupertinoActivityIndicator(radius: 16),
+                      SizedBox(height: AppSpacing.lg),
+                      Text(
+                        'Extracting recipe...',
+                        style: AppTypography.body.copyWith(
+                          color: AppColors.of(builderContext).textSecondary,
+                        ),
+                      ),
+                      SizedBox(height: AppSpacing.lg),
+                    ],
+                  ),
+                );
+              } else {
+                // Error state
+                return Padding(
+                  padding: EdgeInsets.all(AppSpacing.xl),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text(
+                            'Extraction Failed',
+                            style: AppTypography.h4.copyWith(
+                              color: AppColors.of(builderContext).textPrimary,
+                            ),
+                          ),
+                          AppCircleButton(
+                            icon: AppCircleButtonIcon.close,
+                            variant: AppCircleButtonVariant.neutral,
+                            size: 32,
+                            onPressed: () => Navigator.of(
+                              modalContext,
+                              rootNavigator: true,
+                            ).pop(),
+                          ),
+                        ],
+                      ),
+                      SizedBox(height: AppSpacing.lg),
+                      Text(
+                        errorMessage ?? 'An error occurred.',
+                        style: AppTypography.body.copyWith(
+                          color: AppColors.of(builderContext).textSecondary,
+                        ),
+                      ),
+                      SizedBox(height: AppSpacing.lg),
+                    ],
+                  ),
+                );
+              }
+            },
+          ),
+        ),
+      ],
+    );
+  }
+
+  /// Performs full web extraction after user subscribes from preview.
+  ///
+  /// Shows its own modal for progress/errors since the original share modal
+  /// was already closed when we showed the preview sheet.
+  Future<void> _performPostWebSubscriptionExtraction(BuildContext context) async {
+    final webResult = _webExtractionResult;
+    if (webResult == null || !webResult.hasHtml) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('No content available to extract.')),
+        );
+      }
+      return;
+    }
+
+    // State for the extraction modal
+    var isExtracting = true;
+    String? errorMessage;
+
+    // Show extraction progress modal
+    if (!context.mounted) return;
+
+    await WoltModalSheet.show<void>(
+      context: context,
+      useRootNavigator: true,
+      barrierDismissible: false,
+      modalTypeBuilder: (_) => WoltModalType.alertDialog(),
+      pageListBuilder: (modalContext) => [
+        WoltModalSheetPage(
+          navBarHeight: 0,
+          hasTopBarLayer: false,
+          backgroundColor: AppColors.of(modalContext).background,
+          surfaceTintColor: Colors.transparent,
+          child: StatefulBuilder(
+            builder: (builderContext, setModalState) {
+              if (isExtracting && errorMessage == null) {
+                Future.microtask(() async {
+                  try {
+                    final service = ref.read(webExtractionServiceProvider);
+                    final recipe = await service.extractRecipe(
+                      html: webResult.html!,
+                      sourceUrl: webResult.sourceUrl,
+                    );
+
+                    if (!modalContext.mounted) return;
+
+                    if (recipe == null) {
+                      setModalState(() {
+                        isExtracting = false;
+                        errorMessage = 'No recipe found on this page.';
+                      });
+                      return;
+                    }
+
+                    // Download image if available
+                    RecipeImage? coverImage;
+                    final imageUrl = webResult.imageUrl;
+                    if (imageUrl != null && imageUrl.isNotEmpty) {
+                      coverImage = await _downloadAndSaveImage(imageUrl);
+                    }
+
+                    if (!modalContext.mounted) return;
+
+                    Navigator.of(modalContext, rootNavigator: true).pop();
+
+                    if (context.mounted) {
+                      final recipeEntry = _convertToRecipeEntry(
+                        recipe,
+                        coverImage: coverImage,
+                      );
+                      showRecipeEditorModal(
+                        context,
+                        ref: ref,
+                        recipe: recipeEntry,
+                        isEditing: false,
+                      );
+                    }
+                  } on WebExtractionException catch (e) {
+                    if (modalContext.mounted) {
+                      setModalState(() {
+                        isExtracting = false;
+                        errorMessage = e.message;
+                      });
+                    }
+                  } catch (e) {
+                    AppLogger.error('Post-subscription web extraction failed', e);
                     if (modalContext.mounted) {
                       setModalState(() {
                         isExtracting = false;
