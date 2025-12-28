@@ -21,6 +21,7 @@ import '../widgets/recipe_search_results.dart';
 import '../widgets/smart_folder_search_results.dart';
 import 'add_recipe_modal.dart';
 import 'edit_smart_folder_modal.dart';
+import 'photo_capture_review_modal.dart';
 import 'photo_import_modal.dart';
 
 class RecipesFolderPage extends ConsumerWidget {
@@ -225,7 +226,7 @@ class RecipesFolderPage extends ConsumerWidget {
             icon: const Icon(CupertinoIcons.camera),
             onTap: () {
               final saveFolderId = folderId == kUncategorizedFolderId ? null : folderId;
-              showPhotoImportModal(context, ref: ref, source: ImageSource.camera, folderId: saveFolderId);
+              showPhotoCaptureReviewModal(context, ref: ref, folderId: saveFolderId);
             },
           ),
           AdaptiveMenuItem(

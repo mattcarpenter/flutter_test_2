@@ -32,81 +32,51 @@ import '../../clippings/providers/preview_usage_provider.dart';
 import '../../share/widgets/share_recipe_preview_result.dart';
 import 'add_recipe_modal.dart';
 
-/// Shows a photo import flow to extract recipes from photos.
+/// Shows a photo capture and review flow for importing recipes from camera.
 ///
-/// Entry point for in-app photo import (from "Choose Photo" or "Take Photo" menu items).
-/// Handles image selection, processing, subscription checks, and extraction.
-Future<void> showPhotoImportModal(
+/// This modal allows users to:
+/// 1. Take a photo (camera opens immediately)
+/// 2. Review the photo with option to take another (max 2)
+/// 3. Import the recipe with a smooth transition to loading state
+Future<void> showPhotoCaptureReviewModal(
   BuildContext context, {
   required WidgetRef ref,
-  required ImageSource source,
   String? folderId,
 }) async {
   // Check connectivity first
   final connectivityResult = await Connectivity().checkConnectivity();
   if (connectivityResult.contains(ConnectivityResult.none)) {
     if (context.mounted) {
-      _showError(context, 'You\'re offline. Please check your internet connection and try again.');
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('You\'re offline. Please check your internet connection.')),
+      );
     }
     return;
   }
 
-  // Pick image(s)
+  // Take first photo immediately
   final picker = ImagePicker();
-  List<XFile> pickedImages = [];
+  final image = await picker.pickImage(source: ImageSource.camera);
 
-  if (source == ImageSource.camera) {
-    final image = await picker.pickImage(source: ImageSource.camera);
-    if (image != null) {
-      pickedImages = [image];
-    }
-  } else {
-    // Gallery - allow multiple selection (up to 2)
-    pickedImages = await picker.pickMultiImage(limit: 2);
-  }
-
-  if (pickedImages.isEmpty) {
+  if (image == null) {
     return; // User cancelled
   }
 
   if (!context.mounted) return;
 
-  // Show processing modal
-  await _showProcessingModal(
-    context,
-    ref: ref,
-    imagePaths: pickedImages.map((x) => x.path).toList(),
-    folderId: folderId,
-  );
-}
-
-/// Shows a simple error snackbar
-void _showError(BuildContext context, String message) {
-  ScaffoldMessenger.of(context).showSnackBar(
-    SnackBar(content: Text(message)),
-  );
-}
-
-/// Shows the processing modal and handles extraction
-Future<void> _showProcessingModal(
-  BuildContext context, {
-  required WidgetRef ref,
-  required List<String> imagePaths,
-  String? folderId,
-}) async {
+  // Show the review modal with the captured photo
   await WoltModalSheet.show<void>(
     context: context,
     useRootNavigator: true,
     barrierDismissible: false,
-    modalTypeBuilder: (_) => WoltModalType.alertDialog(),
     pageListBuilder: (modalContext) => [
       WoltModalSheetPage(
         navBarHeight: 0,
         hasTopBarLayer: false,
         backgroundColor: AppColors.of(modalContext).background,
         surfaceTintColor: Colors.transparent,
-        child: _PhotoImportContent(
-          imagePaths: imagePaths,
+        child: _PhotoCaptureReviewContent(
+          initialPhotoPath: image.path,
           folderId: folderId,
           onClose: () => Navigator.of(modalContext, rootNavigator: true).pop(),
         ),
@@ -115,117 +85,153 @@ Future<void> _showProcessingModal(
   );
 }
 
-/// Content widget for the photo import modal
-class _PhotoImportContent extends ConsumerStatefulWidget {
-  final List<String> imagePaths;
+/// Content widget for the photo capture review modal
+class _PhotoCaptureReviewContent extends ConsumerStatefulWidget {
+  final String initialPhotoPath;
   final String? folderId;
   final VoidCallback onClose;
 
-  const _PhotoImportContent({
-    required this.imagePaths,
+  const _PhotoCaptureReviewContent({
+    required this.initialPhotoPath,
     required this.folderId,
     required this.onClose,
   });
 
   @override
-  ConsumerState<_PhotoImportContent> createState() => _PhotoImportContentState();
+  ConsumerState<_PhotoCaptureReviewContent> createState() => _PhotoCaptureReviewContentState();
 }
 
 enum _ModalState {
+  reviewing,
   processing,
   error,
-  showingPreview,
 }
 
-class _PhotoImportContentState extends ConsumerState<_PhotoImportContent> {
-  _ModalState _modalState = _ModalState.processing;
+class _PhotoCaptureReviewContentState extends ConsumerState<_PhotoCaptureReviewContent> {
+  _ModalState _modalState = _ModalState.reviewing;
+  bool _isTransitioningOut = false;
+
+  late List<String> _capturedPhotoPaths;
   String? _errorMessage;
   bool _isRateLimitError = false;
   bool _isUpgradeLoading = false;
-  String _statusMessage = 'Reading photo...';
+  String _processingMessage = 'Reading photos...';
+
+  final ImagePicker _picker = ImagePicker();
 
   @override
   void initState() {
     super.initState();
-    _startExtraction();
+    _capturedPhotoPaths = [widget.initialPhotoPath];
   }
 
-  Future<void> _startExtraction() async {
-    try {
-      // Check subscription status
-      final hasPlus = ref.read(effectiveHasPlusProvider);
+  /// Smoothly transition to a new modal state with staged animation
+  Future<void> _transitionToState(_ModalState newState) async {
+    if (_isTransitioningOut || _modalState == newState) return;
 
-      if (hasPlus) {
-        await _performFullExtraction();
-      } else {
-        // Check preview limit
-        final usageService = await ref.read(previewUsageServiceProvider.future);
+    // Start fade-out
+    setState(() {
+      _isTransitioningOut = true;
+    });
 
-        if (!usageService.hasPhotoRecipePreviewsRemaining()) {
-          // Limit exceeded - show paywall
-          if (!mounted) return;
-          widget.onClose();
+    // Wait for fade-out to complete
+    await Future.delayed(const Duration(milliseconds: 200));
 
-          await Future.delayed(const Duration(milliseconds: 100));
-          final rootContext = globalRootNavigatorKey.currentContext;
-          if (rootContext != null && rootContext.mounted) {
-            final purchased = await ref.read(subscriptionProvider.notifier).presentPaywall(rootContext);
-            if (purchased && rootContext.mounted) {
-              // Re-start extraction as Plus user
-              await _showPostSubscriptionModal(rootContext);
-            }
+    if (!mounted) return;
+
+    // Change state and start fade-in
+    setState(() {
+      _modalState = newState;
+      _isTransitioningOut = false;
+    });
+  }
+
+  Future<void> _takeAnotherPhoto() async {
+    if (_capturedPhotoPaths.length >= 2) return;
+
+    final image = await _picker.pickImage(source: ImageSource.camera);
+    if (image == null) return;
+
+    if (mounted) {
+      setState(() {
+        _capturedPhotoPaths.add(image.path);
+      });
+    }
+  }
+
+  void _removePhoto(int index) {
+    if (_capturedPhotoPaths.length <= 1) return; // Must have at least one
+
+    setState(() {
+      _capturedPhotoPaths.removeAt(index);
+    });
+  }
+
+  Future<void> _onImportTap() async {
+    // Smooth transition to processing state
+    await _transitionToState(_ModalState.processing);
+
+    // Check subscription status
+    final hasPlus = ref.read(effectiveHasPlusProvider);
+
+    if (hasPlus) {
+      await _performFullExtraction();
+    } else {
+      // Check preview limit
+      final usageService = await ref.read(previewUsageServiceProvider.future);
+
+      if (!usageService.hasPhotoRecipePreviewsRemaining()) {
+        // Limit exceeded - show paywall
+        if (!mounted) return;
+        widget.onClose();
+
+        await Future.delayed(const Duration(milliseconds: 100));
+        final rootContext = globalRootNavigatorKey.currentContext;
+        if (rootContext != null && rootContext.mounted) {
+          final purchased = await ref.read(subscriptionProvider.notifier).presentPaywall(rootContext);
+          if (purchased && rootContext.mounted) {
+            await _showPostSubscriptionModal(rootContext);
           }
-          return;
         }
+        return;
+      }
 
-        // Show preview
-        await _performPreviewExtraction();
-      }
-    } catch (e) {
-      AppLogger.error('Photo import failed', e);
-      if (mounted) {
-        setState(() {
-          _modalState = _ModalState.error;
-          _errorMessage = 'Something went wrong. Please try again.';
-          _isRateLimitError = false;
-        });
-      }
+      // Show preview
+      await _performPreviewExtraction();
     }
   }
 
   Future<void> _performFullExtraction() async {
     try {
       setState(() {
-        _statusMessage = 'Processing photo...';
+        _processingMessage = 'Processing photos...';
       });
 
-      // Prepare images
       final images = await ImageUtils.prepareImagesFromPaths(
-        widget.imagePaths,
+        _capturedPhotoPaths,
         maxImages: 2,
       );
 
       if (images.isEmpty) {
+        await _transitionToState(_ModalState.error);
         setState(() {
-          _modalState = _ModalState.error;
-          _errorMessage = 'Failed to process the image(s). Please try again.';
+          _errorMessage = 'Failed to process the photo(s). Please try again.';
         });
         return;
       }
 
       setState(() {
-        _statusMessage = 'Extracting recipe...';
+        _processingMessage = 'Extracting recipe...';
       });
 
-      // Call extraction API
       final service = ref.read(photoExtractionServiceProvider);
       final recipe = await service.extractRecipe(images: images);
 
       if (!mounted) return;
 
       if (recipe == null) {
+        await _transitionToState(_ModalState.error);
         setState(() {
-          _modalState = _ModalState.error;
           _errorMessage = 'No recipe found in the photo.\n\nTry a photo of a recipe card or cookbook page.';
         });
         return;
@@ -233,8 +239,8 @@ class _PhotoImportContentState extends ConsumerState<_PhotoImportContent> {
 
       // Save first image as cover
       RecipeImage? coverImage;
-      if (widget.imagePaths.isNotEmpty) {
-        coverImage = await _savePhotoAsCover(widget.imagePaths.first);
+      if (_capturedPhotoPaths.isNotEmpty) {
+        coverImage = await _savePhotoAsCover(_capturedPhotoPaths.first);
       }
 
       if (!mounted) return;
@@ -255,10 +261,19 @@ class _PhotoImportContentState extends ConsumerState<_PhotoImportContent> {
       }
     } on PhotoExtractionException catch (e) {
       if (mounted) {
+        await _transitionToState(_ModalState.error);
         setState(() {
-          _modalState = _ModalState.error;
           _errorMessage = e.message;
           _isRateLimitError = e.statusCode == 429;
+        });
+      }
+    } catch (e) {
+      AppLogger.error('Photo extraction failed', e);
+      if (mounted) {
+        await _transitionToState(_ModalState.error);
+        setState(() {
+          _errorMessage = 'Something went wrong. Please try again.';
+          _isRateLimitError = false;
         });
       }
     }
@@ -267,36 +282,34 @@ class _PhotoImportContentState extends ConsumerState<_PhotoImportContent> {
   Future<void> _performPreviewExtraction() async {
     try {
       setState(() {
-        _statusMessage = 'Processing photo...';
+        _processingMessage = 'Processing photos...';
       });
 
-      // Prepare images
       final images = await ImageUtils.prepareImagesFromPaths(
-        widget.imagePaths,
+        _capturedPhotoPaths,
         maxImages: 2,
       );
 
       if (images.isEmpty) {
+        await _transitionToState(_ModalState.error);
         setState(() {
-          _modalState = _ModalState.error;
-          _errorMessage = 'Failed to process the image(s). Please try again.';
+          _errorMessage = 'Failed to process the photo(s). Please try again.';
         });
         return;
       }
 
       setState(() {
-        _statusMessage = 'Extracting recipe...';
+        _processingMessage = 'Extracting recipe...';
       });
 
-      // Call preview API
       final service = ref.read(photoExtractionServiceProvider);
       final preview = await service.previewRecipe(images: images);
 
       if (!mounted) return;
 
       if (preview == null) {
+        await _transitionToState(_ModalState.error);
         setState(() {
-          _modalState = _ModalState.error;
           _errorMessage = 'No recipe found in the photo.\n\nTry a photo of a recipe card or cookbook page.';
         });
         return;
@@ -312,10 +325,19 @@ class _PhotoImportContentState extends ConsumerState<_PhotoImportContent> {
       _showPreviewSheet(context, preview);
     } on PhotoExtractionException catch (e) {
       if (mounted) {
+        await _transitionToState(_ModalState.error);
         setState(() {
-          _modalState = _ModalState.error;
           _errorMessage = e.message;
           _isRateLimitError = e.statusCode == 429;
+        });
+      }
+    } catch (e) {
+      AppLogger.error('Photo preview extraction failed', e);
+      if (mounted) {
+        await _transitionToState(_ModalState.error);
+        setState(() {
+          _errorMessage = 'Something went wrong. Please try again.';
+          _isRateLimitError = false;
         });
       }
     }
@@ -395,14 +417,14 @@ class _PhotoImportContentState extends ConsumerState<_PhotoImportContent> {
                 Future.microtask(() async {
                   try {
                     final images = await ImageUtils.prepareImagesFromPaths(
-                      widget.imagePaths,
+                      _capturedPhotoPaths,
                       maxImages: 2,
                     );
 
                     if (images.isEmpty) {
                       setModalState(() {
                         isExtracting = false;
-                        errorMessage = 'Failed to process the image(s).';
+                        errorMessage = 'Failed to process the photo(s).';
                       });
                       return;
                     }
@@ -421,8 +443,8 @@ class _PhotoImportContentState extends ConsumerState<_PhotoImportContent> {
                     }
 
                     RecipeImage? coverImage;
-                    if (widget.imagePaths.isNotEmpty) {
-                      coverImage = await _savePhotoAsCover(widget.imagePaths.first);
+                    if (_capturedPhotoPaths.isNotEmpty) {
+                      coverImage = await _savePhotoAsCover(_capturedPhotoPaths.first);
                     }
 
                     if (!modalContext.mounted) return;
@@ -636,14 +658,191 @@ class _PhotoImportContentState extends ConsumerState<_PhotoImportContent> {
 
   @override
   Widget build(BuildContext context) {
+    // Staged animation approach:
+    // 1. AnimatedOpacity handles fade out/in (controlled by _isTransitioningOut)
+    // 2. AnimatedSize handles modal size changes (triggered when _modalState changes)
+    return AnimatedSize(
+      duration: const Duration(milliseconds: 300),
+      curve: Curves.easeOutCubic,
+      alignment: Alignment.topCenter,
+      child: AnimatedOpacity(
+        opacity: _isTransitioningOut ? 0.0 : 1.0,
+        duration: const Duration(milliseconds: 200),
+        curve: Curves.easeOut,
+        child: _buildStateContent(context),
+      ),
+    );
+  }
+
+  Widget _buildStateContent(BuildContext context) {
     switch (_modalState) {
+      case _ModalState.reviewing:
+        return _buildReviewingState(context);
       case _ModalState.processing:
         return _buildProcessingState(context);
       case _ModalState.error:
         return _buildErrorState(context);
-      case _ModalState.showingPreview:
-        return const SizedBox.shrink();
     }
+  }
+
+  Widget _buildReviewingState(BuildContext context) {
+    final canAddMore = _capturedPhotoPaths.length < 2;
+
+    return Padding(
+      padding: EdgeInsets.all(AppSpacing.xl),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Header
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                'Recipe Photos',
+                style: AppTypography.h4.copyWith(
+                  color: AppColors.of(context).textPrimary,
+                ),
+              ),
+              AppCircleButton(
+                icon: AppCircleButtonIcon.close,
+                variant: AppCircleButtonVariant.neutral,
+                size: 32,
+                onPressed: widget.onClose,
+              ),
+            ],
+          ),
+          SizedBox(height: AppSpacing.xl),
+
+          // Photo thumbnails row
+          SizedBox(
+            height: 120,
+            child: Row(
+              children: [
+                // Captured photos
+                ..._capturedPhotoPaths.asMap().entries.map((entry) {
+                  final index = entry.key;
+                  final path = entry.value;
+                  return Padding(
+                    padding: EdgeInsets.only(right: AppSpacing.md),
+                    child: _buildPhotoThumbnail(context, path, index),
+                  );
+                }),
+
+                // Add photo button (if can add more)
+                if (canAddMore)
+                  _buildAddPhotoButton(context),
+              ],
+            ),
+          ),
+          SizedBox(height: AppSpacing.lg),
+
+          // Tip text
+          if (canAddMore)
+            Padding(
+              padding: EdgeInsets.only(bottom: AppSpacing.lg),
+              child: Text(
+                'Tip: Add another photo for multi-page recipes',
+                style: AppTypography.bodySmall.copyWith(
+                  color: AppColors.of(context).textSecondary,
+                ),
+              ),
+            ),
+
+          // Import button
+          AppButton(
+            text: 'Import Recipe',
+            onPressed: _onImportTap,
+            style: AppButtonStyle.fill,
+            theme: AppButtonTheme.primary,
+            size: AppButtonSize.large,
+            shape: AppButtonShape.square,
+            fullWidth: true,
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildPhotoThumbnail(BuildContext context, String path, int index) {
+    final canRemove = _capturedPhotoPaths.length > 1;
+
+    return Stack(
+      clipBehavior: Clip.none,
+      children: [
+        ClipRRect(
+          borderRadius: BorderRadius.circular(8),
+          child: Image.file(
+            File(path),
+            width: 100,
+            height: 120,
+            fit: BoxFit.cover,
+          ),
+        ),
+        // Remove button
+        if (canRemove)
+          Positioned(
+            top: -8,
+            right: -8,
+            child: GestureDetector(
+              onTap: () => _removePhoto(index),
+              child: Container(
+                width: 24,
+                height: 24,
+                decoration: BoxDecoration(
+                  color: AppColors.of(context).background,
+                  shape: BoxShape.circle,
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withValues(alpha: 0.1),
+                      blurRadius: 4,
+                    ),
+                  ],
+                ),
+                child: Icon(
+                  Icons.close,
+                  size: 16,
+                  color: AppColors.of(context).textSecondary,
+                ),
+              ),
+            ),
+          ),
+      ],
+    );
+  }
+
+  Widget _buildAddPhotoButton(BuildContext context) {
+    return GestureDetector(
+      onTap: _takeAnotherPhoto,
+      child: Container(
+        width: 100,
+        height: 120,
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(8),
+          border: Border.all(
+            color: AppColors.of(context).border,
+            width: 1.5,
+          ),
+        ),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              CupertinoIcons.camera,
+              size: 28,
+              color: AppColors.of(context).textSecondary,
+            ),
+            SizedBox(height: AppSpacing.xs),
+            Text(
+              'Add Photo',
+              style: AppTypography.bodySmall.copyWith(
+                color: AppColors.of(context).textSecondary,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
   }
 
   Widget _buildProcessingState(BuildContext context) {
@@ -656,7 +855,7 @@ class _PhotoImportContentState extends ConsumerState<_PhotoImportContent> {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                'Processing Photo',
+                'Importing Recipe',
                 style: AppTypography.h4.copyWith(
                   color: AppColors.of(context).textPrimary,
                 ),
@@ -673,7 +872,7 @@ class _PhotoImportContentState extends ConsumerState<_PhotoImportContent> {
           const CupertinoActivityIndicator(radius: 16),
           SizedBox(height: AppSpacing.lg),
           Text(
-            _statusMessage,
+            _processingMessage,
             style: AppTypography.body.copyWith(
               color: AppColors.of(context).textSecondary,
             ),
@@ -760,6 +959,18 @@ class _PhotoImportContentState extends ConsumerState<_PhotoImportContent> {
               shape: AppButtonShape.square,
               fullWidth: true,
               loading: _isUpgradeLoading,
+            )
+          else
+            AppButton(
+              text: 'Try Again',
+              onPressed: () async {
+                await _transitionToState(_ModalState.reviewing);
+              },
+              style: AppButtonStyle.outline,
+              theme: AppButtonTheme.secondary,
+              size: AppButtonSize.large,
+              shape: AppButtonShape.square,
+              fullWidth: true,
             ),
         ],
       ),

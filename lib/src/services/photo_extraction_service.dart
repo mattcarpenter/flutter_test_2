@@ -188,7 +188,7 @@ class PhotoExtractionService {
 
       if (response.statusCode == 429) {
         throw PhotoExtractionException(
-          'Daily photo import limit reached. Subscribe to Plus for unlimited access.',
+          'Recipe previews are limited for free users. Upgrade to Plus for unlimited imports.',
           statusCode: 429,
         );
       }

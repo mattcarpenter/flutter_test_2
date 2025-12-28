@@ -22,6 +22,7 @@ import '../widgets/recipe_list.dart';
 import '../widgets/pinned_recipes_section.dart';
 import '../widgets/recently_viewed_section.dart';
 import 'add_recipe_modal.dart';
+import 'photo_capture_review_modal.dart';
 import 'photo_import_modal.dart';
 
 class RecipesTab extends ConsumerWidget {
@@ -122,7 +123,7 @@ class RecipesTab extends ConsumerWidget {
             title: 'Take Photo',
             icon: const Icon(CupertinoIcons.camera),
             onTap: () {
-              showPhotoImportModal(context, ref: ref, source: ImageSource.camera);
+              showPhotoCaptureReviewModal(context, ref: ref);
             },
           ),
           AdaptiveMenuItem(
