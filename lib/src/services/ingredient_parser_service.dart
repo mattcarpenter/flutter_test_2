@@ -7,6 +7,42 @@ enum Language {
   japanese,
 }
 
+/// Normalizes full-width characters to their ASCII equivalents.
+/// This is essential for parsing Japanese text that often uses full-width numbers.
+String _normalizeFullWidth(String input) {
+  final buffer = StringBuffer();
+  for (final codeUnit in input.runes) {
+    // Full-width digits ０-９ (U+FF10-U+FF19) -> 0-9
+    if (codeUnit >= 0xFF10 && codeUnit <= 0xFF19) {
+      buffer.writeCharCode(codeUnit - 0xFF10 + 0x30);
+    }
+    // Full-width slash ／ (U+FF0F) -> /
+    else if (codeUnit == 0xFF0F) {
+      buffer.write('/');
+    }
+    // Full-width period ． (U+FF0E) -> .
+    else if (codeUnit == 0xFF0E) {
+      buffer.write('.');
+    }
+    // Wave dash 〜 (U+301C) -> -
+    else if (codeUnit == 0x301C) {
+      buffer.write('-');
+    }
+    // Fullwidth tilde ～ (U+FF5E) -> -
+    else if (codeUnit == 0xFF5E) {
+      buffer.write('-');
+    }
+    // Japanese zero 〇 (U+3007) -> 0
+    else if (codeUnit == 0x3007) {
+      buffer.write('0');
+    }
+    else {
+      buffer.writeCharCode(codeUnit);
+    }
+  }
+  return buffer.toString();
+}
+
 /// Service for parsing ingredient strings to identify quantities and units
 /// for visual highlighting and future scaling features.
 class IngredientParserService {
@@ -42,67 +78,80 @@ class IngredientParserService {
         cleanName: '',
       );
     }
-    
+
+    // Normalize full-width characters to ASCII equivalents for consistent parsing
+    // This converts ０-９ -> 0-9, ／ -> /, ． -> ., 〜/～ -> -, 〇 -> 0
+    final normalizedInput = _normalizeFullWidth(input);
+
     // Auto-detect language from character patterns
-    final detectedLanguage = detectLanguage(input);
-    
+    final detectedLanguage = detectLanguage(normalizedInput);
+
     // Try detected language first
-    final result = _parseWithLanguage(input, detectedLanguage);
+    final result = _parseWithLanguage(normalizedInput, detectedLanguage, input);
     if (result.quantities.isNotEmpty) {
       return result;
     }
-    
+
     // Fallback to primary language if nothing found and languages differ
     if (detectedLanguage != primaryLanguage) {
-      return _parseWithLanguage(input, primaryLanguage);
+      return _parseWithLanguage(normalizedInput, primaryLanguage, input);
     }
-    
+
     return result; // Return empty result if both attempts failed
   }
   
-  /// Parses input using a specific language's patterns
-  IngredientParseResult _parseWithLanguage(String input, Language language) {
+  /// Parses input using a specific language's patterns.
+  /// [input] is the normalized text used for pattern matching.
+  /// [originalInput] is the original text, used for the result's originalText
+  /// and for extracting the matched text with original characters preserved.
+  IngredientParseResult _parseWithLanguage(String input, Language language, [String? originalInput]) {
     final regexBuilder = _builders[language]!;
     final quantities = <QuantitySpan>[];
-    
+    final original = originalInput ?? input;
+
     // Find all quantity matches
     final allMatches = <_QuantityMatch>[];
-    
-    // Check for ranges first (they contain more specific patterns)
+
+    // Check for unit-before-number patterns first (Japanese: 大さじ3)
+    if (language == Language.japanese) {
+      allMatches.addAll(_findUnitBeforeNumber(input, regexBuilder));
+    }
+
+    // Check for ranges (they contain more specific patterns)
     allMatches.addAll(_findRanges(input, regexBuilder));
-    
+
     // Then check for single quantities
     allMatches.addAll(_findSingleQuantities(input, allMatches, regexBuilder));
-    
+
     // Check for approximate quantities
     allMatches.addAll(_findApproximateQuantities(input, allMatches, regexBuilder));
-    
+
     // Check for bare numbers at the start (e.g. "1 onion", "2 eggs")
     allMatches.addAll(_findBareNumbers(input, allMatches, language));
-    
+
     // Sort by start position
     allMatches.sort((a, b) => a.start.compareTo(b.start));
-    
-    // Convert to QuantitySpan objects
+
+    // Convert to QuantitySpan objects, using original text for the span text
     for (final match in allMatches) {
       quantities.add(QuantitySpan(
         start: match.start,
         end: match.end,
-        text: match.text,
+        text: original.substring(match.start, match.end),
       ));
     }
-    
+
     // Extract clean ingredient name by removing all matched quantities
-    String cleanName = input;
+    String cleanName = original;
     for (final span in quantities.reversed) {
       cleanName = cleanName.replaceRange(span.start, span.end, ' ');
     }
-    
+
     // Clean up the name (language-specific cleaning)
     cleanName = _cleanIngredientName(cleanName, language);
-    
+
     return IngredientParseResult(
-      originalText: input,
+      originalText: original,
       quantities: quantities,
       cleanName: cleanName,
     );
@@ -174,10 +223,17 @@ class IngredientParserService {
   /// Parses a quantity text string (e.g., "2 cups", "1/2 tsp") and extracts
   /// numeric value, unit, and unit type.
   _ParsedQuantityData? _parseQuantityText(String text, UnitConversionService converter) {
-    // Try to extract the number and unit parts
+    // Normalize full-width characters to ASCII for consistent parsing
+    final normalizedText = _normalizeFullWidth(text);
+
+    // Try unit-before-number patterns first (Japanese: 大さじ3, 小さじ1/2)
+    final unitBeforeResult = _parseUnitBeforeNumber(normalizedText, converter);
+    if (unitBeforeResult != null) {
+      return unitBeforeResult;
+    }
 
     // Handle ranges like "2-3 cups"
-    final rangeMatch = RegExp(r'^(\d+(?:\.\d+)?)\s*(?:-|–|to)\s*(\d+(?:\.\d+)?)\s*(.+)$').firstMatch(text);
+    final rangeMatch = RegExp(r'^(\d+(?:\.\d+)?)\s*(?:-|–|to)\s*(\d+(?:\.\d+)?)\s*(.+)$').firstMatch(normalizedText);
     if (rangeMatch != null) {
       final minValue = double.tryParse(rangeMatch.group(1)!);
       final maxValue = double.tryParse(rangeMatch.group(2)!);
@@ -194,7 +250,7 @@ class IngredientParserService {
     }
 
     // Handle mixed fractions like "1 1/2 cups"
-    final mixedFractionMatch = RegExp(r'^(\d+)\s+(\d+)/(\d+)\s*(.*)$').firstMatch(text);
+    final mixedFractionMatch = RegExp(r'^(\d+)\s+(\d+)/(\d+)\s*(.*)$').firstMatch(normalizedText);
     if (mixedFractionMatch != null) {
       final whole = int.tryParse(mixedFractionMatch.group(1)!);
       final numerator = int.tryParse(mixedFractionMatch.group(2)!);
@@ -212,7 +268,7 @@ class IngredientParserService {
     }
 
     // Handle simple fractions like "1/2 cup"
-    final fractionMatch = RegExp(r'^(\d+)/(\d+)\s*(.*)$').firstMatch(text);
+    final fractionMatch = RegExp(r'^(\d+)/(\d+)\s*(.*)$').firstMatch(normalizedText);
     if (fractionMatch != null) {
       final numerator = int.tryParse(fractionMatch.group(1)!);
       final denominator = int.tryParse(fractionMatch.group(2)!);
@@ -229,7 +285,7 @@ class IngredientParserService {
     }
 
     // Handle Unicode fractions like "½ cup" or "1½ cups"
-    final unicodeFractionMatch = RegExp(r'^(\d+\s*)?([½⅓⅔¼¾⅕⅖⅗⅘⅙⅚⅛⅜⅝⅞半])\s*(.*)$').firstMatch(text);
+    final unicodeFractionMatch = RegExp(r'^(\d+\s*)?([½⅓⅔¼¾⅕⅖⅗⅘⅙⅚⅛⅜⅝⅞半])\s*(.*)$').firstMatch(normalizedText);
     if (unicodeFractionMatch != null) {
       final wholeStr = unicodeFractionMatch.group(1)?.trim();
       final fractionChar = unicodeFractionMatch.group(2)!;
@@ -247,8 +303,8 @@ class IngredientParserService {
       );
     }
 
-    // Handle Japanese numbers with optional half
-    final japaneseNumberMatch = RegExp(r'^([一二三四五六七八九十]+(?:半)?|\d+半|半)\s*(.*)$').firstMatch(text);
+    // Handle Japanese numbers with optional half (including compound numbers like 十二, 二十三, 百, 千)
+    final japaneseNumberMatch = RegExp(r'^([一二三四五六七八九十百千]+(?:半)?|\d+半|半)\s*(.*)$').firstMatch(normalizedText);
     if (japaneseNumberMatch != null) {
       final numberPart = japaneseNumberMatch.group(1)!;
       final unitText = japaneseNumberMatch.group(2)!.trim();
@@ -264,7 +320,7 @@ class IngredientParserService {
     }
 
     // Handle decimals and whole numbers like "2 cups" or "1.5 tbsp"
-    final numberMatch = RegExp(r'^(\d+(?:\.\d+)?)\s*(.*)$').firstMatch(text);
+    final numberMatch = RegExp(r'^(\d+(?:\.\d+)?)\s*(.*)$').firstMatch(normalizedText);
     if (numberMatch != null) {
       final value = double.tryParse(numberMatch.group(1)!);
       final unitText = numberMatch.group(2)!.trim();
@@ -279,7 +335,7 @@ class IngredientParserService {
     }
 
     // Handle bare numbers (no unit) like just "2" at start
-    final bareNumberMatch = RegExp(r'^(\d+)$').firstMatch(text.trim());
+    final bareNumberMatch = RegExp(r'^(\d+)$').firstMatch(normalizedText.trim());
     if (bareNumberMatch != null) {
       final value = double.tryParse(bareNumberMatch.group(1)!);
       if (value != null) {
@@ -289,6 +345,115 @@ class IngredientParserService {
           canonicalUnit: '',
           unitType: UnitType.count,
         );
+      }
+    }
+
+    return null;
+  }
+
+  /// Parses unit-before-number patterns like 大さじ3, 小さじ1/2, 大さじ1-2
+  _ParsedQuantityData? _parseUnitBeforeNumber(String text, UnitConversionService converter) {
+    // Units that can appear before numbers in Japanese
+    const unitBeforeNumberUnits = ['大さじ', '大匙', 'おおさじ', '小さじ', '小匙', 'こさじ', 'カップ'];
+
+    for (final unit in unitBeforeNumberUnits) {
+      if (!text.startsWith(unit)) continue;
+
+      final remainder = text.substring(unit.length);
+      if (remainder.isEmpty) continue;
+
+      // Try range: 大さじ1-2
+      final rangeMatch = RegExp(r'^(\d+(?:\.\d+)?)\s*(?:-|–|to)\s*(\d+(?:\.\d+)?)([弱強])?$').firstMatch(remainder);
+      if (rangeMatch != null) {
+        final minValue = double.tryParse(rangeMatch.group(1)!);
+        final maxValue = double.tryParse(rangeMatch.group(2)!);
+        if (minValue != null && maxValue != null) {
+          return _ParsedQuantityData(
+            value: minValue,
+            rangeMax: maxValue,
+            unit: unit,
+            canonicalUnit: converter.getCanonicalUnit(unit),
+            unitType: converter.getUnitType(unit),
+          );
+        }
+      }
+
+      // Try mixed fraction: 大さじ1 1/2
+      final mixedFractionMatch = RegExp(r'^(\d+)\s+(\d+)/(\d+)([弱強])?$').firstMatch(remainder);
+      if (mixedFractionMatch != null) {
+        final whole = int.tryParse(mixedFractionMatch.group(1)!);
+        final numerator = int.tryParse(mixedFractionMatch.group(2)!);
+        final denominator = int.tryParse(mixedFractionMatch.group(3)!);
+        if (whole != null && numerator != null && denominator != null && denominator != 0) {
+          final value = whole + numerator / denominator;
+          return _ParsedQuantityData(
+            value: value,
+            unit: unit,
+            canonicalUnit: converter.getCanonicalUnit(unit),
+            unitType: converter.getUnitType(unit),
+          );
+        }
+      }
+
+      // Try simple fraction: 大さじ1/2
+      final fractionMatch = RegExp(r'^(\d+)/(\d+)([弱強])?$').firstMatch(remainder);
+      if (fractionMatch != null) {
+        final numerator = int.tryParse(fractionMatch.group(1)!);
+        final denominator = int.tryParse(fractionMatch.group(2)!);
+        if (numerator != null && denominator != null && denominator != 0) {
+          final value = numerator / denominator;
+          return _ParsedQuantityData(
+            value: value,
+            unit: unit,
+            canonicalUnit: converter.getCanonicalUnit(unit),
+            unitType: converter.getUnitType(unit),
+          );
+        }
+      }
+
+      // Try unicode fraction: 大さじ½
+      final unicodeFractionMatch = RegExp(r'^(\d*\s*)?([½⅓⅔¼¾⅕⅖⅗⅘⅙⅚⅛⅜⅝⅞半])([弱強])?$').firstMatch(remainder);
+      if (unicodeFractionMatch != null) {
+        final wholeStr = unicodeFractionMatch.group(1)?.trim();
+        final fractionChar = unicodeFractionMatch.group(2)!;
+        final whole = (wholeStr != null && wholeStr.isNotEmpty) ? double.tryParse(wholeStr) ?? 0.0 : 0.0;
+        final fractionValue = _unicodeFractionToDecimal(fractionChar);
+        final value = whole + fractionValue;
+        return _ParsedQuantityData(
+          value: value,
+          unit: unit,
+          canonicalUnit: converter.getCanonicalUnit(unit),
+          unitType: converter.getUnitType(unit),
+        );
+      }
+
+      // Try Kanji number: 大さじ二
+      final kanjiMatch = RegExp(r'^([一二三四五六七八九十百千]+(?:半)?|半)([弱強])?$').firstMatch(remainder);
+      if (kanjiMatch != null) {
+        final numberPart = kanjiMatch.group(1)!;
+        final value = _parseJapaneseNumber(numberPart);
+        if (value != null) {
+          return _ParsedQuantityData(
+            value: value,
+            unit: unit,
+            canonicalUnit: converter.getCanonicalUnit(unit),
+            unitType: converter.getUnitType(unit),
+          );
+        }
+      }
+
+      // Try decimal/whole number: 大さじ3, 大さじ1.5
+      final numberMatch = RegExp(r'^(\d+(?:\.\d+)?)([弱強])?$').firstMatch(remainder);
+      if (numberMatch != null) {
+        final value = double.tryParse(numberMatch.group(1)!);
+        if (value != null) {
+          return _ParsedQuantityData(
+            value: value,
+            unit: unit,
+            canonicalUnit: converter.getCanonicalUnit(unit),
+            unitType: converter.getUnitType(unit),
+          );
+        }
       }
     }
 
@@ -318,35 +483,131 @@ class IngredientParserService {
     return fractionMap[char] ?? 0.0;
   }
 
-  /// Parses Japanese numbers (Kanji and Arabic) with half support
+  /// Parses Japanese numbers (Kanji and Arabic) with half support.
+  /// Handles compound Kanji numbers like 十二 (12), 二十 (20), 二十三 (23),
+  /// 百 (100), 千 (1000), and combinations with 半.
   static double? _parseJapaneseNumber(String input) {
+    if (input.trim().isEmpty) return null;
+
+    // Handle pure "半" (half)
     if (input == '半') return 0.5;
 
+    // Handle Arabic numbers with half: "2半" → 2.5
     final arabicHalfMatch = RegExp(r'(\d+(?:\.\d+)?)半').firstMatch(input);
     if (arabicHalfMatch != null) {
       final number = double.tryParse(arabicHalfMatch.group(1)!);
       return number != null ? number + 0.5 : null;
     }
 
+    // Handle pure Arabic numbers
     final arabicMatch = RegExp(r'^\d+(?:\.\d+)?$').firstMatch(input);
     if (arabicMatch != null) {
       return double.tryParse(input);
     }
 
-    const kanjiMap = {
-      '一': 1, '二': 2, '三': 3, '四': 4, '五': 5,
-      '六': 6, '七': 7, '八': 8, '九': 9, '十': 10,
-    };
+    // Handle Kanji numbers with optional half suffix
+    final hasHalf = input.endsWith('半');
+    final kanjiPart = hasHalf ? input.substring(0, input.length - 1) : input;
 
-    if (kanjiMap.containsKey(input)) {
-      return kanjiMap[input]!.toDouble();
+    final kanjiValue = _parseKanjiNumber(kanjiPart);
+    if (kanjiValue != null) {
+      return hasHalf ? kanjiValue + 0.5 : kanjiValue;
     }
 
-    final kanjiHalfMatch = RegExp(r'([一二三四五六七八九十]+)半').firstMatch(input);
-    if (kanjiHalfMatch != null) {
-      final kanjiPart = kanjiHalfMatch.group(1)!;
-      final baseNumber = kanjiMap[kanjiPart];
-      return baseNumber != null ? baseNumber + 0.5 : null;
+    return null;
+  }
+
+  /// Parses pure Kanji numbers including compound numbers.
+  /// Supports: 一-九, 十, 十一-十九, 二十-九十, 二十一-九十九, 百, 千
+  static double? _parseKanjiNumber(String input) {
+    if (input.isEmpty) return null;
+
+    const kanjiDigits = {
+      '一': 1, '二': 2, '三': 3, '四': 4, '五': 5,
+      '六': 6, '七': 7, '八': 8, '九': 9,
+    };
+
+    // Simple single digit kanji
+    if (kanjiDigits.containsKey(input)) {
+      return kanjiDigits[input]!.toDouble();
+    }
+
+    // Handle 十 (10)
+    if (input == '十') return 10.0;
+
+    // Handle 十一 through 十九 (11-19)
+    if (input.startsWith('十') && input.length == 2) {
+      final secondChar = input[1];
+      if (kanjiDigits.containsKey(secondChar)) {
+        return (10 + kanjiDigits[secondChar]!).toDouble();
+      }
+    }
+
+    // Handle 二十, 三十, etc. (20, 30, ...)
+    if (input.endsWith('十') && input.length == 2) {
+      final firstChar = input[0];
+      if (kanjiDigits.containsKey(firstChar)) {
+        return (kanjiDigits[firstChar]! * 10).toDouble();
+      }
+    }
+
+    // Handle 二十一, 三十五, etc. (21, 35, ...)
+    if (input.length == 3 && input[1] == '十') {
+      final firstChar = input[0];
+      final thirdChar = input[2];
+      if (kanjiDigits.containsKey(firstChar) && kanjiDigits.containsKey(thirdChar)) {
+        return (kanjiDigits[firstChar]! * 10 + kanjiDigits[thirdChar]!).toDouble();
+      }
+    }
+
+    // Handle 百 (100) and multiples
+    if (input == '百') return 100.0;
+    if (input.contains('百')) {
+      // Simple cases: 二百 = 200, 五百 = 500
+      if (input.length == 2 && input.endsWith('百')) {
+        final firstChar = input[0];
+        if (kanjiDigits.containsKey(firstChar)) {
+          return (kanjiDigits[firstChar]! * 100).toDouble();
+        }
+      }
+      // Handle 百五十 = 150, etc (百 + tens)
+      if (input.startsWith('百') && input.length >= 2) {
+        final remainder = input.substring(1);
+        final remainderValue = _parseKanjiNumber(remainder);
+        if (remainderValue != null) {
+          return 100 + remainderValue;
+        }
+      }
+      // Handle 二百五十 = 250, etc (hundreds + tens)
+      if (input.length >= 3) {
+        final hundredsIdx = input.indexOf('百');
+        if (hundredsIdx > 0) {
+          final hundredsChar = input.substring(0, hundredsIdx);
+          if (kanjiDigits.containsKey(hundredsChar)) {
+            final hundreds = kanjiDigits[hundredsChar]! * 100;
+            final remainder = input.substring(hundredsIdx + 1);
+            if (remainder.isEmpty) {
+              return hundreds.toDouble();
+            }
+            final remainderValue = _parseKanjiNumber(remainder);
+            if (remainderValue != null) {
+              return hundreds + remainderValue;
+            }
+          }
+        }
+      }
+    }
+
+    // Handle 千 (1000) and multiples
+    if (input == '千') return 1000.0;
+    if (input.contains('千')) {
+      // Simple cases: 二千 = 2000, 五千 = 5000
+      if (input.length == 2 && input.endsWith('千')) {
+        final firstChar = input[0];
+        if (kanjiDigits.containsKey(firstChar)) {
+          return (kanjiDigits[firstChar]! * 1000).toDouble();
+        }
+      }
     }
 
     return null;
@@ -442,7 +703,7 @@ class IngredientParserService {
         const kanjiNumbers = r'[一二三四五六七八九十百千]+';
         const unicodeFractions = r'[½⅓⅔¼¾⅕⅖⅗⅘⅙⅚⅛⅜⅝⅞]';
         // Negative lookahead to exclude known units
-        const japaneseUnits = r'(?!カップ|大さじ|小さじ|ml|リットル|グラム|キログラム|個|本|枚|匹|丁|切れ|粒|玉|束|合|升|勺|人分|杯|袋|パック|つまみ)';
+        const japaneseUnits = r'(?!カップ|大さじ|小さじ|ml|リットル|グラム|キログラム|個|本|枚|匹|丁|切れ|片|粒|玉|束|合|升|勺|人分|杯|袋|パック|つまみ)';
         bareNumberPattern = RegExp('(?:^|(?<=\\s))(?:(?:\\d+(?:\\.\\d+)?|$kanjiNumbers)(?:半)?|$unicodeFractions|半)(?=[\\u3040-\\u309F\\u30A0-\\u30FF\\u4E00-\\u9FAF])$japaneseUnits');
         break;
     }
@@ -467,6 +728,102 @@ class IngredientParserService {
       }
     }
     
+    return matches;
+  }
+
+  /// Finds unit-before-number patterns common in Japanese (e.g., 大さじ3, 小さじ1/2)
+  List<_QuantityMatch> _findUnitBeforeNumber(String input, RegexBuilder regexBuilder) {
+    final matches = <_QuantityMatch>[];
+
+    // Get Japanese units that commonly appear before numbers
+    const unitBeforeNumberUnits = [
+      '大さじ', '大匙', 'おおさじ',
+      '小さじ', '小匙', 'こさじ',
+      'カップ',
+    ];
+
+    // Build pattern: unit followed by number (with optional fractions, ranges)
+    // Supports: 大さじ3, 大さじ1/2, 大さじ1.5, 大さじ1-2, 大さじ二, 大さじ1弱, 大さじ1強
+    final unitsPattern = unitBeforeNumberUnits.map((u) => RegExp.escape(u)).join('|');
+    const kanjiNumbers = '[一二三四五六七八九十百千]+';
+    const unicodeFractions = '[½⅓⅔¼¾⅕⅖⅗⅘⅙⅚⅛⅜⅝⅞]';
+
+    // Pattern for ranges: 大さじ1-2, 大さじ1〜2 (already normalized to -)
+    final rangePattern = RegExp(
+      '($unitsPattern)'
+      '(\\d+(?:\\.\\d+)?|$kanjiNumbers)'
+      '\\s*(?:-|–|to)\\s*'
+      '(\\d+(?:\\.\\d+)?|$kanjiNumbers)'
+      '([弱強])?',
+    );
+
+    for (final match in rangePattern.allMatches(input)) {
+      matches.add(_QuantityMatch(
+        start: match.start,
+        end: match.end,
+        text: match.group(0)!,
+      ));
+    }
+
+    // Pattern for fractions: 大さじ1/2, 大さじ1 1/2, 大さじ½
+    final fractionPattern = RegExp(
+      '($unitsPattern)'
+      '(?:(\\d+)\\s+)?(\\d+)/(\\d+)'
+      '([弱強])?',
+    );
+
+    for (final match in fractionPattern.allMatches(input)) {
+      // Skip if overlaps with existing range match
+      bool overlaps = matches.any((m) =>
+        match.start >= m.start && match.start < m.end);
+      if (!overlaps) {
+        matches.add(_QuantityMatch(
+          start: match.start,
+          end: match.end,
+          text: match.group(0)!,
+        ));
+      }
+    }
+
+    // Pattern for unicode fractions: 大さじ½, 大さじ1½
+    final unicodeFractionPattern = RegExp(
+      '($unitsPattern)'
+      '(?:(\\d+)\\s*)?($unicodeFractions)'
+      '([弱強])?',
+    );
+
+    for (final match in unicodeFractionPattern.allMatches(input)) {
+      bool overlaps = matches.any((m) =>
+        match.start >= m.start && match.start < m.end);
+      if (!overlaps) {
+        matches.add(_QuantityMatch(
+          start: match.start,
+          end: match.end,
+          text: match.group(0)!,
+        ));
+      }
+    }
+
+    // Pattern for single numbers: 大さじ3, 大さじ二, 大さじ1.5, 大さじ1弱
+    final singlePattern = RegExp(
+      '($unitsPattern)'
+      '(\\d+(?:\\.\\d+)?|$kanjiNumbers(?:半)?|半)'
+      '([弱強])?',
+    );
+
+    for (final match in singlePattern.allMatches(input)) {
+      // Skip if overlaps with existing matches
+      bool overlaps = matches.any((m) =>
+        match.start >= m.start && match.start < m.end);
+      if (!overlaps) {
+        matches.add(_QuantityMatch(
+          start: match.start,
+          end: match.end,
+          text: match.group(0)!,
+        ));
+      }
+    }
+
     return matches;
   }
 }
@@ -759,6 +1116,10 @@ class IngredientParserConfig {
       variations: ['切れ', 'きれ'],
     ),
     UnitDefinition(
+      canonical: '片',
+      variations: ['片', 'かけ', 'へん'],  // Slice/piece for garlic, ginger
+    ),
+    UnitDefinition(
       canonical: '粒',
       variations: ['粒', 'つぶ'],
     ),
@@ -814,6 +1175,7 @@ class IngredientParserConfig {
     '適量',
     '少々',
     'ひとつまみ',
+    'ふたつまみ',
     'お好みで',
     'お好み',
     '好みで',
@@ -826,6 +1188,11 @@ class IngredientParserConfig {
     '約',
     'くらい',
     'ぐらい',
+    '程度',
+    '多め',
+    '少なめ',
+    '弱',   // Scant (e.g., 大さじ1弱 - scant tablespoon)
+    '強',   // Heaping (e.g., 大さじ1強 - heaping tablespoon)
   ];
 }
 
@@ -864,9 +1231,10 @@ class RegexBuilder {
     // Single quantity pattern - with optional space between number and unit
     // Updated to better handle word boundaries and spaces
     // For Japanese, allow Japanese characters after units as well
-    final lookahead = language == Language.japanese 
-        ? r'(?=\s|,|$|\)|[\u3040-\u309F\u30A0-\u30FF\u4E00-\u9FAF])'
-        : r'(?=\s|,|$|\))';
+    // Include both opening and closing parentheses/brackets (quantity may be followed by notes in parens)
+    final lookahead = language == Language.japanese
+        ? r'(?=\s|,|$|[()（）\[\]【】「」『』〈〉《》]|[\u3040-\u309F\u30A0-\u30FF\u4E00-\u9FAF])'
+        : r'(?=\s|,|$|[()\[\]])';
     quantityPattern = RegExp(
       numberPattern + r'\s*' + unitsPattern + lookahead,
       caseSensitive: false,
@@ -941,44 +1309,10 @@ extension IngredientScaling on String {
     return fractionMap[unicodeFraction] ?? 0.0;
   }
   
-  /// Parses Japanese numbers (Kanji and Arabic) with half support
+  /// Parses Japanese numbers (Kanji and Arabic) with half support.
+  /// Delegates to IngredientParserService._parseJapaneseNumber for consistency.
   static double? _parseJapaneseNumber(String input) {
-    // Handle pure "半" (half)
-    if (input == '半') return 0.5;
-    
-    // Handle Arabic numbers with half: "2半" → 2.5
-    final arabicHalfMatch = RegExp(r'(\d+(?:\.\d+)?)半').firstMatch(input);
-    if (arabicHalfMatch != null) {
-      final number = double.tryParse(arabicHalfMatch.group(1)!);
-      return number != null ? number + 0.5 : null;
-    }
-    
-    // Handle pure Arabic numbers
-    final arabicMatch = RegExp(r'^\d+(?:\.\d+)?$').firstMatch(input);
-    if (arabicMatch != null) {
-      return double.tryParse(input);
-    }
-    
-    // Handle Kanji numbers (basic set for common use)
-    const kanjiMap = {
-      '一': 1, '二': 2, '三': 3, '四': 4, '五': 5,
-      '六': 6, '七': 7, '八': 8, '九': 9, '十': 10,
-    };
-    
-    // Simple kanji number
-    if (kanjiMap.containsKey(input)) {
-      return kanjiMap[input]!.toDouble();
-    }
-    
-    // Kanji with half: "二半" → 2.5
-    final kanjiHalfMatch = RegExp(r'([一二三四五六七八九十]+)半').firstMatch(input);
-    if (kanjiHalfMatch != null) {
-      final kanjiPart = kanjiHalfMatch.group(1)!;
-      final baseNumber = kanjiMap[kanjiPart];
-      return baseNumber != null ? baseNumber + 0.5 : null;
-    }
-    
-    return null; // Cannot parse
+    return IngredientParserService._parseJapaneseNumber(input);
   }
 
   String _scaleQuantityText(String quantityText, double scale) {

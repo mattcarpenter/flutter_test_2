@@ -224,5 +224,103 @@ void main() {
         expect(result.ingredientName, contains('spinach'));
       });
     });
+
+    group('full-width numbers and wave dash', () {
+      test('parses full-width numbers correctly', () {
+        final result = parser.parseEnhanced('大さじ３塩'); // Full-width 3
+        expect(result.quantities.length, 1);
+        expect(result.quantities[0].value, 3.0);
+      });
+
+      test('parses wave dash ranges correctly', () {
+        final result = parser.parseEnhanced('1〜2個卵'); // Wave dash
+        expect(result.quantities.length, 1);
+        expect(result.quantities[0].value, 1.0);
+        expect(result.quantities[0].rangeMax, 2.0);
+        expect(result.quantities[0].isRange, isTrue);
+      });
+
+      test('parses full-width fractions correctly', () {
+        final result = parser.parseEnhanced('１／２カップ砂糖'); // Full-width 1/2
+        expect(result.quantities.length, 1);
+        expect(result.quantities[0].value, closeTo(0.5, 0.001));
+      });
+    });
+
+    group('unit-before-number parsing', () {
+      test('parses unit-before-number correctly', () {
+        final result = parser.parseEnhanced('大さじ3');
+        expect(result.quantities.length, 1);
+        expect(result.quantities[0].value, 3.0);
+        expect(result.quantities[0].canonicalUnit, '大さじ');
+      });
+
+      test('parses unit-before-fraction correctly', () {
+        final result = parser.parseEnhanced('大さじ1/2');
+        expect(result.quantities.length, 1);
+        expect(result.quantities[0].value, closeTo(0.5, 0.001));
+      });
+
+      test('parses unit-before-range correctly', () {
+        final result = parser.parseEnhanced('大さじ1-2');
+        expect(result.quantities.length, 1);
+        expect(result.quantities[0].value, 1.0);
+        expect(result.quantities[0].rangeMax, 2.0);
+      });
+    });
+
+    group('compound Kanji number parsing', () {
+      test('parses compound tens (十二 = 12)', () {
+        final result = parser.parseEnhanced('十二個卵');
+        expect(result.quantities.length, 1);
+        expect(result.quantities[0].value, 12.0);
+      });
+
+      test('parses compound twenties (二十三 = 23)', () {
+        final result = parser.parseEnhanced('二十三g塩');
+        expect(result.quantities.length, 1);
+        expect(result.quantities[0].value, 23.0);
+      });
+
+      test('parses hundreds (百 = 100)', () {
+        final result = parser.parseEnhanced('百g小麦粉');
+        expect(result.quantities.length, 1);
+        expect(result.quantities[0].value, 100.0);
+      });
+
+      test('parses compound hundreds (二百 = 200)', () {
+        final result = parser.parseEnhanced('二百g砂糖');
+        expect(result.quantities.length, 1);
+        expect(result.quantities[0].value, 200.0);
+      });
+
+      test('parses hundreds with tens (百五十 = 150)', () {
+        final result = parser.parseEnhanced('百五十ml牛乳');
+        expect(result.quantities.length, 1);
+        expect(result.quantities[0].value, 150.0);
+      });
+
+      test('parses Kanji with half (二半 = 2.5)', () {
+        final result = parser.parseEnhanced('二半カップ米');
+        expect(result.quantities.length, 1);
+        expect(result.quantities[0].value, closeTo(2.5, 0.001));
+      });
+    });
+
+    group('片 unit parsing', () {
+      test('parses 片 unit correctly', () {
+        final result = parser.parseEnhanced('にんにく2片');
+        expect(result.quantities.length, 1);
+        expect(result.quantities[0].value, 2.0);
+        expect(result.quantities[0].unitType, UnitType.count);
+      });
+
+      test('parses 片 range correctly', () {
+        final result = parser.parseEnhanced('しょうが1〜2片');
+        expect(result.quantities.length, 1);
+        expect(result.quantities[0].value, 1.0);
+        expect(result.quantities[0].rangeMax, 2.0);
+      });
+    });
   });
 }

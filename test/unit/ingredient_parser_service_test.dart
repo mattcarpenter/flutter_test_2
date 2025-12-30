@@ -674,5 +674,233 @@ void main() {
         expect(result.cleanName, '小麦粉、ふるったもの');
       });
     });
+
+    group('Full-width Numbers (全角数字)', () {
+      test('parses full-width digits', () {
+        final testCases = [
+          ('大さじ３', '大さじ３', ''),    // Full-width 3
+          ('砂糖１００g', '１００g', '砂糖'), // Full-width 100
+          ('にんじん２本', '２本', 'にんじん'), // Full-width 2
+          ('１カップ小麦粉', '１カップ', '小麦粉'), // Full-width 1
+          ('５００mlミルク', '５００ml', 'ミルク'), // Full-width 500
+        ];
+
+        for (final (input, expectedQuantity, expectedName) in testCases) {
+          final result = parser.parse(input);
+          expect(result.quantities.length, 1, reason: 'Failed for: $input');
+          expect(result.quantities[0].text, expectedQuantity, reason: 'Failed for: $input');
+          expect(result.cleanName, expectedName, reason: 'Failed for: $input');
+        }
+      });
+
+      test('parses full-width fractions', () {
+        final result = parser.parse('１／２カップ砂糖'); // Full-width 1/2
+        expect(result.quantities.length, 1);
+        expect(result.quantities[0].text, '１／２カップ');
+        expect(result.cleanName, '砂糖');
+      });
+
+      test('parses full-width decimals', () {
+        final result = parser.parse('１．５カップ小麦粉'); // Full-width 1.5
+        expect(result.quantities.length, 1);
+        expect(result.quantities[0].text, '１．５カップ');
+        expect(result.cleanName, '小麦粉');
+      });
+
+      test('parses Japanese zero (〇)', () {
+        final result = parser.parse('〇.5カップ水'); // Japanese zero
+        expect(result.quantities.length, 1);
+        expect(result.quantities[0].text, '〇.5カップ');
+        expect(result.cleanName, '水');
+      });
+    });
+
+    group('Wave Dash Ranges (〜/～)', () {
+      test('parses wave dash ranges', () {
+        final testCases = [
+          ('1〜2個', '1〜2個', ''),     // Wave dash U+301C
+          ('1～2個', '1～2個', ''),     // Fullwidth tilde U+FF5E
+          ('100〜150g', '100〜150g', ''),
+          ('にんにく1〜2片', '1〜2片', 'にんにく'),
+        ];
+
+        for (final (input, expectedQuantity, expectedName) in testCases) {
+          final result = parser.parse(input);
+          expect(result.quantities.length, 1, reason: 'Failed for: $input');
+          expect(result.quantities[0].text, expectedQuantity, reason: 'Failed for: $input');
+          expect(result.cleanName, expectedName, reason: 'Failed for: $input');
+        }
+      });
+
+      test('parses full-width number ranges with wave dash', () {
+        final result = parser.parse('しょうが１〜２片'); // Full-width 1-2 with wave dash
+        expect(result.quantities.length, 1);
+        expect(result.quantities[0].text, '１〜２片');
+        expect(result.cleanName, 'しょうが');
+      });
+    });
+
+    group('Unit-Before-Number Pattern (大さじ3 format)', () {
+      test('parses unit-before-number patterns', () {
+        final testCases = [
+          ('大さじ3', '大さじ3', ''),
+          ('小さじ1', '小さじ1', ''),
+          ('カップ2', 'カップ2', ''),
+          ('大さじ1.5', '大さじ1.5', ''),
+        ];
+
+        for (final (input, expectedQuantity, expectedName) in testCases) {
+          final result = parser.parse(input);
+          expect(result.quantities.length, 1, reason: 'Failed for: $input');
+          expect(result.quantities[0].text, expectedQuantity, reason: 'Failed for: $input');
+          expect(result.cleanName, expectedName, reason: 'Failed for: $input');
+        }
+      });
+
+      test('parses unit-before-fraction patterns', () {
+        final testCases = [
+          ('大さじ1/2', '大さじ1/2', ''),
+          ('小さじ1 1/2', '小さじ1 1/2', ''),
+          ('大さじ½', '大さじ½', ''),
+        ];
+
+        for (final (input, expectedQuantity, expectedName) in testCases) {
+          final result = parser.parse(input);
+          expect(result.quantities.length, 1, reason: 'Failed for: $input');
+          expect(result.quantities[0].text, expectedQuantity, reason: 'Failed for: $input');
+          expect(result.cleanName, expectedName, reason: 'Failed for: $input');
+        }
+      });
+
+      test('parses unit-before-range patterns', () {
+        final result = parser.parse('大さじ1-2');
+        expect(result.quantities.length, 1);
+        expect(result.quantities[0].text, '大さじ1-2');
+        expect(result.cleanName, '');
+      });
+
+      test('parses unit-before-number with ingredient', () {
+        final result = parser.parse('醤油 大さじ2');
+        expect(result.quantities.length, 1);
+        expect(result.quantities[0].text, '大さじ2');
+        expect(result.cleanName.trim(), '醤油');
+      });
+
+      test('parses unit-before-number with kanji numbers', () {
+        final result = parser.parse('大さじ二');
+        expect(result.quantities.length, 1);
+        expect(result.quantities[0].text, '大さじ二');
+        expect(result.cleanName, '');
+      });
+    });
+
+    group('弱/強 Modifiers', () {
+      test('parses quantities with 弱 (scant) modifier', () {
+        final testCases = [
+          ('大さじ1弱', '大さじ1弱', ''),
+          ('小さじ2弱', '小さじ2弱', ''),
+        ];
+
+        for (final (input, expectedQuantity, expectedName) in testCases) {
+          final result = parser.parse(input);
+          expect(result.quantities.length, 1, reason: 'Failed for: $input');
+          expect(result.quantities[0].text, expectedQuantity, reason: 'Failed for: $input');
+          expect(result.cleanName, expectedName, reason: 'Failed for: $input');
+        }
+      });
+
+      test('parses quantities with 強 (heaping) modifier', () {
+        final testCases = [
+          ('大さじ1強', '大さじ1強', ''),
+          ('カップ1強', 'カップ1強', ''),
+        ];
+
+        for (final (input, expectedQuantity, expectedName) in testCases) {
+          final result = parser.parse(input);
+          expect(result.quantities.length, 1, reason: 'Failed for: $input');
+          expect(result.quantities[0].text, expectedQuantity, reason: 'Failed for: $input');
+          expect(result.cleanName, expectedName, reason: 'Failed for: $input');
+        }
+      });
+    });
+
+    group('Compound Kanji Numbers', () {
+      test('parses compound Kanji tens (11-19)', () {
+        final testCases = [
+          ('十二個', '十二個', ''),   // 12
+          ('十五本', '十五本', ''),   // 15
+        ];
+
+        for (final (input, expectedQuantity, expectedName) in testCases) {
+          final result = parser.parse(input);
+          expect(result.quantities.length, 1, reason: 'Failed for: $input');
+          expect(result.quantities[0].text, expectedQuantity, reason: 'Failed for: $input');
+          expect(result.cleanName, expectedName, reason: 'Failed for: $input');
+        }
+      });
+
+      test('parses compound Kanji tens (20, 30, etc)', () {
+        final testCases = [
+          ('二十個', '二十個', ''),   // 20
+          ('三十g', '三十g', ''),     // 30g
+        ];
+
+        for (final (input, expectedQuantity, expectedName) in testCases) {
+          final result = parser.parse(input);
+          expect(result.quantities.length, 1, reason: 'Failed for: $input');
+          expect(result.quantities[0].text, expectedQuantity, reason: 'Failed for: $input');
+          expect(result.cleanName, expectedName, reason: 'Failed for: $input');
+        }
+      });
+
+      test('parses compound Kanji twenties (21-29, etc)', () {
+        final result = parser.parse('二十三g');  // 23g
+        expect(result.quantities.length, 1);
+        expect(result.quantities[0].text, '二十三g');
+        expect(result.cleanName, '');
+      });
+
+      test('parses Kanji hundreds', () {
+        final testCases = [
+          ('百g', '百g', ''),         // 100g
+          ('二百g', '二百g', ''),     // 200g
+          ('百五十ml', '百五十ml', ''), // 150ml
+        ];
+
+        for (final (input, expectedQuantity, expectedName) in testCases) {
+          final result = parser.parse(input);
+          expect(result.quantities.length, 1, reason: 'Failed for: $input');
+          expect(result.quantities[0].text, expectedQuantity, reason: 'Failed for: $input');
+          expect(result.cleanName, expectedName, reason: 'Failed for: $input');
+        }
+      });
+    });
+
+    group('片 Unit (ginger/garlic slices)', () {
+      test('parses 片 unit', () {
+        final testCases = [
+          ('にんにく2片', '2片', 'にんにく'),
+          ('しょうが1片', '1片', 'しょうが'),
+          ('にんにく1〜2片', '1〜2片', 'にんにく'),
+        ];
+
+        for (final (input, expectedQuantity, expectedName) in testCases) {
+          final result = parser.parse(input);
+          expect(result.quantities.length, 1, reason: 'Failed for: $input');
+          expect(result.quantities[0].text, expectedQuantity, reason: 'Failed for: $input');
+          expect(result.cleanName, expectedName, reason: 'Failed for: $input');
+        }
+      });
+    });
+
+    group('Combined Full-width Patterns', () {
+      test('parses complex full-width ingredients', () {
+        // The user's example: 〇〇1〜2片
+        final result = parser.parse('にんにく１〜２片');
+        expect(result.quantities.length, 1);
+        expect(result.quantities[0].text, '１〜２片');
+        expect(result.cleanName, 'にんにく');
+      });
+    });
   });
 }
