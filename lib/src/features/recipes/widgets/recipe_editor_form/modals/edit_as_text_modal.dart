@@ -85,6 +85,7 @@ double _calculateTextFieldHeight(BuildContext context) {
 }
 
 /// Creates a text field with calculated height that fills available space.
+/// Uses gradient overlays at top/bottom for smoother visual fade when scrolling.
 Widget _buildTextField({
   required BuildContext context,
   required TextEditingController controller,
@@ -92,40 +93,91 @@ Widget _buildTextField({
   required double height,
 }) {
   final colors = AppColors.of(context);
+  const fadeHeight = 14.0;
+  const horizontalPadding = 16.0;
+  const verticalPadding = 14.0;
 
   return SizedBox(
     height: height,
-    child: TextField(
-      controller: controller,
-      maxLines: null,
-      expands: true,
-      textAlignVertical: TextAlignVertical.top,
-      textCapitalization: TextCapitalization.sentences,
-      style: AppTypography.fieldInput.copyWith(
-        color: colors.textPrimary,
+    child: Container(
+      decoration: BoxDecoration(
+        color: colors.input,
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(color: colors.border, width: 1),
       ),
-      decoration: InputDecoration(
-        hintText: placeholder,
-        hintStyle: AppTypography.fieldLabel.copyWith(
-          color: colors.inputPlaceholder,
-        ),
-        contentPadding: const EdgeInsets.symmetric(
-          horizontal: 16,
-          vertical: 15,
-        ),
-        filled: true,
-        fillColor: colors.input,
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(8),
-          borderSide: BorderSide(color: colors.border, width: 1),
-        ),
-        enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(8),
-          borderSide: BorderSide(color: colors.border, width: 1),
-        ),
-        focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(8),
-          borderSide: BorderSide(color: colors.border, width: 1),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(7),
+        child: Stack(
+          children: [
+            // TextField with padding
+            Positioned.fill(
+              child: TextField(
+                controller: controller,
+                maxLines: null,
+                expands: true,
+                textAlignVertical: TextAlignVertical.top,
+                textCapitalization: TextCapitalization.sentences,
+                style: AppTypography.fieldInput.copyWith(
+                  color: colors.textPrimary,
+                ),
+                decoration: InputDecoration(
+                  hintText: placeholder,
+                  hintStyle: AppTypography.fieldLabel.copyWith(
+                    color: colors.inputPlaceholder,
+                  ),
+                  contentPadding: const EdgeInsets.symmetric(
+                    horizontal: horizontalPadding,
+                    vertical: verticalPadding,
+                  ),
+                  border: InputBorder.none,
+                  enabledBorder: InputBorder.none,
+                  focusedBorder: InputBorder.none,
+                ),
+              ),
+            ),
+            // Top fade overlay - draws over clipped text
+            Positioned(
+              top: verticalPadding,
+              left: horizontalPadding,
+              right: horizontalPadding,
+              height: fadeHeight,
+              child: IgnorePointer(
+                child: Container(
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      begin: Alignment.topCenter,
+                      end: Alignment.bottomCenter,
+                      colors: [
+                        colors.input,
+                        colors.input.withValues(alpha: 0),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            ),
+            // Bottom fade overlay - draws over clipped text
+            Positioned(
+              bottom: verticalPadding,
+              left: horizontalPadding,
+              right: horizontalPadding,
+              height: fadeHeight,
+              child: IgnorePointer(
+                child: Container(
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      begin: Alignment.bottomCenter,
+                      end: Alignment.topCenter,
+                      colors: [
+                        colors.input,
+                        colors.input.withValues(alpha: 0),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ],
         ),
       ),
     ),
