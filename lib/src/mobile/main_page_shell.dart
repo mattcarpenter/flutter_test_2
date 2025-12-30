@@ -7,7 +7,7 @@ import 'package:go_router/go_router.dart';
 import '../widgets/menu/menu.dart';
 
 bool isTablet(BuildContext context) {
-  return MediaQuery.of(context).size.shortestSide >= 600;
+  return MediaQuery.sizeOf(context).shortestSide >= 600;
 }
 
 class MainPageShell extends StatefulWidget {
@@ -83,7 +83,7 @@ class MainPageShellState extends State<MainPageShell> with TickerProviderStateMi
   // PHONE LAYOUT
   // --------------------------------------------------------------------------
   Widget _buildPhoneLayout(BuildContext context) {
-    final width = MediaQuery.of(context).size.width;
+    final width = MediaQuery.sizeOf(context).width;
     final drawerWidth = width > 300 ? 300.0 : width * 0.8;
     final Color backgroundColor = CupertinoColors.systemBackground.resolveFrom(context);
 

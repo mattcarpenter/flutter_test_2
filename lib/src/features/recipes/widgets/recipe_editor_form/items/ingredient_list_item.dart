@@ -635,7 +635,7 @@ class _RecipeSelectorContentState extends ConsumerState<RecipeSelectorContent> {
     }
 
     return SizedBox(
-      height: MediaQuery.of(context).size.height * 0.7,
+      height: MediaQuery.sizeOf(context).height * 0.7,
       child: Padding(
         padding: const EdgeInsets.all(AppSpacing.lg),
         child: Column(

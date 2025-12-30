@@ -12,7 +12,7 @@ import '../features/shopping_list/views/shopping_list_root.dart';
 import '../widgets/menu/menu.dart';
 
 bool isTablet(BuildContext context) {
-  return MediaQuery.of(context).size.shortestSide >= 600;
+  return MediaQuery.sizeOf(context).shortestSide >= 600;
 }
 
 class AdaptiveApp extends StatelessWidget {
@@ -20,7 +20,8 @@ class AdaptiveApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final Brightness brightness = MediaQuery.of(context).platformBrightness;
+    // Use specific selector to avoid rebuilds when viewInsets changes (keyboard)
+    final Brightness brightness = MediaQuery.platformBrightnessOf(context);
     final bool isDarkMode = brightness == Brightness.dark;
 
     if (Platform.isIOS) {
@@ -231,7 +232,7 @@ class _MainPageState extends State<MainPage> with TickerProviderStateMixin {
   // PHONE LAYOUT (no top AppBar, bottom nav only)
   // --------------------------------------------------------------------------
   Widget _buildPhoneLayout(BuildContext context) {
-    final width = MediaQuery.of(context).size.width;
+    final width = MediaQuery.sizeOf(context).width;
     final drawerWidth = width > 300 ? 300.0 : width * 0.8;
     final Color backgroundColor =
         CupertinoColors.systemBackground.resolveFrom(context);

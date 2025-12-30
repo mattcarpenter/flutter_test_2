@@ -147,9 +147,10 @@ class _AdaptiveSliverPageState extends State<AdaptiveSliverPage> {
   @override
   Widget build(BuildContext context) {
     return LayoutBuilder(builder: (context, constraints) {
-      final double screenWidth = MediaQuery.of(context).size.width;
+      final screenSize = MediaQuery.sizeOf(context);
+      final double screenWidth = screenSize.width;
       final double pageWidth = constraints.maxWidth;
-      final bool isTablet = MediaQuery.of(context).size.shortestSide >= 600;
+      final bool isTablet = screenSize.shortestSide >= 600;
       final scaffoldColor = CupertinoTheme.of(context).scaffoldBackgroundColor;
 
       final double padding = (screenWidth - pageWidth > 50)

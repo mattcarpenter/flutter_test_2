@@ -62,7 +62,7 @@ import '../widgets/share_session_listener.dart';
 final globalRootNavigatorKey = GlobalKey<NavigatorState>(debugLabel: 'globalRootNavKey');
 
 bool isTablet(BuildContext context) {
-  return MediaQuery.of(context).size.shortestSide >= 600;
+  return MediaQuery.sizeOf(context).shortestSide >= 600;
 }
 
 class AdaptiveApp2 extends ConsumerStatefulWidget {
@@ -96,7 +96,8 @@ class _AdaptiveApp2State extends ConsumerState<AdaptiveApp2> {
   @override
   Widget build(BuildContext context) {
     // Get platform brightness as fallback
-    final Brightness platformBrightness = MediaQuery.of(context).platformBrightness;
+    // Use specific selector to avoid rebuilds when viewInsets changes (keyboard)
+    final Brightness platformBrightness = MediaQuery.platformBrightnessOf(context);
 
     // Watch the theme mode setting
     final themeMode = ref.watch(appThemeModeProvider);

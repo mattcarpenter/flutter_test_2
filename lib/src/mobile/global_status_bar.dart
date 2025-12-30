@@ -47,8 +47,8 @@ class _GlobalStatusBarWrapperState extends ConsumerState<GlobalStatusBarWrapper>
     final activeTimers = ref.watch(activeTimersProvider);
     final shouldShowStatusBar = activeCooks.isNotEmpty || activeTimers.isNotEmpty;
 
-    final mediaQuery = MediaQuery.of(context);
-    final safeAreaTop = mediaQuery.padding.top;
+    // Use specific selector to avoid rebuilds when viewInsets changes (keyboard)
+    final safeAreaTop = MediaQuery.paddingOf(context).top;
 
     // Content heights for collapsed/expanded states
     const collapsedContentHeight = 22.0;

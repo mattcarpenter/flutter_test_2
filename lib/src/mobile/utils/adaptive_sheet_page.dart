@@ -6,7 +6,7 @@ import 'package:sheet/route.dart';
 import 'package:sheet/sheet.dart';
 
 bool isTablet(BuildContext context) {
-  return MediaQuery.of(context).size.shortestSide >= 600;
+  return MediaQuery.sizeOf(context).shortestSide >= 600;
 }
 
 Page<T> buildAdaptiveSheetPage<T>({
