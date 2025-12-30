@@ -1,4 +1,5 @@
 import 'package:drift/drift.dart' hide Column;
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart' hide Step;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:recipe_app/database/models/steps.dart';
@@ -317,6 +318,71 @@ class RecipeEditorFormState extends ConsumerState<RecipeEditorForm> {
     });
   }
 
+  // Clear all operations
+  Future<void> _clearAllIngredients() async {
+    if (_ingredients.isEmpty) return;
+
+    final confirmed = await showCupertinoDialog<bool>(
+      context: context,
+      builder: (context) => CupertinoAlertDialog(
+        title: const Text('Clear All Ingredients?'),
+        content: Text(
+          'This will remove all ${_ingredients.length} ingredient${_ingredients.length == 1 ? '' : 's'}. This action cannot be undone.',
+        ),
+        actions: [
+          CupertinoDialogAction(
+            onPressed: () => Navigator.of(context).pop(false),
+            child: const Text('Cancel'),
+          ),
+          CupertinoDialogAction(
+            isDestructiveAction: true,
+            onPressed: () => Navigator.of(context).pop(true),
+            child: const Text('Clear All'),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmed == true) {
+      setState(() {
+        _ingredients = [];
+        _autoFocusIngredientId = null;
+      });
+    }
+  }
+
+  Future<void> _clearAllSteps() async {
+    if (_steps.isEmpty) return;
+
+    final confirmed = await showCupertinoDialog<bool>(
+      context: context,
+      builder: (context) => CupertinoAlertDialog(
+        title: const Text('Clear All Steps?'),
+        content: Text(
+          'This will remove all ${_steps.length} step${_steps.length == 1 ? '' : 's'}. This action cannot be undone.',
+        ),
+        actions: [
+          CupertinoDialogAction(
+            onPressed: () => Navigator.of(context).pop(false),
+            child: const Text('Cancel'),
+          ),
+          CupertinoDialogAction(
+            isDestructiveAction: true,
+            onPressed: () => Navigator.of(context).pop(true),
+            child: const Text('Clear All'),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmed == true) {
+      setState(() {
+        _steps = [];
+        _autoFocusStepId = null;
+      });
+    }
+  }
+
   // Edit as Text operations
   Future<void> _openEditIngredientsAsText() async {
     final result = await showEditIngredientsAsTextModal(
@@ -443,6 +509,7 @@ class RecipeEditorFormState extends ConsumerState<RecipeEditorForm> {
                 }
               },
               onEditAsText: _openEditIngredientsAsText,
+              onClearAll: _clearAllIngredients,
             ),
 
             const SizedBox(height: AppSpacing.xl),
@@ -469,6 +536,7 @@ class RecipeEditorFormState extends ConsumerState<RecipeEditorForm> {
                 }
               },
               onEditAsText: _openEditStepsAsText,
+              onClearAll: _clearAllSteps,
             ),
 
             const SizedBox(height: AppSpacing.xl),

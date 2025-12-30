@@ -17,6 +17,7 @@ class IngredientsSection extends StatefulWidget {
   final Function(int oldIndex, int newIndex) onReorderIngredients;
   final Function(String id, bool hasFocus) onFocusChanged;
   final VoidCallback? onEditAsText;
+  final VoidCallback? onClearAll;
 
   const IngredientsSection({
     Key? key,
@@ -28,6 +29,7 @@ class IngredientsSection extends StatefulWidget {
     required this.onReorderIngredients,
     required this.onFocusChanged,
     this.onEditAsText,
+    this.onClearAll,
   }) : super(key: key);
 
   @override
@@ -193,12 +195,12 @@ class _IngredientsSectionState extends State<IngredientsSection> {
                     icon: const Icon(Icons.edit_note),
                     onTap: () => widget.onEditAsText?.call(),
                   ),
+                  AdaptiveMenuItem.divider(),
                   AdaptiveMenuItem(
                     title: 'Clear All Ingredients',
                     icon: const Icon(Icons.clear_all),
-                    onTap: () {
-                      // TODO: Implement clear functionality
-                    },
+                    isDestructive: true,
+                    onTap: () => widget.onClearAll?.call(),
                   ),
                 ],
               ),

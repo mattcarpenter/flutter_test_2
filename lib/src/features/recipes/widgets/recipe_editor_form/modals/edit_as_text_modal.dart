@@ -56,12 +56,16 @@ Future<List<Step>?> showEditStepsAsTextModal(
 // =============================================================================
 
 /// Calculates the height available for the text field based on screen size.
+/// Uses specific MediaQuery selectors to minimize rebuild scope - each selector
+/// only triggers rebuilds when its specific property changes, rather than
+/// MediaQuery.of() which rebuilds on ANY MediaQuery change.
 double _calculateTextFieldHeight(BuildContext context) {
-  final mediaQuery = MediaQuery.of(context);
-  final screenHeight = mediaQuery.size.height;
-  final topPadding = mediaQuery.padding.top;
-  final bottomPadding = mediaQuery.padding.bottom;
-  final keyboardHeight = mediaQuery.viewInsets.bottom;
+  // Use specific selectors to reduce rebuild scope during keyboard animation
+  final screenHeight = MediaQuery.sizeOf(context).height;
+  final padding = MediaQuery.paddingOf(context);
+  final topPadding = padding.top;
+  final bottomPadding = padding.bottom;
+  final keyboardHeight = MediaQuery.viewInsetsOf(context).bottom;
 
   // Modal layout constants
   const modalTopMargin = 44.0; // Space above modal
@@ -84,9 +88,35 @@ double _calculateTextFieldHeight(BuildContext context) {
   return max(150.0, available);
 }
 
+/// A text field that automatically adapts its height based on available space
+/// and keyboard visibility. Isolates MediaQuery subscription to minimize
+/// rebuild scope during keyboard animation.
+class _KeyboardAwareTextField extends StatelessWidget {
+  final TextEditingController controller;
+  final String placeholder;
+
+  const _KeyboardAwareTextField({
+    required this.controller,
+    required this.placeholder,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    // This widget subscribes to viewInsetsOf, so ONLY this subtree rebuilds
+    // during keyboard animation - not the parent Column with static content.
+    final height = _calculateTextFieldHeight(context);
+    return _buildTextFieldContent(
+      context: context,
+      controller: controller,
+      placeholder: placeholder,
+      height: height,
+    );
+  }
+}
+
 /// Creates a text field with calculated height that fills available space.
 /// Uses gradient overlays at top/bottom for smoother visual fade when scrolling.
-Widget _buildTextField({
+Widget _buildTextFieldContent({
   required BuildContext context,
   required TextEditingController controller,
   required String placeholder,
@@ -269,8 +299,7 @@ class _EditIngredientsAsTextPage {
             );
           }
 
-          final textFieldHeight = _calculateTextFieldHeight(context);
-
+          // Static content - won't rebuild during keyboard animation
           return Padding(
             padding: EdgeInsets.all(AppSpacing.lg),
             child: Column(
@@ -287,12 +316,11 @@ class _EditIngredientsAsTextPage {
                   style: AppTypography.body.copyWith(color: colors.textSecondary),
                 ),
                 SizedBox(height: AppSpacing.lg),
-                _buildTextField(
-                  context: context,
+                // Only this widget rebuilds during keyboard animation
+                _KeyboardAwareTextField(
                   controller: textController,
                   placeholder:
                       '# Section\n1 cup flour\n2 cups Chicken Stock [recipe:Chicken Stock]\n...',
-                  height: textFieldHeight,
                 ),
               ],
             ),
@@ -355,37 +383,31 @@ class _EditStepsAsTextPage {
           ),
         ),
       ),
-      child: Builder(
-        builder: (context) {
-          final textFieldHeight = _calculateTextFieldHeight(context);
-
-          return Padding(
-            padding: EdgeInsets.all(AppSpacing.lg),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'Edit Steps',
-                  style: AppTypography.h4.copyWith(color: colors.textPrimary),
-                ),
-                SizedBox(height: AppSpacing.sm),
-                Text(
-                  'Separate steps with blank lines. Use # for sections.',
-                  style: AppTypography.body.copyWith(color: colors.textSecondary),
-                ),
-                SizedBox(height: AppSpacing.lg),
-                _buildTextField(
-                  context: context,
-                  controller: textController,
-                  placeholder:
-                      '# Preparation\n\nPreheat oven to 350°F.\n\nMix dry ingredients\nuntil combined.\n\n...',
-                  height: textFieldHeight,
-                ),
-              ],
+      // Static content - won't rebuild during keyboard animation
+      child: Padding(
+        padding: EdgeInsets.all(AppSpacing.lg),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'Edit Steps',
+              style: AppTypography.h4.copyWith(color: colors.textPrimary),
             ),
-          );
-        },
+            SizedBox(height: AppSpacing.sm),
+            Text(
+              'Separate steps with blank lines. Use # for sections.',
+              style: AppTypography.body.copyWith(color: colors.textSecondary),
+            ),
+            SizedBox(height: AppSpacing.lg),
+            // Only this widget rebuilds during keyboard animation
+            _KeyboardAwareTextField(
+              controller: textController,
+              placeholder:
+                  '# Preparation\n\nPreheat oven to 350°F.\n\nMix dry ingredients\nuntil combined.\n\n...',
+            ),
+          ],
+        ),
       ),
     );
   }

@@ -17,6 +17,7 @@ class StepsSection extends StatefulWidget {
   final Function(int oldIndex, int newIndex) onReorderSteps;
   final Function(String id, bool hasFocus) onFocusChanged;
   final VoidCallback? onEditAsText;
+  final VoidCallback? onClearAll;
 
   const StepsSection({
     Key? key,
@@ -28,6 +29,7 @@ class StepsSection extends StatefulWidget {
     required this.onReorderSteps,
     required this.onFocusChanged,
     this.onEditAsText,
+    this.onClearAll,
   }) : super(key: key);
 
   @override
@@ -190,12 +192,12 @@ class _StepsSectionState extends State<StepsSection> {
                     icon: const Icon(Icons.edit_note),
                     onTap: () => widget.onEditAsText?.call(),
                   ),
+                  AdaptiveMenuItem.divider(),
                   AdaptiveMenuItem(
                     title: 'Clear All Steps',
                     icon: const Icon(Icons.clear_all),
-                    onTap: () {
-                      // TODO: Implement clear functionality
-                    },
+                    isDestructive: true,
+                    onTap: () => widget.onClearAll?.call(),
                   ),
                 ],
               ),
