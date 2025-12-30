@@ -38,6 +38,48 @@ class RecipesFolderPage extends ConsumerWidget {
     required this.previousPageTitle,
   });
 
+  /// Build menu items for adding recipes
+  List<AdaptiveMenuItem> _buildAddRecipeMenuItems(BuildContext context, WidgetRef ref) {
+    final saveFolderId = folderId == kUncategorizedFolderId ? null : folderId;
+    return [
+      AdaptiveMenuItem(
+        title: 'New Recipe',
+        icon: const Icon(CupertinoIcons.book),
+        onTap: () {
+          showRecipeEditorModal(context, ref: ref, folderId: saveFolderId);
+        },
+      ),
+      AdaptiveMenuItem(
+        title: 'Generate with AI',
+        icon: const Icon(CupertinoIcons.wand_stars),
+        onTap: () {
+          showAiRecipeGeneratorModal(context, ref: ref, folderId: saveFolderId);
+        },
+      ),
+      AdaptiveMenuItem(
+        title: 'Import from Camera',
+        icon: const Icon(CupertinoIcons.camera),
+        onTap: () {
+          showPhotoCaptureReviewModal(context, ref: ref, folderId: saveFolderId);
+        },
+      ),
+      AdaptiveMenuItem(
+        title: 'Import from Photos',
+        icon: const Icon(CupertinoIcons.photo),
+        onTap: () {
+          showPhotoImportModal(context, ref: ref, source: ImageSource.gallery, folderId: saveFolderId);
+        },
+      ),
+      AdaptiveMenuItem(
+        title: 'Import from URL',
+        icon: const Icon(CupertinoIcons.link),
+        onTap: () {
+          showUrlImportModal(context, ref: ref, folderId: saveFolderId);
+        },
+      ),
+    ];
+  }
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     // Check if this is a smart folder
@@ -51,6 +93,9 @@ class RecipesFolderPage extends ConsumerWidget {
     if (isSmartFolder) {
       return _buildSmartFolderPage(context, ref, currentFolder);
     }
+
+    // Build menu items once for reuse
+    final addRecipeMenuItems = _buildAddRecipeMenuItems(context, ref);
 
     // Watch all recipes (for normal folders)
     final recipesAsyncValue = ref.watch(recipeNotifierProvider);
@@ -127,10 +172,7 @@ class RecipesFolderPage extends ConsumerWidget {
                 notifier.updateFilter(entry.key, entry.value);
               }
             },
-            onAddRecipe: () {
-              final saveFolderId = folderId == kUncategorizedFolderId ? null : folderId;
-              showRecipeEditorModal(context, ref: ref, folderId: saveFolderId);
-            },
+            addRecipeMenuItems: addRecipeMenuItems,
           ),
         ),
 
@@ -213,49 +255,7 @@ class RecipesFolderPage extends ConsumerWidget {
         ),
       ],
       trailing: AdaptivePullDownButton(
-        items: [
-          AdaptiveMenuItem(
-            title: 'New Recipe',
-            icon: const Icon(CupertinoIcons.book),
-            onTap: () {
-              // Don't pass folderId for uncategorized folder
-              final saveFolderId = folderId == kUncategorizedFolderId ? null : folderId;
-              showRecipeEditorModal(context, ref: ref, folderId: saveFolderId);
-            },
-          ),
-          AdaptiveMenuItem(
-            title: 'Generate with AI',
-            icon: const Icon(CupertinoIcons.wand_stars),
-            onTap: () {
-              final saveFolderId = folderId == kUncategorizedFolderId ? null : folderId;
-              showAiRecipeGeneratorModal(context, ref: ref, folderId: saveFolderId);
-            },
-          ),
-          AdaptiveMenuItem(
-            title: 'Import from Camera',
-            icon: const Icon(CupertinoIcons.camera),
-            onTap: () {
-              final saveFolderId = folderId == kUncategorizedFolderId ? null : folderId;
-              showPhotoCaptureReviewModal(context, ref: ref, folderId: saveFolderId);
-            },
-          ),
-          AdaptiveMenuItem(
-            title: 'Import from Photos',
-            icon: const Icon(CupertinoIcons.photo),
-            onTap: () {
-              final saveFolderId = folderId == kUncategorizedFolderId ? null : folderId;
-              showPhotoImportModal(context, ref: ref, source: ImageSource.gallery, folderId: saveFolderId);
-            },
-          ),
-          AdaptiveMenuItem(
-            title: 'Import from URL',
-            icon: const Icon(CupertinoIcons.link),
-            onTap: () {
-              final saveFolderId = folderId == kUncategorizedFolderId ? null : folderId;
-              showUrlImportModal(context, ref: ref, folderId: saveFolderId);
-            },
-          ),
-        ],
+        items: addRecipeMenuItems,
         child: const AppCircleButton(
           icon: AppCircleButtonIcon.plus,
         ),
@@ -331,13 +331,13 @@ class _UnifiedHeaderDelegate extends SliverPersistentHeaderDelegate {
   final RecipeFilterSortState filterSortState;
   final String? folderId;
   final Function(RecipeFilterSortState) onStateChanged;
-  final VoidCallback onAddRecipe;
+  final List<AdaptiveMenuItem> addRecipeMenuItems;
 
   _UnifiedHeaderDelegate({
     required this.filterSortState,
     required this.folderId,
     required this.onStateChanged,
-    required this.onAddRecipe,
+    required this.addRecipeMenuItems,
   });
 
   @override
@@ -384,15 +384,17 @@ class _UnifiedHeaderDelegate extends SliverPersistentHeaderDelegate {
       ],
     );
 
-    // Add Recipe button
-    Widget addRecipeButton() => AppButton(
-      text: 'Add Recipe',
-      leadingIcon: const Icon(Icons.add),
-      style: AppButtonStyle.outline,
-      shape: AppButtonShape.square,
-      size: AppButtonSize.medium,
-      theme: AppButtonTheme.secondary,
-      onPressed: onAddRecipe,
+    // Add Recipe button with dropdown menu
+    Widget addRecipeButton() => AdaptivePullDownButton(
+      items: addRecipeMenuItems,
+      child: const AppButton(
+        text: 'Add Recipe',
+        leadingIcon: Icon(Icons.add),
+        style: AppButtonStyle.outline,
+        shape: AppButtonShape.square,
+        size: AppButtonSize.medium,
+        theme: AppButtonTheme.secondary,
+      ),
     );
 
     return Material(
@@ -432,8 +434,7 @@ class _UnifiedHeaderDelegate extends SliverPersistentHeaderDelegate {
   @override
   bool shouldRebuild(covariant _UnifiedHeaderDelegate oldDelegate) {
     return oldDelegate.filterSortState != filterSortState ||
-           oldDelegate.folderId != folderId ||
-           oldDelegate.onAddRecipe != onAddRecipe;
+           oldDelegate.folderId != folderId;
   }
 
   @override
