@@ -15,6 +15,7 @@ import '../../../theme/typography.dart';
 import '../../../widgets/app_button.dart';
 import '../../../widgets/app_circle_button.dart';
 import '../../../widgets/app_radio_button.dart';
+import '../../../widgets/app_text_field_simple.dart';
 import '../../../widgets/utils/grouped_list_styling.dart';
 import '../../share/widgets/share_recipe_preview_result.dart';
 import '../models/recipe_idea.dart';
@@ -159,31 +160,14 @@ class _InputPageContentState extends State<_InputPageContent> {
     widgets.add(
       Padding(
         padding: EdgeInsets.fromLTRB(AppSpacing.lg, 0, AppSpacing.lg, AppSpacing.lg),
-        child: TextField(
+        child: AppTextFieldSimple(
           controller: _textController,
+          placeholder: 'e.g., "I want a warm soup with chicken"',
           autofocus: true,
-          maxLines: 5,
+          multiline: true,
           minLines: 3,
+          maxLines: 5,
           textCapitalization: TextCapitalization.sentences,
-          decoration: InputDecoration(
-            hintText: 'e.g., "I want a warm soup with chicken"',
-            hintStyle: AppTypography.body.copyWith(
-              color: colors.textSecondary.withValues(alpha: 0.6),
-            ),
-            contentPadding: EdgeInsets.all(AppSpacing.md),
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(8),
-              borderSide: BorderSide(color: colors.border),
-            ),
-            enabledBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(8),
-              borderSide: BorderSide(color: colors.border),
-            ),
-            focusedBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(8),
-              borderSide: BorderSide(color: colors.primary, width: 2),
-            ),
-          ),
           onChanged: (value) {
             viewModel.updatePromptText(value);
           },
@@ -365,7 +349,7 @@ class _AiRecipeResultsPage {
   }
 }
 
-class _ResultsPageContent extends StatelessWidget {
+class _ResultsPageContent extends StatefulWidget {
   final ValueNotifier<int> pageIndexNotifier;
 
   const _ResultsPageContent({
@@ -373,12 +357,47 @@ class _ResultsPageContent extends StatelessWidget {
   });
 
   @override
+  State<_ResultsPageContent> createState() => _ResultsPageContentState();
+}
+
+class _ResultsPageContentState extends State<_ResultsPageContent>
+    with SingleTickerProviderStateMixin {
+  AnimationController? _staggerController;
+  AiGeneratorState? _previousState;
+
+  @override
+  void dispose() {
+    _staggerController?.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     final viewModel = provider.Provider.of<AiRecipeGeneratorViewModel>(
       context,
       listen: true,
     );
-    // Return Slivers directly based on state (correct pattern for multi-page Wolt modals)
+
+    // Detect transition to showingResults and trigger stagger animation
+    if (viewModel.state == AiGeneratorState.showingResults &&
+        _previousState != AiGeneratorState.showingResults) {
+      final itemCount = viewModel.recipeIdeas.length;
+      // Duration scales with item count: 400ms base + 100ms per item
+      final duration = Duration(milliseconds: 400 + (itemCount * 100));
+
+      if (_staggerController == null) {
+        _staggerController = AnimationController(
+          vsync: this,
+          duration: duration,
+        );
+      } else {
+        _staggerController!.duration = duration;
+        _staggerController!.reset();
+      }
+      _staggerController!.forward();
+    }
+    _previousState = viewModel.state;
+
     return _buildContent(context, viewModel);
   }
 
@@ -427,6 +446,7 @@ class _ResultsPageContent extends StatelessWidget {
 
   Widget _buildResultsSliver(BuildContext context, AppColors colors, AiRecipeGeneratorViewModel viewModel) {
     final List<Widget> widgets = [];
+    final ideas = viewModel.recipeIdeas;
 
     // Title
     widgets.add(
@@ -454,24 +474,50 @@ class _ResultsPageContent extends StatelessWidget {
       ),
     );
 
-    // Recipe idea cards (grouped list style)
-    final ideas = viewModel.recipeIdeas;
+    // Recipe idea cards with staggered animation
     for (int i = 0; i < ideas.length; i++) {
       final idea = ideas[i];
       final isFirst = i == 0;
       final isLast = i == ideas.length - 1;
 
-      widgets.add(
-        Padding(
-          padding: EdgeInsets.symmetric(horizontal: AppSpacing.lg),
-          child: _RecipeIdeaCard(
-            idea: idea,
-            isFirst: isFirst,
-            isLast: isLast,
-            onTap: () => viewModel.selectIdea(idea),
-          ),
+      // Calculate stagger interval for this card
+      // Each card starts 12% later and animates over 35% of total duration
+      final double startInterval = i * 0.12;
+      final double endInterval = (startInterval + 0.35).clamp(0.0, 1.0);
+
+      Widget card = Padding(
+        padding: EdgeInsets.symmetric(horizontal: AppSpacing.lg),
+        child: _RecipeIdeaCard(
+          idea: idea,
+          isFirst: isFirst,
+          isLast: isLast,
+          onTap: () => viewModel.selectIdea(idea),
         ),
       );
+
+      // Wrap in animation if controller exists
+      if (_staggerController != null) {
+        final animation = CurvedAnimation(
+          parent: _staggerController!,
+          curve: Interval(startInterval, endInterval, curve: Curves.easeOut),
+        );
+
+        card = AnimatedBuilder(
+          animation: animation,
+          builder: (context, child) {
+            return Opacity(
+              opacity: animation.value,
+              child: Transform.translate(
+                offset: Offset(0, 16 * (1 - animation.value)),
+                child: child,
+              ),
+            );
+          },
+          child: card,
+        );
+      }
+
+      widgets.add(card);
     }
 
     // Bottom padding
@@ -619,7 +665,7 @@ class _ResultsPageContent extends StatelessWidget {
                   final purchased = await viewModel.presentPaywall(context);
                   if (purchased && context.mounted) {
                     viewModel.resetToInput();
-                    pageIndexNotifier.value = 0;
+                    widget.pageIndexNotifier.value = 0;
                   }
                 },
                 style: AppButtonStyle.fill,
@@ -632,7 +678,7 @@ class _ResultsPageContent extends StatelessWidget {
                 text: 'Try Again',
                 onPressed: () {
                   viewModel.resetToInput();
-                  pageIndexNotifier.value = 0;
+                  widget.pageIndexNotifier.value = 0;
                 },
                 style: AppButtonStyle.fill,
                 theme: AppButtonTheme.primary,
