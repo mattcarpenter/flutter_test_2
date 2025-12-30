@@ -19,8 +19,10 @@ class PreviewUsageService {
   static const _shoppingListKeyPrefix = 'shopping_list_preview_usage_';
   static const _shareRecipeKeyPrefix = 'share_recipe_preview_usage_';
   static const _photoRecipeKeyPrefix = 'photo_recipe_preview_usage_';
+  static const _ideaGenerationKeyPrefix = 'idea_generation_usage_';
   static const int dailyLimit = 5;
   static const int photoDailyLimit = 2; // Stricter limit for photos (more expensive)
+  static const int ideaDailyLimit = 10; // Generous limit for AI recipe ideas
 
   final SharedPreferences _prefs;
 
@@ -127,6 +129,36 @@ class PreviewUsageService {
 
     // Clean up old entries (keep only last 7 days)
     await _cleanupOldEntries(_photoRecipeKeyPrefix);
+  }
+
+  // ============================================================================
+  // AI Recipe Idea Generation Usage (10/day for free users)
+  // ============================================================================
+
+  /// Gets the number of AI recipe ideas generated today.
+  int getIdeaUsageToday() {
+    final key = '$_ideaGenerationKeyPrefix${_today()}';
+    return _prefs.getInt(key) ?? 0;
+  }
+
+  /// Returns true if user has remaining idea generations today.
+  bool hasIdeaGenerationsRemaining() {
+    return getIdeaUsageToday() < ideaDailyLimit;
+  }
+
+  /// Returns the number of remaining idea generations today.
+  int getRemainingIdeaGenerations() {
+    return ideaDailyLimit - getIdeaUsageToday();
+  }
+
+  /// Increments the idea generation usage count for today.
+  Future<void> incrementIdeaUsage() async {
+    final key = '$_ideaGenerationKeyPrefix${_today()}';
+    final current = _prefs.getInt(key) ?? 0;
+    await _prefs.setInt(key, current + 1);
+
+    // Clean up old entries (keep only last 7 days)
+    await _cleanupOldEntries(_ideaGenerationKeyPrefix);
   }
 
   // ============================================================================

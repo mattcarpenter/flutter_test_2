@@ -20,6 +20,7 @@ import '../widgets/recipe_list.dart';
 import '../widgets/recipe_search_results.dart';
 import '../widgets/smart_folder_search_results.dart';
 import 'add_recipe_modal.dart';
+import 'ai_recipe_generator_modal.dart';
 import 'edit_smart_folder_modal.dart';
 import 'photo_capture_review_modal.dart';
 import 'photo_import_modal.dart';
@@ -220,6 +221,14 @@ class RecipesFolderPage extends ConsumerWidget {
               // Don't pass folderId for uncategorized folder
               final saveFolderId = folderId == kUncategorizedFolderId ? null : folderId;
               showRecipeEditorModal(context, ref: ref, folderId: saveFolderId);
+            },
+          ),
+          AdaptiveMenuItem(
+            title: 'Generate with AI',
+            icon: const Icon(CupertinoIcons.wand_stars),
+            onTap: () {
+              final saveFolderId = folderId == kUncategorizedFolderId ? null : folderId;
+              showAiRecipeGeneratorModal(context, ref: ref, folderId: saveFolderId);
             },
           ),
           AdaptiveMenuItem(

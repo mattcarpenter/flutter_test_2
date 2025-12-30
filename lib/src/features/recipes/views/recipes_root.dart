@@ -22,6 +22,7 @@ import '../widgets/recipe_list.dart';
 import '../widgets/pinned_recipes_section.dart';
 import '../widgets/recently_viewed_section.dart';
 import 'add_recipe_modal.dart';
+import 'ai_recipe_generator_modal.dart';
 import 'photo_capture_review_modal.dart';
 import 'photo_import_modal.dart';
 import 'url_import_modal.dart';
@@ -119,6 +120,13 @@ class RecipesTab extends ConsumerWidget {
             onTap: () {
               // Don't pass folderId for uncategorized folder
               showRecipeEditorModal(context, ref: ref, folderId: null);
+            },
+          ),
+          AdaptiveMenuItem(
+            title: 'Generate with AI',
+            icon: const Icon(CupertinoIcons.wand_stars),
+            onTap: () {
+              showAiRecipeGeneratorModal(context, ref: ref);
             },
           ),
           AdaptiveMenuItem(
