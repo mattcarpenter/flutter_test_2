@@ -18,6 +18,7 @@ class StepsSection extends StatefulWidget {
   final Function(String id, bool hasFocus) onFocusChanged;
   final VoidCallback? onEditAsText;
   final VoidCallback? onClearAll;
+  final ScrollController? scrollController;
 
   const StepsSection({
     Key? key,
@@ -30,6 +31,7 @@ class StepsSection extends StatefulWidget {
     required this.onFocusChanged,
     this.onEditAsText,
     this.onClearAll,
+    this.scrollController,
   }) : super(key: key);
 
   @override
@@ -143,6 +145,7 @@ class _StepsSectionState extends State<StepsSection> {
                   enableGrouping: true,
                   visualIndex: _getVisualIndex(index),
                   draggedIndex: _draggedIndex,
+                  scrollController: widget.scrollController,
                 ),
               );
             },

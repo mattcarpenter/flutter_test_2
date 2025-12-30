@@ -537,6 +537,7 @@ class RecipeEditorFormState extends ConsumerState<RecipeEditorForm> {
               },
               onEditAsText: _openEditStepsAsText,
               onClearAll: _clearAllSteps,
+              scrollController: _scrollController,
             ),
 
             const SizedBox(height: AppSpacing.xl),

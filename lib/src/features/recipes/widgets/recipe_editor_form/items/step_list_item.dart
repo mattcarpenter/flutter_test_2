@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart' hide Step;
 import 'package:flutter_slidable/flutter_slidable.dart';
+import 'package:keyboard_actions/keyboard_actions.dart';
 import 'package:recipe_app/database/models/steps.dart';
 import 'package:super_context_menu/super_context_menu.dart';
 
@@ -20,6 +21,7 @@ class StepListItem extends StatefulWidget {
   final bool enableGrouping;
   final int? visualIndex;
   final int? draggedIndex;
+  final ScrollController? scrollController;
 
   const StepListItem({
     Key? key,
@@ -35,6 +37,7 @@ class StepListItem extends StatefulWidget {
     this.enableGrouping = false,
     this.visualIndex,
     this.draggedIndex,
+    this.scrollController,
   }) : super(key: key);
 
   @override
@@ -205,6 +208,51 @@ class _StepListItemState extends State<StepListItem> with SingleTickerProviderSt
     return isLocationOutsideKey(location, _dragHandleKey);
   }
 
+  KeyboardActionsConfig _buildKeyboardActionsConfig(BuildContext context, AppColors colors) {
+    final isLastStep = widget.index == widget.allSteps.length - 1;
+
+    return KeyboardActionsConfig(
+      keyboardActionsPlatform: KeyboardActionsPlatform.IOS,
+      keyboardBarColor: colors.surface,
+      keyboardSeparatorColor: colors.border,
+      nextFocus: false,
+      actions: [
+        KeyboardActionsItem(
+          focusNode: _focusNode,
+          displayDoneButton: false,
+          toolbarButtons: [
+            (node) {
+              return GestureDetector(
+                onTap: () {
+                  if (isLastStep) {
+                    // Last step: add a new step (which will get focus)
+                    widget.onAddNext();
+                  } else {
+                    // Not last step: move focus to next step
+                    // scrollPadding on TextField handles ensuring visibility above keyboard toolbar
+                    FocusScope.of(context).nextFocus();
+                  }
+                },
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                  child: Text(
+                    'Next Step',
+                    style: TextStyle(
+                      color: colors.primary,
+                      fontSize: 17,
+                      fontWeight: FontWeight.w400,
+                      letterSpacing: -0.31,
+                    ),
+                  ),
+                ),
+              );
+            },
+          ],
+        ),
+      ],
+    );
+  }
+
   Future<void> _handleDelete() async {
     // Animate removal: reverse from fully visible (1.0) to collapsed (0.0)
     // This keeps the space reserved (heightFactor) while fading out (opacity)
@@ -351,117 +399,116 @@ class _StepListItemState extends State<StepListItem> with SingleTickerProviderSt
       );
     }
 
-    return Container(
-      decoration: BoxDecoration(
-        color: colors.error,
-        borderRadius: _getBorderRadius(),
-      ),
-      child: Slidable(
-        enabled: !widget.isDragging,
-        endActionPane: ActionPane(
-          motion: const ScrollMotion(),
-          extentRatio: 0.2,
-          children: [
-            Expanded(
-              child: Center(
-                child: GestureDetector(
-                  onTap: _handleDelete,
-                  child: Icon(
-                    Icons.delete,
-                    color: colors.surface,
-                    size: 24,
-                  ),
-                ),
-              ),
-            ),
-          ],
+    return KeyboardActions(
+      disableScroll: true,
+      config: _buildKeyboardActionsConfig(context, colors),
+      child: Container(
+        decoration: BoxDecoration(
+          color: colors.error,
+          borderRadius: _getBorderRadius(),
         ),
-        child: ContextMenuWidget(
-          contextMenuIsAllowed: _contextMenuIsAllowed,
-          menuProvider: (_) {
-            return Menu(
-              children: [
-                MenuAction(
-                  title: 'Convert to section',
-                  image: MenuImage.icon(Icons.segment),
-                  callback: () {
-                    // Convert the step to a section
-                    widget.onUpdate(widget.step.copyWith(
-                        type: 'section',
-                        text: widget.step.text.isEmpty ? 'New Section' : widget.step.text
-                    ));
-                  },
-                ),
-                MenuAction(
-                  title: 'Delete',
-                  image: MenuImage.icon(Icons.delete_outline),
-                  callback: _handleDelete,
-                ),
-              ],
-            );
-          },
-          child: Stack(
+        child: Slidable(
+          enabled: !widget.isDragging,
+          endActionPane: ActionPane(
+            motion: const ScrollMotion(),
+            extentRatio: 0.2,
             children: [
-              Container(
-                decoration: BoxDecoration(
-                  color: backgroundColor,
-                  border: _getBorder(),
-                  borderRadius: _getBorderRadius(),
-                ),
-                child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const SizedBox(width: 12), // Add some left padding
-                    Expanded(
-                      child: TextField(
-                        autofocus: widget.autoFocus,
-                        focusNode: _focusNode,
-                        controller: _textController,
-                        style: AppTypography.fieldInput.copyWith(
-                          color: colors.contentPrimary,
-                        ),
-                        decoration: InputDecoration(
-                          hintText: 'Describe this step',
-                          hintStyle: AppTypography.fieldInput.copyWith(
-                            color: colors.contentHint,
-                          ),
-                          border: InputBorder.none,
-                          contentPadding: const EdgeInsets.symmetric(vertical: 12),
-                        ),
-                        onChanged: (value) {
-                          widget.onUpdate(widget.step.copyWith(text: value));
-                        },
-                        textInputAction: TextInputAction.next,
-                        onSubmitted: (_) {
-                          // Only add next step if this is the last step
-                          final isLastStep = widget.index == widget.allSteps.length - 1;
-                          if (isLastStep) {
-                            // Prevent unwanted focus traversal - keep focus here temporarily
-                            _focusNode.requestFocus();
-                            widget.onAddNext(); // Add new step (which will get focus)
-                          }
-                        },
-                      ),
+              Expanded(
+                child: Center(
+                  child: GestureDetector(
+                    onTap: _handleDelete,
+                    child: Icon(
+                      Icons.delete,
+                      color: colors.surface,
+                      size: 24,
                     ),
-                    const SizedBox(width: 48), // Space for the drag handle
-                  ],
-                ),
-              ),
-              // Position the drag handle on top so it's clickable
-              Positioned(
-                right: 0,
-                top: 0,
-                bottom: 0,
-                child: SizedBox(
-                  width: 40,
-                  child: ReorderableDragStartListener(
-                    key: _dragHandleKey,
-                    index: widget.index,
-                    child: Icon(Icons.drag_handle, color: colors.uiSecondary),
                   ),
                 ),
               ),
             ],
+          ),
+          child: ContextMenuWidget(
+            contextMenuIsAllowed: _contextMenuIsAllowed,
+            menuProvider: (_) {
+              return Menu(
+                children: [
+                  MenuAction(
+                    title: 'Convert to section',
+                    image: MenuImage.icon(Icons.segment),
+                    callback: () {
+                      // Convert the step to a section
+                      widget.onUpdate(widget.step.copyWith(
+                          type: 'section',
+                          text: widget.step.text.isEmpty ? 'New Section' : widget.step.text
+                      ));
+                    },
+                  ),
+                  MenuAction(
+                    title: 'Delete',
+                    image: MenuImage.icon(Icons.delete_outline),
+                    callback: _handleDelete,
+                  ),
+                ],
+              );
+            },
+            child: Stack(
+              children: [
+                Container(
+                  decoration: BoxDecoration(
+                    color: backgroundColor,
+                    border: _getBorder(),
+                    borderRadius: _getBorderRadius(),
+                  ),
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const SizedBox(width: 12), // Add some left padding
+                      Expanded(
+                        child: TextField(
+                          autofocus: widget.autoFocus,
+                          focusNode: _focusNode,
+                          controller: _textController,
+                          style: AppTypography.fieldInput.copyWith(
+                            color: colors.contentPrimary,
+                          ),
+                          decoration: InputDecoration(
+                            hintText: 'Describe this step',
+                            hintStyle: AppTypography.fieldInput.copyWith(
+                              color: colors.contentHint,
+                            ),
+                            border: InputBorder.none,
+                            contentPadding: const EdgeInsets.symmetric(vertical: 12),
+                          ),
+                          // Extra bottom padding to account for keyboard_actions toolbar
+                          scrollPadding: const EdgeInsets.fromLTRB(20.0, 20.0, 20.0, 80.0),
+                          onChanged: (value) {
+                            widget.onUpdate(widget.step.copyWith(text: value));
+                          },
+                          maxLines: 5,
+                          minLines: 1,
+                          keyboardType: TextInputType.multiline,
+                        ),
+                      ),
+                      const SizedBox(width: 48), // Space for the drag handle
+                    ],
+                  ),
+                ),
+                // Position the drag handle on top so it's clickable
+                Positioned(
+                  right: 0,
+                  top: 0,
+                  bottom: 0,
+                  child: SizedBox(
+                    width: 40,
+                    child: ReorderableDragStartListener(
+                      key: _dragHandleKey,
+                      index: widget.index,
+                      child: Icon(Icons.drag_handle, color: colors.uiSecondary),
+                    ),
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
       ),

@@ -52,6 +52,7 @@ dependencies:
   form_builder_cupertino_fields:
     path: /Users/matt/repos/form_builder_cupertino_fields
   super_context_menu: ^0.9.1
+  keyboard_actions: ^4.2.1
   flutter_fast_forms: ^18.0.0
   drift_sqlite_async: ^0.2.1
   drift: ^2.23.1
