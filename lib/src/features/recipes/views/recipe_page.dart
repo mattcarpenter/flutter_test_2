@@ -331,6 +331,21 @@ class _RecipePageState extends ConsumerState<RecipePage> {
               AdaptivePullDownButton(
                 items: [
                   AdaptiveMenuItem(
+                    title: 'Edit Recipe',
+                    icon: const Icon(CupertinoIcons.pencil),
+                    onTap: () {
+                      final recipeAsync = ref.read(recipe_provider.recipeByIdStreamProvider(widget.recipeId));
+                      recipeAsync.whenOrNull(
+                        data: (recipe) {
+                          if (recipe != null) {
+                            showRecipeEditorModal(context, recipe: recipe, isEditing: true);
+                          }
+                        },
+                      );
+                    },
+                  ),
+                  AdaptiveMenuItem.divider(),
+                  AdaptiveMenuItem(
                     title: 'Check Pantry Stock',
                     icon: const Icon(CupertinoIcons.checkmark_alt_circle),
                     onTap: () {
@@ -342,20 +357,6 @@ class _RecipePageState extends ConsumerState<RecipePage> {
                             context,
                             matches: matches,
                           );
-                        },
-                      );
-                    },
-                  ),
-                  AdaptiveMenuItem(
-                    title: 'Edit Recipe',
-                    icon: const Icon(CupertinoIcons.pencil),
-                    onTap: () {
-                      final recipeAsync = ref.read(recipe_provider.recipeByIdStreamProvider(widget.recipeId));
-                      recipeAsync.whenOrNull(
-                        data: (recipe) {
-                          if (recipe != null) {
-                            showRecipeEditorModal(context, recipe: recipe, isEditing: true);
-                          }
                         },
                       );
                     },
