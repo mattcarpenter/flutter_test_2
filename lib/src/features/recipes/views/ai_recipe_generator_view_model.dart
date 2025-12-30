@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_quill/flutter_quill.dart' as quill;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../database/database.dart';
@@ -43,11 +42,11 @@ class AiRecipeGeneratorViewModel extends ChangeNotifier {
   // Original prompt (stored when brainstorming starts)
   String _originalPrompt = '';
 
-  // Pantry items that were checked when brainstorming
-  List<String> _selectedPantryItems = [];
+  // User's prompt text
+  String _promptText = '';
 
-  // Quill controller for input
-  late quill.QuillController _inputController;
+  // Selected pantry item IDs (used when toggle is on)
+  Set<String> _selectedPantryItemIds = {};
 
   // Pantry items (cached on init)
   List<PantryItemEntry> _availablePantryItems = [];
@@ -62,14 +61,30 @@ class AiRecipeGeneratorViewModel extends ChangeNotifier {
     required this.ref,
     this.folderId,
   }) {
-    _inputController = quill.QuillController.basic();
-    _loadPantryItems();
+    _setupPantryListener();
   }
 
-  @override
-  void dispose() {
-    _inputController.dispose();
-    super.dispose();
+  /// Set up a listener for pantry items that updates when data becomes available
+  void _setupPantryListener() {
+    // Listen to pantry provider changes
+    ref.listen<AsyncValue<List<PantryItemEntry>>>(
+      pantryNotifierProvider,
+      (previous, next) {
+        _updatePantryItems(next);
+      },
+    );
+
+    // Also read the current value immediately
+    _updatePantryItems(ref.read(pantryNotifierProvider));
+  }
+
+  void _updatePantryItems(AsyncValue<List<PantryItemEntry>> asyncValue) {
+    asyncValue.whenData((items) {
+      _availablePantryItems = items
+          .where((item) => item.stockStatus != StockStatus.outOfStock)
+          .toList();
+      notifyListeners();
+    });
   }
 
   // ============================================================================
@@ -83,19 +98,19 @@ class AiRecipeGeneratorViewModel extends ChangeNotifier {
   List<RecipeIdea> get recipeIdeas => _recipeIdeas;
   RecipeIdea? get selectedIdea => _selectedIdea;
   bool get isTransitioning => _isTransitioning;
-  quill.QuillController get inputController => _inputController;
+  String get promptText => _promptText;
   List<PantryItemEntry> get availablePantryItems => _availablePantryItems;
   bool get hasPantryItems => _availablePantryItems.isNotEmpty;
   ExtractedRecipe? get extractedRecipe => _extractedRecipe;
   RecipePreview? get recipePreview => _recipePreview;
   String get originalPrompt => _originalPrompt;
-  List<String> get selectedPantryItems => _selectedPantryItems;
+  Set<String> get selectedPantryItemIds => _selectedPantryItemIds;
+
+  /// Returns the count of selected pantry items
+  int get selectedPantryItemCount => _selectedPantryItemIds.length;
 
   /// Returns true if the input has content
-  bool get hasInput {
-    final text = _inputController.document.toPlainText().trim();
-    return text.isNotEmpty && text != '\n';
-  }
+  bool get hasInput => _promptText.trim().isNotEmpty;
 
   /// Returns true if user has Plus subscription
   bool get hasPlus => ref.read(effectiveHasPlusProvider);
@@ -104,14 +119,9 @@ class AiRecipeGeneratorViewModel extends ChangeNotifier {
   // Pantry Items
   // ============================================================================
 
-  Future<void> _loadPantryItems() async {
-    final pantryAsync = ref.read(pantryNotifierProvider);
-    _availablePantryItems = pantryAsync.whenData((items) {
-      // Filter to in-stock and low-stock only
-      return items.where((item) =>
-        item.stockStatus != StockStatus.outOfStock
-      ).toList();
-    }).value ?? [];
+  /// Update the prompt text
+  void updatePromptText(String text) {
+    _promptText = text;
     notifyListeners();
   }
 
@@ -119,106 +129,50 @@ class AiRecipeGeneratorViewModel extends ChangeNotifier {
   void toggleUsePantryItems(bool value) {
     _usePantryItems = value;
     if (value) {
-      _appendPantryItemsToEditor();
+      // Select all pantry items by default
+      _selectedPantryItemIds = _availablePantryItems.map((e) => e.id).toSet();
     } else {
-      _removePantryItemsFromEditor();
+      // Clear selection when disabled
+      _selectedPantryItemIds = {};
     }
     notifyListeners();
   }
 
-  /// Append pantry items as checkable items to the editor
-  void _appendPantryItemsToEditor() {
-    if (_availablePantryItems.isEmpty) return;
-
-    final document = _inputController.document;
-    final currentLength = document.length;
-
-    // Add header
-    document.insert(currentLength - 1, '\n\nAvailable ingredients:\n');
-
-    // Add each pantry item as a checked checklist item
-    for (final item in _availablePantryItems) {
-      final insertPos = document.length - 1;
-      document.insert(insertPos, '${item.name}\n');
-
-      // Apply checklist format - checked by default so users can uncheck items they don't want
-      _inputController.formatText(
-        insertPos,
-        item.name.length + 1,
-        quill.Attribute.unchecked,
-      );
-      // Then check it
-      _inputController.formatText(
-        insertPos,
-        item.name.length + 1,
-        quill.Attribute.checked,
-      );
+  /// Toggle selection of a specific pantry item
+  void togglePantryItem(String itemId) {
+    if (_selectedPantryItemIds.contains(itemId)) {
+      _selectedPantryItemIds.remove(itemId);
+    } else {
+      _selectedPantryItemIds.add(itemId);
     }
-
     notifyListeners();
   }
 
-  /// Remove pantry items from the editor
-  void _removePantryItemsFromEditor() {
-    // Find and remove the "Available ingredients:" section and items after it
-    final plainText = _inputController.document.toPlainText();
-    final marker = '\n\nAvailable ingredients:\n';
-    final markerIndex = plainText.indexOf(marker);
+  /// Check if a pantry item is selected
+  bool isPantryItemSelected(String itemId) {
+    return _selectedPantryItemIds.contains(itemId);
+  }
 
-    if (markerIndex == -1) return;
-
-    // Create new document with content before the marker
-    final textBefore = plainText.substring(0, markerIndex);
-    _inputController.document = quill.Document()..insert(0, textBefore.isEmpty ? '' : textBefore);
-
+  /// Select all pantry items
+  void selectAllPantryItems() {
+    _selectedPantryItemIds = _availablePantryItems.map((e) => e.id).toSet();
     notifyListeners();
   }
 
-  /// Get list of pantry items that are still checked (for sending to API)
-  List<String> _getCheckedPantryItems() {
-    if (!_usePantryItems) return [];
-
-    final checkedItems = <String>[];
-    final document = _inputController.document;
-    final delta = document.toDelta();
-
-    // Parse document to find checked items
-    String currentText = '';
-    bool isChecked = false;
-
-    for (final op in delta.toList()) {
-      if (op.data is String) {
-        currentText = (op.data as String).trim();
-      }
-      if (op.attributes != null) {
-        final listType = op.attributes!['list'];
-        if (listType == 'checked' && currentText.isNotEmpty) {
-          isChecked = true;
-        }
-      }
-      if (isChecked && currentText.isNotEmpty) {
-        // Only add if it's actually a pantry item name
-        if (_availablePantryItems.any((item) => item.name == currentText)) {
-          checkedItems.add(currentText);
-        }
-        isChecked = false;
-        currentText = '';
-      }
-    }
-
-    return checkedItems;
+  /// Deselect all pantry items
+  void deselectAllPantryItems() {
+    _selectedPantryItemIds = {};
+    notifyListeners();
   }
 
-  /// Get the user's prompt text (excluding the pantry items section)
-  String _getPromptText() {
-    final plainText = _inputController.document.toPlainText();
-    final marker = '\n\nAvailable ingredients:';
-    final markerIndex = plainText.indexOf(marker);
+  /// Get list of selected pantry item names (for sending to API)
+  List<String> _getSelectedPantryItemNames() {
+    if (!_usePantryItems || _selectedPantryItemIds.isEmpty) return [];
 
-    if (markerIndex != -1) {
-      return plainText.substring(0, markerIndex).trim();
-    }
-    return plainText.trim();
+    return _availablePantryItems
+        .where((item) => _selectedPantryItemIds.contains(item.id))
+        .map((item) => item.name)
+        .toList();
   }
 
   // ============================================================================
@@ -267,8 +221,8 @@ class AiRecipeGeneratorViewModel extends ChangeNotifier {
   /// Generate recipe ideas from user prompt
   Future<void> generateIdeas() async {
     // Store the original prompt and selected pantry items
-    _originalPrompt = _getPromptText();
-    _selectedPantryItems = _getCheckedPantryItems();
+    _originalPrompt = _promptText.trim();
+    final selectedPantryItemNames = _getSelectedPantryItemNames();
 
     // Check if non-Plus user has exceeded daily limit
     if (!hasPlus) {
@@ -288,7 +242,7 @@ class AiRecipeGeneratorViewModel extends ChangeNotifier {
       final service = ref.read(aiRecipeServiceProvider);
       final result = await service.brainstormRecipes(
         prompt: _originalPrompt,
-        pantryItems: _selectedPantryItems.isNotEmpty ? _selectedPantryItems : null,
+        pantryItems: selectedPantryItemNames.isNotEmpty ? selectedPantryItemNames : null,
       );
 
       if (!result.success || result.ideas.isEmpty) {
@@ -344,10 +298,11 @@ class AiRecipeGeneratorViewModel extends ChangeNotifier {
 
     try {
       final service = ref.read(aiRecipeServiceProvider);
+      final selectedPantryItemNames = _getSelectedPantryItemNames();
       final result = await service.generateRecipe(
         idea: idea,
         originalPrompt: _originalPrompt,
-        pantryItems: _selectedPantryItems.isNotEmpty ? _selectedPantryItems : null,
+        pantryItems: selectedPantryItemNames.isNotEmpty ? selectedPantryItemNames : null,
       );
 
       if (!result.success || result.recipe == null) {

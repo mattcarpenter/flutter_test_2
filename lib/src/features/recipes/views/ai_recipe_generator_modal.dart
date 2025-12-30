@@ -1,7 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_quill/flutter_quill.dart' as quill;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:provider/provider.dart' as provider;
 import 'package:uuid/uuid.dart';
@@ -16,6 +15,8 @@ import '../../../theme/spacing.dart';
 import '../../../theme/typography.dart';
 import '../../../widgets/app_button.dart';
 import '../../../widgets/app_circle_button.dart';
+import '../../../widgets/app_radio_button.dart';
+import '../../../widgets/utils/grouped_list_styling.dart';
 import '../../../widgets/wolt/text/modal_sheet_title.dart';
 import '../../clippings/models/extracted_recipe.dart';
 import '../../share/widgets/share_recipe_preview_result.dart';
@@ -32,10 +33,14 @@ Future<void> showAiRecipeGeneratorModal(
   required WidgetRef ref,
   String? folderId,
 }) async {
+  final pageIndexNotifier = ValueNotifier<int>(0);
+
   await WoltModalSheet.show<void>(
     context: context,
     useRootNavigator: true,
     barrierDismissible: true,
+    useSafeArea: false,
+    pageIndexNotifier: pageIndexNotifier,
     modalDecorator: (child) {
       // Wrap in ChangeNotifierProvider for cross-page state
       return provider.ChangeNotifierProvider<AiRecipeGeneratorViewModel>(
@@ -47,20 +52,20 @@ Future<void> showAiRecipeGeneratorModal(
       );
     },
     pageListBuilder: (bottomSheetContext) => [
-      _AiRecipeInputPage.build(bottomSheetContext), // Page 0
-      _AiRecipeResultsPage.build(bottomSheetContext), // Page 1
+      _AiRecipeInputPage.build(bottomSheetContext, pageIndexNotifier), // Page 0
+      _AiRecipeResultsPage.build(bottomSheetContext, pageIndexNotifier), // Page 1
+      _PantrySelectionPage.build(bottomSheetContext, pageIndexNotifier), // Page 2
     ],
   );
 }
 
 // ============================================================================
-// Page 1: Input Page
+// Page 0: Input Page
 // ============================================================================
 
 class _AiRecipeInputPage {
-  static WoltModalSheetPage build(BuildContext context) {
-    return WoltModalSheetPage(
-      navBarHeight: 55,
+  static SliverWoltModalSheetPage build(BuildContext context, ValueNotifier<int> pageIndexNotifier) {
+    return SliverWoltModalSheetPage(
       backgroundColor: AppColors.of(context).background,
       surfaceTintColor: Colors.transparent,
       hasTopBarLayer: false,
@@ -74,25 +79,50 @@ class _AiRecipeInputPage {
           onPressed: () => Navigator.of(context, rootNavigator: true).pop(),
         ),
       ),
-      child: const _InputPageContent(),
+      mainContentSliversBuilder: (context) => [
+        SliverToBoxAdapter(
+          child: _InputPageContent(pageIndexNotifier: pageIndexNotifier),
+        ),
+      ],
     );
   }
 }
 
-class _InputPageContent extends ConsumerStatefulWidget {
-  const _InputPageContent();
+class _InputPageContent extends StatefulWidget {
+  final ValueNotifier<int> pageIndexNotifier;
+
+  const _InputPageContent({required this.pageIndexNotifier});
 
   @override
-  ConsumerState<_InputPageContent> createState() => _InputPageContentState();
+  State<_InputPageContent> createState() => _InputPageContentState();
 }
 
-class _InputPageContentState extends ConsumerState<_InputPageContent> {
+class _InputPageContentState extends State<_InputPageContent> {
+  late TextEditingController _textController;
+
+  @override
+  void initState() {
+    super.initState();
+    _textController = TextEditingController();
+  }
+
+  @override
+  void dispose() {
+    _textController.dispose();
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
     final colors = AppColors.of(context);
 
     return provider.Consumer<AiRecipeGeneratorViewModel>(
       builder: (context, viewModel, child) {
+        // Sync text controller with view model on first build
+        if (_textController.text != viewModel.promptText) {
+          _textController.text = viewModel.promptText;
+        }
+
         return Padding(
           padding: EdgeInsets.fromLTRB(
             AppSpacing.lg,
@@ -122,26 +152,35 @@ class _InputPageContentState extends ConsumerState<_InputPageContent> {
               ),
               SizedBox(height: AppSpacing.lg),
 
-              // Quill Editor
-              Container(
-                height: 150,
-                decoration: BoxDecoration(
-                  border: Border.all(color: colors.border),
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: ClipRRect(
-                  borderRadius: BorderRadius.circular(8),
-                  child: quill.QuillEditor.basic(
-                    controller: viewModel.inputController,
-                    config: quill.QuillEditorConfig(
-                      placeholder: 'e.g., "I want a warm soup with chicken"',
-                      padding: EdgeInsets.all(AppSpacing.md),
-                      autoFocus: true,
-                      expands: true,
-                      scrollable: true,
-                    ),
+              // Text input
+              TextField(
+                controller: _textController,
+                autofocus: true,
+                maxLines: 5,
+                minLines: 3,
+                textCapitalization: TextCapitalization.sentences,
+                decoration: InputDecoration(
+                  hintText: 'e.g., "I want a warm soup with chicken"',
+                  hintStyle: AppTypography.body.copyWith(
+                    color: colors.textSecondary.withValues(alpha: 0.6),
+                  ),
+                  contentPadding: EdgeInsets.all(AppSpacing.md),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(8),
+                    borderSide: BorderSide(color: colors.border),
+                  ),
+                  enabledBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(8),
+                    borderSide: BorderSide(color: colors.border),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(8),
+                    borderSide: BorderSide(color: colors.primary, width: 2),
                   ),
                 ),
+                onChanged: (value) {
+                  viewModel.updatePromptText(value);
+                },
               ),
               SizedBox(height: AppSpacing.lg),
 
@@ -151,13 +190,17 @@ class _InputPageContentState extends ConsumerState<_InputPageContent> {
                   value: viewModel.usePantryItems,
                   onChanged: viewModel.toggleUsePantryItems,
                   pantryItemCount: viewModel.availablePantryItems.length,
+                  selectedCount: viewModel.selectedPantryItemCount,
+                  onSelectTap: () {
+                    widget.pageIndexNotifier.value = 2;
+                  },
                 ),
                 SizedBox(height: AppSpacing.lg),
               ],
 
               // Generate button
               ListenableBuilder(
-                listenable: viewModel.inputController,
+                listenable: viewModel,
                 builder: (context, _) {
                   return AppButton(
                     text: 'Generate Ideas',
@@ -165,7 +208,7 @@ class _InputPageContentState extends ConsumerState<_InputPageContent> {
                         ? () {
                             HapticFeedback.lightImpact();
                             viewModel.generateIdeas();
-                            WoltModalSheet.of(context).showNext();
+                            widget.pageIndexNotifier.value = 1;
                           }
                         : null,
                     style: AppButtonStyle.fill,
@@ -189,11 +232,15 @@ class _PantryToggle extends StatelessWidget {
   final bool value;
   final ValueChanged<bool> onChanged;
   final int pantryItemCount;
+  final int selectedCount;
+  final VoidCallback onSelectTap;
 
   const _PantryToggle({
     required this.value,
     required this.onChanged,
     required this.pantryItemCount,
+    required this.selectedCount,
+    required this.onSelectTap,
   });
 
   @override
@@ -222,6 +269,30 @@ class _PantryToggle extends StatelessWidget {
             ],
           ),
         ),
+        if (value) ...[
+          CupertinoButton(
+            padding: EdgeInsets.zero,
+            onPressed: onSelectTap,
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  '$selectedCount selected',
+                  style: AppTypography.body.copyWith(
+                    color: colors.primary,
+                  ),
+                ),
+                SizedBox(width: 4),
+                Icon(
+                  CupertinoIcons.chevron_right,
+                  size: 16,
+                  color: colors.primary,
+                ),
+              ],
+            ),
+          ),
+          SizedBox(width: AppSpacing.sm),
+        ],
         CupertinoSwitch(
           value: value,
           onChanged: onChanged,
@@ -232,13 +303,12 @@ class _PantryToggle extends StatelessWidget {
 }
 
 // ============================================================================
-// Page 2: Results Page
+// Page 1: Results Page
 // ============================================================================
 
 class _AiRecipeResultsPage {
-  static SliverWoltModalSheetPage build(BuildContext context) {
+  static SliverWoltModalSheetPage build(BuildContext context, ValueNotifier<int> pageIndexNotifier) {
     return SliverWoltModalSheetPage(
-      navBarHeight: 55,
       backgroundColor: AppColors.of(context).background,
       surfaceTintColor: Colors.transparent,
       hasTopBarLayer: true,
@@ -252,7 +322,7 @@ class _AiRecipeResultsPage {
             listen: false,
           );
           viewModel.resetToInput();
-          WoltModalSheet.of(context).showPrevious();
+          pageIndexNotifier.value = 0;
         },
         child: const Icon(CupertinoIcons.back, size: 24),
       ),
@@ -267,7 +337,7 @@ class _AiRecipeResultsPage {
       ),
       mainContentSliversBuilder: (context) => [
         SliverToBoxAdapter(
-          child: _ResultsPageContent(),
+          child: _ResultsPageContent(pageIndexNotifier: pageIndexNotifier),
         ),
       ],
     );
@@ -275,6 +345,10 @@ class _AiRecipeResultsPage {
 }
 
 class _ResultsPageContent extends ConsumerWidget {
+  final ValueNotifier<int> pageIndexNotifier;
+
+  const _ResultsPageContent({required this.pageIndexNotifier});
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     return provider.Consumer<AiRecipeGeneratorViewModel>(
@@ -297,7 +371,7 @@ class _ResultsPageContent extends ConsumerWidget {
   Widget _buildContent(BuildContext context, AiRecipeGeneratorViewModel viewModel) {
     switch (viewModel.state) {
       case AiGeneratorState.inputting:
-        // Should not normally appear on page 2
+        // Should not normally appear on page 1
         return const SizedBox.shrink();
       case AiGeneratorState.brainstorming:
         return const _BrainstormingState();
@@ -311,7 +385,7 @@ class _ResultsPageContent extends ConsumerWidget {
       case AiGeneratorState.showingPreview:
         return _PreviewState(viewModel: viewModel);
       case AiGeneratorState.error:
-        return _ErrorState(viewModel: viewModel);
+        return _ErrorState(viewModel: viewModel, pageIndexNotifier: pageIndexNotifier);
     }
   }
 }
@@ -630,8 +704,12 @@ class _PreviewState extends StatelessWidget {
 
 class _ErrorState extends StatelessWidget {
   final AiRecipeGeneratorViewModel viewModel;
+  final ValueNotifier<int> pageIndexNotifier;
 
-  const _ErrorState({required this.viewModel});
+  const _ErrorState({
+    required this.viewModel,
+    required this.pageIndexNotifier,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -665,7 +743,7 @@ class _ErrorState extends StatelessWidget {
                 if (purchased && context.mounted) {
                   // If upgraded, retry
                   viewModel.resetToInput();
-                  WoltModalSheet.of(context).showPrevious();
+                  pageIndexNotifier.value = 0;
                 }
               },
               style: AppButtonStyle.fill,
@@ -679,7 +757,7 @@ class _ErrorState extends StatelessWidget {
               text: 'Try Again',
               onPressed: () {
                 viewModel.resetToInput();
-                WoltModalSheet.of(context).showPrevious();
+                pageIndexNotifier.value = 0;
               },
               style: AppButtonStyle.fill,
               theme: AppButtonTheme.primary,
@@ -739,6 +817,177 @@ class _AnimatedLoadingTextState extends State<_AnimatedLoadingText> {
           color: colors.textSecondary,
         ),
       ),
+    );
+  }
+}
+
+// ============================================================================
+// Page 2: Pantry Selection Page
+// ============================================================================
+
+class _PantrySelectionPage {
+  static SliverWoltModalSheetPage build(BuildContext context, ValueNotifier<int> pageIndexNotifier) {
+    return SliverWoltModalSheetPage(
+      backgroundColor: AppColors.of(context).background,
+      surfaceTintColor: Colors.transparent,
+      hasTopBarLayer: true,
+      isTopBarLayerAlwaysVisible: false,
+      topBarTitle: const ModalSheetTitle('Select Pantry Items'),
+      leadingNavBarWidget: CupertinoButton(
+        padding: EdgeInsets.only(left: AppSpacing.md),
+        onPressed: () {
+          pageIndexNotifier.value = 0;
+        },
+        child: const Icon(CupertinoIcons.back, size: 24),
+      ),
+      trailingNavBarWidget: Padding(
+        padding: EdgeInsets.only(right: AppSpacing.lg),
+        child: AppCircleButton(
+          icon: AppCircleButtonIcon.close,
+          variant: AppCircleButtonVariant.neutral,
+          size: 32,
+          onPressed: () => Navigator.of(context, rootNavigator: true).pop(),
+        ),
+      ),
+      mainContentSliversBuilder: (context) => [
+        SliverFillRemaining(
+          hasScrollBody: true,
+          child: _PantrySelectionScrollableContent(),
+        ),
+      ],
+      stickyActionBar: Padding(
+        padding: EdgeInsets.fromLTRB(AppSpacing.lg, AppSpacing.sm, AppSpacing.lg, AppSpacing.lg),
+        child: AppButton(
+          text: 'Done',
+          onPressed: () {
+            pageIndexNotifier.value = 0;
+          },
+          style: AppButtonStyle.fill,
+          theme: AppButtonTheme.primary,
+          size: AppButtonSize.large,
+          shape: AppButtonShape.square,
+          fullWidth: true,
+        ),
+      ),
+    );
+  }
+}
+
+class _PantrySelectionScrollableContent extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    final colors = AppColors.of(context);
+
+    return provider.Consumer<AiRecipeGeneratorViewModel>(
+      builder: (context, viewModel, child) {
+        final items = viewModel.availablePantryItems;
+
+        if (items.isEmpty) {
+          return Center(
+            child: Padding(
+              padding: EdgeInsets.all(AppSpacing.xl),
+              child: Text(
+                'No pantry items available',
+                style: AppTypography.body.copyWith(
+                  color: colors.textSecondary,
+                ),
+              ),
+            ),
+          );
+        }
+
+        return ListView.builder(
+          padding: EdgeInsets.fromLTRB(AppSpacing.lg, AppSpacing.md, AppSpacing.lg, AppSpacing.xl),
+          itemCount: items.length + 1, // +1 for header
+          itemBuilder: (context, index) {
+            // First item is the header
+            if (index == 0) {
+              return Padding(
+                padding: EdgeInsets.only(bottom: AppSpacing.md),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: [
+                    CupertinoButton(
+                      padding: EdgeInsets.zero,
+                      onPressed: () {
+                        if (viewModel.selectedPantryItemCount == items.length) {
+                          viewModel.deselectAllPantryItems();
+                        } else {
+                          viewModel.selectAllPantryItems();
+                        }
+                      },
+                      child: Text(
+                        viewModel.selectedPantryItemCount == items.length
+                            ? 'Deselect All'
+                            : 'Select All',
+                        style: AppTypography.body.copyWith(
+                          color: colors.primary,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              );
+            }
+
+            // Pantry items (index - 1 because of header)
+            final itemIndex = index - 1;
+            final item = items[itemIndex];
+            final isFirst = itemIndex == 0;
+            final isLast = itemIndex == items.length - 1;
+            final isSelected = viewModel.isPantryItemSelected(item.id);
+
+            return GestureDetector(
+              onTap: () {
+                HapticFeedback.selectionClick();
+                viewModel.togglePantryItem(item.id);
+              },
+              child: Container(
+                decoration: BoxDecoration(
+                  color: colors.input,
+                  borderRadius: GroupedListStyling.getBorderRadius(
+                    isGrouped: true,
+                    isFirstInGroup: isFirst,
+                    isLastInGroup: isLast,
+                  ),
+                  border: GroupedListStyling.getBorder(
+                    context: context,
+                    isGrouped: true,
+                    isFirstInGroup: isFirst,
+                    isLastInGroup: isLast,
+                    isDragging: false,
+                  ),
+                ),
+                child: Padding(
+                  padding: EdgeInsets.symmetric(
+                    horizontal: AppSpacing.lg,
+                    vertical: AppSpacing.md,
+                  ),
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: Text(
+                          item.name,
+                          style: AppTypography.body.copyWith(
+                            color: colors.textPrimary,
+                          ),
+                        ),
+                      ),
+                      AppRadioButton(
+                        selected: isSelected,
+                        onTap: () {
+                          HapticFeedback.selectionClick();
+                          viewModel.togglePantryItem(item.id);
+                        },
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            );
+          },
+        );
+      },
     );
   }
 }
