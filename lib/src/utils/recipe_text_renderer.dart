@@ -64,6 +64,11 @@ class _RecipeTextRendererState extends ConsumerState<RecipeTextRenderer> {
   final List<TapGestureRecognizer> _recognizers = [];
   final DurationDetectionService _durationService = DurationDetectionService();
 
+  // Cache parsed tokens to avoid re-parsing on every build
+  List<_ParsedToken>? _cachedTokens;
+  String? _cachedText;
+  bool? _cachedEnableDurationLinks;
+
   @override
   void dispose() {
     for (final recognizer in _recognizers) {
@@ -75,8 +80,13 @@ class _RecipeTextRendererState extends ConsumerState<RecipeTextRenderer> {
   @override
   void didUpdateWidget(RecipeTextRenderer oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (oldWidget.text != widget.text) {
-      // Clear old recognizers when text changes
+    if (oldWidget.text != widget.text ||
+        oldWidget.enableDurationLinks != widget.enableDurationLinks) {
+      // Invalidate cache when text or duration links setting changes
+      _cachedTokens = null;
+      _cachedText = null;
+      _cachedEnableDurationLinks = null;
+      // Clear old recognizers
       for (final recognizer in _recognizers) {
         recognizer.dispose();
       }
@@ -84,9 +94,23 @@ class _RecipeTextRendererState extends ConsumerState<RecipeTextRenderer> {
     }
   }
 
+  /// Get cached tokens or parse if needed
+  List<_ParsedToken> _getTokens() {
+    if (_cachedTokens != null &&
+        _cachedText == widget.text &&
+        _cachedEnableDurationLinks == widget.enableDurationLinks) {
+      return _cachedTokens!;
+    }
+
+    _cachedTokens = _parseTokens(widget.text);
+    _cachedText = widget.text;
+    _cachedEnableDurationLinks = widget.enableDurationLinks;
+    return _cachedTokens!;
+  }
+
   @override
   Widget build(BuildContext context) {
-    // Clear and rebuild recognizers on each build
+    // Clear and rebuild recognizers on each build (needed for gesture handling)
     for (final recognizer in _recognizers) {
       recognizer.dispose();
     }
@@ -103,7 +127,7 @@ class _RecipeTextRendererState extends ConsumerState<RecipeTextRenderer> {
 
   List<InlineSpan> _buildSpans(BuildContext context, AppColors colors) {
     final text = widget.text;
-    final tokens = _parseTokens(text);
+    final tokens = _getTokens(); // Use cached tokens
 
     if (tokens.isEmpty) {
       return [TextSpan(text: text, style: widget.baseStyle)];

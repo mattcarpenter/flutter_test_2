@@ -81,7 +81,7 @@ class SmartFolderSearchResults extends ConsumerWidget {
   }
 
   Widget _buildResponsiveGrid(BuildContext context, List<RecipeEntry> recipes) {
-    final screenWidth = MediaQuery.of(context).size.width;
+    final screenWidth = MediaQuery.sizeOf(context).width;
 
     // Responsive layout: 1 column mobile, 2 columns wider screens
     final crossAxisCount = screenWidth < 600 ? 1 : 2;

@@ -17,7 +17,7 @@ class RecipesList extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final screenWidth = MediaQuery.of(context).size.width - 32; // Account for padding
+    final screenWidth = MediaQuery.sizeOf(context).width - 32; // Account for padding
 
     // Calculate number of columns based on screen width
     // More fluid responsive behavior

@@ -342,9 +342,9 @@ class _UnifiedHeaderDelegate extends SliverPersistentHeaderDelegate {
 
   @override
   Widget build(BuildContext context, double shrinkOffset, bool overlapsContent) {
-    final mediaQuery = MediaQuery.of(context);
+    final size = MediaQuery.sizeOf(context);
     // Use compact layout (content-sized button) only in landscape mode
-    final isLandscape = mediaQuery.size.width > mediaQuery.size.height;
+    final isLandscape = size.width > size.height;
 
     // Filter button with indicator dot
     Widget filterButton({required bool fullWidth}) => Stack(

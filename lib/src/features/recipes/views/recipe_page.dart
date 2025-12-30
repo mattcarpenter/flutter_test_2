@@ -51,7 +51,7 @@ class _RecipePageState extends ConsumerState<RecipePage> {
 
     final heroHeight = _getHeroHeight(hasImages);
     // Use viewPadding.top for consistent snap timing regardless of global status bar
-    final fadeHeaderHeight = MediaQuery.of(context).viewPadding.top + 60;
+    final fadeHeaderHeight = MediaQuery.viewPaddingOf(context).top + 60;
     final snapStart = heroHeight * 0.5;
     final snapEnd = heroHeight - (fadeHeaderHeight / 2);
     final currentOffset = metrics.pixels;
@@ -107,7 +107,7 @@ class _RecipePageState extends ConsumerState<RecipePage> {
 
           // Calculate snap offsets based on fade zone
           // Use viewPadding.top for consistent timing regardless of global status bar
-          final fadeHeaderHeight = MediaQuery.of(context).viewPadding.top + 60;
+          final fadeHeaderHeight = MediaQuery.viewPaddingOf(context).top + 60;
           final snapStart = heroHeight * 0.5;
           final snapEnd = heroHeight - (fadeHeaderHeight / 2);
 
@@ -147,7 +147,7 @@ class _RecipePageState extends ConsumerState<RecipePage> {
                             builder: (context, child) {
                               final offset = _scrollController.hasClients ? _scrollController.offset : 0;
                               // Use viewPadding.top for consistent fade timing regardless of global status bar
-                              final fadeHeaderHeight = MediaQuery.of(context).viewPadding.top + 60;
+                              final fadeHeaderHeight = MediaQuery.viewPaddingOf(context).top + 60;
 
                               // Header fade timing (unchanged)
                               final headerFadeStartOffset = heroHeight * 0.5;
@@ -179,7 +179,7 @@ class _RecipePageState extends ConsumerState<RecipePage> {
                           builder: (context, child) {
                             final offset = _scrollController.hasClients ? _scrollController.offset : 0;
                             // Use viewPadding.top for consistent fade timing regardless of global status bar
-                            final fadeHeaderHeight = MediaQuery.of(context).viewPadding.top + 60;
+                            final fadeHeaderHeight = MediaQuery.viewPaddingOf(context).top + 60;
 
                             // Using the fade end offset approach (which was close in attempt 3)
                             // but adjusting for the 16px rounded overlay height
@@ -255,9 +255,9 @@ class _RecipePageState extends ConsumerState<RecipePage> {
         final offset = _scrollController.hasClients ? _scrollController.offset : 0;
 
         // Use viewPadding.top for consistent fade timing regardless of global status bar
-        final fadeHeaderHeight = MediaQuery.of(context).viewPadding.top + 60;
+        final fadeHeaderHeight = MediaQuery.viewPaddingOf(context).top + 60;
         // Use padding.top for overlay sizing (adapts to current layout context)
-        final overlayHeaderHeight = MediaQuery.of(context).padding.top + 60;
+        final overlayHeaderHeight = MediaQuery.paddingOf(context).top + 60;
 
         // For images: start fade at 50% of hero
         // For no images: start at 0 (shorter hero needs earlier fade start for smooth animation)
@@ -298,7 +298,7 @@ class _RecipePageState extends ConsumerState<RecipePage> {
         final offset = _scrollController.hasClients ? _scrollController.offset : 0;
 
         // Use viewPadding.top for consistent fade timing regardless of global status bar
-        final fadeHeaderHeight = MediaQuery.of(context).viewPadding.top + 60;
+        final fadeHeaderHeight = MediaQuery.viewPaddingOf(context).top + 60;
 
         // For images: start fade at 50% of hero
         // For no images: start at 0 (shorter hero needs earlier fade start for smooth animation)
@@ -313,7 +313,7 @@ class _RecipePageState extends ConsumerState<RecipePage> {
         // as header becomes opaque during scroll
         // Use padding.top for button positioning (adapts to current layout context)
         return Positioned(
-          top: MediaQuery.of(context).padding.top + 8,
+          top: MediaQuery.paddingOf(context).top + 8,
           left: 16,
           right: 16,
           child: Row(

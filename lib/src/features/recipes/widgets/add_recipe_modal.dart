@@ -180,8 +180,8 @@ class _AddRecipeContentState extends ConsumerState<_AddRecipeContent> {
 
     // Calculate available height for content
     // Start with 70% of screen, which gives room for the modal to expand
-    final screenHeight = MediaQuery.of(context).size.height;
-    final keyboardHeight = MediaQuery.of(context).viewInsets.bottom;
+    final screenHeight = MediaQuery.sizeOf(context).height;
+    final keyboardHeight = MediaQuery.viewInsetsOf(context).bottom;
     final maxContentHeight = screenHeight * 0.7;
 
     // Height for search field + padding (approximate)

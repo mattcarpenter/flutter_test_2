@@ -156,7 +156,6 @@ class _StepListItemState extends State<StepListItem> with SingleTickerProviderSt
     _focusNode = FocusNode();
     _focusNode.addListener(() {
       widget.onFocus(_focusNode.hasFocus);
-      setState(() {});
     });
 
     // Handle new vs existing items
