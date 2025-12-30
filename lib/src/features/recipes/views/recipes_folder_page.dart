@@ -23,6 +23,7 @@ import 'add_recipe_modal.dart';
 import 'edit_smart_folder_modal.dart';
 import 'photo_capture_review_modal.dart';
 import 'photo_import_modal.dart';
+import 'url_import_modal.dart';
 
 class RecipesFolderPage extends ConsumerWidget {
   final String? folderId;
@@ -235,6 +236,14 @@ class RecipesFolderPage extends ConsumerWidget {
             onTap: () {
               final saveFolderId = folderId == kUncategorizedFolderId ? null : folderId;
               showPhotoImportModal(context, ref: ref, source: ImageSource.gallery, folderId: saveFolderId);
+            },
+          ),
+          AdaptiveMenuItem(
+            title: 'Import from URL',
+            icon: const Icon(CupertinoIcons.link),
+            onTap: () {
+              final saveFolderId = folderId == kUncategorizedFolderId ? null : folderId;
+              showUrlImportModal(context, ref: ref, folderId: saveFolderId);
             },
           ),
         ],

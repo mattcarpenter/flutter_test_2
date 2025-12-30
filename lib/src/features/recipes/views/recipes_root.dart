@@ -24,6 +24,7 @@ import '../widgets/recently_viewed_section.dart';
 import 'add_recipe_modal.dart';
 import 'photo_capture_review_modal.dart';
 import 'photo_import_modal.dart';
+import 'url_import_modal.dart';
 
 class RecipesTab extends ConsumerWidget {
   const RecipesTab({super.key});
@@ -132,6 +133,13 @@ class RecipesTab extends ConsumerWidget {
             icon: const Icon(CupertinoIcons.photo),
             onTap: () {
               showPhotoImportModal(context, ref: ref, source: ImageSource.gallery);
+            },
+          ),
+          AdaptiveMenuItem(
+            title: 'Import from URL',
+            icon: const Icon(CupertinoIcons.link),
+            onTap: () {
+              showUrlImportModal(context, ref: ref);
             },
           ),
         ],
