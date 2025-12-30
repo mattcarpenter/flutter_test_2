@@ -16,6 +16,7 @@ class StepsSection extends StatefulWidget {
   final Function(String id, Step updatedStep) onUpdateStep;
   final Function(int oldIndex, int newIndex) onReorderSteps;
   final Function(String id, bool hasFocus) onFocusChanged;
+  final VoidCallback? onEditAsText;
 
   const StepsSection({
     Key? key,
@@ -26,6 +27,7 @@ class StepsSection extends StatefulWidget {
     required this.onUpdateStep,
     required this.onReorderSteps,
     required this.onFocusChanged,
+    this.onEditAsText,
   }) : super(key: key);
 
   @override
@@ -184,7 +186,12 @@ class _StepsSectionState extends State<StepsSection> {
               AppOverflowButton(
                 items: [
                   AdaptiveMenuItem(
-                    title: 'Clear All Steps', 
+                    title: 'Edit as Text',
+                    icon: const Icon(Icons.edit_note),
+                    onTap: () => widget.onEditAsText?.call(),
+                  ),
+                  AdaptiveMenuItem(
+                    title: 'Clear All Steps',
                     icon: const Icon(Icons.clear_all),
                     onTap: () {
                       // TODO: Implement clear functionality

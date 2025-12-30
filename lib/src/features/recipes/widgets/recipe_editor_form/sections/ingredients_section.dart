@@ -16,6 +16,7 @@ class IngredientsSection extends StatefulWidget {
   final Function(String id, Ingredient updatedIngredient) onUpdateIngredient;
   final Function(int oldIndex, int newIndex) onReorderIngredients;
   final Function(String id, bool hasFocus) onFocusChanged;
+  final VoidCallback? onEditAsText;
 
   const IngredientsSection({
     Key? key,
@@ -26,6 +27,7 @@ class IngredientsSection extends StatefulWidget {
     required this.onUpdateIngredient,
     required this.onReorderIngredients,
     required this.onFocusChanged,
+    this.onEditAsText,
   }) : super(key: key);
 
   @override
@@ -187,7 +189,12 @@ class _IngredientsSectionState extends State<IngredientsSection> {
               AppOverflowButton(
                 items: [
                   AdaptiveMenuItem(
-                    title: 'Clear All Ingredients', 
+                    title: 'Edit as Text',
+                    icon: const Icon(Icons.edit_note),
+                    onTap: () => widget.onEditAsText?.call(),
+                  ),
+                  AdaptiveMenuItem(
+                    title: 'Clear All Ingredients',
                     icon: const Icon(Icons.clear_all),
                     onTap: () {
                       // TODO: Implement clear functionality

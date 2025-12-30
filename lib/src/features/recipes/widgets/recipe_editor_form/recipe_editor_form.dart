@@ -25,6 +25,7 @@ import 'sections/steps_section.dart';
 import 'items/tag_chips_row.dart';
 import '../tag_selection_modal.dart';
 import '../../../../services/ingredient_parser_service.dart';
+import 'modals/edit_as_text_modal.dart';
 
 class RecipeEditorForm extends ConsumerStatefulWidget {
   final RecipeEntry? initialRecipe; // null for new recipe, non-null for editing
@@ -316,6 +317,32 @@ class RecipeEditorFormState extends ConsumerState<RecipeEditorForm> {
     });
   }
 
+  // Edit as Text operations
+  Future<void> _openEditIngredientsAsText() async {
+    final result = await showEditIngredientsAsTextModal(
+      context,
+      ingredients: _ingredients,
+      ref: ref,
+    );
+    if (result != null) {
+      setState(() {
+        _ingredients = result;
+      });
+    }
+  }
+
+  Future<void> _openEditStepsAsText() async {
+    final result = await showEditStepsAsTextModal(
+      context,
+      steps: _steps,
+    );
+    if (result != null) {
+      setState(() {
+        _steps = result;
+      });
+    }
+  }
+
   Future<RecipeEntry> mergeRecipeImagesWithDb(RecipeEntry localRecipe) async {
     // Fetch the current recipe from the database. Use a repository method or direct DB query.
     // Here we use a method getRecipeById (you need to implement this in your repository if not already available).
@@ -415,6 +442,7 @@ class RecipeEditorFormState extends ConsumerState<RecipeEditorForm> {
                   });
                 }
               },
+              onEditAsText: _openEditIngredientsAsText,
             ),
 
             const SizedBox(height: AppSpacing.xl),
@@ -440,6 +468,7 @@ class RecipeEditorFormState extends ConsumerState<RecipeEditorForm> {
                   });
                 }
               },
+              onEditAsText: _openEditStepsAsText,
             ),
 
             const SizedBox(height: AppSpacing.xl),
