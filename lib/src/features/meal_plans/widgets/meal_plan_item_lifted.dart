@@ -83,9 +83,13 @@ class _MealPlanItemLiftedState extends ConsumerState<MealPlanItemLifted>
   }
 
   void _onDragEnd() {
-    // Clear global drag state
+    // Always clear global drag state first, before any other operations
     ref.read(mealPlanDraggingItemProvider.notifier).state = null;
-    _liftController.reverse();
+
+    // Only animate if the widget is still mounted and controller is valid
+    if (mounted) {
+      _liftController.reverse();
+    }
   }
 
   @override

@@ -119,6 +119,11 @@ class _MealPlanDateCardState extends ConsumerState<MealPlanDateCard>
       userId: userId,
       householdId: null, // TODO: Add household support if needed
     );
+
+    // Clear drag state AGAIN after move completes
+    // This handles edge cases where the state might have been set during the async operation
+    // or the source widget was disposed before its _onDragEnd callback could run
+    ref.read(mealPlanDraggingItemProvider.notifier).state = null;
   }
 
   bool _willAcceptDrag(MealPlanDragData? dragData) {
