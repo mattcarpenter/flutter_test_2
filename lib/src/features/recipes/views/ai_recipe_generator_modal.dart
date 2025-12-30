@@ -9,7 +9,6 @@ import 'package:wolt_modal_sheet/wolt_modal_sheet.dart';
 import '../../../../database/database.dart';
 import '../../../../database/models/ingredients.dart';
 import '../../../../database/models/steps.dart' as db;
-import '../../../mobile/adaptive_app.dart' show globalRootNavigatorKey;
 import '../../../theme/colors.dart';
 import '../../../theme/spacing.dart';
 import '../../../theme/typography.dart';
@@ -17,8 +16,6 @@ import '../../../widgets/app_button.dart';
 import '../../../widgets/app_circle_button.dart';
 import '../../../widgets/app_radio_button.dart';
 import '../../../widgets/utils/grouped_list_styling.dart';
-import '../../../widgets/wolt/text/modal_sheet_title.dart';
-import '../../clippings/models/extracted_recipe.dart';
 import '../../share/widgets/share_recipe_preview_result.dart';
 import '../models/recipe_idea.dart';
 import 'add_recipe_modal.dart';
@@ -66,6 +63,7 @@ Future<void> showAiRecipeGeneratorModal(
 class _AiRecipeInputPage {
   static SliverWoltModalSheetPage build(BuildContext context, ValueNotifier<int> pageIndexNotifier) {
     return SliverWoltModalSheetPage(
+      navBarHeight: 55,
       backgroundColor: AppColors.of(context).background,
       surfaceTintColor: Colors.transparent,
       hasTopBarLayer: false,
@@ -79,14 +77,9 @@ class _AiRecipeInputPage {
           onPressed: () => Navigator.of(context, rootNavigator: true).pop(),
         ),
       ),
-      mainContentSliversBuilder: (context) => [
-        provider.Consumer<AiRecipeGeneratorViewModel>(
-          builder: (context, viewModel, child) {
-            return _InputPageContent(
-              pageIndexNotifier: pageIndexNotifier,
-              viewModel: viewModel,
-            );
-          },
+      mainContentSliversBuilder: (builderContext) => [
+        _InputPageContent(
+          pageIndexNotifier: pageIndexNotifier,
         ),
       ],
     );
@@ -95,11 +88,9 @@ class _AiRecipeInputPage {
 
 class _InputPageContent extends StatefulWidget {
   final ValueNotifier<int> pageIndexNotifier;
-  final AiRecipeGeneratorViewModel viewModel;
 
   const _InputPageContent({
     required this.pageIndexNotifier,
-    required this.viewModel,
   });
 
   @override
@@ -108,12 +99,7 @@ class _InputPageContent extends StatefulWidget {
 
 class _InputPageContentState extends State<_InputPageContent> {
   late TextEditingController _textController;
-
-  @override
-  void initState() {
-    super.initState();
-    _textController = TextEditingController(text: widget.viewModel.promptText);
-  }
+  bool _initialized = false;
 
   @override
   void dispose() {
@@ -124,7 +110,16 @@ class _InputPageContentState extends State<_InputPageContent> {
   @override
   Widget build(BuildContext context) {
     final colors = AppColors.of(context);
-    final viewModel = widget.viewModel;
+    final viewModel = provider.Provider.of<AiRecipeGeneratorViewModel>(
+      context,
+      listen: true,
+    );
+
+    // Initialize controller on first build with context available
+    if (!_initialized) {
+      _textController = TextEditingController(text: viewModel.promptText);
+      _initialized = true;
+    }
 
     // Sync text controller with view model
     if (_textController.text != viewModel.promptText) {
@@ -329,11 +324,11 @@ class _PantryToggle extends StatelessWidget {
 class _AiRecipeResultsPage {
   static SliverWoltModalSheetPage build(BuildContext context, ValueNotifier<int> pageIndexNotifier) {
     return SliverWoltModalSheetPage(
+      navBarHeight: 55,
       backgroundColor: AppColors.of(context).background,
       surfaceTintColor: Colors.transparent,
-      hasTopBarLayer: true,
+      hasTopBarLayer: false,
       isTopBarLayerAlwaysVisible: false,
-      topBarTitle: const ModalSheetTitle('Recipe Ideas'),
       leadingNavBarWidget: CupertinoButton(
         padding: EdgeInsets.only(left: AppSpacing.md),
         onPressed: () {
@@ -344,7 +339,13 @@ class _AiRecipeResultsPage {
           viewModel.resetToInput();
           pageIndexNotifier.value = 0;
         },
-        child: const Icon(CupertinoIcons.back, size: 24),
+        child: Text(
+          'Back',
+          style: TextStyle(
+            color: AppColors.of(context).primary,
+            fontSize: 17,
+          ),
+        ),
       ),
       trailingNavBarWidget: Padding(
         padding: EdgeInsets.only(right: AppSpacing.lg),
@@ -355,14 +356,9 @@ class _AiRecipeResultsPage {
           onPressed: () => Navigator.of(context, rootNavigator: true).pop(),
         ),
       ),
-      mainContentSliversBuilder: (context) => [
-        provider.Consumer<AiRecipeGeneratorViewModel>(
-          builder: (context, viewModel, child) {
-            return _ResultsPageContent(
-              pageIndexNotifier: pageIndexNotifier,
-              viewModel: viewModel,
-            );
-          },
+      mainContentSliversBuilder: (builderContext) => [
+        _ResultsPageContent(
+          pageIndexNotifier: pageIndexNotifier,
         ),
       ],
     );
@@ -371,93 +367,84 @@ class _AiRecipeResultsPage {
 
 class _ResultsPageContent extends StatelessWidget {
   final ValueNotifier<int> pageIndexNotifier;
-  final AiRecipeGeneratorViewModel viewModel;
 
   const _ResultsPageContent({
     required this.pageIndexNotifier,
-    required this.viewModel,
   });
 
   @override
   Widget build(BuildContext context) {
+    final viewModel = provider.Provider.of<AiRecipeGeneratorViewModel>(
+      context,
+      listen: true,
+    );
     // Return Slivers directly based on state (correct pattern for multi-page Wolt modals)
     return _buildContent(context, viewModel);
   }
 
   Widget _buildContent(BuildContext context, AiRecipeGeneratorViewModel viewModel) {
+    final colors = AppColors.of(context);
+
     switch (viewModel.state) {
       case AiGeneratorState.inputting:
-        // Should not normally appear on page 1
-        return SliverList(delegate: SliverChildListDelegate([]));
       case AiGeneratorState.brainstorming:
-        return _BrainstormingState();
-      case AiGeneratorState.showingResults:
-        return _ResultsState(
-          ideas: viewModel.recipeIdeas,
-          onSelectIdea: viewModel.selectIdea,
-        );
-      case AiGeneratorState.generatingRecipe:
-        return _GeneratingRecipeState(viewModel: viewModel);
-      case AiGeneratorState.showingPreview:
-        return _PreviewState(viewModel: viewModel);
-      case AiGeneratorState.error:
-        return _ErrorState(viewModel: viewModel, pageIndexNotifier: pageIndexNotifier);
-    }
-  }
-}
-
-// ============================================================================
-// State Widgets
-// ============================================================================
-
-class _BrainstormingState extends StatelessWidget {
-  const _BrainstormingState();
-
-  @override
-  Widget build(BuildContext context) {
-    return SliverFillRemaining(
-      hasScrollBody: false,
-      child: Padding(
-        padding: EdgeInsets.all(AppSpacing.xl),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            const CupertinoActivityIndicator(radius: 16),
-            SizedBox(height: AppSpacing.lg),
-            _AnimatedLoadingText(
-              messages: const [
-                'Brainstorming recipes...',
-                'Considering your preferences...',
-                'Finding delicious ideas...',
+        // Show spinner for both states - if we're on page 1, we're transitioning to brainstorming
+        return SliverFillRemaining(
+          hasScrollBody: false,
+          child: Padding(
+            padding: EdgeInsets.all(AppSpacing.xl),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                const CupertinoActivityIndicator(radius: 16),
+                SizedBox(height: AppSpacing.lg),
+                _AnimatedLoadingText(
+                  messages: const [
+                    'Brainstorming recipes...',
+                    'Considering your preferences...',
+                    'Finding delicious ideas...',
+                  ],
+                ),
               ],
             ),
-          ],
+          ),
+        );
+
+      case AiGeneratorState.showingResults:
+        return _buildResultsSliver(context, colors, viewModel);
+
+      case AiGeneratorState.generatingRecipe:
+        return _buildGeneratingSliver(context, viewModel);
+
+      case AiGeneratorState.showingPreview:
+        return _buildPreviewSliver(context, viewModel);
+
+      case AiGeneratorState.error:
+        return _buildErrorSliver(context, colors, viewModel);
+    }
+  }
+
+  Widget _buildResultsSliver(BuildContext context, AppColors colors, AiRecipeGeneratorViewModel viewModel) {
+    final List<Widget> widgets = [];
+
+    // Title
+    widgets.add(
+      Padding(
+        padding: EdgeInsets.fromLTRB(AppSpacing.lg, 0, AppSpacing.lg, AppSpacing.sm),
+        child: Text(
+          'Recipe Ideas',
+          style: AppTypography.h4.copyWith(
+            color: colors.textPrimary,
+          ),
         ),
       ),
     );
-  }
-}
 
-class _ResultsState extends StatelessWidget {
-  final List<RecipeIdea> ideas;
-  final ValueChanged<RecipeIdea> onSelectIdea;
-
-  const _ResultsState({
-    required this.ideas,
-    required this.onSelectIdea,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final colors = AppColors.of(context);
-
-    final List<Widget> widgets = [];
-
-    // Header text
+    // Subtitle
     widgets.add(
       Padding(
-        padding: EdgeInsets.fromLTRB(AppSpacing.lg, AppSpacing.lg, AppSpacing.lg, AppSpacing.lg),
+        padding: EdgeInsets.fromLTRB(AppSpacing.lg, 0, AppSpacing.lg, AppSpacing.lg),
         child: Text(
           'Select a recipe to generate',
           style: AppTypography.body.copyWith(
@@ -467,223 +454,50 @@ class _ResultsState extends StatelessWidget {
       ),
     );
 
-    // Recipe idea cards
-    for (final idea in ideas) {
+    // Recipe idea cards (grouped list style)
+    final ideas = viewModel.recipeIdeas;
+    for (int i = 0; i < ideas.length; i++) {
+      final idea = ideas[i];
+      final isFirst = i == 0;
+      final isLast = i == ideas.length - 1;
+
       widgets.add(
         Padding(
           padding: EdgeInsets.symmetric(horizontal: AppSpacing.lg),
           child: _RecipeIdeaCard(
             idea: idea,
-            onTap: () => onSelectIdea(idea),
+            isFirst: isFirst,
+            isLast: isLast,
+            onTap: () => viewModel.selectIdea(idea),
           ),
         ),
       );
     }
 
     // Bottom padding
-    widgets.add(SizedBox(height: AppSpacing.lg));
+    widgets.add(SizedBox(height: AppSpacing.xxl));
 
     return SliverList(
       delegate: SliverChildListDelegate(widgets),
     );
   }
-}
 
-class _RecipeIdeaCard extends StatelessWidget {
-  final RecipeIdea idea;
-  final VoidCallback onTap;
-
-  const _RecipeIdeaCard({
-    required this.idea,
-    required this.onTap,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final colors = AppColors.of(context);
-
-    return Padding(
-      padding: EdgeInsets.only(bottom: AppSpacing.md),
-      child: Material(
-        color: Colors.transparent,
-        child: InkWell(
-          onTap: () {
-            HapticFeedback.mediumImpact();
-            onTap();
-          },
-          borderRadius: BorderRadius.circular(12),
-          child: Container(
-            padding: EdgeInsets.all(AppSpacing.lg),
-            decoration: BoxDecoration(
-              border: Border.all(color: colors.border),
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  idea.title,
-                  style: AppTypography.h5.copyWith(
-                    color: colors.textPrimary,
-                  ),
-                ),
-                SizedBox(height: AppSpacing.xs),
-                Text(
-                  idea.description,
-                  style: AppTypography.body.copyWith(
-                    color: colors.textSecondary,
-                  ),
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
-                ),
-                SizedBox(height: AppSpacing.sm),
-                Row(
-                  children: [
-                    if (idea.formattedTime != null) ...[
-                      Icon(
-                        Icons.access_time,
-                        size: 14,
-                        color: colors.textSecondary,
-                      ),
-                      SizedBox(width: 4),
-                      Text(
-                        idea.formattedTime!,
-                        style: AppTypography.caption.copyWith(
-                          color: colors.textSecondary,
-                        ),
-                      ),
-                      SizedBox(width: AppSpacing.md),
-                    ],
-                    if (idea.difficultyLabel != null) ...[
-                      Icon(
-                        Icons.bar_chart,
-                        size: 14,
-                        color: colors.textSecondary,
-                      ),
-                      SizedBox(width: 4),
-                      Text(
-                        idea.difficultyLabel!,
-                        style: AppTypography.caption.copyWith(
-                          color: colors.textSecondary,
-                        ),
-                      ),
-                    ],
-                    const Spacer(),
-                    Icon(
-                      Icons.arrow_forward,
-                      size: 16,
-                      color: colors.primary,
-                    ),
-                  ],
-                ),
-              ],
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class _GeneratingRecipeState extends StatefulWidget {
-  final AiRecipeGeneratorViewModel viewModel;
-
-  const _GeneratingRecipeState({required this.viewModel});
-
-  @override
-  State<_GeneratingRecipeState> createState() => _GeneratingRecipeStateState();
-}
-
-class _GeneratingRecipeStateState extends State<_GeneratingRecipeState> {
-  bool _hasNavigated = false;
-
-  @override
-  void initState() {
-    super.initState();
-    // Listen for recipe completion
-    widget.viewModel.addListener(_checkForRecipe);
-    // Check immediately in case recipe is already ready
-    WidgetsBinding.instance.addPostFrameCallback((_) => _checkForRecipe());
-  }
-
-  @override
-  void dispose() {
-    widget.viewModel.removeListener(_checkForRecipe);
-    super.dispose();
-  }
-
-  void _checkForRecipe() {
-    if (_hasNavigated) return;
-    if (widget.viewModel.extractedRecipe != null && mounted) {
-      _hasNavigated = true;
-      // Recipe is ready - close modal and open editor
-      _openRecipeEditor();
+  Widget _buildGeneratingSliver(BuildContext context, AiRecipeGeneratorViewModel viewModel) {
+    // Check if recipe is ready and navigate
+    if (viewModel.extractedRecipe != null) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!context.mounted) return;
+        Navigator.of(context, rootNavigator: true).pop();
+        final recipe = _createRecipeFromExtracted(viewModel);
+        showRecipeEditorModal(
+          context,
+          recipe: recipe,
+          isEditing: false,
+          folderId: viewModel.folderId,
+        );
+      });
     }
-  }
 
-  Future<void> _openRecipeEditor() async {
-    final recipe = widget.viewModel.extractedRecipe;
-    if (recipe == null) return;
-
-    final recipeEntry = _convertToRecipeEntry(recipe, widget.viewModel.folderId);
-
-    // Close modal
-    Navigator.of(context, rootNavigator: true).pop();
-
-    // Open editor using root context
-    await Future.delayed(const Duration(milliseconds: 100));
-    final rootContext = globalRootNavigatorKey.currentContext;
-    if (rootContext != null && rootContext.mounted) {
-      showRecipeEditorModal(
-        rootContext,
-        recipe: recipeEntry,
-        isEditing: false,
-        folderId: widget.viewModel.folderId,
-      );
-    }
-  }
-
-  RecipeEntry _convertToRecipeEntry(ExtractedRecipe extracted, String? folderId) {
-    const uuid = Uuid();
-
-    final ingredients = extracted.ingredients.map((e) {
-      return Ingredient(
-        id: uuid.v4(),
-        type: e.type,
-        name: e.name,
-        isCanonicalised: false,
-      );
-    }).toList();
-
-    final steps = extracted.steps.map((e) {
-      return db.Step(
-        id: uuid.v4(),
-        type: e.type,
-        text: e.text,
-      );
-    }).toList();
-
-    return RecipeEntry(
-      id: uuid.v4(),
-      title: extracted.title,
-      description: extracted.description,
-      language: 'en',
-      userId: '',
-      servings: extracted.servings,
-      prepTime: extracted.prepTime,
-      cookTime: extracted.cookTime,
-      source: extracted.source,
-      ingredients: ingredients,
-      steps: steps,
-      images: null,
-      folderIds: folderId != null ? [folderId] : [],
-      pinned: 0,
-      pinnedAt: null,
-    );
-  }
-
-  @override
-  Widget build(BuildContext context) {
     return SliverFillRemaining(
       hasScrollBody: false,
       child: Padding(
@@ -706,15 +520,44 @@ class _GeneratingRecipeStateState extends State<_GeneratingRecipeState> {
       ),
     );
   }
-}
 
-class _PreviewState extends StatelessWidget {
-  final AiRecipeGeneratorViewModel viewModel;
+  RecipeEntry _createRecipeFromExtracted(AiRecipeGeneratorViewModel viewModel) {
+    final extracted = viewModel.extractedRecipe!;
+    final uuid = const Uuid();
 
-  const _PreviewState({required this.viewModel});
+    final ingredients = extracted.ingredients
+        .map((i) => Ingredient(
+              id: uuid.v4(),
+              name: i.name,
+              type: i.type == 'section' ? 'section' : 'ingredient',
+            ))
+        .toList();
 
-  @override
-  Widget build(BuildContext context) {
+    final steps = extracted.steps
+        .map((s) => db.Step(
+              id: uuid.v4(),
+              text: s.text,
+              type: s.type == 'section' ? 'section' : 'step',
+            ))
+        .toList();
+
+    final now = DateTime.now().millisecondsSinceEpoch;
+    return RecipeEntry(
+      id: uuid.v4(),
+      title: extracted.title,
+      description: extracted.description,
+      ingredients: ingredients,
+      steps: steps,
+      servings: extracted.servings,
+      prepTime: extracted.prepTime,
+      cookTime: extracted.cookTime,
+      createdAt: now,
+      updatedAt: now,
+      pinnedAt: null,
+    );
+  }
+
+  Widget _buildPreviewSliver(BuildContext context, AiRecipeGeneratorViewModel viewModel) {
     final preview = viewModel.recipePreview;
     if (preview == null) {
       return SliverList(delegate: SliverChildListDelegate([]));
@@ -726,11 +569,8 @@ class _PreviewState extends StatelessWidget {
           preview: preview,
           onSubscribe: () async {
             if (!context.mounted) return;
-
             final purchased = await viewModel.presentPaywall(context);
-
             if (purchased && context.mounted) {
-              // User upgraded - generate full recipe
               await viewModel.upgradeAndGenerateFullRecipe();
             }
           },
@@ -738,21 +578,8 @@ class _PreviewState extends StatelessWidget {
       ]),
     );
   }
-}
 
-class _ErrorState extends StatelessWidget {
-  final AiRecipeGeneratorViewModel viewModel;
-  final ValueNotifier<int> pageIndexNotifier;
-
-  const _ErrorState({
-    required this.viewModel,
-    required this.pageIndexNotifier,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final colors = AppColors.of(context);
-
+  Widget _buildErrorSliver(BuildContext context, AppColors colors, AiRecipeGeneratorViewModel viewModel) {
     final List<Widget> widgets = [];
 
     // Title
@@ -791,7 +618,6 @@ class _ErrorState extends StatelessWidget {
                 onPressed: () async {
                   final purchased = await viewModel.presentPaywall(context);
                   if (purchased && context.mounted) {
-                    // If upgraded, retry
                     viewModel.resetToInput();
                     pageIndexNotifier.value = 0;
                   }
@@ -819,6 +645,126 @@ class _ErrorState extends StatelessWidget {
 
     return SliverList(
       delegate: SliverChildListDelegate(widgets),
+    );
+  }
+}
+
+class _RecipeIdeaCard extends StatelessWidget {
+  final RecipeIdea idea;
+  final bool isFirst;
+  final bool isLast;
+  final VoidCallback onTap;
+
+  const _RecipeIdeaCard({
+    required this.idea,
+    required this.isFirst,
+    required this.isLast,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = AppColors.of(context);
+
+    final borderRadius = GroupedListStyling.getBorderRadius(
+      isGrouped: true,
+      isFirstInGroup: isFirst,
+      isLastInGroup: isLast,
+    );
+
+    final border = GroupedListStyling.getBorder(
+      context: context,
+      isGrouped: true,
+      isFirstInGroup: isFirst,
+      isLastInGroup: isLast,
+      isDragging: false,
+    );
+
+    return GestureDetector(
+      onTap: () {
+        HapticFeedback.mediumImpact();
+        onTap();
+      },
+      child: Container(
+        padding: EdgeInsets.all(AppSpacing.lg),
+        decoration: BoxDecoration(
+          color: colors.groupedListBackground,
+          border: border,
+          borderRadius: borderRadius,
+        ),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            // Title, description, and metadata
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    idea.title,
+                    style: AppTypography.h5.copyWith(
+                      color: colors.textPrimary,
+                    ),
+                  ),
+                  SizedBox(height: AppSpacing.xs),
+                  Text(
+                    idea.description,
+                    style: AppTypography.body.copyWith(
+                      color: colors.textSecondary,
+                    ),
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  if (idea.formattedTime != null || idea.difficultyLabel != null) ...[
+                    SizedBox(height: AppSpacing.sm),
+                    Row(
+                      children: [
+                        if (idea.formattedTime != null) ...[
+                          Icon(
+                            Icons.access_time,
+                            size: 14,
+                            color: colors.textSecondary,
+                          ),
+                          SizedBox(width: 4),
+                          Text(
+                            idea.formattedTime!,
+                            style: AppTypography.caption.copyWith(
+                              color: colors.textSecondary,
+                            ),
+                          ),
+                          if (idea.difficultyLabel != null)
+                            SizedBox(width: AppSpacing.md),
+                        ],
+                        if (idea.difficultyLabel != null) ...[
+                          Icon(
+                            Icons.bar_chart,
+                            size: 14,
+                            color: colors.textSecondary,
+                          ),
+                          SizedBox(width: 4),
+                          Text(
+                            idea.difficultyLabel!,
+                            style: AppTypography.caption.copyWith(
+                              color: colors.textSecondary,
+                            ),
+                          ),
+                        ],
+                      ],
+                    ),
+                  ],
+                ],
+              ),
+            ),
+            // Chevron on right, centered vertically
+            SizedBox(width: AppSpacing.md),
+            Icon(
+              CupertinoIcons.chevron_right,
+              size: 18,
+              color: colors.textSecondary,
+            ),
+          ],
+        ),
+      ),
     );
   }
 }
@@ -880,17 +826,23 @@ class _AnimatedLoadingTextState extends State<_AnimatedLoadingText> {
 class _PantrySelectionPage {
   static SliverWoltModalSheetPage build(BuildContext context, ValueNotifier<int> pageIndexNotifier) {
     return SliverWoltModalSheetPage(
+      navBarHeight: 55,
       backgroundColor: AppColors.of(context).background,
       surfaceTintColor: Colors.transparent,
-      hasTopBarLayer: true,
+      hasTopBarLayer: false,
       isTopBarLayerAlwaysVisible: false,
-      topBarTitle: const ModalSheetTitle('Select Pantry Items'),
       leadingNavBarWidget: CupertinoButton(
         padding: EdgeInsets.only(left: AppSpacing.md),
         onPressed: () {
           pageIndexNotifier.value = 0;
         },
-        child: const Icon(CupertinoIcons.back, size: 24),
+        child: Text(
+          'Back',
+          style: TextStyle(
+            color: AppColors.of(context).primary,
+            fontSize: 17,
+          ),
+        ),
       ),
       trailingNavBarWidget: Padding(
         padding: EdgeInsets.only(right: AppSpacing.lg),
@@ -949,11 +901,24 @@ class _PantrySelectionScrollableContent extends StatelessWidget {
         }
 
         return ListView.builder(
-          padding: EdgeInsets.fromLTRB(AppSpacing.lg, AppSpacing.md, AppSpacing.lg, AppSpacing.xl),
-          itemCount: items.length + 1, // +1 for header
+          padding: EdgeInsets.fromLTRB(AppSpacing.lg, 0, AppSpacing.lg, AppSpacing.xl),
+          itemCount: items.length + 2, // +2 for title and select all row
           itemBuilder: (context, index) {
-            // First item is the header
+            // Title
             if (index == 0) {
+              return Padding(
+                padding: EdgeInsets.only(bottom: AppSpacing.lg),
+                child: Text(
+                  'Select Pantry Items',
+                  style: AppTypography.h4.copyWith(
+                    color: colors.textPrimary,
+                  ),
+                ),
+              );
+            }
+
+            // Select All / Deselect All row
+            if (index == 1) {
               return Padding(
                 padding: EdgeInsets.only(bottom: AppSpacing.md),
                 child: Row(
@@ -982,8 +947,8 @@ class _PantrySelectionScrollableContent extends StatelessWidget {
               );
             }
 
-            // Pantry items (index - 1 because of header)
-            final itemIndex = index - 1;
+            // Pantry items (index - 2 because of title and select all rows)
+            final itemIndex = index - 2;
             final item = items[itemIndex];
             final isFirst = itemIndex == 0;
             final isLast = itemIndex == items.length - 1;
