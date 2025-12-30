@@ -361,13 +361,16 @@ class _ResultsPageContent extends StatefulWidget {
 }
 
 class _ResultsPageContentState extends State<_ResultsPageContent>
-    with SingleTickerProviderStateMixin {
+    with TickerProviderStateMixin {
   AnimationController? _staggerController;
+  AnimationController? _fadeOutController;
   AiGeneratorState? _previousState;
+  bool _wasPreviouslyTransitioning = false;
 
   @override
   void dispose() {
     _staggerController?.dispose();
+    _fadeOutController?.dispose();
     super.dispose();
   }
 
@@ -395,7 +398,24 @@ class _ResultsPageContentState extends State<_ResultsPageContent>
         _staggerController!.reset();
       }
       _staggerController!.forward();
+
+      // Reset fade-out state when entering showingResults
+      _fadeOutController?.dispose();
+      _fadeOutController = null;
+      _wasPreviouslyTransitioning = false;
     }
+
+    // Detect when we start transitioning out from showingResults (fade-out)
+    if (viewModel.isTransitioning &&
+        viewModel.state == AiGeneratorState.showingResults &&
+        !_wasPreviouslyTransitioning) {
+      _fadeOutController = AnimationController(
+        vsync: this,
+        duration: const Duration(milliseconds: 200),
+      )..forward();
+    }
+    _wasPreviouslyTransitioning = viewModel.isTransitioning;
+
     _previousState = viewModel.state;
 
     return _buildContent(context, viewModel);
@@ -523,9 +543,25 @@ class _ResultsPageContentState extends State<_ResultsPageContent>
     // Bottom padding
     widgets.add(SizedBox(height: AppSpacing.xxl));
 
-    return SliverList(
+    final sliverList = SliverList(
       delegate: SliverChildListDelegate(widgets),
     );
+
+    // Apply fade-out animation if transitioning out
+    if (_fadeOutController != null) {
+      return AnimatedBuilder(
+        animation: _fadeOutController!,
+        builder: (context, child) {
+          return SliverOpacity(
+            opacity: 1.0 - _fadeOutController!.value,
+            sliver: child as Widget,
+          );
+        },
+        child: sliverList,
+      );
+    }
+
+    return sliverList;
   }
 
   Widget _buildGeneratingSliver(BuildContext context, AiRecipeGeneratorViewModel viewModel) {
@@ -546,22 +582,33 @@ class _ResultsPageContentState extends State<_ResultsPageContent>
 
     return SliverFillRemaining(
       hasScrollBody: false,
-      child: Padding(
-        padding: EdgeInsets.all(AppSpacing.xl),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            const CupertinoActivityIndicator(radius: 16),
-            SizedBox(height: AppSpacing.lg),
-            _AnimatedLoadingText(
-              messages: const [
-                'Generating recipe...',
-                'Writing ingredients...',
-                'Crafting instructions...',
-              ],
-            ),
-          ],
+      child: TweenAnimationBuilder<double>(
+        tween: Tween(begin: 0.0, end: 1.0),
+        duration: const Duration(milliseconds: 200),
+        curve: Curves.easeOut,
+        builder: (context, opacity, child) {
+          return Opacity(
+            opacity: opacity,
+            child: child,
+          );
+        },
+        child: Padding(
+          padding: EdgeInsets.all(AppSpacing.xl),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const CupertinoActivityIndicator(radius: 16),
+              SizedBox(height: AppSpacing.lg),
+              _AnimatedLoadingText(
+                messages: const [
+                  'Generating recipe...',
+                  'Writing ingredients...',
+                  'Crafting instructions...',
+                ],
+              ),
+            ],
+          ),
         ),
       ),
     );
