@@ -55,10 +55,52 @@ class _DiscoverPageState extends ConsumerState<DiscoverPage> {
   bool _canGoBack = false;
   bool _canGoForward = false;
   bool _isImporting = false;
-  String _currentUrl = _defaultUrl;
+
+  // Address bar controller
+  late TextEditingController _urlController;
+  final FocusNode _urlFocusNode = FocusNode();
 
   // Extraction tools
   final _genericExtractor = GenericWebExtractor();
+
+  @override
+  void initState() {
+    super.initState();
+    _urlController = TextEditingController(text: _defaultUrl);
+  }
+
+  @override
+  void dispose() {
+    _urlController.dispose();
+    _urlFocusNode.dispose();
+    super.dispose();
+  }
+
+  void _updateUrlBar(String url) {
+    // Only update controller if not focused (user isn't typing)
+    if (!_urlFocusNode.hasFocus) {
+      _urlController.text = url;
+    }
+  }
+
+  void _navigateToUrl(String input) {
+    var url = input.trim();
+    if (url.isEmpty) return;
+
+    // Add https:// if no protocol specified
+    if (!url.startsWith('http://') && !url.startsWith('https://')) {
+      // Check if it looks like a URL or a search query
+      if (url.contains('.') && !url.contains(' ')) {
+        url = 'https://$url';
+      } else {
+        // Treat as search query
+        url = 'https://www.google.com/search?q=${Uri.encodeComponent(url)}';
+      }
+    }
+
+    _webViewController?.loadUrl(urlRequest: URLRequest(url: WebUri(url)));
+    _urlFocusNode.unfocus();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -97,35 +139,43 @@ class _DiscoverPageState extends ConsumerState<DiscoverPage> {
               child: Row(
                 children: [
                   Expanded(
-                    child: Container(
+                    child: CupertinoTextField(
+                      controller: _urlController,
+                      focusNode: _urlFocusNode,
+                      placeholder: 'Enter URL or search',
+                      prefix: Padding(
+                        padding: EdgeInsets.only(left: AppSpacing.sm),
+                        child: Icon(
+                          CupertinoIcons.globe,
+                          size: 16,
+                          color: colors.textSecondary,
+                        ),
+                      ),
                       padding: EdgeInsets.symmetric(
-                        horizontal: AppSpacing.md,
+                        horizontal: AppSpacing.sm,
                         vertical: AppSpacing.sm,
                       ),
                       decoration: BoxDecoration(
                         color: colors.surfaceVariant,
                         borderRadius: BorderRadius.circular(8),
                       ),
-                      child: Row(
-                        children: [
-                          Icon(
-                            CupertinoIcons.globe,
-                            size: 16,
-                            color: colors.textSecondary,
-                          ),
-                          SizedBox(width: AppSpacing.sm),
-                          Expanded(
-                            child: Text(
-                              _currentUrl,
-                              style: AppTypography.bodySmall.copyWith(
-                                color: colors.textSecondary,
-                              ),
-                              overflow: TextOverflow.ellipsis,
-                              maxLines: 1,
-                            ),
-                          ),
-                        ],
+                      style: AppTypography.bodySmall.copyWith(
+                        color: colors.textPrimary,
                       ),
+                      placeholderStyle: AppTypography.bodySmall.copyWith(
+                        color: colors.textSecondary,
+                      ),
+                      keyboardType: TextInputType.url,
+                      textInputAction: TextInputAction.go,
+                      autocorrect: false,
+                      onSubmitted: _navigateToUrl,
+                      onTap: () {
+                        // Select all text when tapped for easy replacement
+                        _urlController.selection = TextSelection(
+                          baseOffset: 0,
+                          extentOffset: _urlController.text.length,
+                        );
+                      },
                     ),
                   ),
                   SizedBox(width: AppSpacing.sm),
@@ -159,7 +209,7 @@ class _DiscoverPageState extends ConsumerState<DiscoverPage> {
                   setState(() {
                     _loadingProgress = 0;
                     if (url != null) {
-                      _currentUrl = url.toString();
+                      _updateUrlBar(url.toString());
                     }
                   });
                 },
@@ -167,7 +217,7 @@ class _DiscoverPageState extends ConsumerState<DiscoverPage> {
                   setState(() {
                     _loadingProgress = 100;
                     if (url != null) {
-                      _currentUrl = url.toString();
+                      _updateUrlBar(url.toString());
                     }
                   });
                   await _updateNavigationState();
@@ -180,7 +230,7 @@ class _DiscoverPageState extends ConsumerState<DiscoverPage> {
                 onUpdateVisitedHistory: (controller, url, androidIsReload) async {
                   if (url != null) {
                     setState(() {
-                      _currentUrl = url.toString();
+                      _updateUrlBar(url.toString());
                     });
                   }
                   await _updateNavigationState();
@@ -207,13 +257,14 @@ class _DiscoverPageState extends ConsumerState<DiscoverPage> {
                 children: [
                   // Back button
                   SizedBox(
-                    width: 44,
-                    height: 44,
+                    width: 48,
+                    height: 48,
                     child: CupertinoButton(
                       padding: EdgeInsets.zero,
                       onPressed: _canGoBack ? _goBack : null,
                       child: Icon(
                         CupertinoIcons.chevron_left,
+                        size: 28,
                         color: _canGoBack
                             ? CupertinoTheme.of(context).primaryColor
                             : colors.textSecondary.withValues(alpha: 0.5),
@@ -223,13 +274,14 @@ class _DiscoverPageState extends ConsumerState<DiscoverPage> {
                   SizedBox(width: AppSpacing.sm),
                   // Forward button
                   SizedBox(
-                    width: 44,
-                    height: 44,
+                    width: 48,
+                    height: 48,
                     child: CupertinoButton(
                       padding: EdgeInsets.zero,
                       onPressed: _canGoForward ? _goForward : null,
                       child: Icon(
                         CupertinoIcons.chevron_right,
+                        size: 28,
                         color: _canGoForward
                             ? CupertinoTheme.of(context).primaryColor
                             : colors.textSecondary.withValues(alpha: 0.5),
@@ -259,11 +311,12 @@ class _DiscoverPageState extends ConsumerState<DiscoverPage> {
                     padding: EdgeInsets.zero,
                     onPressed: _isImporting ? null : _onImportRecipe,
                     child: _isImporting
-                        ? const CupertinoActivityIndicator(radius: 10)
+                        ? const CupertinoActivityIndicator(radius: 12)
                         : Text(
                             'Import Recipe',
-                            style: AppTypography.body.copyWith(
+                            style: AppTypography.bodyLarge.copyWith(
                               color: CupertinoTheme.of(context).primaryColor,
+                              fontWeight: FontWeight.w600,
                             ),
                           ),
                   ),
@@ -766,7 +819,11 @@ class _DiscoverPageState extends ConsumerState<DiscoverPage> {
           ),
         ),
       ],
-    );
+    ).then((_) {
+      // Workaround for iOS 18.x bug where WebView taps stop working after modal
+      // See: https://github.com/pichillilorenzo/flutter_inappwebview/issues/2415
+      _webViewController?.reload();
+    });
   }
 
   /// Compress an image file to the specified size
