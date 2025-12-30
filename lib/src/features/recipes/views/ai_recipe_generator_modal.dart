@@ -80,8 +80,13 @@ class _AiRecipeInputPage {
         ),
       ),
       mainContentSliversBuilder: (context) => [
-        SliverToBoxAdapter(
-          child: _InputPageContent(pageIndexNotifier: pageIndexNotifier),
+        provider.Consumer<AiRecipeGeneratorViewModel>(
+          builder: (context, viewModel, child) {
+            return _InputPageContent(
+              pageIndexNotifier: pageIndexNotifier,
+              viewModel: viewModel,
+            );
+          },
         ),
       ],
     );
@@ -90,8 +95,12 @@ class _AiRecipeInputPage {
 
 class _InputPageContent extends StatefulWidget {
   final ValueNotifier<int> pageIndexNotifier;
+  final AiRecipeGeneratorViewModel viewModel;
 
-  const _InputPageContent({required this.pageIndexNotifier});
+  const _InputPageContent({
+    required this.pageIndexNotifier,
+    required this.viewModel,
+  });
 
   @override
   State<_InputPageContent> createState() => _InputPageContentState();
@@ -103,7 +112,7 @@ class _InputPageContentState extends State<_InputPageContent> {
   @override
   void initState() {
     super.initState();
-    _textController = TextEditingController();
+    _textController = TextEditingController(text: widget.viewModel.promptText);
   }
 
   @override
@@ -115,114 +124,125 @@ class _InputPageContentState extends State<_InputPageContent> {
   @override
   Widget build(BuildContext context) {
     final colors = AppColors.of(context);
+    final viewModel = widget.viewModel;
 
-    return provider.Consumer<AiRecipeGeneratorViewModel>(
-      builder: (context, viewModel, child) {
-        // Sync text controller with view model on first build
-        if (_textController.text != viewModel.promptText) {
-          _textController.text = viewModel.promptText;
-        }
+    // Sync text controller with view model
+    if (_textController.text != viewModel.promptText) {
+      _textController.text = viewModel.promptText;
+    }
 
-        return Padding(
-          padding: EdgeInsets.fromLTRB(
-            AppSpacing.lg,
-            0,
-            AppSpacing.lg,
-            AppSpacing.lg,
+    // Build list of widgets for SliverList (correct pattern for multi-page Wolt modals)
+    final List<Widget> widgets = [];
+
+    // Title
+    widgets.add(
+      Padding(
+        padding: EdgeInsets.fromLTRB(AppSpacing.lg, 0, AppSpacing.lg, AppSpacing.sm),
+        child: Text(
+          'Generate with AI',
+          style: AppTypography.h4.copyWith(
+            color: colors.textPrimary,
           ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              // Title
-              Text(
-                'Generate with AI',
-                style: AppTypography.h4.copyWith(
-                  color: colors.textPrimary,
-                ),
-              ),
-              SizedBox(height: AppSpacing.sm),
+        ),
+      ),
+    );
 
-              // Subtitle
-              Text(
-                'Describe what you want to eat',
-                style: AppTypography.body.copyWith(
-                  color: colors.textSecondary,
-                ),
-              ),
-              SizedBox(height: AppSpacing.lg),
-
-              // Text input
-              TextField(
-                controller: _textController,
-                autofocus: true,
-                maxLines: 5,
-                minLines: 3,
-                textCapitalization: TextCapitalization.sentences,
-                decoration: InputDecoration(
-                  hintText: 'e.g., "I want a warm soup with chicken"',
-                  hintStyle: AppTypography.body.copyWith(
-                    color: colors.textSecondary.withValues(alpha: 0.6),
-                  ),
-                  contentPadding: EdgeInsets.all(AppSpacing.md),
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(8),
-                    borderSide: BorderSide(color: colors.border),
-                  ),
-                  enabledBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(8),
-                    borderSide: BorderSide(color: colors.border),
-                  ),
-                  focusedBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(8),
-                    borderSide: BorderSide(color: colors.primary, width: 2),
-                  ),
-                ),
-                onChanged: (value) {
-                  viewModel.updatePromptText(value);
-                },
-              ),
-              SizedBox(height: AppSpacing.lg),
-
-              // Pantry toggle
-              if (viewModel.hasPantryItems) ...[
-                _PantryToggle(
-                  value: viewModel.usePantryItems,
-                  onChanged: viewModel.toggleUsePantryItems,
-                  pantryItemCount: viewModel.availablePantryItems.length,
-                  selectedCount: viewModel.selectedPantryItemCount,
-                  onSelectTap: () {
-                    widget.pageIndexNotifier.value = 2;
-                  },
-                ),
-                SizedBox(height: AppSpacing.lg),
-              ],
-
-              // Generate button
-              ListenableBuilder(
-                listenable: viewModel,
-                builder: (context, _) {
-                  return AppButton(
-                    text: 'Generate Ideas',
-                    onPressed: viewModel.hasInput
-                        ? () {
-                            HapticFeedback.lightImpact();
-                            viewModel.generateIdeas();
-                            widget.pageIndexNotifier.value = 1;
-                          }
-                        : null,
-                    style: AppButtonStyle.fill,
-                    theme: AppButtonTheme.primary,
-                    size: AppButtonSize.large,
-                    shape: AppButtonShape.square,
-                    fullWidth: true,
-                  );
-                },
-              ),
-            ],
+    // Subtitle
+    widgets.add(
+      Padding(
+        padding: EdgeInsets.fromLTRB(AppSpacing.lg, 0, AppSpacing.lg, AppSpacing.lg),
+        child: Text(
+          'Describe what you want to eat',
+          style: AppTypography.body.copyWith(
+            color: colors.textSecondary,
           ),
-        );
-      },
+        ),
+      ),
+    );
+
+    // Text input
+    widgets.add(
+      Padding(
+        padding: EdgeInsets.fromLTRB(AppSpacing.lg, 0, AppSpacing.lg, AppSpacing.lg),
+        child: TextField(
+          controller: _textController,
+          autofocus: true,
+          maxLines: 5,
+          minLines: 3,
+          textCapitalization: TextCapitalization.sentences,
+          decoration: InputDecoration(
+            hintText: 'e.g., "I want a warm soup with chicken"',
+            hintStyle: AppTypography.body.copyWith(
+              color: colors.textSecondary.withValues(alpha: 0.6),
+            ),
+            contentPadding: EdgeInsets.all(AppSpacing.md),
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(8),
+              borderSide: BorderSide(color: colors.border),
+            ),
+            enabledBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(8),
+              borderSide: BorderSide(color: colors.border),
+            ),
+            focusedBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(8),
+              borderSide: BorderSide(color: colors.primary, width: 2),
+            ),
+          ),
+          onChanged: (value) {
+            viewModel.updatePromptText(value);
+          },
+        ),
+      ),
+    );
+
+    // Pantry toggle
+    if (viewModel.hasPantryItems) {
+      widgets.add(
+        Padding(
+          padding: EdgeInsets.fromLTRB(AppSpacing.lg, 0, AppSpacing.lg, AppSpacing.lg),
+          child: _PantryToggle(
+            value: viewModel.usePantryItems,
+            onChanged: viewModel.toggleUsePantryItems,
+            pantryItemCount: viewModel.availablePantryItems.length,
+            selectedCount: viewModel.selectedPantryItemCount,
+            onSelectTap: () {
+              widget.pageIndexNotifier.value = 2;
+            },
+          ),
+        ),
+      );
+    }
+
+    // Generate button
+    widgets.add(
+      Padding(
+        padding: EdgeInsets.fromLTRB(AppSpacing.lg, 0, AppSpacing.lg, AppSpacing.lg),
+        child: ListenableBuilder(
+          listenable: viewModel,
+          builder: (context, _) {
+            return AppButton(
+              text: 'Generate Ideas',
+              onPressed: viewModel.hasInput
+                  ? () {
+                      HapticFeedback.lightImpact();
+                      viewModel.generateIdeas();
+                      widget.pageIndexNotifier.value = 1;
+                    }
+                  : null,
+              style: AppButtonStyle.fill,
+              theme: AppButtonTheme.primary,
+              size: AppButtonSize.large,
+              shape: AppButtonShape.square,
+              fullWidth: true,
+            );
+          },
+        ),
+      ),
+    );
+
+    return SliverList(
+      delegate: SliverChildListDelegate(widgets),
     );
   }
 }
@@ -336,45 +356,41 @@ class _AiRecipeResultsPage {
         ),
       ),
       mainContentSliversBuilder: (context) => [
-        SliverToBoxAdapter(
-          child: _ResultsPageContent(pageIndexNotifier: pageIndexNotifier),
+        provider.Consumer<AiRecipeGeneratorViewModel>(
+          builder: (context, viewModel, child) {
+            return _ResultsPageContent(
+              pageIndexNotifier: pageIndexNotifier,
+              viewModel: viewModel,
+            );
+          },
         ),
       ],
     );
   }
 }
 
-class _ResultsPageContent extends ConsumerWidget {
+class _ResultsPageContent extends StatelessWidget {
   final ValueNotifier<int> pageIndexNotifier;
+  final AiRecipeGeneratorViewModel viewModel;
 
-  const _ResultsPageContent({required this.pageIndexNotifier});
+  const _ResultsPageContent({
+    required this.pageIndexNotifier,
+    required this.viewModel,
+  });
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    return provider.Consumer<AiRecipeGeneratorViewModel>(
-      builder: (context, viewModel, child) {
-        return AnimatedSize(
-          duration: const Duration(milliseconds: 300),
-          curve: Curves.easeOutCubic,
-          alignment: Alignment.topCenter,
-          child: AnimatedOpacity(
-            opacity: viewModel.isTransitioning ? 0.0 : 1.0,
-            duration: const Duration(milliseconds: 200),
-            curve: Curves.easeOut,
-            child: _buildContent(context, viewModel),
-          ),
-        );
-      },
-    );
+  Widget build(BuildContext context) {
+    // Return Slivers directly based on state (correct pattern for multi-page Wolt modals)
+    return _buildContent(context, viewModel);
   }
 
   Widget _buildContent(BuildContext context, AiRecipeGeneratorViewModel viewModel) {
     switch (viewModel.state) {
       case AiGeneratorState.inputting:
         // Should not normally appear on page 1
-        return const SizedBox.shrink();
+        return SliverList(delegate: SliverChildListDelegate([]));
       case AiGeneratorState.brainstorming:
-        return const _BrainstormingState();
+        return _BrainstormingState();
       case AiGeneratorState.showingResults:
         return _ResultsState(
           ideas: viewModel.recipeIdeas,
@@ -399,23 +415,25 @@ class _BrainstormingState extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: EdgeInsets.all(AppSpacing.xl),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          SizedBox(height: AppSpacing.xl),
-          const CupertinoActivityIndicator(radius: 16),
-          SizedBox(height: AppSpacing.lg),
-          _AnimatedLoadingText(
-            messages: const [
-              'Brainstorming recipes...',
-              'Considering your preferences...',
-              'Finding delicious ideas...',
-            ],
-          ),
-          SizedBox(height: AppSpacing.xl),
-        ],
+    return SliverFillRemaining(
+      hasScrollBody: false,
+      child: Padding(
+        padding: EdgeInsets.all(AppSpacing.xl),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const CupertinoActivityIndicator(radius: 16),
+            SizedBox(height: AppSpacing.lg),
+            _AnimatedLoadingText(
+              messages: const [
+                'Brainstorming recipes...',
+                'Considering your preferences...',
+                'Finding delicious ideas...',
+              ],
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -434,27 +452,39 @@ class _ResultsState extends StatelessWidget {
   Widget build(BuildContext context) {
     final colors = AppColors.of(context);
 
-    return Padding(
-      padding: EdgeInsets.all(AppSpacing.lg),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Text(
-            'Select a recipe to generate',
-            style: AppTypography.body.copyWith(
-              color: colors.textSecondary,
-            ),
-          ),
-          SizedBox(height: AppSpacing.lg),
+    final List<Widget> widgets = [];
 
-          // Recipe idea cards
-          ...ideas.map((idea) => _RecipeIdeaCard(
-                idea: idea,
-                onTap: () => onSelectIdea(idea),
-              )),
-        ],
+    // Header text
+    widgets.add(
+      Padding(
+        padding: EdgeInsets.fromLTRB(AppSpacing.lg, AppSpacing.lg, AppSpacing.lg, AppSpacing.lg),
+        child: Text(
+          'Select a recipe to generate',
+          style: AppTypography.body.copyWith(
+            color: colors.textSecondary,
+          ),
+        ),
       ),
+    );
+
+    // Recipe idea cards
+    for (final idea in ideas) {
+      widgets.add(
+        Padding(
+          padding: EdgeInsets.symmetric(horizontal: AppSpacing.lg),
+          child: _RecipeIdeaCard(
+            idea: idea,
+            onTap: () => onSelectIdea(idea),
+          ),
+        ),
+      );
+    }
+
+    // Bottom padding
+    widgets.add(SizedBox(height: AppSpacing.lg));
+
+    return SliverList(
+      delegate: SliverChildListDelegate(widgets),
     );
   }
 }
@@ -654,23 +684,25 @@ class _GeneratingRecipeStateState extends State<_GeneratingRecipeState> {
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: EdgeInsets.all(AppSpacing.xl),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          SizedBox(height: AppSpacing.xl),
-          const CupertinoActivityIndicator(radius: 16),
-          SizedBox(height: AppSpacing.lg),
-          _AnimatedLoadingText(
-            messages: const [
-              'Generating recipe...',
-              'Writing ingredients...',
-              'Crafting instructions...',
-            ],
-          ),
-          SizedBox(height: AppSpacing.xl),
-        ],
+    return SliverFillRemaining(
+      hasScrollBody: false,
+      child: Padding(
+        padding: EdgeInsets.all(AppSpacing.xl),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const CupertinoActivityIndicator(radius: 16),
+            SizedBox(height: AppSpacing.lg),
+            _AnimatedLoadingText(
+              messages: const [
+                'Generating recipe...',
+                'Writing ingredients...',
+                'Crafting instructions...',
+              ],
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -684,20 +716,26 @@ class _PreviewState extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final preview = viewModel.recipePreview;
-    if (preview == null) return const SizedBox.shrink();
+    if (preview == null) {
+      return SliverList(delegate: SliverChildListDelegate([]));
+    }
 
-    return ShareRecipePreviewResultContent(
-      preview: preview,
-      onSubscribe: () async {
-        if (!context.mounted) return;
+    return SliverList(
+      delegate: SliverChildListDelegate([
+        ShareRecipePreviewResultContent(
+          preview: preview,
+          onSubscribe: () async {
+            if (!context.mounted) return;
 
-        final purchased = await viewModel.presentPaywall(context);
+            final purchased = await viewModel.presentPaywall(context);
 
-        if (purchased && context.mounted) {
-          // User upgraded - generate full recipe
-          await viewModel.upgradeAndGenerateFullRecipe();
-        }
-      },
+            if (purchased && context.mounted) {
+              // User upgraded - generate full recipe
+              await viewModel.upgradeAndGenerateFullRecipe();
+            }
+          },
+        ),
+      ]),
     );
   }
 }
@@ -715,58 +753,72 @@ class _ErrorState extends StatelessWidget {
   Widget build(BuildContext context) {
     final colors = AppColors.of(context);
 
-    return Padding(
-      padding: EdgeInsets.all(AppSpacing.xl),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            viewModel.isRateLimitError ? 'Limit Reached' : 'Generation Failed',
-            style: AppTypography.h4.copyWith(
-              color: colors.textPrimary,
-            ),
+    final List<Widget> widgets = [];
+
+    // Title
+    widgets.add(
+      Padding(
+        padding: EdgeInsets.fromLTRB(AppSpacing.xl, AppSpacing.xl, AppSpacing.xl, AppSpacing.lg),
+        child: Text(
+          viewModel.isRateLimitError ? 'Limit Reached' : 'Generation Failed',
+          style: AppTypography.h4.copyWith(
+            color: colors.textPrimary,
           ),
-          SizedBox(height: AppSpacing.lg),
-          Text(
-            viewModel.errorMessage,
-            style: AppTypography.body.copyWith(
-              color: colors.textSecondary,
-            ),
+        ),
+      ),
+    );
+
+    // Error message
+    widgets.add(
+      Padding(
+        padding: EdgeInsets.fromLTRB(AppSpacing.xl, 0, AppSpacing.xl, AppSpacing.xl),
+        child: Text(
+          viewModel.errorMessage,
+          style: AppTypography.body.copyWith(
+            color: colors.textSecondary,
           ),
-          SizedBox(height: AppSpacing.xl),
-          if (viewModel.isRateLimitError)
-            AppButton(
-              text: 'Upgrade to Plus',
-              onPressed: () async {
-                final purchased = await viewModel.presentPaywall(context);
-                if (purchased && context.mounted) {
-                  // If upgraded, retry
+        ),
+      ),
+    );
+
+    // Button
+    widgets.add(
+      Padding(
+        padding: EdgeInsets.fromLTRB(AppSpacing.xl, 0, AppSpacing.xl, AppSpacing.xl),
+        child: viewModel.isRateLimitError
+            ? AppButton(
+                text: 'Upgrade to Plus',
+                onPressed: () async {
+                  final purchased = await viewModel.presentPaywall(context);
+                  if (purchased && context.mounted) {
+                    // If upgraded, retry
+                    viewModel.resetToInput();
+                    pageIndexNotifier.value = 0;
+                  }
+                },
+                style: AppButtonStyle.fill,
+                theme: AppButtonTheme.primary,
+                size: AppButtonSize.large,
+                shape: AppButtonShape.square,
+                fullWidth: true,
+              )
+            : AppButton(
+                text: 'Try Again',
+                onPressed: () {
                   viewModel.resetToInput();
                   pageIndexNotifier.value = 0;
-                }
-              },
-              style: AppButtonStyle.fill,
-              theme: AppButtonTheme.primary,
-              size: AppButtonSize.large,
-              shape: AppButtonShape.square,
-              fullWidth: true,
-            )
-          else
-            AppButton(
-              text: 'Try Again',
-              onPressed: () {
-                viewModel.resetToInput();
-                pageIndexNotifier.value = 0;
-              },
-              style: AppButtonStyle.fill,
-              theme: AppButtonTheme.primary,
-              size: AppButtonSize.large,
-              shape: AppButtonShape.square,
-              fullWidth: true,
-            ),
-        ],
+                },
+                style: AppButtonStyle.fill,
+                theme: AppButtonTheme.primary,
+                size: AppButtonSize.large,
+                shape: AppButtonShape.square,
+                fullWidth: true,
+              ),
       ),
+    );
+
+    return SliverList(
+      delegate: SliverChildListDelegate(widgets),
     );
   }
 }
