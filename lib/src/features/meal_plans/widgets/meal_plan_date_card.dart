@@ -94,10 +94,11 @@ class _MealPlanDateCardState extends ConsumerState<MealPlanDateCard>
       return;
     }
 
-    // CRITICAL: Clear global drag state BEFORE database updates
-    // This prevents the race condition where the new widget builds
-    // while drag state is still set, causing it to show as a ghost (gray box)
-    ref.read(mealPlanDraggingItemProvider.notifier).state = null;
+    // NOTE: We intentionally do NOT clear the drag state here.
+    // The drag state now includes sourceDate, so:
+    // - Source location stays invisible (ghost) during the async move operation
+    // - Target location shows the item normally (different date, so not ghosted)
+    // This prevents the "flash" where the item briefly appears at source before being removed.
 
     // Get current items to determine target index
     final mealPlan = ref.read(mealPlanByDateStreamProvider(widget.dateString)).value;
@@ -114,9 +115,8 @@ class _MealPlanDateCardState extends ConsumerState<MealPlanDateCard>
       targetIndex: currentItems.length, // Add at end
     );
 
-    // Clear drag state AGAIN after move completes
-    // This handles edge cases where the state might have been set during the async operation
-    // or the source widget was disposed before its _onDragEnd callback could run
+    // Clear drag state after move completes
+    // At this point, the item has been removed from source data, so clearing is safe
     ref.read(mealPlanDraggingItemProvider.notifier).state = null;
   }
 

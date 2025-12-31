@@ -76,8 +76,11 @@ class _MealPlanItemLiftedState extends ConsumerState<MealPlanItemLifted>
 
   void _onDragStart() {
     HapticFeedback.mediumImpact();
-    // Set global drag state
-    ref.read(mealPlanDraggingItemProvider.notifier).state = widget.item.id;
+    // Set global drag state with both item ID and source date
+    ref.read(mealPlanDraggingItemProvider.notifier).state = MealPlanDragState(
+      itemId: widget.item.id,
+      sourceDate: widget.dateString,
+    );
     _liftController.forward();
   }
 
@@ -93,9 +96,14 @@ class _MealPlanItemLiftedState extends ConsumerState<MealPlanItemLifted>
 
   @override
   Widget build(BuildContext context) {
-    // Check if THIS specific item is being dragged using global state
-    final draggingItemId = ref.watch(mealPlanDraggingItemProvider);
-    final isDragging = draggingItemId == widget.item.id;
+    // Check if THIS specific item is being dragged FROM THIS DATE using global state
+    // We check both itemId AND sourceDate so that:
+    // - Source location shows ghost (invisible placeholder)
+    // - Target location (after drop) shows normal tile immediately
+    final dragState = ref.watch(mealPlanDraggingItemProvider);
+    final isDragging = dragState != null &&
+        dragState.itemId == widget.item.id &&
+        dragState.sourceDate == widget.dateString;
 
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 3.0),

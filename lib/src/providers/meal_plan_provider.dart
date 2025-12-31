@@ -395,5 +395,12 @@ String _formatDate(DateTime date) {
   return '${date.year.toString().padLeft(4, '0')}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}';
 }
 
-// Global drag state provider - tracks which item is currently being dragged
-final mealPlanDraggingItemProvider = StateProvider<String?>((ref) => null);
+// Global drag state - tracks which item is being dragged and from which date
+class MealPlanDragState {
+  final String itemId;
+  final String sourceDate;
+
+  const MealPlanDragState({required this.itemId, required this.sourceDate});
+}
+
+final mealPlanDraggingItemProvider = StateProvider<MealPlanDragState?>((ref) => null);
