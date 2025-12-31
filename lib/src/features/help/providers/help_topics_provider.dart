@@ -1,4 +1,3 @@
-import 'dart:convert';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -6,6 +5,7 @@ import '../models/help_topic.dart';
 
 /// Section definitions in display order.
 const _sectionDefinitions = [
+  ('Adding Recipes', 'adding-recipes'),
   ('Quick Questions', 'quick-questions'),
   ('Learn More', 'learn-more'),
   ('Troubleshooting', 'troubleshooting'),
@@ -15,17 +15,16 @@ const _sectionDefinitions = [
 final helpTopicsProvider = FutureProvider<List<HelpSection>>((ref) async {
   final sections = <HelpSection>[];
 
-  // Load asset manifest to discover markdown files
-  final manifestContent =
-      await rootBundle.loadString('AssetManifest.json');
-  final manifest = json.decode(manifestContent) as Map<String, dynamic>;
+  // Load asset manifest using modern API (supports both JSON and binary formats)
+  final manifest = await AssetManifest.loadFromAssetBundle(rootBundle);
 
   for (final (sectionName, folderKey) in _sectionDefinitions) {
     final prefix = 'assets/docs/$folderKey/';
     final topics = <HelpTopic>[];
 
     // Find all markdown files in this section's folder
-    final sectionFiles = manifest.keys
+    final allAssets = manifest.listAssets();
+    final sectionFiles = allAssets
         .where((path) => path.startsWith(prefix) && path.endsWith('.md'))
         .toList();
 
