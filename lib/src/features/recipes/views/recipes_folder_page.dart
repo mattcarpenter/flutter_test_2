@@ -394,6 +394,7 @@ class _UnifiedHeaderDelegate extends SliverPersistentHeaderDelegate {
         shape: AppButtonShape.square,
         size: AppButtonSize.medium,
         theme: AppButtonTheme.secondary,
+        visuallyEnabled: true,
       ),
     );
 
