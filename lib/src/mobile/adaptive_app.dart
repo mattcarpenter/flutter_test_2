@@ -19,9 +19,6 @@ import '../features/pantry/views/pantry_sub_page.dart';
 import '../features/clippings/views/clippings_root.dart';
 import '../features/clippings/views/clipping_editor_page.dart';
 import '../features/discover/views/discover_page.dart';
-import '../features/labs/views/auth_sub_page.dart';
-import '../features/labs/views/labs_root.dart';
-import '../features/labs/views/labs_sub_page.dart';
 import '../features/auth/views/auth_landing_page.dart';
 import '../features/auth/views/sign_in_page.dart';
 import '../features/auth/views/sign_up_page.dart';
@@ -180,7 +177,6 @@ class _AdaptiveApp2State extends ConsumerState<AdaptiveApp2> {
     final _mealPlansNavKey = GlobalKey<NavigatorState>(debugLabel: 'mealPlansNavKey');
     final _pantryNavKey  = GlobalKey<NavigatorState>(debugLabel: 'pantryNavKey');
     final _discoverPageShellKey = GlobalKey<MainPageShellState>(debugLabel: 'discoverPageShellKey');
-    final _labsPageShellKey = GlobalKey<MainPageShellState>(debugLabel: 'labsPageShellKey');
     final _authPageShellKey = GlobalKey<MainPageShellState>(debugLabel: 'authPageShellKey');
     final _householdPageShellKey = GlobalKey<MainPageShellState>(debugLabel: 'householdPageShellKey');
     final _settingsPageShellKey = GlobalKey<MainPageShellState>(debugLabel: 'settingsPageShellKey');
@@ -218,59 +214,6 @@ class _AdaptiveApp2State extends ConsumerState<AdaptiveApp2> {
               child: DiscoverPage(
                 onMenuPressed: () {
                   _discoverPageShellKey.currentState?.toggleDrawer();
-                },
-              ),
-            ),
-          ),
-        ],
-      ),
-      // ─────────────────────────────────────────────────────────────
-      // Labs (no bottom nav)
-      // ─────────────────────────────────────────────────────────────
-      ShellRoute(
-        pageBuilder: (BuildContext context, GoRouterState state, Widget child) {
-          return CustomTransitionPage<void>(
-            key: state.pageKey,
-            child: child,
-            transitionDuration: const Duration(milliseconds: 400),
-            reverseTransitionDuration: const Duration(milliseconds: 400),
-            transitionsBuilder: (context, animation, secondaryAnimation, child) =>
-                CupertinoTabPageTransition(
-                  animation: animation,
-                  child: isTablet
-                      ? child
-                      : MainPageShell(
-                    key: _labsPageShellKey,
-                    child: child,
-                    showBottomNavBar: false,
-                  ),
-                ),
-          );
-        },
-        routes: [
-          GoRoute(
-            path: '/labs',
-            routes: [
-              GoRoute(
-                path: 'sub',
-                pageBuilder: (context, state) => _platformPage(
-                  state: state,
-                  child: const LabsSubPage(),
-                ),
-              ),
-              GoRoute(
-                path: 'auth',
-                pageBuilder: (context, state) => _platformPage(
-                  state: state,
-                  child: const AuthSubPage(),
-                ),
-              ),
-            ],
-            pageBuilder: (context, state) => _platformPage(
-              state: state,
-              child: LabsTab(
-                onMenuPressed: () {
-                  _labsPageShellKey.currentState?.toggleDrawer();
                 },
               ),
             ),

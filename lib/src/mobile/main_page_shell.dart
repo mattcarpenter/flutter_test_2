@@ -325,10 +325,10 @@ class MainPageShellState extends State<MainPageShell> with TickerProviderStateMi
     if (location.startsWith('/pantry')) return 4;
     if (location.startsWith('/clippings')) return 5;
     if (location.startsWith('/discover')) return 6;
-    if (location.startsWith('/labs')) return 7;
-    if (location.startsWith('/household')) return 9;
-    if (location.startsWith('/settings')) return 10;
-    if (location.startsWith('/auth')) return 11;
+    if (location.startsWith('/household')) return 7;
+    if (location.startsWith('/settings/account')) return 8; // Account - check before /settings
+    if (location.startsWith('/settings')) return 9;
+    if (location.startsWith('/auth')) return 8; // Sign Up
     return 1; // Default to recipes if unknown
   }
 
