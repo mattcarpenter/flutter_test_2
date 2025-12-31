@@ -422,18 +422,13 @@ class _DiscoverPageState extends ConsumerState<DiscoverPage> {
     }
   }
 
-  /// Handle JSON-LD extracted recipe
+  /// Handle JSON-LD extracted recipe (free for all users)
+  ///
+  /// JSON-LD extraction is completely free since it's local parsing with no API cost.
+  /// All users can import these directly without subscription check.
   Future<void> _handleJsonLdRecipe(WebExtractionResult result) async {
-    final hasPlus = ref.read(effectiveHasPlusProvider);
-
-    if (hasPlus) {
-      // Plus user - go straight to editor
-      await _openRecipeEditor(result.recipe!, result.imageUrl);
-    } else {
-      // Free user - show preview
-      final preview = result.recipe!.toPreview();
-      _showPreviewSheet(preview, result);
-    }
+    AppLogger.info('Discover: JSON-LD recipe - opening editor (free for all users)');
+    await _openRecipeEditor(result.recipe!, result.imageUrl);
   }
 
   /// Handle backend extraction (requires Plus or preview)

@@ -307,13 +307,24 @@ class _ShareRecipePreviewResultContentState
                           SizedBox(width: AppSpacing.sm),
                           Flexible(
                             child: Text(
-                              "We'll structure it for you",
+                              "This recipe needs AI",
                               style: AppTypography.h4.copyWith(
                                 color: colors.textPrimary,
                               ),
                             ),
                           ),
                         ],
+                      ),
+
+                      SizedBox(height: AppSpacing.sm),
+
+                      // Explanation text
+                      Text(
+                        "This site doesn't have structured recipe data, so we'll use AI to extract it for you.",
+                        style: AppTypography.bodySmall.copyWith(
+                          color: colors.textSecondary,
+                        ),
+                        textAlign: TextAlign.center,
                       ),
 
                       SizedBox(height: AppSpacing.md),
@@ -326,26 +337,22 @@ class _ShareRecipePreviewResultContentState
                           children: [
                             _ValuePropItem(
                               icon: CupertinoIcons.check_mark,
-                              text: 'Turn posts into real recipes',
+                              text: 'AI extracts ingredients and steps',
                               textColor: colors.textPrimary,
                             ),
                             _ValuePropItem(
                               icon: CupertinoIcons.check_mark,
-                              text: 'Auto-extract ingredients and steps',
+                              text: 'Works with any recipe page',
                               textColor: colors.textPrimary,
                             ),
                             _ValuePropItem(
                               icon: CupertinoIcons.check_mark,
-                              text: 'Works with Instagram & TikTok',
+                              text: 'Import from social media too',
                               textColor: colors.textPrimary,
                             ),
                             _ValuePropItem(
                               icon: CupertinoIcons.check_mark,
-                              text: 'Save it to your Library',
-                              textColor: colors.textPrimary,
-                            ),
-                            _ValuePropItem(
-                              text: '… and much more!',
+                              text: 'Unlimited recipe imports',
                               textColor: colors.textPrimary,
                             ),
                           ],

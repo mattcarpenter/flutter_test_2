@@ -1178,20 +1178,13 @@ class _ShareSessionLoadedState extends ConsumerState<_ShareSessionLoaded>
       return;
     }
 
-    // Case 1: JSON-LD recipe found
+    // Case 1: JSON-LD recipe found - FREE for all users (no API cost)
     if (result.recipe != null && result.isFromJsonLd) {
-      AppLogger.info('JSON-LD recipe found - checking subscription');
+      AppLogger.info('JSON-LD recipe found - opening editor (free for all users)');
 
-      // Check subscription first
-      final hasPlus = ref.read(effectiveHasPlusProvider);
-
-      if (hasPlus) {
-        // Plus user - skip preview, go straight to editor
-        await _performJsonLdFullExtraction(result);
-      } else {
-        // Free user - show preview (no usage limit for JSON-LD - it's local/free)
-        await _showJsonLdPreview(result);
-      }
+      // JSON-LD extraction is completely free (local parsing, no API call)
+      // No subscription check needed - all users can import these directly
+      await _performJsonLdFullExtraction(result);
       return;
     }
 
@@ -1238,35 +1231,9 @@ class _ShareSessionLoadedState extends ConsumerState<_ShareSessionLoaded>
     }
   }
 
-  /// Shows preview for JSON-LD extracted recipe (no API call, unlimited).
+  /// Performs full extraction for JSON-LD recipe (free for all users).
   ///
-  /// Since JSON-LD parsing is local and free, we don't enforce usage limits.
-  /// The preview is generated from the stored recipe data.
-  Future<void> _showJsonLdPreview(WebExtractionResult result) async {
-    if (result.recipe == null) return;
-
-    // Convert full recipe to preview format
-    final preview = result.recipe!.toPreview();
-
-    // Update modal state
-    if (mounted) {
-      setState(() {
-        _modalState = _ModalState.showingRecipePreview;
-      });
-    }
-
-    // Show preview bottom sheet (same UI as backend previews)
-    if (mounted) {
-      _showWebPreviewBottomSheet(
-        context,
-        preview,
-        isFromJsonLd: true, // Flag to use stored recipe on subscribe
-      );
-    }
-  }
-
-  /// Performs full extraction for JSON-LD recipe (Plus users only).
-  ///
+  /// JSON-LD extraction is completely free since it's local parsing with no API cost.
   /// Downloads the image and opens the recipe editor directly.
   Future<void> _performJsonLdFullExtraction(WebExtractionResult result) async {
     if (result.recipe == null) return;
@@ -1414,9 +1381,9 @@ class _ShareSessionLoadedState extends ConsumerState<_ShareSessionLoaded>
         });
       }
 
-      // Show preview as bottom sheet (isFromJsonLd: false means backend extraction after subscribe)
+      // Show preview as bottom sheet
       if (mounted) {
-        _showWebPreviewBottomSheet(context, preview, isFromJsonLd: false);
+        _showWebPreviewBottomSheet(context, preview);
       }
     } on WebExtractionException catch (e) {
       if (!mounted) return;
@@ -1670,15 +1637,13 @@ class _ShareSessionLoadedState extends ConsumerState<_ShareSessionLoaded>
     );
   }
 
-  /// Shows preview bottom sheet for web extractions.
+  /// Shows preview bottom sheet for web extractions (AI-required recipes only).
   ///
-  /// [isFromJsonLd] - If true, uses stored JSON-LD data on subscribe.
-  /// If false, calls backend for full extraction on subscribe.
+  /// When user subscribes, performs backend extraction to get full recipe.
   void _showWebPreviewBottomSheet(
     BuildContext context,
-    RecipePreview preview, {
-    required bool isFromJsonLd,
-  }) {
+    RecipePreview preview,
+  ) {
     WoltModalSheet.show<void>(
       context: context,
       useRootNavigator: true,
@@ -1714,59 +1679,15 @@ class _ShareSessionLoadedState extends ConsumerState<_ShareSessionLoaded>
                   .presentPaywall(context);
 
               if (purchased && context.mounted) {
-                if (isFromJsonLd) {
-                  // JSON-LD: Do extraction work BEFORE closing modals
-                  // (because widget methods need mounted state)
-                  final webResult = _webExtractionResult;
-                  final recipe = webResult?.recipe;
-                  if (recipe == null) {
-                    if (sheetContext.mounted) {
-                      Navigator.of(sheetContext, rootNavigator: true).pop();
-                    }
-                    widget.onClose();
-                    return;
-                  }
+                // Close modals first, then extract via backend
+                if (sheetContext.mounted) {
+                  Navigator.of(sheetContext, rootNavigator: true).pop();
+                }
+                widget.onClose();
 
-                  // Download image while widget is still mounted
-                  RecipeImage? coverImage;
-                  final imageUrl = webResult?.imageUrl;
-                  if (imageUrl != null && imageUrl.isNotEmpty) {
-                    coverImage = await _downloadAndSaveImage(imageUrl);
-                  }
-
-                  // Convert recipe while widget is still mounted
-                  final recipeEntry = _convertToRecipeEntry(
-                    recipe,
-                    coverImage: coverImage,
-                  );
-
-                  // Now close modals
-                  if (sheetContext.mounted) {
-                    Navigator.of(sheetContext, rootNavigator: true).pop();
-                  }
-                  widget.onClose();
-
-                  // Open recipe editor using rootContext
-                  final rootContext = globalRootNavigatorKey.currentContext;
-                  if (rootContext != null && rootContext.mounted) {
-                    showRecipeEditorModal(
-                      rootContext,
-                      ref: ref,
-                      recipe: recipeEntry,
-                      isEditing: false,
-                    );
-                  }
-                } else {
-                  // Non-JSON-LD: Close modals first, then extract via backend
-                  if (sheetContext.mounted) {
-                    Navigator.of(sheetContext, rootNavigator: true).pop();
-                  }
-                  widget.onClose();
-
-                  final rootContext = globalRootNavigatorKey.currentContext;
-                  if (rootContext != null && rootContext.mounted) {
-                    await _performPostWebSubscriptionExtraction(rootContext);
-                  }
+                final rootContext = globalRootNavigatorKey.currentContext;
+                if (rootContext != null && rootContext.mounted) {
+                  await _performPostWebSubscriptionExtraction(rootContext);
                 }
               }
               // If not purchased, preview sheet stays visible (user can try again or close)

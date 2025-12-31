@@ -201,16 +201,11 @@ class _UrlImportContentState extends ConsumerState<_UrlImportContent> {
       // Store result for later use
       _extractionResult = result;
 
-      // If we got a JSON-LD recipe, handle based on subscription
-      if (result.recipe != null) {
-        if (hasPlus) {
-          // Plus user - go straight to editor
-          await _openRecipeEditor(result.recipe!, result.imageUrl);
-        } else {
-          // Free user - show preview
-          final preview = result.recipe!.toPreview();
-          _showPreviewSheet(context, preview, result);
-        }
+      // If we got a JSON-LD recipe, open editor directly (free for all users)
+      // JSON-LD extraction is completely free since it's local parsing with no API cost
+      if (result.recipe != null && result.isFromJsonLd) {
+        AppLogger.info('JSON-LD recipe found - opening editor (free for all users)');
+        await _openRecipeEditor(result.recipe!, result.imageUrl);
         return;
       }
 
