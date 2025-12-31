@@ -208,6 +208,7 @@ class _UnifiedSortFilterModalPage {
       surfaceTintColor: Colors.transparent,
       hasTopBarLayer: true,
       isTopBarLayerAlwaysVisible: false,
+      forceMaxHeight: true,
       hasSabGradient: true,
       leadingNavBarWidget: TextButton(
         onPressed: () {
@@ -317,10 +318,9 @@ class _UnifiedSortFilterModalPage {
           ),
         ),
 
-        // Bottom padding for sticky action bar (reduced for tighter spacing)
-        SliverPadding(
-          padding: EdgeInsets.only(bottom: AppSpacing.lg), // Minimal space for sticky action bar
-          sliver: SliverToBoxAdapter(child: SizedBox.shrink()),
+        // Bottom padding to allow content to scroll above sticky action bar
+        SliverToBoxAdapter(
+          child: SizedBox(height: 100), // Space for sticky action bar + safe area
         ),
       ],
     );
@@ -615,7 +615,6 @@ class _IndividualTagsFilterState extends ConsumerState<_IndividualTagsFilter> {
                 }).toList(),
               ),
             ),
-            SizedBox(height: 200),
           ],
         );
           },
