@@ -34,9 +34,7 @@ class Menu extends ConsumerWidget {
         .color ?? Colors.black;
     final Color activeTextColor = isDarkMode ? textColor : primaryColor;
 
-    return Padding(
-      padding: const EdgeInsets.only(left: 8),
-      child: Column(
+    return Column(
         children: [
           // Main menu items (scrollable)
           Expanded(
@@ -80,7 +78,7 @@ class Menu extends ConsumerWidget {
                 MenuItem(
                   index: 4,
                   title: 'Pantry',
-                  icon: CupertinoIcons.cart_fill,
+                  icon: CupertinoIcons.archivebox,
                   isActive: selectedIndex == 4,
                   color: primaryColor,
                   textColor: textColor,
@@ -199,8 +197,7 @@ class Menu extends ConsumerWidget {
             ),
           ],
         ),
-        ],
-      ),
+      ],
     );
   }
 }
@@ -241,7 +238,7 @@ class _UpgradeBannerState extends State<_UpgradeBanner> {
         duration: const Duration(milliseconds: 100),
         opacity: _isPressed ? 0.7 : 1.0,
         child: Container(
-          margin: const EdgeInsets.only(bottom: 20, right: 8),
+          margin: const EdgeInsets.only(bottom: 20, left: 16, right: 16),
           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 18),
           decoration: BoxDecoration(
             gradient: LinearGradient(

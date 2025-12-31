@@ -83,22 +83,14 @@ class MenuItemState extends State<MenuItem> {
             : Duration.zero, // Immediate change for touch start
         opacity: _opacity,
         child: Container(
-          padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 8.0),
-          margin: const EdgeInsets.symmetric(vertical: 2.0, horizontal: 0.0),
+          padding: const EdgeInsets.symmetric(vertical: 10.0),
+          margin: const EdgeInsets.symmetric(vertical: 2.0),
           decoration: BoxDecoration(
             color: widget.isActive ? widget.backgroundColor : Colors.transparent,
-            borderRadius: BorderRadius.circular(10.0),
-            boxShadow: widget.isActive
-                ? [
-              BoxShadow(
-                color: Colors.black.withOpacity(0.08), // Shadow color
-                blurRadius: 10.0, // How blurred the shadow should be
-                offset: const Offset(0, 2), // Position of the shadow
-              ),
-            ]
-                : [],
           ),
-          child: Row(
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16.0),
+            child: Row(
             children: [
               Icon(
                 widget.icon,
@@ -113,6 +105,7 @@ class MenuItemState extends State<MenuItem> {
                 widget.trailing!,
               ],
             ],
+            ),
           ),
         ),
       ),

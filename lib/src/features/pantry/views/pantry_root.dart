@@ -169,6 +169,7 @@ class PantryTab extends ConsumerWidget {
           },
         ),
           ],
+          leading: const Icon(CupertinoIcons.archivebox),
           trailing: AdaptivePullDownButton(
             items: [
               AdaptiveMenuItem(

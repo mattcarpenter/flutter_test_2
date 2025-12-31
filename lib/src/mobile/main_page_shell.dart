@@ -180,7 +180,7 @@ class MainPageShellState extends State<MainPageShell> with TickerProviderStateMi
             label: 'Meal Plan',
           ),
           BottomNavigationBarItem(
-            icon: Icon(CupertinoIcons.cart_fill),
+            icon: Icon(CupertinoIcons.archivebox),
             label: 'Pantry',
           ),
         ],
@@ -214,7 +214,7 @@ class MainPageShellState extends State<MainPageShell> with TickerProviderStateMi
             label: 'Meal Plan',
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.shopping_cart),
+            icon: Icon(Icons.inventory_2_outlined),
             label: 'Pantry',
           ),
         ],

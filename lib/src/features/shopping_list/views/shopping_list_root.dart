@@ -88,6 +88,7 @@ class ShoppingListTab extends ConsumerWidget {
               },
             ),
           ],
+          leading: const Icon(CupertinoIcons.cart),
           trailing: AdaptivePullDownButton(
             items: [
               AdaptiveMenuItem(

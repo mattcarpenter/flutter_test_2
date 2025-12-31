@@ -155,7 +155,7 @@ class RecipesTab extends ConsumerWidget {
           icon: AppCircleButtonIcon.ellipsis,
         ),
       ),
-      leading: const Icon(CupertinoIcons.person_2),
+      leading: const Icon(CupertinoIcons.book),
     );
   }
 }
