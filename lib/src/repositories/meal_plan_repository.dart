@@ -1,6 +1,7 @@
 import 'package:drift/drift.dart';
 import 'package:recipe_app/database/database.dart';
 import 'package:recipe_app/database/models/meal_plan_items.dart';
+import '../services/logging/app_logger.dart';
 
 class MealPlanRepository {
   final AppDatabase _db;
@@ -13,19 +14,71 @@ class MealPlanRepository {
       ..where((tbl) => tbl.date.equals(date))
       ..where((tbl) => tbl.deletedAt.isNull());
 
-    // Only filter by userId if explicitly provided (for household vs personal distinction)
-    // PowerSync already ensures local DB only contains current user's data
-    if (userId != null) {
+    // Query logic for household users:
+    // - Match records with this household_id (shared records), OR
+    // - Match records with NULL household_id AND matching user_id (legacy/personal records)
+    // This handles the transition case where records were created before user joined household
+    if (householdId != null && userId != null) {
+      query = query..where((tbl) =>
+        tbl.householdId.equals(householdId) |
+        (tbl.householdId.isNull() & tbl.userId.equals(userId))
+      );
+    } else if (householdId != null) {
+      query = query..where((tbl) => tbl.householdId.equals(householdId));
+    } else if (userId != null) {
       query = query..where((tbl) => tbl.userId.equals(userId));
     }
 
-    // Only filter by householdId if explicitly provided
-    if (householdId != null) {
-      query = query..where((tbl) => tbl.householdId.equals(householdId));
+    final results = await query.get();
+
+    AppLogger.debug(
+      'MEAL_PLAN_QUERY: date=$date, userId=$userId, householdId=$householdId, '
+      'found=${results.length} records${results.isNotEmpty ? ": ${results.map((r) => "id=${r.id}, uId=${r.userId}, hId=${r.householdId}").join("; ")}" : ""}'
+    );
+
+    if (results.isEmpty) return null;
+
+    // If multiple records exist (e.g., legacy personal + household), prefer household-scoped
+    if (results.length > 1) {
+      AppLogger.warning(
+        'MEAL_PLAN_QUERY_DUPLICATE: Found ${results.length} records for date $date. '
+        'Preferring household-scoped record.'
+      );
+      final householdRecord = results.where((r) => r.householdId != null).firstOrNull;
+      return householdRecord ?? results.first;
     }
 
+    return results.first;
+  }
+
+  /// Get meal plan by date without ownership filter.
+  /// Used for drag operations where we need to find the record being displayed,
+  /// regardless of who created it. Prefers household-scoped records.
+  Future<MealPlanEntry?> getMealPlanByDateUnfiltered(String date) async {
+    final query = _db.select(_db.mealPlans)
+      ..where((tbl) => tbl.date.equals(date))
+      ..where((tbl) => tbl.deletedAt.isNull());
+
     final results = await query.get();
-    return results.isNotEmpty ? results.first : null;
+
+    AppLogger.debug(
+      'MEAL_PLAN_QUERY_UNFILTERED: date=$date, '
+      'found=${results.length} records${results.isNotEmpty ? ": ${results.map((r) => "id=${r.id}, uId=${r.userId}, hId=${r.householdId}").join("; ")}" : ""}'
+    );
+
+    if (results.isEmpty) return null;
+
+    // If multiple records exist, prefer household-scoped (matches stream provider behavior)
+    if (results.length > 1) {
+      AppLogger.warning(
+        'MEAL_PLAN_QUERY_UNFILTERED_DUPLICATE: Found ${results.length} records for date $date. '
+        'Preferring household-scoped record.'
+      );
+      final householdRecord = results.where((r) => r.householdId != null).firstOrNull;
+      return householdRecord ?? results.first;
+    }
+
+    return results.first;
   }
 
   // Create or update meal plan for a date
@@ -37,18 +90,34 @@ class MealPlanRepository {
   }) async {
     final existing = await getMealPlanByDate(date, userId, householdId);
     final now = DateTime.now().millisecondsSinceEpoch;
-    
+
     if (existing != null) {
-      // Update existing
+      // Check if we need to migrate a personal record to household scope
+      final needsMigration = existing.householdId == null && householdId != null;
+
+      AppLogger.info(
+        'MEAL_PLAN_UPDATE: date=$date, existingId=${existing.id}, '
+        'existingUserId=${existing.userId}, existingHouseholdId=${existing.householdId}, '
+        'newHouseholdId=$householdId, needsMigration=$needsMigration, '
+        'itemCount=${items.length}'
+      );
+
       final updatedEntry = existing.copyWith(
         items: Value(items),
         updatedAt: Value(now),
+        // Migrate personal records to household scope when applicable
+        householdId: needsMigration ? Value(householdId) : Value.absent(),
       );
-      
+
       await _db.update(_db.mealPlans).replace(updatedEntry);
       return updatedEntry;
     } else {
       // Create new
+      AppLogger.info(
+        'MEAL_PLAN_CREATE: date=$date, userId=$userId, householdId=$householdId, '
+        'itemCount=${items.length}'
+      );
+
       final newEntry = MealPlansCompanion.insert(
         date: date,
         userId: userId != null ? Value(userId) : const Value.absent(),
@@ -57,9 +126,9 @@ class MealPlanRepository {
         createdAt: Value(now),
         updatedAt: Value(now),
       );
-      
+
       await _db.into(_db.mealPlans).insert(newEntry);
-      
+
       // Return the created entry
       return (await getMealPlanByDate(date, userId, householdId))!;
     }
@@ -230,15 +299,18 @@ class MealPlanRepository {
       ..where((tbl) => tbl.date.isBetweenValues(startDate, endDate))
       ..where((tbl) => tbl.deletedAt.isNull());
 
-    // Only filter by userId if explicitly provided (for household vs personal distinction)
-    // PowerSync already ensures local DB only contains current user's data
-    if (userId != null) {
-      query = query..where((tbl) => tbl.userId.equals(userId));
-    }
-
-    // Only filter by householdId if explicitly provided
-    if (householdId != null) {
+    // Query logic for household users:
+    // - Match records with this household_id (shared records), OR
+    // - Match records with NULL household_id AND matching user_id (legacy/personal records)
+    if (householdId != null && userId != null) {
+      query = query..where((tbl) =>
+        tbl.householdId.equals(householdId) |
+        (tbl.householdId.isNull() & tbl.userId.equals(userId))
+      );
+    } else if (householdId != null) {
       query = query..where((tbl) => tbl.householdId.equals(householdId));
+    } else if (userId != null) {
+      query = query..where((tbl) => tbl.userId.equals(userId));
     }
 
     return await query.get();

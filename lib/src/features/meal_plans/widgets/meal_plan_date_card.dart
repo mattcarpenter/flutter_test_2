@@ -2,7 +2,6 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../database/models/meal_plan_items.dart';
-import '../../../providers/auth_provider.dart';
 import '../../../providers/meal_plan_provider.dart';
 import '../../../theme/colors.dart';
 import '../models/meal_plan_drag_data.dart';
@@ -106,9 +105,6 @@ class _MealPlanDateCardState extends ConsumerState<MealPlanDateCard>
         ? (mealPlan!.items as List).cast<MealPlanItem>()
         : <MealPlanItem>[];
 
-    // Get current user ID for proper database query
-    final userId = ref.read(currentUserProvider)?.id;
-
     // Move item to this date at the end of the list
     await ref.read(mealPlanNotifierProvider.notifier).moveItemBetweenDates(
       sourceDate: dragData.sourceDate,
@@ -116,8 +112,6 @@ class _MealPlanDateCardState extends ConsumerState<MealPlanDateCard>
       item: dragData.item,
       sourceIndex: dragData.sourceIndex,
       targetIndex: currentItems.length, // Add at end
-      userId: userId,
-      householdId: null, // TODO: Add household support if needed
     );
 
     // Clear drag state AGAIN after move completes
@@ -141,15 +135,10 @@ class _MealPlanDateCardState extends ConsumerState<MealPlanDateCard>
     // Wait for fade animation to complete, then actually remove
     Future.delayed(const Duration(milliseconds: 300), () {
       if (mounted && _deletingItemIds.contains(itemId)) {
-        // Get current user ID
-        final userId = ref.read(currentUserProvider)?.id;
-
         // Actually remove the item from database
         ref.read(mealPlanNotifierProvider.notifier).removeItem(
           date: widget.dateString,
           itemId: itemId,
-          userId: userId,
-          householdId: null,
         );
 
         // Clear from deleting set after removal

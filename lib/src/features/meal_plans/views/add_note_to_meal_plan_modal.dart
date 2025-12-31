@@ -102,9 +102,6 @@ class _AddNoteToMealPlanContentState extends ConsumerState<AddNoteToMealPlanCont
       await ref.read(mealPlanNotifierProvider.notifier).addNote(
         date: widget.date,
         noteText: noteText,
-        noteTitle: null,
-        userId: null, // TODO: Pass actual user info
-        householdId: null, // TODO: Pass actual household info
       );
 
       // Close the modal once added

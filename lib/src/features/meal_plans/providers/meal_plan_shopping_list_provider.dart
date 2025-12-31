@@ -1,6 +1,8 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../repositories/recipe_repository.dart';
 import '../../../repositories/pantry_repository.dart';
+import '../../../providers/auth_provider.dart';
+import '../../../providers/household_provider.dart';
 import '../../../providers/shopping_list_provider.dart';
 import '../../../providers/meal_plan_provider.dart';
 import '../../../providers/pantry_provider.dart';
@@ -36,11 +38,19 @@ final aggregatedIngredientsProvider = FutureProvider.family<List<AggregatedIngre
   // Watch pantry items to refresh when pantry stock status changes
   // This is important to update the ingredient list when user updates pantry
   ref.watch(pantryItemsProvider);
-  
-  // TODO: Get actual user/household IDs
+
+  // Get current user and household for proper data scoping
+  final userId = ref.read(currentUserProvider)?.id;
+  String? householdId;
+  try {
+    householdId = ref.read(householdNotifierProvider).currentHousehold?.id;
+  } catch (_) {
+    // Household provider may not be ready
+  }
+
   return service.getAggregatedIngredients(
     date: date,
-    userId: null,
-    householdId: null,
+    userId: userId,
+    householdId: householdId,
   );
 });

@@ -132,8 +132,6 @@ class MealPlanContextMenu {
               Navigator.pop(context);
               ref.read(mealPlanNotifierProvider.notifier).clearItems(
                 date: date,
-                userId: null, // TODO: Pass actual user info
-                householdId: null, // TODO: Pass actual household info
               );
             },
             child: const Text('Clear'),

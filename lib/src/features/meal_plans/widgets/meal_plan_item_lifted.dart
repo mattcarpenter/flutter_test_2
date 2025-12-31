@@ -6,7 +6,6 @@ import 'package:go_router/go_router.dart';
 import 'package:super_context_menu/super_context_menu.dart';
 import '../../../../database/models/meal_plan_items.dart';
 import '../../../../database/models/recipe_images.dart';
-import '../../../providers/auth_provider.dart';
 import '../../../providers/meal_plan_provider.dart';
 import '../../../providers/recipe_provider.dart';
 import '../../../theme/colors.dart';
@@ -356,14 +355,9 @@ class _MealPlanItemLiftedState extends ConsumerState<MealPlanItemLifted>
       widget.onDelete!();
     } else {
       // Fallback to direct removal if no callback provided
-      // Get current user ID to satisfy RLS policies
-      final userId = ref.read(currentUserProvider)?.id;
-
       ref.read(mealPlanNotifierProvider.notifier).removeItem(
         date: widget.dateString,
         itemId: widget.item.id,
-        userId: userId,
-        householdId: null,
       );
     }
   }

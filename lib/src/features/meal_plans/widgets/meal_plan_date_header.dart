@@ -148,8 +148,6 @@ class MealPlanDateHeader extends StatelessWidget {
               Navigator.pop(context);
               ref.read(mealPlanNotifierProvider.notifier).clearItems(
                 date: date,
-                userId: null,
-                householdId: null,
               );
             },
             child: const Text('Clear'),

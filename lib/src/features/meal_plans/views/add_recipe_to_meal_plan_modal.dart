@@ -18,8 +18,6 @@ void showAddRecipeToMealPlanModal(BuildContext context, String date) {
         date: date,
         recipeId: recipe.id,
         recipeTitle: recipe.title,
-        userId: null,
-        householdId: null,
       );
     },
   );

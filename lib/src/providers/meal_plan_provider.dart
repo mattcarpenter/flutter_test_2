@@ -3,6 +3,9 @@ import 'package:recipe_app/database/database.dart';
 import 'package:recipe_app/database/models/meal_plan_items.dart';
 import 'package:recipe_app/database/powersync.dart';
 import '../repositories/meal_plan_repository.dart';
+import '../services/logging/app_logger.dart';
+import 'auth_provider.dart';
+import 'household_provider.dart';
 
 // Repository provider
 final mealPlanRepositoryProvider = Provider<MealPlanRepository>((ref) {
@@ -10,11 +13,27 @@ final mealPlanRepositoryProvider = Provider<MealPlanRepository>((ref) {
 });
 
 // Stream provider for meal plan by date (for real-time updates)
+// Uses watch() instead of watchSingleOrNull() to handle duplicate records gracefully
 final mealPlanByDateStreamProvider = StreamProvider.family<MealPlanEntry?, String>((ref, date) {
-  return (appDb.select(appDb.mealPlans)
+  final stream = (appDb.select(appDb.mealPlans)
       ..where((tbl) => tbl.date.equals(date))
       ..where((tbl) => tbl.deletedAt.isNull()))
-      .watchSingleOrNull();
+      .watch();
+
+  // Transform the list stream to single entry, handling duplicates
+  return stream.map((results) {
+    if (results.isEmpty) return null;
+    if (results.length > 1) {
+      // Log duplicate records for debugging
+      AppLogger.warning(
+        'MEAL_PLAN_DUPLICATE: Found ${results.length} records for date $date. '
+        'Records: ${results.map((r) => "id=${r.id}, userId=${r.userId}, householdId=${r.householdId}").join("; ")}'
+      );
+    }
+    // Return the first record (preferring household-scoped if available)
+    final householdRecord = results.where((r) => r.householdId != null).firstOrNull;
+    return householdRecord ?? results.first;
+  });
 });
 
 // Notifier for meal plan operations
@@ -28,6 +47,46 @@ class MealPlanNotifier extends Notifier<void> {
     _repository = ref.read(mealPlanRepositoryProvider);
   }
 
+  /// Get current user ID from auth provider
+  String? _getCurrentUserId() {
+    return ref.read(currentUserProvider)?.id;
+  }
+
+  /// Get current household ID if user is in a household
+  String? _getCurrentHouseholdId() {
+    try {
+      final householdState = ref.read(householdNotifierProvider);
+      final householdId = householdState.currentHousehold?.id;
+      AppLogger.debug(
+        'MEAL_PLAN_HOUSEHOLD_LOOKUP: currentHousehold=${householdState.currentHousehold != null}, '
+        'householdId=$householdId'
+      );
+      return householdId;
+    } catch (e) {
+      // User may not be authenticated or household provider not ready
+      AppLogger.warning('MEAL_PLAN_HOUSEHOLD_LOOKUP_ERROR: $e');
+      return null;
+    }
+  }
+
+  /// Resolve userId and householdId with smart defaults.
+  ///
+  /// Strategy:
+  /// - Always set userId (identifies the creator)
+  /// - Set householdId if user is in a household (makes it shared)
+  /// - If explicit values are provided, they take precedence
+  /// - Never blocks if values can't be determined (graceful degradation)
+  ({String? userId, String? householdId}) _resolveOwnership({
+    String? userId,
+    String? householdId,
+  }) {
+    // Use provided values or fall back to current user/household
+    final resolvedUserId = userId ?? _getCurrentUserId();
+    final resolvedHouseholdId = householdId ?? _getCurrentHouseholdId();
+
+    return (userId: resolvedUserId, householdId: resolvedHouseholdId);
+  }
+
   Future<void> addRecipe({
     required String date,
     required String recipeId,
@@ -35,14 +94,21 @@ class MealPlanNotifier extends Notifier<void> {
     String? userId,
     String? householdId,
   }) async {
+    final ownership = _resolveOwnership(userId: userId, householdId: householdId);
+
+    AppLogger.info(
+      'MEAL_PLAN_ADD_RECIPE: date=$date, recipeId=$recipeId, '
+      'userId=${ownership.userId}, householdId=${ownership.householdId}'
+    );
+
     await _repository.addRecipe(
       date: date,
       recipeId: recipeId,
       recipeTitle: recipeTitle,
-      userId: userId,
-      householdId: householdId,
+      userId: ownership.userId,
+      householdId: ownership.householdId,
     );
-    
+
     // Invalidate providers to trigger refresh
     ref.invalidate(mealPlanByDateStreamProvider(date));
   }
@@ -54,14 +120,16 @@ class MealPlanNotifier extends Notifier<void> {
     String? userId,
     String? householdId,
   }) async {
+    final ownership = _resolveOwnership(userId: userId, householdId: householdId);
+
     await _repository.addNote(
       date: date,
       noteText: noteText,
       noteTitle: noteTitle,
-      userId: userId,
-      householdId: householdId,
+      userId: ownership.userId,
+      householdId: ownership.householdId,
     );
-    
+
     // Invalidate providers to trigger refresh
     ref.invalidate(mealPlanByDateStreamProvider(date));
   }
@@ -72,13 +140,15 @@ class MealPlanNotifier extends Notifier<void> {
     String? userId,
     String? householdId,
   }) async {
+    final ownership = _resolveOwnership(userId: userId, householdId: householdId);
+
     await _repository.removeItem(
       date: date,
       itemId: itemId,
-      userId: userId,
-      householdId: householdId,
+      userId: ownership.userId,
+      householdId: ownership.householdId,
     );
-    
+
     // Invalidate providers to trigger refresh
     ref.invalidate(mealPlanByDateStreamProvider(date));
   }
@@ -89,13 +159,15 @@ class MealPlanNotifier extends Notifier<void> {
     String? userId,
     String? householdId,
   }) async {
+    final ownership = _resolveOwnership(userId: userId, householdId: householdId);
+
     await _repository.reorderItems(
       date: date,
       reorderedItems: reorderedItems,
-      userId: userId,
-      householdId: householdId,
+      userId: ownership.userId,
+      householdId: ownership.householdId,
     );
-    
+
     // Invalidate providers to trigger refresh
     ref.invalidate(mealPlanByDateStreamProvider(date));
   }
@@ -105,12 +177,14 @@ class MealPlanNotifier extends Notifier<void> {
     String? userId,
     String? householdId,
   }) async {
+    final ownership = _resolveOwnership(userId: userId, householdId: householdId);
+
     await _repository.clearItems(
       date: date,
-      userId: userId,
-      householdId: householdId,
+      userId: ownership.userId,
+      householdId: ownership.householdId,
     );
-    
+
     // Invalidate providers to trigger refresh
     ref.invalidate(mealPlanByDateStreamProvider(date));
   }
@@ -123,15 +197,17 @@ class MealPlanNotifier extends Notifier<void> {
     String? userId,
     String? householdId,
   }) async {
+    final ownership = _resolveOwnership(userId: userId, householdId: householdId);
+
     await _repository.updateItem(
       date: date,
       itemId: itemId,
       noteText: noteText,
       noteTitle: noteTitle,
-      userId: userId,
-      householdId: householdId,
+      userId: ownership.userId,
+      householdId: ownership.householdId,
     );
-    
+
     // Invalidate providers to trigger refresh
     ref.invalidate(mealPlanByDateStreamProvider(date));
   }
@@ -142,10 +218,12 @@ class MealPlanNotifier extends Notifier<void> {
     String? userId,
     String? householdId,
   }) async {
+    final ownership = _resolveOwnership(userId: userId, householdId: householdId);
+
     return await _repository.getRecipeIdsForDate(
       date: date,
-      userId: userId,
-      householdId: householdId,
+      userId: ownership.userId,
+      householdId: ownership.householdId,
     );
   }
 
@@ -159,9 +237,33 @@ class MealPlanNotifier extends Notifier<void> {
     String? userId,
     String? householdId,
   }) async {
-    // Get both meal plans
-    final sourceMealPlan = await _repository.getMealPlanByDate(sourceDate, userId, householdId);
-    final targetMealPlan = await _repository.getMealPlanByDate(targetDate, userId, householdId);
+    // For drag operations, use unfiltered query to find the records being displayed.
+    // This handles the case where User B is dragging an item from User A's household record.
+    // We inherit ownership from the source record to ensure we update the correct record.
+    final sourceMealPlan = await _repository.getMealPlanByDateUnfiltered(sourceDate);
+    final targetMealPlan = await _repository.getMealPlanByDateUnfiltered(targetDate);
+
+    // Inherit ownership from source record, or fall back to resolved ownership for new records
+    final sourceOwnership = sourceMealPlan != null
+        ? (userId: sourceMealPlan.userId, householdId: sourceMealPlan.householdId)
+        : _resolveOwnership(userId: userId, householdId: householdId);
+
+    // For target, prefer source's ownership (keep items in same scope),
+    // or use target's existing ownership, or fall back to resolved
+    final targetOwnership = targetMealPlan != null
+        ? (userId: targetMealPlan.userId, householdId: targetMealPlan.householdId)
+        : sourceOwnership;
+
+    AppLogger.info(
+      'MEAL_PLAN_MOVE_START: sourceDate=$sourceDate, targetDate=$targetDate, '
+      'itemId=${item.id}, sourceOwnership=(userId=${sourceOwnership.userId}, householdId=${sourceOwnership.householdId}), '
+      'targetOwnership=(userId=${targetOwnership.userId}, householdId=${targetOwnership.householdId})'
+    );
+
+    AppLogger.debug(
+      'MEAL_PLAN_MOVE_FOUND: sourceMealPlan=${sourceMealPlan != null ? "id=${sourceMealPlan.id}, items=${sourceMealPlan.items?.length ?? 0}" : "null"}, '
+      'targetMealPlan=${targetMealPlan != null ? "id=${targetMealPlan.id}, items=${targetMealPlan.items?.length ?? 0}" : "null"}'
+    );
 
     // Extract items from source
     final sourceItems = sourceMealPlan?.items != null
@@ -173,8 +275,15 @@ class MealPlanNotifier extends Notifier<void> {
         ? List<MealPlanItem>.from(targetMealPlan!.items as List)
         : <MealPlanItem>[];
 
+    final sourceItemCountBefore = sourceItems.length;
+
     // Remove from source by ID (not by index) for reliability
     sourceItems.removeWhere((sourceItem) => sourceItem.id == item.id);
+
+    AppLogger.debug(
+      'MEAL_PLAN_MOVE_REMOVE: itemId=${item.id}, sourceItemsBefore=$sourceItemCountBefore, sourceItemsAfter=${sourceItems.length}, '
+      'removed=${sourceItemCountBefore - sourceItems.length}'
+    );
 
     // Update positions in source
     for (int i = 0; i < sourceItems.length; i++) {
@@ -202,27 +311,25 @@ class MealPlanNotifier extends Notifier<void> {
     }
 
     // Batch database operations to minimize race condition window
+    // Note: Always use createOrUpdateMealPlan for both source and target.
+    // Don't use clearItems (soft-delete) for empty source - that causes record
+    // accumulation when items are dragged back and forth between dates.
     await Future.wait([
-      // Update source
-      sourceItems.isEmpty
-          ? _repository.clearItems(
-              date: sourceDate,
-              userId: userId,
-              householdId: householdId,
-            )
-          : _repository.createOrUpdateMealPlan(
-              date: sourceDate,
-              items: sourceItems,
-              userId: userId,
-              householdId: householdId,
-            ),
+      // Update source (empty items list is fine - keeps the record for reuse)
+      _repository.createOrUpdateMealPlan(
+        date: sourceDate,
+        items: sourceItems,
+        userId: sourceOwnership.userId,
+        householdId: sourceOwnership.householdId,
+      ),
 
-      // Update target
+      // Update target - use source ownership to keep items in same scope
+      // (if User A created a household record, User B's drag should update that same household record)
       _repository.createOrUpdateMealPlan(
         date: targetDate,
         items: targetItems,
-        userId: userId,
-        householdId: householdId,
+        userId: sourceOwnership.userId,
+        householdId: sourceOwnership.householdId,
       ),
     ]);
 

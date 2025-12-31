@@ -254,8 +254,6 @@ class MealPlanItemWithHandle extends ConsumerWidget {
     ref.read(mealPlanNotifierProvider.notifier).removeItem(
       date: dateString,
       itemId: item.id,
-      userId: null,
-      householdId: null,
     );
   }
 

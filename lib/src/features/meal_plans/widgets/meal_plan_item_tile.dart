@@ -201,8 +201,6 @@ class _MealPlanItemTileState extends ConsumerState<MealPlanItemTile> {
     ref.read(mealPlanNotifierProvider.notifier).removeItem(
       date: widget.dateString,
       itemId: widget.item.id,
-      userId: null, // TODO: Pass actual user info
-      householdId: null, // TODO: Pass actual household info
     );
   }
 
