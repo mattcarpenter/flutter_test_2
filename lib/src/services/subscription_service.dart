@@ -179,9 +179,10 @@ class SubscriptionService {
       }
 
       // 2. If not in database and fallback allowed, check RevenueCat
-      if (allowRevenueCatFallback && _isInitialized) {
+      // Only attempt if RevenueCat is already configured - don't initialize just for a check
+      // Use native isConfigured check which is more reliable than Dart flag
+      if (allowRevenueCatFallback && await Purchases.isConfigured) {
         try {
-          // Ensure RevenueCat has correct user
           final currentRevenueCatUser = await Purchases.appUserID;
           if (currentRevenueCatUser != user.id) {
             await Purchases.logIn(user.id);
@@ -197,6 +198,7 @@ class SubscriptionService {
 
           return customerInfo.entitlements.active.containsKey(_entitlementId);
         } catch (e) {
+          // Log but don't crash - RevenueCat might not be configured
           AppLogger.warning('RevenueCat fallback check failed', e);
         }
       }
@@ -444,14 +446,21 @@ class SubscriptionService {
   /// Synchronize user ID with current authenticated user
   Future<void> syncUserId() async {
     try {
-      await _ensureInitialized();
-
       final currentUser = _supabase.auth.currentUser;
       if (currentUser == null) {
-        await Purchases.logOut();
+        // No user - only log out if RevenueCat is configured
+        // Use Purchases.isConfigured for native-level check (safer than Dart flag)
+        try {
+          if (await Purchases.isConfigured) {
+            await Purchases.logOut();
+          }
+        } catch (e) {
+          AppLogger.warning('Error logging out of RevenueCat', e);
+        }
         return;
       }
 
+      await _ensureInitialized();
       await Purchases.logIn(currentUser.id);
     } on PlatformException catch (e) {
       AppLogger.error('Error syncing RevenueCat user ID', e);
@@ -496,11 +505,19 @@ class SubscriptionService {
   }
 
   /// Stream of customer info changes
-  Stream<CustomerInfo> get customerInfoStream {
+  Stream<CustomerInfo?> get customerInfoStream {
     // Note: Customer info stream requires manual polling in current RevenueCat version
     // For real-time updates, implement periodic checks or use provider-level refresh
     return Stream.periodic(const Duration(seconds: 30))
-        .asyncMap((_) => Purchases.getCustomerInfo())
+        .asyncMap((_) async {
+          // Only poll if RevenueCat is configured to avoid native fatal errors
+          if (!await Purchases.isConfigured) {
+            return null;
+          }
+          return await Purchases.getCustomerInfo();
+        })
+        .where((info) => info != null)
+        .cast<CustomerInfo>()
         .distinct((prev, next) => prev.originalPurchaseDate == next.originalPurchaseDate);
   }
 
@@ -549,7 +566,13 @@ class SubscriptionService {
         return;
       }
 
-      await _ensureInitialized();
+      // Only proceed if RevenueCat is configured
+      // Use native isConfigured check which is more reliable than Dart flag
+      // Don't try to initialize just for a refresh - let presentPaywall handle that
+      if (!await Purchases.isConfigured) {
+        AppLogger.debug('RevenueCat not configured, skipping refresh');
+        return;
+      }
 
       // Ensure correct user is logged in
       final currentRevenueCatUser = await Purchases.appUserID;

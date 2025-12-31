@@ -511,9 +511,15 @@ class AuthService {
       await _supabase.auth.signOut();
 
       // Also log out from RevenueCat to keep them in sync
+      // IMPORTANT: Must check isConfigured first - calling Purchases methods
+      // before configure() causes a native fatal error that can't be caught
       try {
-        await Purchases.logOut();
-        AppLogger.debug('Logged out from RevenueCat');
+        if (await Purchases.isConfigured) {
+          await Purchases.logOut();
+          AppLogger.debug('Logged out from RevenueCat');
+        } else {
+          AppLogger.debug('RevenueCat not configured, skipping logout');
+        }
       } catch (e) {
         // Don't fail sign out if RevenueCat logout fails
         AppLogger.warning('Failed to log out from RevenueCat', e);

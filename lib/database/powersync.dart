@@ -35,6 +35,48 @@ Timer? _authRetryTimer;
 int _authRetryCount = 0;
 const int _maxSyncAuthRetries = 5;
 
+// Track whether current user is anonymous (needed for sign-out handling).
+// We track this because when signedOut fires, the session may already be null.
+bool _currentUserIsAnonymous = false;
+
+/// Safely check if a user is anonymous.
+/// Uses multiple fallback methods since isAnonymous property availability varies.
+bool _checkIfUserIsAnonymous(User? user) {
+  if (user == null) return false;
+
+  try {
+    // Primary method: check the isAnonymous property
+    // ignore: unnecessary_null_comparison
+    if (user.isAnonymous != null) {
+      return user.isAnonymous;
+    }
+  } catch (e) {
+    log.fine('isAnonymous property not available: $e');
+  }
+
+  // Fallback: check user metadata for is_anonymous flag
+  try {
+    final userMetadata = user.userMetadata;
+    if (userMetadata != null && userMetadata['is_anonymous'] == true) {
+      return true;
+    }
+  } catch (e) {
+    log.fine('Could not check userMetadata: $e');
+  }
+
+  // Fallback: anonymous users typically have no linked identities
+  try {
+    final identities = user.identities;
+    if (identities != null && identities.isEmpty) {
+      return true;
+    }
+  } catch (e) {
+    log.fine('Could not check identities: $e');
+  }
+
+  return false;
+}
+
 /// Postgres Response codes that we cannot recover from by retrying.
 final List<RegExp> fatalResponseCodes = [
   // Class 22 — Data Exception
@@ -279,7 +321,11 @@ Future<void> openDatabase({bool isTest = false}) async {
       final expiryTime = DateTime.fromMillisecondsSinceEpoch(session.expiresAt! * 1000);
       log.info('Initial session check - User: $userId, expires at: $expiryTime');
     }
-    
+
+    // Track whether this is an anonymous user (needed for sign-out handling)
+    _currentUserIsAnonymous = _checkIfUserIsAnonymous(session?.user);
+    log.info('User is anonymous: $_currentUserIsAnonymous');
+
     if (userId != null) {
       await _claimOrphanedRecords(userId);
     }
@@ -301,6 +347,11 @@ Future<void> openDatabase({bool isTest = false}) async {
     if (event == AuthChangeEvent.signedIn) {
       // Connect to PowerSync when the user is signed in
       log.info('User signed in, connecting to PowerSync');
+
+      // Track whether this is an anonymous user (needed for sign-out handling)
+      _currentUserIsAnonymous = _checkIfUserIsAnonymous(session?.user);
+      log.info('User is anonymous: $_currentUserIsAnonymous');
+
       final userId = getUserId();
       if (userId != null) {
         await _claimOrphanedRecords(userId);
@@ -312,12 +363,30 @@ Future<void> openDatabase({bool isTest = false}) async {
       db.connect(connector: currentConnector!);
       _setupSyncStatusMonitor(currentConnector!);
     } else if (event == AuthChangeEvent.signedOut) {
-      // Sign out - disconnect and clear local data for privacy
-      log.info('User signed out, clearing local data');
+      // Sign out - disconnect from PowerSync
+      log.info('User signed out, disconnecting from PowerSync');
       _cleanupSyncStatusMonitor();
       currentConnector?.dispose();
       currentConnector = null;
-      await db.disconnectAndClear();
+
+      // Only clear local data for non-anonymous users.
+      // Anonymous users have no way to recover their data if we clear it,
+      // so we preserve it locally in case they can link their account later.
+      // For regular users, clearing data is important for privacy when
+      // signing out on shared devices.
+      //
+      // Note: We use _currentUserIsAnonymous which was set on sign-in,
+      // because data.session may already be null when signedOut fires.
+      if (_currentUserIsAnonymous) {
+        log.info('Anonymous user signed out - preserving local data for potential account linking');
+        await db.disconnect();
+      } else {
+        log.info('Regular user signed out - clearing local data for privacy');
+        await db.disconnectAndClear();
+      }
+
+      // Reset the tracking flag
+      _currentUserIsAnonymous = false;
     } else if (event == AuthChangeEvent.tokenRefreshed) {
       // Supabase token refreshed - trigger token refresh for PowerSync.
       log.info('Token refreshed by Supabase, updating PowerSync credentials');
