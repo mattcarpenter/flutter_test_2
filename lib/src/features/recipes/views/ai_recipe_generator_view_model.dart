@@ -61,20 +61,17 @@ class AiRecipeGeneratorViewModel extends ChangeNotifier {
     required this.ref,
     this.folderId,
   }) {
-    _setupPantryListener();
+    _loadPantryItems();
   }
 
-  /// Set up a listener for pantry items that updates when data becomes available
-  void _setupPantryListener() {
-    // Listen to pantry provider changes
-    ref.listen<AsyncValue<List<PantryItemEntry>>>(
-      pantryNotifierProvider,
-      (previous, next) {
-        _updatePantryItems(next);
-      },
-    );
+  /// Load pantry items from the provider
+  void _loadPantryItems() {
+    // Read the current value - no listener needed since we just need initial state
+    _updatePantryItems(ref.read(pantryNotifierProvider));
+  }
 
-    // Also read the current value immediately
+  /// Refresh pantry items (can be called from UI if needed)
+  void refreshPantryItems() {
     _updatePantryItems(ref.read(pantryNotifierProvider));
   }
 

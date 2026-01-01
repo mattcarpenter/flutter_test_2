@@ -196,7 +196,12 @@ class _InputPageContentState extends State<_InputPageContent> {
     // Generate button
     widgets.add(
       Padding(
-        padding: EdgeInsets.fromLTRB(AppSpacing.lg, 0, AppSpacing.lg, AppSpacing.lg),
+        padding: EdgeInsets.fromLTRB(
+          AppSpacing.lg,
+          0,
+          AppSpacing.lg,
+          AppSpacing.lg + MediaQuery.paddingOf(context).bottom,
+        ),
         child: ListenableBuilder(
           listenable: viewModel,
           builder: (context, _) {

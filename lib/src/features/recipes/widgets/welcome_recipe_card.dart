@@ -7,7 +7,7 @@ import '../../../theme/colors.dart';
 import '../../../theme/spacing.dart';
 import '../../../theme/typography.dart';
 import '../../../widgets/app_button.dart';
-import '../views/add_recipe_modal.dart';
+import '../views/recipe_creation_menu_modal.dart';
 
 /// A welcome card shown to new users who have no recipes yet.
 /// Encourages them to create their first recipe.
@@ -27,7 +27,7 @@ class WelcomeRecipeCard extends ConsumerWidget {
     }
 
     final colors = AppColors.of(context);
-    final screenWidth = MediaQuery.of(context).size.width;
+    final screenWidth = MediaQuery.sizeOf(context).width;
     final isLargeScreen = screenWidth > 600;
 
     return Padding(
@@ -37,7 +37,8 @@ class WelcomeRecipeCard extends ConsumerWidget {
         AppSpacing.lg,
         AppSpacing.sm,
       ),
-      child: Center(
+      child: Align(
+        alignment: Alignment.centerLeft,
         child: ConstrainedBox(
           constraints: BoxConstraints(
             maxWidth: isLargeScreen ? _maxCardWidth : double.infinity,
@@ -109,7 +110,7 @@ class WelcomeRecipeCard extends ConsumerWidget {
                           child: AppButton(
                             text: 'Create a Recipe',
                             onPressed: () {
-                              showRecipeEditorModal(
+                              showRecipeCreationMenuModal(
                                 context,
                                 ref: ref,
                                 folderId: null,

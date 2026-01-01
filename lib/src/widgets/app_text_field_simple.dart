@@ -108,6 +108,12 @@ class _AppTextFieldSimpleState extends State<AppTextFieldSimple> {
     final colors = AppColors.of(context);
     final effectiveMaxLines = widget.multiline ? (widget.maxLines ?? 4) : 1;
 
+    // When multiline is true and keyboardType wasn't explicitly set (is still default text),
+    // use TextInputType.multiline to satisfy Flutter's assertion
+    final effectiveKeyboardType = widget.multiline && widget.keyboardType == TextInputType.text
+        ? TextInputType.multiline
+        : widget.keyboardType;
+
     // Determine border color
     final borderColor = _effectiveErrorText != null
         ? colors.error
@@ -118,7 +124,7 @@ class _AppTextFieldSimpleState extends State<AppTextFieldSimple> {
       controller: widget.controller,
       focusNode: _focusNode,
       enabled: widget.enabled,
-      keyboardType: widget.keyboardType,
+      keyboardType: effectiveKeyboardType,
       obscureText: widget.obscureText,
       autocorrect: widget.autocorrect,
       maxLines: effectiveMaxLines,
