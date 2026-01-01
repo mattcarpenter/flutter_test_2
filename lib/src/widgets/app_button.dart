@@ -6,6 +6,7 @@ import '../theme/typography.dart';
 enum AppButtonTheme {
   primary,
   secondary,
+  dark,
 }
 
 /// Style options for the button
@@ -92,6 +93,17 @@ class _AppButtonState extends State<AppButton> {
       if (pressed) return AppColorSwatches.primary[700]!;
       if (hover) return AppColorSwatches.primary[600]!;
       return colors.primary;
+    } else if (widget.theme == AppButtonTheme.dark) {
+      // Dark theme: black in light mode, white in dark mode
+      if (colors.brightness == Brightness.dark) {
+        if (pressed) return AppColorSwatches.neutral[200]!;
+        if (hover) return AppColorSwatches.neutral[100]!;
+        return Colors.white;
+      } else {
+        if (pressed) return AppColorSwatches.neutral[700]!;
+        if (hover) return AppColorSwatches.neutral[800]!;
+        return AppColorSwatches.neutral[900]!;
+      }
     } else {
       // Secondary uses primary color
       if (pressed) return colors.primaryVariant;
@@ -111,13 +123,15 @@ class _AppButtonState extends State<AppButton> {
 
     if (widget.style == AppButtonStyle.muted) {
       // Muted style uses very light version of the color
-      return widget.theme == AppButtonTheme.primary
-          ? colors.brightness == Brightness.light
-              ? AppColorSwatches.neutral[100]!
-              : AppColorSwatches.neutral[800]!
-          : colors.brightness == Brightness.light
-              ? AppColorSwatches.primary[50]!
-              : AppColorSwatches.primary[900]!.withOpacity(0.15);
+      if (widget.theme == AppButtonTheme.primary || widget.theme == AppButtonTheme.dark) {
+        return colors.brightness == Brightness.light
+            ? AppColorSwatches.neutral[100]!
+            : AppColorSwatches.neutral[800]!;
+      } else {
+        return colors.brightness == Brightness.light
+            ? AppColorSwatches.primary[50]!
+            : AppColorSwatches.primary[900]!.withOpacity(0.15);
+      }
     }
 
     // Check visuallyEnabled to override disabled appearance
@@ -133,7 +147,7 @@ class _AppButtonState extends State<AppButton> {
 
     if (widget.style == AppButtonStyle.mutedOutline) {
       // Muted outline uses very subtle border
-      return widget.theme == AppButtonTheme.primary
+      return (widget.theme == AppButtonTheme.primary || widget.theme == AppButtonTheme.dark)
           ? colors.textPrimary.withOpacity(0.20) // Even lighter border
           : colors.primary.withOpacity(0.20);
     }
@@ -159,25 +173,27 @@ class _AppButtonState extends State<AppButton> {
 
     if (widget.style == AppButtonStyle.fill) {
       // Filled buttons use contrasting text
-      if (widget.theme == AppButtonTheme.primary) {
-        // Primary uses white text on primary background
-        return colors.onPrimary;
+      if (widget.theme == AppButtonTheme.dark) {
+        // Dark theme: white text in light mode, dark text in dark mode
+        return colors.brightness == Brightness.dark
+            ? AppColorSwatches.neutral[900]!
+            : colors.onPrimary;
       } else {
-        // Secondary uses contrasting text
+        // Primary and secondary use white text
         return colors.onPrimary;
       }
     }
 
     if (widget.style == AppButtonStyle.muted) {
       // Muted style uses darker text
-      return widget.theme == AppButtonTheme.primary
+      return (widget.theme == AppButtonTheme.primary || widget.theme == AppButtonTheme.dark)
           ? colors.textPrimary
           : colors.primary;
     }
 
     if (widget.style == AppButtonStyle.mutedOutline) {
       // Muted outline uses darker text (improved readability)
-      return widget.theme == AppButtonTheme.primary
+      return (widget.theme == AppButtonTheme.primary || widget.theme == AppButtonTheme.dark)
           ? colors.textPrimary.withOpacity(0.85)
           : colors.primary.withOpacity(0.85);
     }

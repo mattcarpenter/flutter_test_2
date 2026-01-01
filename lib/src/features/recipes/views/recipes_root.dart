@@ -15,6 +15,7 @@ import '../../../widgets/adaptive_pull_down/adaptive_menu_item.dart';
 import '../../../widgets/adaptive_pull_down/adaptive_pull_down.dart';
 import '../../../widgets/app_circle_button.dart';
 import '../widgets/recipe_search_results.dart';
+import '../widgets/welcome_recipe_card.dart';
 import 'add_folder_modal.dart';
 import 'add_smart_folder_modal.dart';
 import '../widgets/folder_list.dart';
@@ -97,6 +98,10 @@ class RecipesTab extends ConsumerWidget {
         // Recently viewed recipes section
         const SliverToBoxAdapter(
           child: RecentlyViewedSection(),
+        ),
+        // Welcome card for new users (hidden once they have recipes)
+        const SliverToBoxAdapter(
+          child: WelcomeRecipeCard(),
         ),
       ],
       trailing: AdaptivePullDownButton(
