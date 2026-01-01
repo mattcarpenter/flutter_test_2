@@ -1,4 +1,5 @@
 import 'package:flutter/cupertino.dart';
+import 'package:hugeicons/hugeicons.dart';
 import '../../../../database/database.dart';
 import '../../../theme/colors.dart';
 import '../../../theme/spacing.dart';
@@ -136,8 +137,8 @@ class ShoppingListItemTile extends StatelessWidget {
           color: CupertinoColors.destructiveRed,
           borderRadius: borderRadius,
         ),
-        child: const Icon(
-          CupertinoIcons.trash,
+        child: HugeIcon(
+          icon: HugeIcons.strokeRoundedDelete02,
           color: CupertinoColors.white,
           size: 20,
         ),

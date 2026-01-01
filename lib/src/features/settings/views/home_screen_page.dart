@@ -1,5 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:hugeicons/hugeicons.dart';
 
 import '../../../mobile/utils/adaptive_sliver_page.dart';
 import '../../../theme/spacing.dart';
@@ -19,17 +20,17 @@ class HomeScreenPage extends ConsumerWidget {
       _HomeScreenOption(
         value: 'recipes',
         title: 'Recipes',
-        icon: CupertinoIcons.book,
+        icon: HugeIcons.strokeRoundedBook01,
       ),
       _HomeScreenOption(
         value: 'shopping',
         title: 'Shopping',
-        icon: CupertinoIcons.cart,
+        icon: HugeIcons.strokeRoundedShoppingCart01,
       ),
       _HomeScreenOption(
         value: 'meal_plans',
         title: 'Meal Plan',
-        icon: CupertinoIcons.calendar,
+        icon: HugeIcons.strokeRoundedCalendar01,
       ),
       _HomeScreenOption(
         value: 'pantry',
@@ -73,7 +74,7 @@ class HomeScreenPage extends ConsumerWidget {
 class _HomeScreenOption {
   final String value;
   final String title;
-  final IconData icon;
+  final dynamic icon; // HugeIcons return List<List<dynamic>>, IconData for Cupertino
 
   const _HomeScreenOption({
     required this.value,

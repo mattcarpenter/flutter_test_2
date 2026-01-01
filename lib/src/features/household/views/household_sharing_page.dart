@@ -1,6 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:hugeicons/hugeicons.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../../providers/household_provider.dart';
 import '../../../mobile/utils/adaptive_sliver_page.dart';
@@ -40,7 +41,7 @@ class HouseholdSharingPage extends ConsumerWidget {
     final menuButton = onMenuPressed != null
         ? GestureDetector(
             onTap: onMenuPressed,
-            child: const Icon(CupertinoIcons.bars),
+            child: const HugeIcon(icon: HugeIcons.strokeRoundedMenu01),
           )
         : null;
 
@@ -165,7 +166,7 @@ class HouseholdSharingPage extends ConsumerWidget {
     final menuButton = onMenuPressed != null
         ? GestureDetector(
             onTap: onMenuPressed,
-            child: const Icon(CupertinoIcons.bars),
+            child: const HugeIcon(icon: HugeIcons.strokeRoundedMenu01),
           )
         : null;
 
@@ -181,8 +182,8 @@ class HouseholdSharingPage extends ConsumerWidget {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Icon(
-                    CupertinoIcons.person_badge_minus,
+                  HugeIcon(
+                    icon: HugeIcons.strokeRoundedUserMinus01,
                     size: 64,
                     color: AppColors.of(context).textTertiary,
                   ),
@@ -369,8 +370,8 @@ class HouseholdSharingPage extends ConsumerWidget {
         Center(
           child: Column(
             children: [
-              Icon(
-                CupertinoIcons.house,
+              HugeIcon(
+                icon: HugeIcons.strokeRoundedHome01,
                 size: 48,
                 color: AppColors.of(context).textTertiary,
               ),

@@ -1,4 +1,5 @@
 import 'package:flutter/cupertino.dart';
+import 'package:hugeicons/hugeicons.dart';
 
 class QuantityControl extends StatelessWidget {
   final int value;
@@ -36,10 +37,10 @@ class QuantityControl extends StatelessWidget {
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
             minSize: 0,
             onPressed: canDecrease ? () => onChanged(value - 1) : null,
-            child: Icon(
-              CupertinoIcons.minus,
+            child: HugeIcon(
+              icon: HugeIcons.strokeRoundedMinusSign,
               size: 18,
-              color: canDecrease 
+              color: canDecrease
                 ? CupertinoColors.label
                 : CupertinoColors.quaternaryLabel,
             ),
@@ -64,10 +65,10 @@ class QuantityControl extends StatelessWidget {
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
             minSize: 0,
             onPressed: canIncrease ? () => onChanged(value + 1) : null,
-            child: Icon(
-              CupertinoIcons.plus,
+            child: HugeIcon(
+              icon: HugeIcons.strokeRoundedAdd01,
               size: 18,
-              color: canIncrease 
+              color: canIncrease
                 ? CupertinoColors.label
                 : CupertinoColors.quaternaryLabel,
             ),

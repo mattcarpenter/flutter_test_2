@@ -1,4 +1,5 @@
 import 'package:flutter/cupertino.dart';
+import 'package:hugeicons/hugeicons.dart';
 
 import '../../../theme/colors.dart';
 import '../../../theme/spacing.dart';
@@ -92,7 +93,7 @@ class ShoppingListSelectionRow extends StatelessWidget {
                   items: [
                     AdaptiveMenuItem(
                       title: 'Delete',
-                      icon: const Icon(CupertinoIcons.trash),
+                      icon: const HugeIcon(icon: HugeIcons.strokeRoundedDelete02),
                       isDestructive: true,
                       onTap: onDelete,
                     ),

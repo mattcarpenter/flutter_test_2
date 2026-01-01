@@ -1,6 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:hugeicons/hugeicons.dart';
 import 'package:go_router/go_router.dart';
 import 'package:super_context_menu/super_context_menu.dart';
 import '../../../../database/models/meal_plan_items.dart';
@@ -53,11 +54,7 @@ class MealPlanItemWithHandle extends ConsumerWidget {
                             color: _getItemColor(context),
                             borderRadius: BorderRadius.circular(6),
                           ),
-                          child: Icon(
-                            _getItemIcon(),
-                            size: 16,
-                            color: CupertinoColors.white,
-                          ),
+                          child: _getItemIcon(),
                         ),
                         
                         const SizedBox(width: 12),
@@ -109,8 +106,8 @@ class MealPlanItemWithHandle extends ConsumerWidget {
               feedback: _buildDragFeedback(context),
               childWhenDragging: Container(
                 padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                child: Icon(
-                  CupertinoIcons.line_horizontal_3,
+                child: HugeIcon(
+                  icon: HugeIcons.strokeRoundedDragDropVertical,
                   size: 16,
                   color: CupertinoColors.tertiaryLabel.resolveFrom(context).withOpacity(0.3),
                 ),
@@ -121,8 +118,8 @@ class MealPlanItemWithHandle extends ConsumerWidget {
               child: Container(
                 padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                 color: Colors.transparent, // Important for hit testing
-                child: Icon(
-                  CupertinoIcons.line_horizontal_3,
+                child: HugeIcon(
+                  icon: HugeIcons.strokeRoundedDragDropVertical,
                   size: 16,
                   color: CupertinoColors.tertiaryLabel.resolveFrom(context),
                 ),
@@ -202,11 +199,7 @@ class MealPlanItemWithHandle extends ConsumerWidget {
                 color: _getItemColor(context),
                 borderRadius: BorderRadius.circular(6),
               ),
-              child: Icon(
-                _getItemIcon(),
-                size: 16,
-                color: CupertinoColors.white,
-              ),
+              child: _getItemIcon(),
             ),
             const SizedBox(width: 12),
             Flexible(
@@ -257,14 +250,26 @@ class MealPlanItemWithHandle extends ConsumerWidget {
     );
   }
 
-  IconData _getItemIcon() {
+  Widget _getItemIcon() {
     switch (item.type) {
       case 'recipe':
-        return CupertinoIcons.book;
+        return HugeIcon(
+          icon: HugeIcons.strokeRoundedBook01,
+          size: 16,
+          color: CupertinoColors.white,
+        );
       case 'note':
-        return CupertinoIcons.doc_text;
+        return HugeIcon(
+          icon: HugeIcons.strokeRoundedFile01,
+          size: 16,
+          color: CupertinoColors.white,
+        );
       default:
-        return CupertinoIcons.square;
+        return const Icon(
+          CupertinoIcons.square,
+          size: 16,
+          color: CupertinoColors.white,
+        );
     }
   }
 

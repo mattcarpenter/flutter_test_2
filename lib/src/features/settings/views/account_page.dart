@@ -1,5 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:hugeicons/hugeicons.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../database/powersync.dart';
@@ -69,8 +70,8 @@ class AccountPage extends ConsumerWidget {
                   children: [
                     SettingsRowCondensed(
                       title: 'Sign In',
-                      leading: Icon(
-                        CupertinoIcons.person_circle,
+                      leading: HugeIcon(
+                        icon: HugeIcons.strokeRoundedUserCircle,
                         size: 22,
                         color: colors.primary,
                       ),
@@ -197,8 +198,8 @@ class _UserInfoRow extends StatelessWidget {
       padding: EdgeInsets.symmetric(horizontal: AppSpacing.lg),
       child: Row(
         children: [
-          Icon(
-            CupertinoIcons.person_circle_fill,
+          HugeIcon(
+            icon: HugeIcons.strokeRoundedUserCircle,
             size: 22,
             color: colors.primary,
           ),

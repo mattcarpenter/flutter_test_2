@@ -1,5 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:hugeicons/hugeicons.dart';
 import 'package:wolt_modal_sheet/wolt_modal_sheet.dart';
 import '../../../../database/database.dart';
 import '../../../../database/models/pantry_items.dart';

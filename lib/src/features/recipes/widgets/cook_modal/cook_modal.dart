@@ -1,4 +1,5 @@
 import 'package:flutter/cupertino.dart';
+import 'package:hugeicons/hugeicons.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:wolt_modal_sheet/wolt_modal_sheet.dart';
@@ -76,7 +77,7 @@ void showCookModal(BuildContext context, {
                       items: [
                         AdaptiveMenuItem(
                           title: 'Add Recipe',
-                          icon: const Icon(CupertinoIcons.add),
+                          icon: const HugeIcon(icon: HugeIcons.strokeRoundedAdd01),
                           onTap: () {
                             contentKey.currentState?.showAddRecipeSheet();
                           },

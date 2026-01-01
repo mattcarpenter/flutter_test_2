@@ -3,6 +3,7 @@ import 'package:cupertino_sidebar/cupertino_sidebar.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:hugeicons/hugeicons.dart';
 
 import '../color_theme.dart';
 import '../features/discover/views/discover_root.dart';
@@ -337,23 +338,23 @@ class _MainPageState extends State<MainPage> with TickerProviderStateMixin {
           currentIndex: _selectedTab,
           items: const [
             BottomNavigationBarItem(
-              icon: Icon(CupertinoIcons.bars),
+              icon: HugeIcon(icon: HugeIcons.strokeRoundedMenu01),
               label: 'More',
             ),
             BottomNavigationBarItem(
-              icon: Icon(CupertinoIcons.book),
+              icon: HugeIcon(icon: HugeIcons.strokeRoundedBook01),
               label: 'Recipes',
             ),
             BottomNavigationBarItem(
-              icon: Icon(CupertinoIcons.cart),
+              icon: HugeIcon(icon: HugeIcons.strokeRoundedShoppingCart01),
               label: 'Shopping',
             ),
             BottomNavigationBarItem(
-              icon: Icon(CupertinoIcons.calendar),
+              icon: HugeIcon(icon: HugeIcons.strokeRoundedCalendar01),
               label: 'Meal Plan',
             ),
             BottomNavigationBarItem(
-              icon: Icon(CupertinoIcons.home),
+              icon: HugeIcon(icon: HugeIcons.strokeRoundedHome01),
               label: 'Discover',
             ),
           ],

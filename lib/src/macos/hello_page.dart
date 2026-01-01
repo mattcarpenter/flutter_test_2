@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart';
 import 'package:macos_ui/macos_ui.dart';
 // ignore: implementation_imports
 import 'package:macos_ui/src/library.dart';
@@ -227,7 +228,7 @@ class DemoSheet extends StatelessWidget {
               ),
               const SizedBox(height: 24),
               const MacosListTile(
-                leading: MacosIcon(CupertinoIcons.lightbulb),
+                leading: MacosIcon(CupertinoIcons.lightbulb_fill),
                 title: Text(
                   'A robust library of Flutter components for macOS',
                   //style: MacosTheme.of(context).typography.headline,
@@ -238,7 +239,7 @@ class DemoSheet extends StatelessWidget {
               ),
               const SizedBox(height: 16),
               const MacosListTile(
-                leading: MacosIcon(CupertinoIcons.bolt),
+                leading: MacosIcon(CupertinoIcons.bolt_fill),
                 title: Text(
                   'Create beautiful macOS applications in minutes',
                   //style: MacosTheme.of(context).typography.headline,

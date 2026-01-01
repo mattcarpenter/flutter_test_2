@@ -3,6 +3,7 @@ import 'package:flutter/cupertino.dart';
 import 'dart:io' show Platform;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:hugeicons/hugeicons.dart';
 import 'package:wolt_modal_sheet/wolt_modal_sheet.dart';
 import 'package:super_context_menu/super_context_menu.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -923,7 +924,7 @@ class _AddToShoppingListPageState extends ConsumerState<AddToShoppingListPage> {
                         onPressed: () {
                           widget.pageIndexNotifier.value = 2;
                         },
-                        trailingIcon: const Icon(CupertinoIcons.chevron_right, size: 14),
+                        trailingIcon: const HugeIcon(icon: HugeIcons.strokeRoundedArrowRight01, size: 14),
                         compactTrailingIcon: true,
                         theme: AppButtonTheme.secondary,
                         style: AppButtonStyle.outline,
@@ -1153,7 +1154,7 @@ class _AddToShoppingListPageState extends ConsumerState<AddToShoppingListPage> {
               items: [
                 AdaptiveMenuItem(
                   title: 'My Shopping List',
-                  icon: Icon(selectedListId == null ? CupertinoIcons.checkmark : CupertinoIcons.list_bullet),
+                  icon: selectedListId == null ? const Icon(CupertinoIcons.checkmark) : const HugeIcon(icon: HugeIcons.strokeRoundedLeftToRightListBullet),
                   onTap: () {
                     controller.updateSelectedList(ingredient.id, null);
                     if (!isChecked) {
@@ -1163,7 +1164,7 @@ class _AddToShoppingListPageState extends ConsumerState<AddToShoppingListPage> {
                 ),
                 ...lists.map((list) => AdaptiveMenuItem(
                       title: list.name ?? 'Unnamed',
-                      icon: Icon(selectedListId == list.id ? CupertinoIcons.checkmark : CupertinoIcons.list_bullet),
+                      icon: selectedListId == list.id ? const Icon(CupertinoIcons.checkmark) : const HugeIcon(icon: HugeIcons.strokeRoundedLeftToRightListBullet),
                       onTap: () {
                         controller.updateSelectedList(ingredient.id, list.id);
                         if (!isChecked) {
@@ -2416,8 +2417,8 @@ class _SelectFromPantryPageState extends ConsumerState<SelectFromPantryPage> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(
-              CupertinoIcons.search,
+            HugeIcon(
+              icon: HugeIcons.strokeRoundedSearch01,
               size: 48,
               color: colors.textTertiary,
             ),

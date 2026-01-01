@@ -1,5 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:hugeicons/hugeicons.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../theme/colors.dart';
 import '../../../widgets/adaptive_pull_down/adaptive_menu_item.dart';
@@ -332,7 +333,7 @@ class _RecipePageState extends ConsumerState<RecipePage> {
                 items: [
                   AdaptiveMenuItem(
                     title: 'Edit Recipe',
-                    icon: const Icon(CupertinoIcons.pencil),
+                    icon: const HugeIcon(icon: HugeIcons.strokeRoundedPencilEdit01),
                     onTap: () {
                       final recipeAsync = ref.read(recipe_provider.recipeByIdStreamProvider(widget.recipeId));
                       recipeAsync.whenOrNull(

@@ -1,6 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:hugeicons/hugeicons.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:wolt_modal_sheet/wolt_modal_sheet.dart';
 import '../../../providers/shopping_list_provider.dart';
@@ -172,8 +173,8 @@ class ShoppingListSelectionPageContent extends ConsumerWidget {
                             color: CupertinoColors.destructiveRed,
                             borderRadius: borderRadius,
                           ),
-                          child: const Icon(
-                            CupertinoIcons.trash,
+                          child: HugeIcon(
+                            icon: HugeIcons.strokeRoundedDelete02,
                             color: CupertinoColors.white,
                             size: 20,
                           ),

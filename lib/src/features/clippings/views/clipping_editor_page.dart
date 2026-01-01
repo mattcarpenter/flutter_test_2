@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:hugeicons/hugeicons.dart';
 import 'package:flutter_quill/flutter_quill.dart' as quill;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -585,7 +586,7 @@ class _ClippingEditorPageState extends ConsumerState<ClippingEditorPage>
           child: _buildConversionButton(
             context: context,
             text: 'Convert to Recipe',
-            icon: CupertinoIcons.sparkles,
+            icon: HugeIcon(icon: HugeIcons.strokeRoundedAiMagic),
             onPressed: hasContent ? _handleConvertToRecipe : null,
             enabled: hasContent,
           ),
@@ -595,7 +596,7 @@ class _ClippingEditorPageState extends ConsumerState<ClippingEditorPage>
           child: _buildConversionButton(
             context: context,
             text: 'To Shopping List',
-            icon: CupertinoIcons.list_bullet,
+            icon: HugeIcon(icon: HugeIcons.strokeRoundedLeftToRightListBullet),
             onPressed: hasContent ? _handleAddToShoppingList : null,
             enabled: hasContent,
           ),
@@ -626,7 +627,7 @@ class _ClippingEditorPageState extends ConsumerState<ClippingEditorPage>
   Widget _buildConversionButton({
     required BuildContext context,
     required String text,
-    required IconData icon,
+    required Widget icon,
     VoidCallback? onPressed,
     bool enabled = true,
   }) {
@@ -649,10 +650,9 @@ class _ClippingEditorPageState extends ConsumerState<ClippingEditorPage>
       child: Row(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(
-            icon,
-            size: 16,
-            color: contentColor,
+          IconTheme(
+            data: IconThemeData(size: 16, color: contentColor),
+            child: icon,
           ),
           const SizedBox(width: 6),
           Flexible(
@@ -714,18 +714,18 @@ class _ClippingEditorPageState extends ConsumerState<ClippingEditorPage>
             items: [
               AdaptiveMenuItem(
                 title: 'Convert to Recipe',
-                icon: const Icon(CupertinoIcons.sparkles),
+                icon: const HugeIcon(icon: HugeIcons.strokeRoundedAiMagic),
                 onTap: hasContent ? _handleConvertToRecipe : null,
               ),
               AdaptiveMenuItem(
                 title: 'To Shopping List',
-                icon: const Icon(CupertinoIcons.list_bullet),
+                icon: const HugeIcon(icon: HugeIcons.strokeRoundedLeftToRightListBullet),
                 onTap: hasContent ? _handleAddToShoppingList : null,
               ),
               AdaptiveMenuItem.divider(),
               AdaptiveMenuItem(
                 title: 'Delete Clipping',
-                icon: const Icon(CupertinoIcons.trash),
+                icon: const HugeIcon(icon: HugeIcons.strokeRoundedDelete02),
                 onTap: _deleteClipping,
                 isDestructive: true,
               ),
@@ -789,8 +789,8 @@ class _ClippingEditorPageState extends ConsumerState<ClippingEditorPage>
             toolbarSectionSpacing: AppSpacing.sm,
             customButtons: [
               quill.QuillToolbarCustomButtonOptions(
-                icon: Icon(
-                  CupertinoIcons.link,
+                icon: HugeIcon(
+                  icon: HugeIcons.strokeRoundedLink01,
                   size: 20,
                   color: quill.QuillTextLink.isSelected(_contentController)
                       ? AppColors.of(context).primary

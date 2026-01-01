@@ -1,6 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:hugeicons/hugeicons.dart';
 
 import '../../../../database/database.dart';
 import '../../../constants/folder_constants.dart';
@@ -78,17 +79,17 @@ class _SortFoldersPageState extends ConsumerState<SortFoldersPage> {
       _SortOption(
         value: 'newest',
         title: 'Newest First',
-        icon: CupertinoIcons.time,
+        icon: HugeIcons.strokeRoundedTime01,
       ),
       _SortOption(
         value: 'oldest',
         title: 'Oldest First',
-        icon: CupertinoIcons.clock,
+        icon: HugeIcons.strokeRoundedClock01,
       ),
       _SortOption(
         value: 'custom',
         title: 'Custom',
-        icon: CupertinoIcons.hand_draw,
+        icon: HugeIcons.strokeRoundedEdit01,
       ),
     ];
 
@@ -287,7 +288,7 @@ class _SortFoldersPageState extends ConsumerState<SortFoldersPage> {
 class _SortOption {
   final String value;
   final String title;
-  final IconData icon;
+  final dynamic icon; // HugeIcons return List<List<dynamic>>, IconData for Cupertino
 
   const _SortOption({
     required this.value,
@@ -353,14 +354,11 @@ class _DraggableFolderItem extends StatelessWidget {
     final colors = AppColors.of(context);
 
     // Determine icon based on folder type
-    IconData folderIcon;
-    if (item.isUncategorized) {
-      folderIcon = CupertinoIcons.tray;
-    } else if (item.isSmartFolder) {
-      folderIcon = CupertinoIcons.wand_stars;
-    } else {
-      folderIcon = CupertinoIcons.folder;
-    }
+    final folderIcon = item.isUncategorized
+        ? HugeIcons.strokeRoundedInbox
+        : item.isSmartFolder
+            ? HugeIcons.strokeRoundedMagicWand01
+            : HugeIcons.strokeRoundedFolder01;
 
     return Container(
       height: 48,
@@ -378,8 +376,8 @@ class _DraggableFolderItem extends StatelessWidget {
             index: index,
             child: Padding(
               padding: EdgeInsets.symmetric(horizontal: AppSpacing.xs),
-              child: Icon(
-                CupertinoIcons.line_horizontal_3,
+              child: HugeIcon(
+                icon: HugeIcons.strokeRoundedDragDropVertical,
                 color: colors.textTertiary,
                 size: 20,
               ),
@@ -389,8 +387,8 @@ class _DraggableFolderItem extends StatelessWidget {
           SizedBox(width: AppSpacing.sm),
 
           // Folder icon
-          Icon(
-            folderIcon,
+          HugeIcon(
+            icon: folderIcon,
             color: colors.primary,
             size: 20,
           ),

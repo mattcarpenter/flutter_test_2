@@ -2,6 +2,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:hugeicons/hugeicons.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../../providers/household_provider.dart';
 import '../../../services/logging/app_logger.dart';
@@ -35,7 +36,7 @@ class ClippingsTab extends ConsumerWidget {
     final menuButton = onMenuPressed != null
         ? GestureDetector(
             onTap: onMenuPressed,
-            child: const Icon(CupertinoIcons.bars),
+            child: const HugeIcon(icon: HugeIcons.strokeRoundedMenu01),
           )
         : null;
 
@@ -69,8 +70,8 @@ class ClippingsTab extends ConsumerWidget {
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Icon(
-                        CupertinoIcons.doc_text,
+                      HugeIcon(
+                        icon: HugeIcons.strokeRoundedFile01,
                         size: 48,
                         color: AppColors.of(context).textTertiary,
                       ),
@@ -130,7 +131,7 @@ class ClippingsTab extends ConsumerWidget {
             items: [
               AdaptiveMenuItem(
                 title: 'New Clipping',
-                icon: const Icon(CupertinoIcons.doc_text_fill),
+                icon: const HugeIcon(icon: HugeIcons.strokeRoundedFile01),
                 onTap: () => _createNewClipping(context, ref),
               ),
             ],

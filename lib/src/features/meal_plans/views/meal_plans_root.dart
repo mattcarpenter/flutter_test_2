@@ -1,5 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:hugeicons/hugeicons.dart';
 import '../../../mobile/utils/adaptive_sliver_page.dart';
 import '../../../providers/meal_plan_provider.dart';
 import '../widgets/meal_plan_date_card.dart';
@@ -53,7 +54,7 @@ class _MealPlansRootState extends ConsumerState<MealPlansRoot> {
       },
       child: AdaptiveSliverPage(
         title: 'Meal Plans',
-        leading: const Icon(CupertinoIcons.calendar),
+        leading: const HugeIcon(icon: HugeIcons.strokeRoundedCalendar01),
         slivers: [
           SliverPadding(
             padding: const EdgeInsets.all(16.0),

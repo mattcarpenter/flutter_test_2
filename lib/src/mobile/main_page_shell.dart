@@ -3,6 +3,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:cupertino_sidebar/cupertino_sidebar.dart';
 import 'package:go_router/go_router.dart';
+import 'package:hugeicons/hugeicons.dart';
 
 import '../widgets/menu/menu.dart';
 
@@ -162,25 +163,25 @@ class MainPageShellState extends State<MainPageShell> with TickerProviderStateMi
             _switchToTab(context, index);
           }
         },
-        items: const [
+        items: [
           BottomNavigationBarItem(
-            icon: Icon(CupertinoIcons.bars),
+            icon: HugeIcon(icon: HugeIcons.strokeRoundedMenu01, strokeWidth: 1.75),
             label: 'More',
           ),
           BottomNavigationBarItem(
-            icon: Icon(CupertinoIcons.book),
+            icon: HugeIcon(icon: HugeIcons.strokeRoundedBook01, strokeWidth: 1.75),
             label: 'Recipes',
           ),
           BottomNavigationBarItem(
-            icon: Icon(CupertinoIcons.cart),
+            icon: HugeIcon(icon: HugeIcons.strokeRoundedShoppingCart01, strokeWidth: 1.75),
             label: 'Shopping',
           ),
           BottomNavigationBarItem(
-            icon: Icon(CupertinoIcons.calendar),
+            icon: HugeIcon(icon: HugeIcons.strokeRoundedCalendar01, strokeWidth: 1.75),
             label: 'Meal Plan',
           ),
           BottomNavigationBarItem(
-            icon: Icon(CupertinoIcons.archivebox),
+            icon: HugeIcon(icon: HugeIcons.strokeRoundedFridge, strokeWidth: 1.75),
             label: 'Pantry',
           ),
         ],

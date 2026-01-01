@@ -1,4 +1,5 @@
 import 'package:flutter/cupertino.dart';
+import 'package:hugeicons/hugeicons.dart';
 import '../../../../database/models/pantry_items.dart';
 import '../../../theme/colors.dart';
 import '../../../widgets/stock_chip.dart';
@@ -58,8 +59,8 @@ class PantryUpdateItemTile extends StatelessWidget {
                       : CupertinoColors.transparent,
                 ),
                 child: isChecked
-                    ? const Icon(
-                        CupertinoIcons.check_mark,
+                    ? HugeIcon(
+                        icon: HugeIcons.strokeRoundedCheckmarkCircle01,
                         size: 16,
                         color: CupertinoColors.white,
                       )

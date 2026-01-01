@@ -1,4 +1,5 @@
 import 'package:flutter/cupertino.dart';
+import 'package:hugeicons/hugeicons.dart';
 import '../../../theme/colors.dart';
 import '../../../theme/spacing.dart';
 import '../../../theme/typography.dart';
@@ -73,8 +74,8 @@ class _SettingsRowState extends State<SettingsRow> {
     if (widget.trailing != null) {
       trailingWidget = widget.trailing!;
     } else if (widget.showChevron && widget.onTap != null) {
-      trailingWidget = Icon(
-        CupertinoIcons.chevron_right,
+      trailingWidget = HugeIcon(
+        icon: HugeIcons.strokeRoundedArrowRight01,
         color: widget.enabled ? colors.textTertiary : colors.textDisabled,
         size: 16,
       );

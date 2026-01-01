@@ -1,4 +1,5 @@
 import 'package:flutter/cupertino.dart';
+import 'package:hugeicons/hugeicons.dart';
 
 import '../../../theme/colors.dart';
 import '../../../theme/spacing.dart';
@@ -57,7 +58,7 @@ class _SectionLabel extends StatelessWidget {
 
 /// Value proposition bullet item
 class _ValuePropItem extends StatelessWidget {
-  final IconData? icon;
+  final List<List<dynamic>>? icon;
   final String text;
   final Color? textColor;
 
@@ -79,8 +80,8 @@ class _ValuePropItem extends StatelessWidget {
           icon != null
               ? Padding(
                   padding: const EdgeInsets.only(top: 4),
-                  child: Icon(
-                    icon,
+                  child: HugeIcon(
+                    icon: icon!,
                     size: 14,
                     color: colors.textPrimary,
                   ),
@@ -158,8 +159,8 @@ class _ShareRecipePreviewResultContentState
             // Header row: Title + Plus pill
             Row(
               children: [
-                Icon(
-                  CupertinoIcons.sparkles,
+                HugeIcon(
+                  icon: HugeIcons.strokeRoundedAiMagic,
                   size: 20,
                   color: colors.textPrimary,
                 ),
@@ -299,8 +300,8 @@ class _ShareRecipePreviewResultContentState
                       Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          Icon(
-                            CupertinoIcons.wand_stars,
+                          HugeIcon(
+                            icon: HugeIcons.strokeRoundedMagicWand01,
                             size: 20,
                             color: colors.textPrimary,
                           ),
@@ -336,22 +337,22 @@ class _ShareRecipePreviewResultContentState
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             _ValuePropItem(
-                              icon: CupertinoIcons.check_mark,
+                              icon: HugeIcons.strokeRoundedCheckmarkCircle01,
                               text: 'AI extracts ingredients and steps',
                               textColor: colors.textPrimary,
                             ),
                             _ValuePropItem(
-                              icon: CupertinoIcons.check_mark,
+                              icon: HugeIcons.strokeRoundedCheckmarkCircle01,
                               text: 'Works with any recipe page',
                               textColor: colors.textPrimary,
                             ),
                             _ValuePropItem(
-                              icon: CupertinoIcons.check_mark,
+                              icon: HugeIcons.strokeRoundedCheckmarkCircle01,
                               text: 'Import from social media too',
                               textColor: colors.textPrimary,
                             ),
                             _ValuePropItem(
-                              icon: CupertinoIcons.check_mark,
+                              icon: HugeIcons.strokeRoundedCheckmarkCircle01,
                               text: 'Unlimited recipe imports',
                               textColor: colors.textPrimary,
                             ),
@@ -377,7 +378,7 @@ class _ShareRecipePreviewResultContentState
                 fullWidth: true,
                 loading: _isLoading,
                 leadingIcon:
-                    _isLoading ? null : const Icon(CupertinoIcons.sparkles, size: 18),
+                    _isLoading ? null : const HugeIcon(icon: HugeIcons.strokeRoundedAiMagic, size: 18),
               ),
             ),
 

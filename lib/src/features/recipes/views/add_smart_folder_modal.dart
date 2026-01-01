@@ -1,6 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:hugeicons/hugeicons.dart';
 import 'package:provider/provider.dart' as provider;
 import 'package:wolt_modal_sheet/wolt_modal_sheet.dart';
 
@@ -94,7 +95,7 @@ class _TypeSelectionContent extends StatelessWidget {
 
           // Tags option card
           _TypeOptionCard(
-            icon: CupertinoIcons.tag,
+            icon: HugeIcon(icon: HugeIcons.strokeRoundedTag01, size: 24),
             title: 'By Tags',
             description: 'Group recipes that have specific tags like "Vegetarian" or "Quick Meals"',
             onTap: () {
@@ -111,7 +112,7 @@ class _TypeSelectionContent extends StatelessWidget {
 
           // Ingredients option card
           _TypeOptionCard(
-            icon: CupertinoIcons.list_bullet,
+            icon: HugeIcon(icon: HugeIcons.strokeRoundedLeftToRightListBullet, size: 24),
             title: 'By Ingredients',
             description: 'Group recipes that contain specific ingredients like "chicken" or "pasta"',
             onTap: () {
@@ -132,7 +133,7 @@ class _TypeSelectionContent extends StatelessWidget {
 }
 
 class _TypeOptionCard extends StatelessWidget {
-  final IconData icon;
+  final Widget icon;
   final String title;
   final String description;
   final VoidCallback onTap;
@@ -167,10 +168,9 @@ class _TypeOptionCard extends StatelessWidget {
                 color: colors.primary.withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(10),
               ),
-              child: Icon(
-                icon,
-                color: colors.primary,
-                size: 24,
+              child: IconTheme(
+                data: IconThemeData(color: colors.primary, size: 24),
+                child: icon,
               ),
             ),
             SizedBox(width: AppSpacing.lg),
@@ -195,8 +195,8 @@ class _TypeOptionCard extends StatelessWidget {
                 ],
               ),
             ),
-            Icon(
-              CupertinoIcons.chevron_right,
+            HugeIcon(
+              icon: HugeIcons.strokeRoundedArrowRight01,
               color: colors.textTertiary,
               size: 20,
             ),
@@ -888,11 +888,17 @@ class _TagSelectionRow extends StatelessWidget {
                 style: AppTypography.body.copyWith(color: colors.textPrimary),
               ),
             ),
-            Icon(
-              isSelected ? CupertinoIcons.checkmark_circle_fill : CupertinoIcons.circle,
-              color: isSelected ? colors.primary : colors.textTertiary,
-              size: 22,
-            ),
+            isSelected
+                ? HugeIcon(
+                    icon: HugeIcons.strokeRoundedCheckmarkCircle02,
+                    color: colors.primary,
+                    size: 22,
+                  )
+                : Icon(
+                    CupertinoIcons.circle,
+                    color: colors.textTertiary,
+                    size: 22,
+                  ),
           ],
         ),
       ),
@@ -957,14 +963,14 @@ class _IngredientResultRow extends StatelessWidget {
               ),
             ),
             if (isSelected)
-              Icon(
-                CupertinoIcons.checkmark_circle_fill,
+              HugeIcon(
+                icon: HugeIcons.strokeRoundedCheckmarkCircle02,
                 color: colors.primary,
                 size: 22,
               )
             else
-              Icon(
-                CupertinoIcons.plus_circle,
+              HugeIcon(
+                icon: HugeIcons.strokeRoundedAddCircle,
                 color: colors.textTertiary,
                 size: 22,
               ),

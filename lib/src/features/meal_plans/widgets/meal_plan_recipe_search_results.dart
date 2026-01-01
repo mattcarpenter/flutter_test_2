@@ -1,5 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:hugeicons/hugeicons.dart';
 import '../../../../database/database.dart';
 import '../../../providers/recipe_provider.dart' as recipe_provider;
 
@@ -47,8 +48,8 @@ class MealPlanRecipeSearchResults extends ConsumerWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(
-              CupertinoIcons.doc_text_search,
+            HugeIcon(
+              icon: HugeIcons.strokeRoundedFileSearch,
               size: 48,
               color: CupertinoColors.tertiaryLabel.resolveFrom(context),
             ),
@@ -125,8 +126,8 @@ class _RecipeSearchResultTile extends StatelessWidget {
                 color: CupertinoColors.activeBlue,
                 borderRadius: BorderRadius.circular(8),
               ),
-              child: const Icon(
-                CupertinoIcons.book,
+              child: const HugeIcon(
+                icon: HugeIcons.strokeRoundedBook01,
                 color: CupertinoColors.white,
                 size: 20,
               ),
@@ -167,8 +168,8 @@ class _RecipeSearchResultTile extends StatelessWidget {
                   Row(
                     children: [
                       if (recipe.totalTime != null) ...[
-                        Icon(
-                          CupertinoIcons.clock,
+                        HugeIcon(
+                          icon: HugeIcons.strokeRoundedClock01,
                           size: 12,
                           color: CupertinoColors.tertiaryLabel.resolveFrom(context),
                         ),
@@ -192,8 +193,8 @@ class _RecipeSearchResultTile extends StatelessWidget {
                           ),
                           const SizedBox(width: 12),
                         ],
-                        Icon(
-                          CupertinoIcons.person_2,
+                        HugeIcon(
+                          icon: HugeIcons.strokeRoundedUserGroup,
                           size: 12,
                           color: CupertinoColors.tertiaryLabel.resolveFrom(context),
                         ),
@@ -239,8 +240,8 @@ class _RecipeSearchResultTile extends StatelessWidget {
             
             // Add button indicator
             const SizedBox(width: 8),
-            Icon(
-              CupertinoIcons.add_circled,
+            HugeIcon(
+              icon: HugeIcons.strokeRoundedAddCircle,
               size: 24,
               color: CupertinoColors.activeBlue.resolveFrom(context),
             ),

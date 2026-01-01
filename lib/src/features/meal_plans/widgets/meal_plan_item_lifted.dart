@@ -1,6 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:hugeicons/hugeicons.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:super_context_menu/super_context_menu.dart';
@@ -217,11 +218,7 @@ class _MealPlanItemLiftedState extends ConsumerState<MealPlanItemLifted>
                     color: _getItemColor(context),
                     borderRadius: BorderRadius.circular(6),
                   ),
-                  child: Icon(
-                    _getItemIcon(),
-                    size: 16,
-                    color: CupertinoColors.white,
-                  ),
+                  child: _getItemIcon(),
                 ),
 
           const SizedBox(width: 8),
@@ -278,15 +275,15 @@ class _MealPlanItemLiftedState extends ConsumerState<MealPlanItemLifted>
                   feedback: _buildLiftedTile(context),
                   child: Container(
                     padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
-                    child: Icon(
-                      CupertinoIcons.line_horizontal_3,
+                    child: HugeIcon(
+                      icon: HugeIcons.strokeRoundedDragDropVertical,
                       size: 16,
                       color: colors.textTertiary,
                     ),
                   ),
                 )
-              : Icon(
-                  CupertinoIcons.line_horizontal_3,
+              : HugeIcon(
+                  icon: HugeIcons.strokeRoundedDragDropVertical,
                   size: 16,
                   color: colors.textTertiary,
                 ),
@@ -421,14 +418,26 @@ class _MealPlanItemLiftedState extends ConsumerState<MealPlanItemLifted>
     );
   }
 
-  IconData _getItemIcon() {
+  Widget _getItemIcon() {
     switch (widget.item.type) {
       case 'recipe':
-        return CupertinoIcons.book;
+        return HugeIcon(
+          icon: HugeIcons.strokeRoundedBook01,
+          size: 16,
+          color: CupertinoColors.white,
+        );
       case 'note':
-        return CupertinoIcons.doc_text;
+        return HugeIcon(
+          icon: HugeIcons.strokeRoundedFile01,
+          size: 16,
+          color: CupertinoColors.white,
+        );
       default:
-        return CupertinoIcons.square;
+        return const Icon(
+          CupertinoIcons.square,
+          size: 16,
+          color: CupertinoColors.white,
+        );
     }
   }
 

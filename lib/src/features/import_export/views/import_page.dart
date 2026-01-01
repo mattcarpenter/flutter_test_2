@@ -2,6 +2,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:file_picker/file_picker.dart';
+import 'package:hugeicons/hugeicons.dart';
 
 import '../../../mobile/utils/adaptive_sliver_page.dart';
 import '../../../theme/spacing.dart';
@@ -184,8 +185,8 @@ class _ImportSourceRowState extends State<_ImportSourceRow> {
                 ],
               ),
             ),
-            Icon(
-              CupertinoIcons.chevron_right,
+            HugeIcon(
+              icon: HugeIcons.strokeRoundedArrowRight01,
               color: colors.textSecondary,
               size: 16,
             ),

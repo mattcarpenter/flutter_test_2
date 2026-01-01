@@ -2,6 +2,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:hugeicons/hugeicons.dart';
 import 'package:provider/provider.dart' as provider;
 import 'package:uuid/uuid.dart';
 import 'package:wolt_modal_sheet/wolt_modal_sheet.dart';
@@ -287,8 +288,8 @@ class _PantryToggle extends StatelessWidget {
                   ),
                 ),
                 SizedBox(width: 4),
-                Icon(
-                  CupertinoIcons.chevron_right,
+                HugeIcon(
+                  icon: HugeIcons.strokeRoundedArrowRight01,
                   size: 16,
                   color: colors.primary,
                 ),
@@ -855,8 +856,8 @@ class _RecipeIdeaCard extends StatelessWidget {
             ),
             // Chevron on right, centered vertically
             SizedBox(width: AppSpacing.md),
-            Icon(
-              CupertinoIcons.chevron_right,
+            HugeIcon(
+              icon: HugeIcons.strokeRoundedArrowRight01,
               size: 18,
               color: colors.textSecondary,
             ),

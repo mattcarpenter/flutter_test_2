@@ -1,5 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:hugeicons/hugeicons.dart';
 import '../../../providers/meal_plan_provider.dart';
 import '../views/add_recipe_to_meal_plan_modal.dart';
 import '../views/add_note_to_meal_plan_modal.dart';
@@ -25,7 +26,7 @@ class MealPlanContextMenu {
             child: const Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Icon(CupertinoIcons.book, size: 18),
+                HugeIcon(icon: HugeIcons.strokeRoundedBook01, size: 18),
                 SizedBox(width: 8),
                 Text('Add Recipe'),
               ],
@@ -39,7 +40,7 @@ class MealPlanContextMenu {
             child: const Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Icon(CupertinoIcons.doc_text, size: 18),
+                HugeIcon(icon: HugeIcons.strokeRoundedFile01, size: 18),
                 SizedBox(width: 8),
                 Text('Add Note'),
               ],
@@ -73,7 +74,7 @@ class MealPlanContextMenu {
             child: const Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Icon(CupertinoIcons.cart_badge_plus, size: 18),
+                HugeIcon(icon: HugeIcons.strokeRoundedShoppingCartAdd01, size: 18),
                 SizedBox(width: 8),
                 Text('Add to Shopping List'),
               ],
@@ -88,7 +89,7 @@ class MealPlanContextMenu {
             child: const Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Icon(CupertinoIcons.clear, size: 18),
+                HugeIcon(icon: HugeIcons.strokeRoundedCancel01, size: 18),
                 SizedBox(width: 8),
                 Text('Clear Items'),
               ],

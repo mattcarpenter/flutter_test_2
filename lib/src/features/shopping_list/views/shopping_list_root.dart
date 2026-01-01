@@ -1,6 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:hugeicons/hugeicons.dart';
 import '../../../../database/database.dart';
 import '../../../mobile/utils/adaptive_sliver_page.dart';
 import '../../../providers/shopping_list_provider.dart';
@@ -88,26 +89,26 @@ class ShoppingListTab extends ConsumerWidget {
               },
             ),
           ],
-          leading: const Icon(CupertinoIcons.cart),
+          leading: const HugeIcon(icon: HugeIcons.strokeRoundedShoppingCart01),
           trailing: AdaptivePullDownButton(
             items: [
               AdaptiveMenuItem(
                 title: 'Manage Lists',
-                icon: const Icon(CupertinoIcons.list_bullet),
+                icon: const HugeIcon(icon: HugeIcons.strokeRoundedLeftToRightListBullet),
                 onTap: () {
                   showShoppingListSelectionModal(context, ref);
                 },
               ),
               AdaptiveMenuItem(
                 title: 'Add Item',
-                icon: const Icon(CupertinoIcons.cart_badge_plus),
+                icon: const HugeIcon(icon: HugeIcons.strokeRoundedShoppingCartAdd01),
                 onTap: () {
                   showAddShoppingListItemModal(context, currentListId);
                 },
               ),
               AdaptiveMenuItem(
                 title: 'Clear All Items',
-                icon: const Icon(CupertinoIcons.clear),
+                icon: const HugeIcon(icon: HugeIcons.strokeRoundedCancel01),
                 isDestructive: true,
                 onTap: () async {
                   final items = itemsAsyncValue.valueOrNull ?? [];
@@ -161,7 +162,7 @@ class ShoppingListTab extends ConsumerWidget {
               ),
               AdaptiveMenuItem(
                 title: 'Delete List',
-                icon: const Icon(CupertinoIcons.trash),
+                icon: const HugeIcon(icon: HugeIcons.strokeRoundedDelete02),
                 isDestructive: true,
                 onTap: () async {
                   // Check if trying to delete the default list

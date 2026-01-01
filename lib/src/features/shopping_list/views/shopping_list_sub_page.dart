@@ -1,4 +1,5 @@
 import 'package:flutter/cupertino.dart';
+import 'package:hugeicons/hugeicons.dart';
 import '../../../mobile/utils/adaptive_sliver_page.dart';
 
 class ShoppingListSubPage extends StatelessWidget {
@@ -13,7 +14,7 @@ class ShoppingListSubPage extends StatelessWidget {
       body: const Center(
         child: Text("Shopping list sub page 🛒"),
       ),
-      trailing: const Icon(CupertinoIcons.add_circled),
+      trailing: const HugeIcon(icon: HugeIcons.strokeRoundedAddCircle),
       previousPageTitle: 'Shopping List',
       automaticallyImplyLeading: true,
     );

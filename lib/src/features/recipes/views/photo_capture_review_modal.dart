@@ -4,6 +4,7 @@ import 'dart:io';
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:hugeicons/hugeicons.dart';
 import 'package:flutter_image_compress/flutter_image_compress.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:image_picker/image_picker.dart';
@@ -827,8 +828,8 @@ class _PhotoCaptureReviewContentState extends ConsumerState<_PhotoCaptureReviewC
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(
-              CupertinoIcons.camera,
+            HugeIcon(
+              icon: HugeIcons.strokeRoundedCamera01,
               size: 28,
               color: AppColors.of(context).textSecondary,
             ),

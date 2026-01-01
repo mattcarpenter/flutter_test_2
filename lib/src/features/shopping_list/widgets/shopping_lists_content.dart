@@ -1,6 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:hugeicons/hugeicons.dart';
 import '../../../providers/shopping_list_provider.dart';
 import '../../../theme/colors.dart';
 import '../../../theme/spacing.dart';
@@ -185,8 +186,8 @@ class ShoppingListsContent extends ConsumerWidget {
                           color: CupertinoColors.destructiveRed,
                           borderRadius: borderRadius,
                         ),
-                        child: const Icon(
-                          CupertinoIcons.trash,
+                        child: HugeIcon(
+                          icon: HugeIcons.strokeRoundedDelete02,
                           color: CupertinoColors.white,
                           size: 20,
                         ),

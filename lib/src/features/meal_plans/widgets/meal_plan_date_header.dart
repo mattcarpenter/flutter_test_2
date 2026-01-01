@@ -1,6 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:hugeicons/hugeicons.dart';
 import 'package:intl/intl.dart';
 import '../../../widgets/app_circle_button.dart';
 import '../../../widgets/adaptive_pull_down/adaptive_menu_item.dart';
@@ -76,12 +77,12 @@ class MealPlanDateHeader extends StatelessWidget {
             items: [
               AdaptiveMenuItem(
                 title: 'Add Recipe',
-                icon: const Icon(CupertinoIcons.book),
+                icon: const HugeIcon(icon: HugeIcons.strokeRoundedBook01),
                 onTap: () => _showAddRecipeModal(context, dateString, ref),
               ),
               AdaptiveMenuItem(
                 title: 'Add Note',
-                icon: const Icon(CupertinoIcons.doc_text),
+                icon: const HugeIcon(icon: HugeIcons.strokeRoundedFile01),
                 onTap: () => _showAddNoteModal(context, dateString, ref),
               ),
             ],
@@ -98,12 +99,12 @@ class MealPlanDateHeader extends StatelessWidget {
             items: [
               AdaptiveMenuItem(
                 title: 'Add to Shopping List',
-                icon: const Icon(CupertinoIcons.cart_badge_plus),
+                icon: const HugeIcon(icon: HugeIcons.strokeRoundedShoppingCartAdd01),
                 onTap: () => _showAddToShoppingListModal(context, dateString, ref),
               ),
               AdaptiveMenuItem(
                 title: 'Clear Items',
-                icon: const Icon(CupertinoIcons.clear),
+                icon: const HugeIcon(icon: HugeIcons.strokeRoundedCancel01),
                 onTap: () => _confirmClearItems(context, dateString, ref),
                 isDestructive: true,
               ),

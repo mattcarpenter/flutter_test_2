@@ -1,4 +1,5 @@
 import 'package:flutter/cupertino.dart';
+import 'package:hugeicons/hugeicons.dart';
 import 'package:flutter/services.dart';
 import '../../../theme/colors.dart';
 import '../../../theme/spacing.dart';
@@ -45,10 +46,10 @@ class HouseholdInviteTile extends StatelessWidget {
             // Header row: icon, name, status badge
             Row(
               children: [
-                Icon(
-                  invite.inviteType == HouseholdInviteType.email
-                      ? CupertinoIcons.mail
-                      : CupertinoIcons.qrcode,
+                HugeIcon(
+                  icon: invite.inviteType == HouseholdInviteType.email
+                      ? HugeIcons.strokeRoundedMail01
+                      : HugeIcons.strokeRoundedQrCode,
                   color: AppColors.of(context).primary,
                   size: 20,
                 ),

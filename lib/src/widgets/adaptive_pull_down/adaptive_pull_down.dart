@@ -1,6 +1,7 @@
 import 'dart:io' show Platform;
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:hugeicons/hugeicons.dart';
 import 'package:pull_down_button/pull_down_button.dart';
 import 'adaptive_menu_item.dart'; // if you want to keep the model in a separate file
 
@@ -14,6 +15,27 @@ class AdaptivePullDownButton extends StatelessWidget {
     required this.items,
   }) : super(key: key);
 
+  /// Extract IconData from a widget if possible (Icon or HugeIcon)
+  IconData? _getIconData(Widget icon) {
+    if (icon is Icon) {
+      return icon.icon;
+    } else if (icon is HugeIcon) {
+      // HugeIcons don't use IconData, return null to use iconWidget instead
+      return null;
+    }
+    return null;
+  }
+
+  /// Extract color from a widget if possible (Icon or HugeIcon)
+  Color? _getIconColor(Widget icon) {
+    if (icon is Icon) {
+      return icon.color;
+    } else if (icon is HugeIcon) {
+      return icon.color;
+    }
+    return null;
+  }
+
   @override
   Widget build(BuildContext context) {
     if (Platform.isIOS) {
@@ -25,19 +47,39 @@ class AdaptivePullDownButton extends StatelessWidget {
             if (item.isDivider) {
               menuItems.add(const PullDownMenuDivider.large());
             } else if (item.isDestructive) {
-              menuItems.add(PullDownMenuItem(
-                title: item.title,
-                icon: item.icon.icon,
-                onTap: item.onTap,
-                isDestructive: true,
-              ));
+              final iconData = _getIconData(item.icon);
+              if (iconData != null) {
+                menuItems.add(PullDownMenuItem(
+                  title: item.title,
+                  icon: iconData,
+                  onTap: item.onTap,
+                  isDestructive: true,
+                ));
+              } else {
+                menuItems.add(PullDownMenuItem(
+                  title: item.title,
+                  iconWidget: item.icon,
+                  onTap: item.onTap,
+                  isDestructive: true,
+                ));
+              }
             } else {
-              menuItems.add(PullDownMenuItem(
-                title: item.title,
-                icon: item.icon.icon,
-                iconColor: item.icon.color,
-                onTap: item.onTap,
-              ));
+              final iconData = _getIconData(item.icon);
+              final iconColor = _getIconColor(item.icon);
+              if (iconData != null) {
+                menuItems.add(PullDownMenuItem(
+                  title: item.title,
+                  icon: iconData,
+                  iconColor: iconColor,
+                  onTap: item.onTap,
+                ));
+              } else {
+                menuItems.add(PullDownMenuItem(
+                  title: item.title,
+                  iconWidget: item.icon,
+                  onTap: item.onTap,
+                ));
+              }
             }
           }
           return menuItems;
@@ -69,9 +111,6 @@ class AdaptivePullDownButton extends StatelessWidget {
               final textStyle = item.isDestructive
                   ? const TextStyle(color: Colors.red)
                   : null;
-              final iconColor = item.isDestructive
-                  ? Colors.red
-                  : item.icon.color;
 
               menuItems.add(PopupMenuItem<AdaptiveMenuItem>(
                 value: item,
@@ -79,10 +118,7 @@ class AdaptivePullDownButton extends StatelessWidget {
                   children: [
                     Padding(
                       padding: const EdgeInsets.only(right: 8.0),
-                      child: Icon(
-                        item.icon.icon,
-                        color: iconColor,
-                      ),
+                      child: item.icon,
                     ),
                     Text(item.title, style: textStyle),
                   ],

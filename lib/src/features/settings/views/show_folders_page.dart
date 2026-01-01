@@ -1,4 +1,5 @@
 import 'package:flutter/cupertino.dart';
+import 'package:hugeicons/hugeicons.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../mobile/utils/adaptive_sliver_page.dart';
@@ -104,8 +105,8 @@ class _FolderCountPicker extends StatelessWidget {
                 color: count > 3 ? colors.primary : colors.surfaceVariant,
                 borderRadius: BorderRadius.circular(8),
               ),
-              child: Icon(
-                CupertinoIcons.minus,
+              child: HugeIcon(
+                icon: HugeIcons.strokeRoundedMinusSign,
                 color: count > 3 ? CupertinoColors.white : colors.textDisabled,
                 size: 20,
               ),
@@ -138,8 +139,8 @@ class _FolderCountPicker extends StatelessWidget {
                 color: count < 20 ? colors.primary : colors.surfaceVariant,
                 borderRadius: BorderRadius.circular(8),
               ),
-              child: Icon(
-                CupertinoIcons.plus,
+              child: HugeIcon(
+                icon: HugeIcons.strokeRoundedAdd01,
                 color: count < 20 ? CupertinoColors.white : colors.textDisabled,
                 size: 20,
               ),

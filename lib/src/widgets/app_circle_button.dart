@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:hugeicons/hugeicons.dart';
 import '../theme/colors.dart';
 
 enum AppCircleButtonIcon {
@@ -37,20 +38,20 @@ class AppCircleButton extends StatelessWidget {
     this.colorTransitionProgress,
   }) : super(key: key);
 
-  IconData? get _iconData {
+  List<List<dynamic>>? get _hugeIconData {
     switch (icon) {
       case AppCircleButtonIcon.plus:
-        return Icons.add;
+        return HugeIcons.strokeRoundedAdd01;
       case AppCircleButtonIcon.ellipsis:
-        return Icons.more_horiz;
+        return HugeIcons.strokeRoundedMoreHorizontal;
       case AppCircleButtonIcon.pencil:
-        return Icons.edit;
+        return HugeIcons.strokeRoundedPencilEdit01;
       case AppCircleButtonIcon.close:
-        return Icons.close;
+        return HugeIcons.strokeRoundedCancel01;
       case AppCircleButtonIcon.back:
-        return Icons.arrow_back_rounded;
+        return HugeIcons.strokeRoundedArrowLeft01;
       case AppCircleButtonIcon.list:
-        return Icons.format_list_bulleted;
+        return HugeIcons.strokeRoundedLeftToRightListBullet;
       case AppCircleButtonIcon.info:
         return null; // Special case - rendered as text "i"
     }
@@ -128,17 +129,11 @@ class AppCircleButton extends StatelessWidget {
           color: backgroundColor,
         ),
         child: Center(
-          child: _iconData != null
-              ? Text(
-                  String.fromCharCode(_iconData!.codePoint),
-                  style: TextStyle(
-                    inherit: false,
-                    fontSize: size * 0.6, // Icon is 60% of button size for better visibility
-                    fontWeight: FontWeight.w900, // Maximum boldness
-                    fontFamily: _iconData!.fontFamily,
-                    package: _iconData!.fontPackage,
-                    color: iconColor,
-                  ),
+          child: _hugeIconData != null
+              ? HugeIcon(
+                  icon: _hugeIconData!,
+                  size: size * 0.6, // Icon is 60% of button size for better visibility
+                  color: iconColor,
                 )
               : Text(
                   'i',

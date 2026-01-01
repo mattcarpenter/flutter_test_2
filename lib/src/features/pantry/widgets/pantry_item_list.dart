@@ -1,5 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:hugeicons/hugeicons.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:disclosure/disclosure.dart';
 import '../../../../database/database.dart';
@@ -314,12 +315,15 @@ class _PantryItemListState extends ConsumerState<PantryItemList> {
                 items: [
                   AdaptiveMenuItem(
                     title: 'Set to Out of Stock',
-                    icon: Icon(
-                      item.stockStatus == StockStatus.outOfStock
-                          ? CupertinoIcons.checkmark_circle_fill
-                          : CupertinoIcons.circle,
-                      color: const Color(0xFFEF5350), // Red
-                    ),
+                    icon: item.stockStatus == StockStatus.outOfStock
+                        ? HugeIcon(
+                            icon: HugeIcons.strokeRoundedCheckmarkCircle02,
+                            color: const Color(0xFFEF5350), // Red
+                          )
+                        : Icon(
+                            CupertinoIcons.circle,
+                            color: const Color(0xFFEF5350), // Red
+                          ),
                     onTap: () {
                       ref.read(pantryNotifierProvider.notifier).updateItem(
                         id: item.id,
@@ -329,12 +333,15 @@ class _PantryItemListState extends ConsumerState<PantryItemList> {
                   ),
                   AdaptiveMenuItem(
                     title: 'Set to Low Stock',
-                    icon: Icon(
-                      item.stockStatus == StockStatus.lowStock
-                          ? CupertinoIcons.checkmark_circle_fill
-                          : CupertinoIcons.circle,
-                      color: const Color(0xFFFFA726), // Orange
-                    ),
+                    icon: item.stockStatus == StockStatus.lowStock
+                        ? HugeIcon(
+                            icon: HugeIcons.strokeRoundedCheckmarkCircle02,
+                            color: const Color(0xFFFFA726), // Orange
+                          )
+                        : Icon(
+                            CupertinoIcons.circle,
+                            color: const Color(0xFFFFA726), // Orange
+                          ),
                     onTap: () {
                       ref.read(pantryNotifierProvider.notifier).updateItem(
                         id: item.id,
@@ -344,12 +351,15 @@ class _PantryItemListState extends ConsumerState<PantryItemList> {
                   ),
                   AdaptiveMenuItem(
                     title: 'Set to In Stock',
-                    icon: Icon(
-                      item.stockStatus == StockStatus.inStock
-                          ? CupertinoIcons.checkmark_circle_fill
-                          : CupertinoIcons.circle,
-                      color: const Color(0xFF66BB6A), // Green
-                    ),
+                    icon: item.stockStatus == StockStatus.inStock
+                        ? HugeIcon(
+                            icon: HugeIcons.strokeRoundedCheckmarkCircle02,
+                            color: const Color(0xFF66BB6A), // Green
+                          )
+                        : Icon(
+                            CupertinoIcons.circle,
+                            color: const Color(0xFF66BB6A), // Green
+                          ),
                     onTap: () {
                       ref.read(pantryNotifierProvider.notifier).updateItem(
                         id: item.id,
@@ -360,7 +370,7 @@ class _PantryItemListState extends ConsumerState<PantryItemList> {
                   AdaptiveMenuItem.divider(),
                   AdaptiveMenuItem(
                     title: 'Edit',
-                    icon: const Icon(CupertinoIcons.pencil),
+                    icon: const HugeIcon(icon: HugeIcons.strokeRoundedPencilEdit01),
                     onTap: () {
                       showUpdatePantryItemModal(
                         context,
@@ -371,7 +381,7 @@ class _PantryItemListState extends ConsumerState<PantryItemList> {
                   AdaptiveMenuItem.divider(),
                   AdaptiveMenuItem(
                     title: 'Delete',
-                    icon: const Icon(CupertinoIcons.trash),
+                    icon: const HugeIcon(icon: HugeIcons.strokeRoundedDelete02),
                     isDestructive: true,
                     onTap: () {
                       _showDeleteConfirmation(context, ref, item);
@@ -447,8 +457,8 @@ class _PantryItemListState extends ConsumerState<PantryItemList> {
         onPressed: () {
           showAddPantryItemModal(context);
         },
-        icon: Icon(
-          CupertinoIcons.add,
+        icon: HugeIcon(
+          icon: HugeIcons.strokeRoundedAdd01,
           color: colors.textSecondary,
           size: 18,
         ),

@@ -4,6 +4,7 @@ import 'dart:io';
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:hugeicons/hugeicons.dart';
 import 'package:flutter_image_compress/flutter_image_compress.dart' as compress;
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -114,7 +115,7 @@ class _DiscoverPageState extends ConsumerState<DiscoverPage> {
             ? null
             : GestureDetector(
                 onTap: widget.onMenuPressed,
-                child: const Icon(CupertinoIcons.bars),
+                child: const HugeIcon(icon: HugeIcons.strokeRoundedMenu01),
               ),
         backgroundColor: colors.background,
       ),
@@ -145,8 +146,8 @@ class _DiscoverPageState extends ConsumerState<DiscoverPage> {
                       placeholder: 'Enter URL or search',
                       prefix: Padding(
                         padding: EdgeInsets.only(left: AppSpacing.sm),
-                        child: Icon(
-                          CupertinoIcons.globe,
+                        child: HugeIcon(
+                          icon: HugeIcons.strokeRoundedGlobal,
                           size: 16,
                           color: colors.textSecondary,
                         ),
@@ -181,8 +182,8 @@ class _DiscoverPageState extends ConsumerState<DiscoverPage> {
                   SizedBox(width: AppSpacing.sm),
                   GestureDetector(
                     onTap: () => _webViewController?.reload(),
-                    child: Icon(
-                      CupertinoIcons.refresh,
+                    child: HugeIcon(
+                      icon: HugeIcons.strokeRoundedRefresh,
                       color: CupertinoTheme.of(context).primaryColor,
                     ),
                   ),
@@ -279,8 +280,8 @@ class _DiscoverPageState extends ConsumerState<DiscoverPage> {
                     child: CupertinoButton(
                       padding: EdgeInsets.zero,
                       onPressed: _canGoForward ? _goForward : null,
-                      child: Icon(
-                        CupertinoIcons.chevron_right,
+                      child: HugeIcon(
+                        icon: HugeIcons.strokeRoundedArrowRight01,
                         size: 28,
                         color: _canGoForward
                             ? CupertinoTheme.of(context).primaryColor

@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:hugeicons/hugeicons.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
@@ -67,14 +68,14 @@ class RecipesTab extends ConsumerWidget {
                   items: [
                     AdaptiveMenuItem(
                       title: 'Add Folder',
-                      icon: const Icon(CupertinoIcons.folder),
+                      icon: const HugeIcon(icon: HugeIcons.strokeRoundedFolder01),
                       onTap: () {
                         showAddFolderModal(context);
                       },
                     ),
                     AdaptiveMenuItem(
                       title: 'Add Smart Folder',
-                      icon: const Icon(CupertinoIcons.sparkles),
+                      icon: const HugeIcon(icon: HugeIcons.strokeRoundedAiMagic),
                       onTap: () {
                         showAddSmartFolderModal(context);
                       },
@@ -107,13 +108,13 @@ class RecipesTab extends ConsumerWidget {
       trailing: AdaptivePullDownButton(
         items: [
           AdaptiveMenuItem(
-            title: 'Add Folder', icon: const Icon(CupertinoIcons.folder), onTap: () {
+            title: 'Add Folder', icon: const HugeIcon(icon: HugeIcons.strokeRoundedFolder01), onTap: () {
               showAddFolderModal(context);
             }
           ),
           AdaptiveMenuItem(
             title: 'Add Smart Folder',
-            icon: const Icon(CupertinoIcons.sparkles),
+            icon: const HugeIcon(icon: HugeIcons.strokeRoundedAiMagic),
             onTap: () {
               showAddSmartFolderModal(context);
             },
@@ -121,7 +122,7 @@ class RecipesTab extends ConsumerWidget {
           AdaptiveMenuItem.divider(),
           AdaptiveMenuItem(
             title: 'New Recipe',
-            icon: const Icon(CupertinoIcons.book),
+            icon: const HugeIcon(icon: HugeIcons.strokeRoundedBook01),
             onTap: () {
               // Don't pass folderId for uncategorized folder
               showRecipeEditorModal(context, ref: ref, folderId: null);
@@ -129,28 +130,28 @@ class RecipesTab extends ConsumerWidget {
           ),
           AdaptiveMenuItem(
             title: 'Generate with AI',
-            icon: const Icon(CupertinoIcons.wand_stars),
+            icon: const HugeIcon(icon: HugeIcons.strokeRoundedMagicWand01),
             onTap: () {
               showAiRecipeGeneratorModal(context, ref: ref);
             },
           ),
           AdaptiveMenuItem(
             title: 'Import from Camera',
-            icon: const Icon(CupertinoIcons.camera),
+            icon: const HugeIcon(icon: HugeIcons.strokeRoundedCamera01),
             onTap: () {
               showPhotoCaptureReviewModal(context, ref: ref);
             },
           ),
           AdaptiveMenuItem(
             title: 'Import from Photos',
-            icon: const Icon(CupertinoIcons.photo),
+            icon: const HugeIcon(icon: HugeIcons.strokeRoundedImage01),
             onTap: () {
               showPhotoImportModal(context, ref: ref, source: ImageSource.gallery);
             },
           ),
           AdaptiveMenuItem(
             title: 'Import from URL',
-            icon: const Icon(CupertinoIcons.link),
+            icon: const HugeIcon(icon: HugeIcons.strokeRoundedLink01),
             onTap: () {
               showUrlImportModal(context, ref: ref);
             },
@@ -160,7 +161,7 @@ class RecipesTab extends ConsumerWidget {
           icon: AppCircleButtonIcon.ellipsis,
         ),
       ),
-      leading: const Icon(CupertinoIcons.book),
+      leading: const HugeIcon(icon: HugeIcons.strokeRoundedBook01),
     );
   }
 }

@@ -1,6 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart' show Theme, Brightness;
 import 'package:flutter/services.dart';
+import 'package:hugeicons/hugeicons.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
@@ -146,7 +147,7 @@ class _CreationOptionsContent extends StatelessWidget {
         _CreationOption(
           title: 'Create Manually',
           subtitle: 'Start from scratch',
-          icon: CupertinoIcons.pencil,
+          icon: HugeIcon(icon: HugeIcons.strokeRoundedPencilEdit01, size: 22),
           onTap: () {
             Navigator.of(modalContext).pop();
             showRecipeEditorModal(rootContext, ref: ref, folderId: folderId);
@@ -155,7 +156,7 @@ class _CreationOptionsContent extends StatelessWidget {
         _CreationOption(
           title: 'Import from URL',
           subtitle: 'Paste a recipe link',
-          icon: CupertinoIcons.link,
+          icon: HugeIcon(icon: HugeIcons.strokeRoundedLink01, size: 22),
           onTap: () {
             Navigator.of(modalContext).pop();
             showUrlImportModal(rootContext, ref: ref, folderId: folderId);
@@ -167,7 +168,7 @@ class _CreationOptionsContent extends StatelessWidget {
         _CreationOption(
           title: 'Generate with AI',
           subtitle: 'Describe what you want',
-          icon: CupertinoIcons.wand_stars,
+          icon: HugeIcon(icon: HugeIcons.strokeRoundedMagicWand01, size: 22),
           requiresPlus: true,
           onTap: () {
             Navigator.of(modalContext).pop();
@@ -177,7 +178,7 @@ class _CreationOptionsContent extends StatelessWidget {
         _CreationOption(
           title: 'Import from Social',
           subtitle: 'Instagram, TikTok, YouTube',
-          icon: CupertinoIcons.share,
+          icon: HugeIcon(icon: HugeIcons.strokeRoundedShare01, size: 22),
           requiresPlus: true,
           onTap: () {
             // Push to page 2 instead of closing
@@ -187,7 +188,7 @@ class _CreationOptionsContent extends StatelessWidget {
         _CreationOption(
           title: 'Import from Camera',
           subtitle: 'Photograph a recipe',
-          icon: CupertinoIcons.camera,
+          icon: HugeIcon(icon: HugeIcons.strokeRoundedCamera01, size: 22),
           requiresPlus: true,
           onTap: () {
             Navigator.of(modalContext).pop();
@@ -197,7 +198,7 @@ class _CreationOptionsContent extends StatelessWidget {
         _CreationOption(
           title: 'Import from Photos',
           subtitle: 'Select from your library',
-          icon: CupertinoIcons.photo,
+          icon: HugeIcon(icon: HugeIcons.strokeRoundedImage01, size: 22),
           requiresPlus: true,
           onTap: () {
             Navigator.of(modalContext).pop();
@@ -215,7 +216,7 @@ class _CreationOptionsContent extends StatelessWidget {
         _CreationOption(
           title: 'Discover Recipes',
           subtitle: 'Browse and import from the web',
-          icon: CupertinoIcons.globe,
+          icon: HugeIcon(icon: HugeIcons.strokeRoundedGlobal, size: 22),
           onTap: () {
             Navigator.of(modalContext).pop();
             rootContext.push('/discover');
@@ -233,7 +234,7 @@ class _CreationOptionsContent extends StatelessWidget {
 class _CreationOption {
   final String title;
   final String? subtitle;
-  final IconData icon;
+  final Widget icon;
   final bool requiresPlus;
   final VoidCallback onTap;
 
@@ -295,10 +296,9 @@ class _OptionRow extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             // Icon on left
-            Icon(
-              option.icon,
-              size: 22,
-              color: colors.textPrimary,
+            IconTheme(
+              data: IconThemeData(size: 22, color: colors.textPrimary),
+              child: option.icon,
             ),
             SizedBox(width: AppSpacing.md),
             // Title and subtitle
@@ -331,8 +331,8 @@ class _OptionRow extends StatelessWidget {
             ],
             // Chevron on right
             SizedBox(width: AppSpacing.md),
-            Icon(
-              CupertinoIcons.chevron_right,
+            HugeIcon(
+              icon: HugeIcons.strokeRoundedArrowRight01,
               size: 18,
               color: colors.textSecondary,
             ),

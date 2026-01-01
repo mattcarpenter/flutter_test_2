@@ -1,4 +1,5 @@
 import 'package:flutter/cupertino.dart';
+import 'package:hugeicons/hugeicons.dart';
 import 'package:flutter/material.dart';
 import 'package:wolt_modal_sheet/wolt_modal_sheet.dart';
 
@@ -99,8 +100,8 @@ void showClippingHelpModal(BuildContext context) {
                 child: Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Icon(
-                      CupertinoIcons.lightbulb,
+                    HugeIcon(
+                      icon: HugeIcons.strokeRoundedIdea01,
                       size: 16,
                       color: AppColorSwatches.primary[600],
                     ),

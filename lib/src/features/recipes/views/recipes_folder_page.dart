@@ -1,5 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:hugeicons/hugeicons.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:image_picker/image_picker.dart';
 import '../../../../database/database.dart';
@@ -44,35 +45,35 @@ class RecipesFolderPage extends ConsumerWidget {
     return [
       AdaptiveMenuItem(
         title: 'New Recipe',
-        icon: const Icon(CupertinoIcons.book),
+        icon: const HugeIcon(icon: HugeIcons.strokeRoundedBook01),
         onTap: () {
           showRecipeEditorModal(context, ref: ref, folderId: saveFolderId);
         },
       ),
       AdaptiveMenuItem(
         title: 'Generate with AI',
-        icon: const Icon(CupertinoIcons.wand_stars),
+        icon: const HugeIcon(icon: HugeIcons.strokeRoundedMagicWand01),
         onTap: () {
           showAiRecipeGeneratorModal(context, ref: ref, folderId: saveFolderId);
         },
       ),
       AdaptiveMenuItem(
         title: 'Import from Camera',
-        icon: const Icon(CupertinoIcons.camera),
+        icon: const HugeIcon(icon: HugeIcons.strokeRoundedCamera01),
         onTap: () {
           showPhotoCaptureReviewModal(context, ref: ref, folderId: saveFolderId);
         },
       ),
       AdaptiveMenuItem(
         title: 'Import from Photos',
-        icon: const Icon(CupertinoIcons.photo),
+        icon: const HugeIcon(icon: HugeIcons.strokeRoundedImage01),
         onTap: () {
           showPhotoImportModal(context, ref: ref, source: ImageSource.gallery, folderId: saveFolderId);
         },
       ),
       AdaptiveMenuItem(
         title: 'Import from URL',
-        icon: const Icon(CupertinoIcons.link),
+        icon: const HugeIcon(icon: HugeIcons.strokeRoundedLink01),
         onTap: () {
           showUrlImportModal(context, ref: ref, folderId: saveFolderId);
         },

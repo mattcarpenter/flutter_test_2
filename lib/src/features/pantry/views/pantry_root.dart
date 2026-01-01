@@ -1,6 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:hugeicons/hugeicons.dart';
 import '../../../../database/database.dart';
 import '../../../mobile/utils/adaptive_sliver_page.dart';
 import '../../../providers/pantry_provider.dart';
@@ -169,12 +170,12 @@ class PantryTab extends ConsumerWidget {
           },
         ),
           ],
-          leading: const Icon(CupertinoIcons.archivebox),
+          leading: const HugeIcon(icon: HugeIcons.strokeRoundedFridge),
           trailing: AdaptivePullDownButton(
             items: [
               AdaptiveMenuItem(
                 title: 'Add Pantry Item',
-                icon: const Icon(CupertinoIcons.cart_badge_plus),
+                icon: const HugeIcon(icon: HugeIcons.strokeRoundedShoppingCartAdd01),
                 onTap: () {
                   showAddPantryItemModal(context);
                 },

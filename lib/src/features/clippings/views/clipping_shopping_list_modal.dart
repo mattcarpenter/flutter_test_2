@@ -1,6 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:hugeicons/hugeicons.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:wolt_modal_sheet/wolt_modal_sheet.dart';
 
@@ -531,7 +532,7 @@ class _ClippingShoppingListContentState
                         widget.pageIndexNotifier.value = 1;
                       },
                       trailingIcon:
-                          const Icon(CupertinoIcons.chevron_right, size: 14),
+                          const HugeIcon(icon: HugeIcons.strokeRoundedArrowRight01, size: 14),
                       compactTrailingIcon: true,
                       theme: AppButtonTheme.secondary,
                       style: AppButtonStyle.outline,
@@ -553,8 +554,8 @@ class _ClippingShoppingListContentState
                   child: Center(
                     child: Column(
                       children: [
-                        Icon(
-                          CupertinoIcons.cart,
+                        HugeIcon(
+                          icon: HugeIcons.strokeRoundedShoppingCart01,
                           size: 64,
                           color: colors.textTertiary,
                         ),
@@ -767,9 +768,9 @@ class _ClippingShoppingListContentState
               items: [
                 AdaptiveMenuItem(
                   title: 'My Shopping List',
-                  icon: Icon(selectedListId == null
-                      ? CupertinoIcons.checkmark
-                      : CupertinoIcons.list_bullet),
+                  icon: selectedListId == null
+                      ? const Icon(CupertinoIcons.checkmark)
+                      : const HugeIcon(icon: HugeIcons.strokeRoundedLeftToRightListBullet),
                   onTap: () {
                     controller.updateSelectedList(item.id, null);
                     if (!isChecked) {
@@ -779,9 +780,9 @@ class _ClippingShoppingListContentState
                 ),
                 ...lists.map((list) => AdaptiveMenuItem(
                       title: list.name ?? 'Unnamed',
-                      icon: Icon(selectedListId == list.id
-                          ? CupertinoIcons.checkmark
-                          : CupertinoIcons.list_bullet),
+                      icon: selectedListId == list.id
+                          ? const Icon(CupertinoIcons.checkmark)
+                          : const HugeIcon(icon: HugeIcons.strokeRoundedLeftToRightListBullet),
                       onTap: () {
                         controller.updateSelectedList(item.id, list.id);
                         if (!isChecked) {

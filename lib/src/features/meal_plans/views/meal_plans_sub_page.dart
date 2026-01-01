@@ -1,4 +1,5 @@
 import 'package:flutter/cupertino.dart';
+import 'package:hugeicons/hugeicons.dart';
 import '../../../mobile/utils/adaptive_sliver_page.dart';
 
 class MealPlansSubPage extends StatelessWidget {
@@ -13,7 +14,7 @@ class MealPlansSubPage extends StatelessWidget {
       body: const Center(
         child: Text("Discover Sub Page"),
       ),
-      trailing: const Icon(CupertinoIcons.add_circled),
+      trailing: const HugeIcon(icon: HugeIcons.strokeRoundedAddCircle),
       previousPageTitle: 'Meal Plans',
       automaticallyImplyLeading: true,
     );

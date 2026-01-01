@@ -1,5 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart' show LicensePage;
+import 'package:hugeicons/hugeicons.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 
 import '../../../mobile/utils/adaptive_sliver_page.dart';
@@ -32,8 +33,8 @@ class AcknowledgementsPage extends StatelessWidget {
                 children: [
                   SettingsRowCondensed(
                     title: 'Open Source Software Licenses',
-                    leading: Icon(
-                      CupertinoIcons.doc_text,
+                    leading: HugeIcon(
+                      icon: HugeIcons.strokeRoundedFile01,
                       size: 22,
                       color: colors.primary,
                     ),

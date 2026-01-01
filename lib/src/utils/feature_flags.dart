@@ -1,5 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:hugeicons/hugeicons.dart';
 import '../providers/auth_provider.dart';
 import '../providers/subscription_provider.dart';
 import '../models/subscription_state.dart';
@@ -194,8 +195,8 @@ class FeatureGate extends ConsumerWidget {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(
-            CupertinoIcons.person_circle,
+          HugeIcon(
+            icon: HugeIcons.strokeRoundedUserCircle,
             size: 48,
             color: CupertinoColors.systemBlue.resolveFrom(context),
           ),

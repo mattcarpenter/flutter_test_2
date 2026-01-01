@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:hugeicons/hugeicons.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -49,8 +50,8 @@ class SupportPage extends ConsumerWidget {
                       loading: () => '...',
                       error: (_, __) => 'Error',
                     ),
-                    leading: Icon(
-                      CupertinoIcons.doc_text,
+                    leading: HugeIcon(
+                      icon: HugeIcons.strokeRoundedFile01,
                       size: 22,
                       color: colors.primary,
                     ),
@@ -58,8 +59,8 @@ class SupportPage extends ConsumerWidget {
                   ),
                   SettingsRowCondensed(
                     title: 'Clear Logs',
-                    leading: Icon(
-                      CupertinoIcons.trash,
+                    leading: HugeIcon(
+                      icon: HugeIcons.strokeRoundedDelete02,
                       size: 22,
                       color: colors.primary,
                     ),
@@ -76,8 +77,8 @@ class SupportPage extends ConsumerWidget {
                 children: [
                   SettingsRowCondensed(
                     title: 'Email Support',
-                    leading: Icon(
-                      CupertinoIcons.mail,
+                    leading: HugeIcon(
+                      icon: HugeIcons.strokeRoundedMail01,
                       size: 22,
                       color: colors.primary,
                     ),

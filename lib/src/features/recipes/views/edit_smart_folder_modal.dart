@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:hugeicons/hugeicons.dart';
 import 'package:wolt_modal_sheet/wolt_modal_sheet.dart';
 
 import '../../../../database/database.dart';
@@ -623,11 +624,17 @@ class _TagSelectionRow extends StatelessWidget {
                 style: AppTypography.body.copyWith(color: colors.textPrimary),
               ),
             ),
-            Icon(
-              isSelected ? CupertinoIcons.checkmark_circle_fill : CupertinoIcons.circle,
-              color: isSelected ? colors.primary : colors.textTertiary,
-              size: 22,
-            ),
+            isSelected
+                ? HugeIcon(
+                    icon: HugeIcons.strokeRoundedCheckmarkCircle02,
+                    color: colors.primary,
+                    size: 22,
+                  )
+                : Icon(
+                    CupertinoIcons.circle,
+                    color: colors.textTertiary,
+                    size: 22,
+                  ),
           ],
         ),
       ),
@@ -692,14 +699,14 @@ class _IngredientResultRow extends StatelessWidget {
               ),
             ),
             if (isSelected)
-              Icon(
-                CupertinoIcons.checkmark_circle_fill,
+              HugeIcon(
+                icon: HugeIcons.strokeRoundedCheckmarkCircle02,
                 color: colors.primary,
                 size: 22,
               )
             else
-              Icon(
-                CupertinoIcons.plus_circle,
+              HugeIcon(
+                icon: HugeIcons.strokeRoundedAddCircle,
                 color: colors.textTertiary,
                 size: 22,
               ),

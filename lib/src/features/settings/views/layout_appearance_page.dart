@@ -1,5 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:hugeicons/hugeicons.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../mobile/utils/adaptive_sliver_page.dart';
@@ -45,8 +46,8 @@ class LayoutAppearancePage extends ConsumerWidget {
                   SettingsRowCondensed(
                     title: 'Show Folders',
                     value: showFoldersLabel,
-                    leading: Icon(
-                      CupertinoIcons.folder,
+                    leading: HugeIcon(
+                      icon: HugeIcons.strokeRoundedFolder01,
                       size: 22,
                       color: colors.primary,
                     ),
@@ -90,8 +91,8 @@ class LayoutAppearancePage extends ConsumerWidget {
                   SettingsRowCondensed(
                     title: 'Recipe Font Size',
                     value: fontSizeLabel,
-                    leading: Icon(
-                      CupertinoIcons.textformat_size,
+                    leading: HugeIcon(
+                      icon: HugeIcons.strokeRoundedTextFont,
                       size: 22,
                       color: colors.primary,
                     ),

@@ -1,6 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:hugeicons/hugeicons.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:wolt_modal_sheet/wolt_modal_sheet.dart';
 import 'package:recipe_app/src/providers/shopping_list_provider.dart';
@@ -241,8 +242,8 @@ class _AddRecipeIngredientsToShoppingListModalPage {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(
-            CupertinoIcons.cart,
+          HugeIcon(
+            icon: HugeIcons.strokeRoundedShoppingCart01,
             size: 64,
             color: CupertinoColors.secondaryLabel.resolveFrom(context),
           ),

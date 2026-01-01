@@ -2,6 +2,7 @@ import 'dart:math' as math;
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:hugeicons/hugeicons.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
@@ -343,8 +344,8 @@ class _CollapsedHeader extends StatelessWidget {
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
-        const Icon(
-          CupertinoIcons.flame_fill,
+        HugeIcon(
+          icon: HugeIcons.strokeRoundedFire,
           color: Colors.white,
           size: 16,
         ),
@@ -390,8 +391,8 @@ class _CookHeaderRow extends StatelessWidget {
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
-        const Icon(
-          CupertinoIcons.flame_fill,
+        HugeIcon(
+          icon: HugeIcons.strokeRoundedFire,
           color: Colors.white,
           size: 16,
         ),
@@ -536,10 +537,10 @@ class _CookButtonRow extends ConsumerWidget {
           GestureDetector(
             onTap: () => _confirmAndCompleteCook(ref),
             behavior: HitTestBehavior.opaque,
-            child: const Padding(
-              padding: EdgeInsets.all(4),
-              child: Icon(
-                CupertinoIcons.xmark,
+            child: Padding(
+              padding: const EdgeInsets.all(4),
+              child: HugeIcon(
+                icon: HugeIcons.strokeRoundedCancel01,
                 color: Colors.white,
                 size: 16,
               ),
@@ -601,8 +602,8 @@ class _TimerStatusDisplay extends StatelessWidget {
         // Offset icon down slightly to align with text baseline
         Padding(
           padding: const EdgeInsets.only(top: 1),
-          child: const Icon(
-            CupertinoIcons.timer,
+          child: HugeIcon(
+            icon: HugeIcons.strokeRoundedTimer01,
             color: Colors.white,
             size: 16,
           ),
@@ -651,8 +652,8 @@ class _TimerSection extends ConsumerWidget {
             // Offset icon down slightly to align with text baseline
             Padding(
               padding: const EdgeInsets.only(top: 1),
-              child: const Icon(
-                CupertinoIcons.timer,
+              child: HugeIcon(
+                icon: HugeIcons.strokeRoundedTimer01,
                 color: Colors.white,
                 size: 16,
               ),

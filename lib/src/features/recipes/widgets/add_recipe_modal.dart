@@ -1,5 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:hugeicons/hugeicons.dart';
 import 'package:wolt_modal_sheet/wolt_modal_sheet.dart';
 import '../../../../database/database.dart';
 import '../../../providers/recipe_provider.dart' as recipe_provider;
@@ -249,8 +250,8 @@ class _AddRecipeContentState extends ConsumerState<_AddRecipeContent> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Icon(
-                CupertinoIcons.search,
+              HugeIcon(
+                icon: HugeIcons.strokeRoundedSearch01,
                 size: 48,
                 color: CupertinoColors.tertiaryLabel.resolveFrom(context),
               ),
@@ -278,8 +279,8 @@ class _AddRecipeContentState extends ConsumerState<_AddRecipeContent> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Icon(
-                CupertinoIcons.doc_text_search,
+              HugeIcon(
+                icon: HugeIcons.strokeRoundedFileSearch,
                 size: 48,
                 color: CupertinoColors.tertiaryLabel.resolveFrom(context),
               ),

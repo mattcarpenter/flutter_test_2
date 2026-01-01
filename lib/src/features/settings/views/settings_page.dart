@@ -1,6 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:hugeicons/hugeicons.dart';
 
 import '../../../mobile/utils/adaptive_sliver_page.dart';
 import '../../../theme/spacing.dart';
@@ -19,7 +20,7 @@ class SettingsPage extends ConsumerWidget {
     final menuButton = onMenuPressed != null
         ? GestureDetector(
             onTap: onMenuPressed,
-            child: const Icon(CupertinoIcons.bars),
+            child: const HugeIcon(icon: HugeIcons.strokeRoundedMenu01),
           )
         : null;
 
@@ -47,8 +48,8 @@ class SettingsPage extends ConsumerWidget {
                   SettingsRowCondensed(
                     title: 'Home Screen',
                     value: homeScreenLabel,
-                    leading: Icon(
-                      CupertinoIcons.house,
+                    leading: HugeIcon(
+                      icon: HugeIcons.strokeRoundedHome01,
                       size: 22,
                       color: colors.primary,
                     ),
@@ -66,8 +67,8 @@ class SettingsPage extends ConsumerWidget {
                 children: [
                   SettingsRowCondensed(
                     title: 'Layout & Appearance',
-                    leading: Icon(
-                      CupertinoIcons.paintbrush,
+                    leading: HugeIcon(
+                      icon: HugeIcons.strokeRoundedPaintBrush01,
                       size: 22,
                       color: colors.primary,
                     ),
@@ -85,8 +86,8 @@ class SettingsPage extends ConsumerWidget {
                 children: [
                   SettingsRowCondensed(
                     title: 'Manage Tags',
-                    leading: Icon(
-                      CupertinoIcons.tag,
+                    leading: HugeIcon(
+                      icon: HugeIcons.strokeRoundedTag01,
                       size: 22,
                       color: colors.primary,
                     ),
@@ -104,8 +105,8 @@ class SettingsPage extends ConsumerWidget {
                 children: [
                   SettingsRowCondensed(
                     title: 'Account',
-                    leading: Icon(
-                      CupertinoIcons.person_circle,
+                    leading: HugeIcon(
+                      icon: HugeIcons.strokeRoundedUserCircle,
                       size: 22,
                       color: colors.primary,
                     ),
@@ -153,8 +154,8 @@ class SettingsPage extends ConsumerWidget {
                 children: [
                   SettingsRowCondensed(
                     title: 'Help',
-                    leading: Icon(
-                      CupertinoIcons.question_circle,
+                    leading: HugeIcon(
+                      icon: HugeIcons.strokeRoundedHelpCircle,
                       size: 22,
                       color: colors.primary,
                     ),
@@ -164,8 +165,8 @@ class SettingsPage extends ConsumerWidget {
                   ),
                   SettingsRowCondensed(
                     title: 'Support',
-                    leading: Icon(
-                      CupertinoIcons.chat_bubble_2,
+                    leading: HugeIcon(
+                      icon: HugeIcons.strokeRoundedMessage01,
                       size: 22,
                       color: colors.primary,
                     ),
@@ -183,8 +184,8 @@ class SettingsPage extends ConsumerWidget {
                 children: [
                   SettingsRowCondensed(
                     title: 'Privacy Policy',
-                    leading: Icon(
-                      CupertinoIcons.shield,
+                    leading: HugeIcon(
+                      icon: HugeIcons.strokeRoundedShield01,
                       size: 22,
                       color: colors.primary,
                     ),
@@ -194,8 +195,8 @@ class SettingsPage extends ConsumerWidget {
                   ),
                   SettingsRowCondensed(
                     title: 'Terms of Use',
-                    leading: Icon(
-                      CupertinoIcons.doc_text,
+                    leading: HugeIcon(
+                      icon: HugeIcons.strokeRoundedFile01,
                       size: 22,
                       color: colors.primary,
                     ),
@@ -205,8 +206,8 @@ class SettingsPage extends ConsumerWidget {
                   ),
                   SettingsRowCondensed(
                     title: 'Acknowledgements',
-                    leading: Icon(
-                      CupertinoIcons.heart,
+                    leading: HugeIcon(
+                      icon: HugeIcons.strokeRoundedFavourite,
                       size: 22,
                       color: colors.primary,
                     ),

@@ -1,5 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:hugeicons/hugeicons.dart';
 import '../../../theme/colors.dart';
 import '../../../theme/typography.dart';
 
@@ -88,8 +89,8 @@ class _SettingsRowCondensedState extends State<SettingsRowCondensed> {
           // Chevron (if enabled)
           if (widget.showChevron && widget.onTap != null) ...[
             const SizedBox(width: 8),
-            Icon(
-              CupertinoIcons.chevron_right,
+            HugeIcon(
+              icon: HugeIcons.strokeRoundedArrowRight01,
               color: widget.enabled ? colors.textSecondary : colors.textDisabled,
               size: 16,
             ),

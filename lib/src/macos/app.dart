@@ -40,7 +40,7 @@ class _MyHomePageState extends State<MyHomePage> {
             onChanged: (index) {},
             items: const [
               SidebarItem(
-                leading: MacosIcon(CupertinoIcons.home),
+                leading: MacosIcon(CupertinoIcons.house_fill),
                 label: Text('Home'),
               ),
               SidebarItem(

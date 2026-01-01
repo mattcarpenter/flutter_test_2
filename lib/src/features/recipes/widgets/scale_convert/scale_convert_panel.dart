@@ -2,6 +2,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:hugeicons/hugeicons.dart';
 
 import '../../../../providers/scale_convert_provider.dart';
 import '../../../../theme/colors.dart';
@@ -174,8 +175,8 @@ class _ScaleTypeRow extends ConsumerWidget {
               if (hasServings)
                 AdaptiveMenuItem(
                   title: 'Servings',
-                  icon: Icon(
-                    CupertinoIcons.person_2,
+                  icon: HugeIcon(
+                    icon: HugeIcons.strokeRoundedUserGroup,
                     color: state.scaleType == ScaleType.servings
                         ? colors.primary
                         : colors.textPrimary,
@@ -189,8 +190,8 @@ class _ScaleTypeRow extends ConsumerWidget {
                 ),
               AdaptiveMenuItem(
                 title: 'Ingredient',
-                icon: Icon(
-                  CupertinoIcons.list_bullet,
+                icon: HugeIcon(
+                  icon: HugeIcons.strokeRoundedLeftToRightListBullet,
                   color: state.scaleType == ScaleType.ingredient
                       ? colors.primary
                       : colors.textPrimary,
@@ -260,14 +261,15 @@ class _IngredientSelectorRow extends ConsumerWidget {
               items: scalableIngredients.map((ingredient) {
                 return AdaptiveMenuItem(
                   title: ingredient.displayName,
-                  icon: Icon(
-                    state.selectedIngredientId == ingredient.id
-                        ? CupertinoIcons.checkmark_circle_fill
-                        : CupertinoIcons.circle,
-                    color: state.selectedIngredientId == ingredient.id
-                        ? colors.primary
-                        : colors.textSecondary,
-                  ),
+                  icon: state.selectedIngredientId == ingredient.id
+                      ? HugeIcon(
+                          icon: HugeIcons.strokeRoundedCheckmarkCircle02,
+                          color: colors.primary,
+                        )
+                      : Icon(
+                          CupertinoIcons.circle,
+                          color: colors.textSecondary,
+                        ),
                   onTap: () {
                     HapticFeedback.selectionClick();
                     ref
@@ -712,10 +714,10 @@ class _ConvertRow extends ConsumerWidget {
             items: [
               AdaptiveMenuItem(
                 title: 'Original',
-                icon: Icon(
-                  state.conversionMode == ConversionMode.original
-                      ? CupertinoIcons.checkmark_circle_fill
-                      : CupertinoIcons.doc_text,
+                icon: HugeIcon(
+                  icon: state.conversionMode == ConversionMode.original
+                      ? HugeIcons.strokeRoundedCheckmarkCircle02
+                      : HugeIcons.strokeRoundedFile01,
                   color: state.conversionMode == ConversionMode.original
                       ? colors.primary
                       : colors.textPrimary,
@@ -729,10 +731,10 @@ class _ConvertRow extends ConsumerWidget {
               ),
               AdaptiveMenuItem(
                 title: 'Imperial',
-                icon: Icon(
-                  state.conversionMode == ConversionMode.imperial
-                      ? CupertinoIcons.checkmark_circle_fill
-                      : CupertinoIcons.flag,
+                icon: HugeIcon(
+                  icon: state.conversionMode == ConversionMode.imperial
+                      ? HugeIcons.strokeRoundedCheckmarkCircle02
+                      : HugeIcons.strokeRoundedFlag01,
                   color: state.conversionMode == ConversionMode.imperial
                       ? colors.primary
                       : colors.textPrimary,
@@ -746,10 +748,10 @@ class _ConvertRow extends ConsumerWidget {
               ),
               AdaptiveMenuItem(
                 title: 'Metric',
-                icon: Icon(
-                  state.conversionMode == ConversionMode.metric
-                      ? CupertinoIcons.checkmark_circle_fill
-                      : CupertinoIcons.globe,
+                icon: HugeIcon(
+                  icon: state.conversionMode == ConversionMode.metric
+                      ? HugeIcons.strokeRoundedCheckmarkCircle02
+                      : HugeIcons.strokeRoundedGlobal,
                   color: state.conversionMode == ConversionMode.metric
                       ? colors.primary
                       : colors.textPrimary,

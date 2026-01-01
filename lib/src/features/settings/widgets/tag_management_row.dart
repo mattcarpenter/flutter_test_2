@@ -1,5 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:hugeicons/hugeicons.dart';
 import '../../../constants/tag_colors.dart';
 import '../../../../database/database.dart';
 import '../../../theme/colors.dart';
@@ -179,8 +180,8 @@ class TagManagementRow extends StatelessWidget {
             padding: EdgeInsets.zero,
             minimumSize: const Size(32, 32),
             onPressed: () => _confirmDelete(context),
-            child: Icon(
-              CupertinoIcons.trash,
+            child: HugeIcon(
+              icon: HugeIcons.strokeRoundedDelete02,
               color: colors.error,
               size: 20,
             ),

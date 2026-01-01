@@ -1,4 +1,5 @@
 import 'package:flutter/cupertino.dart';
+import 'package:hugeicons/hugeicons.dart';
 
 import '../../../theme/colors.dart';
 import '../../../theme/spacing.dart';
@@ -57,7 +58,7 @@ class _SectionLabel extends StatelessWidget {
 
 /// Value proposition bullet item
 class _ValuePropItem extends StatelessWidget {
-  final IconData? icon;
+  final List<List<dynamic>>? icon;
   final String text;
   final Color? textColor;
 
@@ -79,8 +80,8 @@ class _ValuePropItem extends StatelessWidget {
           icon != null
               ? Padding(
                   padding: const EdgeInsets.only(top: 4),
-                  child: Icon(
-                    icon,
+                  child: HugeIcon(
+                    icon: icon!,
                     size: 14,
                     color: colors.textPrimary,
                   ),
@@ -129,8 +130,8 @@ class ShoppingListPreviewResultContent extends StatelessWidget {
             // Header row: Title + Plus pill
             Row(
               children: [
-                Icon(
-                  CupertinoIcons.sparkles,
+                HugeIcon(
+                  icon: HugeIcons.strokeRoundedAiMagic,
                   size: 20,
                   color: colors.textPrimary,
                 ),
@@ -244,8 +245,8 @@ class ShoppingListPreviewResultContent extends StatelessWidget {
                       Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          Icon(
-                            CupertinoIcons.wand_stars,
+                          HugeIcon(
+                            icon: HugeIcons.strokeRoundedMagicWand01,
                             size: 20,
                             color: colors.textPrimary,
                           ),
@@ -268,22 +269,22 @@ class ShoppingListPreviewResultContent extends StatelessWidget {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             _ValuePropItem(
-                              icon: CupertinoIcons.check_mark,
+                              icon: HugeIcons.strokeRoundedCheckmarkCircle01,
                               text: 'Turn notes into shopping lists',
                               textColor: colors.textPrimary,
                             ),
                             _ValuePropItem(
-                              icon: CupertinoIcons.check_mark,
+                              icon: HugeIcons.strokeRoundedCheckmarkCircle01,
                               text: 'Auto-categorize items by aisle',
                               textColor: colors.textPrimary,
                             ),
                             _ValuePropItem(
-                              icon: CupertinoIcons.check_mark,
+                              icon: HugeIcons.strokeRoundedCheckmarkCircle01,
                               text: 'Smart matching with your pantry',
                               textColor: colors.textPrimary,
                             ),
                             _ValuePropItem(
-                              icon: CupertinoIcons.check_mark,
+                              icon: HugeIcons.strokeRoundedCheckmarkCircle01,
                               text: 'Add everything in one tap',
                               textColor: colors.textPrimary,
                             ),
@@ -311,7 +312,7 @@ class ShoppingListPreviewResultContent extends StatelessWidget {
                 size: AppButtonSize.large,
                 shape: AppButtonShape.square,
                 fullWidth: true,
-                leadingIcon: const Icon(CupertinoIcons.sparkles, size: 18),
+                leadingIcon: const HugeIcon(icon: HugeIcons.strokeRoundedAiMagic, size: 18),
               ),
             ),
 

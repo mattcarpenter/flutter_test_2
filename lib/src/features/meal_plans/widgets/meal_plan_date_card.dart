@@ -1,6 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:hugeicons/hugeicons.dart';
 import '../../../../database/models/meal_plan_items.dart';
 import '../../../providers/meal_plan_provider.dart';
 import '../../../theme/colors.dart';
@@ -289,8 +290,8 @@ class _MealPlanDateCardState extends ConsumerState<MealPlanDateCard>
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(
-              CupertinoIcons.calendar_badge_plus,
+            HugeIcon(
+              icon: HugeIcons.strokeRoundedCalendarAdd01,
               size: 32,
               color: colors.textSecondary,
             ),

@@ -4,7 +4,7 @@ import 'package:flutter/cupertino.dart';
 class MenuItem extends StatefulWidget {
   final int index;
   final String title;
-  final IconData icon;
+  final Widget icon;
   final bool isActive;
   final Color color;
   final Color textColor;
@@ -92,10 +92,7 @@ class MenuItemState extends State<MenuItem> {
             padding: const EdgeInsets.symmetric(horizontal: 16.0),
             child: Row(
             children: [
-              Icon(
-                widget.icon,
-                color: widget.color,
-              ),
+              widget.icon,
               const SizedBox(width: 10),
               Expanded(
                 child: Text(widget.title, style: effectiveTextStyle),

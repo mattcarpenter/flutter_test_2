@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 
 class AdaptiveMenuItem {
   final String title;
-  final Icon icon;
+  final Widget icon;
   final VoidCallback? onTap;
   final bool isDestructive;
   final bool isDivider;

@@ -1,6 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:hugeicons/hugeicons.dart';
 
 import '../../providers/auth_provider.dart';
 import '../../providers/subscription_provider.dart';
@@ -45,7 +46,7 @@ class Menu extends ConsumerWidget {
                 MenuItem(
                   index: 1,
                   title: 'Recipes',
-                  icon: CupertinoIcons.book,
+                  icon: HugeIcon(icon: HugeIcons.strokeRoundedBook01, color: primaryColor),
                   isActive: selectedIndex == 1,
                   color: primaryColor,
                   textColor: textColor,
@@ -56,7 +57,7 @@ class Menu extends ConsumerWidget {
                 MenuItem(
                   index: 2,
                   title: 'Shopping List',
-                  icon: CupertinoIcons.shopping_cart,
+                  icon: HugeIcon(icon: HugeIcons.strokeRoundedShoppingCart01, color: primaryColor),
                   isActive: selectedIndex == 2,
                   color: primaryColor,
                   textColor: textColor,
@@ -67,7 +68,7 @@ class Menu extends ConsumerWidget {
                 MenuItem(
                   index: 3,
                   title: 'Meal Plans',
-                  icon: CupertinoIcons.calendar_today,
+                  icon: HugeIcon(icon: HugeIcons.strokeRoundedCalendar01, color: primaryColor),
                   isActive: selectedIndex == 3,
                   color: primaryColor,
                   textColor: textColor,
@@ -78,7 +79,7 @@ class Menu extends ConsumerWidget {
                 MenuItem(
                   index: 4,
                   title: 'Pantry',
-                  icon: CupertinoIcons.archivebox,
+                  icon: HugeIcon(icon: HugeIcons.strokeRoundedFridge, color: primaryColor),
                   isActive: selectedIndex == 4,
                   color: primaryColor,
                   textColor: textColor,
@@ -89,7 +90,7 @@ class Menu extends ConsumerWidget {
                 MenuItem(
                   index: 5,
                   title: 'Clippings',
-                  icon: CupertinoIcons.doc_text,
+                  icon: HugeIcon(icon: HugeIcons.strokeRoundedFile01, color: primaryColor),
                   isActive: selectedIndex == 5,
                   color: primaryColor,
                   textColor: textColor,
@@ -102,7 +103,7 @@ class Menu extends ConsumerWidget {
                 MenuItem(
                   index: 6,
                   title: 'Discover',
-                  icon: CupertinoIcons.compass,
+                  icon: HugeIcon(icon: HugeIcons.strokeRoundedCompass01, color: primaryColor),
                   isActive: selectedIndex == 6,
                   color: primaryColor,
                   textColor: textColor,
@@ -115,7 +116,7 @@ class Menu extends ConsumerWidget {
                 MenuItem(
                   index: 7,
                   title: 'Household',
-                  icon: CupertinoIcons.home,
+                  icon: HugeIcon(icon: HugeIcons.strokeRoundedHome01, color: primaryColor),
                   isActive: selectedIndex == 7,
                   color: primaryColor,
                   textColor: textColor,
@@ -158,7 +159,7 @@ class Menu extends ConsumerWidget {
               MenuItem(
                 index: 8,
                 title: 'Account',
-                icon: CupertinoIcons.person_circle_fill,
+                icon: HugeIcon(icon: HugeIcons.strokeRoundedUserCircle, color: primaryColor),
                 isActive: selectedIndex == 8,
                 color: primaryColor,
                 textColor: textColor,
@@ -172,7 +173,7 @@ class Menu extends ConsumerWidget {
               MenuItem(
                 index: 8,
                 title: 'Sign Up',
-                icon: CupertinoIcons.person_circle_fill,
+                icon: HugeIcon(icon: HugeIcons.strokeRoundedUserCircle, color: primaryColor),
                 isActive: selectedIndex == 8,
                 color: primaryColor,
                 textColor: textColor,
@@ -185,7 +186,7 @@ class Menu extends ConsumerWidget {
             MenuItem(
               index: 9,
               title: 'Settings',
-              icon: CupertinoIcons.settings,
+              icon: HugeIcon(icon: HugeIcons.strokeRoundedSettings01, color: primaryColor),
               isActive: selectedIndex == 9,
               color: primaryColor,
               textColor: textColor,
@@ -250,8 +251,8 @@ class _UpgradeBannerState extends State<_UpgradeBanner> {
           ),
           child: Row(
             children: [
-              const Icon(
-                CupertinoIcons.sparkles,
+              HugeIcon(
+                icon: HugeIcons.strokeRoundedAiMagic,
                 color: Colors.white,
                 size: 22,
               ),

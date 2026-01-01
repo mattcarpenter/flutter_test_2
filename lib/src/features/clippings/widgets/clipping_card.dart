@@ -52,7 +52,7 @@ class ClippingCard extends StatelessWidget {
           children: [
             MenuAction(
               title: 'Delete',
-              image: MenuImage.icon(CupertinoIcons.trash),
+              image: MenuImage.icon(CupertinoIcons.delete),
               attributes: const MenuActionAttributes(destructive: true),
               callback: onDelete,
             ),

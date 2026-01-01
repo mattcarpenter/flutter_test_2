@@ -1,4 +1,5 @@
 import 'package:flutter/cupertino.dart';
+import 'package:hugeicons/hugeicons.dart';
 import '../theme/colors.dart';
 
 /// A custom radio button widget that follows the app's design system
@@ -90,8 +91,8 @@ class _AppRadioButtonState extends State<AppRadioButton>
                 ),
               ),
               child: widget.selected
-                  ? Icon(
-                      CupertinoIcons.check_mark,
+                  ? HugeIcon(
+                      icon: HugeIcons.strokeRoundedCheckmarkCircle01,
                       size: widget.size * 0.67, // 16px for 24px container
                       color: CupertinoColors.white,
                     )
