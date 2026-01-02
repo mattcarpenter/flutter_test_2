@@ -2912,6 +2912,84 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Check Pantry Stock'**
   String get recipePageCheckPantryStock;
+
+  /// Reset button in scale/convert panel
+  ///
+  /// In en, this message translates to:
+  /// **'Reset'**
+  String get scaleConvertReset;
+
+  /// Scale row label
+  ///
+  /// In en, this message translates to:
+  /// **'Scale'**
+  String get scaleConvertScale;
+
+  /// Convert row label
+  ///
+  /// In en, this message translates to:
+  /// **'Convert'**
+  String get scaleConvertConvert;
+
+  /// Ingredient row label and scale type
+  ///
+  /// In en, this message translates to:
+  /// **'Ingredient'**
+  String get scaleConvertIngredient;
+
+  /// Placeholder for ingredient selector
+  ///
+  /// In en, this message translates to:
+  /// **'Select ingredient'**
+  String get scaleConvertSelectIngredient;
+
+  /// Amount scale type option
+  ///
+  /// In en, this message translates to:
+  /// **'Amount'**
+  String get scaleTypeAmount;
+
+  /// Servings scale type option
+  ///
+  /// In en, this message translates to:
+  /// **'Servings'**
+  String get scaleTypeServings;
+
+  /// Slider label for amount scale
+  ///
+  /// In en, this message translates to:
+  /// **'Amount: {value}x'**
+  String scaleSliderAmount(String value);
+
+  /// Slider label for servings scale
+  ///
+  /// In en, this message translates to:
+  /// **'Servings: {count}'**
+  String scaleSliderServings(int count);
+
+  /// Slider label for ingredient amount
+  ///
+  /// In en, this message translates to:
+  /// **'Amount: {value}'**
+  String scaleSliderIngredientAmount(String value);
+
+  /// Original conversion mode option
+  ///
+  /// In en, this message translates to:
+  /// **'Original'**
+  String get conversionModeOriginal;
+
+  /// Imperial conversion mode option
+  ///
+  /// In en, this message translates to:
+  /// **'Imperial'**
+  String get conversionModeImperial;
+
+  /// Metric conversion mode option
+  ///
+  /// In en, this message translates to:
+  /// **'Metric'**
+  String get conversionModeMetric;
 }
 
 class _AppLocalizationsDelegate

@@ -1600,4 +1600,49 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get recipePageCheckPantryStock => 'Check Pantry Stock';
+
+  @override
+  String get scaleConvertReset => 'Reset';
+
+  @override
+  String get scaleConvertScale => 'Scale';
+
+  @override
+  String get scaleConvertConvert => 'Convert';
+
+  @override
+  String get scaleConvertIngredient => 'Ingredient';
+
+  @override
+  String get scaleConvertSelectIngredient => 'Select ingredient';
+
+  @override
+  String get scaleTypeAmount => 'Amount';
+
+  @override
+  String get scaleTypeServings => 'Servings';
+
+  @override
+  String scaleSliderAmount(String value) {
+    return 'Amount: ${value}x';
+  }
+
+  @override
+  String scaleSliderServings(int count) {
+    return 'Servings: $count';
+  }
+
+  @override
+  String scaleSliderIngredientAmount(String value) {
+    return 'Amount: $value';
+  }
+
+  @override
+  String get conversionModeOriginal => 'Original';
+
+  @override
+  String get conversionModeImperial => 'Imperial';
+
+  @override
+  String get conversionModeMetric => 'Metric';
 }

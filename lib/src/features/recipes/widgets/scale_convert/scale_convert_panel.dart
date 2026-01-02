@@ -4,6 +4,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hugeicons/hugeicons.dart';
 
+import '../../../../localization/l10n_extension.dart';
 import '../../../../providers/scale_convert_provider.dart';
 import '../../../../theme/colors.dart';
 import '../../../../theme/spacing.dart';
@@ -97,7 +98,7 @@ class ScaleConvertPanel extends ConsumerWidget {
               ),
             ),
             child: Text(
-              'Reset',
+              context.l10n.scaleConvertReset,
               style: AppTypography.body.copyWith(
                 color: state.isTransformActive
                     ? colors.primary
@@ -126,20 +127,22 @@ class _ScaleTypeRow extends ConsumerWidget {
     required this.hasServings,
   });
 
-  String _getScaleTypeLabel(ScaleType type) {
+  String _getScaleTypeLabel(BuildContext context, ScaleType type) {
+    final l10n = context.l10n;
     switch (type) {
       case ScaleType.amount:
-        return 'Amount';
+        return l10n.scaleTypeAmount;
       case ScaleType.servings:
-        return 'Servings';
+        return l10n.scaleTypeServings;
       case ScaleType.ingredient:
-        return 'Ingredient';
+        return l10n.scaleConvertIngredient;
     }
   }
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final colors = AppColors.of(context);
+    final l10n = context.l10n;
 
     return Padding(
       padding: EdgeInsets.symmetric(
@@ -150,7 +153,7 @@ class _ScaleTypeRow extends ConsumerWidget {
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           Text(
-            'Scale',
+            l10n.scaleConvertScale,
             style: AppTypography.body.copyWith(
               color: colors.textPrimary,
             ),
@@ -158,7 +161,7 @@ class _ScaleTypeRow extends ConsumerWidget {
           AdaptivePullDownButton(
             items: [
               AdaptiveMenuItem(
-                title: 'Amount',
+                title: l10n.scaleTypeAmount,
                 icon: Icon(
                   CupertinoIcons.number,
                   color: state.scaleType == ScaleType.amount
@@ -174,7 +177,7 @@ class _ScaleTypeRow extends ConsumerWidget {
               ),
               if (hasServings)
                 AdaptiveMenuItem(
-                  title: 'Servings',
+                  title: l10n.scaleTypeServings,
                   icon: HugeIcon(
                     icon: HugeIcons.strokeRoundedUserGroup,
                     color: state.scaleType == ScaleType.servings
@@ -189,7 +192,7 @@ class _ScaleTypeRow extends ConsumerWidget {
                   },
                 ),
               AdaptiveMenuItem(
-                title: 'Ingredient',
+                title: l10n.scaleConvertIngredient,
                 icon: HugeIcon(
                   icon: HugeIcons.strokeRoundedLeftToRightListBullet,
                   color: state.scaleType == ScaleType.ingredient
@@ -205,7 +208,7 @@ class _ScaleTypeRow extends ConsumerWidget {
               ),
             ],
             child: _DropdownButtonChip(
-              text: _getScaleTypeLabel(state.scaleType),
+              text: _getScaleTypeLabel(context, state.scaleType),
             ),
           ),
         ],
@@ -230,16 +233,17 @@ class _IngredientSelectorRow extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final colors = AppColors.of(context);
+    final l10n = context.l10n;
     final scalableIngredients = ref.watch(scalableIngredientsProvider(recipeId));
 
     // Find currently selected ingredient
-    String selectedText = 'Select ingredient';
+    String selectedText = l10n.scaleConvertSelectIngredient;
     if (state.selectedIngredientId != null) {
       final selected = scalableIngredients.firstWhere(
         (i) => i.id == state.selectedIngredientId,
-        orElse: () => (id: '', name: '', displayName: 'Select ingredient'),
+        orElse: () => (id: '', name: '', displayName: l10n.scaleConvertSelectIngredient),
       );
-      selectedText = selected.name.isNotEmpty ? selected.name : 'Select ingredient';
+      selectedText = selected.name.isNotEmpty ? selected.name : l10n.scaleConvertSelectIngredient;
     }
 
     return Padding(
@@ -251,7 +255,7 @@ class _IngredientSelectorRow extends ConsumerWidget {
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           Text(
-            'Ingredient',
+            l10n.scaleConvertIngredient,
             style: AppTypography.body.copyWith(
               color: colors.textPrimary,
             ),
@@ -484,17 +488,18 @@ class _ScaleSliderRow extends ConsumerWidget {
   }
 
   /// Get the slider label
-  String _getSliderLabel(_ParsedIngredientInfo? ingredientInfo) {
+  String _getSliderLabel(BuildContext context, _ParsedIngredientInfo? ingredientInfo) {
+    final l10n = context.l10n;
     switch (state.scaleType) {
       case ScaleType.amount:
-        return 'Amount: ${_formatScale(state.scaleFactor)}x';
+        return l10n.scaleSliderAmount(_formatScale(state.scaleFactor));
       case ScaleType.servings:
         final targetServings =
             (state.scaleFactor * (recipeServings ?? 4)).round();
-        return 'Servings: $targetServings';
+        return l10n.scaleSliderServings(targetServings);
       case ScaleType.ingredient:
         if (ingredientInfo == null) {
-          return 'Amount: ${_formatScale(state.scaleFactor)}x';
+          return l10n.scaleSliderAmount(_formatScale(state.scaleFactor));
         }
         final targetAmount = ingredientInfo.amount * state.scaleFactor;
         final formattedAmount = _formatIngredientAmount(
@@ -504,7 +509,7 @@ class _ScaleSliderRow extends ConsumerWidget {
         );
         final unitStr =
             ingredientInfo.unit.isNotEmpty ? ' ${ingredientInfo.unit}' : '';
-        return 'Amount: $formattedAmount$unitStr';
+        return l10n.scaleSliderIngredientAmount('$formattedAmount$unitStr');
     }
   }
 
@@ -623,7 +628,7 @@ class _ScaleSliderRow extends ConsumerWidget {
           SizedBox(
             width: 145,
             child: Text(
-              _getSliderLabel(ingredientInfo),
+              _getSliderLabel(context, ingredientInfo),
               style: AppTypography.body.copyWith(
                 color: colors.textPrimary,
               ),
@@ -681,20 +686,22 @@ class _ConvertRow extends ConsumerWidget {
     required this.state,
   });
 
-  String _getConversionLabel(ConversionMode mode) {
+  String _getConversionLabel(BuildContext context, ConversionMode mode) {
+    final l10n = context.l10n;
     switch (mode) {
       case ConversionMode.original:
-        return 'Original';
+        return l10n.conversionModeOriginal;
       case ConversionMode.imperial:
-        return 'Imperial';
+        return l10n.conversionModeImperial;
       case ConversionMode.metric:
-        return 'Metric';
+        return l10n.conversionModeMetric;
     }
   }
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final colors = AppColors.of(context);
+    final l10n = context.l10n;
 
     return Padding(
       padding: EdgeInsets.symmetric(
@@ -705,7 +712,7 @@ class _ConvertRow extends ConsumerWidget {
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           Text(
-            'Convert',
+            l10n.scaleConvertConvert,
             style: AppTypography.body.copyWith(
               color: colors.textPrimary,
             ),
@@ -713,7 +720,7 @@ class _ConvertRow extends ConsumerWidget {
           AdaptivePullDownButton(
             items: [
               AdaptiveMenuItem(
-                title: 'Original',
+                title: l10n.conversionModeOriginal,
                 icon: HugeIcon(
                   icon: state.conversionMode == ConversionMode.original
                       ? HugeIcons.strokeRoundedCheckmarkCircle02
@@ -730,7 +737,7 @@ class _ConvertRow extends ConsumerWidget {
                 },
               ),
               AdaptiveMenuItem(
-                title: 'Imperial',
+                title: l10n.conversionModeImperial,
                 icon: HugeIcon(
                   icon: state.conversionMode == ConversionMode.imperial
                       ? HugeIcons.strokeRoundedCheckmarkCircle02
@@ -747,7 +754,7 @@ class _ConvertRow extends ConsumerWidget {
                 },
               ),
               AdaptiveMenuItem(
-                title: 'Metric',
+                title: l10n.conversionModeMetric,
                 icon: HugeIcon(
                   icon: state.conversionMode == ConversionMode.metric
                       ? HugeIcons.strokeRoundedCheckmarkCircle02
@@ -765,7 +772,7 @@ class _ConvertRow extends ConsumerWidget {
               ),
             ],
             child: _DropdownButtonChip(
-              text: _getConversionLabel(state.conversionMode),
+              text: _getConversionLabel(context, state.conversionMode),
             ),
           ),
         ],

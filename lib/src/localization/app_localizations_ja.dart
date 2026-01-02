@@ -1552,4 +1552,49 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get recipePageCheckPantryStock => 'パントリー在庫を確認';
+
+  @override
+  String get scaleConvertReset => 'リセット';
+
+  @override
+  String get scaleConvertScale => '倍率';
+
+  @override
+  String get scaleConvertConvert => '単位変換';
+
+  @override
+  String get scaleConvertIngredient => '材料';
+
+  @override
+  String get scaleConvertSelectIngredient => '材料を選択';
+
+  @override
+  String get scaleTypeAmount => '倍率';
+
+  @override
+  String get scaleTypeServings => '人数';
+
+  @override
+  String scaleSliderAmount(String value) {
+    return '倍率: ${value}x';
+  }
+
+  @override
+  String scaleSliderServings(int count) {
+    return '人数: $count';
+  }
+
+  @override
+  String scaleSliderIngredientAmount(String value) {
+    return '分量: $value';
+  }
+
+  @override
+  String get conversionModeOriginal => 'オリジナル';
+
+  @override
+  String get conversionModeImperial => 'ヤード・ポンド法';
+
+  @override
+  String get conversionModeMetric => 'メートル法';
 }

@@ -530,5 +530,22 @@
   "recipeCookResumeCooking": "調理を再開",
 
   "recipePageEditRecipe": "レシピを編集",
-  "recipePageCheckPantryStock": "パントリー在庫を確認"
+  "recipePageCheckPantryStock": "パントリー在庫を確認",
+
+  "scaleConvertReset": "リセット",
+  "scaleConvertScale": "倍率",
+  "scaleConvertConvert": "単位変換",
+  "scaleConvertIngredient": "材料",
+  "scaleConvertSelectIngredient": "材料を選択",
+
+  "scaleTypeAmount": "倍率",
+  "scaleTypeServings": "人数",
+
+  "scaleSliderAmount": "倍率: {value}x",
+  "scaleSliderServings": "人数: {count}",
+  "scaleSliderIngredientAmount": "分量: {value}",
+
+  "conversionModeOriginal": "オリジナル",
+  "conversionModeImperial": "ヤード・ポンド法",
+  "conversionModeMetric": "メートル法"
 }

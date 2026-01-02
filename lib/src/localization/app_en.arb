@@ -2187,5 +2187,76 @@
   "recipePageCheckPantryStock": "Check Pantry Stock",
   "@recipePageCheckPantryStock": {
     "description": "Check pantry stock menu item on recipe page"
+  },
+
+  "scaleConvertReset": "Reset",
+  "@scaleConvertReset": {
+    "description": "Reset button in scale/convert panel"
+  },
+  "scaleConvertScale": "Scale",
+  "@scaleConvertScale": {
+    "description": "Scale row label"
+  },
+  "scaleConvertConvert": "Convert",
+  "@scaleConvertConvert": {
+    "description": "Convert row label"
+  },
+  "scaleConvertIngredient": "Ingredient",
+  "@scaleConvertIngredient": {
+    "description": "Ingredient row label and scale type"
+  },
+  "scaleConvertSelectIngredient": "Select ingredient",
+  "@scaleConvertSelectIngredient": {
+    "description": "Placeholder for ingredient selector"
+  },
+
+  "scaleTypeAmount": "Amount",
+  "@scaleTypeAmount": {
+    "description": "Amount scale type option"
+  },
+  "scaleTypeServings": "Servings",
+  "@scaleTypeServings": {
+    "description": "Servings scale type option"
+  },
+
+  "scaleSliderAmount": "Amount: {value}x",
+  "@scaleSliderAmount": {
+    "description": "Slider label for amount scale",
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "scaleSliderServings": "Servings: {count}",
+  "@scaleSliderServings": {
+    "description": "Slider label for servings scale",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "scaleSliderIngredientAmount": "Amount: {value}",
+  "@scaleSliderIngredientAmount": {
+    "description": "Slider label for ingredient amount",
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+
+  "conversionModeOriginal": "Original",
+  "@conversionModeOriginal": {
+    "description": "Original conversion mode option"
+  },
+  "conversionModeImperial": "Imperial",
+  "@conversionModeImperial": {
+    "description": "Imperial conversion mode option"
+  },
+  "conversionModeMetric": "Metric",
+  "@conversionModeMetric": {
+    "description": "Metric conversion mode option"
   }
 }
