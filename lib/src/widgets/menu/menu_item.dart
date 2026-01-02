@@ -70,8 +70,11 @@ class MenuItemState extends State<MenuItem> {
         ? typography.textStyle.copyWith(
       color: widget.activeTextColor,
       fontWeight: FontWeight.w600,
+      fontSize: 16,
     )
-        : typography.textStyle;
+        : typography.textStyle.copyWith(
+      fontSize: 16,
+    );
 
     return GestureDetector(
       onTapDown: _handleTapDown,

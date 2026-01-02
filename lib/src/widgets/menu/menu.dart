@@ -43,10 +43,11 @@ class Menu extends ConsumerWidget {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
+                const SizedBox(height: 12),
                 MenuItem(
                   index: 1,
                   title: 'Recipes',
-                  icon: HugeIcon(icon: HugeIcons.strokeRoundedBook01, color: primaryColor),
+                  icon: HugeIcon(icon: HugeIcons.strokeRoundedBook01, color: primaryColor, size: 20),
                   isActive: selectedIndex == 1,
                   color: primaryColor,
                   textColor: textColor,
@@ -57,7 +58,7 @@ class Menu extends ConsumerWidget {
                 MenuItem(
                   index: 2,
                   title: 'Shopping List',
-                  icon: HugeIcon(icon: HugeIcons.strokeRoundedShoppingCart01, color: primaryColor),
+                  icon: HugeIcon(icon: HugeIcons.strokeRoundedShoppingCart01, color: primaryColor, size: 20),
                   isActive: selectedIndex == 2,
                   color: primaryColor,
                   textColor: textColor,
@@ -68,7 +69,7 @@ class Menu extends ConsumerWidget {
                 MenuItem(
                   index: 3,
                   title: 'Meal Plans',
-                  icon: HugeIcon(icon: HugeIcons.strokeRoundedCalendar01, color: primaryColor),
+                  icon: HugeIcon(icon: HugeIcons.strokeRoundedCalendar01, color: primaryColor, size: 20),
                   isActive: selectedIndex == 3,
                   color: primaryColor,
                   textColor: textColor,
@@ -79,7 +80,7 @@ class Menu extends ConsumerWidget {
                 MenuItem(
                   index: 4,
                   title: 'Pantry',
-                  icon: HugeIcon(icon: HugeIcons.strokeRoundedFridge, color: primaryColor),
+                  icon: HugeIcon(icon: HugeIcons.strokeRoundedFridge, color: primaryColor, size: 20),
                   isActive: selectedIndex == 4,
                   color: primaryColor,
                   textColor: textColor,
@@ -90,7 +91,7 @@ class Menu extends ConsumerWidget {
                 MenuItem(
                   index: 5,
                   title: 'Clippings',
-                  icon: HugeIcon(icon: HugeIcons.strokeRoundedFile01, color: primaryColor),
+                  icon: HugeIcon(icon: HugeIcons.strokeRoundedFile01, color: primaryColor, size: 20),
                   isActive: selectedIndex == 5,
                   color: primaryColor,
                   textColor: textColor,
@@ -103,7 +104,7 @@ class Menu extends ConsumerWidget {
                 MenuItem(
                   index: 6,
                   title: 'Discover',
-                  icon: HugeIcon(icon: HugeIcons.strokeRoundedCompass01, color: primaryColor),
+                  icon: HugeIcon(icon: HugeIcons.strokeRoundedCompass01, color: primaryColor, size: 20),
                   isActive: selectedIndex == 6,
                   color: primaryColor,
                   textColor: textColor,
@@ -116,7 +117,7 @@ class Menu extends ConsumerWidget {
                 MenuItem(
                   index: 7,
                   title: 'Household',
-                  icon: HugeIcon(icon: HugeIcons.strokeRoundedHome01, color: primaryColor),
+                  icon: HugeIcon(icon: HugeIcons.strokeRoundedHome01, color: primaryColor, size: 20),
                   isActive: selectedIndex == 7,
                   color: primaryColor,
                   textColor: textColor,
@@ -159,7 +160,7 @@ class Menu extends ConsumerWidget {
               MenuItem(
                 index: 8,
                 title: 'Account',
-                icon: HugeIcon(icon: HugeIcons.strokeRoundedUserCircle, color: primaryColor),
+                icon: HugeIcon(icon: HugeIcons.strokeRoundedUserCircle, color: primaryColor, size: 20),
                 isActive: selectedIndex == 8,
                 color: primaryColor,
                 textColor: textColor,
@@ -173,7 +174,7 @@ class Menu extends ConsumerWidget {
               MenuItem(
                 index: 8,
                 title: 'Sign Up',
-                icon: HugeIcon(icon: HugeIcons.strokeRoundedUserCircle, color: primaryColor),
+                icon: HugeIcon(icon: HugeIcons.strokeRoundedUserCircle, color: primaryColor, size: 20),
                 isActive: selectedIndex == 8,
                 color: primaryColor,
                 textColor: textColor,
@@ -186,7 +187,7 @@ class Menu extends ConsumerWidget {
             MenuItem(
               index: 9,
               title: 'Settings',
-              icon: HugeIcon(icon: HugeIcons.strokeRoundedSettings01, color: primaryColor),
+              icon: HugeIcon(icon: HugeIcons.strokeRoundedSettings01, color: primaryColor, size: 20),
               isActive: selectedIndex == 9,
               color: primaryColor,
               textColor: textColor,
