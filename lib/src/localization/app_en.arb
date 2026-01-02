@@ -2976,5 +2976,324 @@
         "example": "Connection timeout"
       }
     }
+  },
+
+  "pantryTitle": "Pantry",
+  "@pantryTitle": {
+    "description": "Pantry page title"
+  },
+  "pantryFilterAndSort": "Filter and Sort",
+  "@pantryFilterAndSort": {
+    "description": "Filter and sort button text"
+  },
+  "pantryAddItem": "Add Item",
+  "@pantryAddItem": {
+    "description": "Add item button text"
+  },
+  "pantryNoItemsMatchFilters": "No pantry items match the current filters",
+  "@pantryNoItemsMatchFilters": {
+    "description": "Empty state when filters exclude all items"
+  },
+  "pantryNoItemsYet": "No pantry items yet. Tap the + button to add items.",
+  "@pantryNoItemsYet": {
+    "description": "Empty state when pantry is empty"
+  },
+  "pantryClearFilters": "Clear Filters",
+  "@pantryClearFilters": {
+    "description": "Clear filters button text"
+  },
+  "pantryAddPantryItem": "Add Pantry Item",
+  "@pantryAddPantryItem": {
+    "description": "Add pantry item menu option"
+  },
+  "pantryAddItemsTitle": "Add Pantry Items",
+  "@pantryAddItemsTitle": {
+    "description": "Add pantry items modal title"
+  },
+  "pantryItemNamePlaceholder": "Item name",
+  "@pantryItemNamePlaceholder": {
+    "description": "Item name field placeholder"
+  },
+  "pantryPreviouslyAdded": "Previously Added",
+  "@pantryPreviouslyAdded": {
+    "description": "Previously added section header"
+  },
+  "pantryUndo": "Undo",
+  "@pantryUndo": {
+    "description": "Undo button text"
+  },
+  "pantryStatusLabel": "Status:",
+  "@pantryStatusLabel": {
+    "description": "Status label"
+  },
+  "pantryAddHelpText": "Items are added with \"In Stock\" status by default. You can change the status above or edit items later for more details.",
+  "@pantryAddHelpText": {
+    "description": "Help text in add pantry item modal"
+  },
+  "pantryEditTitle": "Edit Pantry Item",
+  "@pantryEditTitle": {
+    "description": "Edit pantry item modal title"
+  },
+  "pantryItemNameFieldPlaceholder": "Pantry Item Name",
+  "@pantryItemNameFieldPlaceholder": {
+    "description": "Pantry item name field placeholder"
+  },
+  "pantryStockStatusLabel": "Stock Status",
+  "@pantryStockStatusLabel": {
+    "description": "Stock status section label"
+  },
+  "pantryMarkAsStaple": "Mark as staple",
+  "@pantryMarkAsStaple": {
+    "description": "Mark as staple toggle label"
+  },
+  "pantryStapleDescription": "Staples are assumed to always be in stock",
+  "@pantryStapleDescription": {
+    "description": "Staple toggle description"
+  },
+  "pantryMatchingTerms": "Matching Terms",
+  "@pantryMatchingTerms": {
+    "description": "Matching terms section header"
+  },
+  "pantryAddTerm": "Add Term",
+  "@pantryAddTerm": {
+    "description": "Add term button text"
+  },
+  "pantryNoTermsMessage": "No additional terms for this item. Add terms to improve recipe matching.",
+  "@pantryNoTermsMessage": {
+    "description": "Empty state for terms list"
+  },
+  "pantryTermSource": "Source: {source}",
+  "@pantryTermSource": {
+    "description": "Term source label",
+    "placeholders": {
+      "source": {
+        "type": "String",
+        "example": "user"
+      }
+    }
+  },
+  "pantryTermTip": "Tip: Add terms that match recipe ingredients to improve matching.",
+  "@pantryTermTip": {
+    "description": "Tip for adding terms"
+  },
+  "pantryAddTermFor": "Add Term for \"{name}\"",
+  "@pantryAddTermFor": {
+    "description": "Add term page title",
+    "placeholders": {
+      "name": {
+        "type": "String",
+        "example": "Flour"
+      }
+    }
+  },
+  "pantryEnterMatchingTerm": "Enter matching term",
+  "@pantryEnterMatchingTerm": {
+    "description": "Matching term field placeholder"
+  },
+  "pantryResetAll": "Reset All",
+  "@pantryResetAll": {
+    "description": "Reset all filters button"
+  },
+  "pantryApplyChanges": "Apply Changes",
+  "@pantryApplyChanges": {
+    "description": "Apply changes button"
+  },
+  "pantrySortHeader": "Sort",
+  "@pantrySortHeader": {
+    "description": "Sort section header"
+  },
+  "pantrySortBy": "Sort by {option}",
+  "@pantrySortBy": {
+    "description": "Sort by label",
+    "placeholders": {
+      "option": {
+        "type": "String",
+        "example": "Category"
+      }
+    }
+  },
+  "pantrySortAZ": "A-Z",
+  "@pantrySortAZ": {
+    "description": "Ascending sort indicator"
+  },
+  "pantrySortZA": "Z-A",
+  "@pantrySortZA": {
+    "description": "Descending sort indicator"
+  },
+  "pantrySortCategory": "Category",
+  "@pantrySortCategory": {
+    "description": "Sort by category option"
+  },
+  "pantrySortAlphabetical": "Alphabetical",
+  "@pantrySortAlphabetical": {
+    "description": "Sort alphabetically option"
+  },
+  "pantrySortDateAdded": "Date Added",
+  "@pantrySortDateAdded": {
+    "description": "Sort by date added option"
+  },
+  "pantrySortDateModified": "Date Modified",
+  "@pantrySortDateModified": {
+    "description": "Sort by date modified option"
+  },
+  "pantrySortStockStatus": "Stock Status",
+  "@pantrySortStockStatus": {
+    "description": "Sort by stock status option"
+  },
+  "pantryCategoryHeader": "Category",
+  "@pantryCategoryHeader": {
+    "description": "Category filter section header"
+  },
+  "pantryCategoryOther": "Other",
+  "@pantryCategoryOther": {
+    "description": "Other category fallback"
+  },
+  "pantryCategoryNone": "No categories available",
+  "@pantryCategoryNone": {
+    "description": "Empty state for categories"
+  },
+  "pantryStockStatusHeader": "Stock Status",
+  "@pantryStockStatusHeader": {
+    "description": "Stock status filter section header"
+  },
+  "pantryStockOutOfStock": "Out of Stock",
+  "@pantryStockOutOfStock": {
+    "description": "Out of stock status label"
+  },
+  "pantryStockLowStock": "Low Stock",
+  "@pantryStockLowStock": {
+    "description": "Low stock status label"
+  },
+  "pantryStockInStock": "In Stock",
+  "@pantryStockInStock": {
+    "description": "In stock status label"
+  },
+  "pantryShowStaplesHeader": "Show Staples",
+  "@pantryShowStaplesHeader": {
+    "description": "Show staples section header"
+  },
+  "pantryIncludeStapleItems": "Include staple items",
+  "@pantryIncludeStapleItems": {
+    "description": "Include staple items toggle label"
+  },
+  "pantrySetOutOfStock": "Set to Out of Stock",
+  "@pantrySetOutOfStock": {
+    "description": "Set to out of stock menu option"
+  },
+  "pantrySetLowStock": "Set to Low Stock",
+  "@pantrySetLowStock": {
+    "description": "Set to low stock menu option"
+  },
+  "pantrySetInStock": "Set to In Stock",
+  "@pantrySetInStock": {
+    "description": "Set to in stock menu option"
+  },
+  "pantryEdit": "Edit",
+  "@pantryEdit": {
+    "description": "Edit menu option"
+  },
+  "pantryDeleteItemTitle": "Delete Item",
+  "@pantryDeleteItemTitle": {
+    "description": "Delete item dialog title"
+  },
+  "pantryDeleteItemMessage": "Are you sure you want to delete \"{name}\"? This action cannot be undone.",
+  "@pantryDeleteItemMessage": {
+    "description": "Delete item confirmation message",
+    "placeholders": {
+      "name": {
+        "type": "String",
+        "example": "Flour"
+      }
+    }
+  },
+  "pantryDeleteFailed": "Failed to delete item: {error}",
+  "@pantryDeleteFailed": {
+    "description": "Delete item error message",
+    "placeholders": {
+      "error": {
+        "type": "String",
+        "example": "Network error"
+      }
+    }
+  },
+  "pantrySelectedCount": "{count} Selected",
+  "@pantrySelectedCount": {
+    "description": "Selected items count label",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "5"
+      }
+    }
+  },
+  "pantryItemsSelected": "{count, plural, =1{1 item selected} other{{count} items selected}}",
+  "@pantryItemsSelected": {
+    "description": "Items selected action sheet title",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "3"
+      }
+    }
+  },
+  "pantrySetAllInStock": "Set All to In-Stock",
+  "@pantrySetAllInStock": {
+    "description": "Bulk set to in stock action"
+  },
+  "pantrySetAllLowStock": "Set All to Low-Stock",
+  "@pantrySetAllLowStock": {
+    "description": "Bulk set to low stock action"
+  },
+  "pantrySetAllOutOfStock": "Set All to Out-of-Stock",
+  "@pantrySetAllOutOfStock": {
+    "description": "Bulk set to out of stock action"
+  },
+  "pantryDeleteSelected": "Delete Selected",
+  "@pantryDeleteSelected": {
+    "description": "Delete selected items action"
+  },
+  "pantryDeleteItemsTitle": "Delete Items",
+  "@pantryDeleteItemsTitle": {
+    "description": "Delete items dialog title"
+  },
+  "pantryDeleteItemsMessage": "{count, plural, =1{Are you sure you want to delete 1 item? This action cannot be undone.} other{Are you sure you want to delete {count} items? This action cannot be undone.}}",
+  "@pantryDeleteItemsMessage": {
+    "description": "Delete items confirmation message",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "3"
+      }
+    }
+  },
+  "pantryStockStatusAccessibility": "Stock status: {status}",
+  "@pantryStockStatusAccessibility": {
+    "description": "Accessibility label for stock status",
+    "placeholders": {
+      "status": {
+        "type": "String",
+        "example": "In Stock"
+      }
+    }
+  },
+  "pantryTapToChangeStatus": "Tap to change stock status",
+  "@pantryTapToChangeStatus": {
+    "description": "Accessibility hint for stock status control"
+  },
+  "pantryDetailsTitle": "Pantry Details",
+  "@pantryDetailsTitle": {
+    "description": "Pantry details sub-page title"
+  },
+  "pantrySubPagePlaceholder": "This is a pantry sub-page",
+  "@pantrySubPagePlaceholder": {
+    "description": "Placeholder text for pantry sub-page"
+  },
+  "pantryGoBack": "Go Back",
+  "@pantryGoBack": {
+    "description": "Go back button text"
+  },
+  "pantrySave": "Save",
+  "@pantrySave": {
+    "description": "Save button text"
   }
 }

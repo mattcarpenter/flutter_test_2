@@ -6,6 +6,7 @@ import 'package:wolt_modal_sheet/wolt_modal_sheet.dart';
 
 import '../../../../database/database.dart';
 import '../../../../database/models/pantry_items.dart';
+import '../../../localization/l10n_extension.dart';
 import '../../../providers/pantry_provider.dart';
 import '../../../theme/colors.dart';
 import '../../../theme/spacing.dart';
@@ -54,7 +55,7 @@ class AddPantryItemModalPage {
           mainAxisSize: MainAxisSize.min,
           children: [
             Text(
-              'Add Pantry Items',
+              context.l10n.pantryAddItemsTitle,
               style: AppTypography.h4.copyWith(
                 color: AppColors.of(context).textPrimary,
               ),
@@ -212,7 +213,7 @@ class _AddPantryItemFormState extends ConsumerState<AddPantryItemForm> {
                 key: _textFieldKey,
                 controller: _nameController,
                 focusNode: _focusNode,
-                placeholder: 'Item name',
+                placeholder: context.l10n.pantryItemNamePlaceholder,
                 autofocus: true,
                 textInputAction: TextInputAction.send,
                 onEditingComplete: () {}, // Prevent default focus traversal
@@ -222,7 +223,7 @@ class _AddPantryItemFormState extends ConsumerState<AddPantryItemForm> {
             ),
             SizedBox(width: AppSpacing.md),
             AppButtonVariants.primaryFilled(
-              text: 'Add',
+              text: context.l10n.commonAdd,
               size: AppButtonSize.large,
               shape: AppButtonShape.square,
               onPressed: (_isLoading || !_hasInput) ? null : () {
@@ -240,7 +241,7 @@ class _AddPantryItemFormState extends ConsumerState<AddPantryItemForm> {
         if (_lastAddedItem != null) ...[
           SizedBox(height: AppSpacing.xl),
           Text(
-            'Previously Added',
+            context.l10n.pantryPreviouslyAdded,
             style: AppTypography.h5.copyWith(
               color: AppColors.of(context).textPrimary,
             ),
@@ -275,7 +276,7 @@ class _AddPantryItemFormState extends ConsumerState<AddPantryItemForm> {
                       padding: EdgeInsets.all(4),
                       minSize: 0,
                       child: Text(
-                        'Undo',
+                        context.l10n.pantryUndo,
                         style: TextStyle(
                           color: AppColors.of(context).error,
                           fontSize: 14,
@@ -289,7 +290,7 @@ class _AddPantryItemFormState extends ConsumerState<AddPantryItemForm> {
                 Row(
                   children: [
                     Text(
-                      'Status:',
+                      context.l10n.pantryStatusLabel,
                       style: AppTypography.body.copyWith(
                         color: AppColors.of(context).textPrimary,
                       ),
@@ -308,7 +309,7 @@ class _AddPantryItemFormState extends ConsumerState<AddPantryItemForm> {
 
         SizedBox(height: AppSpacing.lg),
         Text(
-          'Items are added with "In Stock" status by default. You can change the status above or edit items later for more details.',
+          context.l10n.pantryAddHelpText,
           style: AppTypography.caption.copyWith(
             color: AppColors.of(context).textTertiary,
           ),

@@ -3807,6 +3807,402 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Error loading meal plan: {error}'**
   String mealPlanErrorLoading(String error);
+
+  /// Pantry page title
+  ///
+  /// In en, this message translates to:
+  /// **'Pantry'**
+  String get pantryTitle;
+
+  /// Filter and sort button text
+  ///
+  /// In en, this message translates to:
+  /// **'Filter and Sort'**
+  String get pantryFilterAndSort;
+
+  /// Add item button text
+  ///
+  /// In en, this message translates to:
+  /// **'Add Item'**
+  String get pantryAddItem;
+
+  /// Empty state when filters exclude all items
+  ///
+  /// In en, this message translates to:
+  /// **'No pantry items match the current filters'**
+  String get pantryNoItemsMatchFilters;
+
+  /// Empty state when pantry is empty
+  ///
+  /// In en, this message translates to:
+  /// **'No pantry items yet. Tap the + button to add items.'**
+  String get pantryNoItemsYet;
+
+  /// Clear filters button text
+  ///
+  /// In en, this message translates to:
+  /// **'Clear Filters'**
+  String get pantryClearFilters;
+
+  /// Add pantry item menu option
+  ///
+  /// In en, this message translates to:
+  /// **'Add Pantry Item'**
+  String get pantryAddPantryItem;
+
+  /// Add pantry items modal title
+  ///
+  /// In en, this message translates to:
+  /// **'Add Pantry Items'**
+  String get pantryAddItemsTitle;
+
+  /// Item name field placeholder
+  ///
+  /// In en, this message translates to:
+  /// **'Item name'**
+  String get pantryItemNamePlaceholder;
+
+  /// Previously added section header
+  ///
+  /// In en, this message translates to:
+  /// **'Previously Added'**
+  String get pantryPreviouslyAdded;
+
+  /// Undo button text
+  ///
+  /// In en, this message translates to:
+  /// **'Undo'**
+  String get pantryUndo;
+
+  /// Status label
+  ///
+  /// In en, this message translates to:
+  /// **'Status:'**
+  String get pantryStatusLabel;
+
+  /// Help text in add pantry item modal
+  ///
+  /// In en, this message translates to:
+  /// **'Items are added with \"In Stock\" status by default. You can change the status above or edit items later for more details.'**
+  String get pantryAddHelpText;
+
+  /// Edit pantry item modal title
+  ///
+  /// In en, this message translates to:
+  /// **'Edit Pantry Item'**
+  String get pantryEditTitle;
+
+  /// Pantry item name field placeholder
+  ///
+  /// In en, this message translates to:
+  /// **'Pantry Item Name'**
+  String get pantryItemNameFieldPlaceholder;
+
+  /// Stock status section label
+  ///
+  /// In en, this message translates to:
+  /// **'Stock Status'**
+  String get pantryStockStatusLabel;
+
+  /// Mark as staple toggle label
+  ///
+  /// In en, this message translates to:
+  /// **'Mark as staple'**
+  String get pantryMarkAsStaple;
+
+  /// Staple toggle description
+  ///
+  /// In en, this message translates to:
+  /// **'Staples are assumed to always be in stock'**
+  String get pantryStapleDescription;
+
+  /// Matching terms section header
+  ///
+  /// In en, this message translates to:
+  /// **'Matching Terms'**
+  String get pantryMatchingTerms;
+
+  /// Add term button text
+  ///
+  /// In en, this message translates to:
+  /// **'Add Term'**
+  String get pantryAddTerm;
+
+  /// Empty state for terms list
+  ///
+  /// In en, this message translates to:
+  /// **'No additional terms for this item. Add terms to improve recipe matching.'**
+  String get pantryNoTermsMessage;
+
+  /// Term source label
+  ///
+  /// In en, this message translates to:
+  /// **'Source: {source}'**
+  String pantryTermSource(String source);
+
+  /// Tip for adding terms
+  ///
+  /// In en, this message translates to:
+  /// **'Tip: Add terms that match recipe ingredients to improve matching.'**
+  String get pantryTermTip;
+
+  /// Add term page title
+  ///
+  /// In en, this message translates to:
+  /// **'Add Term for \"{name}\"'**
+  String pantryAddTermFor(String name);
+
+  /// Matching term field placeholder
+  ///
+  /// In en, this message translates to:
+  /// **'Enter matching term'**
+  String get pantryEnterMatchingTerm;
+
+  /// Reset all filters button
+  ///
+  /// In en, this message translates to:
+  /// **'Reset All'**
+  String get pantryResetAll;
+
+  /// Apply changes button
+  ///
+  /// In en, this message translates to:
+  /// **'Apply Changes'**
+  String get pantryApplyChanges;
+
+  /// Sort section header
+  ///
+  /// In en, this message translates to:
+  /// **'Sort'**
+  String get pantrySortHeader;
+
+  /// Sort by label
+  ///
+  /// In en, this message translates to:
+  /// **'Sort by {option}'**
+  String pantrySortBy(String option);
+
+  /// Ascending sort indicator
+  ///
+  /// In en, this message translates to:
+  /// **'A-Z'**
+  String get pantrySortAZ;
+
+  /// Descending sort indicator
+  ///
+  /// In en, this message translates to:
+  /// **'Z-A'**
+  String get pantrySortZA;
+
+  /// Sort by category option
+  ///
+  /// In en, this message translates to:
+  /// **'Category'**
+  String get pantrySortCategory;
+
+  /// Sort alphabetically option
+  ///
+  /// In en, this message translates to:
+  /// **'Alphabetical'**
+  String get pantrySortAlphabetical;
+
+  /// Sort by date added option
+  ///
+  /// In en, this message translates to:
+  /// **'Date Added'**
+  String get pantrySortDateAdded;
+
+  /// Sort by date modified option
+  ///
+  /// In en, this message translates to:
+  /// **'Date Modified'**
+  String get pantrySortDateModified;
+
+  /// Sort by stock status option
+  ///
+  /// In en, this message translates to:
+  /// **'Stock Status'**
+  String get pantrySortStockStatus;
+
+  /// Category filter section header
+  ///
+  /// In en, this message translates to:
+  /// **'Category'**
+  String get pantryCategoryHeader;
+
+  /// Other category fallback
+  ///
+  /// In en, this message translates to:
+  /// **'Other'**
+  String get pantryCategoryOther;
+
+  /// Empty state for categories
+  ///
+  /// In en, this message translates to:
+  /// **'No categories available'**
+  String get pantryCategoryNone;
+
+  /// Stock status filter section header
+  ///
+  /// In en, this message translates to:
+  /// **'Stock Status'**
+  String get pantryStockStatusHeader;
+
+  /// Out of stock status label
+  ///
+  /// In en, this message translates to:
+  /// **'Out of Stock'**
+  String get pantryStockOutOfStock;
+
+  /// Low stock status label
+  ///
+  /// In en, this message translates to:
+  /// **'Low Stock'**
+  String get pantryStockLowStock;
+
+  /// In stock status label
+  ///
+  /// In en, this message translates to:
+  /// **'In Stock'**
+  String get pantryStockInStock;
+
+  /// Show staples section header
+  ///
+  /// In en, this message translates to:
+  /// **'Show Staples'**
+  String get pantryShowStaplesHeader;
+
+  /// Include staple items toggle label
+  ///
+  /// In en, this message translates to:
+  /// **'Include staple items'**
+  String get pantryIncludeStapleItems;
+
+  /// Set to out of stock menu option
+  ///
+  /// In en, this message translates to:
+  /// **'Set to Out of Stock'**
+  String get pantrySetOutOfStock;
+
+  /// Set to low stock menu option
+  ///
+  /// In en, this message translates to:
+  /// **'Set to Low Stock'**
+  String get pantrySetLowStock;
+
+  /// Set to in stock menu option
+  ///
+  /// In en, this message translates to:
+  /// **'Set to In Stock'**
+  String get pantrySetInStock;
+
+  /// Edit menu option
+  ///
+  /// In en, this message translates to:
+  /// **'Edit'**
+  String get pantryEdit;
+
+  /// Delete item dialog title
+  ///
+  /// In en, this message translates to:
+  /// **'Delete Item'**
+  String get pantryDeleteItemTitle;
+
+  /// Delete item confirmation message
+  ///
+  /// In en, this message translates to:
+  /// **'Are you sure you want to delete \"{name}\"? This action cannot be undone.'**
+  String pantryDeleteItemMessage(String name);
+
+  /// Delete item error message
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to delete item: {error}'**
+  String pantryDeleteFailed(String error);
+
+  /// Selected items count label
+  ///
+  /// In en, this message translates to:
+  /// **'{count} Selected'**
+  String pantrySelectedCount(int count);
+
+  /// Items selected action sheet title
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 item selected} other{{count} items selected}}'**
+  String pantryItemsSelected(int count);
+
+  /// Bulk set to in stock action
+  ///
+  /// In en, this message translates to:
+  /// **'Set All to In-Stock'**
+  String get pantrySetAllInStock;
+
+  /// Bulk set to low stock action
+  ///
+  /// In en, this message translates to:
+  /// **'Set All to Low-Stock'**
+  String get pantrySetAllLowStock;
+
+  /// Bulk set to out of stock action
+  ///
+  /// In en, this message translates to:
+  /// **'Set All to Out-of-Stock'**
+  String get pantrySetAllOutOfStock;
+
+  /// Delete selected items action
+  ///
+  /// In en, this message translates to:
+  /// **'Delete Selected'**
+  String get pantryDeleteSelected;
+
+  /// Delete items dialog title
+  ///
+  /// In en, this message translates to:
+  /// **'Delete Items'**
+  String get pantryDeleteItemsTitle;
+
+  /// Delete items confirmation message
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{Are you sure you want to delete 1 item? This action cannot be undone.} other{Are you sure you want to delete {count} items? This action cannot be undone.}}'**
+  String pantryDeleteItemsMessage(int count);
+
+  /// Accessibility label for stock status
+  ///
+  /// In en, this message translates to:
+  /// **'Stock status: {status}'**
+  String pantryStockStatusAccessibility(String status);
+
+  /// Accessibility hint for stock status control
+  ///
+  /// In en, this message translates to:
+  /// **'Tap to change stock status'**
+  String get pantryTapToChangeStatus;
+
+  /// Pantry details sub-page title
+  ///
+  /// In en, this message translates to:
+  /// **'Pantry Details'**
+  String get pantryDetailsTitle;
+
+  /// Placeholder text for pantry sub-page
+  ///
+  /// In en, this message translates to:
+  /// **'This is a pantry sub-page'**
+  String get pantrySubPagePlaceholder;
+
+  /// Go back button text
+  ///
+  /// In en, this message translates to:
+  /// **'Go Back'**
+  String get pantryGoBack;
+
+  /// Save button text
+  ///
+  /// In en, this message translates to:
+  /// **'Save'**
+  String get pantrySave;
 }
 
 class _AppLocalizationsDelegate

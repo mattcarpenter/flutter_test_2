@@ -2072,4 +2072,232 @@ class AppLocalizationsJa extends AppLocalizations {
   String mealPlanErrorLoading(String error) {
     return '献立の読み込みエラー: $error';
   }
+
+  @override
+  String get pantryTitle => 'パントリー';
+
+  @override
+  String get pantryFilterAndSort => 'フィルターと並べ替え';
+
+  @override
+  String get pantryAddItem => '追加';
+
+  @override
+  String get pantryNoItemsMatchFilters => 'フィルター条件に一致するアイテムがありません';
+
+  @override
+  String get pantryNoItemsYet => 'パントリーにアイテムがありません。+ボタンをタップして追加してください。';
+
+  @override
+  String get pantryClearFilters => 'フィルターをクリア';
+
+  @override
+  String get pantryAddPantryItem => 'パントリーアイテムを追加';
+
+  @override
+  String get pantryAddItemsTitle => 'パントリーに追加';
+
+  @override
+  String get pantryItemNamePlaceholder => 'アイテム名';
+
+  @override
+  String get pantryPreviouslyAdded => '追加済み';
+
+  @override
+  String get pantryUndo => '元に戻す';
+
+  @override
+  String get pantryStatusLabel => '状態:';
+
+  @override
+  String get pantryAddHelpText =>
+      'アイテムはデフォルトで「在庫あり」として追加されます。上で状態を変更するか、後で編集して詳細を追加できます。';
+
+  @override
+  String get pantryEditTitle => 'パントリーアイテムを編集';
+
+  @override
+  String get pantryItemNameFieldPlaceholder => 'パントリーアイテム名';
+
+  @override
+  String get pantryStockStatusLabel => '在庫状態';
+
+  @override
+  String get pantryMarkAsStaple => '常備品としてマーク';
+
+  @override
+  String get pantryStapleDescription => '常備品は常に在庫ありとみなされます';
+
+  @override
+  String get pantryMatchingTerms => 'マッチング用語';
+
+  @override
+  String get pantryAddTerm => '用語を追加';
+
+  @override
+  String get pantryNoTermsMessage =>
+      'このアイテムの追加用語はありません。用語を追加してレシピマッチングを改善しましょう。';
+
+  @override
+  String pantryTermSource(String source) {
+    return 'ソース: $source';
+  }
+
+  @override
+  String get pantryTermTip => 'ヒント: レシピの材料と一致する用語を追加してマッチングを改善しましょう。';
+
+  @override
+  String pantryAddTermFor(String name) {
+    return '「$name」の用語を追加';
+  }
+
+  @override
+  String get pantryEnterMatchingTerm => 'マッチング用語を入力';
+
+  @override
+  String get pantryResetAll => 'すべてリセット';
+
+  @override
+  String get pantryApplyChanges => '変更を適用';
+
+  @override
+  String get pantrySortHeader => '並べ替え';
+
+  @override
+  String pantrySortBy(String option) {
+    return '$optionで並べ替え';
+  }
+
+  @override
+  String get pantrySortAZ => 'A-Z';
+
+  @override
+  String get pantrySortZA => 'Z-A';
+
+  @override
+  String get pantrySortCategory => 'カテゴリ';
+
+  @override
+  String get pantrySortAlphabetical => '名前順';
+
+  @override
+  String get pantrySortDateAdded => '追加日';
+
+  @override
+  String get pantrySortDateModified => '更新日';
+
+  @override
+  String get pantrySortStockStatus => '在庫状態';
+
+  @override
+  String get pantryCategoryHeader => 'カテゴリ';
+
+  @override
+  String get pantryCategoryOther => 'その他';
+
+  @override
+  String get pantryCategoryNone => 'カテゴリがありません';
+
+  @override
+  String get pantryStockStatusHeader => '在庫状態';
+
+  @override
+  String get pantryStockOutOfStock => '在庫切れ';
+
+  @override
+  String get pantryStockLowStock => '残りわずか';
+
+  @override
+  String get pantryStockInStock => '在庫あり';
+
+  @override
+  String get pantryShowStaplesHeader => '常備品を表示';
+
+  @override
+  String get pantryIncludeStapleItems => '常備品を含める';
+
+  @override
+  String get pantrySetOutOfStock => '在庫切れに設定';
+
+  @override
+  String get pantrySetLowStock => '残りわずかに設定';
+
+  @override
+  String get pantrySetInStock => '在庫ありに設定';
+
+  @override
+  String get pantryEdit => '編集';
+
+  @override
+  String get pantryDeleteItemTitle => 'アイテムを削除';
+
+  @override
+  String pantryDeleteItemMessage(String name) {
+    return '「$name」を削除しますか？この操作は元に戻せません。';
+  }
+
+  @override
+  String pantryDeleteFailed(String error) {
+    return 'アイテムの削除に失敗しました: $error';
+  }
+
+  @override
+  String pantrySelectedCount(int count) {
+    return '$count件選択';
+  }
+
+  @override
+  String pantryItemsSelected(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count件のアイテムを選択',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get pantrySetAllInStock => 'すべて在庫ありに設定';
+
+  @override
+  String get pantrySetAllLowStock => 'すべて残りわずかに設定';
+
+  @override
+  String get pantrySetAllOutOfStock => 'すべて在庫切れに設定';
+
+  @override
+  String get pantryDeleteSelected => '選択したアイテムを削除';
+
+  @override
+  String get pantryDeleteItemsTitle => 'アイテムを削除';
+
+  @override
+  String pantryDeleteItemsMessage(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count件のアイテムを削除しますか？この操作は元に戻せません。',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String pantryStockStatusAccessibility(String status) {
+    return '在庫状態: $status';
+  }
+
+  @override
+  String get pantryTapToChangeStatus => 'タップして在庫状態を変更';
+
+  @override
+  String get pantryDetailsTitle => 'パントリー詳細';
+
+  @override
+  String get pantrySubPagePlaceholder => 'パントリーサブページです';
+
+  @override
+  String get pantryGoBack => '戻る';
+
+  @override
+  String get pantrySave => '保存';
 }

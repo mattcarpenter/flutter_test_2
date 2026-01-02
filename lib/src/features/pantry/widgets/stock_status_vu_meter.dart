@@ -1,6 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import '../../../../database/models/pantry_items.dart';
+import '../../../localization/l10n_extension.dart';
 import '../../../theme/colors.dart';
 import '../../../widgets/adaptive_pull_down/adaptive_menu_item.dart';
 import '../../../widgets/adaptive_pull_down/adaptive_pull_down.dart';
@@ -20,14 +21,14 @@ class StockStatusVuMeter extends StatelessWidget {
     required this.onChanged,
   });
 
-  String _getStatusLabel(StockStatus status) {
+  String _getStatusLabel(BuildContext context, StockStatus status) {
     switch (status) {
       case StockStatus.outOfStock:
-        return 'Out of Stock';
+        return context.l10n.pantryStockOutOfStock;
       case StockStatus.lowStock:
-        return 'Low Stock';
+        return context.l10n.pantryStockLowStock;
       case StockStatus.inStock:
-        return 'In Stock';
+        return context.l10n.pantryStockInStock;
     }
   }
 
@@ -44,18 +45,18 @@ class StockStatusVuMeter extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colors = AppColors.of(context);
+    final statusLabel = _getStatusLabel(context, value);
 
     return Tooltip(
-      message: _getStatusLabel(value),
+      message: statusLabel,
       child: Semantics(
-        label: 'Stock status: ${_getStatusLabel(value)}',
+        label: context.l10n.pantryStockStatusAccessibility(statusLabel),
         button: true,
-        hint: 'Tap to change stock status',
+        hint: context.l10n.pantryTapToChangeStatus,
         child: AdaptivePullDownButton(
           items: StockStatus.values.map((status) {
             return AdaptiveMenuItem(
-              title: _getStatusLabel(status),
+              title: _getStatusLabel(context, status),
               icon: Icon(
                 CupertinoIcons.circle_fill,
                 color: _getStatusColor(status),

@@ -1,34 +1,35 @@
 import 'package:flutter/cupertino.dart';
+import '../../../localization/l10n_extension.dart';
 import '../../../mobile/utils/adaptive_sliver_page.dart';
 
 class PantrySubPage extends StatelessWidget {
-  final String title;
+  final String? title;
 
   const PantrySubPage({
     super.key,
-    this.title = 'Pantry Details',
+    this.title,
   });
 
   @override
   Widget build(BuildContext context) {
     return AdaptiveSliverPage(
-      title: title,
+      title: title ?? context.l10n.pantryDetailsTitle,
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            const Text('This is a pantry sub-page'),
+            Text(context.l10n.pantrySubPagePlaceholder),
             const SizedBox(height: 20),
             CupertinoButton.filled(
               onPressed: () {
                 Navigator.of(context).pop();
               },
-              child: const Text('Go Back'),
+              child: Text(context.l10n.pantryGoBack),
             ),
           ],
         ),
       ),
-      previousPageTitle: 'Pantry',
+      previousPageTitle: context.l10n.pantryTitle,
     );
   }
 }

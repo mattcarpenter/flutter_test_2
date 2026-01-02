@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:wolt_modal_sheet/wolt_modal_sheet.dart';
 import '../../../../../database/models/pantry_items.dart';
+import '../../../../localization/l10n_extension.dart';
 import '../../../../providers/pantry_provider.dart';
 import '../../../../theme/colors.dart';
 import '../../../../theme/spacing.dart';
@@ -58,7 +59,7 @@ class _UnifiedPantrySortFilterModalPage {
         onPressed: () {
           controller.resetAll();
         },
-        child: const Text('Reset All'),
+        child: Text(modalContext.l10n.pantryResetAll),
       ),
       trailingNavBarWidget: Padding(
         padding: EdgeInsets.only(right: AppSpacing.lg),
@@ -78,7 +79,7 @@ class _UnifiedPantrySortFilterModalPage {
             listenable: controller,
             builder: (context, _) {
               return AppButton(
-                text: 'Apply Changes',
+                text: modalContext.l10n.pantryApplyChanges,
                 theme: AppButtonTheme.secondary,
                 fullWidth: true,
                 onPressed: controller.isButtonEnabled
@@ -291,7 +292,7 @@ class _SortSection extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          'Sort',
+          context.l10n.pantrySortHeader,
           style: AppTypography.h5.copyWith(
             color: colors.textPrimary,
           ),
@@ -308,7 +309,7 @@ class _SortSection extends StatelessWidget {
                     items: PantrySortOption.values.map((option) {
                       final isSelected = controller.sortOption == option;
                       return AdaptiveMenuItem(
-                        title: _sortOptionLabel(option),
+                        title: _sortOptionLabel(context, option),
                         icon: Icon(
                           isSelected ? Icons.check_circle : Icons.sort,
                           size: 16,
@@ -320,7 +321,7 @@ class _SortSection extends StatelessWidget {
                       );
                     }).toList(),
                     child: AppButton(
-                      text: 'Sort by ${_sortOptionLabel(controller.sortOption)}',
+                      text: context.l10n.pantrySortBy(_sortOptionLabel(context, controller.sortOption)),
                       trailingIcon: const Icon(
                         Icons.keyboard_arrow_down,
                         size: 16,
@@ -340,7 +341,7 @@ class _SortSection extends StatelessWidget {
 
                 // Direction toggle button
                 AppButton(
-                  text: controller.sortDirection == SortDirection.ascending ? 'A-Z' : 'Z-A',
+                  text: controller.sortDirection == SortDirection.ascending ? context.l10n.pantrySortAZ : context.l10n.pantrySortZA,
                   leadingIcon: Icon(
                     controller.sortDirection == SortDirection.ascending
                         ? Icons.north
@@ -368,18 +369,18 @@ class _SortSection extends StatelessWidget {
     );
   }
 
-  String _sortOptionLabel(PantrySortOption option) {
+  String _sortOptionLabel(BuildContext context, PantrySortOption option) {
     switch (option) {
       case PantrySortOption.category:
-        return 'Category';
+        return context.l10n.pantrySortCategory;
       case PantrySortOption.alphabetical:
-        return 'Alphabetical';
+        return context.l10n.pantrySortAlphabetical;
       case PantrySortOption.dateAdded:
-        return 'Date Added';
+        return context.l10n.pantrySortDateAdded;
       case PantrySortOption.dateModified:
-        return 'Date Modified';
+        return context.l10n.pantrySortDateModified;
       case PantrySortOption.stockStatus:
-        return 'Stock Status';
+        return context.l10n.pantrySortStockStatus;
     }
   }
 }
@@ -398,7 +399,7 @@ class _CategoryFilterSection extends ConsumerWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          'Category',
+          context.l10n.pantryCategoryHeader,
           style: AppTypography.h5.copyWith(
             color: AppColors.of(context).textPrimary,
           ),
@@ -406,24 +407,25 @@ class _CategoryFilterSection extends ConsumerWidget {
         SizedBox(height: AppSpacing.md),
         pantryItemsAsyncValue.when(
           loading: () => const CircularProgressIndicator(),
-          error: (error, stack) => Text('Error: $error'),
+          error: (error, stack) => Text('${context.l10n.commonError}: $error'),
           data: (pantryItems) {
             // Extract unique categories
             final categories = <String>{};
             for (final item in pantryItems) {
-              categories.add(item.category ?? 'Other');
+              categories.add(item.category ?? context.l10n.pantryCategoryOther);
             }
 
             // Sort categories alphabetically, with "Other" last
+            final otherLabel = context.l10n.pantryCategoryOther;
             final sortedCategories = categories.toList()..sort((a, b) {
-              if (a == 'Other') return 1;
-              if (b == 'Other') return -1;
+              if (a == otherLabel) return 1;
+              if (b == otherLabel) return -1;
               return a.compareTo(b);
             });
 
             if (sortedCategories.isEmpty) {
               return Text(
-                'No categories available',
+                context.l10n.pantryCategoryNone,
                 style: AppTypography.body.copyWith(
                   color: AppColors.of(context).textSecondary,
                 ),
@@ -479,7 +481,7 @@ class _StockStatusFilterSection extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          'Stock Status',
+          context.l10n.pantryStockStatusHeader,
           style: AppTypography.h5.copyWith(
             color: AppColors.of(context).textPrimary,
           ),
@@ -504,7 +506,7 @@ class _StockStatusFilterSection extends StatelessWidget {
 
   Widget _buildStockStatusButton(BuildContext context, StockStatus status, bool isSelected) {
     return AppButton(
-      text: _stockStatusLabel(status),
+      text: _stockStatusLabel(context, status),
       size: AppButtonSize.small,
       style: isSelected ? AppButtonStyle.fill : AppButtonStyle.mutedOutline,
       onPressed: () {
@@ -519,14 +521,14 @@ class _StockStatusFilterSection extends StatelessWidget {
     );
   }
 
-  String _stockStatusLabel(StockStatus status) {
+  String _stockStatusLabel(BuildContext context, StockStatus status) {
     switch (status) {
       case StockStatus.outOfStock:
-        return 'Out of Stock';
+        return context.l10n.pantryStockOutOfStock;
       case StockStatus.lowStock:
-        return 'Low Stock';
+        return context.l10n.pantryStockLowStock;
       case StockStatus.inStock:
-        return 'In Stock';
+        return context.l10n.pantryStockInStock;
     }
   }
 }
@@ -543,7 +545,7 @@ class _ShowStaplesSection extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          'Show Staples',
+          context.l10n.pantryShowStaplesHeader,
           style: AppTypography.h5.copyWith(
             color: AppColors.of(context).textPrimary,
           ),
@@ -561,7 +563,7 @@ class _ShowStaplesSection extends StatelessWidget {
               ),
               child: ListTile(
                 title: Text(
-                  'Include staple items',
+                  context.l10n.pantryIncludeStapleItems,
                   style: AppTypography.body.copyWith(
                     color: AppColors.of(context).textPrimary,
                   ),

@@ -2131,4 +2131,240 @@ class AppLocalizationsEn extends AppLocalizations {
   String mealPlanErrorLoading(String error) {
     return 'Error loading meal plan: $error';
   }
+
+  @override
+  String get pantryTitle => 'Pantry';
+
+  @override
+  String get pantryFilterAndSort => 'Filter and Sort';
+
+  @override
+  String get pantryAddItem => 'Add Item';
+
+  @override
+  String get pantryNoItemsMatchFilters =>
+      'No pantry items match the current filters';
+
+  @override
+  String get pantryNoItemsYet =>
+      'No pantry items yet. Tap the + button to add items.';
+
+  @override
+  String get pantryClearFilters => 'Clear Filters';
+
+  @override
+  String get pantryAddPantryItem => 'Add Pantry Item';
+
+  @override
+  String get pantryAddItemsTitle => 'Add Pantry Items';
+
+  @override
+  String get pantryItemNamePlaceholder => 'Item name';
+
+  @override
+  String get pantryPreviouslyAdded => 'Previously Added';
+
+  @override
+  String get pantryUndo => 'Undo';
+
+  @override
+  String get pantryStatusLabel => 'Status:';
+
+  @override
+  String get pantryAddHelpText =>
+      'Items are added with \"In Stock\" status by default. You can change the status above or edit items later for more details.';
+
+  @override
+  String get pantryEditTitle => 'Edit Pantry Item';
+
+  @override
+  String get pantryItemNameFieldPlaceholder => 'Pantry Item Name';
+
+  @override
+  String get pantryStockStatusLabel => 'Stock Status';
+
+  @override
+  String get pantryMarkAsStaple => 'Mark as staple';
+
+  @override
+  String get pantryStapleDescription =>
+      'Staples are assumed to always be in stock';
+
+  @override
+  String get pantryMatchingTerms => 'Matching Terms';
+
+  @override
+  String get pantryAddTerm => 'Add Term';
+
+  @override
+  String get pantryNoTermsMessage =>
+      'No additional terms for this item. Add terms to improve recipe matching.';
+
+  @override
+  String pantryTermSource(String source) {
+    return 'Source: $source';
+  }
+
+  @override
+  String get pantryTermTip =>
+      'Tip: Add terms that match recipe ingredients to improve matching.';
+
+  @override
+  String pantryAddTermFor(String name) {
+    return 'Add Term for \"$name\"';
+  }
+
+  @override
+  String get pantryEnterMatchingTerm => 'Enter matching term';
+
+  @override
+  String get pantryResetAll => 'Reset All';
+
+  @override
+  String get pantryApplyChanges => 'Apply Changes';
+
+  @override
+  String get pantrySortHeader => 'Sort';
+
+  @override
+  String pantrySortBy(String option) {
+    return 'Sort by $option';
+  }
+
+  @override
+  String get pantrySortAZ => 'A-Z';
+
+  @override
+  String get pantrySortZA => 'Z-A';
+
+  @override
+  String get pantrySortCategory => 'Category';
+
+  @override
+  String get pantrySortAlphabetical => 'Alphabetical';
+
+  @override
+  String get pantrySortDateAdded => 'Date Added';
+
+  @override
+  String get pantrySortDateModified => 'Date Modified';
+
+  @override
+  String get pantrySortStockStatus => 'Stock Status';
+
+  @override
+  String get pantryCategoryHeader => 'Category';
+
+  @override
+  String get pantryCategoryOther => 'Other';
+
+  @override
+  String get pantryCategoryNone => 'No categories available';
+
+  @override
+  String get pantryStockStatusHeader => 'Stock Status';
+
+  @override
+  String get pantryStockOutOfStock => 'Out of Stock';
+
+  @override
+  String get pantryStockLowStock => 'Low Stock';
+
+  @override
+  String get pantryStockInStock => 'In Stock';
+
+  @override
+  String get pantryShowStaplesHeader => 'Show Staples';
+
+  @override
+  String get pantryIncludeStapleItems => 'Include staple items';
+
+  @override
+  String get pantrySetOutOfStock => 'Set to Out of Stock';
+
+  @override
+  String get pantrySetLowStock => 'Set to Low Stock';
+
+  @override
+  String get pantrySetInStock => 'Set to In Stock';
+
+  @override
+  String get pantryEdit => 'Edit';
+
+  @override
+  String get pantryDeleteItemTitle => 'Delete Item';
+
+  @override
+  String pantryDeleteItemMessage(String name) {
+    return 'Are you sure you want to delete \"$name\"? This action cannot be undone.';
+  }
+
+  @override
+  String pantryDeleteFailed(String error) {
+    return 'Failed to delete item: $error';
+  }
+
+  @override
+  String pantrySelectedCount(int count) {
+    return '$count Selected';
+  }
+
+  @override
+  String pantryItemsSelected(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count items selected',
+      one: '1 item selected',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get pantrySetAllInStock => 'Set All to In-Stock';
+
+  @override
+  String get pantrySetAllLowStock => 'Set All to Low-Stock';
+
+  @override
+  String get pantrySetAllOutOfStock => 'Set All to Out-of-Stock';
+
+  @override
+  String get pantryDeleteSelected => 'Delete Selected';
+
+  @override
+  String get pantryDeleteItemsTitle => 'Delete Items';
+
+  @override
+  String pantryDeleteItemsMessage(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other:
+          'Are you sure you want to delete $count items? This action cannot be undone.',
+      one:
+          'Are you sure you want to delete 1 item? This action cannot be undone.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String pantryStockStatusAccessibility(String status) {
+    return 'Stock status: $status';
+  }
+
+  @override
+  String get pantryTapToChangeStatus => 'Tap to change stock status';
+
+  @override
+  String get pantryDetailsTitle => 'Pantry Details';
+
+  @override
+  String get pantrySubPagePlaceholder => 'This is a pantry sub-page';
+
+  @override
+  String get pantryGoBack => 'Go Back';
+
+  @override
+  String get pantrySave => 'Save';
 }

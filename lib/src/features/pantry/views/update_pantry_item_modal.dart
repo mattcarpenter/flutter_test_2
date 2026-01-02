@@ -7,6 +7,7 @@ import 'package:wolt_modal_sheet/wolt_modal_sheet.dart';
 import '../../../../database/database.dart';
 import '../../../../database/models/pantry_item_terms.dart';
 import '../../../../database/models/pantry_items.dart';
+import '../../../localization/l10n_extension.dart';
 import '../../../providers/pantry_provider.dart';
 import '../../../theme/colors.dart';
 import '../../../theme/spacing.dart';
@@ -68,7 +69,7 @@ SliverWoltModalSheetPage _buildEditPage(
     leadingNavBarWidget: CupertinoButton(
       padding: const EdgeInsets.symmetric(horizontal: 16.0),
       onPressed: () => Navigator.of(context).pop(),
-      child: const Text('Cancel'),
+      child: Text(context.l10n.commonCancel),
     ),
     trailingNavBarWidget: CupertinoButton(
       padding: const EdgeInsets.symmetric(horizontal: 16.0),
@@ -82,7 +83,7 @@ SliverWoltModalSheetPage _buildEditPage(
           }
         }
       },
-      child: const Text('Save'),
+      child: Text(context.l10n.pantrySave),
     ),
     mainContentSliversBuilder: (context) => [
       SliverToBoxAdapter(
@@ -215,7 +216,7 @@ class _EditPantryItemPageState extends ConsumerState<_EditPantryItemPage> {
         children: [
           // Title
           Text(
-            'Edit Pantry Item',
+            context.l10n.pantryEditTitle,
             style: AppTypography.h4.copyWith(
               color: colors.textPrimary,
             ),
@@ -226,7 +227,7 @@ class _EditPantryItemPageState extends ConsumerState<_EditPantryItemPage> {
           // Pantry Item Name
           AppTextFieldSimple(
             controller: _nameController,
-            placeholder: 'Pantry Item Name',
+            placeholder: context.l10n.pantryItemNameFieldPlaceholder,
             textInputAction: TextInputAction.done,
           ),
 
@@ -236,7 +237,7 @@ class _EditPantryItemPageState extends ConsumerState<_EditPantryItemPage> {
           Row(
             children: [
               Text(
-                'Stock Status',
+                context.l10n.pantryStockStatusLabel,
                 style: AppTypography.body.copyWith(
                   color: colors.textPrimary,
                   fontWeight: FontWeight.w500,
@@ -262,7 +263,7 @@ class _EditPantryItemPageState extends ConsumerState<_EditPantryItemPage> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'Mark as staple',
+                      context.l10n.pantryMarkAsStaple,
                       style: AppTypography.body.copyWith(
                         color: colors.textPrimary,
                         fontWeight: FontWeight.w500,
@@ -270,7 +271,7 @@ class _EditPantryItemPageState extends ConsumerState<_EditPantryItemPage> {
                     ),
                     SizedBox(height: AppSpacing.xs),
                     Text(
-                      'Staples are assumed to always be in stock',
+                      context.l10n.pantryStapleDescription,
                       style: AppTypography.caption.copyWith(
                         color: colors.textTertiary,
                       ),
@@ -293,14 +294,14 @@ class _EditPantryItemPageState extends ConsumerState<_EditPantryItemPage> {
           Row(
             children: [
               Text(
-                'Matching Terms',
+                context.l10n.pantryMatchingTerms,
                 style: AppTypography.h5.copyWith(
                   color: colors.textPrimary,
                 ),
               ),
               const Spacer(),
               AppButton(
-                text: 'Add Term',
+                text: context.l10n.pantryAddTerm,
                 onPressed: () {
                   widget.pageIndexNotifier.value = 1;
                 },
@@ -320,7 +321,7 @@ class _EditPantryItemPageState extends ConsumerState<_EditPantryItemPage> {
             Padding(
               padding: EdgeInsets.all(AppSpacing.sm),
               child: Text(
-                'No additional terms for this item. Add terms to improve recipe matching.',
+                context.l10n.pantryNoTermsMessage,
                 style: TextStyle(
                   fontStyle: FontStyle.italic,
                   color: colors.textTertiary,
@@ -373,7 +374,7 @@ class _EditPantryItemPageState extends ConsumerState<_EditPantryItemPage> {
 
           // Help text
           Text(
-            'Tip: Add terms that match recipe ingredients to improve matching.',
+            context.l10n.pantryTermTip,
             style: TextStyle(
               fontSize: 12,
               color: colors.textTertiary,
@@ -420,7 +421,7 @@ class _EditPantryItemPageState extends ConsumerState<_EditPantryItemPage> {
             return Menu(
               children: [
                 MenuAction(
-                  title: 'Delete',
+                  title: context.l10n.commonDelete,
                   image: MenuImage.icon(Icons.delete),
                   callback: () => _handleTermDeletion(term),
                 ),
@@ -451,7 +452,7 @@ class _EditPantryItemPageState extends ConsumerState<_EditPantryItemPage> {
                       ),
                       const SizedBox(height: 2),
                       Text(
-                        'Source: ${term.source}',
+                        context.l10n.pantryTermSource(term.source),
                         style: AppTypography.caption.copyWith(
                           color: colors.contentSecondary,
                         ),
@@ -679,7 +680,7 @@ class _AddCustomTermPageState extends ConsumerState<_AddCustomTermPage> {
         mainAxisSize: MainAxisSize.min,
         children: [
           Text(
-            'Add Term for "${widget.pantryItem.name}"',
+            context.l10n.pantryAddTermFor(widget.pantryItem.name),
             style: AppTypography.h4.copyWith(
               color: colors.textPrimary,
             ),
@@ -691,14 +692,14 @@ class _AddCustomTermPageState extends ConsumerState<_AddCustomTermPage> {
                 child: AppTextFieldSimple(
                   controller: _termController,
                   focusNode: _focusNode,
-                  placeholder: 'Enter matching term',
+                  placeholder: context.l10n.pantryEnterMatchingTerm,
                   textInputAction: TextInputAction.done,
                   onSubmitted: (_) => _addTerm(),
                 ),
               ),
               SizedBox(width: AppSpacing.md),
               AppButtonVariants.primaryFilled(
-                text: 'Add',
+                text: context.l10n.commonAdd,
                 size: AppButtonSize.large,
                 shape: AppButtonShape.square,
                 onPressed: (_isLoading || !_hasInput) ? null : _addTerm,

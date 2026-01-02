@@ -2,6 +2,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../database/models/pantry_items.dart';
+import '../../../localization/l10n_extension.dart';
 import '../../../providers/pantry_provider.dart';
 import '../../../providers/pantry_selection_provider.dart';
 
@@ -76,7 +77,7 @@ class _PantrySelectionFABState extends ConsumerState<PantrySelectionFAB>
               foregroundColor: Theme.of(context).colorScheme.onPrimary,
               icon: const Icon(CupertinoIcons.chevron_up),
               label: Text(
-                '$selectedCount Selected',
+                context.l10n.pantrySelectedCount(selectedCount),
                 style: const TextStyle(
                   fontWeight: FontWeight.w600,
                 ),
@@ -90,47 +91,47 @@ class _PantrySelectionFABState extends ConsumerState<PantrySelectionFAB>
 
   void _showContextMenu(BuildContext context) {
     final selectedItems = ref.read(pantrySelectionProvider);
-    
+
     showCupertinoModalPopup<void>(
       context: context,
-      builder: (BuildContext context) => CupertinoActionSheet(
-        title: Text('${selectedItems.length} item${selectedItems.length == 1 ? '' : 's'} selected'),
+      builder: (sheetContext) => CupertinoActionSheet(
+        title: Text(context.l10n.pantryItemsSelected(selectedItems.length)),
         actions: <CupertinoActionSheetAction>[
           CupertinoActionSheetAction(
             onPressed: () {
-              Navigator.pop(context);
+              Navigator.pop(sheetContext);
               _updateStockStatus(StockStatus.inStock);
             },
-            child: const Text('Set All to In-Stock'),
+            child: Text(context.l10n.pantrySetAllInStock),
           ),
           CupertinoActionSheetAction(
             onPressed: () {
-              Navigator.pop(context);
+              Navigator.pop(sheetContext);
               _updateStockStatus(StockStatus.lowStock);
             },
-            child: const Text('Set All to Low-Stock'),
+            child: Text(context.l10n.pantrySetAllLowStock),
           ),
           CupertinoActionSheetAction(
             onPressed: () {
-              Navigator.pop(context);
+              Navigator.pop(sheetContext);
               _updateStockStatus(StockStatus.outOfStock);
             },
-            child: const Text('Set All to Out-of-Stock'),
+            child: Text(context.l10n.pantrySetAllOutOfStock),
           ),
           CupertinoActionSheetAction(
             onPressed: () {
-              Navigator.pop(context);
+              Navigator.pop(sheetContext);
               _showDeleteConfirmation(context);
             },
             isDestructiveAction: true,
-            child: const Text('Delete Selected'),
+            child: Text(context.l10n.pantryDeleteSelected),
           ),
         ],
         cancelButton: CupertinoActionSheetAction(
           onPressed: () {
-            Navigator.pop(context);
+            Navigator.pop(sheetContext);
           },
-          child: const Text('Cancel'),
+          child: Text(context.l10n.commonCancel),
         ),
       ),
     );
@@ -138,28 +139,28 @@ class _PantrySelectionFABState extends ConsumerState<PantrySelectionFAB>
 
   void _showDeleteConfirmation(BuildContext context) {
     final selectedItems = ref.read(pantrySelectionProvider);
-    
+
     showCupertinoDialog<void>(
       context: context,
-      builder: (BuildContext context) => CupertinoAlertDialog(
-        title: const Text('Delete Items'),
+      builder: (BuildContext dialogContext) => CupertinoAlertDialog(
+        title: Text(context.l10n.pantryDeleteItemsTitle),
         content: Text(
-          'Are you sure you want to delete ${selectedItems.length} item${selectedItems.length == 1 ? '' : 's'}? This action cannot be undone.',
+          context.l10n.pantryDeleteItemsMessage(selectedItems.length),
         ),
         actions: <CupertinoDialogAction>[
           CupertinoDialogAction(
-            child: const Text('Cancel'),
+            child: Text(context.l10n.commonCancel),
             onPressed: () {
-              Navigator.pop(context);
+              Navigator.pop(dialogContext);
             },
           ),
           CupertinoDialogAction(
             isDestructiveAction: true,
             onPressed: () {
-              Navigator.pop(context);
+              Navigator.pop(dialogContext);
               _deleteSelected();
             },
-            child: const Text('Delete'),
+            child: Text(context.l10n.commonDelete),
           ),
         ],
       ),
@@ -206,14 +207,14 @@ class _PantrySelectionFABState extends ConsumerState<PantrySelectionFAB>
   void _showErrorDialog(String message) {
     showCupertinoDialog<void>(
       context: context,
-      builder: (BuildContext context) => CupertinoAlertDialog(
-        title: const Text('Error'),
+      builder: (BuildContext dialogContext) => CupertinoAlertDialog(
+        title: Text(context.l10n.commonError),
         content: Text(message),
         actions: <CupertinoDialogAction>[
           CupertinoDialogAction(
-            child: const Text('OK'),
+            child: Text(context.l10n.commonOk),
             onPressed: () {
-              Navigator.pop(context);
+              Navigator.pop(dialogContext);
             },
           ),
         ],

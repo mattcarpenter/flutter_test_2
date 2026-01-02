@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:disclosure/disclosure.dart';
 import '../../../../database/database.dart';
 import '../../../../database/models/pantry_items.dart';
+import '../../../localization/l10n_extension.dart';
 import '../../../providers/pantry_provider.dart';
 import '../../../providers/pantry_selection_provider.dart';
 import '../../../theme/colors.dart';
@@ -314,7 +315,7 @@ class _PantryItemListState extends ConsumerState<PantryItemList> {
               AdaptivePullDownButton(
                 items: [
                   AdaptiveMenuItem(
-                    title: 'Set to Out of Stock',
+                    title: context.l10n.pantrySetOutOfStock,
                     icon: item.stockStatus == StockStatus.outOfStock
                         ? HugeIcon(
                             icon: HugeIcons.strokeRoundedCheckmarkCircle02,
@@ -332,7 +333,7 @@ class _PantryItemListState extends ConsumerState<PantryItemList> {
                     },
                   ),
                   AdaptiveMenuItem(
-                    title: 'Set to Low Stock',
+                    title: context.l10n.pantrySetLowStock,
                     icon: item.stockStatus == StockStatus.lowStock
                         ? HugeIcon(
                             icon: HugeIcons.strokeRoundedCheckmarkCircle02,
@@ -350,7 +351,7 @@ class _PantryItemListState extends ConsumerState<PantryItemList> {
                     },
                   ),
                   AdaptiveMenuItem(
-                    title: 'Set to In Stock',
+                    title: context.l10n.pantrySetInStock,
                     icon: item.stockStatus == StockStatus.inStock
                         ? HugeIcon(
                             icon: HugeIcons.strokeRoundedCheckmarkCircle02,
@@ -369,7 +370,7 @@ class _PantryItemListState extends ConsumerState<PantryItemList> {
                   ),
                   AdaptiveMenuItem.divider(),
                   AdaptiveMenuItem(
-                    title: 'Edit',
+                    title: context.l10n.pantryEdit,
                     icon: const HugeIcon(icon: HugeIcons.strokeRoundedPencilEdit01),
                     onTap: () {
                       showUpdatePantryItemModal(
@@ -380,7 +381,7 @@ class _PantryItemListState extends ConsumerState<PantryItemList> {
                   ),
                   AdaptiveMenuItem.divider(),
                   AdaptiveMenuItem(
-                    title: 'Delete',
+                    title: context.l10n.commonDelete,
                     icon: const HugeIcon(icon: HugeIcons.strokeRoundedDelete02),
                     isDestructive: true,
                     onTap: () {
@@ -404,36 +405,36 @@ class _PantryItemListState extends ConsumerState<PantryItemList> {
   void _showDeleteConfirmation(BuildContext context, WidgetRef ref, PantryItemEntry item) {
     showCupertinoDialog<void>(
       context: context,
-      builder: (BuildContext context) => CupertinoAlertDialog(
-        title: const Text('Delete Item'),
+      builder: (dialogContext) => CupertinoAlertDialog(
+        title: Text(context.l10n.pantryDeleteItemTitle),
         content: Text(
-          'Are you sure you want to delete "${item.name}"? This action cannot be undone.',
+          context.l10n.pantryDeleteItemMessage(item.name),
         ),
         actions: <CupertinoDialogAction>[
           CupertinoDialogAction(
-            child: const Text('Cancel'),
+            child: Text(context.l10n.commonCancel),
             onPressed: () {
-              Navigator.pop(context);
+              Navigator.pop(dialogContext);
             },
           ),
           CupertinoDialogAction(
             isDestructiveAction: true,
             onPressed: () async {
-              Navigator.pop(context);
+              Navigator.pop(dialogContext);
               try {
                 await ref.read(pantryNotifierProvider.notifier).deleteItem(item.id);
               } catch (e) {
                 if (context.mounted) {
                   showCupertinoDialog<void>(
                     context: context,
-                    builder: (BuildContext context) => CupertinoAlertDialog(
-                      title: const Text('Error'),
-                      content: Text('Failed to delete item: $e'),
+                    builder: (errorDialogContext) => CupertinoAlertDialog(
+                      title: Text(context.l10n.commonError),
+                      content: Text(context.l10n.pantryDeleteFailed(e.toString())),
                       actions: <CupertinoDialogAction>[
                         CupertinoDialogAction(
-                          child: const Text('OK'),
+                          child: Text(context.l10n.commonOk),
                           onPressed: () {
-                            Navigator.pop(context);
+                            Navigator.pop(errorDialogContext);
                           },
                         ),
                       ],
@@ -442,7 +443,7 @@ class _PantryItemListState extends ConsumerState<PantryItemList> {
                 }
               }
             },
-            child: const Text('Delete'),
+            child: Text(context.l10n.commonDelete),
           ),
         ],
       ),
@@ -463,7 +464,7 @@ class _PantryItemListState extends ConsumerState<PantryItemList> {
           size: 18,
         ),
         label: Text(
-          'Add Item',
+          context.l10n.pantryAddItem,
           style: TextStyle(
             color: colors.textSecondary,
             fontSize: 16,

@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hugeicons/hugeicons.dart';
 import '../../../../database/database.dart';
+import '../../../localization/l10n_extension.dart';
 import '../../../mobile/utils/adaptive_sliver_page.dart';
 import '../../../providers/pantry_provider.dart';
 import '../../../providers/pantry_filter_sort_provider.dart';
@@ -32,7 +33,7 @@ class PantryTab extends ConsumerWidget {
     return Stack(
       children: [
         AdaptiveSliverPage(
-          title: 'Pantry',
+          title: context.l10n.pantryTitle,
           searchEnabled: true,
           onSearchChanged: (query) {
             ref.read(pantryFilterSortProvider.notifier).updateSearchQuery(query);
@@ -54,7 +55,7 @@ class PantryTab extends ConsumerWidget {
                     clipBehavior: Clip.none,
                     children: [
                       AppButton(
-                        text: 'Filter and Sort',
+                        text: context.l10n.pantryFilterAndSort,
                         leadingIcon: const Icon(Icons.tune),
                         style: AppButtonStyle.mutedOutline,
                         shape: AppButtonShape.square,
@@ -100,7 +101,7 @@ class PantryTab extends ConsumerWidget {
 
                 // Add Item button (fixed width)
                 AppButton(
-                  text: 'Add Item',
+                  text: context.l10n.pantryAddItem,
                   leadingIcon: const Icon(Icons.add),
                   style: AppButtonStyle.outline,
                   shape: AppButtonShape.square,
@@ -144,8 +145,8 @@ class PantryTab extends ConsumerWidget {
                     children: [
                       Text(
                         filterSortState.hasFilters
-                          ? 'No pantry items match the current filters'
-                          : 'No pantry items yet. Tap the + button to add items.',
+                          ? context.l10n.pantryNoItemsMatchFilters
+                          : context.l10n.pantryNoItemsYet,
                         style: TextStyle(
                           color: AppColors.of(context).textSecondary,
                         ),
@@ -155,7 +156,7 @@ class PantryTab extends ConsumerWidget {
                           onPressed: () {
                             ref.read(pantryFilterSortProvider.notifier).clearFilters();
                           },
-                          child: const Text('Clear Filters'),
+                          child: Text(context.l10n.pantryClearFilters),
                         ),
                     ],
                   ),
@@ -174,7 +175,7 @@ class PantryTab extends ConsumerWidget {
           trailing: AdaptivePullDownButton(
             items: [
               AdaptiveMenuItem(
-                title: 'Add Pantry Item',
+                title: context.l10n.pantryAddPantryItem,
                 icon: const HugeIcon(icon: HugeIcons.strokeRoundedShoppingCartAdd01),
                 onTap: () {
                   showAddPantryItemModal(context);
