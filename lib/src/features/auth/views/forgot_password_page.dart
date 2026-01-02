@@ -4,6 +4,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../mobile/utils/adaptive_sliver_page.dart';
+import '../../../theme/colors.dart';
+import '../../../theme/typography.dart';
 import '../../../providers/auth_provider.dart';
 import '../../../widgets/error_dialog.dart';
 import '../../../widgets/success_dialog.dart';
@@ -67,6 +69,8 @@ class _ForgotPasswordPageState extends ConsumerState<ForgotPasswordPage> {
 
     return AdaptiveSliverPage(
       title: 'Reset Password',
+      automaticallyImplyLeading: true,
+      previousPageTitle: 'Sign In',
       body: Padding(
         padding: const EdgeInsets.all(24.0),
         child: Form(
@@ -79,8 +83,8 @@ class _ForgotPasswordPageState extends ConsumerState<ForgotPasswordPage> {
               // Instructions
               Text(
                 'Enter your email address and we\'ll send you a link to reset your password.',
-                style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                  color: Colors.grey[700],
+                style: AppTypography.body.copyWith(
+                  color: AppColors.of(context).textSecondary,
                 ),
                 textAlign: TextAlign.center,
               ),
@@ -107,13 +111,18 @@ class _ForgotPasswordPageState extends ConsumerState<ForgotPasswordPage> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  const Text('Remember your password? '),
+                  Text(
+                    'Remember your password? ',
+                    style: AppTypography.body.copyWith(
+                      color: AppColors.of(context).textSecondary,
+                    ),
+                  ),
                   GestureDetector(
                     onTap: () => context.go('/auth/signin'),
                     child: Text(
                       'Sign In',
-                      style: TextStyle(
-                        color: Theme.of(context).primaryColor,
+                      style: AppTypography.body.copyWith(
+                        color: AppColors.of(context).primary,
                         fontWeight: FontWeight.w600,
                       ),
                     ),

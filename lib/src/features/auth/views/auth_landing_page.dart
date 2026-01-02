@@ -4,10 +4,12 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:hugeicons/hugeicons.dart';
 
 import '../../../mobile/utils/adaptive_sliver_page.dart';
 import '../../../providers/auth_provider.dart';
 import '../../../theme/colors.dart';
+import '../../../theme/typography.dart';
 import '../../../widgets/error_dialog.dart';
 import '../widgets/auth_button.dart';
 import '../widgets/social_auth_button.dart';
@@ -96,11 +98,11 @@ class _AuthLandingPageState extends ConsumerState<AuthLandingPage> {
     final colors = AppColors.of(context);
 
     return AdaptiveSliverPage(
-      title: 'Welcome',
+      title: 'Sign Up',
       leading: widget.onMenuPressed != null
-          ? IconButton(
-              icon: const Icon(Icons.menu),
-              onPressed: widget.onMenuPressed,
+          ? GestureDetector(
+              onTap: widget.onMenuPressed,
+              child: const HugeIcon(icon: HugeIcons.strokeRoundedMenu01),
             )
           : null,
       body: Padding(
@@ -112,31 +114,6 @@ class _AuthLandingPageState extends ConsumerState<AuthLandingPage> {
               mainAxisAlignment: MainAxisAlignment.center,
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                // App branding section
-                Icon(
-                  Icons.restaurant_menu,
-                  size: 80,
-                  color: colors.primary,
-                ),
-                const SizedBox(height: 16),
-                Text(
-                  'Recipe Manager',
-                  style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                    fontWeight: FontWeight.bold,
-                    color: colors.textPrimary,
-                  ),
-                  textAlign: TextAlign.center,
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  'Organize, cook, and share your favorite recipes',
-                  style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                    color: colors.textSecondary,
-                  ),
-                  textAlign: TextAlign.center,
-                ),
-                const SizedBox(height: 48),
-
                 // Auth buttons
                 AuthButton.primary(
                   text: 'Continue with Email',
@@ -164,13 +141,15 @@ class _AuthLandingPageState extends ConsumerState<AuthLandingPage> {
                   children: [
                     Text(
                       'Already have an account? ',
-                      style: TextStyle(color: colors.textSecondary),
+                      style: AppTypography.body.copyWith(
+                        color: colors.textSecondary,
+                      ),
                     ),
                     GestureDetector(
                       onTap: () => context.go('/auth/signin'),
                       child: Text(
                         'Sign In',
-                        style: TextStyle(
+                        style: AppTypography.body.copyWith(
                           color: colors.primary,
                           fontWeight: FontWeight.w600,
                         ),
