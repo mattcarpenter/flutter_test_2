@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hugeicons/hugeicons.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:wolt_modal_sheet/wolt_modal_sheet.dart';
+import '../../../localization/l10n_extension.dart';
 import '../../../providers/shopping_list_provider.dart';
 import '../../../theme/colors.dart';
 import '../../../theme/spacing.dart';
@@ -36,9 +37,9 @@ class ShoppingListSelectionPage {
       backgroundColor: AppColors.of(context).background,
       surfaceTintColor: Colors.transparent,
       pageTitle: ModalSheetTitle(
-        'Select Shopping List',
+        context.l10n.shoppingListSelectTitle,
         trailing: AppButton(
-          text: 'Create New List',
+          text: context.l10n.shoppingListCreateNew,
           onPressed: () {
             WoltModalSheet.of(context).showNext();
           },
@@ -101,13 +102,13 @@ class ShoppingListSelectionPageContent extends ConsumerWidget {
         final allLists = <_ListItem>[
           _ListItem(
             id: null,
-            name: 'My Shopping List',
+            name: context.l10n.recipeAddToShoppingListDefault,
             isDefault: true,
             isSelected: currentListId == null,
           ),
           ...lists.map((list) => _ListItem(
                 id: list.id,
-                name: list.name ?? 'Unnamed List',
+                name: list.name ?? context.l10n.shoppingListUnnamed,
                 isDefault: false,
                 isSelected: currentListId == list.id,
               )),
@@ -123,7 +124,7 @@ class ShoppingListSelectionPageContent extends ConsumerWidget {
                 child: Padding(
                   padding: EdgeInsets.all(AppSpacing.xl),
                   child: Text(
-                    'No shopping lists yet',
+                    context.l10n.shoppingListNoLists,
                     style: AppTypography.body.copyWith(
                       color: colors.textSecondary,
                     ),
@@ -182,21 +183,21 @@ class ShoppingListSelectionPageContent extends ConsumerWidget {
                         confirmDismiss: (direction) async {
                           return await showCupertinoDialog<bool>(
                                 context: context,
-                                builder: (context) => CupertinoAlertDialog(
-                                  title: const Text('Delete List'),
+                                builder: (dialogContext) => CupertinoAlertDialog(
+                                  title: Text(context.l10n.shoppingListDeleteTitle),
                                   content: Text(
-                                      'Are you sure you want to delete "${listItem.name}"? All items in this list will also be deleted.'),
+                                      context.l10n.shoppingListDeleteConfirm(listItem.name)),
                                   actions: [
                                     CupertinoDialogAction(
-                                      child: const Text('Cancel'),
+                                      child: Text(context.l10n.commonCancel),
                                       onPressed: () =>
-                                          Navigator.of(context).pop(false),
+                                          Navigator.of(dialogContext).pop(false),
                                     ),
                                     CupertinoDialogAction(
                                       isDestructiveAction: true,
-                                      child: const Text('Delete'),
+                                      child: Text(context.l10n.commonDelete),
                                       onPressed: () =>
-                                          Navigator.of(context).pop(true),
+                                          Navigator.of(dialogContext).pop(true),
                                     ),
                                   ],
                                 ),
@@ -238,7 +239,7 @@ class CreateShoppingListPage {
       navBarHeight: 55,
       backgroundColor: AppColors.of(context).background,
       surfaceTintColor: Colors.transparent,
-      pageTitle: ModalSheetTitle('Create New List'),
+      pageTitle: ModalSheetTitle(context.l10n.shoppingListCreateNew),
       leadingNavBarWidget: Padding(
         padding: EdgeInsets.only(left: AppSpacing.lg),
         child: AppCircleButton(
@@ -327,7 +328,7 @@ class _CreateShoppingListPageContentState
       children: [
         // List name input label
         Text(
-          'List Name',
+          context.l10n.shoppingListNameLabel,
           style: AppTypography.label.copyWith(
             color: colors.textPrimary,
           ),
@@ -337,7 +338,7 @@ class _CreateShoppingListPageContentState
         // List name input field
         AppTextFieldSimple(
           controller: _nameController,
-          placeholder: 'Enter list name',
+          placeholder: context.l10n.shoppingListNamePlaceholder,
           onChanged: (_) {
             setState(() {}); // Rebuild to update button state
           },
@@ -348,7 +349,7 @@ class _CreateShoppingListPageContentState
 
         // Create button
         AppButton(
-          text: 'Create',
+          text: context.l10n.shoppingListCreate,
           onPressed: _nameController.text.trim().isEmpty || _isCreating
               ? null
               : _createListAndReturn,

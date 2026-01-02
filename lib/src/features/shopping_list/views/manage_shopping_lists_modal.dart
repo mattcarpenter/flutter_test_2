@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hugeicons/hugeicons.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:wolt_modal_sheet/wolt_modal_sheet.dart';
+import '../../../localization/l10n_extension.dart';
 import '../../../providers/shopping_list_provider.dart';
 import '../../../services/logging/app_logger.dart';
 import '../../../theme/colors.dart';
@@ -34,7 +35,7 @@ class ManageShoppingListsModalPage {
         onPressed: () {
           Navigator.of(context).pop();
         },
-        child: const Text('Done'),
+        child: Text(context.l10n.commonDone),
       ),
       trailingNavBarWidget: CupertinoButton(
         padding: const EdgeInsets.symmetric(horizontal: 16.0),
@@ -43,7 +44,7 @@ class ManageShoppingListsModalPage {
         },
         child: const HugeIcon(icon: HugeIcons.strokeRoundedAdd01),
       ),
-      pageTitle: const ModalSheetTitle('Manage Shopping Lists'),
+      pageTitle: ModalSheetTitle(context.l10n.shoppingListManageTitle),
       child: const Padding(
         padding: EdgeInsets.fromLTRB(0, 16, 0, 16),
         child: ManageShoppingListsContent(),
@@ -75,13 +76,13 @@ class ManageShoppingListsContent extends ConsumerWidget {
         final allLists = <_ListItem>[
           _ListItem(
             id: null,
-            name: 'My Shopping List',
+            name: context.l10n.recipeAddToShoppingListDefault,
             isDefault: true,
             isSelected: currentListId == null,
           ),
           ...lists.map((list) => _ListItem(
             id: list.id,
-            name: list.name ?? 'Unnamed List',
+            name: list.name ?? context.l10n.shoppingListUnnamed,
             isDefault: false,
             isSelected: currentListId == list.id,
           )),
@@ -91,9 +92,9 @@ class ManageShoppingListsContent extends ConsumerWidget {
           mainAxisSize: MainAxisSize.min,
           children: [
             if (allLists.isEmpty)
-              const Padding(
-                padding: EdgeInsets.all(32),
-                child: Text('No shopping lists yet'),
+              Padding(
+                padding: const EdgeInsets.all(32),
+                child: Text(context.l10n.shoppingListNoLists),
               )
             else
               ...allLists.map((listItem) => _ListTile(
@@ -187,18 +188,18 @@ class _ListTile extends StatelessWidget {
         confirmDismiss: (direction) async {
           return await showCupertinoDialog<bool>(
             context: context,
-            builder: (context) => CupertinoAlertDialog(
-              title: const Text('Delete List'),
-              content: Text('Are you sure you want to delete "${listItem.name}"? All items in this list will also be deleted.'),
+            builder: (dialogContext) => CupertinoAlertDialog(
+              title: Text(context.l10n.shoppingListDeleteTitle),
+              content: Text(context.l10n.shoppingListDeleteConfirm(listItem.name)),
               actions: [
                 CupertinoDialogAction(
-                  child: const Text('Cancel'),
-                  onPressed: () => Navigator.of(context).pop(false),
+                  child: Text(context.l10n.commonCancel),
+                  onPressed: () => Navigator.of(dialogContext).pop(false),
                 ),
                 CupertinoDialogAction(
                   isDestructiveAction: true,
-                  child: const Text('Delete'),
-                  onPressed: () => Navigator.of(context).pop(true),
+                  child: Text(context.l10n.commonDelete),
+                  onPressed: () => Navigator.of(dialogContext).pop(true),
                 ),
               ],
             ),
@@ -266,13 +267,13 @@ class _AddShoppingListDialogState extends ConsumerState<AddShoppingListDialog> {
   @override
   Widget build(BuildContext context) {
     return CupertinoAlertDialog(
-      title: const Text('New Shopping List'),
+      title: Text(context.l10n.shoppingListNewListTitle),
       content: Column(
         children: [
           const SizedBox(height: 16),
           CupertinoTextField(
             controller: _nameController,
-            placeholder: 'List name',
+            placeholder: context.l10n.shoppingListListNamePlaceholder,
             textInputAction: TextInputAction.done,
             autocorrect: false,
             enabled: !_isLoading,
@@ -282,14 +283,14 @@ class _AddShoppingListDialogState extends ConsumerState<AddShoppingListDialog> {
       ),
       actions: [
         CupertinoDialogAction(
-          child: const Text('Cancel'),
+          child: Text(context.l10n.commonCancel),
           onPressed: () => Navigator.of(context).pop(),
         ),
         CupertinoDialogAction(
           onPressed: _isLoading ? null : _createList,
           child: _isLoading
             ? const CupertinoActivityIndicator()
-            : const Text('Create'),
+            : Text(context.l10n.shoppingListCreate),
         ),
       ],
     );

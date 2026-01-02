@@ -1,6 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:hugeicons/hugeicons.dart';
 import '../../../../database/database.dart';
+import '../../../localization/l10n_extension.dart';
 import '../../../theme/colors.dart';
 import '../../../theme/spacing.dart';
 import '../../../widgets/app_radio_button.dart';
@@ -146,18 +147,18 @@ class ShoppingListItemTile extends StatelessWidget {
       confirmDismiss: (direction) async {
         return await showCupertinoDialog<bool>(
           context: context,
-          builder: (context) => CupertinoAlertDialog(
-            title: const Text('Delete Item'),
-            content: Text('Are you sure you want to delete "${item.name}"?'),
+          builder: (dialogContext) => CupertinoAlertDialog(
+            title: Text(context.l10n.shoppingListDeleteItemTitle),
+            content: Text(context.l10n.shoppingListDeleteItemConfirm(item.name)),
             actions: [
               CupertinoDialogAction(
-                child: const Text('Cancel'),
-                onPressed: () => Navigator.of(context).pop(false),
+                child: Text(context.l10n.commonCancel),
+                onPressed: () => Navigator.of(dialogContext).pop(false),
               ),
               CupertinoDialogAction(
                 isDestructiveAction: true,
-                child: const Text('Delete'),
-                onPressed: () => Navigator.of(context).pop(true),
+                child: Text(context.l10n.commonDelete),
+                onPressed: () => Navigator.of(dialogContext).pop(true),
               ),
             ],
           ),

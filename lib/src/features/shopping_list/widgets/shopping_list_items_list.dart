@@ -97,26 +97,32 @@ class _ShoppingListItemsListState extends ConsumerState<ShoppingListItemsList> {
             ),
             child: DisclosureView(
               padding: EdgeInsets.zero,
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  for (int itemIndex = 0; itemIndex < categoryItems.length; itemIndex++)
-                    ShoppingListItemTile(
-                      item: categoryItems[itemIndex],
-                      isFirst: itemIndex == 0,
-                      isLast: itemIndex == categoryItems.length - 1,
-                      onBoughtToggle: (bought) async {
-                        final currentListId = ref.read(currentShoppingListProvider);
-                        await ref.read(shoppingListItemsProvider(currentListId).notifier)
-                            .markBought(categoryItems[itemIndex].id, bought: bought);
-                      },
-                      onDelete: () async {
-                        final currentListId = ref.read(currentShoppingListProvider);
-                        await ref.read(shoppingListItemsProvider(currentListId).notifier)
-                            .deleteItem(categoryItems[itemIndex].id);
-                      },
-                    ),
-                ],
+              // Wrap in GestureDetector to absorb taps and prevent
+              // them from propagating up to toggle the Disclosure
+              child: GestureDetector(
+                onTap: () {}, // Absorb tap to prevent disclosure toggle
+                behavior: HitTestBehavior.opaque,
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    for (int itemIndex = 0; itemIndex < categoryItems.length; itemIndex++)
+                      ShoppingListItemTile(
+                        item: categoryItems[itemIndex],
+                        isFirst: itemIndex == 0,
+                        isLast: itemIndex == categoryItems.length - 1,
+                        onBoughtToggle: (bought) async {
+                          final currentListId = ref.read(currentShoppingListProvider);
+                          await ref.read(shoppingListItemsProvider(currentListId).notifier)
+                              .markBought(categoryItems[itemIndex].id, bought: bought);
+                        },
+                        onDelete: () async {
+                          final currentListId = ref.read(currentShoppingListProvider);
+                          await ref.read(shoppingListItemsProvider(currentListId).notifier)
+                              .deleteItem(categoryItems[itemIndex].id);
+                        },
+                      ),
+                  ],
+                ),
               ),
             ),
           ),

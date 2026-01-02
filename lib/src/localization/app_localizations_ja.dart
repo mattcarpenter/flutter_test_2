@@ -1845,6 +1845,116 @@ class AppLocalizationsJa extends AppLocalizations {
   String get shoppingListCreateButton => 'リストを作成';
 
   @override
+  String get shoppingListPageTitle => '買い物リスト';
+
+  @override
+  String get shoppingListEmptyState => 'このリストにはまだアイテムがありません。';
+
+  @override
+  String get shoppingListAddFirstItem => '最初のアイテムを追加';
+
+  @override
+  String get shoppingListManageLists => 'リストを管理';
+
+  @override
+  String get shoppingListAddItem => 'アイテムを追加';
+
+  @override
+  String get shoppingListClearAll => 'すべてのアイテムを削除';
+
+  @override
+  String get shoppingListNoItemsTitle => 'アイテムなし';
+
+  @override
+  String get shoppingListNoItemsMessage => '削除するアイテムがありません。';
+
+  @override
+  String shoppingListClearAllConfirm(int count) {
+    return 'このリストから$count件のアイテムをすべて削除しますか？';
+  }
+
+  @override
+  String get shoppingListCannotDeleteTitle => '削除できません';
+
+  @override
+  String get shoppingListCannotDeleteMessage => 'デフォルトの買い物リストは削除できません。';
+
+  @override
+  String get shoppingListSelectTitle => '買い物リストを選択';
+
+  @override
+  String get shoppingListManageTitle => '買い物リストを管理';
+
+  @override
+  String get shoppingListNewListTitle => '新しい買い物リスト';
+
+  @override
+  String get shoppingListCreate => '作成';
+
+  @override
+  String get shoppingListAddItemTitle => '買い物リストにアイテムを追加';
+
+  @override
+  String get shoppingListItemPlaceholder => 'アイテム名';
+
+  @override
+  String get shoppingListPreviouslyAdded => '追加済み';
+
+  @override
+  String get shoppingListUndo => '元に戻す';
+
+  @override
+  String get shoppingListDeleteItemTitle => 'アイテムを削除';
+
+  @override
+  String shoppingListDeleteItemConfirm(String name) {
+    return '「$name」を削除しますか？';
+  }
+
+  @override
+  String get shoppingListBulkLabel => 'マーク済みの操作…';
+
+  @override
+  String shoppingListBulkTitle(int count) {
+    return '$count件のマーク済みアイテムの操作';
+  }
+
+  @override
+  String get shoppingListBulkUpdatePantry => 'パントリーを更新';
+
+  @override
+  String get shoppingListBulkUnmark => 'マーク解除';
+
+  @override
+  String get shoppingListPantryNothingToUpdate => '更新するものはありません';
+
+  @override
+  String get shoppingListPantryNothingMessage =>
+      'すべてのアイテムはすでにパントリーにあり、\n在庫ありとしてマークされています。';
+
+  @override
+  String get shoppingListPantryItemsToAdd => '追加するアイテム';
+
+  @override
+  String get shoppingListPantryItemsToUpdate => '更新するアイテム';
+
+  @override
+  String shoppingListPantryUpdateButton(int count) {
+    return 'パントリーを更新 ($count)';
+  }
+
+  @override
+  String get shoppingListPantryUpdateButtonEmpty => 'パントリーを更新';
+
+  @override
+  String shoppingListErrorLoading(String error) {
+    return 'パントリーの読み込みエラー: $error';
+  }
+
+  @override
+  String get shoppingListListNamePlaceholder => 'リスト名';
+
+  @override
   String get stockStatusOut => '切れ';
 
   @override

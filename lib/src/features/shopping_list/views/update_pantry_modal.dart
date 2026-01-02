@@ -4,6 +4,7 @@ import 'package:hugeicons/hugeicons.dart';
 import 'package:wolt_modal_sheet/wolt_modal_sheet.dart';
 import '../../../../database/database.dart';
 import '../../../../database/models/pantry_items.dart';
+import '../../../localization/l10n_extension.dart';
 import '../../../providers/pantry_provider.dart';
 import '../../../providers/shopping_list_provider.dart';
 import '../../../theme/colors.dart';
@@ -162,7 +163,7 @@ class _UpdatePantryContentSliversState extends ConsumerState<_UpdatePantryConten
             SizedBox(
               height: 300,
               child: Center(
-                child: Text('Error loading pantry: $error'),
+                child: Text(context.l10n.shoppingListErrorLoading(error.toString())),
               ),
             ),
           ],
@@ -194,7 +195,7 @@ class _UpdatePantryContentSliversState extends ConsumerState<_UpdatePantryConten
                         ),
                         SizedBox(height: 16),
                         Text(
-                          'Nothing to update',
+                          context.l10n.shoppingListPantryNothingToUpdate,
                           style: TextStyle(
                             fontSize: 18,
                             fontWeight: FontWeight.w600,
@@ -202,7 +203,7 @@ class _UpdatePantryContentSliversState extends ConsumerState<_UpdatePantryConten
                         ),
                         SizedBox(height: 8),
                         Text(
-                          'All items are already in your pantry\nand marked as in stock.',
+                          context.l10n.shoppingListPantryNothingMessage,
                           textAlign: TextAlign.center,
                           style: TextStyle(
                             fontSize: 16,
@@ -226,7 +227,7 @@ class _UpdatePantryContentSliversState extends ConsumerState<_UpdatePantryConten
                   padding: EdgeInsets.symmetric(horizontal: AppSpacing.lg),
                   child: UpdatePantryModalPage._buildSectionHeader(
                     context,
-                    'Items to add',
+                    context.l10n.shoppingListPantryItemsToAdd,
                     updateResult.itemsToAdd.length,
                   ),
                 ),
@@ -262,7 +263,7 @@ class _UpdatePantryContentSliversState extends ConsumerState<_UpdatePantryConten
                   padding: EdgeInsets.symmetric(horizontal: AppSpacing.lg),
                   child: UpdatePantryModalPage._buildSectionHeader(
                     context,
-                    'Items to update',
+                    context.l10n.shoppingListPantryItemsToUpdate,
                     updateResult.itemsToUpdate.length,
                   ),
                 ),
@@ -336,8 +337,8 @@ class UpdatePantryButton extends ConsumerWidget {
 
     return AppButtonVariants.primaryFilled(
       text: checkedCount > 0
-          ? 'Update Pantry ($checkedCount)'
-          : 'Update Pantry',
+          ? context.l10n.shoppingListPantryUpdateButton(checkedCount)
+          : context.l10n.shoppingListPantryUpdateButtonEmpty,
       size: AppButtonSize.large,
       shape: AppButtonShape.square,
       fullWidth: true,

@@ -1896,6 +1896,123 @@ class AppLocalizationsEn extends AppLocalizations {
   String get shoppingListCreateButton => 'Create List';
 
   @override
+  String get shoppingListPageTitle => 'Shopping List';
+
+  @override
+  String get shoppingListEmptyState => 'No items in this shopping list yet.';
+
+  @override
+  String get shoppingListAddFirstItem => 'Add your first item';
+
+  @override
+  String get shoppingListManageLists => 'Manage Lists';
+
+  @override
+  String get shoppingListAddItem => 'Add Item';
+
+  @override
+  String get shoppingListClearAll => 'Clear All Items';
+
+  @override
+  String get shoppingListNoItemsTitle => 'No Items';
+
+  @override
+  String get shoppingListNoItemsMessage => 'There are no items to clear.';
+
+  @override
+  String shoppingListClearAllConfirm(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'items',
+      one: 'item',
+    );
+    return 'Are you sure you want to remove all $count $_temp0 from this list?';
+  }
+
+  @override
+  String get shoppingListCannotDeleteTitle => 'Cannot Delete';
+
+  @override
+  String get shoppingListCannotDeleteMessage =>
+      'The default shopping list cannot be deleted.';
+
+  @override
+  String get shoppingListSelectTitle => 'Select Shopping List';
+
+  @override
+  String get shoppingListManageTitle => 'Manage Shopping Lists';
+
+  @override
+  String get shoppingListNewListTitle => 'New Shopping List';
+
+  @override
+  String get shoppingListCreate => 'Create';
+
+  @override
+  String get shoppingListAddItemTitle => 'Add Shopping List Item';
+
+  @override
+  String get shoppingListItemPlaceholder => 'Item name';
+
+  @override
+  String get shoppingListPreviouslyAdded => 'Previously Added';
+
+  @override
+  String get shoppingListUndo => 'Undo';
+
+  @override
+  String get shoppingListDeleteItemTitle => 'Delete Item';
+
+  @override
+  String shoppingListDeleteItemConfirm(String name) {
+    return 'Are you sure you want to delete \"$name\"?';
+  }
+
+  @override
+  String get shoppingListBulkLabel => 'With marked…';
+
+  @override
+  String shoppingListBulkTitle(int count) {
+    return 'Actions for $count marked items';
+  }
+
+  @override
+  String get shoppingListBulkUpdatePantry => 'Update Pantry';
+
+  @override
+  String get shoppingListBulkUnmark => 'Un-mark';
+
+  @override
+  String get shoppingListPantryNothingToUpdate => 'Nothing to update';
+
+  @override
+  String get shoppingListPantryNothingMessage =>
+      'All items are already in your pantry\nand marked as in stock.';
+
+  @override
+  String get shoppingListPantryItemsToAdd => 'Items to add';
+
+  @override
+  String get shoppingListPantryItemsToUpdate => 'Items to update';
+
+  @override
+  String shoppingListPantryUpdateButton(int count) {
+    return 'Update Pantry ($count)';
+  }
+
+  @override
+  String get shoppingListPantryUpdateButtonEmpty => 'Update Pantry';
+
+  @override
+  String shoppingListErrorLoading(String error) {
+    return 'Error loading pantry: $error';
+  }
+
+  @override
+  String get shoppingListListNamePlaceholder => 'List name';
+
+  @override
   String get stockStatusOut => 'Out';
 
   @override

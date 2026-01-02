@@ -2644,6 +2644,163 @@
   "@shoppingListCreateButton": {
     "description": "Button text to create a shopping list"
   },
+  "shoppingListPageTitle": "Shopping List",
+  "@shoppingListPageTitle": {
+    "description": "Shopping list page title"
+  },
+  "shoppingListEmptyState": "No items in this shopping list yet.",
+  "@shoppingListEmptyState": {
+    "description": "Empty state message when shopping list has no items"
+  },
+  "shoppingListAddFirstItem": "Add your first item",
+  "@shoppingListAddFirstItem": {
+    "description": "Call to action to add first item"
+  },
+  "shoppingListManageLists": "Manage Lists",
+  "@shoppingListManageLists": {
+    "description": "Button to manage shopping lists"
+  },
+  "shoppingListAddItem": "Add Item",
+  "@shoppingListAddItem": {
+    "description": "Button to add a shopping list item"
+  },
+  "shoppingListClearAll": "Clear All Items",
+  "@shoppingListClearAll": {
+    "description": "Menu option to clear all items"
+  },
+  "shoppingListNoItemsTitle": "No Items",
+  "@shoppingListNoItemsTitle": {
+    "description": "Dialog title when no items to clear"
+  },
+  "shoppingListNoItemsMessage": "There are no items to clear.",
+  "@shoppingListNoItemsMessage": {
+    "description": "Message when no items to clear"
+  },
+  "shoppingListClearAllConfirm": "Are you sure you want to remove all {count} {count, plural, =1{item} other{items}} from this list?",
+  "@shoppingListClearAllConfirm": {
+    "description": "Confirmation message for clearing all items",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "shoppingListCannotDeleteTitle": "Cannot Delete",
+  "@shoppingListCannotDeleteTitle": {
+    "description": "Dialog title when cannot delete default list"
+  },
+  "shoppingListCannotDeleteMessage": "The default shopping list cannot be deleted.",
+  "@shoppingListCannotDeleteMessage": {
+    "description": "Message explaining default list cannot be deleted"
+  },
+  "shoppingListSelectTitle": "Select Shopping List",
+  "@shoppingListSelectTitle": {
+    "description": "Title for shopping list selection modal"
+  },
+  "shoppingListManageTitle": "Manage Shopping Lists",
+  "@shoppingListManageTitle": {
+    "description": "Title for manage shopping lists modal"
+  },
+  "shoppingListNewListTitle": "New Shopping List",
+  "@shoppingListNewListTitle": {
+    "description": "Dialog title for creating new list"
+  },
+  "shoppingListCreate": "Create",
+  "@shoppingListCreate": {
+    "description": "Short create button text"
+  },
+  "shoppingListAddItemTitle": "Add Shopping List Item",
+  "@shoppingListAddItemTitle": {
+    "description": "Modal title for adding shopping list item"
+  },
+  "shoppingListItemPlaceholder": "Item name",
+  "@shoppingListItemPlaceholder": {
+    "description": "Placeholder for item name input"
+  },
+  "shoppingListPreviouslyAdded": "Previously Added",
+  "@shoppingListPreviouslyAdded": {
+    "description": "Section header for previously added items"
+  },
+  "shoppingListUndo": "Undo",
+  "@shoppingListUndo": {
+    "description": "Undo button text"
+  },
+  "shoppingListDeleteItemTitle": "Delete Item",
+  "@shoppingListDeleteItemTitle": {
+    "description": "Dialog title for deleting an item"
+  },
+  "shoppingListDeleteItemConfirm": "Are you sure you want to delete \"{name}\"?",
+  "@shoppingListDeleteItemConfirm": {
+    "description": "Confirmation message for deleting an item",
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "shoppingListBulkLabel": "With marked…",
+  "@shoppingListBulkLabel": {
+    "description": "FAB label for bulk actions on marked items"
+  },
+  "shoppingListBulkTitle": "Actions for {count} marked items",
+  "@shoppingListBulkTitle": {
+    "description": "Action sheet title for bulk actions",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "shoppingListBulkUpdatePantry": "Update Pantry",
+  "@shoppingListBulkUpdatePantry": {
+    "description": "Bulk action to update pantry"
+  },
+  "shoppingListBulkUnmark": "Un-mark",
+  "@shoppingListBulkUnmark": {
+    "description": "Bulk action to unmark items"
+  },
+  "shoppingListPantryNothingToUpdate": "Nothing to update",
+  "@shoppingListPantryNothingToUpdate": {
+    "description": "Title when all pantry items are up to date"
+  },
+  "shoppingListPantryNothingMessage": "All items are already in your pantry\nand marked as in stock.",
+  "@shoppingListPantryNothingMessage": {
+    "description": "Message when all pantry items are up to date"
+  },
+  "shoppingListPantryItemsToAdd": "Items to add",
+  "@shoppingListPantryItemsToAdd": {
+    "description": "Section header for items to add to pantry"
+  },
+  "shoppingListPantryItemsToUpdate": "Items to update",
+  "@shoppingListPantryItemsToUpdate": {
+    "description": "Section header for items to update in pantry"
+  },
+  "shoppingListPantryUpdateButton": "Update Pantry ({count})",
+  "@shoppingListPantryUpdateButton": {
+    "description": "Button text to update pantry with count",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "shoppingListPantryUpdateButtonEmpty": "Update Pantry",
+  "@shoppingListPantryUpdateButtonEmpty": {
+    "description": "Button text to update pantry without count"
+  },
+  "shoppingListErrorLoading": "Error loading pantry: {error}",
+  "@shoppingListErrorLoading": {
+    "description": "Error message when pantry fails to load",
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "shoppingListListNamePlaceholder": "List name",
+  "@shoppingListListNamePlaceholder": {
+    "description": "Short placeholder for list name in dialog"
+  },
 
   "stockStatusOut": "Out",
   "@stockStatusOut": {

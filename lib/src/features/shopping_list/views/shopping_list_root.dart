@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hugeicons/hugeicons.dart';
 import '../../../../database/database.dart';
+import '../../../localization/l10n_extension.dart';
 import '../../../mobile/utils/adaptive_sliver_page.dart';
 import '../../../providers/shopping_list_provider.dart';
 import '../../../theme/colors.dart';
@@ -28,7 +29,7 @@ class ShoppingListTab extends ConsumerWidget {
     return Stack(
       children: [
         AdaptiveSliverPage(
-          title: 'Shopping List',
+          title: context.l10n.shoppingListPageTitle,
           searchEnabled: false, // No search as per requirements
           slivers: [
             // Shopping list dropdown header
@@ -67,7 +68,7 @@ class ShoppingListTab extends ConsumerWidget {
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
                           Text(
-                            'No items in this shopping list yet.',
+                            context.l10n.shoppingListEmptyState,
                             style: TextStyle(
                               color: AppColors.of(context).textSecondary,
                             ),
@@ -77,7 +78,7 @@ class ShoppingListTab extends ConsumerWidget {
                             onPressed: () {
                               showAddShoppingListItemModal(context, currentListId);
                             },
-                            child: const Text('Add your first item'),
+                            child: Text(context.l10n.shoppingListAddFirstItem),
                           ),
                         ],
                       ),
@@ -93,21 +94,21 @@ class ShoppingListTab extends ConsumerWidget {
           trailing: AdaptivePullDownButton(
             items: [
               AdaptiveMenuItem(
-                title: 'Manage Lists',
+                title: context.l10n.shoppingListManageLists,
                 icon: const HugeIcon(icon: HugeIcons.strokeRoundedLeftToRightListBullet),
                 onTap: () {
                   showShoppingListSelectionModal(context, ref);
                 },
               ),
               AdaptiveMenuItem(
-                title: 'Add Item',
+                title: context.l10n.shoppingListAddItem,
                 icon: const HugeIcon(icon: HugeIcons.strokeRoundedShoppingCartAdd01),
                 onTap: () {
                   showAddShoppingListItemModal(context, currentListId);
                 },
               ),
               AdaptiveMenuItem(
-                title: 'Clear All Items',
+                title: context.l10n.shoppingListClearAll,
                 icon: const HugeIcon(icon: HugeIcons.strokeRoundedCancel01),
                 isDestructive: true,
                 onTap: () async {
@@ -117,13 +118,13 @@ class ShoppingListTab extends ConsumerWidget {
                   if (items.isEmpty) {
                     await showCupertinoDialog(
                       context: context,
-                      builder: (context) => CupertinoAlertDialog(
-                        title: const Text('No Items'),
-                        content: const Text('There are no items to clear.'),
+                      builder: (dialogContext) => CupertinoAlertDialog(
+                        title: Text(context.l10n.shoppingListNoItemsTitle),
+                        content: Text(context.l10n.shoppingListNoItemsMessage),
                         actions: [
                           CupertinoDialogAction(
-                            child: const Text('OK'),
-                            onPressed: () => Navigator.of(context).pop(),
+                            child: Text(context.l10n.commonOk),
+                            onPressed: () => Navigator.of(dialogContext).pop(),
                           ),
                         ],
                       ),
@@ -133,20 +134,20 @@ class ShoppingListTab extends ConsumerWidget {
 
                   final shouldClear = await showCupertinoDialog<bool>(
                     context: context,
-                    builder: (context) => CupertinoAlertDialog(
-                      title: const Text('Clear All Items'),
+                    builder: (dialogContext) => CupertinoAlertDialog(
+                      title: Text(context.l10n.shoppingListClearAll),
                       content: Text(
-                        'Are you sure you want to remove all ${items.length} item${items.length == 1 ? '' : 's'} from this list?',
+                        context.l10n.shoppingListClearAllConfirm(items.length),
                       ),
                       actions: [
                         CupertinoDialogAction(
-                          child: const Text('Cancel'),
-                          onPressed: () => Navigator.of(context).pop(false),
+                          child: Text(context.l10n.commonCancel),
+                          onPressed: () => Navigator.of(dialogContext).pop(false),
                         ),
                         CupertinoDialogAction(
                           isDestructiveAction: true,
-                          child: const Text('Clear All'),
-                          onPressed: () => Navigator.of(context).pop(true),
+                          child: Text(context.l10n.commonClear),
+                          onPressed: () => Navigator.of(dialogContext).pop(true),
                         ),
                       ],
                     ),
@@ -161,7 +162,7 @@ class ShoppingListTab extends ConsumerWidget {
                 },
               ),
               AdaptiveMenuItem(
-                title: 'Delete List',
+                title: context.l10n.shoppingListDeleteTitle,
                 icon: const HugeIcon(icon: HugeIcons.strokeRoundedDelete02),
                 isDestructive: true,
                 onTap: () async {
@@ -169,13 +170,13 @@ class ShoppingListTab extends ConsumerWidget {
                   if (currentListId == null) {
                     await showCupertinoDialog(
                       context: context,
-                      builder: (context) => CupertinoAlertDialog(
-                        title: const Text('Cannot Delete'),
-                        content: const Text('The default shopping list cannot be deleted.'),
+                      builder: (dialogContext) => CupertinoAlertDialog(
+                        title: Text(context.l10n.shoppingListCannotDeleteTitle),
+                        content: Text(context.l10n.shoppingListCannotDeleteMessage),
                         actions: [
                           CupertinoDialogAction(
-                            child: const Text('OK'),
-                            onPressed: () => Navigator.of(context).pop(),
+                            child: Text(context.l10n.commonOk),
+                            onPressed: () => Navigator.of(dialogContext).pop(),
                           ),
                         ],
                       ),
@@ -187,24 +188,24 @@ class ShoppingListTab extends ConsumerWidget {
                   final listName = listsAsyncValue.value
                       ?.where((l) => l.id == currentListId)
                       .firstOrNull
-                      ?.name ?? 'this list';
+                      ?.name ?? context.l10n.shoppingListUnnamed;
 
                   final shouldDelete = await showCupertinoDialog<bool>(
                     context: context,
-                    builder: (context) => CupertinoAlertDialog(
-                      title: const Text('Delete List'),
+                    builder: (dialogContext) => CupertinoAlertDialog(
+                      title: Text(context.l10n.shoppingListDeleteTitle),
                       content: Text(
-                        'Are you sure you want to delete "$listName"? All items in this list will also be deleted.',
+                        context.l10n.shoppingListDeleteConfirm(listName),
                       ),
                       actions: [
                         CupertinoDialogAction(
-                          child: const Text('Cancel'),
-                          onPressed: () => Navigator.of(context).pop(false),
+                          child: Text(context.l10n.commonCancel),
+                          onPressed: () => Navigator.of(dialogContext).pop(false),
                         ),
                         CupertinoDialogAction(
                           isDestructiveAction: true,
-                          child: const Text('Delete'),
-                          onPressed: () => Navigator.of(context).pop(true),
+                          child: Text(context.l10n.commonDelete),
+                          onPressed: () => Navigator.of(dialogContext).pop(true),
                         ),
                       ],
                     ),
@@ -258,13 +259,14 @@ class _ShoppingListDropdownDelegate extends SliverPersistentHeaderDelegate {
     required this.onAddItem,
   });
 
-  String _getCurrentListName() {
+  String _getCurrentListName(BuildContext context) {
+    final defaultName = context.l10n.recipeAddToShoppingListDefault;
     if (currentListId == null) {
-      return 'My Shopping List'; // Default list name
+      return defaultName; // Default list name
     }
 
     final list = lists.where((l) => l.id == currentListId).firstOrNull;
-    return list?.name ?? 'My Shopping List';
+    return list?.name ?? defaultName;
   }
 
   @override
@@ -278,7 +280,7 @@ class _ShoppingListDropdownDelegate extends SliverPersistentHeaderDelegate {
           // List selector button (takes all available space)
           Expanded(
             child: AppButton(
-              text: _getCurrentListName(),
+              text: _getCurrentListName(context),
               trailingIcon: const Icon(Icons.keyboard_arrow_down, size: 24),
               trailingIconOffset: const Offset(8, -2),
               style: AppButtonStyle.mutedOutline,
@@ -295,7 +297,7 @@ class _ShoppingListDropdownDelegate extends SliverPersistentHeaderDelegate {
 
           // Add Item button (fixed width)
           AppButton(
-            text: 'Add Item',
+            text: context.l10n.shoppingListAddItem,
             leadingIcon: const Icon(Icons.add),
             style: AppButtonStyle.outline,
             shape: AppButtonShape.square,

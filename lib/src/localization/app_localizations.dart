@@ -3394,6 +3394,204 @@ abstract class AppLocalizations {
   /// **'Create List'**
   String get shoppingListCreateButton;
 
+  /// Shopping list page title
+  ///
+  /// In en, this message translates to:
+  /// **'Shopping List'**
+  String get shoppingListPageTitle;
+
+  /// Empty state message when shopping list has no items
+  ///
+  /// In en, this message translates to:
+  /// **'No items in this shopping list yet.'**
+  String get shoppingListEmptyState;
+
+  /// Call to action to add first item
+  ///
+  /// In en, this message translates to:
+  /// **'Add your first item'**
+  String get shoppingListAddFirstItem;
+
+  /// Button to manage shopping lists
+  ///
+  /// In en, this message translates to:
+  /// **'Manage Lists'**
+  String get shoppingListManageLists;
+
+  /// Button to add a shopping list item
+  ///
+  /// In en, this message translates to:
+  /// **'Add Item'**
+  String get shoppingListAddItem;
+
+  /// Menu option to clear all items
+  ///
+  /// In en, this message translates to:
+  /// **'Clear All Items'**
+  String get shoppingListClearAll;
+
+  /// Dialog title when no items to clear
+  ///
+  /// In en, this message translates to:
+  /// **'No Items'**
+  String get shoppingListNoItemsTitle;
+
+  /// Message when no items to clear
+  ///
+  /// In en, this message translates to:
+  /// **'There are no items to clear.'**
+  String get shoppingListNoItemsMessage;
+
+  /// Confirmation message for clearing all items
+  ///
+  /// In en, this message translates to:
+  /// **'Are you sure you want to remove all {count} {count, plural, =1{item} other{items}} from this list?'**
+  String shoppingListClearAllConfirm(int count);
+
+  /// Dialog title when cannot delete default list
+  ///
+  /// In en, this message translates to:
+  /// **'Cannot Delete'**
+  String get shoppingListCannotDeleteTitle;
+
+  /// Message explaining default list cannot be deleted
+  ///
+  /// In en, this message translates to:
+  /// **'The default shopping list cannot be deleted.'**
+  String get shoppingListCannotDeleteMessage;
+
+  /// Title for shopping list selection modal
+  ///
+  /// In en, this message translates to:
+  /// **'Select Shopping List'**
+  String get shoppingListSelectTitle;
+
+  /// Title for manage shopping lists modal
+  ///
+  /// In en, this message translates to:
+  /// **'Manage Shopping Lists'**
+  String get shoppingListManageTitle;
+
+  /// Dialog title for creating new list
+  ///
+  /// In en, this message translates to:
+  /// **'New Shopping List'**
+  String get shoppingListNewListTitle;
+
+  /// Short create button text
+  ///
+  /// In en, this message translates to:
+  /// **'Create'**
+  String get shoppingListCreate;
+
+  /// Modal title for adding shopping list item
+  ///
+  /// In en, this message translates to:
+  /// **'Add Shopping List Item'**
+  String get shoppingListAddItemTitle;
+
+  /// Placeholder for item name input
+  ///
+  /// In en, this message translates to:
+  /// **'Item name'**
+  String get shoppingListItemPlaceholder;
+
+  /// Section header for previously added items
+  ///
+  /// In en, this message translates to:
+  /// **'Previously Added'**
+  String get shoppingListPreviouslyAdded;
+
+  /// Undo button text
+  ///
+  /// In en, this message translates to:
+  /// **'Undo'**
+  String get shoppingListUndo;
+
+  /// Dialog title for deleting an item
+  ///
+  /// In en, this message translates to:
+  /// **'Delete Item'**
+  String get shoppingListDeleteItemTitle;
+
+  /// Confirmation message for deleting an item
+  ///
+  /// In en, this message translates to:
+  /// **'Are you sure you want to delete \"{name}\"?'**
+  String shoppingListDeleteItemConfirm(String name);
+
+  /// FAB label for bulk actions on marked items
+  ///
+  /// In en, this message translates to:
+  /// **'With marked…'**
+  String get shoppingListBulkLabel;
+
+  /// Action sheet title for bulk actions
+  ///
+  /// In en, this message translates to:
+  /// **'Actions for {count} marked items'**
+  String shoppingListBulkTitle(int count);
+
+  /// Bulk action to update pantry
+  ///
+  /// In en, this message translates to:
+  /// **'Update Pantry'**
+  String get shoppingListBulkUpdatePantry;
+
+  /// Bulk action to unmark items
+  ///
+  /// In en, this message translates to:
+  /// **'Un-mark'**
+  String get shoppingListBulkUnmark;
+
+  /// Title when all pantry items are up to date
+  ///
+  /// In en, this message translates to:
+  /// **'Nothing to update'**
+  String get shoppingListPantryNothingToUpdate;
+
+  /// Message when all pantry items are up to date
+  ///
+  /// In en, this message translates to:
+  /// **'All items are already in your pantry\nand marked as in stock.'**
+  String get shoppingListPantryNothingMessage;
+
+  /// Section header for items to add to pantry
+  ///
+  /// In en, this message translates to:
+  /// **'Items to add'**
+  String get shoppingListPantryItemsToAdd;
+
+  /// Section header for items to update in pantry
+  ///
+  /// In en, this message translates to:
+  /// **'Items to update'**
+  String get shoppingListPantryItemsToUpdate;
+
+  /// Button text to update pantry with count
+  ///
+  /// In en, this message translates to:
+  /// **'Update Pantry ({count})'**
+  String shoppingListPantryUpdateButton(int count);
+
+  /// Button text to update pantry without count
+  ///
+  /// In en, this message translates to:
+  /// **'Update Pantry'**
+  String get shoppingListPantryUpdateButtonEmpty;
+
+  /// Error message when pantry fails to load
+  ///
+  /// In en, this message translates to:
+  /// **'Error loading pantry: {error}'**
+  String shoppingListErrorLoading(String error);
+
+  /// Short placeholder for list name in dialog
+  ///
+  /// In en, this message translates to:
+  /// **'List name'**
+  String get shoppingListListNamePlaceholder;
+
   /// Short label for out of stock status
   ///
   /// In en, this message translates to:

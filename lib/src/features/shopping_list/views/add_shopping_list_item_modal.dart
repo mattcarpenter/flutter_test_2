@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:wolt_modal_sheet/wolt_modal_sheet.dart';
+import '../../../localization/l10n_extension.dart';
 import '../../../providers/shopping_list_provider.dart';
 import '../../../services/logging/app_logger.dart';
 import '../../../theme/colors.dart';
@@ -53,7 +54,7 @@ class AddShoppingListItemModalPage {
           mainAxisSize: MainAxisSize.min,
           children: [
             Text(
-              'Add Shopping List Item',
+              context.l10n.shoppingListAddItemTitle,
               style: AppTypography.h4.copyWith(
                 color: AppColors.of(context).textPrimary,
               ),
@@ -169,13 +170,13 @@ class _AddShoppingListItemFormState extends ConsumerState<AddShoppingListItemFor
       if (mounted) {
         showCupertinoDialog(
           context: context,
-          builder: (context) => CupertinoAlertDialog(
-            title: const Text('Error'),
+          builder: (dialogContext) => CupertinoAlertDialog(
+            title: Text(context.l10n.commonError),
             content: Text('Failed to add item: $e'),
             actions: [
               CupertinoDialogAction(
-                child: const Text('OK'),
-                onPressed: () => Navigator.of(context).pop(),
+                child: Text(context.l10n.commonOk),
+                onPressed: () => Navigator.of(dialogContext).pop(),
               ),
             ],
           ),
@@ -211,7 +212,7 @@ class _AddShoppingListItemFormState extends ConsumerState<AddShoppingListItemFor
                 key: _textFieldKey,
                 controller: _nameController,
                 focusNode: _focusNode,
-                placeholder: 'Item name',
+                placeholder: context.l10n.shoppingListItemPlaceholder,
                 autofocus: true,
                 textInputAction: TextInputAction.send,
                 onEditingComplete: () {}, // Prevent default focus traversal
@@ -220,7 +221,7 @@ class _AddShoppingListItemFormState extends ConsumerState<AddShoppingListItemFor
             ),
             SizedBox(width: AppSpacing.md),
             AppButtonVariants.primaryFilled(
-              text: 'Add',
+              text: context.l10n.commonAdd,
               size: AppButtonSize.large,
               shape: AppButtonShape.square,
               onPressed: (_isLoading || !_hasInput) ? null : () {
@@ -238,7 +239,7 @@ class _AddShoppingListItemFormState extends ConsumerState<AddShoppingListItemFor
         if (_lastAddedItem != null) ...[
           SizedBox(height: AppSpacing.xl),
           Text(
-            'Previously Added',
+            context.l10n.shoppingListPreviouslyAdded,
             style: AppTypography.h5.copyWith(
               color: AppColors.of(context).textPrimary,
             ),
@@ -265,7 +266,7 @@ class _AddShoppingListItemFormState extends ConsumerState<AddShoppingListItemFor
                   padding: EdgeInsets.all(4),
                   minSize: 0,
                   child: Text(
-                    'Undo',
+                    context.l10n.shoppingListUndo,
                     style: TextStyle(
                       color: AppColors.of(context).error,
                       fontSize: 14,
