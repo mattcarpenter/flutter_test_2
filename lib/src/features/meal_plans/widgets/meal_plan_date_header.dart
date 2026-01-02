@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hugeicons/hugeicons.dart';
 import 'package:intl/intl.dart';
+import '../../../localization/l10n_extension.dart';
 import '../../../widgets/app_circle_button.dart';
 import '../../../widgets/adaptive_pull_down/adaptive_menu_item.dart';
 import '../../../widgets/adaptive_pull_down/adaptive_pull_down.dart';
@@ -27,12 +28,13 @@ class MealPlanDateHeader extends StatelessWidget {
   Widget build(BuildContext context) {
     final isToday = _isToday(date);
     final isTomorrow = _isTomorrow(date);
+    final formattedDate = DateFormat('MMM d').format(date);
 
     String displayText;
     if (isToday) {
-      displayText = 'Today, ${DateFormat('MMM d').format(date)}';
+      displayText = context.l10n.mealPlanTodayDate(formattedDate);
     } else if (isTomorrow) {
-      displayText = 'Tomorrow, ${DateFormat('MMM d').format(date)}';
+      displayText = context.l10n.mealPlanTomorrowDate(formattedDate);
     } else {
       displayText = DateFormat('EEEE, MMM d').format(date);
     }
@@ -76,12 +78,12 @@ class MealPlanDateHeader extends StatelessWidget {
           AdaptivePullDownButton(
             items: [
               AdaptiveMenuItem(
-                title: 'Add Recipe',
+                title: context.l10n.mealPlanAddRecipe,
                 icon: const HugeIcon(icon: HugeIcons.strokeRoundedBook01),
                 onTap: () => _showAddRecipeModal(context, dateString, ref),
               ),
               AdaptiveMenuItem(
-                title: 'Add Note',
+                title: context.l10n.mealPlanAddNote,
                 icon: const HugeIcon(icon: HugeIcons.strokeRoundedFile01),
                 onTap: () => _showAddNoteModal(context, dateString, ref),
               ),
@@ -98,12 +100,12 @@ class MealPlanDateHeader extends StatelessWidget {
           AdaptivePullDownButton(
             items: [
               AdaptiveMenuItem(
-                title: 'Add to Shopping List',
+                title: context.l10n.recipeAddToShoppingList,
                 icon: const HugeIcon(icon: HugeIcons.strokeRoundedShoppingCartAdd01),
                 onTap: () => _showAddToShoppingListModal(context, dateString, ref),
               ),
               AdaptiveMenuItem(
-                title: 'Clear Items',
+                title: context.l10n.mealPlanClearItems,
                 icon: const HugeIcon(icon: HugeIcons.strokeRoundedCancel01),
                 onTap: () => _confirmClearItems(context, dateString, ref),
                 isDestructive: true,
@@ -135,23 +137,23 @@ class MealPlanDateHeader extends StatelessWidget {
   void _confirmClearItems(BuildContext context, String date, WidgetRef ref) {
     showCupertinoDialog<void>(
       context: context,
-      builder: (BuildContext context) => CupertinoAlertDialog(
-        title: const Text('Clear Items'),
-        content: const Text('Are you sure you want to remove all recipes and notes from this day?'),
+      builder: (dialogContext) => CupertinoAlertDialog(
+        title: Text(context.l10n.mealPlanClearItems),
+        content: Text(context.l10n.mealPlanClearItemsConfirm),
         actions: [
           CupertinoDialogAction(
-            child: const Text('Cancel'),
-            onPressed: () => Navigator.pop(context),
+            child: Text(context.l10n.commonCancel),
+            onPressed: () => Navigator.pop(dialogContext),
           ),
           CupertinoDialogAction(
             isDestructiveAction: true,
             onPressed: () {
-              Navigator.pop(context);
+              Navigator.pop(dialogContext);
               ref.read(mealPlanNotifierProvider.notifier).clearItems(
                 date: date,
               );
             },
-            child: const Text('Clear'),
+            child: Text(context.l10n.commonClear),
           ),
         ],
       ),

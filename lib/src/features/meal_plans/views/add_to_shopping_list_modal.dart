@@ -6,6 +6,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:wolt_modal_sheet/wolt_modal_sheet.dart';
 import 'package:recipe_app/database/database.dart';
 import 'package:recipe_app/database/models/pantry_items.dart';
+import '../../../localization/l10n_extension.dart';
 import '../../../providers/shopping_list_provider.dart';
 import '../../../services/ingredient_parser_service.dart';
 import '../../../services/logging/app_logger.dart';
@@ -94,8 +95,8 @@ SliverWoltModalSheetPage _buildAddToShoppingListPage({
               builder: (buttonContext, child) {
                 return AppButtonVariants.primaryFilled(
                   text: _addToShoppingListController.isLoading
-                      ? 'Adding...'
-                      : 'Add to Shopping List',
+                      ? buttonContext.l10n.recipeAddToShoppingListAdding
+                      : buttonContext.l10n.recipeAddToShoppingListButton,
                   size: AppButtonSize.large,
                   shape: AppButtonShape.square,
                   fullWidth: true,
@@ -168,7 +169,7 @@ WoltModalSheetPage _buildManageListsPage({
         mainAxisSize: MainAxisSize.min,
         children: [
           Text(
-            'Manage Lists',
+            modalContext.l10n.shoppingListManageLists,
             style: AppTypography.h4.copyWith(
               color: AppColors.of(modalContext).textPrimary,
             ),
@@ -228,7 +229,7 @@ WoltModalSheetPage _buildCreateListPage({
         mainAxisSize: MainAxisSize.min,
         children: [
           Text(
-            'Create New List',
+            modalContext.l10n.shoppingListCreateNew,
             style: AppTypography.h4.copyWith(
               color: AppColors.of(modalContext).textPrimary,
             ),
@@ -448,13 +449,13 @@ class _AddToShoppingListContentState
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
                     Text(
-                      'Add to Shopping List',
+                      context.l10n.recipeAddToShoppingList,
                       style: AppTypography.h4.copyWith(
                         color: colors.textPrimary,
                       ),
                     ),
                     AppButton(
-                      text: 'Manage Lists',
+                      text: context.l10n.shoppingListManageLists,
                       onPressed: () {
                         widget.pageIndexNotifier.value = 1;
                       },
@@ -487,7 +488,7 @@ class _AddToShoppingListContentState
                         ),
                         SizedBox(height: AppSpacing.lg),
                         Text(
-                          'No ingredients to add',
+                          context.l10n.recipeAddToShoppingListNoIngredients,
                           style: AppTypography.body.copyWith(
                             color: colors.textSecondary,
                             fontWeight: FontWeight.w600,
@@ -495,7 +496,7 @@ class _AddToShoppingListContentState
                         ),
                         SizedBox(height: AppSpacing.sm),
                         Text(
-                          'All ingredients are in your pantry or already on a shopping list.',
+                          context.l10n.mealPlanAllIngredientsInPantry,
                           style: AppTypography.bodySmall.copyWith(
                             color: colors.textTertiary,
                           ),
@@ -632,10 +633,10 @@ class _AddToShoppingListContentState
         controller.selectedListIds[ingredient.id] ?? defaultListId;
 
     // Get list name for display
-    String listName = 'My Shopping List';
+    String listName = context.l10n.recipeAddToShoppingListDefault;
     if (selectedListId != null) {
       final list = lists.where((l) => l.id == selectedListId).firstOrNull;
-      listName = list?.name ?? 'My Shopping List';
+      listName = list?.name ?? context.l10n.recipeAddToShoppingListDefault;
     }
 
     final borderRadius = GroupedListStyling.getBorderRadius(
@@ -701,7 +702,7 @@ class _AddToShoppingListContentState
             AdaptivePullDownButton(
               items: [
                 AdaptiveMenuItem(
-                  title: 'My Shopping List',
+                  title: context.l10n.recipeAddToShoppingListDefault,
                   icon: selectedListId == null
                       ? Icon(CupertinoIcons.checkmark)
                       : HugeIcon(icon: HugeIcons.strokeRoundedLeftToRightListBullet),
@@ -713,7 +714,7 @@ class _AddToShoppingListContentState
                   },
                 ),
                 ...lists.map((list) => AdaptiveMenuItem(
-                      title: list.name ?? 'Unnamed',
+                      title: list.name ?? context.l10n.shoppingListUnnamed,
                       icon: selectedListId == list.id
                           ? Icon(CupertinoIcons.checkmark)
                           : HugeIcon(icon: HugeIcons.strokeRoundedLeftToRightListBullet),
@@ -812,7 +813,7 @@ class _AddToShoppingListContentState
                   ),
                   SizedBox(height: AppSpacing.xs),
                   Text(
-                    'Already on shopping list',
+                    context.l10n.mealPlanAlreadyOnShoppingList,
                     style: AppTypography.caption.copyWith(
                       color: colors.textTertiary,
                     ),

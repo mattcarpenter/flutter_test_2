@@ -2029,4 +2029,92 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get stockStatusNotInPantry => 'Not in Pantry';
+
+  @override
+  String get mealPlanPageTitle => 'Meal Plans';
+
+  @override
+  String get mealPlanAddRecipe => 'Add Recipe';
+
+  @override
+  String get mealPlanAddNote => 'Add Note';
+
+  @override
+  String get mealPlanClearItems => 'Clear Items';
+
+  @override
+  String get mealPlanClearItemsConfirm =>
+      'Are you sure you want to remove all recipes and notes from this day?';
+
+  @override
+  String get mealPlanViewRecipe => 'View Recipe';
+
+  @override
+  String get mealPlanEditNote => 'Edit Note';
+
+  @override
+  String get mealPlanRemove => 'Remove';
+
+  @override
+  String get mealPlanEditNotePlaceholder => 'Note editing will be implemented';
+
+  @override
+  String get mealPlanNotePlaceholder => 'Enter your note...';
+
+  @override
+  String mealPlanFailedToAddNote(String message) {
+    return 'Failed to add note: $message';
+  }
+
+  @override
+  String get mealPlanActionsTitle => 'Meal Plan Actions';
+
+  @override
+  String get mealPlanAddToMealPlanTitle => 'Add to Meal Plan';
+
+  @override
+  String get mealPlanNoRecipesFound => 'No recipes found';
+
+  @override
+  String get mealPlanTryDifferentSearch => 'Try a different search term';
+
+  @override
+  String mealPlanServings(int count) {
+    return '$count servings';
+  }
+
+  @override
+  String get mealPlanAlreadyOnShoppingList => 'Already on shopping list';
+
+  @override
+  String get mealPlanAllIngredientsInPantry =>
+      'All ingredients are in your pantry or already on a shopping list.';
+
+  @override
+  String get mealPlanDiscoverSubPage => 'Discover Sub Page';
+
+  @override
+  String mealPlanTodayDate(String date) {
+    return 'Today, $date';
+  }
+
+  @override
+  String mealPlanTomorrowDate(String date) {
+    return 'Tomorrow, $date';
+  }
+
+  @override
+  String get mealPlanUnknownRecipe => 'Unknown Recipe';
+
+  @override
+  String get mealPlanNoteDefault => 'Note';
+
+  @override
+  String get mealPlanUnknownItem => 'Unknown Item';
+
+  @override
+  String get mealPlanNoMealsPlanned => 'No meals planned';
+
+  @override
+  String get mealPlanTapToAdd => 'Tap + to add recipes or notes';
 }

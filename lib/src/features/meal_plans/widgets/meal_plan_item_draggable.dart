@@ -5,6 +5,7 @@ import 'package:hugeicons/hugeicons.dart';
 import 'package:go_router/go_router.dart';
 import 'package:super_context_menu/super_context_menu.dart';
 import '../../../../database/models/meal_plan_items.dart';
+import '../../../localization/l10n_extension.dart';
 import '../../../providers/meal_plan_provider.dart';
 import '../models/meal_plan_drag_data.dart';
 
@@ -78,7 +79,7 @@ class _MealPlanItemDraggableState extends ConsumerState<MealPlanItemDraggable> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          _getDisplayTitle(),
+                          _getDisplayTitle(context),
                           style: CupertinoTheme.of(context).textTheme.textStyle.copyWith(
                             fontSize: 16,
                             fontWeight: FontWeight.w500,
@@ -125,7 +126,7 @@ class _MealPlanItemDraggableState extends ConsumerState<MealPlanItemDraggable> {
       children: [
         if (widget.item.isRecipe) ...[
           MenuAction(
-            title: 'View Recipe',
+            title: context.l10n.mealPlanViewRecipe,
             image: MenuImage.icon(CupertinoIcons.book),
             callback: () {
               if (widget.item.recipeId != null) {
@@ -136,7 +137,7 @@ class _MealPlanItemDraggableState extends ConsumerState<MealPlanItemDraggable> {
         ],
         if (widget.item.isNote) ...[
           MenuAction(
-            title: 'Edit Note',
+            title: context.l10n.mealPlanEditNote,
             image: MenuImage.icon(CupertinoIcons.pencil),
             callback: () {
               _editNote(context, ref);
@@ -144,7 +145,7 @@ class _MealPlanItemDraggableState extends ConsumerState<MealPlanItemDraggable> {
           ),
         ],
         MenuAction(
-          title: 'Remove',
+          title: context.l10n.mealPlanRemove,
           image: MenuImage.icon(CupertinoIcons.delete),
           attributes: const MenuActionAttributes(destructive: true),
           callback: () {
@@ -185,7 +186,7 @@ class _MealPlanItemDraggableState extends ConsumerState<MealPlanItemDraggable> {
             const SizedBox(width: 12),
             Expanded(
               child: Text(
-                _getDisplayTitle(),
+                _getDisplayTitle(context),
                 style: CupertinoTheme.of(context).textTheme.textStyle.copyWith(
                   fontSize: 16,
                   fontWeight: FontWeight.w500,
@@ -256,13 +257,13 @@ class _MealPlanItemDraggableState extends ConsumerState<MealPlanItemDraggable> {
     // For now, just show a placeholder
     showCupertinoDialog(
       context: context,
-      builder: (context) => CupertinoAlertDialog(
-        title: const Text('Edit Note'),
-        content: const Text('Note editing will be implemented'),
+      builder: (dialogContext) => CupertinoAlertDialog(
+        title: Text(context.l10n.mealPlanEditNote),
+        content: Text(context.l10n.mealPlanEditNotePlaceholder),
         actions: [
           CupertinoDialogAction(
-            child: const Text('OK'),
-            onPressed: () => Navigator.pop(context),
+            child: Text(context.l10n.commonOk),
+            onPressed: () => Navigator.pop(dialogContext),
           ),
         ],
       ),
@@ -310,13 +311,13 @@ class _MealPlanItemDraggableState extends ConsumerState<MealPlanItemDraggable> {
     }
   }
 
-  String _getDisplayTitle() {
+  String _getDisplayTitle(BuildContext context) {
     if (widget.item.isRecipe) {
-      return widget.item.recipeTitle ?? 'Unknown Recipe';
+      return widget.item.recipeTitle ?? context.l10n.mealPlanUnknownRecipe;
     } else if (widget.item.isNote) {
-      return widget.item.noteText ?? 'Note';
+      return widget.item.noteText ?? context.l10n.mealPlanNoteDefault;
     }
-    return 'Unknown Item';
+    return context.l10n.mealPlanUnknownItem;
   }
 
   String? _getDisplaySubtitle() {

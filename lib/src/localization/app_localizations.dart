@@ -3627,6 +3627,162 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Not in Pantry'**
   String get stockStatusNotInPantry;
+
+  /// Title for the meal plans page
+  ///
+  /// In en, this message translates to:
+  /// **'Meal Plans'**
+  String get mealPlanPageTitle;
+
+  /// Add recipe menu item
+  ///
+  /// In en, this message translates to:
+  /// **'Add Recipe'**
+  String get mealPlanAddRecipe;
+
+  /// Add note menu item and modal title
+  ///
+  /// In en, this message translates to:
+  /// **'Add Note'**
+  String get mealPlanAddNote;
+
+  /// Clear items menu item and dialog title
+  ///
+  /// In en, this message translates to:
+  /// **'Clear Items'**
+  String get mealPlanClearItems;
+
+  /// Clear items confirmation message
+  ///
+  /// In en, this message translates to:
+  /// **'Are you sure you want to remove all recipes and notes from this day?'**
+  String get mealPlanClearItemsConfirm;
+
+  /// View recipe context menu action
+  ///
+  /// In en, this message translates to:
+  /// **'View Recipe'**
+  String get mealPlanViewRecipe;
+
+  /// Edit note context menu action and dialog title
+  ///
+  /// In en, this message translates to:
+  /// **'Edit Note'**
+  String get mealPlanEditNote;
+
+  /// Remove item context menu action
+  ///
+  /// In en, this message translates to:
+  /// **'Remove'**
+  String get mealPlanRemove;
+
+  /// Placeholder message for edit note dialog
+  ///
+  /// In en, this message translates to:
+  /// **'Note editing will be implemented'**
+  String get mealPlanEditNotePlaceholder;
+
+  /// Placeholder for note text field
+  ///
+  /// In en, this message translates to:
+  /// **'Enter your note...'**
+  String get mealPlanNotePlaceholder;
+
+  /// Error message when adding note fails
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to add note: {message}'**
+  String mealPlanFailedToAddNote(String message);
+
+  /// Title for meal plan actions sheet
+  ///
+  /// In en, this message translates to:
+  /// **'Meal Plan Actions'**
+  String get mealPlanActionsTitle;
+
+  /// Title for add to meal plan action sheet
+  ///
+  /// In en, this message translates to:
+  /// **'Add to Meal Plan'**
+  String get mealPlanAddToMealPlanTitle;
+
+  /// Empty state when no recipes match search
+  ///
+  /// In en, this message translates to:
+  /// **'No recipes found'**
+  String get mealPlanNoRecipesFound;
+
+  /// Suggestion when no recipes found
+  ///
+  /// In en, this message translates to:
+  /// **'Try a different search term'**
+  String get mealPlanTryDifferentSearch;
+
+  /// Recipe servings label
+  ///
+  /// In en, this message translates to:
+  /// **'{count} servings'**
+  String mealPlanServings(int count);
+
+  /// Indicator that ingredient is already on shopping list
+  ///
+  /// In en, this message translates to:
+  /// **'Already on shopping list'**
+  String get mealPlanAlreadyOnShoppingList;
+
+  /// Message when all ingredients are available
+  ///
+  /// In en, this message translates to:
+  /// **'All ingredients are in your pantry or already on a shopping list.'**
+  String get mealPlanAllIngredientsInPantry;
+
+  /// Placeholder text for discover sub page
+  ///
+  /// In en, this message translates to:
+  /// **'Discover Sub Page'**
+  String get mealPlanDiscoverSubPage;
+
+  /// Date header for today's meal plan
+  ///
+  /// In en, this message translates to:
+  /// **'Today, {date}'**
+  String mealPlanTodayDate(String date);
+
+  /// Date header for tomorrow's meal plan
+  ///
+  /// In en, this message translates to:
+  /// **'Tomorrow, {date}'**
+  String mealPlanTomorrowDate(String date);
+
+  /// Fallback title for recipe with missing title
+  ///
+  /// In en, this message translates to:
+  /// **'Unknown Recipe'**
+  String get mealPlanUnknownRecipe;
+
+  /// Fallback title for note with missing text
+  ///
+  /// In en, this message translates to:
+  /// **'Note'**
+  String get mealPlanNoteDefault;
+
+  /// Fallback title for unknown item type
+  ///
+  /// In en, this message translates to:
+  /// **'Unknown Item'**
+  String get mealPlanUnknownItem;
+
+  /// Empty state title for date card with no items
+  ///
+  /// In en, this message translates to:
+  /// **'No meals planned'**
+  String get mealPlanNoMealsPlanned;
+
+  /// Empty state hint for date card with no items
+  ///
+  /// In en, this message translates to:
+  /// **'Tap + to add recipes or notes'**
+  String get mealPlanTapToAdd;
 }
 
 class _AppLocalizationsDelegate

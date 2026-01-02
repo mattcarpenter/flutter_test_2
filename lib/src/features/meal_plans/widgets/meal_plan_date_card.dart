@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hugeicons/hugeicons.dart';
 import '../../../../database/models/meal_plan_items.dart';
+import '../../../localization/l10n_extension.dart';
 import '../../../providers/meal_plan_provider.dart';
 import '../../../theme/colors.dart';
 import '../models/meal_plan_drag_data.dart';
@@ -297,7 +298,7 @@ class _MealPlanDateCardState extends ConsumerState<MealPlanDateCard>
             ),
             const SizedBox(height: 12),
             Text(
-              'No meals planned',
+              context.l10n.mealPlanNoMealsPlanned,
               style: TextStyle(
                 fontSize: 14,
                 color: colors.textSecondary,
@@ -305,7 +306,7 @@ class _MealPlanDateCardState extends ConsumerState<MealPlanDateCard>
             ),
             const SizedBox(height: 4),
             Text(
-              'Tap + to add recipes or notes',
+              context.l10n.mealPlanTapToAdd,
               style: TextStyle(
                 fontSize: 12,
                 color: colors.textTertiary,

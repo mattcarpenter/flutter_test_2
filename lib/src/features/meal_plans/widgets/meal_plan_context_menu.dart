@@ -1,6 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hugeicons/hugeicons.dart';
+import '../../../localization/l10n_extension.dart';
 import '../../../providers/meal_plan_provider.dart';
 import '../views/add_recipe_to_meal_plan_modal.dart';
 import '../views/add_note_to_meal_plan_modal.dart';
@@ -15,41 +16,41 @@ class MealPlanContextMenu {
   }) {
     showCupertinoModalPopup<void>(
       context: context,
-      builder: (BuildContext context) => CupertinoActionSheet(
-        title: const Text('Add to Meal Plan'),
+      builder: (sheetContext) => CupertinoActionSheet(
+        title: Text(context.l10n.mealPlanAddToMealPlanTitle),
         actions: [
           CupertinoActionSheetAction(
             onPressed: () {
-              Navigator.pop(context);
+              Navigator.pop(sheetContext);
               _showAddRecipeModal(context, date, ref);
             },
-            child: const Row(
+            child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 HugeIcon(icon: HugeIcons.strokeRoundedBook01, size: 18),
                 SizedBox(width: 8),
-                Text('Add Recipe'),
+                Text(context.l10n.mealPlanAddRecipe),
               ],
             ),
           ),
           CupertinoActionSheetAction(
             onPressed: () {
-              Navigator.pop(context);
+              Navigator.pop(sheetContext);
               _showAddNoteModal(context, date, ref);
             },
-            child: const Row(
+            child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 HugeIcon(icon: HugeIcons.strokeRoundedFile01, size: 18),
                 SizedBox(width: 8),
-                Text('Add Note'),
+                Text(context.l10n.mealPlanAddNote),
               ],
             ),
           ),
         ],
         cancelButton: CupertinoActionSheetAction(
-          child: const Text('Cancel'),
-          onPressed: () => Navigator.pop(context),
+          child: Text(context.l10n.commonCancel),
+          onPressed: () => Navigator.pop(sheetContext),
         ),
       ),
     );
@@ -63,42 +64,42 @@ class MealPlanContextMenu {
   }) {
     showCupertinoModalPopup<void>(
       context: context,
-      builder: (BuildContext context) => CupertinoActionSheet(
-        title: const Text('Meal Plan Actions'),
+      builder: (sheetContext) => CupertinoActionSheet(
+        title: Text(context.l10n.mealPlanActionsTitle),
         actions: [
           CupertinoActionSheetAction(
             onPressed: () {
-              Navigator.pop(context);
+              Navigator.pop(sheetContext);
               _showAddToShoppingListModal(context, date, ref);
             },
-            child: const Row(
+            child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 HugeIcon(icon: HugeIcons.strokeRoundedShoppingCartAdd01, size: 18),
                 SizedBox(width: 8),
-                Text('Add to Shopping List'),
+                Text(context.l10n.recipeAddToShoppingList),
               ],
             ),
           ),
           CupertinoActionSheetAction(
             isDestructiveAction: true,
             onPressed: () {
-              Navigator.pop(context);
+              Navigator.pop(sheetContext);
               _confirmClearItems(context, date, ref);
             },
-            child: const Row(
+            child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 HugeIcon(icon: HugeIcons.strokeRoundedCancel01, size: 18),
                 SizedBox(width: 8),
-                Text('Clear Items'),
+                Text(context.l10n.mealPlanClearItems),
               ],
             ),
           ),
         ],
         cancelButton: CupertinoActionSheetAction(
-          child: const Text('Cancel'),
-          onPressed: () => Navigator.pop(context),
+          child: Text(context.l10n.commonCancel),
+          onPressed: () => Navigator.pop(sheetContext),
         ),
       ),
     );
@@ -119,23 +120,23 @@ class MealPlanContextMenu {
   static void _confirmClearItems(BuildContext context, String date, WidgetRef ref) {
     showCupertinoDialog<void>(
       context: context,
-      builder: (BuildContext context) => CupertinoAlertDialog(
-        title: const Text('Clear Items'),
-        content: const Text('Are you sure you want to remove all recipes and notes from this day?'),
+      builder: (dialogContext) => CupertinoAlertDialog(
+        title: Text(context.l10n.mealPlanClearItems),
+        content: Text(context.l10n.mealPlanClearItemsConfirm),
         actions: [
           CupertinoDialogAction(
-            child: const Text('Cancel'),
-            onPressed: () => Navigator.pop(context),
+            child: Text(context.l10n.commonCancel),
+            onPressed: () => Navigator.pop(dialogContext),
           ),
           CupertinoDialogAction(
             isDestructiveAction: true,
             onPressed: () {
-              Navigator.pop(context);
+              Navigator.pop(dialogContext);
               ref.read(mealPlanNotifierProvider.notifier).clearItems(
                 date: date,
               );
             },
-            child: const Text('Clear'),
+            child: Text(context.l10n.commonClear),
           ),
         ],
       ),

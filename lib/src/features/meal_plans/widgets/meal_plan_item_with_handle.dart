@@ -5,6 +5,7 @@ import 'package:hugeicons/hugeicons.dart';
 import 'package:go_router/go_router.dart';
 import 'package:super_context_menu/super_context_menu.dart';
 import '../../../../database/models/meal_plan_items.dart';
+import '../../../localization/l10n_extension.dart';
 import '../../../providers/meal_plan_provider.dart';
 import '../models/meal_plan_drag_data.dart';
 
@@ -65,7 +66,7 @@ class MealPlanItemWithHandle extends ConsumerWidget {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
-                                _getDisplayTitle(),
+                                _getDisplayTitle(context),
                                 style: CupertinoTheme.of(context).textTheme.textStyle.copyWith(
                                   fontSize: 16,
                                   fontWeight: FontWeight.w500,
@@ -137,7 +138,7 @@ class MealPlanItemWithHandle extends ConsumerWidget {
       children: [
         if (item.isRecipe) ...[
           MenuAction(
-            title: 'View Recipe',
+            title: context.l10n.mealPlanViewRecipe,
             image: MenuImage.icon(CupertinoIcons.book),
             callback: () {
               if (item.recipeId != null) {
@@ -148,7 +149,7 @@ class MealPlanItemWithHandle extends ConsumerWidget {
         ],
         if (item.isNote) ...[
           MenuAction(
-            title: 'Edit Note',
+            title: context.l10n.mealPlanEditNote,
             image: MenuImage.icon(CupertinoIcons.pencil),
             callback: () {
               _editNote(context, ref);
@@ -156,7 +157,7 @@ class MealPlanItemWithHandle extends ConsumerWidget {
           ),
         ],
         MenuAction(
-          title: 'Remove',
+          title: context.l10n.mealPlanRemove,
           image: MenuImage.icon(CupertinoIcons.delete),
           attributes: const MenuActionAttributes(destructive: true),
           callback: () {
@@ -204,7 +205,7 @@ class MealPlanItemWithHandle extends ConsumerWidget {
             const SizedBox(width: 12),
             Flexible(
               child: Text(
-                _getDisplayTitle(),
+                _getDisplayTitle(context),
                 style: CupertinoTheme.of(context).textTheme.textStyle.copyWith(
                   fontSize: 16,
                   fontWeight: FontWeight.w500,
@@ -230,13 +231,13 @@ class MealPlanItemWithHandle extends ConsumerWidget {
   void _editNote(BuildContext context, WidgetRef ref) {
     showCupertinoDialog(
       context: context,
-      builder: (context) => CupertinoAlertDialog(
-        title: const Text('Edit Note'),
-        content: const Text('Note editing will be implemented'),
+      builder: (dialogContext) => CupertinoAlertDialog(
+        title: Text(context.l10n.mealPlanEditNote),
+        content: Text(context.l10n.mealPlanEditNotePlaceholder),
         actions: [
           CupertinoDialogAction(
-            child: const Text('OK'),
-            onPressed: () => Navigator.pop(context),
+            child: Text(context.l10n.commonOk),
+            onPressed: () => Navigator.pop(dialogContext),
           ),
         ],
       ),
@@ -284,13 +285,13 @@ class MealPlanItemWithHandle extends ConsumerWidget {
     }
   }
 
-  String _getDisplayTitle() {
+  String _getDisplayTitle(BuildContext context) {
     if (item.isRecipe) {
-      return item.recipeTitle ?? 'Unknown Recipe';
+      return item.recipeTitle ?? context.l10n.mealPlanUnknownRecipe;
     } else if (item.isNote) {
-      return item.noteText ?? 'Note';
+      return item.noteText ?? context.l10n.mealPlanNoteDefault;
     }
-    return 'Unknown Item';
+    return context.l10n.mealPlanUnknownItem;
   }
 
   String? _getDisplaySubtitle() {

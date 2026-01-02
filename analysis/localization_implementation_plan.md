@@ -238,7 +238,7 @@ Test by changing device language or using a test override.
 | 2 | settings | 25 | Medium | ✅ Done | User-facing settings, many labels |
 | 3 | recipes | 71 | High | ✅ Done | Largest feature, core functionality |
 | 4 | shopping_list | 17 | Medium | ✅ Done | Core feature |
-| 5 | meal_plans | 22 | Medium | ⏳ Pending | Core feature |
+| 5 | meal_plans | 22 | Medium | ✅ Done | Core feature |
 | 6 | pantry | 11 | Low | ⏳ Pending | Core feature |
 | 7 | clippings | 18 | Medium | ⏳ Pending | Labs feature |
 | 8 | import_export | 22 | Medium | ✅ Done | Utility feature |
@@ -481,7 +481,7 @@ validator: (value) {
 - [x] settings (25 files) - ✅ Done
 - [x] recipes (71 files) - ✅ Done
 - [x] shopping_list (17 files) - ✅ Done
-- [ ] meal_plans (22 files)
+- [x] meal_plans (22 files) - ✅ Done
 - [ ] pantry (11 files)
 
 ### Phase 4: Secondary Features

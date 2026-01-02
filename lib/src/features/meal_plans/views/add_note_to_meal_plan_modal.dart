@@ -1,6 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:wolt_modal_sheet/wolt_modal_sheet.dart';
+import '../../../localization/l10n_extension.dart';
 import '../../../providers/meal_plan_provider.dart';
 import '../../../theme/colors.dart';
 import '../../../theme/spacing.dart';
@@ -119,13 +120,13 @@ class _AddNoteToMealPlanContentState extends ConsumerState<AddNoteToMealPlanCont
   void _showError(String message) {
     showCupertinoDialog(
       context: context,
-      builder: (context) => CupertinoAlertDialog(
-        title: const Text('Error'),
-        content: Text('Failed to add note: $message'),
+      builder: (dialogContext) => CupertinoAlertDialog(
+        title: Text(context.l10n.commonError),
+        content: Text(context.l10n.mealPlanFailedToAddNote(message)),
         actions: [
           CupertinoDialogAction(
-            child: const Text('OK'),
-            onPressed: () => Navigator.pop(context),
+            child: Text(context.l10n.commonOk),
+            onPressed: () => Navigator.pop(dialogContext),
           ),
         ],
       ),
@@ -142,7 +143,7 @@ class _AddNoteToMealPlanContentState extends ConsumerState<AddNoteToMealPlanCont
         children: [
           // Modal title
           Text(
-            'Add Note',
+            context.l10n.mealPlanAddNote,
             style: AppTypography.h4.copyWith(
               color: AppColors.of(context).textPrimary,
             ),
@@ -153,7 +154,7 @@ class _AddNoteToMealPlanContentState extends ConsumerState<AddNoteToMealPlanCont
           AppTextFieldSimple(
             controller: _textController,
             focusNode: _textFocusNode,
-            placeholder: 'Enter your note...',
+            placeholder: context.l10n.mealPlanNotePlaceholder,
             autofocus: true,
             enabled: !_isSubmitting,
             multiline: true,
@@ -168,7 +169,7 @@ class _AddNoteToMealPlanContentState extends ConsumerState<AddNoteToMealPlanCont
 
           // Add button
           AppButtonVariants.primaryFilled(
-            text: 'Add Note',
+            text: context.l10n.mealPlanAddNote,
             size: AppButtonSize.large,
             shape: AppButtonShape.square,
             onPressed: _canSubmit ? _handleSubmit : null,

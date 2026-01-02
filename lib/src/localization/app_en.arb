@@ -2825,5 +2825,134 @@
   "stockStatusNotInPantry": "Not in Pantry",
   "@stockStatusNotInPantry": {
     "description": "Label for items not found in pantry"
+  },
+
+  "mealPlanPageTitle": "Meal Plans",
+  "@mealPlanPageTitle": {
+    "description": "Title for the meal plans page"
+  },
+  "mealPlanAddRecipe": "Add Recipe",
+  "@mealPlanAddRecipe": {
+    "description": "Add recipe menu item"
+  },
+  "mealPlanAddNote": "Add Note",
+  "@mealPlanAddNote": {
+    "description": "Add note menu item and modal title"
+  },
+  "mealPlanClearItems": "Clear Items",
+  "@mealPlanClearItems": {
+    "description": "Clear items menu item and dialog title"
+  },
+  "mealPlanClearItemsConfirm": "Are you sure you want to remove all recipes and notes from this day?",
+  "@mealPlanClearItemsConfirm": {
+    "description": "Clear items confirmation message"
+  },
+  "mealPlanViewRecipe": "View Recipe",
+  "@mealPlanViewRecipe": {
+    "description": "View recipe context menu action"
+  },
+  "mealPlanEditNote": "Edit Note",
+  "@mealPlanEditNote": {
+    "description": "Edit note context menu action and dialog title"
+  },
+  "mealPlanRemove": "Remove",
+  "@mealPlanRemove": {
+    "description": "Remove item context menu action"
+  },
+  "mealPlanEditNotePlaceholder": "Note editing will be implemented",
+  "@mealPlanEditNotePlaceholder": {
+    "description": "Placeholder message for edit note dialog"
+  },
+  "mealPlanNotePlaceholder": "Enter your note...",
+  "@mealPlanNotePlaceholder": {
+    "description": "Placeholder for note text field"
+  },
+  "mealPlanFailedToAddNote": "Failed to add note: {message}",
+  "@mealPlanFailedToAddNote": {
+    "description": "Error message when adding note fails",
+    "placeholders": {
+      "message": {
+        "type": "String",
+        "example": "Network error"
+      }
+    }
+  },
+  "mealPlanActionsTitle": "Meal Plan Actions",
+  "@mealPlanActionsTitle": {
+    "description": "Title for meal plan actions sheet"
+  },
+  "mealPlanAddToMealPlanTitle": "Add to Meal Plan",
+  "@mealPlanAddToMealPlanTitle": {
+    "description": "Title for add to meal plan action sheet"
+  },
+  "mealPlanNoRecipesFound": "No recipes found",
+  "@mealPlanNoRecipesFound": {
+    "description": "Empty state when no recipes match search"
+  },
+  "mealPlanTryDifferentSearch": "Try a different search term",
+  "@mealPlanTryDifferentSearch": {
+    "description": "Suggestion when no recipes found"
+  },
+  "mealPlanServings": "{count} servings",
+  "@mealPlanServings": {
+    "description": "Recipe servings label",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "4"
+      }
+    }
+  },
+  "mealPlanAlreadyOnShoppingList": "Already on shopping list",
+  "@mealPlanAlreadyOnShoppingList": {
+    "description": "Indicator that ingredient is already on shopping list"
+  },
+  "mealPlanAllIngredientsInPantry": "All ingredients are in your pantry or already on a shopping list.",
+  "@mealPlanAllIngredientsInPantry": {
+    "description": "Message when all ingredients are available"
+  },
+  "mealPlanDiscoverSubPage": "Discover Sub Page",
+  "@mealPlanDiscoverSubPage": {
+    "description": "Placeholder text for discover sub page"
+  },
+  "mealPlanTodayDate": "Today, {date}",
+  "@mealPlanTodayDate": {
+    "description": "Date header for today's meal plan",
+    "placeholders": {
+      "date": {
+        "type": "String",
+        "example": "Jan 5"
+      }
+    }
+  },
+  "mealPlanTomorrowDate": "Tomorrow, {date}",
+  "@mealPlanTomorrowDate": {
+    "description": "Date header for tomorrow's meal plan",
+    "placeholders": {
+      "date": {
+        "type": "String",
+        "example": "Jan 6"
+      }
+    }
+  },
+  "mealPlanUnknownRecipe": "Unknown Recipe",
+  "@mealPlanUnknownRecipe": {
+    "description": "Fallback title for recipe with missing title"
+  },
+  "mealPlanNoteDefault": "Note",
+  "@mealPlanNoteDefault": {
+    "description": "Fallback title for note with missing text"
+  },
+  "mealPlanUnknownItem": "Unknown Item",
+  "@mealPlanUnknownItem": {
+    "description": "Fallback title for unknown item type"
+  },
+  "mealPlanNoMealsPlanned": "No meals planned",
+  "@mealPlanNoMealsPlanned": {
+    "description": "Empty state title for date card with no items"
+  },
+  "mealPlanTapToAdd": "Tap + to add recipes or notes",
+  "@mealPlanTapToAdd": {
+    "description": "Empty state hint for date card with no items"
   }
 }

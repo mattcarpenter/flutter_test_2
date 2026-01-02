@@ -2,6 +2,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hugeicons/hugeicons.dart';
 import '../../../../database/database.dart';
+import '../../../localization/l10n_extension.dart';
 import '../../../providers/recipe_provider.dart' as recipe_provider;
 
 class MealPlanRecipeSearchResults extends ConsumerWidget {
@@ -55,7 +56,7 @@ class MealPlanRecipeSearchResults extends ConsumerWidget {
             ),
             const SizedBox(height: 16),
             Text(
-              'No recipes found',
+              context.l10n.mealPlanNoRecipesFound,
               style: CupertinoTheme.of(context).textTheme.textStyle.copyWith(
                 fontSize: 16,
                 color: CupertinoColors.secondaryLabel.resolveFrom(context),
@@ -63,7 +64,7 @@ class MealPlanRecipeSearchResults extends ConsumerWidget {
             ),
             const SizedBox(height: 8),
             Text(
-              'Try a different search term',
+              context.l10n.mealPlanTryDifferentSearch,
               style: CupertinoTheme.of(context).textTheme.textStyle.copyWith(
                 fontSize: 14,
                 color: CupertinoColors.tertiaryLabel.resolveFrom(context),
@@ -200,7 +201,7 @@ class _RecipeSearchResultTile extends StatelessWidget {
                         ),
                         const SizedBox(width: 4),
                         Text(
-                          '${recipe.servings} servings',
+                          context.l10n.mealPlanServings(recipe.servings!),
                           style: CupertinoTheme.of(context).textTheme.textStyle.copyWith(
                             fontSize: 12,
                             color: CupertinoColors.tertiaryLabel.resolveFrom(context),

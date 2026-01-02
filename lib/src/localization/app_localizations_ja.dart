@@ -1971,4 +1971,91 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get stockStatusNotInPantry => 'パントリーにない';
+
+  @override
+  String get mealPlanPageTitle => '献立';
+
+  @override
+  String get mealPlanAddRecipe => 'レシピを追加';
+
+  @override
+  String get mealPlanAddNote => 'メモを追加';
+
+  @override
+  String get mealPlanClearItems => 'アイテムをクリア';
+
+  @override
+  String get mealPlanClearItemsConfirm => 'この日のすべてのレシピとメモを削除しますか？';
+
+  @override
+  String get mealPlanViewRecipe => 'レシピを表示';
+
+  @override
+  String get mealPlanEditNote => 'メモを編集';
+
+  @override
+  String get mealPlanRemove => '削除';
+
+  @override
+  String get mealPlanEditNotePlaceholder => 'メモ編集機能は実装予定です';
+
+  @override
+  String get mealPlanNotePlaceholder => 'メモを入力...';
+
+  @override
+  String mealPlanFailedToAddNote(String message) {
+    return 'メモの追加に失敗しました: $message';
+  }
+
+  @override
+  String get mealPlanActionsTitle => '献立の操作';
+
+  @override
+  String get mealPlanAddToMealPlanTitle => '献立に追加';
+
+  @override
+  String get mealPlanNoRecipesFound => 'レシピが見つかりません';
+
+  @override
+  String get mealPlanTryDifferentSearch => '別の検索語をお試しください';
+
+  @override
+  String mealPlanServings(int count) {
+    return '$count人分';
+  }
+
+  @override
+  String get mealPlanAlreadyOnShoppingList => '買い物リストに追加済み';
+
+  @override
+  String get mealPlanAllIngredientsInPantry =>
+      'すべての材料がパントリーにあるか、すでに買い物リストに追加されています。';
+
+  @override
+  String get mealPlanDiscoverSubPage => 'ディスカバーサブページ';
+
+  @override
+  String mealPlanTodayDate(String date) {
+    return '今日、$date';
+  }
+
+  @override
+  String mealPlanTomorrowDate(String date) {
+    return '明日、$date';
+  }
+
+  @override
+  String get mealPlanUnknownRecipe => '不明なレシピ';
+
+  @override
+  String get mealPlanNoteDefault => 'メモ';
+
+  @override
+  String get mealPlanUnknownItem => '不明なアイテム';
+
+  @override
+  String get mealPlanNoMealsPlanned => '献立がありません';
+
+  @override
+  String get mealPlanTapToAdd => '+をタップしてレシピやメモを追加';
 }
