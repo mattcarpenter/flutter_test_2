@@ -56,6 +56,24 @@ class AppTheme {
     textTheme: CupertinoTextThemeData(
       // textStyle: const TextStyle(fontFamily: 'Inter'), // Commented out - let iOS use SF Pro
       primaryColor: AppColorSwatches.neutral[900]!,
+      navLargeTitleTextStyle: TextStyle(
+        inherit: false,
+        fontFamily: 'SF Pro Rounded',
+        fontSize: 28,
+        fontWeight: FontWeight.w700,
+        letterSpacing: -0.41,
+        color: AppColorSwatches.neutral[900]!,
+        decoration: TextDecoration.none,
+      ),
+      navTitleTextStyle: TextStyle(
+        inherit: false,
+        fontFamily: 'SF Pro Rounded',
+        fontSize: 17,
+        fontWeight: FontWeight.w600,
+        letterSpacing: -0.41,
+        color: AppColorSwatches.neutral[900]!,
+        decoration: TextDecoration.none,
+      ),
     ),
   );
 
@@ -82,6 +100,24 @@ class AppTheme {
     textTheme: CupertinoTextThemeData(
       // textStyle: const TextStyle(fontFamily: 'Inter'), // Commented out - let iOS use SF Pro
       primaryColor: AppColorSwatches.neutral[50]!,
+      navLargeTitleTextStyle: TextStyle(
+        inherit: false,
+        fontFamily: 'SF Pro Rounded',
+        fontSize: 34,
+        fontWeight: FontWeight.w700,
+        letterSpacing: -0.41,
+        color: AppColorSwatches.neutral[50]!,
+        decoration: TextDecoration.none,
+      ),
+      navTitleTextStyle: TextStyle(
+        inherit: false,
+        fontFamily: 'SF Pro Rounded',
+        fontSize: 17,
+        fontWeight: FontWeight.w600,
+        letterSpacing: -0.41,
+        color: AppColorSwatches.neutral[50]!,
+        decoration: TextDecoration.none,
+      ),
     ),
   );
 }

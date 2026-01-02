@@ -177,10 +177,7 @@ class _AdaptiveSliverPageState extends State<AdaptiveSliverPage> {
                             },
                           ),
                           largeTitle: Text(
-                              widget.title,
-                              style: AppTypography.h1Serif.copyWith(
-                                color: AppColors.of(context).textPrimary,
-                              ),
+                              widget.title
                           ),
                           transitionBetweenRoutes: true,
                           previousPageTitle: widget.previousPageTitle,
@@ -199,10 +196,7 @@ class _AdaptiveSliverPageState extends State<AdaptiveSliverPage> {
                               : null,
                         )
                       : CupertinoSliverNavigationBar(
-                          largeTitle: Text(widget.title,
-                              style: AppTypography.h1Serif.copyWith(
-                                color: AppColors.of(context).textPrimary,
-                              )),
+                          largeTitle: Text(widget.title),
                           transitionBetweenRoutes: true,
                           previousPageTitle: widget.previousPageTitle,
                           trailing: Padding(
@@ -225,10 +219,7 @@ class _AdaptiveSliverPageState extends State<AdaptiveSliverPage> {
                               widget.onSearchChanged?.call(value);
                             },
                           ),
-                          largeTitle: Text(widget.title,
-                              style: AppTypography.h1Serif.copyWith(
-                                color: AppColors.of(context).textPrimary,
-                              )),
+                          largeTitle: Text(widget.title),
                           transitionBetweenRoutes: true,
                           previousPageTitle: widget.previousPageTitle,
                           trailing: widget.trailing,
@@ -246,10 +237,7 @@ class _AdaptiveSliverPageState extends State<AdaptiveSliverPage> {
                               : null,
                         )
                       : CupertinoSliverNavigationBar(
-                          largeTitle: Text(widget.title,
-                              style: AppTypography.h1Serif.copyWith(
-                                color: AppColors.of(context).textPrimary,
-                              )),
+                          largeTitle: Text(widget.title),
                           transitionBetweenRoutes: true,
                           previousPageTitle: widget.previousPageTitle,
                           trailing: widget.trailing,
@@ -300,10 +288,8 @@ class _AdaptiveSliverPageState extends State<AdaptiveSliverPage> {
             keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
             slivers: [
               SliverAppBar(
-                title: Text(widget.title,
-                    style: AppTypography.h1Serif.copyWith(
-                      color: AppColors.of(context).textPrimary,
-                    )),
+                title: Text(widget.title
+                    ),
                 floating: true,
                 pinned: true,
                 // leadingPadding:

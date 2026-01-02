@@ -31,8 +31,8 @@ class AppTypography {
   );
 
   static TextStyle get h2 => TextStyle(
-    fontSize: 24,
-    fontWeight: _boldWeight,
+    fontSize: 22,
+    fontWeight: _mediumWeight,
     height: Platform.isIOS ? 1.3 : 1.2,
     fontFamily: _headingFontFamily,
     letterSpacing: _letterSpacing,
@@ -68,10 +68,10 @@ class AppTypography {
   );
 
   static TextStyle get h2Serif => TextStyle(
-    fontSize: 24,
+    fontSize: 18,
     fontWeight: _boldWeight,
     height: Platform.isIOS ? 1.3 : 1.2,
-    fontFamily: _headingFontFamilyAlternate,
+    fontFamily: _headingFontFamily,
     color: const Color(0xFF1D2129),
   );
 
