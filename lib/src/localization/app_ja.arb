@@ -547,5 +547,22 @@
 
   "conversionModeOriginal": "オリジナル",
   "conversionModeImperial": "ヤード・ポンド法",
-  "conversionModeMetric": "メートル法"
+  "conversionModeMetric": "メートル法",
+
+  "cookStepProgress": "ステップ {current} / {total}",
+  "cookPercentComplete": "{percent}% 完了",
+  "cookRecipeNotFound": "レシピが見つかりません",
+  "cookNoStepsValidation": "このレシピにはまだ調理手順がありません。調理を開始する前にレシピに手順を追加してください。",
+
+  "ingredientsSheetTitle": "材料",
+  "ingredientsSheetScaleConvert": "分量変換",
+
+  "timerStartTitle": "タイマーを開始しますか？",
+  "timerStartMessage": "{recipeName}の\nステップ {stepNumber} / {totalSteps}\n{duration}のタイマーを開始",
+  "timerStart": "開始",
+  "timerStartFailed": "タイマーの開始に失敗しました。もう一度お試しください。",
+  "timerNotificationsTitle": "タイマー通知を有効にする",
+  "timerNotificationsMessage": "アプリがバックグラウンドにあっても、調理タイマーが完了したときに通知を受け取れます。",
+  "timerNotificationsNotNow": "後で",
+  "timerNotificationsEnable": "有効にする"
 }

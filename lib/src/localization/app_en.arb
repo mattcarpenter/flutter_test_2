@@ -2258,5 +2258,91 @@
   "conversionModeMetric": "Metric",
   "@conversionModeMetric": {
     "description": "Metric conversion mode option"
+  },
+
+  "cookStepProgress": "Step {current} of {total}",
+  "@cookStepProgress": {
+    "description": "Step progress indicator in cook modal",
+    "placeholders": {
+      "current": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "cookPercentComplete": "{percent}% complete",
+  "@cookPercentComplete": {
+    "description": "Percentage complete indicator for cook session",
+    "placeholders": {
+      "percent": {
+        "type": "int"
+      }
+    }
+  },
+  "cookRecipeNotFound": "Recipe not found",
+  "@cookRecipeNotFound": {
+    "description": "Error message when recipe cannot be found"
+  },
+  "cookNoStepsValidation": "This recipe doesn't have any cooking steps yet. Please add steps to this recipe before starting a cook session.",
+  "@cookNoStepsValidation": {
+    "description": "Validation error when trying to cook a recipe without steps"
+  },
+
+  "ingredientsSheetTitle": "Ingredients",
+  "@ingredientsSheetTitle": {
+    "description": "Title for ingredients sheet in cook modal"
+  },
+  "ingredientsSheetScaleConvert": "Scale or Convert",
+  "@ingredientsSheetScaleConvert": {
+    "description": "Button text to expand scale/convert panel"
+  },
+
+  "timerStartTitle": "Start Timer?",
+  "@timerStartTitle": {
+    "description": "Title for start timer confirmation dialog"
+  },
+  "timerStartMessage": "Start a {duration} timer for\n{recipeName}\nStep {stepNumber} of {totalSteps}",
+  "@timerStartMessage": {
+    "description": "Confirmation message for starting a timer",
+    "placeholders": {
+      "duration": {
+        "type": "String"
+      },
+      "recipeName": {
+        "type": "String"
+      },
+      "stepNumber": {
+        "type": "int"
+      },
+      "totalSteps": {
+        "type": "int"
+      }
+    }
+  },
+  "timerStart": "Start",
+  "@timerStart": {
+    "description": "Start button for timer dialog"
+  },
+  "timerStartFailed": "Failed to start timer. Please try again.",
+  "@timerStartFailed": {
+    "description": "Error message when timer fails to start"
+  },
+  "timerNotificationsTitle": "Enable Timer Notifications",
+  "@timerNotificationsTitle": {
+    "description": "Title for notification permission dialog"
+  },
+  "timerNotificationsMessage": "Get notified when your cooking timers are done, even when the app is in the background.",
+  "@timerNotificationsMessage": {
+    "description": "Explanation for notification permission"
+  },
+  "timerNotificationsNotNow": "Not Now",
+  "@timerNotificationsNotNow": {
+    "description": "Decline button for notification permission"
+  },
+  "timerNotificationsEnable": "Enable",
+  "@timerNotificationsEnable": {
+    "description": "Enable button for notification permission"
   }
 }

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:wolt_modal_sheet/wolt_modal_sheet.dart';
 import 'package:recipe_app/database/models/ingredients.dart';
+import '../../../../localization/l10n_extension.dart';
 import '../../../../providers/recipe_provider.dart' show recipeByIdStreamProvider;
 import '../../../../providers/scale_convert_provider.dart';
 import '../../../../theme/colors.dart';
@@ -121,7 +122,7 @@ class _IngredientsSheetState extends ConsumerState<IngredientsSheet>
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                'Ingredients',
+                context.l10n.ingredientsSheetTitle,
                 style: AppTypography.h4.copyWith(
                   color: AppColors.of(context).textPrimary,
                 ),
@@ -155,7 +156,7 @@ class _IngredientsSheetState extends ConsumerState<IngredientsSheet>
                             ),
                             const SizedBox(width: 6),
                           ],
-                          const Text('Scale or Convert'),
+                          Text(context.l10n.ingredientsSheetScaleConvert),
                           const SizedBox(width: 4),
                           Icon(
                             _accordionController.value > 0.5

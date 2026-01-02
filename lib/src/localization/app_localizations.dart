@@ -2990,6 +2990,91 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Metric'**
   String get conversionModeMetric;
+
+  /// Step progress indicator in cook modal
+  ///
+  /// In en, this message translates to:
+  /// **'Step {current} of {total}'**
+  String cookStepProgress(int current, int total);
+
+  /// Percentage complete indicator for cook session
+  ///
+  /// In en, this message translates to:
+  /// **'{percent}% complete'**
+  String cookPercentComplete(int percent);
+
+  /// Error message when recipe cannot be found
+  ///
+  /// In en, this message translates to:
+  /// **'Recipe not found'**
+  String get cookRecipeNotFound;
+
+  /// Validation error when trying to cook a recipe without steps
+  ///
+  /// In en, this message translates to:
+  /// **'This recipe doesn\'t have any cooking steps yet. Please add steps to this recipe before starting a cook session.'**
+  String get cookNoStepsValidation;
+
+  /// Title for ingredients sheet in cook modal
+  ///
+  /// In en, this message translates to:
+  /// **'Ingredients'**
+  String get ingredientsSheetTitle;
+
+  /// Button text to expand scale/convert panel
+  ///
+  /// In en, this message translates to:
+  /// **'Scale or Convert'**
+  String get ingredientsSheetScaleConvert;
+
+  /// Title for start timer confirmation dialog
+  ///
+  /// In en, this message translates to:
+  /// **'Start Timer?'**
+  String get timerStartTitle;
+
+  /// Confirmation message for starting a timer
+  ///
+  /// In en, this message translates to:
+  /// **'Start a {duration} timer for\n{recipeName}\nStep {stepNumber} of {totalSteps}'**
+  String timerStartMessage(
+      String duration, String recipeName, int stepNumber, int totalSteps);
+
+  /// Start button for timer dialog
+  ///
+  /// In en, this message translates to:
+  /// **'Start'**
+  String get timerStart;
+
+  /// Error message when timer fails to start
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to start timer. Please try again.'**
+  String get timerStartFailed;
+
+  /// Title for notification permission dialog
+  ///
+  /// In en, this message translates to:
+  /// **'Enable Timer Notifications'**
+  String get timerNotificationsTitle;
+
+  /// Explanation for notification permission
+  ///
+  /// In en, this message translates to:
+  /// **'Get notified when your cooking timers are done, even when the app is in the background.'**
+  String get timerNotificationsMessage;
+
+  /// Decline button for notification permission
+  ///
+  /// In en, this message translates to:
+  /// **'Not Now'**
+  String get timerNotificationsNotNow;
+
+  /// Enable button for notification permission
+  ///
+  /// In en, this message translates to:
+  /// **'Enable'**
+  String get timerNotificationsEnable;
 }
 
 class _AppLocalizationsDelegate

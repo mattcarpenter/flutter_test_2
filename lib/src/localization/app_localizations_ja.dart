@@ -1597,4 +1597,55 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get conversionModeMetric => 'メートル法';
+
+  @override
+  String cookStepProgress(int current, int total) {
+    return 'ステップ $current / $total';
+  }
+
+  @override
+  String cookPercentComplete(int percent) {
+    return '$percent% 完了';
+  }
+
+  @override
+  String get cookRecipeNotFound => 'レシピが見つかりません';
+
+  @override
+  String get cookNoStepsValidation =>
+      'このレシピにはまだ調理手順がありません。調理を開始する前にレシピに手順を追加してください。';
+
+  @override
+  String get ingredientsSheetTitle => '材料';
+
+  @override
+  String get ingredientsSheetScaleConvert => '分量変換';
+
+  @override
+  String get timerStartTitle => 'タイマーを開始しますか？';
+
+  @override
+  String timerStartMessage(
+      String duration, String recipeName, int stepNumber, int totalSteps) {
+    return '$recipeNameの\nステップ $stepNumber / $totalSteps\n$durationのタイマーを開始';
+  }
+
+  @override
+  String get timerStart => '開始';
+
+  @override
+  String get timerStartFailed => 'タイマーの開始に失敗しました。もう一度お試しください。';
+
+  @override
+  String get timerNotificationsTitle => 'タイマー通知を有効にする';
+
+  @override
+  String get timerNotificationsMessage =>
+      'アプリがバックグラウンドにあっても、調理タイマーが完了したときに通知を受け取れます。';
+
+  @override
+  String get timerNotificationsNotNow => '後で';
+
+  @override
+  String get timerNotificationsEnable => '有効にする';
 }

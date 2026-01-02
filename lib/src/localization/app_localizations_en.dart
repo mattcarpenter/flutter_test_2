@@ -1645,4 +1645,55 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get conversionModeMetric => 'Metric';
+
+  @override
+  String cookStepProgress(int current, int total) {
+    return 'Step $current of $total';
+  }
+
+  @override
+  String cookPercentComplete(int percent) {
+    return '$percent% complete';
+  }
+
+  @override
+  String get cookRecipeNotFound => 'Recipe not found';
+
+  @override
+  String get cookNoStepsValidation =>
+      'This recipe doesn\'t have any cooking steps yet. Please add steps to this recipe before starting a cook session.';
+
+  @override
+  String get ingredientsSheetTitle => 'Ingredients';
+
+  @override
+  String get ingredientsSheetScaleConvert => 'Scale or Convert';
+
+  @override
+  String get timerStartTitle => 'Start Timer?';
+
+  @override
+  String timerStartMessage(
+      String duration, String recipeName, int stepNumber, int totalSteps) {
+    return 'Start a $duration timer for\n$recipeName\nStep $stepNumber of $totalSteps';
+  }
+
+  @override
+  String get timerStart => 'Start';
+
+  @override
+  String get timerStartFailed => 'Failed to start timer. Please try again.';
+
+  @override
+  String get timerNotificationsTitle => 'Enable Timer Notifications';
+
+  @override
+  String get timerNotificationsMessage =>
+      'Get notified when your cooking timers are done, even when the app is in the background.';
+
+  @override
+  String get timerNotificationsNotNow => 'Not Now';
+
+  @override
+  String get timerNotificationsEnable => 'Enable';
 }

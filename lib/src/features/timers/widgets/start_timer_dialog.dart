@@ -1,6 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../localization/l10n_extension.dart';
 import '../../../providers/timer_provider.dart';
 import '../../../services/logging/app_logger.dart';
 
@@ -30,23 +31,26 @@ Future<void> showStartTimerDialog(
   await showCupertinoDialog<void>(
     context: context,
     builder: (dialogContext) => CupertinoAlertDialog(
-      title: const Text('Start Timer?'),
+      title: Text(context.l10n.timerStartTitle),
       content: Padding(
         padding: const EdgeInsets.only(top: 8.0),
         child: Text(
-          'Start a $detectedText timer for\n'
-          '$recipeName\n'
-          'Step $stepNumber of $totalSteps',
+          context.l10n.timerStartMessage(
+            detectedText,
+            recipeName,
+            stepNumber,
+            totalSteps,
+          ),
         ),
       ),
       actions: [
         CupertinoDialogAction(
-          child: const Text('Cancel'),
+          child: Text(context.l10n.commonCancel),
           onPressed: () => Navigator.of(dialogContext).pop(),
         ),
         CupertinoDialogAction(
           isDefaultAction: true,
-          child: const Text('Start'),
+          child: Text(context.l10n.timerStart),
           onPressed: () async {
             Navigator.of(dialogContext).pop();
 
@@ -72,7 +76,7 @@ Future<void> showStartTimerDialog(
               AppLogger.error('Failed to start timer', e, stack);
               // Timer start failed - show error if context is still mounted
               if (context.mounted) {
-                _showErrorDialog(context, 'Failed to start timer. Please try again.');
+                _showErrorDialog(context);
               }
             }
           },
@@ -104,22 +108,19 @@ Future<void> _ensureNotificationPermission(
     final shouldRequest = await showCupertinoDialog<bool>(
       context: context,
       builder: (dialogContext) => CupertinoAlertDialog(
-        title: const Text('Enable Timer Notifications'),
-        content: const Padding(
-          padding: EdgeInsets.only(top: 8.0),
-          child: Text(
-            'Get notified when your cooking timers are done, '
-            'even when the app is in the background.',
-          ),
+        title: Text(context.l10n.timerNotificationsTitle),
+        content: Padding(
+          padding: const EdgeInsets.only(top: 8.0),
+          child: Text(context.l10n.timerNotificationsMessage),
         ),
         actions: [
           CupertinoDialogAction(
-            child: const Text('Not Now'),
+            child: Text(context.l10n.timerNotificationsNotNow),
             onPressed: () => Navigator.of(dialogContext).pop(false),
           ),
           CupertinoDialogAction(
             isDefaultAction: true,
-            child: const Text('Enable'),
+            child: Text(context.l10n.timerNotificationsEnable),
             onPressed: () => Navigator.of(dialogContext).pop(true),
           ),
         ],
@@ -136,20 +137,20 @@ Future<void> _ensureNotificationPermission(
   }
 }
 
-/// Shows an error dialog with the given message.
-void _showErrorDialog(BuildContext context, String message) {
+/// Shows an error dialog for timer start failures.
+void _showErrorDialog(BuildContext context) {
   showCupertinoDialog<void>(
     context: context,
     builder: (dialogContext) => CupertinoAlertDialog(
-      title: const Text('Error'),
+      title: Text(context.l10n.commonError),
       content: Padding(
         padding: const EdgeInsets.only(top: 8.0),
-        child: Text(message),
+        child: Text(context.l10n.timerStartFailed),
       ),
       actions: [
         CupertinoDialogAction(
           isDefaultAction: true,
-          child: const Text('OK'),
+          child: Text(context.l10n.commonOk),
           onPressed: () => Navigator.of(dialogContext).pop(),
         ),
       ],

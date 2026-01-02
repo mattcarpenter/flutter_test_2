@@ -69,7 +69,7 @@ class CookContentState extends ConsumerState<CookContent> {
         // Validate that recipe has non-section steps before allowing it to be added to cook
         final nonSectionSteps = recipe.steps?.where((s) => s.type != 'section').toList() ?? [];
         if (nonSectionSteps.isEmpty) {
-          return "This recipe doesn't have any cooking steps yet. Please add steps to this recipe before starting a cook session.";
+          return context.l10n.cookNoStepsValidation;
         }
         return null; // Valid
       },
@@ -249,7 +249,7 @@ class CookContentState extends ConsumerState<CookContent> {
         error: (error, _) => _buildErrorContent(error.toString()),
         data: (recipe) {
           if (recipe == null) {
-            return _buildErrorContent("Recipe not found");
+            return _buildErrorContent(context.l10n.cookRecipeNotFound);
           }
 
           // Get the steps and ingredients from the recipe
@@ -359,7 +359,7 @@ class CookContentState extends ConsumerState<CookContent> {
               overflow: TextOverflow.ellipsis,
             ),
             Text(
-              '$percentage% complete',
+              context.l10n.cookPercentComplete(percentage),
               style: TextStyle(
                 fontSize: 12,
                 color: isActive
@@ -423,7 +423,7 @@ class CookContentState extends ConsumerState<CookContent> {
 
               // Step number and progress indicator
               Text(
-                'Step $displayStepNumber of $totalSteps',
+                context.l10n.cookStepProgress(displayStepNumber, totalSteps),
                 style: TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.w500,
