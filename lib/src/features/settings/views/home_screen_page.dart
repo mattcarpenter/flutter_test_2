@@ -2,6 +2,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hugeicons/hugeicons.dart';
 
+import '../../../localization/l10n_extension.dart';
 import '../../../mobile/utils/adaptive_sliver_page.dart';
 import '../../../theme/spacing.dart';
 import '../providers/app_settings_provider.dart';
@@ -19,37 +20,37 @@ class HomeScreenPage extends ConsumerWidget {
     final options = [
       _HomeScreenOption(
         value: 'recipes',
-        title: 'Recipes',
+        title: context.l10n.settingsHomeScreenRecipes,
         icon: HugeIcons.strokeRoundedBook01,
       ),
       _HomeScreenOption(
         value: 'shopping',
-        title: 'Shopping',
+        title: context.l10n.settingsHomeScreenShopping,
         icon: HugeIcons.strokeRoundedShoppingCart01,
       ),
       _HomeScreenOption(
         value: 'meal_plans',
-        title: 'Meal Plan',
+        title: context.l10n.settingsHomeScreenMealPlan,
         icon: HugeIcons.strokeRoundedCalendar01,
       ),
       _HomeScreenOption(
         value: 'pantry',
-        title: 'Pantry',
+        title: context.l10n.settingsHomeScreenPantry,
         icon: CupertinoIcons.cube_box,
       ),
     ];
 
     return AdaptiveSliverPage(
-      title: 'Home Screen',
+      title: context.l10n.settingsHomeScreen,
       automaticallyImplyLeading: true,
-      previousPageTitle: 'Settings',
+      previousPageTitle: context.l10n.settingsTitle,
       slivers: [
         SliverToBoxAdapter(
           child: Column(
             children: [
               SizedBox(height: AppSpacing.xl),
               SettingsGroupCondensed(
-                footer: 'Choose which tab opens when the app launches. Changes take effect on next app launch.',
+                footer: context.l10n.settingsHomeScreenDescription,
                 children: options.map((option) {
                   final isSelected = currentHomeScreen == option.value;
 

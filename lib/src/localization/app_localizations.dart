@@ -397,6 +397,835 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Cancel'**
   String get commonCancel;
+
+  /// OK button text
+  ///
+  /// In en, this message translates to:
+  /// **'OK'**
+  String get commonOk;
+
+  /// Delete button text
+  ///
+  /// In en, this message translates to:
+  /// **'Delete'**
+  String get commonDelete;
+
+  /// Clear button text
+  ///
+  /// In en, this message translates to:
+  /// **'Clear'**
+  String get commonClear;
+
+  /// Error dialog title
+  ///
+  /// In en, this message translates to:
+  /// **'Error'**
+  String get commonError;
+
+  /// Loading indicator text
+  ///
+  /// In en, this message translates to:
+  /// **'...'**
+  String get commonLoading;
+
+  /// Coming soon placeholder text
+  ///
+  /// In en, this message translates to:
+  /// **'Coming Soon'**
+  String get commonComingSoon;
+
+  /// Settings page title
+  ///
+  /// In en, this message translates to:
+  /// **'Settings'**
+  String get settingsTitle;
+
+  /// Home screen settings row
+  ///
+  /// In en, this message translates to:
+  /// **'Home Screen'**
+  String get settingsHomeScreen;
+
+  /// Layout and appearance settings row
+  ///
+  /// In en, this message translates to:
+  /// **'Layout & Appearance'**
+  String get settingsLayoutAppearance;
+
+  /// Manage tags settings row
+  ///
+  /// In en, this message translates to:
+  /// **'Manage Tags'**
+  String get settingsManageTags;
+
+  /// Account settings row
+  ///
+  /// In en, this message translates to:
+  /// **'Account'**
+  String get settingsAccount;
+
+  /// Import recipes settings row
+  ///
+  /// In en, this message translates to:
+  /// **'Import Recipes'**
+  String get settingsImportRecipes;
+
+  /// Export recipes settings row
+  ///
+  /// In en, this message translates to:
+  /// **'Export Recipes'**
+  String get settingsExportRecipes;
+
+  /// Help settings row
+  ///
+  /// In en, this message translates to:
+  /// **'Help'**
+  String get settingsHelp;
+
+  /// Support settings row
+  ///
+  /// In en, this message translates to:
+  /// **'Support'**
+  String get settingsSupport;
+
+  /// Privacy policy settings row
+  ///
+  /// In en, this message translates to:
+  /// **'Privacy Policy'**
+  String get settingsPrivacyPolicy;
+
+  /// Terms of use settings row
+  ///
+  /// In en, this message translates to:
+  /// **'Terms of Use'**
+  String get settingsTermsOfUse;
+
+  /// Acknowledgements settings row
+  ///
+  /// In en, this message translates to:
+  /// **'Acknowledgements'**
+  String get settingsAcknowledgements;
+
+  /// Recipes home screen option
+  ///
+  /// In en, this message translates to:
+  /// **'Recipes'**
+  String get settingsHomeScreenRecipes;
+
+  /// Shopping home screen option
+  ///
+  /// In en, this message translates to:
+  /// **'Shopping'**
+  String get settingsHomeScreenShopping;
+
+  /// Meal plan home screen option
+  ///
+  /// In en, this message translates to:
+  /// **'Meal Plan'**
+  String get settingsHomeScreenMealPlan;
+
+  /// Pantry home screen option
+  ///
+  /// In en, this message translates to:
+  /// **'Pantry'**
+  String get settingsHomeScreenPantry;
+
+  /// Home screen setting description
+  ///
+  /// In en, this message translates to:
+  /// **'Choose which tab opens when the app launches. Changes take effect on next app launch.'**
+  String get settingsHomeScreenDescription;
+
+  /// Fallback when user has no email
+  ///
+  /// In en, this message translates to:
+  /// **'No email'**
+  String get settingsAccountNoEmail;
+
+  /// Sign out error dialog title
+  ///
+  /// In en, this message translates to:
+  /// **'Sign Out Error'**
+  String get settingsAccountSignOutError;
+
+  /// Sign out error message
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to sign out: {error}'**
+  String settingsAccountSignOutErrorMessage(String error);
+
+  /// Unsaved changes dialog title
+  ///
+  /// In en, this message translates to:
+  /// **'Unsaved Changes'**
+  String get settingsAccountUnsavedChanges;
+
+  /// Unsaved changes warning message
+  ///
+  /// In en, this message translates to:
+  /// **'Some data hasn\'t finished syncing to the cloud. If you sign out now, these changes may be lost.\n\nAre you sure you want to sign out?'**
+  String get settingsAccountUnsavedChangesMessage;
+
+  /// Sign out button text
+  ///
+  /// In en, this message translates to:
+  /// **'Sign Out'**
+  String get settingsAccountSignOut;
+
+  /// Sign out anyway button text
+  ///
+  /// In en, this message translates to:
+  /// **'Sign Out Anyway'**
+  String get settingsAccountSignOutAnyway;
+
+  /// Account not linked notice title
+  ///
+  /// In en, this message translates to:
+  /// **'Account Not Linked'**
+  String get settingsAccountNotLinked;
+
+  /// Account not linked warning message
+  ///
+  /// In en, this message translates to:
+  /// **'You have Stockpot Plus but no account linked. Create an account to sync your recipes across devices and prevent data loss.'**
+  String get settingsAccountNotLinkedMessage;
+
+  /// Recipes page section header
+  ///
+  /// In en, this message translates to:
+  /// **'Recipes Page'**
+  String get settingsLayoutRecipesPage;
+
+  /// Show folders setting row
+  ///
+  /// In en, this message translates to:
+  /// **'Show Folders'**
+  String get settingsLayoutShowFolders;
+
+  /// Sort folders setting row
+  ///
+  /// In en, this message translates to:
+  /// **'Sort Folders'**
+  String get settingsLayoutSortFolders;
+
+  /// Appearance section header
+  ///
+  /// In en, this message translates to:
+  /// **'Appearance'**
+  String get settingsLayoutAppearanceSection;
+
+  /// Color theme setting row
+  ///
+  /// In en, this message translates to:
+  /// **'Color Theme'**
+  String get settingsLayoutColorTheme;
+
+  /// Recipe font size setting row
+  ///
+  /// In en, this message translates to:
+  /// **'Recipe Font Size'**
+  String get settingsLayoutRecipeFontSize;
+
+  /// Show all folders option
+  ///
+  /// In en, this message translates to:
+  /// **'All folders'**
+  String get settingsShowFoldersAll;
+
+  /// Show first N folders option
+  ///
+  /// In en, this message translates to:
+  /// **'First {count} folders'**
+  String settingsShowFoldersFirst(int count);
+
+  /// First N folders option label
+  ///
+  /// In en, this message translates to:
+  /// **'First N folders'**
+  String get settingsShowFoldersFirstN;
+
+  /// Number of folders section header
+  ///
+  /// In en, this message translates to:
+  /// **'Number of Folders'**
+  String get settingsShowFoldersNumberHeader;
+
+  /// Number of folders setting description
+  ///
+  /// In en, this message translates to:
+  /// **'Show this many folders on the recipes page.'**
+  String get settingsShowFoldersNumberDescription;
+
+  /// Sort alphabetically A-Z option
+  ///
+  /// In en, this message translates to:
+  /// **'Alphabetical (A-Z)'**
+  String get settingsSortFoldersAlphaAZ;
+
+  /// Sort alphabetically Z-A option
+  ///
+  /// In en, this message translates to:
+  /// **'Alphabetical (Z-A)'**
+  String get settingsSortFoldersAlphaZA;
+
+  /// Sort newest first option
+  ///
+  /// In en, this message translates to:
+  /// **'Newest First'**
+  String get settingsSortFoldersNewest;
+
+  /// Sort oldest first option
+  ///
+  /// In en, this message translates to:
+  /// **'Oldest First'**
+  String get settingsSortFoldersOldest;
+
+  /// Custom sort order option
+  ///
+  /// In en, this message translates to:
+  /// **'Custom'**
+  String get settingsSortFoldersCustom;
+
+  /// Error loading folders message
+  ///
+  /// In en, this message translates to:
+  /// **'Error loading folders'**
+  String get settingsSortFoldersError;
+
+  /// Custom order section header
+  ///
+  /// In en, this message translates to:
+  /// **'CUSTOM ORDER'**
+  String get settingsSortFoldersCustomOrder;
+
+  /// Drag to reorder description
+  ///
+  /// In en, this message translates to:
+  /// **'Drag folders to set your preferred order.'**
+  String get settingsSortFoldersDragDescription;
+
+  /// Light theme option
+  ///
+  /// In en, this message translates to:
+  /// **'Light'**
+  String get settingsThemeLight;
+
+  /// Light theme description
+  ///
+  /// In en, this message translates to:
+  /// **'Always use light appearance'**
+  String get settingsThemeLightDescription;
+
+  /// Dark theme option
+  ///
+  /// In en, this message translates to:
+  /// **'Dark'**
+  String get settingsThemeDark;
+
+  /// Dark theme description
+  ///
+  /// In en, this message translates to:
+  /// **'Always use dark appearance'**
+  String get settingsThemeDarkDescription;
+
+  /// System theme option
+  ///
+  /// In en, this message translates to:
+  /// **'System'**
+  String get settingsThemeSystem;
+
+  /// System theme description
+  ///
+  /// In en, this message translates to:
+  /// **'Match device appearance'**
+  String get settingsThemeSystemDescription;
+
+  /// Font size page title
+  ///
+  /// In en, this message translates to:
+  /// **'Font Size'**
+  String get settingsFontSizeTitle;
+
+  /// Small font size option
+  ///
+  /// In en, this message translates to:
+  /// **'Small'**
+  String get settingsFontSizeSmall;
+
+  /// Medium font size option
+  ///
+  /// In en, this message translates to:
+  /// **'Medium'**
+  String get settingsFontSizeMedium;
+
+  /// Large font size option
+  ///
+  /// In en, this message translates to:
+  /// **'Large'**
+  String get settingsFontSizeLarge;
+
+  /// Font size setting description
+  ///
+  /// In en, this message translates to:
+  /// **'Adjust the text size for recipe ingredients and steps.'**
+  String get settingsFontSizeDescription;
+
+  /// Font size preview section header
+  ///
+  /// In en, this message translates to:
+  /// **'Preview'**
+  String get settingsFontSizePreview;
+
+  /// Preview ingredients header
+  ///
+  /// In en, this message translates to:
+  /// **'Ingredients'**
+  String get settingsFontSizePreviewIngredients;
+
+  /// Preview ingredient 1
+  ///
+  /// In en, this message translates to:
+  /// **'2 cups all-purpose flour'**
+  String get settingsFontSizePreviewItem1;
+
+  /// Preview ingredient 2
+  ///
+  /// In en, this message translates to:
+  /// **'1 tsp baking powder'**
+  String get settingsFontSizePreviewItem2;
+
+  /// Preview ingredient 3
+  ///
+  /// In en, this message translates to:
+  /// **'1/2 cup unsalted butter, softened'**
+  String get settingsFontSizePreviewItem3;
+
+  /// No tags empty state title
+  ///
+  /// In en, this message translates to:
+  /// **'No Tags Yet'**
+  String get settingsTagsNoTagsTitle;
+
+  /// No tags empty state description
+  ///
+  /// In en, this message translates to:
+  /// **'Tags help you organize your recipes.\nCreate your first tag by adding one when editing a recipe.'**
+  String get settingsTagsNoTagsDescription;
+
+  /// Your tags section header
+  ///
+  /// In en, this message translates to:
+  /// **'Your Tags'**
+  String get settingsTagsYourTags;
+
+  /// Tags management description
+  ///
+  /// In en, this message translates to:
+  /// **'Tap a color circle to change the tag color. Deleting a tag will remove it from all recipes.'**
+  String get settingsTagsDescription;
+
+  /// Delete tag confirmation title
+  ///
+  /// In en, this message translates to:
+  /// **'Delete \"{tagName}\"?'**
+  String settingsTagsDeleteTitle(String tagName);
+
+  /// Delete tag message when tag has recipes
+  ///
+  /// In en, this message translates to:
+  /// **'This tag is used by {count, plural, =1{1 recipe} other{{count} recipes}}. Deleting it will remove the tag from all recipes.'**
+  String settingsTagsDeleteMessageWithRecipes(int count);
+
+  /// Delete tag message when tag has no recipes
+  ///
+  /// In en, this message translates to:
+  /// **'This action cannot be undone.'**
+  String get settingsTagsDeleteMessageNoRecipes;
+
+  /// Recipe count display for tags
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =0{No recipes} =1{1 recipe} other{{count} recipes}}'**
+  String settingsTagsRecipeCount(int count);
+
+  /// Diagnostics section header
+  ///
+  /// In en, this message translates to:
+  /// **'Diagnostics'**
+  String get settingsSupportDiagnostics;
+
+  /// Export logs row
+  ///
+  /// In en, this message translates to:
+  /// **'Export Logs'**
+  String get settingsSupportExportLogs;
+
+  /// Clear logs row
+  ///
+  /// In en, this message translates to:
+  /// **'Clear Logs'**
+  String get settingsSupportClearLogs;
+
+  /// Contact section header
+  ///
+  /// In en, this message translates to:
+  /// **'Contact'**
+  String get settingsSupportContact;
+
+  /// Email support row
+  ///
+  /// In en, this message translates to:
+  /// **'Email Support'**
+  String get settingsSupportEmailSupport;
+
+  /// No logs available dialog title
+  ///
+  /// In en, this message translates to:
+  /// **'No Logs Available'**
+  String get settingsSupportNoLogs;
+
+  /// No logs available message
+  ///
+  /// In en, this message translates to:
+  /// **'There are no logs to export yet.'**
+  String get settingsSupportNoLogsMessage;
+
+  /// Clear logs confirmation title
+  ///
+  /// In en, this message translates to:
+  /// **'Clear Logs?'**
+  String get settingsSupportClearLogsTitle;
+
+  /// Clear logs confirmation message
+  ///
+  /// In en, this message translates to:
+  /// **'This will delete all diagnostic logs. This action cannot be undone.'**
+  String get settingsSupportClearLogsMessage;
+
+  /// Logs cleared success title
+  ///
+  /// In en, this message translates to:
+  /// **'Logs Cleared'**
+  String get settingsSupportLogsCleared;
+
+  /// Logs cleared success message
+  ///
+  /// In en, this message translates to:
+  /// **'All diagnostic logs have been deleted.'**
+  String get settingsSupportLogsClearedMessage;
+
+  /// Logs clear failed message
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to clear logs. Please try again.'**
+  String get settingsSupportLogsClearFailed;
+
+  /// Email error dialog title
+  ///
+  /// In en, this message translates to:
+  /// **'Unable to Open Email'**
+  String get settingsSupportEmailError;
+
+  /// Email error message with fallback address
+  ///
+  /// In en, this message translates to:
+  /// **'Please email us at support@stockpot.app'**
+  String get settingsSupportEmailErrorMessage;
+
+  /// Support email subject
+  ///
+  /// In en, this message translates to:
+  /// **'Stockpot Support Request'**
+  String get settingsSupportEmailSubject;
+
+  /// User ID fallback when not signed in
+  ///
+  /// In en, this message translates to:
+  /// **'Not signed in'**
+  String get settingsSupportNotSignedIn;
+
+  /// Support email body template
+  ///
+  /// In en, this message translates to:
+  /// **'Please describe your issue above this line\n\n---\nUser ID: {userId}\nApp Version: {appVersion}\nPlatform: {platform}\nOS Version: {osVersion}'**
+  String settingsSupportEmailBody(
+      String userId, String appVersion, String platform, String osVersion);
+
+  /// OSS licenses row
+  ///
+  /// In en, this message translates to:
+  /// **'Open Source Software Licenses'**
+  String get settingsAcknowledgementsOSSLicenses;
+
+  /// Sound credits attribution
+  ///
+  /// In en, this message translates to:
+  /// **'Sound material used: OtoLogic (https://otologic.jp)'**
+  String get settingsAcknowledgementsSoundCredits;
+
+  /// Import recipes description
+  ///
+  /// In en, this message translates to:
+  /// **'Import recipes from other apps or websites.'**
+  String get settingsImportDescription;
+
+  /// Export recipes description
+  ///
+  /// In en, this message translates to:
+  /// **'Export your recipes to share or backup.'**
+  String get settingsExportDescription;
+
+  /// Import page title
+  ///
+  /// In en, this message translates to:
+  /// **'Import Recipes'**
+  String get importTitle;
+
+  /// Import source section header
+  ///
+  /// In en, this message translates to:
+  /// **'Import from:'**
+  String get importFromHeader;
+
+  /// Stockpot import source
+  ///
+  /// In en, this message translates to:
+  /// **'Stockpot'**
+  String get importSourceStockpot;
+
+  /// Stockpot import description
+  ///
+  /// In en, this message translates to:
+  /// **'Import from a previous backup'**
+  String get importSourceStockpotDesc;
+
+  /// Paprika import source
+  ///
+  /// In en, this message translates to:
+  /// **'Paprika'**
+  String get importSourcePaprika;
+
+  /// Paprika import description
+  ///
+  /// In en, this message translates to:
+  /// **'Import from Paprika Recipe Manager'**
+  String get importSourcePaprikaDesc;
+
+  /// Crouton import source
+  ///
+  /// In en, this message translates to:
+  /// **'Crouton'**
+  String get importSourceCrouton;
+
+  /// Crouton import description
+  ///
+  /// In en, this message translates to:
+  /// **'Import from Crouton app'**
+  String get importSourceCroutonDesc;
+
+  /// Invalid file dialog title
+  ///
+  /// In en, this message translates to:
+  /// **'Invalid File'**
+  String get importInvalidFile;
+
+  /// Invalid Paprika file message
+  ///
+  /// In en, this message translates to:
+  /// **'Please select a .paprikarecipes file exported from Paprika.'**
+  String get importInvalidPaprikaFile;
+
+  /// Import preview page title
+  ///
+  /// In en, this message translates to:
+  /// **'Import Preview'**
+  String get importPreviewTitle;
+
+  /// Loading message while analyzing import
+  ///
+  /// In en, this message translates to:
+  /// **'Analyzing import file...'**
+  String get importAnalyzing;
+
+  /// Parse failure title
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to Parse Import'**
+  String get importParseFailed;
+
+  /// Unknown error fallback
+  ///
+  /// In en, this message translates to:
+  /// **'Unknown error'**
+  String get importUnknownError;
+
+  /// Preview header with source name
+  ///
+  /// In en, this message translates to:
+  /// **'Ready to import from {source}:'**
+  String importReadyFrom(String source);
+
+  /// Recipe count
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 recipe} other{{count} recipes}}'**
+  String importRecipeCount(int count);
+
+  /// Tag count summary
+  ///
+  /// In en, this message translates to:
+  /// **'{total, plural, =1{1 tag} other{{total} tags}} ({newCount} new, {existingCount} existing)'**
+  String importTagCount(int total, int newCount, int existingCount);
+
+  /// Folder count summary
+  ///
+  /// In en, this message translates to:
+  /// **'{total, plural, =1{1 folder} other{{total} folders}} ({newCount} new, {existingCount} existing)'**
+  String importFolderCount(int total, int newCount, int existingCount);
+
+  /// Paprika categories section header
+  ///
+  /// In en, this message translates to:
+  /// **'Paprika Categories'**
+  String get importPaprikaCategoriesHeader;
+
+  /// Paprika categories section footer
+  ///
+  /// In en, this message translates to:
+  /// **'Choose whether to import Paprika categories as tags or folders.'**
+  String get importPaprikaCategoriesFooter;
+
+  /// Import as tags option
+  ///
+  /// In en, this message translates to:
+  /// **'Tags (recommended)'**
+  String get importAsTags;
+
+  /// Import as folders option
+  ///
+  /// In en, this message translates to:
+  /// **'Folders'**
+  String get importAsFolders;
+
+  /// Import button text
+  ///
+  /// In en, this message translates to:
+  /// **'Import Recipes'**
+  String get importButton;
+
+  /// Import complete dialog title
+  ///
+  /// In en, this message translates to:
+  /// **'Import Complete'**
+  String get importComplete;
+
+  /// Import finished with partial success
+  ///
+  /// In en, this message translates to:
+  /// **'Import Finished'**
+  String get importFinished;
+
+  /// Success message
+  ///
+  /// In en, this message translates to:
+  /// **'Successfully imported {count, plural, =1{1 recipe} other{{count} recipes}}!'**
+  String importSuccessMessage(int count);
+
+  /// Success with upgrade prompt
+  ///
+  /// In en, this message translates to:
+  /// **'Imported {count} recipes. Upgrade to unlock your full collection.'**
+  String importSuccessUpgradeMessage(int count);
+
+  /// Partial success message
+  ///
+  /// In en, this message translates to:
+  /// **'Imported {success} recipes. {failed} failed.'**
+  String importPartialMessage(int success, int failed);
+
+  /// Import failed dialog title
+  ///
+  /// In en, this message translates to:
+  /// **'Import Failed'**
+  String get importFailed;
+
+  /// Import failed message
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to import recipes: {error}'**
+  String importFailedMessage(String error);
+
+  /// Export page title
+  ///
+  /// In en, this message translates to:
+  /// **'Export Recipes'**
+  String get exportTitle;
+
+  /// Export options section header
+  ///
+  /// In en, this message translates to:
+  /// **'Export Options'**
+  String get exportOptionsHeader;
+
+  /// Export all recipes row
+  ///
+  /// In en, this message translates to:
+  /// **'Export All Recipes'**
+  String get exportAllRecipes;
+
+  /// Export in progress
+  ///
+  /// In en, this message translates to:
+  /// **'Exporting...'**
+  String get exportExporting;
+
+  /// Export formats coming soon
+  ///
+  /// In en, this message translates to:
+  /// **'Additional export formats (HTML, PDF, etc.) coming soon.'**
+  String get exportComingSoon;
+
+  /// No recipes dialog title
+  ///
+  /// In en, this message translates to:
+  /// **'No Recipes'**
+  String get exportNoRecipes;
+
+  /// No recipes message
+  ///
+  /// In en, this message translates to:
+  /// **'You don\'t have any recipes to export.'**
+  String get exportNoRecipesMessage;
+
+  /// Share sheet subject
+  ///
+  /// In en, this message translates to:
+  /// **'My Recipes Export'**
+  String get exportShareSubject;
+
+  /// Export complete dialog title
+  ///
+  /// In en, this message translates to:
+  /// **'Export Complete'**
+  String get exportComplete;
+
+  /// Export success message
+  ///
+  /// In en, this message translates to:
+  /// **'Successfully exported {count, plural, =1{1 recipe} other{{count} recipes}}.'**
+  String exportSuccessMessage(int count);
+
+  /// Export failed dialog title
+  ///
+  /// In en, this message translates to:
+  /// **'Export Failed'**
+  String get exportFailed;
+
+  /// Export failed message
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to export recipes: {error}'**
+  String exportFailedMessage(String error);
 }
 
 class _AppLocalizationsDelegate

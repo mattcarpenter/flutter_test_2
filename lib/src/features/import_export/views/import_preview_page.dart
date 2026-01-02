@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
+import '../../../localization/l10n_extension.dart';
 import '../../../managers/upload_queue_manager.dart';
 import '../../../mobile/utils/adaptive_sliver_page.dart';
 import '../../../providers/household_provider.dart';
@@ -299,19 +300,18 @@ class _ImportPreviewPageState extends ConsumerState<ImportPreviewPage> {
         String message;
 
         if (result.failureCount == 0) {
-          title = 'Import Complete';
+          title = context.l10n.importComplete;
           if (willBeLocked > 0) {
             // User has more recipes than the limit - show upgrade messaging
-            message = 'Imported ${result.successCount} recipes. '
-                'Upgrade to unlock your full collection.';
+            message = context.l10n.importSuccessUpgradeMessage(result.successCount);
           } else {
-            message = 'Successfully imported ${result.successCount} recipes!';
+            message = context.l10n.importSuccessMessage(result.successCount);
           }
         } else {
-          title = 'Import Finished';
-          message = 'Imported ${result.successCount} recipes. ${result.failureCount} failed.';
+          title = context.l10n.importFinished;
+          message = context.l10n.importPartialMessage(result.successCount, result.failureCount);
           if (willBeLocked > 0) {
-            message += ' Upgrade to unlock your full collection.';
+            message += ' ${context.l10n.importSuccessUpgradeMessage(result.successCount).split('.').last.trim()}';
           }
         }
 
@@ -326,7 +326,7 @@ class _ImportPreviewPageState extends ConsumerState<ImportPreviewPage> {
       AppLogger.error('Import failed', e, stack);
       if (mounted) {
         setState(() => _isLoading = false);
-        _showAlert(context, title: 'Import Failed', message: 'Failed to import recipes: $e');
+        _showAlert(context, title: context.l10n.importFailed, message: context.l10n.importFailedMessage(e.toString()));
       }
     }
   }
@@ -338,14 +338,14 @@ class _ImportPreviewPageState extends ConsumerState<ImportPreviewPage> {
   }) {
     return showCupertinoDialog(
       context: context,
-      builder: (context) => CupertinoAlertDialog(
+      builder: (dialogContext) => CupertinoAlertDialog(
         title: Text(title),
         content: Text(message),
         actions: [
           CupertinoDialogAction(
             isDefaultAction: true,
-            onPressed: () => Navigator.pop(context),
-            child: const Text('OK'),
+            onPressed: () => Navigator.pop(dialogContext),
+            child: Text(context.l10n.commonOk),
           ),
         ],
       ),
@@ -360,7 +360,7 @@ class _ImportPreviewPageState extends ConsumerState<ImportPreviewPage> {
           const CircularProgressIndicator(),
           SizedBox(height: AppSpacing.lg),
           Text(
-            'Analyzing import file...',
+            context.l10n.importAnalyzing,
             style: AppTypography.body.copyWith(
               color: AppColors.of(context).textSecondary,
             ),
@@ -384,14 +384,14 @@ class _ImportPreviewPageState extends ConsumerState<ImportPreviewPage> {
             ),
             SizedBox(height: AppSpacing.lg),
             Text(
-              'Failed to Parse Import',
+              context.l10n.importParseFailed,
               style: AppTypography.h4.copyWith(
                 color: AppColors.of(context).textPrimary,
               ),
             ),
             SizedBox(height: AppSpacing.md),
             Text(
-              _error ?? 'Unknown error',
+              _error ?? context.l10n.importUnknownError,
               style: AppTypography.body.copyWith(
                 color: AppColors.of(context).textSecondary,
               ),
@@ -421,7 +421,7 @@ class _ImportPreviewPageState extends ConsumerState<ImportPreviewPage> {
             AppSpacing.lg,
           ),
           child: Text(
-            'Ready to import from ${_getSourceDisplayName()}:',
+            context.l10n.importReadyFrom(_getSourceDisplayName()),
             style: AppTypography.body.copyWith(
               color: colors.textPrimary,
             ),
@@ -432,7 +432,7 @@ class _ImportPreviewPageState extends ConsumerState<ImportPreviewPage> {
         Padding(
           padding: EdgeInsets.symmetric(horizontal: AppSpacing.lg),
           child: Text(
-            '${preview.recipeCount} ${preview.recipeCount == 1 ? 'recipe' : 'recipes'}',
+            context.l10n.importRecipeCount(preview.recipeCount),
             style: AppTypography.h3.copyWith(
               color: colors.textPrimary,
             ),
@@ -445,8 +445,7 @@ class _ImportPreviewPageState extends ConsumerState<ImportPreviewPage> {
         Padding(
           padding: EdgeInsets.symmetric(horizontal: AppSpacing.lg),
           child: Text(
-            '${preview.tagNames.length} ${preview.tagNames.length == 1 ? 'tag' : 'tags'} '
-            '(${preview.newTagNames.length} new, ${preview.existingTagNames.length} existing)',
+            context.l10n.importTagCount(preview.tagNames.length, preview.newTagNames.length, preview.existingTagNames.length),
             style: AppTypography.body.copyWith(
               color: colors.textSecondary,
             ),
@@ -459,8 +458,7 @@ class _ImportPreviewPageState extends ConsumerState<ImportPreviewPage> {
         Padding(
           padding: EdgeInsets.symmetric(horizontal: AppSpacing.lg),
           child: Text(
-            '${preview.folderNames.length} ${preview.folderNames.length == 1 ? 'folder' : 'folders'} '
-            '(${preview.newFolderNames.length} new, ${preview.existingFolderNames.length} existing)',
+            context.l10n.importFolderCount(preview.folderNames.length, preview.newFolderNames.length, preview.existingFolderNames.length),
             style: AppTypography.body.copyWith(
               color: colors.textSecondary,
             ),
@@ -472,11 +470,11 @@ class _ImportPreviewPageState extends ConsumerState<ImportPreviewPage> {
         // Paprika categories option (if applicable)
         if (preview.hasPaprikaCategories) ...[
           SettingsGroupCondensed(
-            header: 'Paprika Categories',
-            footer: 'Choose whether to import Paprika categories as tags or folders.',
+            header: context.l10n.importPaprikaCategoriesHeader,
+            footer: context.l10n.importPaprikaCategoriesFooter,
             children: [
               AppRadioButtonRowCondensed(
-                label: 'Tags (recommended)',
+                label: context.l10n.importAsTags,
                 selected: _paprikaCategoriesAsTags,
                 onTap: () {
                   setState(() {
@@ -488,7 +486,7 @@ class _ImportPreviewPageState extends ConsumerState<ImportPreviewPage> {
                 grouped: true,
               ),
               AppRadioButtonRowCondensed(
-                label: 'Folders',
+                label: context.l10n.importAsFolders,
                 selected: !_paprikaCategoriesAsTags,
                 onTap: () {
                   setState(() {
@@ -511,7 +509,7 @@ class _ImportPreviewPageState extends ConsumerState<ImportPreviewPage> {
         Padding(
           padding: EdgeInsets.all(AppSpacing.lg),
           child: AppButtonVariants.primaryFilled(
-            text: 'Import Recipes',
+            text: context.l10n.importButton,
             onPressed: _isLoading ? null : _executeImport,
             size: AppButtonSize.large,
             shape: AppButtonShape.square,
@@ -536,7 +534,7 @@ class _ImportPreviewPageState extends ConsumerState<ImportPreviewPage> {
   @override
   Widget build(BuildContext context) {
     return AdaptiveSliverPage(
-      title: 'Import Preview',
+      title: context.l10n.importPreviewTitle,
       automaticallyImplyLeading: true,
       body: _isLoading
           ? _buildLoadingState()

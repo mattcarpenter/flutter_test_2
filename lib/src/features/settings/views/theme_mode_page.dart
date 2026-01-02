@@ -1,6 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../localization/l10n_extension.dart';
 import '../../../mobile/utils/adaptive_sliver_page.dart';
 import '../../../theme/spacing.dart';
 import '../providers/app_settings_provider.dart';
@@ -18,25 +19,25 @@ class ThemeModePage extends ConsumerWidget {
     final options = [
       _ThemeOption(
         value: 'light',
-        title: 'Light',
-        subtitle: 'Always use light appearance',
+        title: context.l10n.settingsThemeLight,
+        subtitle: context.l10n.settingsThemeLightDescription,
       ),
       _ThemeOption(
         value: 'dark',
-        title: 'Dark',
-        subtitle: 'Always use dark appearance',
+        title: context.l10n.settingsThemeDark,
+        subtitle: context.l10n.settingsThemeDarkDescription,
       ),
       _ThemeOption(
         value: 'auto',
-        title: 'System',
-        subtitle: 'Match device appearance',
+        title: context.l10n.settingsThemeSystem,
+        subtitle: context.l10n.settingsThemeSystemDescription,
       ),
     ];
 
     return AdaptiveSliverPage(
-      title: 'Color Theme',
+      title: context.l10n.settingsLayoutColorTheme,
       automaticallyImplyLeading: true,
-      previousPageTitle: 'Layout',
+      previousPageTitle: context.l10n.settingsLayoutAppearance,
       slivers: [
         SliverToBoxAdapter(
           child: Column(

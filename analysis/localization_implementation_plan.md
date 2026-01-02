@@ -232,30 +232,30 @@ Test by changing device language or using a test override.
 
 ### Feature Inventory & Prioritization
 
-| Priority | Feature | Files | Complexity | Notes |
-|----------|---------|-------|------------|-------|
-| 1 | auth | 12 | Low | Pilot feature, high visibility |
-| 2 | settings | 25 | Medium | User-facing settings, many labels |
-| 3 | recipes | 71 | High | Largest feature, core functionality |
-| 4 | shopping_list | 17 | Medium | Core feature |
-| 5 | meal_plans | 22 | Medium | Core feature |
-| 6 | pantry | 11 | Low | Core feature |
-| 7 | clippings | 18 | Medium | Labs feature |
-| 8 | import_export | 22 | Medium | Utility feature |
-| 9 | household | 15 | Medium | Sharing feature |
-| 10 | help | 4 | Low | Help documentation |
-| 11 | share | 3 | Low | Share previews |
-| 12 | timers | 3 | Low | Timer UI |
-| 13 | discover | 1 | Low | Discovery page |
-| 14 | subscription | 1 | Low | Paywall |
+| Priority | Feature | Files | Complexity | Status | Notes |
+|----------|---------|-------|------------|--------|-------|
+| 1 | auth | 12 | Low | ✅ Done | Pilot feature, high visibility |
+| 2 | settings | 25 | Medium | ✅ Done | User-facing settings, many labels |
+| 3 | recipes | 71 | High | ⏳ Pending | Largest feature, core functionality |
+| 4 | shopping_list | 17 | Medium | ⏳ Pending | Core feature |
+| 5 | meal_plans | 22 | Medium | ⏳ Pending | Core feature |
+| 6 | pantry | 11 | Low | ⏳ Pending | Core feature |
+| 7 | clippings | 18 | Medium | ⏳ Pending | Labs feature |
+| 8 | import_export | 22 | Medium | ⏳ Pending | Utility feature |
+| 9 | household | 15 | Medium | ⏳ Pending | Sharing feature |
+| 10 | help | 4 | Low | ⏳ Pending | Help documentation |
+| 11 | share | 3 | Low | ⏳ Pending | Share previews |
+| 12 | timers | 3 | Low | ⏳ Pending | Timer UI |
+| 13 | discover | 1 | Low | ⏳ Pending | Discovery page |
+| 14 | subscription | 1 | Low | ⏳ Pending | Paywall |
 
 ### Non-Feature Areas
 
-| Area | Files | Notes |
-|------|-------|-------|
-| widgets/ | 59 | Shared UI components |
-| mobile/ | 7 | Navigation labels, status bar |
-| utils/ | ~5 | Utility text (rare) |
+| Area | Files | Status | Notes |
+|------|-------|--------|-------|
+| widgets/ | 59 | ⏳ Pending | Shared UI components |
+| mobile/ | 7 | ⏳ Pending | Navigation labels, status bar |
+| utils/ | ~5 | ⏳ Pending | Utility text (rare) |
 
 ---
 
@@ -460,25 +460,25 @@ validator: (value) {
 
 ## Implementation Checklist
 
-### Phase 1: Infrastructure
-- [ ] Add `AppLocalizations.delegate` to `adaptive_app.dart`
-- [ ] Add `Locale('ja')` to `supportedLocales`
-- [ ] Create `app_ja.arb` with initial content
-- [ ] Update `ios/Runner/Info.plist` with ja locale
-- [ ] Create `l10n_extension.dart` helper
-- [ ] Run `flutter gen-l10n`
-- [ ] Verify app builds and runs
+### Phase 1: Infrastructure ✅
+- [x] Add `AppLocalizations.delegate` to `adaptive_app.dart`
+- [x] Add `Locale('ja')` to `supportedLocales`
+- [x] Create `app_ja.arb` with initial content
+- [x] Update `ios/Runner/Info.plist` with ja locale
+- [x] Create `l10n_extension.dart` helper
+- [x] Run `flutter gen-l10n`
+- [x] Verify app builds and runs
 
-### Phase 2: Pilot Feature (auth)
-- [ ] Audit auth feature for strings
-- [ ] Add auth strings to ARB files
-- [ ] Replace hardcoded strings in auth views
-- [ ] Test with English
-- [ ] Test with Japanese
-- [ ] Document any issues/learnings
+### Phase 2: Pilot Feature (auth) ✅
+- [x] Audit auth feature for strings
+- [x] Add auth strings to ARB files
+- [x] Replace hardcoded strings in auth views
+- [x] Test with English
+- [x] Test with Japanese
+- [x] Document any issues/learnings
 
 ### Phase 3: Core Features
-- [ ] settings (25 files)
+- [x] settings (25 files) - ✅ Done
 - [ ] recipes (71 files)
 - [ ] shopping_list (17 files)
 - [ ] meal_plans (22 files)

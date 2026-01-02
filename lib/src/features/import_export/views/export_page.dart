@@ -2,6 +2,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:share_plus/share_plus.dart';
 
+import '../../../localization/l10n_extension.dart';
 import '../../../mobile/utils/adaptive_sliver_page.dart';
 import '../../../theme/colors.dart';
 import '../../../theme/spacing.dart';
@@ -27,9 +28,9 @@ class _ExportPageState extends ConsumerState<ExportPage> {
     final colors = AppColors.of(context);
 
     return AdaptiveSliverPage(
-      title: 'Export Recipes',
+      title: context.l10n.exportTitle,
       automaticallyImplyLeading: true,
-      previousPageTitle: 'Settings',
+      previousPageTitle: context.l10n.settingsTitle,
       slivers: [
         SliverToBoxAdapter(
           child: Column(
@@ -39,16 +40,16 @@ class _ExportPageState extends ConsumerState<ExportPage> {
 
               // Export Options section
               SettingsGroupCondensed(
-                header: 'Export Options',
+                header: context.l10n.exportOptionsHeader,
                 children: [
                   SettingsRowCondensed(
-                    title: 'Export All Recipes',
+                    title: context.l10n.exportAllRecipes,
                     leading: Icon(
                       CupertinoIcons.square_arrow_down,
                       size: 22,
                       color: _isExporting ? colors.textTertiary : colors.primary,
                     ),
-                    value: _isExporting ? 'Exporting...' : null,
+                    value: _isExporting ? context.l10n.exportExporting : null,
                     enabled: !_isExporting,
                     onTap: _isExporting ? null : _exportAllRecipes,
                   ),
@@ -61,7 +62,7 @@ class _ExportPageState extends ConsumerState<ExportPage> {
               Padding(
                 padding: EdgeInsets.symmetric(horizontal: AppSpacing.lg + AppSpacing.sm),
                 child: Text(
-                  'Additional export formats (HTML, PDF, etc.) coming soon.',
+                  context.l10n.exportComingSoon,
                   style: AppTypography.caption.copyWith(
                     color: colors.textSecondary,
                   ),
@@ -91,8 +92,8 @@ class _ExportPageState extends ConsumerState<ExportPage> {
         if (mounted) {
           _showAlert(
             context,
-            title: 'No Recipes',
-            message: 'You don\'t have any recipes to export.',
+            title: context.l10n.exportNoRecipes,
+            message: context.l10n.exportNoRecipesMessage,
           );
         }
         return;
@@ -122,7 +123,7 @@ class _ExportPageState extends ConsumerState<ExportPage> {
       // Share the file
       final shareResult = await Share.shareXFiles(
         [XFile(file.path)],
-        subject: 'My Recipes Export',
+        subject: context.l10n.exportShareSubject,
         sharePositionOrigin: sharePositionOrigin,
       );
 
@@ -133,8 +134,8 @@ class _ExportPageState extends ConsumerState<ExportPage> {
       if (mounted && shareResult.status != ShareResultStatus.unavailable) {
         _showAlert(
           context,
-          title: 'Export Complete',
-          message: 'Successfully exported ${recipesAsync.length} ${recipesAsync.length == 1 ? 'recipe' : 'recipes'}.',
+          title: context.l10n.exportComplete,
+          message: context.l10n.exportSuccessMessage(recipesAsync.length),
         );
       }
     } catch (e, stackTrace) {
@@ -143,8 +144,8 @@ class _ExportPageState extends ConsumerState<ExportPage> {
       if (mounted) {
         _showAlert(
           context,
-          title: 'Export Failed',
-          message: 'Failed to export recipes: $e',
+          title: context.l10n.exportFailed,
+          message: context.l10n.exportFailedMessage(e.toString()),
         );
       }
     } finally {
@@ -161,14 +162,14 @@ class _ExportPageState extends ConsumerState<ExportPage> {
   }) {
     showCupertinoDialog(
       context: context,
-      builder: (context) => CupertinoAlertDialog(
+      builder: (dialogContext) => CupertinoAlertDialog(
         title: Text(title),
         content: Text(message),
         actions: [
           CupertinoDialogAction(
             isDefaultAction: true,
-            onPressed: () => Navigator.pop(context),
-            child: const Text('OK'),
+            onPressed: () => Navigator.pop(dialogContext),
+            child: Text(context.l10n.commonOk),
           ),
         ],
       ),

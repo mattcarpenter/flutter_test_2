@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hugeicons/hugeicons.dart';
 
+import '../../../localization/l10n_extension.dart';
 import '../../../mobile/utils/adaptive_sliver_page.dart';
 import '../../../theme/spacing.dart';
 import '../../../theme/colors.dart';
@@ -29,10 +30,10 @@ class SettingsPage extends ConsumerWidget {
     final settings = settingsState.settings;
 
     // Get display values for current settings
-    final homeScreenLabel = _getHomeScreenLabel(settings.homeScreen);
+    final homeScreenLabel = _getHomeScreenLabel(context, settings.homeScreen);
 
     return AdaptiveSliverPage(
-      title: 'Settings',
+      title: context.l10n.settingsTitle,
       leading: menuButton,
       automaticallyImplyLeading: onMenuPressed == null,
       slivers: [
@@ -46,7 +47,7 @@ class SettingsPage extends ConsumerWidget {
               SettingsGroupCondensed(
                 children: [
                   SettingsRowCondensed(
-                    title: 'Home Screen',
+                    title: context.l10n.settingsHomeScreen,
                     value: homeScreenLabel,
                     leading: HugeIcon(
                       icon: HugeIcons.strokeRoundedHome01,
@@ -66,7 +67,7 @@ class SettingsPage extends ConsumerWidget {
               SettingsGroupCondensed(
                 children: [
                   SettingsRowCondensed(
-                    title: 'Layout & Appearance',
+                    title: context.l10n.settingsLayoutAppearance,
                     leading: HugeIcon(
                       icon: HugeIcons.strokeRoundedPaintBrush01,
                       size: 22,
@@ -85,7 +86,7 @@ class SettingsPage extends ConsumerWidget {
               SettingsGroupCondensed(
                 children: [
                   SettingsRowCondensed(
-                    title: 'Manage Tags',
+                    title: context.l10n.settingsManageTags,
                     leading: HugeIcon(
                       icon: HugeIcons.strokeRoundedTag01,
                       size: 22,
@@ -104,7 +105,7 @@ class SettingsPage extends ConsumerWidget {
               SettingsGroupCondensed(
                 children: [
                   SettingsRowCondensed(
-                    title: 'Account',
+                    title: context.l10n.settingsAccount,
                     leading: HugeIcon(
                       icon: HugeIcons.strokeRoundedUserCircle,
                       size: 22,
@@ -123,7 +124,7 @@ class SettingsPage extends ConsumerWidget {
               SettingsGroupCondensed(
                 children: [
                   SettingsRowCondensed(
-                    title: 'Import Recipes',
+                    title: context.l10n.settingsImportRecipes,
                     leading: Icon(
                       CupertinoIcons.arrow_down_doc,
                       size: 22,
@@ -134,7 +135,7 @@ class SettingsPage extends ConsumerWidget {
                     },
                   ),
                   SettingsRowCondensed(
-                    title: 'Export Recipes',
+                    title: context.l10n.settingsExportRecipes,
                     leading: Icon(
                       CupertinoIcons.arrow_up_doc,
                       size: 22,
@@ -153,7 +154,7 @@ class SettingsPage extends ConsumerWidget {
               SettingsGroupCondensed(
                 children: [
                   SettingsRowCondensed(
-                    title: 'Help',
+                    title: context.l10n.settingsHelp,
                     leading: HugeIcon(
                       icon: HugeIcons.strokeRoundedHelpCircle,
                       size: 22,
@@ -164,7 +165,7 @@ class SettingsPage extends ConsumerWidget {
                     },
                   ),
                   SettingsRowCondensed(
-                    title: 'Support',
+                    title: context.l10n.settingsSupport,
                     leading: HugeIcon(
                       icon: HugeIcons.strokeRoundedMessage01,
                       size: 22,
@@ -183,7 +184,7 @@ class SettingsPage extends ConsumerWidget {
               SettingsGroupCondensed(
                 children: [
                   SettingsRowCondensed(
-                    title: 'Privacy Policy',
+                    title: context.l10n.settingsPrivacyPolicy,
                     leading: HugeIcon(
                       icon: HugeIcons.strokeRoundedShield01,
                       size: 22,
@@ -194,7 +195,7 @@ class SettingsPage extends ConsumerWidget {
                     },
                   ),
                   SettingsRowCondensed(
-                    title: 'Terms of Use',
+                    title: context.l10n.settingsTermsOfUse,
                     leading: HugeIcon(
                       icon: HugeIcons.strokeRoundedFile01,
                       size: 22,
@@ -205,7 +206,7 @@ class SettingsPage extends ConsumerWidget {
                     },
                   ),
                   SettingsRowCondensed(
-                    title: 'Acknowledgements',
+                    title: context.l10n.settingsAcknowledgements,
                     leading: HugeIcon(
                       icon: HugeIcons.strokeRoundedFavourite,
                       size: 22,
@@ -228,12 +229,12 @@ class SettingsPage extends ConsumerWidget {
     );
   }
 
-  String _getHomeScreenLabel(String value) {
+  String _getHomeScreenLabel(BuildContext context, String value) {
     return switch (value) {
-      'shopping' => 'Shopping',
-      'meal_plans' => 'Meal Plan',
-      'pantry' => 'Pantry',
-      _ => 'Recipes',
+      'shopping' => context.l10n.settingsHomeScreenShopping,
+      'meal_plans' => context.l10n.settingsHomeScreenMealPlan,
+      'pantry' => context.l10n.settingsHomeScreenPantry,
+      _ => context.l10n.settingsHomeScreenRecipes,
     };
   }
 }

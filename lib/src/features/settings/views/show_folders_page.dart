@@ -2,6 +2,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:hugeicons/hugeicons.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../localization/l10n_extension.dart';
 import '../../../mobile/utils/adaptive_sliver_page.dart';
 import '../../../theme/colors.dart';
 import '../../../theme/spacing.dart';
@@ -20,9 +21,9 @@ class ShowFoldersPage extends ConsumerWidget {
     final showFoldersCount = ref.watch(showFoldersCountProvider);
 
     return AdaptiveSliverPage(
-      title: 'Show Folders',
+      title: context.l10n.settingsLayoutShowFolders,
       automaticallyImplyLeading: true,
-      previousPageTitle: 'Layout',
+      previousPageTitle: context.l10n.settingsLayoutAppearance,
       slivers: [
         SliverToBoxAdapter(
           child: Column(
@@ -33,14 +34,14 @@ class ShowFoldersPage extends ConsumerWidget {
               SettingsGroupCondensed(
                 children: [
                   SettingsSelectionRow(
-                    title: 'All folders',
+                    title: context.l10n.settingsShowFoldersAll,
                     isSelected: showFolders == 'all',
                     onTap: () {
                       ref.read(appSettingsProvider.notifier).setShowFolders('all');
                     },
                   ),
                   SettingsSelectionRow(
-                    title: 'First N folders',
+                    title: context.l10n.settingsShowFoldersFirstN,
                     isSelected: showFolders == 'firstN',
                     onTap: () {
                       ref.read(appSettingsProvider.notifier).setShowFolders('firstN');
@@ -53,8 +54,8 @@ class ShowFoldersPage extends ConsumerWidget {
               if (showFolders == 'firstN') ...[
                 SizedBox(height: AppSpacing.settingsGroupGap),
                 SettingsGroupCondensed(
-                  header: 'Number of Folders',
-                  footer: 'Show this many folders on the recipes page.',
+                  header: context.l10n.settingsShowFoldersNumberHeader,
+                  footer: context.l10n.settingsShowFoldersNumberDescription,
                   children: [
                     _FolderCountPicker(
                       count: showFoldersCount,

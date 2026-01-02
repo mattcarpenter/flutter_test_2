@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:hugeicons/hugeicons.dart';
 import '../../../constants/tag_colors.dart';
 import '../../../../database/database.dart';
+import '../../../localization/l10n_extension.dart';
 import '../../../theme/colors.dart';
 import '../../../theme/spacing.dart';
 import '../../../theme/typography.dart';
@@ -51,24 +52,23 @@ class TagManagementRow extends StatelessWidget {
       // Show warning for tags with recipes
       showCupertinoDialog(
         context: context,
-        builder: (context) => CupertinoAlertDialog(
-          title: Text('Delete "${tag.name}"?'),
+        builder: (dialogContext) => CupertinoAlertDialog(
+          title: Text(context.l10n.settingsTagsDeleteTitle(tag.name)),
           content: Text(
-            'This tag is used by $recipeCount recipe${recipeCount == 1 ? '' : 's'}. '
-            'Deleting it will remove the tag from all recipes.',
+            context.l10n.settingsTagsDeleteMessageWithRecipes(recipeCount),
           ),
           actions: [
             CupertinoDialogAction(
-              child: const Text('Cancel'),
-              onPressed: () => Navigator.of(context).pop(),
+              child: Text(context.l10n.commonCancel),
+              onPressed: () => Navigator.of(dialogContext).pop(),
             ),
             CupertinoDialogAction(
               isDestructiveAction: true,
               onPressed: () {
-                Navigator.of(context).pop();
+                Navigator.of(dialogContext).pop();
                 onDelete();
               },
-              child: const Text('Delete'),
+              child: Text(context.l10n.commonDelete),
             ),
           ],
         ),
@@ -77,21 +77,21 @@ class TagManagementRow extends StatelessWidget {
       // Simple confirmation for unused tags
       showCupertinoDialog(
         context: context,
-        builder: (context) => CupertinoAlertDialog(
-          title: Text('Delete "${tag.name}"?'),
-          content: const Text('This action cannot be undone.'),
+        builder: (dialogContext) => CupertinoAlertDialog(
+          title: Text(context.l10n.settingsTagsDeleteTitle(tag.name)),
+          content: Text(context.l10n.settingsTagsDeleteMessageNoRecipes),
           actions: [
             CupertinoDialogAction(
-              child: const Text('Cancel'),
-              onPressed: () => Navigator.of(context).pop(),
+              child: Text(context.l10n.commonCancel),
+              onPressed: () => Navigator.of(dialogContext).pop(),
             ),
             CupertinoDialogAction(
               isDestructiveAction: true,
               onPressed: () {
-                Navigator.of(context).pop();
+                Navigator.of(dialogContext).pop();
                 onDelete();
               },
-              child: const Text('Delete'),
+              child: Text(context.l10n.commonDelete),
             ),
           ],
         ),
@@ -162,9 +162,7 @@ class TagManagementRow extends StatelessWidget {
                 ),
                 SizedBox(height: 2),
                 Text(
-                  recipeCount == 0 
-                      ? 'No recipes'
-                      : '$recipeCount recipe${recipeCount == 1 ? '' : 's'}',
+                  context.l10n.settingsTagsRecipeCount(recipeCount),
                   style: AppTypography.caption.copyWith(
                     color: colors.textSecondary,
                   ),

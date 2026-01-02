@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:hugeicons/hugeicons.dart';
 
+import '../../../localization/l10n_extension.dart';
 import '../../../mobile/utils/adaptive_sliver_page.dart';
 import '../../../theme/spacing.dart';
 import '../../../theme/colors.dart';
@@ -29,14 +30,14 @@ class ImportPage extends ConsumerWidget {
         if (context.mounted) {
           showCupertinoDialog(
             context: context,
-            builder: (context) => CupertinoAlertDialog(
-              title: const Text('Invalid File'),
-              content: const Text('Please select a .paprikarecipes file exported from Paprika.'),
+            builder: (dialogContext) => CupertinoAlertDialog(
+              title: Text(context.l10n.importInvalidFile),
+              content: Text(context.l10n.importInvalidPaprikaFile),
               actions: [
                 CupertinoDialogAction(
                   isDefaultAction: true,
-                  onPressed: () => Navigator.pop(context),
-                  child: const Text('OK'),
+                  onPressed: () => Navigator.pop(dialogContext),
+                  child: Text(context.l10n.commonOk),
                 ),
               ],
             ),
@@ -72,9 +73,9 @@ class ImportPage extends ConsumerWidget {
     final colors = AppColors.of(context);
 
     return AdaptiveSliverPage(
-      title: 'Import Recipes',
+      title: context.l10n.importTitle,
       automaticallyImplyLeading: true,
-      previousPageTitle: 'Settings',
+      previousPageTitle: context.l10n.settingsTitle,
       slivers: [
         SliverToBoxAdapter(
           child: Column(
@@ -86,7 +87,7 @@ class ImportPage extends ConsumerWidget {
               Padding(
                 padding: EdgeInsets.symmetric(horizontal: AppSpacing.lg),
                 child: Text(
-                  'Import from:',
+                  context.l10n.importFromHeader,
                   style: AppTypography.h5.copyWith(
                     color: colors.textPrimary,
                   ),
@@ -99,18 +100,18 @@ class ImportPage extends ConsumerWidget {
               SettingsGroupCondensed(
                 children: [
                   _ImportSourceRow(
-                    title: 'Stockpot',
-                    subtitle: 'Import from a previous backup',
+                    title: context.l10n.importSourceStockpot,
+                    subtitle: context.l10n.importSourceStockpotDesc,
                     onTap: () => _selectFile(context, ImportSource.stockpot),
                   ),
                   _ImportSourceRow(
-                    title: 'Paprika',
-                    subtitle: 'Import from Paprika Recipe Manager',
+                    title: context.l10n.importSourcePaprika,
+                    subtitle: context.l10n.importSourcePaprikaDesc,
                     onTap: () => _selectFile(context, ImportSource.paprika),
                   ),
                   _ImportSourceRow(
-                    title: 'Crouton',
-                    subtitle: 'Import from Crouton app',
+                    title: context.l10n.importSourceCrouton,
+                    subtitle: context.l10n.importSourceCroutonDesc,
                     onTap: () => _selectFile(context, ImportSource.crouton),
                   ),
                 ],

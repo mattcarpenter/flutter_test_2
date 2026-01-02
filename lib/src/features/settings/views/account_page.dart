@@ -4,6 +4,7 @@ import 'package:hugeicons/hugeicons.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../database/powersync.dart';
+import '../../../localization/l10n_extension.dart';
 import '../../../mobile/utils/adaptive_sliver_page.dart';
 import '../../../providers/auth_provider.dart';
 import '../../../providers/subscription_provider.dart';
@@ -27,9 +28,9 @@ class AccountPage extends ConsumerWidget {
     final user = ref.watch(currentUserProvider);
 
     return AdaptiveSliverPage(
-      title: 'Account',
+      title: context.l10n.settingsAccount,
       automaticallyImplyLeading: true,
-      previousPageTitle: 'Settings',
+      previousPageTitle: context.l10n.settingsTitle,
       slivers: [
         SliverToBoxAdapter(
           child: Column(
@@ -41,7 +42,7 @@ class AccountPage extends ConsumerWidget {
                 SettingsGroupCondensed(
                   children: [
                     _UserInfoRow(
-                      email: user.email ?? 'No email',
+                      email: user.email ?? context.l10n.settingsAccountNoEmail,
                     ),
                   ],
                 ),
@@ -69,7 +70,7 @@ class AccountPage extends ConsumerWidget {
                 SettingsGroupCondensed(
                   children: [
                     SettingsRowCondensed(
-                      title: 'Sign In',
+                      title: context.l10n.authSignIn,
                       leading: HugeIcon(
                         icon: HugeIcons.strokeRoundedUserCircle,
                         size: 22,
@@ -110,13 +111,13 @@ class AccountPage extends ConsumerWidget {
       if (context.mounted) {
         showCupertinoDialog(
           context: context,
-          builder: (context) => CupertinoAlertDialog(
-            title: const Text('Sign Out Error'),
-            content: Text('Failed to sign out: $e'),
+          builder: (dialogContext) => CupertinoAlertDialog(
+            title: Text(context.l10n.settingsAccountSignOutError),
+            content: Text(context.l10n.settingsAccountSignOutErrorMessage(e.toString())),
             actions: [
               CupertinoDialogAction(
-                child: const Text('OK'),
-                onPressed: () => Navigator.of(context).pop(),
+                child: Text(context.l10n.commonOk),
+                onPressed: () => Navigator.of(dialogContext).pop(),
               ),
             ],
           ),
@@ -160,21 +161,18 @@ class AccountPage extends ConsumerWidget {
     return await showCupertinoDialog<bool>(
           context: context,
           barrierDismissible: false,
-          builder: (context) => CupertinoAlertDialog(
-            title: const Text('Unsaved Changes'),
-            content: const Text(
-              'Some data hasn\'t finished syncing. If you sign out now, '
-              'your recent changes may be lost.',
-            ),
+          builder: (dialogContext) => CupertinoAlertDialog(
+            title: Text(context.l10n.settingsAccountUnsavedChanges),
+            content: Text(context.l10n.settingsAccountUnsavedChangesMessage),
             actions: [
               CupertinoDialogAction(
-                child: const Text('Cancel'),
-                onPressed: () => Navigator.of(context).pop(false),
+                child: Text(context.l10n.commonCancel),
+                onPressed: () => Navigator.of(dialogContext).pop(false),
               ),
               CupertinoDialogAction(
                 isDestructiveAction: true,
-                child: const Text('Sign Out Anyway'),
-                onPressed: () => Navigator.of(context).pop(true),
+                child: Text(context.l10n.settingsAccountSignOutAnyway),
+                onPressed: () => Navigator.of(dialogContext).pop(true),
               ),
             ],
           ),
@@ -256,7 +254,7 @@ class _SignOutRowState extends State<_SignOutRow> {
             SizedBox(width: AppSpacing.md),
             Expanded(
               child: Text(
-                'Sign Out',
+                context.l10n.settingsAccountSignOut,
                 style: AppTypography.body.copyWith(
                   color: colors.error,
                 ),
@@ -298,7 +296,7 @@ class _AnonymousUserNotice extends StatelessWidget {
               SizedBox(width: AppSpacing.sm),
               Expanded(
                 child: Text(
-                  'Account Not Linked',
+                  context.l10n.settingsAccountNotLinked,
                   style: AppTypography.body.copyWith(
                     color: colors.warning,
                     fontWeight: FontWeight.w600,
@@ -309,9 +307,7 @@ class _AnonymousUserNotice extends StatelessWidget {
           ),
           SizedBox(height: AppSpacing.sm),
           Text(
-            'You have Stockpot Plus but no account. Create an account to '
-            'access your subscription on other devices and enable features '
-            'like household sharing.',
+            context.l10n.settingsAccountNotLinkedMessage,
             style: AppTypography.bodySmall.copyWith(color: colors.textSecondary),
           ),
         ],

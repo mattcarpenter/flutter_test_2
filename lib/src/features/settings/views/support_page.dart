@@ -7,6 +7,7 @@ import 'package:package_info_plus/package_info_plus.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:url_launcher/url_launcher.dart';
 
+import '../../../localization/l10n_extension.dart';
 import '../../../mobile/utils/adaptive_sliver_page.dart';
 import '../../../theme/colors.dart';
 import '../../../theme/spacing.dart';
@@ -29,9 +30,9 @@ class SupportPage extends ConsumerWidget {
     final logSizeAsync = ref.watch(_logFileSizeProvider);
 
     return AdaptiveSliverPage(
-      title: 'Support',
+      title: context.l10n.settingsSupport,
       automaticallyImplyLeading: true,
-      previousPageTitle: 'Settings',
+      previousPageTitle: context.l10n.settingsTitle,
       slivers: [
         SliverToBoxAdapter(
           child: Column(
@@ -41,14 +42,14 @@ class SupportPage extends ConsumerWidget {
 
               // Logs section
               SettingsGroupCondensed(
-                header: 'Diagnostics',
+                header: context.l10n.settingsSupportDiagnostics,
                 children: [
                   SettingsRowCondensed(
-                    title: 'Export Logs',
+                    title: context.l10n.settingsSupportExportLogs,
                     value: logSizeAsync.when(
                       data: (size) => size,
-                      loading: () => '...',
-                      error: (_, __) => 'Error',
+                      loading: () => context.l10n.commonLoading,
+                      error: (_, __) => context.l10n.commonError,
                     ),
                     leading: HugeIcon(
                       icon: HugeIcons.strokeRoundedFile01,
@@ -58,7 +59,7 @@ class SupportPage extends ConsumerWidget {
                     onTap: () => _exportLogs(context, ref),
                   ),
                   SettingsRowCondensed(
-                    title: 'Clear Logs',
+                    title: context.l10n.settingsSupportClearLogs,
                     leading: HugeIcon(
                       icon: HugeIcons.strokeRoundedDelete02,
                       size: 22,
@@ -73,10 +74,10 @@ class SupportPage extends ConsumerWidget {
 
               // Contact section
               SettingsGroupCondensed(
-                header: 'Contact',
+                header: context.l10n.settingsSupportContact,
                 children: [
                   SettingsRowCondensed(
-                    title: 'Email Support',
+                    title: context.l10n.settingsSupportEmailSupport,
                     leading: HugeIcon(
                       icon: HugeIcons.strokeRoundedMail01,
                       size: 22,
@@ -113,8 +114,8 @@ class SupportPage extends ConsumerWidget {
     if (result == null && context.mounted) {
       _showAlert(
         context,
-        title: 'No Logs Available',
-        message: 'There are no logs to export yet.',
+        title: context.l10n.settingsSupportNoLogs,
+        message: context.l10n.settingsSupportNoLogsMessage,
       );
     }
   }
@@ -122,9 +123,9 @@ class SupportPage extends ConsumerWidget {
   Future<void> _clearLogs(BuildContext context, WidgetRef ref) async {
     final confirmed = await _showConfirmDialog(
       context,
-      title: 'Clear Logs?',
-      message: 'This will delete all diagnostic logs. This action cannot be undone.',
-      confirmLabel: 'Clear',
+      title: context.l10n.settingsSupportClearLogsTitle,
+      message: context.l10n.settingsSupportClearLogsMessage,
+      confirmLabel: context.l10n.commonClear,
       isDestructive: true,
     );
 
@@ -137,10 +138,10 @@ class SupportPage extends ConsumerWidget {
       if (context.mounted) {
         _showAlert(
           context,
-          title: success ? 'Logs Cleared' : 'Error',
+          title: success ? context.l10n.settingsSupportLogsCleared : context.l10n.commonError,
           message: success
-              ? 'All diagnostic logs have been deleted.'
-              : 'Failed to clear logs. Please try again.',
+              ? context.l10n.settingsSupportLogsClearedMessage
+              : context.l10n.settingsSupportLogsClearFailed,
         );
       }
     }
@@ -162,7 +163,7 @@ class SupportPage extends ConsumerWidget {
           CupertinoDialogAction(
             isDefaultAction: true,
             onPressed: () => Navigator.pop(context, false),
-            child: const Text('Cancel'),
+            child: Text(context.l10n.commonCancel),
           ),
           CupertinoDialogAction(
             isDestructiveAction: isDestructive,
@@ -188,7 +189,7 @@ class SupportPage extends ConsumerWidget {
           CupertinoDialogAction(
             isDefaultAction: true,
             onPressed: () => Navigator.pop(context),
-            child: const Text('OK'),
+            child: Text(context.l10n.commonOk),
           ),
         ],
       ),
@@ -199,29 +200,19 @@ class SupportPage extends ConsumerWidget {
     try {
       // Gather device and app info
       final packageInfo = await PackageInfo.fromPlatform();
-      final userId = Supabase.instance.client.auth.currentUser?.id ?? 'Not signed in';
+      final userId = Supabase.instance.client.auth.currentUser?.id ?? context.l10n.settingsSupportNotSignedIn;
 
       final appVersion = '${packageInfo.version}+${packageInfo.buildNumber}';
       final platform = Platform.operatingSystem;
       final osVersion = Platform.operatingSystemVersion;
 
-      final body = '''
-
-
----
-Please describe your issue above this line
----
-User ID: $userId
-App Version: $appVersion
-Platform: $platform
-OS Version: $osVersion
-''';
+      final body = context.l10n.settingsSupportEmailBody(userId, appVersion, platform, osVersion);
 
       final uri = Uri(
         scheme: 'mailto',
         path: 'support@stockpot.app',
         query: _encodeQueryParameters({
-          'subject': 'Stockpot Support Request',
+          'subject': context.l10n.settingsSupportEmailSubject,
           'body': body,
         }),
       );
@@ -232,8 +223,8 @@ OS Version: $osVersion
         if (context.mounted) {
           _showAlert(
             context,
-            title: 'Unable to Open Email',
-            message: 'Please email us at support@stockpot.app',
+            title: context.l10n.settingsSupportEmailError,
+            message: context.l10n.settingsSupportEmailErrorMessage,
           );
         }
       }
@@ -242,8 +233,8 @@ OS Version: $osVersion
       if (context.mounted) {
         _showAlert(
           context,
-          title: 'Error',
-          message: 'Unable to open email client. Please email us at support@stockpot.app',
+          title: context.l10n.commonError,
+          message: context.l10n.settingsSupportEmailErrorMessage,
         );
       }
     }

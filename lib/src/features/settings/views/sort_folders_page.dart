@@ -5,6 +5,7 @@ import 'package:hugeicons/hugeicons.dart';
 
 import '../../../../database/database.dart';
 import '../../../constants/folder_constants.dart';
+import '../../../localization/l10n_extension.dart';
 import '../../../mobile/utils/adaptive_sliver_page.dart';
 import '../../../providers/recipe_folder_provider.dart';
 import '../../../theme/colors.dart';
@@ -68,35 +69,35 @@ class _SortFoldersPageState extends ConsumerState<SortFoldersPage> {
     final sortOptions = [
       _SortOption(
         value: 'alphabetical_asc',
-        title: 'Alphabetical (A-Z)',
+        title: context.l10n.settingsSortFoldersAlphaAZ,
         icon: CupertinoIcons.sort_up,
       ),
       _SortOption(
         value: 'alphabetical_desc',
-        title: 'Alphabetical (Z-A)',
+        title: context.l10n.settingsSortFoldersAlphaZA,
         icon: CupertinoIcons.sort_down,
       ),
       _SortOption(
         value: 'newest',
-        title: 'Newest First',
+        title: context.l10n.settingsSortFoldersNewest,
         icon: HugeIcons.strokeRoundedTime01,
       ),
       _SortOption(
         value: 'oldest',
-        title: 'Oldest First',
+        title: context.l10n.settingsSortFoldersOldest,
         icon: HugeIcons.strokeRoundedClock01,
       ),
       _SortOption(
         value: 'custom',
-        title: 'Custom',
+        title: context.l10n.settingsSortFoldersCustom,
         icon: HugeIcons.strokeRoundedEdit01,
       ),
     ];
 
     return AdaptiveSliverPage(
-      title: 'Sort Folders',
+      title: context.l10n.settingsLayoutSortFolders,
       automaticallyImplyLeading: true,
-      previousPageTitle: 'Layout',
+      previousPageTitle: context.l10n.settingsLayoutAppearance,
       slivers: [
         SliverToBoxAdapter(
           child: Column(
@@ -132,7 +133,7 @@ class _SortFoldersPageState extends ConsumerState<SortFoldersPage> {
                     child: CupertinoActivityIndicator(),
                   ),
                   error: (_, __) => Text(
-                    'Error loading folders',
+                    context.l10n.settingsSortFoldersError,
                     style: AppTypography.body.copyWith(color: colors.error),
                   ),
                 ),
@@ -165,7 +166,7 @@ class _SortFoldersPageState extends ConsumerState<SortFoldersPage> {
           Padding(
             padding: EdgeInsets.only(left: AppSpacing.lg, bottom: AppSpacing.sm),
             child: Text(
-              'CUSTOM ORDER',
+              context.l10n.settingsSortFoldersCustomOrder,
               style: AppTypography.caption.copyWith(
                 color: colors.textSecondary,
                 fontWeight: FontWeight.w500,
@@ -221,7 +222,7 @@ class _SortFoldersPageState extends ConsumerState<SortFoldersPage> {
           Padding(
             padding: EdgeInsets.only(left: AppSpacing.lg, top: AppSpacing.sm),
             child: Text(
-              'Drag folders to set your preferred order.',
+              context.l10n.settingsSortFoldersDragDescription,
               style: AppTypography.caption.copyWith(
                 color: colors.textTertiary,
               ),

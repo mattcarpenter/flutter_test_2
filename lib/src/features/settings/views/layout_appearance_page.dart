@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hugeicons/hugeicons.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../localization/l10n_extension.dart';
 import '../../../mobile/utils/adaptive_sliver_page.dart';
 import '../../../theme/colors.dart';
 import '../../../theme/spacing.dart';
@@ -22,17 +23,18 @@ class LayoutAppearancePage extends ConsumerWidget {
 
     // Get display values
     final showFoldersLabel = _getShowFoldersLabel(
+      context,
       settings.layout.showFolders,
       settings.layout.showFoldersCount,
     );
-    final sortFoldersLabel = _getSortFoldersLabel(settings.layout.folderSortOption);
-    final themeLabel = _getThemeLabel(settings.appearance.themeMode);
-    final fontSizeLabel = _getFontSizeLabel(settings.appearance.recipeFontSize);
+    final sortFoldersLabel = _getSortFoldersLabel(context, settings.layout.folderSortOption);
+    final themeLabel = _getThemeLabel(context, settings.appearance.themeMode);
+    final fontSizeLabel = _getFontSizeLabel(context, settings.appearance.recipeFontSize);
 
     return AdaptiveSliverPage(
-      title: 'Layout & Appearance',
+      title: context.l10n.settingsLayoutAppearance,
       automaticallyImplyLeading: true,
-      previousPageTitle: 'Settings',
+      previousPageTitle: context.l10n.settingsTitle,
       slivers: [
         SliverToBoxAdapter(
           child: Column(
@@ -41,10 +43,10 @@ class LayoutAppearancePage extends ConsumerWidget {
 
               // Recipes Page section
               SettingsGroupCondensed(
-                header: 'Recipes Page',
+                header: context.l10n.settingsLayoutRecipesPage,
                 children: [
                   SettingsRowCondensed(
-                    title: 'Show Folders',
+                    title: context.l10n.settingsLayoutShowFolders,
                     value: showFoldersLabel,
                     leading: HugeIcon(
                       icon: HugeIcons.strokeRoundedFolder01,
@@ -56,7 +58,7 @@ class LayoutAppearancePage extends ConsumerWidget {
                     },
                   ),
                   SettingsRowCondensed(
-                    title: 'Sort Folders',
+                    title: context.l10n.settingsLayoutSortFolders,
                     value: sortFoldersLabel,
                     leading: Icon(
                       CupertinoIcons.arrow_up_arrow_down,
@@ -74,10 +76,10 @@ class LayoutAppearancePage extends ConsumerWidget {
 
               // Color Theme section
               SettingsGroupCondensed(
-                header: 'Appearance',
+                header: context.l10n.settingsLayoutAppearanceSection,
                 children: [
                   SettingsRowCondensed(
-                    title: 'Color Theme',
+                    title: context.l10n.settingsLayoutColorTheme,
                     value: themeLabel,
                     leading: Icon(
                       CupertinoIcons.circle_lefthalf_fill,
@@ -89,7 +91,7 @@ class LayoutAppearancePage extends ConsumerWidget {
                     },
                   ),
                   SettingsRowCondensed(
-                    title: 'Recipe Font Size',
+                    title: context.l10n.settingsLayoutRecipeFontSize,
                     value: fontSizeLabel,
                     leading: HugeIcon(
                       icon: HugeIcons.strokeRoundedTextFont,
@@ -111,37 +113,37 @@ class LayoutAppearancePage extends ConsumerWidget {
     );
   }
 
-  String _getShowFoldersLabel(String showFolders, int count) {
+  String _getShowFoldersLabel(BuildContext context, String showFolders, int count) {
     if (showFolders == 'firstN') {
-      return 'First $count folders';
+      return context.l10n.settingsShowFoldersFirst(count);
     }
-    return 'All folders';
+    return context.l10n.settingsShowFoldersAll;
   }
 
-  String _getSortFoldersLabel(String sortOption) {
+  String _getSortFoldersLabel(BuildContext context, String sortOption) {
     return switch (sortOption) {
-      'alphabetical_asc' => 'Alphabetical (A-Z)',
-      'alphabetical_desc' => 'Alphabetical (Z-A)',
-      'newest' => 'Newest First',
-      'oldest' => 'Oldest First',
-      'custom' => 'Custom',
-      _ => 'Alphabetical (A-Z)',
+      'alphabetical_asc' => context.l10n.settingsSortFoldersAlphaAZ,
+      'alphabetical_desc' => context.l10n.settingsSortFoldersAlphaZA,
+      'newest' => context.l10n.settingsSortFoldersNewest,
+      'oldest' => context.l10n.settingsSortFoldersOldest,
+      'custom' => context.l10n.settingsSortFoldersCustom,
+      _ => context.l10n.settingsSortFoldersAlphaAZ,
     };
   }
 
-  String _getThemeLabel(String themeMode) {
+  String _getThemeLabel(BuildContext context, String themeMode) {
     return switch (themeMode) {
-      'light' => 'Light',
-      'dark' => 'Dark',
-      _ => 'System',
+      'light' => context.l10n.settingsThemeLight,
+      'dark' => context.l10n.settingsThemeDark,
+      _ => context.l10n.settingsThemeSystem,
     };
   }
 
-  String _getFontSizeLabel(String fontSize) {
+  String _getFontSizeLabel(BuildContext context, String fontSize) {
     return switch (fontSize) {
-      'small' => 'Small',
-      'large' => 'Large',
-      _ => 'Medium',
+      'small' => context.l10n.settingsFontSizeSmall,
+      'large' => context.l10n.settingsFontSizeLarge,
+      _ => context.l10n.settingsFontSizeMedium,
     };
   }
 }

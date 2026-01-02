@@ -66,22 +66,29 @@ class _SettingsRowCondensedState extends State<SettingsRowCondensed> {
             const SizedBox(width: 12),
           ],
 
-          // Title label
-          Text(
-            widget.title,
-            style: AppTypography.fieldInput.copyWith(
-              color: titleColor,
+          // Title label (expands to fill available space)
+          Expanded(
+            child: Text(
+              widget.title,
+              style: AppTypography.fieldInput.copyWith(
+                color: titleColor,
+              ),
+              overflow: TextOverflow.ellipsis,
             ),
           ),
 
-          const Spacer(),
-
-          // Value text (if provided)
+          // Value text (if provided) - constrained to prevent overflow
           if (widget.value != null) ...[
-            Text(
-              widget.value!,
-              style: AppTypography.fieldInput.copyWith(
-                color: widget.enabled ? colors.textSecondary : colors.textDisabled,
+            const SizedBox(width: 8),
+            ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 140),
+              child: Text(
+                widget.value!,
+                style: AppTypography.fieldInput.copyWith(
+                  color: widget.enabled ? colors.textSecondary : colors.textDisabled,
+                ),
+                overflow: TextOverflow.ellipsis,
+                textAlign: TextAlign.end,
               ),
             ),
           ],

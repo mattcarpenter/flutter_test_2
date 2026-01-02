@@ -2,6 +2,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hugeicons/hugeicons.dart';
 
+import '../../../localization/l10n_extension.dart';
 import '../../../mobile/utils/adaptive_sliver_page.dart';
 import '../../../theme/colors.dart';
 import '../../../theme/spacing.dart';
@@ -16,13 +17,13 @@ class ManageTagsPage extends ConsumerWidget {
   void _showError(BuildContext context, String message) {
     showCupertinoDialog(
       context: context,
-      builder: (context) => CupertinoAlertDialog(
-        title: const Text('Error'),
+      builder: (dialogContext) => CupertinoAlertDialog(
+        title: Text(context.l10n.commonError),
         content: Text(message),
         actions: [
           CupertinoDialogAction(
-            child: const Text('OK'),
-            onPressed: () => Navigator.of(context).pop(),
+            child: Text(context.l10n.commonOk),
+            onPressed: () => Navigator.of(dialogContext).pop(),
           ),
         ],
       ),
@@ -44,9 +45,9 @@ class ManageTagsPage extends ConsumerWidget {
     });
 
     return AdaptiveSliverPage(
-      title: 'Manage Tags',
+      title: context.l10n.settingsManageTags,
       automaticallyImplyLeading: true,
-      previousPageTitle: 'Settings',
+      previousPageTitle: context.l10n.settingsTitle,
       slivers: [
         if (tagManagementState.isLoading)
           const SliverFillRemaining(
@@ -80,14 +81,14 @@ class ManageTagsPage extends ConsumerWidget {
             ),
             SizedBox(height: AppSpacing.lg),
             Text(
-              'No Tags Yet',
+              context.l10n.settingsTagsNoTagsTitle,
               style: AppTypography.h4.copyWith(
                 color: colors.textPrimary,
               ),
             ),
             SizedBox(height: AppSpacing.sm),
             Text(
-              'Tags help you organize your recipes.\nCreate your first tag by adding one when editing a recipe.',
+              context.l10n.settingsTagsNoTagsDescription,
               textAlign: TextAlign.center,
               style: AppTypography.body.copyWith(
                 color: colors.textSecondary,
@@ -111,8 +112,8 @@ class ManageTagsPage extends ConsumerWidget {
 
         // Tags section
         SettingsGroup(
-          header: 'Your Tags',
-          footer: 'Tap a color circle to change the tag color. Deleting a tag will remove it from all recipes.',
+          header: context.l10n.settingsTagsYourTags,
+          footer: context.l10n.settingsTagsDescription,
           children: state.tags.indexed.map((indexed) {
             final (index, tag) = indexed;
             final recipeCount = state.recipeCounts[tag.id] ?? 0;

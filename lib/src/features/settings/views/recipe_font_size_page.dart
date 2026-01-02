@@ -1,6 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../localization/l10n_extension.dart';
 import '../../../mobile/utils/adaptive_sliver_page.dart';
 import '../../../theme/colors.dart';
 import '../../../theme/spacing.dart';
@@ -20,25 +21,25 @@ class RecipeFontSizePage extends ConsumerWidget {
     final options = [
       _FontSizeOption(
         value: 'small',
-        title: 'Small',
+        title: context.l10n.settingsFontSizeSmall,
         scaleFactor: 0.85,
       ),
       _FontSizeOption(
         value: 'medium',
-        title: 'Medium',
+        title: context.l10n.settingsFontSizeMedium,
         scaleFactor: 1.0,
       ),
       _FontSizeOption(
         value: 'large',
-        title: 'Large',
+        title: context.l10n.settingsFontSizeLarge,
         scaleFactor: 1.15,
       ),
     ];
 
     return AdaptiveSliverPage(
-      title: 'Font Size',
+      title: context.l10n.settingsFontSizeTitle,
       automaticallyImplyLeading: true,
-      previousPageTitle: 'Layout',
+      previousPageTitle: context.l10n.settingsLayoutAppearance,
       slivers: [
         SliverToBoxAdapter(
           child: Column(
@@ -47,7 +48,7 @@ class RecipeFontSizePage extends ConsumerWidget {
 
               // Options
               SettingsGroupCondensed(
-                footer: 'Adjust the text size for recipe ingredients and steps.',
+                footer: context.l10n.settingsFontSizeDescription,
                 children: options.map((option) {
                   final isSelected = currentFontSize == option.value;
 
@@ -65,7 +66,7 @@ class RecipeFontSizePage extends ConsumerWidget {
 
               // Preview section
               SettingsGroupCondensed(
-                header: 'Preview',
+                header: context.l10n.settingsFontSizePreview,
                 children: [
                   _FontSizePreview(
                     scaleFactor: currentFontSize == 'small'
@@ -115,7 +116,7 @@ class _FontSizePreview extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'Ingredients',
+            context.l10n.settingsFontSizePreviewIngredients,
             style: AppTypography.bodySmall.copyWith(
               color: colors.textSecondary,
               fontWeight: FontWeight.w600,
@@ -123,21 +124,21 @@ class _FontSizePreview extends StatelessWidget {
           ),
           SizedBox(height: AppSpacing.sm),
           _buildIngredientLine(
-            '2 cups all-purpose flour',
+            context.l10n.settingsFontSizePreviewItem1,
             baseSize,
             scaleFactor,
             colors,
           ),
           SizedBox(height: AppSpacing.xs),
           _buildIngredientLine(
-            '1 tsp baking powder',
+            context.l10n.settingsFontSizePreviewItem2,
             baseSize,
             scaleFactor,
             colors,
           ),
           SizedBox(height: AppSpacing.xs),
           _buildIngredientLine(
-            '1/2 cup unsalted butter, softened',
+            context.l10n.settingsFontSizePreviewItem3,
             baseSize,
             scaleFactor,
             colors,

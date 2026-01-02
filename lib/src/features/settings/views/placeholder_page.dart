@@ -1,8 +1,7 @@
 import 'package:flutter/cupertino.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:package_info_plus/package_info_plus.dart';
 
+import '../../../localization/l10n_extension.dart';
 import '../../../mobile/utils/adaptive_sliver_page.dart';
 import '../../../theme/colors.dart';
 import '../../../theme/spacing.dart';
@@ -12,27 +11,29 @@ import '../../../theme/typography.dart';
 class PlaceholderSettingsPage extends ConsumerWidget {
   final String title;
   final IconData icon;
-  final String message;
+  final String? message;
   final String? description;
-  final String previousPageTitle;
+  final String? previousPageTitle;
 
   const PlaceholderSettingsPage({
     super.key,
     required this.title,
     required this.icon,
-    this.message = 'Coming Soon',
+    this.message,
     this.description,
-    this.previousPageTitle = 'Settings',
+    this.previousPageTitle,
   });
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final colors = AppColors.of(context);
+    final effectiveMessage = message ?? context.l10n.commonComingSoon;
+    final effectivePreviousPageTitle = previousPageTitle ?? context.l10n.settingsTitle;
 
     return AdaptiveSliverPage(
       title: title,
       automaticallyImplyLeading: true,
-      previousPageTitle: previousPageTitle,
+      previousPageTitle: effectivePreviousPageTitle,
       slivers: [
         SliverFillRemaining(
           child: Center(
@@ -46,7 +47,7 @@ class PlaceholderSettingsPage extends ConsumerWidget {
                 ),
                 SizedBox(height: AppSpacing.lg),
                 Text(
-                  message,
+                  effectiveMessage,
                   style: AppTypography.h4.copyWith(
                     color: colors.textPrimary,
                   ),
@@ -75,40 +76,31 @@ class PlaceholderSettingsPage extends ConsumerWidget {
 
 // Pre-configured placeholder pages for specific settings
 
-class ImportRecipesPage extends PlaceholderSettingsPage {
-  const ImportRecipesPage({super.key})
-      : super(
-          title: 'Import Recipes',
-          icon: CupertinoIcons.arrow_down_doc,
-          message: 'Coming Soon',
-          description: 'Import recipes from other apps or websites.',
-        );
-}
-
-class ExportRecipesPage extends PlaceholderSettingsPage {
-  const ExportRecipesPage({super.key})
-      : super(
-          title: 'Export Recipes',
-          icon: CupertinoIcons.arrow_up_doc,
-          message: 'Coming Soon',
-          description: 'Export your recipes to share or backup.',
-        );
-}
-
-class AcknowledgementsPage extends StatelessWidget {
-  const AcknowledgementsPage({super.key});
+class ImportRecipesPage extends ConsumerWidget {
+  const ImportRecipesPage({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    return FutureBuilder<PackageInfo>(
-      future: PackageInfo.fromPlatform(),
-      builder: (context, snapshot) {
-        final version = snapshot.data?.version ?? '';
-        return LicensePage(
-          applicationName: 'Recipe App',
-          applicationVersion: version,
-        );
-      },
+  Widget build(BuildContext context, WidgetRef ref) {
+    return PlaceholderSettingsPage(
+      title: context.l10n.settingsImportRecipes,
+      icon: CupertinoIcons.arrow_down_doc,
+      message: context.l10n.commonComingSoon,
+      description: context.l10n.settingsImportDescription,
     );
   }
 }
+
+class ExportRecipesPage extends ConsumerWidget {
+  const ExportRecipesPage({super.key});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    return PlaceholderSettingsPage(
+      title: context.l10n.settingsExportRecipes,
+      icon: CupertinoIcons.arrow_up_doc,
+      message: context.l10n.commonComingSoon,
+      description: context.l10n.settingsExportDescription,
+    );
+  }
+}
+

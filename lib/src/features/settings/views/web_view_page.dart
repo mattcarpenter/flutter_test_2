@@ -1,6 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 
+import '../../../localization/l10n_extension.dart';
 import '../../../theme/colors.dart';
 
 /// A simple webview page for displaying web content like Terms of Service, Privacy Policy, etc.
@@ -8,13 +9,13 @@ import '../../../theme/colors.dart';
 class WebViewPage extends StatefulWidget {
   final String title;
   final String url;
-  final String previousPageTitle;
+  final String? previousPageTitle;
 
   const WebViewPage({
     super.key,
     required this.title,
     required this.url,
-    this.previousPageTitle = 'Settings',
+    this.previousPageTitle,
   });
 
   @override
@@ -34,11 +35,12 @@ class _WebViewPageState extends State<WebViewPage> {
   @override
   Widget build(BuildContext context) {
     final colors = AppColors.of(context);
+    final effectivePreviousPageTitle = widget.previousPageTitle ?? context.l10n.settingsTitle;
 
     return CupertinoPageScaffold(
       navigationBar: CupertinoNavigationBar(
         middle: Text(widget.title),
-        previousPageTitle: widget.previousPageTitle,
+        previousPageTitle: effectivePreviousPageTitle,
         backgroundColor: colors.background,
       ),
       child: SafeArea(

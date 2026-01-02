@@ -3,6 +3,7 @@ import 'package:flutter/material.dart' show LicensePage;
 import 'package:hugeicons/hugeicons.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 
+import '../../../localization/l10n_extension.dart';
 import '../../../mobile/utils/adaptive_sliver_page.dart';
 import '../../../theme/colors.dart';
 import '../../../theme/spacing.dart';
@@ -18,9 +19,9 @@ class AcknowledgementsPage extends StatelessWidget {
     final colors = AppColors.of(context);
 
     return AdaptiveSliverPage(
-      title: 'Acknowledgements',
+      title: context.l10n.settingsAcknowledgements,
       automaticallyImplyLeading: true,
-      previousPageTitle: 'Settings',
+      previousPageTitle: context.l10n.settingsTitle,
       slivers: [
         SliverToBoxAdapter(
           child: Column(
@@ -32,7 +33,7 @@ class AcknowledgementsPage extends StatelessWidget {
               SettingsGroupCondensed(
                 children: [
                   SettingsRowCondensed(
-                    title: 'Open Source Software Licenses',
+                    title: context.l10n.settingsAcknowledgementsOSSLicenses,
                     leading: HugeIcon(
                       icon: HugeIcons.strokeRoundedFile01,
                       size: 22,
@@ -49,7 +50,7 @@ class AcknowledgementsPage extends StatelessWidget {
               Padding(
                 padding: EdgeInsets.symmetric(horizontal: AppSpacing.lg),
                 child: Text(
-                  'Sound material used: OtoLogic (https://otologic.jp)',
+                  context.l10n.settingsAcknowledgementsSoundCredits,
                   style: AppTypography.bodySmall.copyWith(
                     color: colors.textSecondary,
                   ),

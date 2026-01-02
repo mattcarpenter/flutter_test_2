@@ -231,5 +231,684 @@
   "commonCancel": "Cancel",
   "@commonCancel": {
     "description": "Cancel button text"
+  },
+  "commonOk": "OK",
+  "@commonOk": {
+    "description": "OK button text"
+  },
+  "commonDelete": "Delete",
+  "@commonDelete": {
+    "description": "Delete button text"
+  },
+  "commonClear": "Clear",
+  "@commonClear": {
+    "description": "Clear button text"
+  },
+  "commonError": "Error",
+  "@commonError": {
+    "description": "Error dialog title"
+  },
+  "commonLoading": "...",
+  "@commonLoading": {
+    "description": "Loading indicator text"
+  },
+  "commonComingSoon": "Coming Soon",
+  "@commonComingSoon": {
+    "description": "Coming soon placeholder text"
+  },
+
+  "settingsTitle": "Settings",
+  "@settingsTitle": {
+    "description": "Settings page title"
+  },
+  "settingsHomeScreen": "Home Screen",
+  "@settingsHomeScreen": {
+    "description": "Home screen settings row"
+  },
+  "settingsLayoutAppearance": "Layout & Appearance",
+  "@settingsLayoutAppearance": {
+    "description": "Layout and appearance settings row"
+  },
+  "settingsManageTags": "Manage Tags",
+  "@settingsManageTags": {
+    "description": "Manage tags settings row"
+  },
+  "settingsAccount": "Account",
+  "@settingsAccount": {
+    "description": "Account settings row"
+  },
+  "settingsImportRecipes": "Import Recipes",
+  "@settingsImportRecipes": {
+    "description": "Import recipes settings row"
+  },
+  "settingsExportRecipes": "Export Recipes",
+  "@settingsExportRecipes": {
+    "description": "Export recipes settings row"
+  },
+  "settingsHelp": "Help",
+  "@settingsHelp": {
+    "description": "Help settings row"
+  },
+  "settingsSupport": "Support",
+  "@settingsSupport": {
+    "description": "Support settings row"
+  },
+  "settingsPrivacyPolicy": "Privacy Policy",
+  "@settingsPrivacyPolicy": {
+    "description": "Privacy policy settings row"
+  },
+  "settingsTermsOfUse": "Terms of Use",
+  "@settingsTermsOfUse": {
+    "description": "Terms of use settings row"
+  },
+  "settingsAcknowledgements": "Acknowledgements",
+  "@settingsAcknowledgements": {
+    "description": "Acknowledgements settings row"
+  },
+
+  "settingsHomeScreenRecipes": "Recipes",
+  "@settingsHomeScreenRecipes": {
+    "description": "Recipes home screen option"
+  },
+  "settingsHomeScreenShopping": "Shopping",
+  "@settingsHomeScreenShopping": {
+    "description": "Shopping home screen option"
+  },
+  "settingsHomeScreenMealPlan": "Meal Plan",
+  "@settingsHomeScreenMealPlan": {
+    "description": "Meal plan home screen option"
+  },
+  "settingsHomeScreenPantry": "Pantry",
+  "@settingsHomeScreenPantry": {
+    "description": "Pantry home screen option"
+  },
+  "settingsHomeScreenDescription": "Choose which tab opens when the app launches. Changes take effect on next app launch.",
+  "@settingsHomeScreenDescription": {
+    "description": "Home screen setting description"
+  },
+
+  "settingsAccountNoEmail": "No email",
+  "@settingsAccountNoEmail": {
+    "description": "Fallback when user has no email"
+  },
+  "settingsAccountSignOutError": "Sign Out Error",
+  "@settingsAccountSignOutError": {
+    "description": "Sign out error dialog title"
+  },
+  "settingsAccountSignOutErrorMessage": "Failed to sign out: {error}",
+  "@settingsAccountSignOutErrorMessage": {
+    "description": "Sign out error message",
+    "placeholders": {
+      "error": {
+        "type": "String",
+        "example": "Network error"
+      }
+    }
+  },
+  "settingsAccountUnsavedChanges": "Unsaved Changes",
+  "@settingsAccountUnsavedChanges": {
+    "description": "Unsaved changes dialog title"
+  },
+  "settingsAccountUnsavedChangesMessage": "Some data hasn't finished syncing to the cloud. If you sign out now, these changes may be lost.\n\nAre you sure you want to sign out?",
+  "@settingsAccountUnsavedChangesMessage": {
+    "description": "Unsaved changes warning message"
+  },
+  "settingsAccountSignOut": "Sign Out",
+  "@settingsAccountSignOut": {
+    "description": "Sign out button text"
+  },
+  "settingsAccountSignOutAnyway": "Sign Out Anyway",
+  "@settingsAccountSignOutAnyway": {
+    "description": "Sign out anyway button text"
+  },
+  "settingsAccountNotLinked": "Account Not Linked",
+  "@settingsAccountNotLinked": {
+    "description": "Account not linked notice title"
+  },
+  "settingsAccountNotLinkedMessage": "You have Stockpot Plus but no account linked. Create an account to sync your recipes across devices and prevent data loss.",
+  "@settingsAccountNotLinkedMessage": {
+    "description": "Account not linked warning message"
+  },
+
+  "settingsLayoutRecipesPage": "Recipes Page",
+  "@settingsLayoutRecipesPage": {
+    "description": "Recipes page section header"
+  },
+  "settingsLayoutShowFolders": "Show Folders",
+  "@settingsLayoutShowFolders": {
+    "description": "Show folders setting row"
+  },
+  "settingsLayoutSortFolders": "Sort Folders",
+  "@settingsLayoutSortFolders": {
+    "description": "Sort folders setting row"
+  },
+  "settingsLayoutAppearanceSection": "Appearance",
+  "@settingsLayoutAppearanceSection": {
+    "description": "Appearance section header"
+  },
+  "settingsLayoutColorTheme": "Color Theme",
+  "@settingsLayoutColorTheme": {
+    "description": "Color theme setting row"
+  },
+  "settingsLayoutRecipeFontSize": "Recipe Font Size",
+  "@settingsLayoutRecipeFontSize": {
+    "description": "Recipe font size setting row"
+  },
+
+  "settingsShowFoldersAll": "All folders",
+  "@settingsShowFoldersAll": {
+    "description": "Show all folders option"
+  },
+  "settingsShowFoldersFirst": "First {count} folders",
+  "@settingsShowFoldersFirst": {
+    "description": "Show first N folders option",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "5"
+      }
+    }
+  },
+  "settingsShowFoldersFirstN": "First N folders",
+  "@settingsShowFoldersFirstN": {
+    "description": "First N folders option label"
+  },
+  "settingsShowFoldersNumberHeader": "Number of Folders",
+  "@settingsShowFoldersNumberHeader": {
+    "description": "Number of folders section header"
+  },
+  "settingsShowFoldersNumberDescription": "Show this many folders on the recipes page.",
+  "@settingsShowFoldersNumberDescription": {
+    "description": "Number of folders setting description"
+  },
+
+  "settingsSortFoldersAlphaAZ": "Alphabetical (A-Z)",
+  "@settingsSortFoldersAlphaAZ": {
+    "description": "Sort alphabetically A-Z option"
+  },
+  "settingsSortFoldersAlphaZA": "Alphabetical (Z-A)",
+  "@settingsSortFoldersAlphaZA": {
+    "description": "Sort alphabetically Z-A option"
+  },
+  "settingsSortFoldersNewest": "Newest First",
+  "@settingsSortFoldersNewest": {
+    "description": "Sort newest first option"
+  },
+  "settingsSortFoldersOldest": "Oldest First",
+  "@settingsSortFoldersOldest": {
+    "description": "Sort oldest first option"
+  },
+  "settingsSortFoldersCustom": "Custom",
+  "@settingsSortFoldersCustom": {
+    "description": "Custom sort order option"
+  },
+  "settingsSortFoldersError": "Error loading folders",
+  "@settingsSortFoldersError": {
+    "description": "Error loading folders message"
+  },
+  "settingsSortFoldersCustomOrder": "CUSTOM ORDER",
+  "@settingsSortFoldersCustomOrder": {
+    "description": "Custom order section header"
+  },
+  "settingsSortFoldersDragDescription": "Drag folders to set your preferred order.",
+  "@settingsSortFoldersDragDescription": {
+    "description": "Drag to reorder description"
+  },
+
+  "settingsThemeLight": "Light",
+  "@settingsThemeLight": {
+    "description": "Light theme option"
+  },
+  "settingsThemeLightDescription": "Always use light appearance",
+  "@settingsThemeLightDescription": {
+    "description": "Light theme description"
+  },
+  "settingsThemeDark": "Dark",
+  "@settingsThemeDark": {
+    "description": "Dark theme option"
+  },
+  "settingsThemeDarkDescription": "Always use dark appearance",
+  "@settingsThemeDarkDescription": {
+    "description": "Dark theme description"
+  },
+  "settingsThemeSystem": "System",
+  "@settingsThemeSystem": {
+    "description": "System theme option"
+  },
+  "settingsThemeSystemDescription": "Match device appearance",
+  "@settingsThemeSystemDescription": {
+    "description": "System theme description"
+  },
+
+  "settingsFontSizeTitle": "Font Size",
+  "@settingsFontSizeTitle": {
+    "description": "Font size page title"
+  },
+  "settingsFontSizeSmall": "Small",
+  "@settingsFontSizeSmall": {
+    "description": "Small font size option"
+  },
+  "settingsFontSizeMedium": "Medium",
+  "@settingsFontSizeMedium": {
+    "description": "Medium font size option"
+  },
+  "settingsFontSizeLarge": "Large",
+  "@settingsFontSizeLarge": {
+    "description": "Large font size option"
+  },
+  "settingsFontSizeDescription": "Adjust the text size for recipe ingredients and steps.",
+  "@settingsFontSizeDescription": {
+    "description": "Font size setting description"
+  },
+  "settingsFontSizePreview": "Preview",
+  "@settingsFontSizePreview": {
+    "description": "Font size preview section header"
+  },
+  "settingsFontSizePreviewIngredients": "Ingredients",
+  "@settingsFontSizePreviewIngredients": {
+    "description": "Preview ingredients header"
+  },
+  "settingsFontSizePreviewItem1": "2 cups all-purpose flour",
+  "@settingsFontSizePreviewItem1": {
+    "description": "Preview ingredient 1"
+  },
+  "settingsFontSizePreviewItem2": "1 tsp baking powder",
+  "@settingsFontSizePreviewItem2": {
+    "description": "Preview ingredient 2"
+  },
+  "settingsFontSizePreviewItem3": "1/2 cup unsalted butter, softened",
+  "@settingsFontSizePreviewItem3": {
+    "description": "Preview ingredient 3"
+  },
+
+  "settingsTagsNoTagsTitle": "No Tags Yet",
+  "@settingsTagsNoTagsTitle": {
+    "description": "No tags empty state title"
+  },
+  "settingsTagsNoTagsDescription": "Tags help you organize your recipes.\nCreate your first tag by adding one when editing a recipe.",
+  "@settingsTagsNoTagsDescription": {
+    "description": "No tags empty state description"
+  },
+  "settingsTagsYourTags": "Your Tags",
+  "@settingsTagsYourTags": {
+    "description": "Your tags section header"
+  },
+  "settingsTagsDescription": "Tap a color circle to change the tag color. Deleting a tag will remove it from all recipes.",
+  "@settingsTagsDescription": {
+    "description": "Tags management description"
+  },
+  "settingsTagsDeleteTitle": "Delete \"{tagName}\"?",
+  "@settingsTagsDeleteTitle": {
+    "description": "Delete tag confirmation title",
+    "placeholders": {
+      "tagName": {
+        "type": "String",
+        "example": "Favorites"
+      }
+    }
+  },
+  "settingsTagsDeleteMessageWithRecipes": "This tag is used by {count, plural, =1{1 recipe} other{{count} recipes}}. Deleting it will remove the tag from all recipes.",
+  "@settingsTagsDeleteMessageWithRecipes": {
+    "description": "Delete tag message when tag has recipes",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "5"
+      }
+    }
+  },
+  "settingsTagsDeleteMessageNoRecipes": "This action cannot be undone.",
+  "@settingsTagsDeleteMessageNoRecipes": {
+    "description": "Delete tag message when tag has no recipes"
+  },
+  "settingsTagsRecipeCount": "{count, plural, =0{No recipes} =1{1 recipe} other{{count} recipes}}",
+  "@settingsTagsRecipeCount": {
+    "description": "Recipe count display for tags",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "5"
+      }
+    }
+  },
+
+  "settingsSupportDiagnostics": "Diagnostics",
+  "@settingsSupportDiagnostics": {
+    "description": "Diagnostics section header"
+  },
+  "settingsSupportExportLogs": "Export Logs",
+  "@settingsSupportExportLogs": {
+    "description": "Export logs row"
+  },
+  "settingsSupportClearLogs": "Clear Logs",
+  "@settingsSupportClearLogs": {
+    "description": "Clear logs row"
+  },
+  "settingsSupportContact": "Contact",
+  "@settingsSupportContact": {
+    "description": "Contact section header"
+  },
+  "settingsSupportEmailSupport": "Email Support",
+  "@settingsSupportEmailSupport": {
+    "description": "Email support row"
+  },
+  "settingsSupportNoLogs": "No Logs Available",
+  "@settingsSupportNoLogs": {
+    "description": "No logs available dialog title"
+  },
+  "settingsSupportNoLogsMessage": "There are no logs to export yet.",
+  "@settingsSupportNoLogsMessage": {
+    "description": "No logs available message"
+  },
+  "settingsSupportClearLogsTitle": "Clear Logs?",
+  "@settingsSupportClearLogsTitle": {
+    "description": "Clear logs confirmation title"
+  },
+  "settingsSupportClearLogsMessage": "This will delete all diagnostic logs. This action cannot be undone.",
+  "@settingsSupportClearLogsMessage": {
+    "description": "Clear logs confirmation message"
+  },
+  "settingsSupportLogsCleared": "Logs Cleared",
+  "@settingsSupportLogsCleared": {
+    "description": "Logs cleared success title"
+  },
+  "settingsSupportLogsClearedMessage": "All diagnostic logs have been deleted.",
+  "@settingsSupportLogsClearedMessage": {
+    "description": "Logs cleared success message"
+  },
+  "settingsSupportLogsClearFailed": "Failed to clear logs. Please try again.",
+  "@settingsSupportLogsClearFailed": {
+    "description": "Logs clear failed message"
+  },
+  "settingsSupportEmailError": "Unable to Open Email",
+  "@settingsSupportEmailError": {
+    "description": "Email error dialog title"
+  },
+  "settingsSupportEmailErrorMessage": "Please email us at support@stockpot.app",
+  "@settingsSupportEmailErrorMessage": {
+    "description": "Email error message with fallback address"
+  },
+  "settingsSupportEmailSubject": "Stockpot Support Request",
+  "@settingsSupportEmailSubject": {
+    "description": "Support email subject"
+  },
+  "settingsSupportNotSignedIn": "Not signed in",
+  "@settingsSupportNotSignedIn": {
+    "description": "User ID fallback when not signed in"
+  },
+  "settingsSupportEmailBody": "Please describe your issue above this line\n\n---\nUser ID: {userId}\nApp Version: {appVersion}\nPlatform: {platform}\nOS Version: {osVersion}",
+  "@settingsSupportEmailBody": {
+    "description": "Support email body template",
+    "placeholders": {
+      "userId": {
+        "type": "String",
+        "example": "abc123"
+      },
+      "appVersion": {
+        "type": "String",
+        "example": "1.0.0"
+      },
+      "platform": {
+        "type": "String",
+        "example": "iOS"
+      },
+      "osVersion": {
+        "type": "String",
+        "example": "17.0"
+      }
+    }
+  },
+
+  "settingsAcknowledgementsOSSLicenses": "Open Source Software Licenses",
+  "@settingsAcknowledgementsOSSLicenses": {
+    "description": "OSS licenses row"
+  },
+  "settingsAcknowledgementsSoundCredits": "Sound material used: OtoLogic (https://otologic.jp)",
+  "@settingsAcknowledgementsSoundCredits": {
+    "description": "Sound credits attribution"
+  },
+
+  "settingsImportDescription": "Import recipes from other apps or websites.",
+  "@settingsImportDescription": {
+    "description": "Import recipes description"
+  },
+  "settingsExportDescription": "Export your recipes to share or backup.",
+  "@settingsExportDescription": {
+    "description": "Export recipes description"
+  },
+
+  "importTitle": "Import Recipes",
+  "@importTitle": {
+    "description": "Import page title"
+  },
+  "importFromHeader": "Import from:",
+  "@importFromHeader": {
+    "description": "Import source section header"
+  },
+  "importSourceStockpot": "Stockpot",
+  "@importSourceStockpot": {
+    "description": "Stockpot import source"
+  },
+  "importSourceStockpotDesc": "Import from a previous backup",
+  "@importSourceStockpotDesc": {
+    "description": "Stockpot import description"
+  },
+  "importSourcePaprika": "Paprika",
+  "@importSourcePaprika": {
+    "description": "Paprika import source"
+  },
+  "importSourcePaprikaDesc": "Import from Paprika Recipe Manager",
+  "@importSourcePaprikaDesc": {
+    "description": "Paprika import description"
+  },
+  "importSourceCrouton": "Crouton",
+  "@importSourceCrouton": {
+    "description": "Crouton import source"
+  },
+  "importSourceCroutonDesc": "Import from Crouton app",
+  "@importSourceCroutonDesc": {
+    "description": "Crouton import description"
+  },
+  "importInvalidFile": "Invalid File",
+  "@importInvalidFile": {
+    "description": "Invalid file dialog title"
+  },
+  "importInvalidPaprikaFile": "Please select a .paprikarecipes file exported from Paprika.",
+  "@importInvalidPaprikaFile": {
+    "description": "Invalid Paprika file message"
+  },
+  "importPreviewTitle": "Import Preview",
+  "@importPreviewTitle": {
+    "description": "Import preview page title"
+  },
+  "importAnalyzing": "Analyzing import file...",
+  "@importAnalyzing": {
+    "description": "Loading message while analyzing import"
+  },
+  "importParseFailed": "Failed to Parse Import",
+  "@importParseFailed": {
+    "description": "Parse failure title"
+  },
+  "importUnknownError": "Unknown error",
+  "@importUnknownError": {
+    "description": "Unknown error fallback"
+  },
+  "importReadyFrom": "Ready to import from {source}:",
+  "@importReadyFrom": {
+    "description": "Preview header with source name",
+    "placeholders": {
+      "source": {
+        "type": "String"
+      }
+    }
+  },
+  "importRecipeCount": "{count, plural, =1{1 recipe} other{{count} recipes}}",
+  "@importRecipeCount": {
+    "description": "Recipe count",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "importTagCount": "{total, plural, =1{1 tag} other{{total} tags}} ({newCount} new, {existingCount} existing)",
+  "@importTagCount": {
+    "description": "Tag count summary",
+    "placeholders": {
+      "total": {
+        "type": "int"
+      },
+      "newCount": {
+        "type": "int"
+      },
+      "existingCount": {
+        "type": "int"
+      }
+    }
+  },
+  "importFolderCount": "{total, plural, =1{1 folder} other{{total} folders}} ({newCount} new, {existingCount} existing)",
+  "@importFolderCount": {
+    "description": "Folder count summary",
+    "placeholders": {
+      "total": {
+        "type": "int"
+      },
+      "newCount": {
+        "type": "int"
+      },
+      "existingCount": {
+        "type": "int"
+      }
+    }
+  },
+  "importPaprikaCategoriesHeader": "Paprika Categories",
+  "@importPaprikaCategoriesHeader": {
+    "description": "Paprika categories section header"
+  },
+  "importPaprikaCategoriesFooter": "Choose whether to import Paprika categories as tags or folders.",
+  "@importPaprikaCategoriesFooter": {
+    "description": "Paprika categories section footer"
+  },
+  "importAsTags": "Tags (recommended)",
+  "@importAsTags": {
+    "description": "Import as tags option"
+  },
+  "importAsFolders": "Folders",
+  "@importAsFolders": {
+    "description": "Import as folders option"
+  },
+  "importButton": "Import Recipes",
+  "@importButton": {
+    "description": "Import button text"
+  },
+  "importComplete": "Import Complete",
+  "@importComplete": {
+    "description": "Import complete dialog title"
+  },
+  "importFinished": "Import Finished",
+  "@importFinished": {
+    "description": "Import finished with partial success"
+  },
+  "importSuccessMessage": "Successfully imported {count, plural, =1{1 recipe} other{{count} recipes}}!",
+  "@importSuccessMessage": {
+    "description": "Success message",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "importSuccessUpgradeMessage": "Imported {count} recipes. Upgrade to unlock your full collection.",
+  "@importSuccessUpgradeMessage": {
+    "description": "Success with upgrade prompt",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "importPartialMessage": "Imported {success} recipes. {failed} failed.",
+  "@importPartialMessage": {
+    "description": "Partial success message",
+    "placeholders": {
+      "success": {
+        "type": "int"
+      },
+      "failed": {
+        "type": "int"
+      }
+    }
+  },
+  "importFailed": "Import Failed",
+  "@importFailed": {
+    "description": "Import failed dialog title"
+  },
+  "importFailedMessage": "Failed to import recipes: {error}",
+  "@importFailedMessage": {
+    "description": "Import failed message",
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+
+  "exportTitle": "Export Recipes",
+  "@exportTitle": {
+    "description": "Export page title"
+  },
+  "exportOptionsHeader": "Export Options",
+  "@exportOptionsHeader": {
+    "description": "Export options section header"
+  },
+  "exportAllRecipes": "Export All Recipes",
+  "@exportAllRecipes": {
+    "description": "Export all recipes row"
+  },
+  "exportExporting": "Exporting...",
+  "@exportExporting": {
+    "description": "Export in progress"
+  },
+  "exportComingSoon": "Additional export formats (HTML, PDF, etc.) coming soon.",
+  "@exportComingSoon": {
+    "description": "Export formats coming soon"
+  },
+  "exportNoRecipes": "No Recipes",
+  "@exportNoRecipes": {
+    "description": "No recipes dialog title"
+  },
+  "exportNoRecipesMessage": "You don't have any recipes to export.",
+  "@exportNoRecipesMessage": {
+    "description": "No recipes message"
+  },
+  "exportShareSubject": "My Recipes Export",
+  "@exportShareSubject": {
+    "description": "Share sheet subject"
+  },
+  "exportComplete": "Export Complete",
+  "@exportComplete": {
+    "description": "Export complete dialog title"
+  },
+  "exportSuccessMessage": "Successfully exported {count, plural, =1{1 recipe} other{{count} recipes}}.",
+  "@exportSuccessMessage": {
+    "description": "Export success message",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "exportFailed": "Export Failed",
+  "@exportFailed": {
+    "description": "Export failed dialog title"
+  },
+  "exportFailedMessage": "Failed to export recipes: {error}",
+  "@exportFailedMessage": {
+    "description": "Export failed message",
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
   }
 }
