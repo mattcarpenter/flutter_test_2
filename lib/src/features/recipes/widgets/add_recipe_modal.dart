@@ -201,7 +201,7 @@ class _AddRecipeContentState extends ConsumerState<_AddRecipeContent> {
           child: CupertinoSearchTextField(
             controller: _searchController,
             focusNode: _searchFocusNode,
-            placeholder: 'Search recipes...',
+            placeholder: context.l10n.recipeAddModalSearchPlaceholder,
             onChanged: _onSearchChanged,
             style: CupertinoTheme.of(context).textTheme.textStyle,
           ),
@@ -258,7 +258,7 @@ class _AddRecipeContentState extends ConsumerState<_AddRecipeContent> {
               ),
               SizedBox(height: AppSpacing.lg),
               Text(
-                'Search for recipes to add',
+                context.l10n.recipeAddModalSearchPrompt,
                 style: CupertinoTheme.of(context).textTheme.textStyle.copyWith(
                   fontSize: 16,
                   color: CupertinoColors.secondaryLabel.resolveFrom(context),
@@ -287,7 +287,7 @@ class _AddRecipeContentState extends ConsumerState<_AddRecipeContent> {
               ),
               SizedBox(height: AppSpacing.lg),
               Text(
-                'No recipes found',
+                context.l10n.recipeSearchNoResults,
                 style: CupertinoTheme.of(context).textTheme.textStyle.copyWith(
                   fontSize: 16,
                   color: CupertinoColors.secondaryLabel.resolveFrom(context),
@@ -295,7 +295,7 @@ class _AddRecipeContentState extends ConsumerState<_AddRecipeContent> {
               ),
               SizedBox(height: AppSpacing.xs),
               Text(
-                'Try a different search term',
+                context.l10n.recipeSearchTryDifferent,
                 style: CupertinoTheme.of(context).textTheme.textStyle.copyWith(
                   fontSize: 14,
                   color: CupertinoColors.tertiaryLabel.resolveFrom(context),
@@ -351,7 +351,7 @@ class _AddRecipeContentState extends ConsumerState<_AddRecipeContent> {
           Padding(
             padding: EdgeInsets.fromLTRB(AppSpacing.lg, AppSpacing.lg, AppSpacing.lg, AppSpacing.sm),
             child: Text(
-              'Recently Viewed',
+              context.l10n.recipeAddModalRecentlyViewed,
               style: AppTypography.h2Serif.copyWith(
                 color: AppColors.of(context).headingSecondary,
               ),

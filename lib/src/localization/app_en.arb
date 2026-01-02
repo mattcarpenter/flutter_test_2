@@ -1805,6 +1805,18 @@
   "@recipeAddModalAdd": {
     "description": "Add button"
   },
+  "recipeAddModalSearchPlaceholder": "Search recipes...",
+  "@recipeAddModalSearchPlaceholder": {
+    "description": "Search field placeholder in add recipe modal"
+  },
+  "recipeAddModalSearchPrompt": "Search for recipes to add",
+  "@recipeAddModalSearchPrompt": {
+    "description": "Initial state message prompting user to search"
+  },
+  "recipeAddModalRecentlyViewed": "Recently Viewed",
+  "@recipeAddModalRecentlyViewed": {
+    "description": "Section header for recently viewed recipes"
+  },
 
   "commonSave": "Save",
   "@commonSave": {
@@ -2954,5 +2966,15 @@
   "mealPlanTapToAdd": "Tap + to add recipes or notes",
   "@mealPlanTapToAdd": {
     "description": "Empty state hint for date card with no items"
+  },
+  "mealPlanErrorLoading": "Error loading meal plan: {error}",
+  "@mealPlanErrorLoading": {
+    "description": "Error message when meal plan fails to load",
+    "placeholders": {
+      "error": {
+        "type": "String",
+        "example": "Connection timeout"
+      }
+    }
   }
 }

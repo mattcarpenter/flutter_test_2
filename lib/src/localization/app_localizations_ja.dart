@@ -1302,6 +1302,15 @@ class AppLocalizationsJa extends AppLocalizations {
   String get recipeAddModalAdd => '追加';
 
   @override
+  String get recipeAddModalSearchPlaceholder => 'レシピを検索...';
+
+  @override
+  String get recipeAddModalSearchPrompt => '追加するレシピを検索';
+
+  @override
+  String get recipeAddModalRecentlyViewed => '最近見たレシピ';
+
+  @override
   String get commonSave => '保存';
 
   @override
@@ -2058,4 +2067,9 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get mealPlanTapToAdd => '+をタップしてレシピやメモを追加';
+
+  @override
+  String mealPlanErrorLoading(String error) {
+    return '献立の読み込みエラー: $error';
+  }
 }

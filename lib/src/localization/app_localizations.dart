@@ -2457,6 +2457,24 @@ abstract class AppLocalizations {
   /// **'Add'**
   String get recipeAddModalAdd;
 
+  /// Search field placeholder in add recipe modal
+  ///
+  /// In en, this message translates to:
+  /// **'Search recipes...'**
+  String get recipeAddModalSearchPlaceholder;
+
+  /// Initial state message prompting user to search
+  ///
+  /// In en, this message translates to:
+  /// **'Search for recipes to add'**
+  String get recipeAddModalSearchPrompt;
+
+  /// Section header for recently viewed recipes
+  ///
+  /// In en, this message translates to:
+  /// **'Recently Viewed'**
+  String get recipeAddModalRecentlyViewed;
+
   /// Save button
   ///
   /// In en, this message translates to:
@@ -3783,6 +3801,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Tap + to add recipes or notes'**
   String get mealPlanTapToAdd;
+
+  /// Error message when meal plan fails to load
+  ///
+  /// In en, this message translates to:
+  /// **'Error loading meal plan: {error}'**
+  String mealPlanErrorLoading(String error);
 }
 
 class _AppLocalizationsDelegate

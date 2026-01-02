@@ -1340,6 +1340,15 @@ class AppLocalizationsEn extends AppLocalizations {
   String get recipeAddModalAdd => 'Add';
 
   @override
+  String get recipeAddModalSearchPlaceholder => 'Search recipes...';
+
+  @override
+  String get recipeAddModalSearchPrompt => 'Search for recipes to add';
+
+  @override
+  String get recipeAddModalRecentlyViewed => 'Recently Viewed';
+
+  @override
   String get commonSave => 'Save';
 
   @override
@@ -2117,4 +2126,9 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get mealPlanTapToAdd => 'Tap + to add recipes or notes';
+
+  @override
+  String mealPlanErrorLoading(String error) {
+    return 'Error loading meal plan: $error';
+  }
 }

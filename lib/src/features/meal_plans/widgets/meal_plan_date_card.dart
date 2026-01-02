@@ -223,7 +223,7 @@ class _MealPlanDateCardState extends ConsumerState<MealPlanDateCard>
                       error: (error, stack) => Padding(
                         padding: const EdgeInsets.all(16.0),
                         child: Text(
-                          'Error loading meal plan: $error',
+                          context.l10n.mealPlanErrorLoading(error.toString()),
                           style: TextStyle(
                             color: CupertinoColors.destructiveRed.resolveFrom(context),
                           ),

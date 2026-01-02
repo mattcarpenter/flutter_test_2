@@ -437,6 +437,9 @@
   "recipeAddModalFailed": "レシピの追加に失敗しました: {message}",
   "recipeAddModalCannotAdd": "レシピを追加できません",
   "recipeAddModalAdd": "追加",
+  "recipeAddModalSearchPlaceholder": "レシピを検索...",
+  "recipeAddModalSearchPrompt": "追加するレシピを検索",
+  "recipeAddModalRecentlyViewed": "最近見たレシピ",
 
   "commonSave": "保存",
   "commonDone": "完了",
@@ -687,5 +690,6 @@
   "mealPlanNoteDefault": "メモ",
   "mealPlanUnknownItem": "不明なアイテム",
   "mealPlanNoMealsPlanned": "献立がありません",
-  "mealPlanTapToAdd": "+をタップしてレシピやメモを追加"
+  "mealPlanTapToAdd": "+をタップしてレシピやメモを追加",
+  "mealPlanErrorLoading": "献立の読み込みエラー: {error}"
 }
