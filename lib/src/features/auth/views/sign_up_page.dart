@@ -11,6 +11,7 @@ import '../../../services/auth_service.dart';
 import '../../../theme/colors.dart';
 import '../../../widgets/error_dialog.dart';
 import '../models/auth_error.dart';
+import '../../../localization/l10n_extension.dart';
 import '../widgets/auth_form_field.dart';
 import '../widgets/auth_button.dart';
 import '../widgets/social_auth_button.dart';
@@ -55,7 +56,7 @@ class _SignUpPageState extends ConsumerState<SignUpPage> {
     if (!_acceptTerms) {
       await ErrorDialog.show(
         context,
-        message: 'Please accept the Terms of Service and Privacy Policy to continue.',
+        message: context.l10n.authAcceptTermsRequired,
       );
       return;
     }
@@ -73,7 +74,7 @@ class _SignUpPageState extends ConsumerState<SignUpPage> {
       if (mounted) {
         await ErrorDialog.show(
           context,
-          message: 'Failed to create account. Please try again.',
+          message: context.l10n.authFailedCreateAccount,
         );
       }
     }
@@ -104,7 +105,7 @@ class _SignUpPageState extends ConsumerState<SignUpPage> {
         } else {
           await ErrorDialog.show(
             context,
-            message: 'Failed to sign up with Google. Please try again.',
+            message: context.l10n.authFailedSignUpWithProvider('Google'),
           );
         }
       }
@@ -136,7 +137,7 @@ class _SignUpPageState extends ConsumerState<SignUpPage> {
         } else {
           await ErrorDialog.show(
             context,
-            message: 'Failed to sign up with Apple. Please try again.',
+            message: context.l10n.authFailedSignUpWithProvider('Apple'),
           );
         }
       }
@@ -148,22 +149,19 @@ class _SignUpPageState extends ConsumerState<SignUpPage> {
     await showCupertinoDialog<void>(
       context: context,
       barrierDismissible: false,
-      builder: (context) => CupertinoAlertDialog(
-        title: const Text('Account Already Exists'),
-        content: Text(
-          'This $provider account is already linked to another user. '
-          'Please go to Sign In to access that account.',
-        ),
+      builder: (dialogContext) => CupertinoAlertDialog(
+        title: Text(context.l10n.authAccountExistsTitle),
+        content: Text(context.l10n.authAccountExistsMessage(provider)),
         actions: [
           CupertinoDialogAction(
-            child: const Text('Cancel'),
-            onPressed: () => Navigator.of(context).pop(),
+            child: Text(context.l10n.commonCancel),
+            onPressed: () => Navigator.of(dialogContext).pop(),
           ),
           CupertinoDialogAction(
             isDefaultAction: true,
-            child: const Text('Go to Sign In'),
+            child: Text(context.l10n.authGoToSignIn),
             onPressed: () {
-              Navigator.of(context).pop();
+              Navigator.of(dialogContext).pop();
               context.go('/auth/signin');
             },
           ),
@@ -178,7 +176,7 @@ class _SignUpPageState extends ConsumerState<SignUpPage> {
     final isAnyActionInProgress = authState.isPerformingAction || authState.isLoading;
 
     return AdaptiveSliverPage(
-      title: 'Create Account',
+      title: context.l10n.authCreateAccount,
       automaticallyImplyLeading: true,
       body: Padding(
         padding: const EdgeInsets.all(24.0),
@@ -241,17 +239,17 @@ class _SignUpPageState extends ConsumerState<SignUpPage> {
                             color: AppColors.of(context).textSecondary,
                           ),
                           children: [
-                            const TextSpan(text: 'I agree to the '),
+                            TextSpan(text: context.l10n.authTermsPrefix),
                             TextSpan(
-                              text: 'Terms of Service',
+                              text: context.l10n.authTermsOfService,
                               style: TextStyle(
                                 color: AppColors.of(context).primary,
                                 fontWeight: FontWeight.w600,
                               ),
                             ),
-                            const TextSpan(text: ' and '),
+                            TextSpan(text: context.l10n.authTermsAnd),
                             TextSpan(
-                              text: 'Privacy Policy',
+                              text: context.l10n.authPrivacyPolicy,
                               style: TextStyle(
                                 color: AppColors.of(context).primary,
                                 fontWeight: FontWeight.w600,
@@ -268,7 +266,7 @@ class _SignUpPageState extends ConsumerState<SignUpPage> {
 
               // Create account button
               AuthButton.primary(
-                text: 'Create Account',
+                text: context.l10n.authCreateAccount,
                 onPressed: _handleEmailSignUp,
                 isLoading: authState.isSigningUp,
                 enabled: !authState.isSigningInWithGoogle && !authState.isSigningInWithApple,
@@ -282,7 +280,7 @@ class _SignUpPageState extends ConsumerState<SignUpPage> {
                   Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 16),
                     child: Text(
-                      'OR',
+                      context.l10n.authOr,
                       style: TextStyle(
                         color: Colors.grey[600],
                         fontWeight: FontWeight.w500,
@@ -315,13 +313,13 @@ class _SignUpPageState extends ConsumerState<SignUpPage> {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Text(
-                    'Already have an account? ',
+                    context.l10n.authAlreadyHaveAccount,
                     style: TextStyle(color: AppColors.of(context).textSecondary),
                   ),
                   GestureDetector(
                     onTap: () => context.go('/auth/signin'),
                     child: Text(
-                      'Sign In',
+                      context.l10n.authSignIn,
                       style: TextStyle(
                         color: AppColors.of(context).primary,
                         fontWeight: FontWeight.w600,

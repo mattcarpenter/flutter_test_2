@@ -3,6 +3,8 @@ import 'dart:io' show Platform;
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
+import '../../../localization/l10n_extension.dart';
+
 class AuthFormField extends StatelessWidget {
   final TextEditingController? controller;
   final String label;
@@ -205,16 +207,16 @@ class EmailFormField extends StatelessWidget {
     this.autofocus = false,
   });
 
-  String? _validateEmail(String? value) {
+  String? _validateEmail(String? value, BuildContext context) {
     if (value == null || value.trim().isEmpty) {
-      return 'Email is required';
+      return context.l10n.authEmailRequired;
     }
-    
+
     final emailRegex = RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$');
     if (!emailRegex.hasMatch(value.trim())) {
-      return 'Please enter a valid email address';
+      return context.l10n.authEmailInvalid;
     }
-    
+
     return null;
   }
 
@@ -222,13 +224,13 @@ class EmailFormField extends StatelessWidget {
   Widget build(BuildContext context) {
     return AuthFormField(
       controller: controller,
-      label: 'Email',
-      placeholder: 'your@email.com',
+      label: context.l10n.authEmailLabel,
+      placeholder: context.l10n.authEmailPlaceholder,
       keyboardType: TextInputType.emailAddress,
       textInputAction: TextInputAction.next,
       autocorrect: false,
       enableSuggestions: false,
-      validator: _validateEmail,
+      validator: (value) => _validateEmail(value, context),
       onChanged: onChanged,
       onSubmitted: onSubmitted,
       focusNode: focusNode,
@@ -242,7 +244,7 @@ class EmailFormField extends StatelessWidget {
 // Password field with built-in validation
 class PasswordFormField extends StatelessWidget {
   final TextEditingController? controller;
-  final String label;
+  final String? label;
   final bool enabled;
   final ValueChanged<String>? onChanged;
   final ValueChanged<String>? onSubmitted;
@@ -253,7 +255,7 @@ class PasswordFormField extends StatelessWidget {
   const PasswordFormField({
     super.key,
     this.controller,
-    this.label = 'Password',
+    this.label,
     this.enabled = true,
     this.onChanged,
     this.onSubmitted,
@@ -262,17 +264,17 @@ class PasswordFormField extends StatelessWidget {
     this.textInputAction,
   });
 
-  String? _validatePassword(String? value) {
+  String? _validatePassword(String? value, BuildContext context) {
     if (!requireValidation) return null;
-    
+
     if (value == null || value.isEmpty) {
-      return 'Password is required';
+      return context.l10n.authPasswordRequired;
     }
-    
+
     if (value.length < 6) {
-      return 'Password must be at least 6 characters';
+      return context.l10n.authPasswordTooShort;
     }
-    
+
     return null;
   }
 
@@ -280,10 +282,10 @@ class PasswordFormField extends StatelessWidget {
   Widget build(BuildContext context) {
     return AuthFormField(
       controller: controller,
-      label: label,
+      label: label ?? context.l10n.authPasswordLabel,
       obscureText: true,
       textInputAction: textInputAction ?? TextInputAction.done,
-      validator: requireValidation ? _validatePassword : null,
+      validator: requireValidation ? (value) => _validatePassword(value, context) : null,
       onChanged: onChanged,
       onSubmitted: onSubmitted,
       focusNode: focusNode,
@@ -312,15 +314,15 @@ class ConfirmPasswordFormField extends StatelessWidget {
     this.focusNode,
   });
 
-  String? _validatePasswordConfirm(String? value) {
+  String? _validatePasswordConfirm(String? value, BuildContext context) {
     if (value == null || value.isEmpty) {
-      return 'Please confirm your password';
+      return context.l10n.authConfirmPasswordRequired;
     }
-    
+
     if (value != passwordController.text) {
-      return 'Passwords do not match';
+      return context.l10n.authPasswordsDoNotMatch;
     }
-    
+
     return null;
   }
 
@@ -328,10 +330,10 @@ class ConfirmPasswordFormField extends StatelessWidget {
   Widget build(BuildContext context) {
     return AuthFormField(
       controller: controller,
-      label: 'Confirm Password',
+      label: context.l10n.authConfirmPasswordLabel,
       obscureText: true,
       textInputAction: TextInputAction.done,
-      validator: _validatePasswordConfirm,
+      validator: (value) => _validatePasswordConfirm(value, context),
       onChanged: onChanged,
       onSubmitted: onSubmitted,
       focusNode: focusNode,

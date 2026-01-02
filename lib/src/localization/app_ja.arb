@@ -1,0 +1,61 @@
+{
+  "@@locale": "ja",
+  "appTitle": "Stockpot",
+
+  "authSignUp": "新規登録",
+  "authSignIn": "ログイン",
+  "authCreateAccount": "アカウント作成",
+  "authContinueWithEmail": "メールで続ける",
+  "authContinueWithGoogle": "Googleで続ける",
+  "authContinueWithProvider": "{provider}で続ける",
+  "authSignInWithGoogle": "Googleでログイン",
+  "authSignInWithApple": "Appleでログイン",
+  "authAlreadyHaveAccount": "アカウントをお持ちの方は",
+  "authDontHaveAccount": "アカウントをお持ちでない方は",
+  "authForgotPassword": "パスワードをお忘れですか？",
+  "authResetPassword": "パスワードをリセット",
+  "authSendResetLink": "リセットリンクを送信",
+  "authResetPasswordInstructions": "メールアドレスを入力してください。パスワードリセット用のリンクをお送りします。",
+  "authRememberPassword": "パスワードを覚えている方は",
+  "authOr": "または",
+
+  "authEmailLabel": "メールアドレス",
+  "authEmailPlaceholder": "your@email.com",
+  "authPasswordLabel": "パスワード",
+  "authConfirmPasswordLabel": "パスワード（確認）",
+
+  "authEmailRequired": "メールアドレスを入力してください",
+  "authEmailInvalid": "有効なメールアドレスを入力してください",
+  "authPasswordRequired": "パスワードを入力してください",
+  "authPasswordTooShort": "パスワードは6文字以上で入力してください",
+  "authConfirmPasswordRequired": "パスワードを確認してください",
+  "authPasswordsDoNotMatch": "パスワードが一致しません",
+  "authEnterEmailAndPassword": "メールアドレスとパスワードを入力してください。",
+
+  "authTermsPrefix": "",
+  "authTermsOfService": "利用規約",
+  "authTermsAnd": "と",
+  "authPrivacyPolicy": "プライバシーポリシー",
+  "authAcceptTermsRequired": "続行するには利用規約とプライバシーポリシーに同意してください。",
+
+  "authFailedGoogle": "Googleログインに失敗しました。もう一度お試しください。",
+  "authFailedApple": "Appleログインに失敗しました。もう一度お試しください。",
+  "authFailedSignIn": "ログインに失敗しました。認証情報を確認してもう一度お試しください。",
+  "authFailedCreateAccount": "アカウントの作成に失敗しました。もう一度お試しください。",
+  "authFailedSignUpWithProvider": "{provider}での登録に失敗しました。もう一度お試しください。",
+  "authFailedSignInWithProvider": "{provider}でのログインに失敗しました。もう一度お試しください。",
+  "authPasswordResetSuccess": "パスワードリセットメールを送信しました！受信トレイを確認し、指示に従ってパスワードをリセットしてください。",
+  "authPasswordResetFailed": "リセットメールの送信に失敗しました。メールアドレスを確認してもう一度お試しください。",
+
+  "authSignInWarningTitle": "ログインに関する警告",
+  "authSignInWarningMessage": "現在、このデバイスにStockpot Plusのサブスクリプションが紐づけられています。既存のアカウントにログインすると：\n\n\u2022 ローカルのレシピがアカウントのデータに置き換えられます\n\u2022 ログイン後に購入の復元が必要です\n\n先にレシピをエクスポートすることをお勧めします。",
+  "authSignInAnyway": "ログインする",
+  "authReplaceLocalDataTitle": "ローカルデータを置き換えますか？",
+  "authReplaceLocalDataMessage": "ログインすると、ローカルのレシピがアカウントのデータに置き換えられます。先にレシピをエクスポートすることをお勧めします。",
+
+  "authAccountExistsTitle": "アカウントが既に存在します",
+  "authAccountExistsMessage": "この{provider}アカウントは既に別のユーザーに紐づけられています。そのアカウントにアクセスするにはログインしてください。",
+  "authGoToSignIn": "ログインへ",
+
+  "commonCancel": "キャンセル"
+}

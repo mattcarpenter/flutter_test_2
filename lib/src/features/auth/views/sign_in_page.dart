@@ -11,6 +11,7 @@ import '../../../providers/subscription_provider.dart';
 import '../../../services/auth_service.dart';
 import '../../../widgets/error_dialog.dart';
 import '../models/auth_error.dart';
+import '../../../localization/l10n_extension.dart';
 import '../widgets/auth_form_field.dart';
 import '../widgets/auth_button.dart';
 import '../widgets/social_auth_button.dart';
@@ -49,7 +50,7 @@ class _SignInPageState extends ConsumerState<SignInPage> {
     if (email.isEmpty || password.isEmpty) {
       await ErrorDialog.show(
         context,
-        message: 'Please enter both email and password.',
+        message: context.l10n.authEnterEmailAndPassword,
       );
       return;
     }
@@ -78,7 +79,7 @@ class _SignInPageState extends ConsumerState<SignInPage> {
       if (mounted) {
         await ErrorDialog.show(
           context,
-          message: 'Failed to sign in. Please check your credentials and try again.',
+          message: context.l10n.authFailedSignIn,
         );
       }
     }
@@ -120,7 +121,7 @@ class _SignInPageState extends ConsumerState<SignInPage> {
         } else {
           await ErrorDialog.show(
             context,
-            message: 'Failed to sign in with Google. Please try again.',
+            message: context.l10n.authFailedGoogle,
           );
         }
       }
@@ -165,7 +166,7 @@ class _SignInPageState extends ConsumerState<SignInPage> {
         } else {
           await ErrorDialog.show(
             context,
-            message: 'Failed to sign in with Apple. Please try again.',
+            message: context.l10n.authFailedApple,
           );
         }
       }
@@ -177,24 +178,18 @@ class _SignInPageState extends ConsumerState<SignInPage> {
     return await showCupertinoDialog<bool>(
           context: context,
           barrierDismissible: false,
-          builder: (context) => CupertinoAlertDialog(
-            title: const Text('Sign In Warning'),
-            content: const Text(
-              'You currently have a Stockpot Plus subscription tied to this device. '
-              'If you sign in to an existing account:\n\n'
-              '\u2022 Your local recipes will be replaced with the account\'s data\n'
-              '\u2022 You\'ll need to restore your purchase after signing in\n\n'
-              'We recommend exporting your recipes first.',
-            ),
+          builder: (dialogContext) => CupertinoAlertDialog(
+            title: Text(context.l10n.authSignInWarningTitle),
+            content: Text(context.l10n.authSignInWarningMessage),
             actions: [
               CupertinoDialogAction(
-                child: const Text('Cancel'),
-                onPressed: () => Navigator.of(context).pop(false),
+                child: Text(context.l10n.commonCancel),
+                onPressed: () => Navigator.of(dialogContext).pop(false),
               ),
               CupertinoDialogAction(
                 isDestructiveAction: true,
-                child: const Text('Sign In Anyway'),
-                onPressed: () => Navigator.of(context).pop(true),
+                child: Text(context.l10n.authSignInAnyway),
+                onPressed: () => Navigator.of(dialogContext).pop(true),
               ),
             ],
           ),
@@ -207,21 +202,18 @@ class _SignInPageState extends ConsumerState<SignInPage> {
     return await showCupertinoDialog<bool>(
           context: context,
           barrierDismissible: false,
-          builder: (context) => CupertinoAlertDialog(
-            title: const Text('Replace Local Data?'),
-            content: const Text(
-              'Signing in will replace your local recipes with the account\'s data. '
-              'We recommend exporting your recipes first.',
-            ),
+          builder: (dialogContext) => CupertinoAlertDialog(
+            title: Text(context.l10n.authReplaceLocalDataTitle),
+            content: Text(context.l10n.authReplaceLocalDataMessage),
             actions: [
               CupertinoDialogAction(
-                child: const Text('Cancel'),
-                onPressed: () => Navigator.of(context).pop(false),
+                child: Text(context.l10n.commonCancel),
+                onPressed: () => Navigator.of(dialogContext).pop(false),
               ),
               CupertinoDialogAction(
                 isDestructiveAction: true,
-                child: const Text('Sign In'),
-                onPressed: () => Navigator.of(context).pop(true),
+                child: Text(context.l10n.authSignIn),
+                onPressed: () => Navigator.of(dialogContext).pop(true),
               ),
             ],
           ),
@@ -265,7 +257,7 @@ class _SignInPageState extends ConsumerState<SignInPage> {
         if (!errorMessage.contains('cancel')) {
           await ErrorDialog.show(
             context,
-            message: 'Failed to sign in with $provider. Please try again.',
+            message: context.l10n.authFailedSignInWithProvider(provider),
           );
         }
       }
@@ -280,9 +272,9 @@ class _SignInPageState extends ConsumerState<SignInPage> {
     final authState = ref.watch(authNotifierProvider);
 
     return AdaptiveSliverPage(
-      title: 'Sign In',
+      title: context.l10n.authSignIn,
       automaticallyImplyLeading: true,
-      previousPageTitle: 'Sign Up',
+      previousPageTitle: context.l10n.authSignUp,
       body: Padding(
         padding: const EdgeInsets.all(24.0),
         child: Center(
@@ -298,8 +290,8 @@ class _SignInPageState extends ConsumerState<SignInPage> {
                   // Email field (no validation for sign-in)
                   AuthFormField(
                     controller: _emailController,
-                    label: 'Email',
-                    placeholder: 'your@email.com',
+                    label: context.l10n.authEmailLabel,
+                    placeholder: context.l10n.authEmailPlaceholder,
                     keyboardType: TextInputType.emailAddress,
                     textInputAction: TextInputAction.next,
                     autocorrect: false,
@@ -313,7 +305,7 @@ class _SignInPageState extends ConsumerState<SignInPage> {
                   // Password field (no validation for sign-in)
                   AuthFormField(
                     controller: _passwordController,
-                    label: 'Password',
+                    label: context.l10n.authPasswordLabel,
                     obscureText: true,
                     textInputAction: TextInputAction.done,
                     focusNode: _passwordFocusNode,
@@ -324,7 +316,7 @@ class _SignInPageState extends ConsumerState<SignInPage> {
 
                   // Sign in button
                   AuthButton.primary(
-                    text: 'Sign In',
+                    text: context.l10n.authSignIn,
                     onPressed: _handleEmailSignIn,
                     isLoading: authState.isSigningIn,
                     enabled: !authState.isSigningInWithGoogle && !authState.isSigningInWithApple,
@@ -336,7 +328,7 @@ class _SignInPageState extends ConsumerState<SignInPage> {
                     child: GestureDetector(
                       onTap: () => context.go('/auth/forgot-password'),
                       child: Text(
-                        'Forgot Password?',
+                        context.l10n.authForgotPassword,
                         style: TextStyle(
                           color: Theme.of(context).primaryColor,
                           fontWeight: FontWeight.w500,
@@ -353,7 +345,7 @@ class _SignInPageState extends ConsumerState<SignInPage> {
                       Padding(
                         padding: const EdgeInsets.symmetric(horizontal: 16),
                         child: Text(
-                          'OR',
+                          context.l10n.authOr,
                           style: TextStyle(
                             color: Colors.grey[600],
                             fontWeight: FontWeight.w500,

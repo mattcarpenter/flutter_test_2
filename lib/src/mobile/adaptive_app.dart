@@ -4,6 +4,8 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_quill/flutter_quill.dart';
+
+import '../localization/app_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
@@ -116,13 +118,15 @@ class _AdaptiveApp2State extends ConsumerState<AdaptiveApp2> {
         routerDelegate: router.routerDelegate,
         routeInformationProvider: router.routeInformationProvider,
         localizationsDelegates: const [
+          AppLocalizations.delegate,
           GlobalMaterialLocalizations.delegate,
           GlobalWidgetsLocalizations.delegate,
           GlobalCupertinoLocalizations.delegate,
           FlutterQuillLocalizations.delegate,
         ],
         supportedLocales: const [
-          Locale('en', ''),
+          Locale('en'),
+          Locale('ja'),
         ],
         theme: isDarkMode
             ? AppTheme.cupertinoDarkTheme
@@ -144,13 +148,15 @@ class _AdaptiveApp2State extends ConsumerState<AdaptiveApp2> {
         routerDelegate: router.routerDelegate,
         routeInformationProvider: router.routeInformationProvider,
         localizationsDelegates: const [
+          AppLocalizations.delegate,
           GlobalMaterialLocalizations.delegate,
           GlobalWidgetsLocalizations.delegate,
           GlobalCupertinoLocalizations.delegate,
           FlutterQuillLocalizations.delegate,
         ],
         supportedLocales: const [
-          Locale('en', ''),
+          Locale('en'),
+          Locale('ja'),
         ],
         themeMode: themeMode,
         theme: AppTheme.materialLightTheme,

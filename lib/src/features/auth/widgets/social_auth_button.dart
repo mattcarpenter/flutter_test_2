@@ -4,6 +4,8 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:sign_in_button/sign_in_button.dart';
 
+import '../../../localization/l10n_extension.dart';
+
 class SocialAuthButton extends StatelessWidget {
   final String provider;
   final String? label;
@@ -42,18 +44,18 @@ class SocialAuthButton extends StatelessWidget {
     }
   }
 
-  String _getDefaultLabel() {
+  String _getDefaultLabel(BuildContext context) {
     switch (provider.toLowerCase()) {
       case 'google':
-        return 'Continue with Google';
+        return context.l10n.authContinueWithGoogle;
       default:
-        return 'Continue with $provider';
+        return context.l10n.authContinueWithProvider(provider);
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    final buttonLabel = label ?? _getDefaultLabel();
+    final buttonLabel = label ?? _getDefaultLabel(context);
     final canPress = enabled && !isLoading && onPressed != null;
 
     if (Platform.isIOS) {
@@ -187,7 +189,7 @@ class GoogleSignInButton extends StatelessWidget {
       width: double.infinity,
       child: SignInButton(
         Buttons.google,
-        text: customLabel ?? "Sign in with Google",
+        text: customLabel ?? context.l10n.authSignInWithGoogle,
         onPressed: enabled && onPressed != null ? onPressed! as dynamic : null,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(4),
@@ -245,7 +247,7 @@ class AppleSignInButton extends StatelessWidget {
       width: double.infinity,
       child: SignInButton(
         Buttons.apple,
-        text: customLabel ?? "Sign in with Apple",
+        text: customLabel ?? context.l10n.authSignInWithApple,
         onPressed: enabled && onPressed != null ? onPressed! as dynamic : null,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(4),

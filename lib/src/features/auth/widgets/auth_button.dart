@@ -3,6 +3,8 @@ import 'dart:io' show Platform;
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
+import '../../../localization/l10n_extension.dart';
+
 
 enum AuthButtonType {
   primary,
@@ -236,7 +238,7 @@ class SignInButton extends StatelessWidget {
     return SizedBox(
       width: double.infinity,
       child: AuthButton.primary(
-        text: 'Sign In',
+        text: context.l10n.authSignIn,
         onPressed: onPressed,
         isLoading: isLoading,
       ),
@@ -259,7 +261,7 @@ class SignUpButton extends StatelessWidget {
     return SizedBox(
       width: double.infinity,
       child: AuthButton.primary(
-        text: 'Create Account',
+        text: context.l10n.authCreateAccount,
         onPressed: onPressed,
         isLoading: isLoading,
       ),
@@ -282,7 +284,7 @@ class ResetPasswordButton extends StatelessWidget {
     return SizedBox(
       width: double.infinity,
       child: AuthButton.primary(
-        text: 'Send Reset Link',
+        text: context.l10n.authSendResetLink,
         onPressed: onPressed,
         isLoading: isLoading,
       ),

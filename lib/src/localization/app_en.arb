@@ -1,6 +1,235 @@
 {
-  "appTitle": "flutter_test_2",
+  "@@locale": "en",
+  "appTitle": "Stockpot",
   "@appTitle": {
     "description": "The title of the application"
+  },
+
+  "authSignUp": "Sign Up",
+  "@authSignUp": {
+    "description": "Sign up page title and link text"
+  },
+  "authSignIn": "Sign In",
+  "@authSignIn": {
+    "description": "Sign in page title and link text"
+  },
+  "authCreateAccount": "Create Account",
+  "@authCreateAccount": {
+    "description": "Create account page title and button text"
+  },
+  "authContinueWithEmail": "Continue with Email",
+  "@authContinueWithEmail": {
+    "description": "Button text for email sign up"
+  },
+  "authContinueWithGoogle": "Continue with Google",
+  "@authContinueWithGoogle": {
+    "description": "Button text for Google sign in"
+  },
+  "authContinueWithProvider": "Continue with {provider}",
+  "@authContinueWithProvider": {
+    "description": "Button text for OAuth provider sign in",
+    "placeholders": {
+      "provider": {
+        "type": "String",
+        "example": "Facebook"
+      }
+    }
+  },
+  "authSignInWithGoogle": "Sign in with Google",
+  "@authSignInWithGoogle": {
+    "description": "Google sign in button text"
+  },
+  "authSignInWithApple": "Sign in with Apple",
+  "@authSignInWithApple": {
+    "description": "Apple sign in button text"
+  },
+  "authAlreadyHaveAccount": "Already have an account? ",
+  "@authAlreadyHaveAccount": {
+    "description": "Text before sign in link"
+  },
+  "authDontHaveAccount": "Don't have an account? ",
+  "@authDontHaveAccount": {
+    "description": "Text before sign up link"
+  },
+  "authForgotPassword": "Forgot Password?",
+  "@authForgotPassword": {
+    "description": "Forgot password link text"
+  },
+  "authResetPassword": "Reset Password",
+  "@authResetPassword": {
+    "description": "Reset password page title"
+  },
+  "authSendResetLink": "Send Reset Link",
+  "@authSendResetLink": {
+    "description": "Reset password button text"
+  },
+  "authResetPasswordInstructions": "Enter your email address and we'll send you a link to reset your password.",
+  "@authResetPasswordInstructions": {
+    "description": "Instructions on reset password page"
+  },
+  "authRememberPassword": "Remember your password? ",
+  "@authRememberPassword": {
+    "description": "Text before sign in link on reset password page"
+  },
+  "authOr": "OR",
+  "@authOr": {
+    "description": "Divider text between auth options"
+  },
+
+  "authEmailLabel": "Email",
+  "@authEmailLabel": {
+    "description": "Email field label"
+  },
+  "authEmailPlaceholder": "your@email.com",
+  "@authEmailPlaceholder": {
+    "description": "Email field placeholder"
+  },
+  "authPasswordLabel": "Password",
+  "@authPasswordLabel": {
+    "description": "Password field label"
+  },
+  "authConfirmPasswordLabel": "Confirm Password",
+  "@authConfirmPasswordLabel": {
+    "description": "Confirm password field label"
+  },
+
+  "authEmailRequired": "Email is required",
+  "@authEmailRequired": {
+    "description": "Email validation error"
+  },
+  "authEmailInvalid": "Please enter a valid email address",
+  "@authEmailInvalid": {
+    "description": "Email format validation error"
+  },
+  "authPasswordRequired": "Password is required",
+  "@authPasswordRequired": {
+    "description": "Password validation error"
+  },
+  "authPasswordTooShort": "Password must be at least 6 characters",
+  "@authPasswordTooShort": {
+    "description": "Password length validation error"
+  },
+  "authConfirmPasswordRequired": "Please confirm your password",
+  "@authConfirmPasswordRequired": {
+    "description": "Confirm password validation error"
+  },
+  "authPasswordsDoNotMatch": "Passwords do not match",
+  "@authPasswordsDoNotMatch": {
+    "description": "Password mismatch validation error"
+  },
+  "authEnterEmailAndPassword": "Please enter both email and password.",
+  "@authEnterEmailAndPassword": {
+    "description": "Error when email or password is empty"
+  },
+
+  "authTermsPrefix": "I agree to the ",
+  "@authTermsPrefix": {
+    "description": "Text before Terms of Service link"
+  },
+  "authTermsOfService": "Terms of Service",
+  "@authTermsOfService": {
+    "description": "Terms of service link text"
+  },
+  "authTermsAnd": " and ",
+  "@authTermsAnd": {
+    "description": "Text between Terms and Privacy links"
+  },
+  "authPrivacyPolicy": "Privacy Policy",
+  "@authPrivacyPolicy": {
+    "description": "Privacy policy link text"
+  },
+  "authAcceptTermsRequired": "Please accept the Terms of Service and Privacy Policy to continue.",
+  "@authAcceptTermsRequired": {
+    "description": "Error when terms not accepted"
+  },
+
+  "authFailedGoogle": "Failed to sign in with Google. Please try again.",
+  "@authFailedGoogle": {
+    "description": "Google sign in error message"
+  },
+  "authFailedApple": "Failed to sign in with Apple. Please try again.",
+  "@authFailedApple": {
+    "description": "Apple sign in error message"
+  },
+  "authFailedSignIn": "Failed to sign in. Please check your credentials and try again.",
+  "@authFailedSignIn": {
+    "description": "General sign in error message"
+  },
+  "authFailedCreateAccount": "Failed to create account. Please try again.",
+  "@authFailedCreateAccount": {
+    "description": "Account creation error message"
+  },
+  "authFailedSignUpWithProvider": "Failed to sign up with {provider}. Please try again.",
+  "@authFailedSignUpWithProvider": {
+    "description": "OAuth sign up error message",
+    "placeholders": {
+      "provider": {
+        "type": "String",
+        "example": "Google"
+      }
+    }
+  },
+  "authFailedSignInWithProvider": "Failed to sign in with {provider}. Please try again.",
+  "@authFailedSignInWithProvider": {
+    "description": "OAuth sign in error message",
+    "placeholders": {
+      "provider": {
+        "type": "String",
+        "example": "Google"
+      }
+    }
+  },
+  "authPasswordResetSuccess": "Password reset email sent! Check your inbox and follow the instructions to reset your password.",
+  "@authPasswordResetSuccess": {
+    "description": "Password reset success message"
+  },
+  "authPasswordResetFailed": "Failed to send reset email. Please check your email address and try again.",
+  "@authPasswordResetFailed": {
+    "description": "Password reset error message"
+  },
+
+  "authSignInWarningTitle": "Sign In Warning",
+  "@authSignInWarningTitle": {
+    "description": "Warning dialog title for subscription users"
+  },
+  "authSignInWarningMessage": "You currently have a Stockpot Plus subscription tied to this device. If you sign in to an existing account:\n\n\u2022 Your local recipes will be replaced with the account's data\n\u2022 You'll need to restore your purchase after signing in\n\nWe recommend exporting your recipes first.",
+  "@authSignInWarningMessage": {
+    "description": "Warning message for subscription users signing in"
+  },
+  "authSignInAnyway": "Sign In Anyway",
+  "@authSignInAnyway": {
+    "description": "Destructive action button text"
+  },
+  "authReplaceLocalDataTitle": "Replace Local Data?",
+  "@authReplaceLocalDataTitle": {
+    "description": "Warning dialog title for anonymous users"
+  },
+  "authReplaceLocalDataMessage": "Signing in will replace your local recipes with the account's data. We recommend exporting your recipes first.",
+  "@authReplaceLocalDataMessage": {
+    "description": "Warning message for anonymous users signing in"
+  },
+
+  "authAccountExistsTitle": "Account Already Exists",
+  "@authAccountExistsTitle": {
+    "description": "Dialog title when OAuth identity already linked"
+  },
+  "authAccountExistsMessage": "This {provider} account is already linked to another user. Please go to Sign In to access that account.",
+  "@authAccountExistsMessage": {
+    "description": "Dialog message when OAuth identity already linked",
+    "placeholders": {
+      "provider": {
+        "type": "String",
+        "example": "Google"
+      }
+    }
+  },
+  "authGoToSignIn": "Go to Sign In",
+  "@authGoToSignIn": {
+    "description": "Button to navigate to sign in"
+  },
+
+  "commonCancel": "Cancel",
+  "@commonCancel": {
+    "description": "Cancel button text"
   }
 }

@@ -9,6 +9,7 @@ import '../../../theme/typography.dart';
 import '../../../providers/auth_provider.dart';
 import '../../../widgets/error_dialog.dart';
 import '../../../widgets/success_dialog.dart';
+import '../../../localization/l10n_extension.dart';
 import '../widgets/auth_form_field.dart';
 import '../widgets/auth_button.dart';
 
@@ -47,7 +48,7 @@ class _ForgotPasswordPageState extends ConsumerState<ForgotPasswordPage> {
       if (mounted) {
         await SuccessDialog.show(
           context,
-          message: 'Password reset email sent! Check your inbox and follow the instructions to reset your password.',
+          message: context.l10n.authPasswordResetSuccess,
         );
         if (mounted) {
           context.go('/auth/signin');
@@ -57,7 +58,7 @@ class _ForgotPasswordPageState extends ConsumerState<ForgotPasswordPage> {
       if (mounted) {
         await ErrorDialog.show(
           context,
-          message: 'Failed to send reset email. Please check your email address and try again.',
+          message: context.l10n.authPasswordResetFailed,
         );
       }
     }
@@ -68,9 +69,9 @@ class _ForgotPasswordPageState extends ConsumerState<ForgotPasswordPage> {
     final authState = ref.watch(authNotifierProvider);
 
     return AdaptiveSliverPage(
-      title: 'Reset Password',
+      title: context.l10n.authResetPassword,
       automaticallyImplyLeading: true,
-      previousPageTitle: 'Sign In',
+      previousPageTitle: context.l10n.authSignIn,
       body: Padding(
         padding: const EdgeInsets.all(24.0),
         child: Form(
@@ -82,7 +83,7 @@ class _ForgotPasswordPageState extends ConsumerState<ForgotPasswordPage> {
 
               // Instructions
               Text(
-                'Enter your email address and we\'ll send you a link to reset your password.',
+                context.l10n.authResetPasswordInstructions,
                 style: AppTypography.body.copyWith(
                   color: AppColors.of(context).textSecondary,
                 ),
@@ -112,7 +113,7 @@ class _ForgotPasswordPageState extends ConsumerState<ForgotPasswordPage> {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Text(
-                    'Remember your password? ',
+                    context.l10n.authRememberPassword,
                     style: AppTypography.body.copyWith(
                       color: AppColors.of(context).textSecondary,
                     ),
@@ -120,7 +121,7 @@ class _ForgotPasswordPageState extends ConsumerState<ForgotPasswordPage> {
                   GestureDetector(
                     onTap: () => context.go('/auth/signin'),
                     child: Text(
-                      'Sign In',
+                      context.l10n.authSignIn,
                       style: AppTypography.body.copyWith(
                         color: AppColors.of(context).primary,
                         fontWeight: FontWeight.w600,

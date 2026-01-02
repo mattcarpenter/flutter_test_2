@@ -10,6 +10,7 @@ import '../../../mobile/utils/adaptive_sliver_page.dart';
 import '../../../providers/auth_provider.dart';
 import '../../../theme/colors.dart';
 import '../../../theme/typography.dart';
+import '../../../localization/l10n_extension.dart';
 import '../../../widgets/error_dialog.dart';
 import '../widgets/auth_button.dart';
 import '../widgets/social_auth_button.dart';
@@ -49,7 +50,7 @@ class _AuthLandingPageState extends ConsumerState<AuthLandingPage> {
       if (mounted) {
         await ErrorDialog.show(
           context,
-          message: 'Failed to sign in with Google. Please try again.',
+          message: context.l10n.authFailedGoogle,
         );
       }
     } finally {
@@ -80,7 +81,7 @@ class _AuthLandingPageState extends ConsumerState<AuthLandingPage> {
         if (!errorMessage.contains('cancel')) {
           await ErrorDialog.show(
             context,
-            message: 'Failed to sign in with Apple. Please try again.',
+            message: context.l10n.authFailedApple,
           );
         }
       }
@@ -98,7 +99,7 @@ class _AuthLandingPageState extends ConsumerState<AuthLandingPage> {
     final colors = AppColors.of(context);
 
     return AdaptiveSliverPage(
-      title: 'Sign Up',
+      title: context.l10n.authSignUp,
       leading: widget.onMenuPressed != null
           ? GestureDetector(
               onTap: widget.onMenuPressed,
@@ -116,7 +117,7 @@ class _AuthLandingPageState extends ConsumerState<AuthLandingPage> {
               children: [
                 // Auth buttons
                 AuthButton.primary(
-                  text: 'Continue with Email',
+                  text: context.l10n.authContinueWithEmail,
                   onPressed: () => context.go('/auth/signup'),
                 ),
                 const SizedBox(height: 16),
@@ -140,7 +141,7 @@ class _AuthLandingPageState extends ConsumerState<AuthLandingPage> {
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     Text(
-                      'Already have an account? ',
+                      context.l10n.authAlreadyHaveAccount,
                       style: AppTypography.body.copyWith(
                         color: colors.textSecondary,
                       ),
@@ -148,7 +149,7 @@ class _AuthLandingPageState extends ConsumerState<AuthLandingPage> {
                     GestureDetector(
                       onTap: () => context.go('/auth/signin'),
                       child: Text(
-                        'Sign In',
+                        context.l10n.authSignIn,
                         style: AppTypography.body.copyWith(
                           color: colors.primary,
                           fontWeight: FontWeight.w600,
