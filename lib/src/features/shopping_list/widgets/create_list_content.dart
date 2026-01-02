@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import '../../../localization/l10n_extension.dart';
 import '../../../providers/shopping_list_provider.dart';
 import '../../../services/logging/app_logger.dart';
 import '../../../theme/colors.dart';
@@ -80,7 +81,7 @@ class _CreateListContentState extends ConsumerState<CreateListContent> {
       children: [
         // List name input label
         Text(
-          'List Name',
+          context.l10n.shoppingListNameLabel,
           style: AppTypography.label.copyWith(
             color: colors.textPrimary,
           ),
@@ -90,7 +91,7 @@ class _CreateListContentState extends ConsumerState<CreateListContent> {
         // List name input field
         AppTextFieldSimple(
           controller: _nameController,
-          placeholder: 'Enter list name',
+          placeholder: context.l10n.shoppingListNamePlaceholder,
           onChanged: (_) {
             setState(() {}); // Rebuild to update button state
           },
@@ -102,7 +103,7 @@ class _CreateListContentState extends ConsumerState<CreateListContent> {
 
         // Create button
         AppButtonVariants.primaryFilled(
-          text: 'Create List',
+          text: context.l10n.shoppingListCreateButton,
           size: AppButtonSize.large,
           shape: AppButtonShape.square,
           fullWidth: true,

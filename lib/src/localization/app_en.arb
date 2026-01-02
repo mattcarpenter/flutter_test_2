@@ -2444,5 +2444,204 @@
   "statusBarKeep": "Keep",
   "@statusBarKeep": {
     "description": "Keep timer button"
+  },
+
+  "ingredientMatchTitle": "Recipe Ingredients",
+  "@ingredientMatchTitle": {
+    "description": "Title for ingredient matches bottom sheet"
+  },
+  "ingredientMatchAllAvailable": "All {count} ingredients available",
+  "@ingredientMatchAllAvailable": {
+    "description": "Status when all ingredients are available",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "ingredientMatchAvailableOf": "{available} of {total} items available",
+  "@ingredientMatchAvailableOf": {
+    "description": "Status showing available vs total items",
+    "placeholders": {
+      "available": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "ingredientMatchOutOfStock": "{count} out of stock",
+  "@ingredientMatchOutOfStock": {
+    "description": "Count of out of stock items",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "ingredientMatchNotInPantry": "{count} not in pantry",
+  "@ingredientMatchNotInPantry": {
+    "description": "Count of items not in pantry",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "ingredientMatchAddItemsButton": "{count, plural, =1{Add 1 Item} other{Add {count} Items}}",
+  "@ingredientMatchAddItemsButton": {
+    "description": "Button text with item count for adding to shopping list",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "ingredientMatchAddItemsDefault": "Add Items",
+  "@ingredientMatchAddItemsDefault": {
+    "description": "Default button text when no items selected"
+  },
+  "ingredientMatchManageLists": "Manage Lists",
+  "@ingredientMatchManageLists": {
+    "description": "Button and title for manage lists page"
+  },
+  "ingredientMatchCreateNewList": "Create New List",
+  "@ingredientMatchCreateNewList": {
+    "description": "Title for create new list page"
+  },
+  "ingredientMatchInList": "In {listName}",
+  "@ingredientMatchInList": {
+    "description": "Label showing item is already in a shopping list",
+    "placeholders": {
+      "listName": {
+        "type": "String"
+      }
+    }
+  },
+  "ingredientMatchMatchesWith": "Matches with pantry item {name}",
+  "@ingredientMatchMatchesWith": {
+    "description": "Label showing pantry item match",
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "ingredientMatchEverythingToMake": "You have everything to make ",
+  "@ingredientMatchEverythingToMake": {
+    "description": "Prefix for linked recipe when all ingredients available"
+  },
+  "ingredientMatchMissingFor": "Missing ingredients for ",
+  "@ingredientMatchMissingFor": {
+    "description": "Prefix for linked recipe when ingredients missing"
+  },
+  "ingredientMatchLinkedExplainer": "This ingredient is linked to a recipe. However, if any of the terms below match items in your pantry, those will be used instead of making the recipe.",
+  "@ingredientMatchLinkedExplainer": {
+    "description": "Explainer text for linked recipe ingredients"
+  },
+  "ingredientMatchAddTermButton": "Add Term",
+  "@ingredientMatchAddTermButton": {
+    "description": "Button to add a matching term"
+  },
+  "ingredientMatchChooseOption": "Choose an option to add a matching term",
+  "@ingredientMatchChooseOption": {
+    "description": "Action sheet message for adding term options"
+  },
+  "ingredientMatchEnterCustomTerm": "Enter Custom Term",
+  "@ingredientMatchEnterCustomTerm": {
+    "description": "Option to enter a custom matching term"
+  },
+  "ingredientMatchSelectFromPantry": "Select from Pantry",
+  "@ingredientMatchSelectFromPantry": {
+    "description": "Option to select from pantry items"
+  },
+  "ingredientMatchEnterNewTermDesc": "Enter a new term for matching",
+  "@ingredientMatchEnterNewTermDesc": {
+    "description": "Description for custom term option"
+  },
+  "ingredientMatchUsePantryItemDesc": "Use an existing pantry item name",
+  "@ingredientMatchUsePantryItemDesc": {
+    "description": "Description for pantry selection option"
+  },
+  "ingredientMatchAddTermFor": "Add Term for \"{name}\"",
+  "@ingredientMatchAddTermFor": {
+    "description": "Title for add term page",
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "ingredientMatchEnterTermPlaceholder": "Enter matching term",
+  "@ingredientMatchEnterTermPlaceholder": {
+    "description": "Placeholder for term input field"
+  },
+  "ingredientMatchSelectItemFor": "Select Item for \"{name}\"",
+  "@ingredientMatchSelectItemFor": {
+    "description": "Title for pantry selection page",
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "ingredientMatchSearchPantry": "Search pantry items...",
+  "@ingredientMatchSearchPantry": {
+    "description": "Placeholder for pantry search field"
+  },
+  "ingredientMatchNoPantryItems": "No pantry items found",
+  "@ingredientMatchNoPantryItems": {
+    "description": "Empty state when no pantry items exist"
+  },
+  "ingredientMatchAddInPantryTab": "Add items in the Pantry tab",
+  "@ingredientMatchAddInPantryTab": {
+    "description": "Hint to add items in pantry tab"
+  },
+  "ingredientMatchNoItemsFound": "No items found",
+  "@ingredientMatchNoItemsFound": {
+    "description": "Empty state when search returns no results"
+  },
+  "ingredientMatchTryDifferentSearch": "Try a different search term",
+  "@ingredientMatchTryDifferentSearch": {
+    "description": "Hint when search returns no results"
+  },
+
+  "shoppingListCreateNew": "Create New List",
+  "@shoppingListCreateNew": {
+    "description": "Button text to create a new shopping list"
+  },
+  "shoppingListNoLists": "No shopping lists yet",
+  "@shoppingListNoLists": {
+    "description": "Empty state when no shopping lists exist"
+  },
+  "shoppingListDeleteTitle": "Delete List",
+  "@shoppingListDeleteTitle": {
+    "description": "Title for delete list confirmation dialog"
+  },
+  "shoppingListDeleteConfirm": "Are you sure you want to delete \"{name}\"? All items in this list will also be deleted.",
+  "@shoppingListDeleteConfirm": {
+    "description": "Confirmation message for deleting a shopping list",
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "shoppingListUnnamed": "Unnamed List",
+  "@shoppingListUnnamed": {
+    "description": "Fallback name for unnamed shopping lists"
+  },
+  "shoppingListNameLabel": "List Name",
+  "@shoppingListNameLabel": {
+    "description": "Label for list name input field"
+  },
+  "shoppingListNamePlaceholder": "Enter list name",
+  "@shoppingListNamePlaceholder": {
+    "description": "Placeholder for list name input field"
+  },
+  "shoppingListCreateButton": "Create List",
+  "@shoppingListCreateButton": {
+    "description": "Button text to create a shopping list"
   }
 }

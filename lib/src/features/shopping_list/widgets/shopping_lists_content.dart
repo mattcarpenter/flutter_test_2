@@ -8,6 +8,7 @@ import '../../../theme/spacing.dart';
 import '../../../theme/typography.dart';
 import '../../../widgets/app_button.dart';
 import '../../../widgets/utils/grouped_list_styling.dart';
+import '../../../localization/l10n_extension.dart';
 import 'shopping_list_selection_row.dart';
 
 /// Reusable widget that displays a list of shopping lists
@@ -61,13 +62,13 @@ class ShoppingListsContent extends ConsumerWidget {
         final allLists = <_ListItem>[
           _ListItem(
             id: null,
-            name: 'My Shopping List',
+            name: context.l10n.recipeAddToShoppingListDefault,
             isDefault: true,
             isSelected: showSelection && (selectedListId ?? currentListId) == null,
           ),
           ...lists.map((list) => _ListItem(
                 id: list.id,
-                name: list.name ?? 'Unnamed List',
+                name: list.name ?? context.l10n.shoppingListUnnamed,
                 isDefault: false,
                 isSelected: showSelection && (selectedListId ?? currentListId) == list.id,
               )),
@@ -84,7 +85,7 @@ class ShoppingListsContent extends ConsumerWidget {
                 child: Align(
                   alignment: Alignment.centerRight,
                   child: AppButton(
-                    text: 'Create New List',
+                    text: context.l10n.shoppingListCreateNew,
                     onPressed: onCreateList,
                     theme: AppButtonTheme.secondary,
                     style: AppButtonStyle.outline,
@@ -101,7 +102,7 @@ class ShoppingListsContent extends ConsumerWidget {
                 child: Padding(
                   padding: EdgeInsets.all(AppSpacing.xl),
                   child: Text(
-                    'No shopping lists yet',
+                    context.l10n.shoppingListNoLists,
                     style: AppTypography.body.copyWith(
                       color: colors.textSecondary,
                     ),
@@ -121,19 +122,19 @@ class ShoppingListsContent extends ConsumerWidget {
                   Future<void> handleDelete() async {
                     final confirmed = await showCupertinoDialog<bool>(
                       context: context,
-                      builder: (context) => CupertinoAlertDialog(
-                        title: const Text('Delete List'),
+                      builder: (dialogContext) => CupertinoAlertDialog(
+                        title: Text(context.l10n.shoppingListDeleteTitle),
                         content: Text(
-                            'Are you sure you want to delete "${listItem.name}"? All items in this list will also be deleted.'),
+                            context.l10n.shoppingListDeleteConfirm(listItem.name)),
                         actions: [
                           CupertinoDialogAction(
-                            child: const Text('Cancel'),
-                            onPressed: () => Navigator.of(context).pop(false),
+                            child: Text(context.l10n.commonCancel),
+                            onPressed: () => Navigator.of(dialogContext).pop(false),
                           ),
                           CupertinoDialogAction(
                             isDestructiveAction: true,
-                            child: const Text('Delete'),
-                            onPressed: () => Navigator.of(context).pop(true),
+                            child: Text(context.l10n.commonDelete),
+                            onPressed: () => Navigator.of(dialogContext).pop(true),
                           ),
                         ],
                       ),
@@ -195,21 +196,21 @@ class ShoppingListsContent extends ConsumerWidget {
                       confirmDismiss: (direction) async {
                         return await showCupertinoDialog<bool>(
                               context: context,
-                              builder: (context) => CupertinoAlertDialog(
-                                title: const Text('Delete List'),
+                              builder: (dialogContext) => CupertinoAlertDialog(
+                                title: Text(context.l10n.shoppingListDeleteTitle),
                                 content: Text(
-                                    'Are you sure you want to delete "${listItem.name}"? All items in this list will also be deleted.'),
+                                    context.l10n.shoppingListDeleteConfirm(listItem.name)),
                                 actions: [
                                   CupertinoDialogAction(
-                                    child: const Text('Cancel'),
+                                    child: Text(context.l10n.commonCancel),
                                     onPressed: () =>
-                                        Navigator.of(context).pop(false),
+                                        Navigator.of(dialogContext).pop(false),
                                   ),
                                   CupertinoDialogAction(
                                     isDestructiveAction: true,
-                                    child: const Text('Delete'),
+                                    child: Text(context.l10n.commonDelete),
                                     onPressed: () =>
-                                        Navigator.of(context).pop(true),
+                                        Navigator.of(dialogContext).pop(true),
                                   ),
                                 ],
                               ),

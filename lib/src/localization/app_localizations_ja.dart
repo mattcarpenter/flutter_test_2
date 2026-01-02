@@ -1709,4 +1709,138 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get statusBarKeep => '保持';
+
+  @override
+  String get ingredientMatchTitle => 'レシピの材料';
+
+  @override
+  String ingredientMatchAllAvailable(int count) {
+    return '$count種類の材料がすべて揃っています';
+  }
+
+  @override
+  String ingredientMatchAvailableOf(int available, int total) {
+    return '$available/$total品目が利用可能';
+  }
+
+  @override
+  String ingredientMatchOutOfStock(int count) {
+    return '$count品目が在庫切れ';
+  }
+
+  @override
+  String ingredientMatchNotInPantry(int count) {
+    return '$count品目がパントリーにありません';
+  }
+
+  @override
+  String ingredientMatchAddItemsButton(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count品目を追加',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get ingredientMatchAddItemsDefault => '品目を追加';
+
+  @override
+  String get ingredientMatchManageLists => 'リストを管理';
+
+  @override
+  String get ingredientMatchCreateNewList => '新しいリストを作成';
+
+  @override
+  String ingredientMatchInList(String listName) {
+    return '$listNameに追加済み';
+  }
+
+  @override
+  String ingredientMatchMatchesWith(String name) {
+    return 'パントリーの「$name」とマッチ';
+  }
+
+  @override
+  String get ingredientMatchEverythingToMake => '作るのに必要なものがすべて揃っています: ';
+
+  @override
+  String get ingredientMatchMissingFor => '材料が不足しています: ';
+
+  @override
+  String get ingredientMatchLinkedExplainer =>
+      'この材料はレシピにリンクされています。ただし、以下の用語がパントリーのアイテムと一致する場合は、レシピを作る代わりにそちらが使用されます。';
+
+  @override
+  String get ingredientMatchAddTermButton => '用語を追加';
+
+  @override
+  String get ingredientMatchChooseOption => 'マッチング用語を追加するオプションを選択';
+
+  @override
+  String get ingredientMatchEnterCustomTerm => 'カスタム用語を入力';
+
+  @override
+  String get ingredientMatchSelectFromPantry => 'パントリーから選択';
+
+  @override
+  String get ingredientMatchEnterNewTermDesc => 'マッチング用の新しい用語を入力';
+
+  @override
+  String get ingredientMatchUsePantryItemDesc => '既存のパントリーアイテム名を使用';
+
+  @override
+  String ingredientMatchAddTermFor(String name) {
+    return '「$name」の用語を追加';
+  }
+
+  @override
+  String get ingredientMatchEnterTermPlaceholder => 'マッチング用語を入力';
+
+  @override
+  String ingredientMatchSelectItemFor(String name) {
+    return '「$name」のアイテムを選択';
+  }
+
+  @override
+  String get ingredientMatchSearchPantry => 'パントリーを検索...';
+
+  @override
+  String get ingredientMatchNoPantryItems => 'パントリーにアイテムがありません';
+
+  @override
+  String get ingredientMatchAddInPantryTab => 'パントリータブでアイテムを追加してください';
+
+  @override
+  String get ingredientMatchNoItemsFound => 'アイテムが見つかりません';
+
+  @override
+  String get ingredientMatchTryDifferentSearch => '別の検索語をお試しください';
+
+  @override
+  String get shoppingListCreateNew => '新しいリストを作成';
+
+  @override
+  String get shoppingListNoLists => '買い物リストがありません';
+
+  @override
+  String get shoppingListDeleteTitle => 'リストを削除';
+
+  @override
+  String shoppingListDeleteConfirm(String name) {
+    return '「$name」を削除しますか？このリスト内のすべてのアイテムも削除されます。';
+  }
+
+  @override
+  String get shoppingListUnnamed => '名前なしリスト';
+
+  @override
+  String get shoppingListNameLabel => 'リスト名';
+
+  @override
+  String get shoppingListNamePlaceholder => 'リスト名を入力';
+
+  @override
+  String get shoppingListCreateButton => 'リストを作成';
 }

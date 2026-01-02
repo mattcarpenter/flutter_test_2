@@ -1757,4 +1757,141 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get statusBarKeep => 'Keep';
+
+  @override
+  String get ingredientMatchTitle => 'Recipe Ingredients';
+
+  @override
+  String ingredientMatchAllAvailable(int count) {
+    return 'All $count ingredients available';
+  }
+
+  @override
+  String ingredientMatchAvailableOf(int available, int total) {
+    return '$available of $total items available';
+  }
+
+  @override
+  String ingredientMatchOutOfStock(int count) {
+    return '$count out of stock';
+  }
+
+  @override
+  String ingredientMatchNotInPantry(int count) {
+    return '$count not in pantry';
+  }
+
+  @override
+  String ingredientMatchAddItemsButton(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Add $count Items',
+      one: 'Add 1 Item',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get ingredientMatchAddItemsDefault => 'Add Items';
+
+  @override
+  String get ingredientMatchManageLists => 'Manage Lists';
+
+  @override
+  String get ingredientMatchCreateNewList => 'Create New List';
+
+  @override
+  String ingredientMatchInList(String listName) {
+    return 'In $listName';
+  }
+
+  @override
+  String ingredientMatchMatchesWith(String name) {
+    return 'Matches with pantry item $name';
+  }
+
+  @override
+  String get ingredientMatchEverythingToMake => 'You have everything to make ';
+
+  @override
+  String get ingredientMatchMissingFor => 'Missing ingredients for ';
+
+  @override
+  String get ingredientMatchLinkedExplainer =>
+      'This ingredient is linked to a recipe. However, if any of the terms below match items in your pantry, those will be used instead of making the recipe.';
+
+  @override
+  String get ingredientMatchAddTermButton => 'Add Term';
+
+  @override
+  String get ingredientMatchChooseOption =>
+      'Choose an option to add a matching term';
+
+  @override
+  String get ingredientMatchEnterCustomTerm => 'Enter Custom Term';
+
+  @override
+  String get ingredientMatchSelectFromPantry => 'Select from Pantry';
+
+  @override
+  String get ingredientMatchEnterNewTermDesc => 'Enter a new term for matching';
+
+  @override
+  String get ingredientMatchUsePantryItemDesc =>
+      'Use an existing pantry item name';
+
+  @override
+  String ingredientMatchAddTermFor(String name) {
+    return 'Add Term for \"$name\"';
+  }
+
+  @override
+  String get ingredientMatchEnterTermPlaceholder => 'Enter matching term';
+
+  @override
+  String ingredientMatchSelectItemFor(String name) {
+    return 'Select Item for \"$name\"';
+  }
+
+  @override
+  String get ingredientMatchSearchPantry => 'Search pantry items...';
+
+  @override
+  String get ingredientMatchNoPantryItems => 'No pantry items found';
+
+  @override
+  String get ingredientMatchAddInPantryTab => 'Add items in the Pantry tab';
+
+  @override
+  String get ingredientMatchNoItemsFound => 'No items found';
+
+  @override
+  String get ingredientMatchTryDifferentSearch => 'Try a different search term';
+
+  @override
+  String get shoppingListCreateNew => 'Create New List';
+
+  @override
+  String get shoppingListNoLists => 'No shopping lists yet';
+
+  @override
+  String get shoppingListDeleteTitle => 'Delete List';
+
+  @override
+  String shoppingListDeleteConfirm(String name) {
+    return 'Are you sure you want to delete \"$name\"? All items in this list will also be deleted.';
+  }
+
+  @override
+  String get shoppingListUnnamed => 'Unnamed List';
+
+  @override
+  String get shoppingListNameLabel => 'List Name';
+
+  @override
+  String get shoppingListNamePlaceholder => 'Enter list name';
+
+  @override
+  String get shoppingListCreateButton => 'Create List';
 }

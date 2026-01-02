@@ -3177,6 +3177,222 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Keep'**
   String get statusBarKeep;
+
+  /// Title for ingredient matches bottom sheet
+  ///
+  /// In en, this message translates to:
+  /// **'Recipe Ingredients'**
+  String get ingredientMatchTitle;
+
+  /// Status when all ingredients are available
+  ///
+  /// In en, this message translates to:
+  /// **'All {count} ingredients available'**
+  String ingredientMatchAllAvailable(int count);
+
+  /// Status showing available vs total items
+  ///
+  /// In en, this message translates to:
+  /// **'{available} of {total} items available'**
+  String ingredientMatchAvailableOf(int available, int total);
+
+  /// Count of out of stock items
+  ///
+  /// In en, this message translates to:
+  /// **'{count} out of stock'**
+  String ingredientMatchOutOfStock(int count);
+
+  /// Count of items not in pantry
+  ///
+  /// In en, this message translates to:
+  /// **'{count} not in pantry'**
+  String ingredientMatchNotInPantry(int count);
+
+  /// Button text with item count for adding to shopping list
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{Add 1 Item} other{Add {count} Items}}'**
+  String ingredientMatchAddItemsButton(int count);
+
+  /// Default button text when no items selected
+  ///
+  /// In en, this message translates to:
+  /// **'Add Items'**
+  String get ingredientMatchAddItemsDefault;
+
+  /// Button and title for manage lists page
+  ///
+  /// In en, this message translates to:
+  /// **'Manage Lists'**
+  String get ingredientMatchManageLists;
+
+  /// Title for create new list page
+  ///
+  /// In en, this message translates to:
+  /// **'Create New List'**
+  String get ingredientMatchCreateNewList;
+
+  /// Label showing item is already in a shopping list
+  ///
+  /// In en, this message translates to:
+  /// **'In {listName}'**
+  String ingredientMatchInList(String listName);
+
+  /// Label showing pantry item match
+  ///
+  /// In en, this message translates to:
+  /// **'Matches with pantry item {name}'**
+  String ingredientMatchMatchesWith(String name);
+
+  /// Prefix for linked recipe when all ingredients available
+  ///
+  /// In en, this message translates to:
+  /// **'You have everything to make '**
+  String get ingredientMatchEverythingToMake;
+
+  /// Prefix for linked recipe when ingredients missing
+  ///
+  /// In en, this message translates to:
+  /// **'Missing ingredients for '**
+  String get ingredientMatchMissingFor;
+
+  /// Explainer text for linked recipe ingredients
+  ///
+  /// In en, this message translates to:
+  /// **'This ingredient is linked to a recipe. However, if any of the terms below match items in your pantry, those will be used instead of making the recipe.'**
+  String get ingredientMatchLinkedExplainer;
+
+  /// Button to add a matching term
+  ///
+  /// In en, this message translates to:
+  /// **'Add Term'**
+  String get ingredientMatchAddTermButton;
+
+  /// Action sheet message for adding term options
+  ///
+  /// In en, this message translates to:
+  /// **'Choose an option to add a matching term'**
+  String get ingredientMatchChooseOption;
+
+  /// Option to enter a custom matching term
+  ///
+  /// In en, this message translates to:
+  /// **'Enter Custom Term'**
+  String get ingredientMatchEnterCustomTerm;
+
+  /// Option to select from pantry items
+  ///
+  /// In en, this message translates to:
+  /// **'Select from Pantry'**
+  String get ingredientMatchSelectFromPantry;
+
+  /// Description for custom term option
+  ///
+  /// In en, this message translates to:
+  /// **'Enter a new term for matching'**
+  String get ingredientMatchEnterNewTermDesc;
+
+  /// Description for pantry selection option
+  ///
+  /// In en, this message translates to:
+  /// **'Use an existing pantry item name'**
+  String get ingredientMatchUsePantryItemDesc;
+
+  /// Title for add term page
+  ///
+  /// In en, this message translates to:
+  /// **'Add Term for \"{name}\"'**
+  String ingredientMatchAddTermFor(String name);
+
+  /// Placeholder for term input field
+  ///
+  /// In en, this message translates to:
+  /// **'Enter matching term'**
+  String get ingredientMatchEnterTermPlaceholder;
+
+  /// Title for pantry selection page
+  ///
+  /// In en, this message translates to:
+  /// **'Select Item for \"{name}\"'**
+  String ingredientMatchSelectItemFor(String name);
+
+  /// Placeholder for pantry search field
+  ///
+  /// In en, this message translates to:
+  /// **'Search pantry items...'**
+  String get ingredientMatchSearchPantry;
+
+  /// Empty state when no pantry items exist
+  ///
+  /// In en, this message translates to:
+  /// **'No pantry items found'**
+  String get ingredientMatchNoPantryItems;
+
+  /// Hint to add items in pantry tab
+  ///
+  /// In en, this message translates to:
+  /// **'Add items in the Pantry tab'**
+  String get ingredientMatchAddInPantryTab;
+
+  /// Empty state when search returns no results
+  ///
+  /// In en, this message translates to:
+  /// **'No items found'**
+  String get ingredientMatchNoItemsFound;
+
+  /// Hint when search returns no results
+  ///
+  /// In en, this message translates to:
+  /// **'Try a different search term'**
+  String get ingredientMatchTryDifferentSearch;
+
+  /// Button text to create a new shopping list
+  ///
+  /// In en, this message translates to:
+  /// **'Create New List'**
+  String get shoppingListCreateNew;
+
+  /// Empty state when no shopping lists exist
+  ///
+  /// In en, this message translates to:
+  /// **'No shopping lists yet'**
+  String get shoppingListNoLists;
+
+  /// Title for delete list confirmation dialog
+  ///
+  /// In en, this message translates to:
+  /// **'Delete List'**
+  String get shoppingListDeleteTitle;
+
+  /// Confirmation message for deleting a shopping list
+  ///
+  /// In en, this message translates to:
+  /// **'Are you sure you want to delete \"{name}\"? All items in this list will also be deleted.'**
+  String shoppingListDeleteConfirm(String name);
+
+  /// Fallback name for unnamed shopping lists
+  ///
+  /// In en, this message translates to:
+  /// **'Unnamed List'**
+  String get shoppingListUnnamed;
+
+  /// Label for list name input field
+  ///
+  /// In en, this message translates to:
+  /// **'List Name'**
+  String get shoppingListNameLabel;
+
+  /// Placeholder for list name input field
+  ///
+  /// In en, this message translates to:
+  /// **'Enter list name'**
+  String get shoppingListNamePlaceholder;
+
+  /// Button text to create a shopping list
+  ///
+  /// In en, this message translates to:
+  /// **'Create List'**
+  String get shoppingListCreateButton;
 }
 
 class _AppLocalizationsDelegate

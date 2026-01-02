@@ -32,6 +32,7 @@ import 'package:recipe_app/src/services/ingredient_parser_service.dart';
 import 'package:recipe_app/src/services/logging/app_logger.dart';
 import 'package:recipe_app/src/features/shopping_list/widgets/shopping_lists_content.dart';
 import 'package:recipe_app/src/features/shopping_list/widgets/create_list_content.dart';
+import 'package:recipe_app/src/localization/l10n_extension.dart';
 
 // Controller for Add to Shopping List page (no GlobalKey needed)
 final _addToShoppingListController = _AddToShoppingListController();
@@ -82,10 +83,10 @@ SliverWoltModalSheetPage _buildAddToShoppingListPage({
             top: false,
             child: AppButtonVariants.primaryFilled(
               text: isLoading
-                  ? 'Adding...'
+                  ? context.l10n.recipeAddToShoppingListAdding
                   : checkedCount > 0
-                      ? 'Add $checkedCount Item${checkedCount == 1 ? '' : 's'}'
-                      : 'Add Items',
+                      ? context.l10n.ingredientMatchAddItemsButton(checkedCount)
+                      : context.l10n.ingredientMatchAddItemsDefault,
               size: AppButtonSize.large,
               shape: AppButtonShape.square,
               fullWidth: true,
@@ -161,7 +162,7 @@ void showIngredientMatchesBottomSheet(
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     Text(
-                      'Recipe Ingredients',
+                      modalContext.l10n.ingredientMatchTitle,
                       style: AppTypography.h4.copyWith(
                         color: AppColors.of(modalContext).textPrimary,
                       ),
@@ -216,7 +217,7 @@ void showIngredientMatchesBottomSheet(
               mainAxisSize: MainAxisSize.min,
               children: [
                 Text(
-                  'Manage Lists',
+                  modalContext.l10n.ingredientMatchManageLists,
                   style: AppTypography.h4.copyWith(
                     color: AppColors.of(modalContext).textPrimary,
                   ),
@@ -267,7 +268,7 @@ void showIngredientMatchesBottomSheet(
               mainAxisSize: MainAxisSize.min,
               children: [
                 Text(
-                  'Create New List',
+                  modalContext.l10n.ingredientMatchCreateNewList,
                   style: AppTypography.h4.copyWith(
                     color: AppColors.of(modalContext).textPrimary,
                   ),
@@ -432,6 +433,7 @@ class IngredientMatchesListPage extends ConsumerWidget {
 
         // Build status lines
         final statusLines = _buildStatusLines(
+          context,
           total: total,
           available: available,
           outOfStock: outOfStock,
@@ -477,7 +479,7 @@ class IngredientMatchesListPage extends ConsumerWidget {
 
                 // Add to Shopping List button
                 AppButton(
-                  text: 'Add to Shopping List',
+                  text: context.l10n.recipeAddToShoppingListButton,
                   onPressed: () {
                     pageIndexNotifier.value = 1;
                   },
@@ -627,7 +629,8 @@ class IngredientMatchesListPage extends ConsumerWidget {
     return 4;
   }
 
-  List<String> _buildStatusLines({
+  List<String> _buildStatusLines(
+    BuildContext context, {
     required int total,
     required int available,
     required int outOfStock,
@@ -635,18 +638,18 @@ class IngredientMatchesListPage extends ConsumerWidget {
   }) {
     // If all available, show positive message
     if (available == total) {
-      return ['All $total ingredient${total == 1 ? '' : 's'} available'];
+      return [context.l10n.ingredientMatchAllAvailable(total)];
     }
 
     // Start with availability fraction
-    final lines = <String>['$available of $total items available'];
+    final lines = <String>[context.l10n.ingredientMatchAvailableOf(available, total)];
 
     // Add problems
     if (outOfStock > 0) {
-      lines.add('$outOfStock out of stock');
+      lines.add(context.l10n.ingredientMatchOutOfStock(outOfStock));
     }
     if (notInPantry > 0) {
-      lines.add('$notInPantry not in pantry');
+      lines.add(context.l10n.ingredientMatchNotInPantry(notInPantry));
     }
 
     return lines;
@@ -914,13 +917,13 @@ class _AddToShoppingListPageState extends ConsumerState<AddToShoppingListPage> {
                     crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
                       Text(
-                        'Add to Shopping List',
+                        context.l10n.recipeAddToShoppingListButton,
                         style: AppTypography.h4.copyWith(
                           color: colors.textPrimary,
                         ),
                       ),
                       AppButton(
-                        text: 'Manage Lists',
+                        text: context.l10n.ingredientMatchManageLists,
                         onPressed: () {
                           widget.pageIndexNotifier.value = 2;
                         },
@@ -994,7 +997,7 @@ class _AddToShoppingListPageState extends ConsumerState<AddToShoppingListPage> {
                     padding: EdgeInsets.all(AppSpacing.xl),
                     child: Center(
                       child: Text(
-                        'No ingredients to add',
+                        context.l10n.recipeAddToShoppingListNoIngredients,
                         style: AppTypography.body.copyWith(
                           color: colors.textSecondary,
                         ),
@@ -1083,10 +1086,10 @@ class _AddToShoppingListPageState extends ConsumerState<AddToShoppingListPage> {
     final selectedListId = controller.selectedListIds[ingredient.id] ?? defaultListId;
 
     // Get list name for display
-    String listName = 'My Shopping List';
+    String listName = context.l10n.recipeAddToShoppingListDefault;
     if (selectedListId != null) {
       final list = lists.where((l) => l.id == selectedListId).firstOrNull;
-      listName = list?.name ?? 'My Shopping List';
+      listName = list?.name ?? context.l10n.recipeAddToShoppingListDefault;
     }
 
 
@@ -1153,7 +1156,7 @@ class _AddToShoppingListPageState extends ConsumerState<AddToShoppingListPage> {
             AdaptivePullDownButton(
               items: [
                 AdaptiveMenuItem(
-                  title: 'My Shopping List',
+                  title: context.l10n.recipeAddToShoppingListDefault,
                   icon: selectedListId == null ? const Icon(CupertinoIcons.checkmark) : const HugeIcon(icon: HugeIcons.strokeRoundedLeftToRightListBullet),
                   onTap: () {
                     controller.updateSelectedList(ingredient.id, null);
@@ -1163,7 +1166,7 @@ class _AddToShoppingListPageState extends ConsumerState<AddToShoppingListPage> {
                   },
                 ),
                 ...lists.map((list) => AdaptiveMenuItem(
-                      title: list.name ?? 'Unnamed',
+                      title: list.name ?? context.l10n.shoppingListUnnamed,
                       icon: selectedListId == list.id ? const Icon(CupertinoIcons.checkmark) : const HugeIcon(icon: HugeIcons.strokeRoundedLeftToRightListBullet),
                       onTap: () {
                         controller.updateSelectedList(ingredient.id, list.id);
@@ -1262,7 +1265,7 @@ class _AddToShoppingListPageState extends ConsumerState<AddToShoppingListPage> {
                   ),
                   SizedBox(height: 2),
                   Text(
-                    'In $listName',
+                    context.l10n.ingredientMatchInList(listName),
                     style: AppTypography.caption.copyWith(
                       color: colors.textSecondary,
                     ),
@@ -1401,19 +1404,11 @@ class _IngredientDetailPageState extends ConsumerState<IngredientDetailPage> {
     final colors = AppColors.of(context);
 
     // "Matches with pantry item {name}"
-    return RichText(
-      text: TextSpan(
-        style: TextStyle(
-          fontSize: 14,
-          color: colors.textTertiary,
-        ),
-        children: [
-          const TextSpan(text: 'Matches with pantry item '),
-          TextSpan(
-            text: match.pantryItem!.name,
-            style: const TextStyle(fontWeight: FontWeight.bold),
-          ),
-        ],
+    return Text(
+      context.l10n.ingredientMatchMatchesWith(match.pantryItem!.name),
+      style: TextStyle(
+        fontSize: 14,
+        color: colors.textTertiary,
       ),
     );
   }
@@ -1471,8 +1466,8 @@ class _IngredientDetailPageState extends ConsumerState<IngredientDetailPage> {
                     children: [
                       TextSpan(
                         text: match.hasRecipeMatch
-                            ? 'You have everything to make '
-                            : 'Missing ingredients for ',
+                            ? context.l10n.ingredientMatchEverythingToMake
+                            : context.l10n.ingredientMatchMissingFor,
                       ),
                       TextSpan(
                         text: recipeName,
@@ -1519,7 +1514,7 @@ class _IngredientDetailPageState extends ConsumerState<IngredientDetailPage> {
         Row(
           children: [
             Text(
-              'Matching Terms',
+              context.l10n.recipeMatchTermsTitle,
               style: AppTypography.h5.copyWith(
                 color: colors.textPrimary,
               ),
@@ -1528,7 +1523,7 @@ class _IngredientDetailPageState extends ConsumerState<IngredientDetailPage> {
 
             // Add term button
             AppButton(
-              text: 'Add Term',
+              text: context.l10n.ingredientMatchAddTermButton,
               onPressed: () => _addNewTerm(ingredient.id),
               theme: AppButtonTheme.secondary,
               style: AppButtonStyle.outline,
@@ -1544,7 +1539,7 @@ class _IngredientDetailPageState extends ConsumerState<IngredientDetailPage> {
         // Explainer text for linked recipe ingredients
         if (hasLinkedRecipe) ...[
           Text(
-            'This ingredient is linked to a recipe. However, if any of the terms below match items in your pantry, those will be used instead of making the recipe.',
+            context.l10n.ingredientMatchLinkedExplainer,
             style: TextStyle(
               fontSize: 13,
               color: colors.textTertiary,
@@ -1559,7 +1554,7 @@ class _IngredientDetailPageState extends ConsumerState<IngredientDetailPage> {
           Padding(
             padding: EdgeInsets.all(AppSpacing.sm),
             child: Text(
-              'No additional terms for this ingredient. Add terms to improve pantry matching.',
+              context.l10n.recipeMatchNoTerms,
               style: TextStyle(
                 fontStyle: FontStyle.italic,
                 color: colors.textTertiary,
@@ -1618,7 +1613,7 @@ class _IngredientDetailPageState extends ConsumerState<IngredientDetailPage> {
 
         // Help text
         Text(
-          'Tip: Add terms that match pantry item names to improve matching.',
+          context.l10n.recipeMatchTip,
           style: TextStyle(
             fontSize: 12,
             color: colors.textTertiary,
@@ -1665,7 +1660,7 @@ class _IngredientDetailPageState extends ConsumerState<IngredientDetailPage> {
           return Menu(
             children: [
               MenuAction(
-                title: 'Delete',
+                title: context.l10n.commonDelete,
                 image: MenuImage.icon(Icons.delete),
                 callback: () => _handleTermDeletion(ingredientId, term),
               ),
@@ -1696,7 +1691,7 @@ class _IngredientDetailPageState extends ConsumerState<IngredientDetailPage> {
                     ),
                     SizedBox(height: 2),
                     Text(
-                      'Source: ${term.source}',
+                      context.l10n.recipeMatchSource(term.source),
                       style: AppTypography.caption.copyWith(
                         color: colors.contentSecondary,
                       ),
@@ -1725,20 +1720,20 @@ class _IngredientDetailPageState extends ConsumerState<IngredientDetailPage> {
                       onPressed: () {
                         showCupertinoModalPopup(
                           context: context,
-                          builder: (context) => CupertinoActionSheet(
+                          builder: (sheetContext) => CupertinoActionSheet(
                             actions: [
                               CupertinoActionSheetAction(
                                 isDestructiveAction: true,
                                 onPressed: () {
-                                  Navigator.pop(context);
+                                  Navigator.pop(sheetContext);
                                   _handleTermDeletion(ingredientId, term);
                                 },
-                                child: const Text('Delete'),
+                                child: Text(context.l10n.commonDelete),
                               ),
                             ],
                             cancelButton: CupertinoActionSheetAction(
-                              onPressed: () => Navigator.pop(context),
-                              child: const Text('Cancel'),
+                              onPressed: () => Navigator.pop(sheetContext),
+                              child: Text(context.l10n.commonCancel),
                             ),
                           ),
                         );
@@ -1762,14 +1757,14 @@ class _IngredientDetailPageState extends ConsumerState<IngredientDetailPage> {
                           _handleTermDeletion(ingredientId, term);
                         }
                       },
-                      itemBuilder: (context) => [
-                        const PopupMenuItem<String>(
+                      itemBuilder: (menuContext) => [
+                        PopupMenuItem<String>(
                           value: 'delete',
                           child: Row(
                             children: [
-                              Icon(Icons.delete),
-                              SizedBox(width: 8),
-                              Text('Delete'),
+                              const Icon(Icons.delete),
+                              const SizedBox(width: 8),
+                              Text(context.l10n.commonDelete),
                             ],
                           ),
                         ),
@@ -1867,22 +1862,22 @@ class _IngredientDetailPageState extends ConsumerState<IngredientDetailPage> {
     if (Platform.isIOS || Platform.isMacOS) {
       showCupertinoModalPopup(
         context: context,
-        builder: (context) => CupertinoActionSheet(
-          title: const Text('Add Matching Term'),
-          message: const Text('Choose an option to add a matching term'),
+        builder: (sheetContext) => CupertinoActionSheet(
+          title: Text(context.l10n.recipeMatchAddTermTitle),
+          message: Text(context.l10n.ingredientMatchChooseOption),
           actions: [
             CupertinoActionSheetAction(
-              child: const Text('Enter Custom Term'),
+              child: Text(context.l10n.ingredientMatchEnterCustomTerm),
               onPressed: () {
-                Navigator.pop(context);
+                Navigator.pop(sheetContext);
                 // Navigate to page 5 (Add Custom Term)
                 widget.pageIndexNotifier.value = 5;
               },
             ),
             CupertinoActionSheetAction(
-              child: const Text('Select from Pantry'),
+              child: Text(context.l10n.ingredientMatchSelectFromPantry),
               onPressed: () {
-                Navigator.pop(context);
+                Navigator.pop(sheetContext);
                 // Navigate to page 6 (Select from Pantry)
                 widget.pageIndexNotifier.value = 6;
               },
@@ -1891,9 +1886,9 @@ class _IngredientDetailPageState extends ConsumerState<IngredientDetailPage> {
           cancelButton: CupertinoActionSheetAction(
             isDestructiveAction: true,
             onPressed: () {
-              Navigator.pop(context);
+              Navigator.pop(sheetContext);
             },
-            child: const Text('Cancel'),
+            child: Text(context.l10n.commonCancel),
           ),
         ),
       );
@@ -1912,10 +1907,10 @@ class _IngredientDetailPageState extends ConsumerState<IngredientDetailPage> {
         ),
         items: [
           PopupMenuItem(
-            child: const ListTile(
-              leading: Icon(Icons.edit),
-              title: Text('Enter Custom Term'),
-              subtitle: Text('Enter a new term for matching'),
+            child: ListTile(
+              leading: const Icon(Icons.edit),
+              title: Text(context.l10n.ingredientMatchEnterCustomTerm),
+              subtitle: Text(context.l10n.ingredientMatchEnterNewTermDesc),
             ),
             onTap: () {
               // Navigate to page 5 (Add Custom Term)
@@ -1923,10 +1918,10 @@ class _IngredientDetailPageState extends ConsumerState<IngredientDetailPage> {
             },
           ),
           PopupMenuItem(
-            child: const ListTile(
-              leading: Icon(Icons.kitchen),
-              title: Text('Select from Pantry'),
-              subtitle: Text('Use an existing pantry item name'),
+            child: ListTile(
+              leading: const Icon(Icons.kitchen),
+              title: Text(context.l10n.ingredientMatchSelectFromPantry),
+              subtitle: Text(context.l10n.ingredientMatchUsePantryItemDesc),
             ),
             onTap: () {
               // Navigate to page 6 (Select from Pantry)
@@ -2074,7 +2069,7 @@ class _AddCustomTermPageState extends ConsumerState<AddCustomTermPage> {
         mainAxisSize: MainAxisSize.min,
         children: [
           Text(
-            'Add Term for "$displayName"',
+            context.l10n.ingredientMatchAddTermFor(displayName),
             style: AppTypography.h4.copyWith(
               color: colors.textPrimary,
             ),
@@ -2086,14 +2081,14 @@ class _AddCustomTermPageState extends ConsumerState<AddCustomTermPage> {
                 child: AppTextFieldSimple(
                   controller: _termController,
                   focusNode: _focusNode,
-                  placeholder: 'Enter matching term',
+                  placeholder: context.l10n.ingredientMatchEnterTermPlaceholder,
                   textInputAction: TextInputAction.done,
                   onSubmitted: (_) => _addTerm(),
                 ),
               ),
               SizedBox(width: AppSpacing.md),
               AppButtonVariants.primaryFilled(
-                text: 'Add',
+                text: context.l10n.commonAdd,
                 size: AppButtonSize.large,
                 shape: AppButtonShape.square,
                 onPressed: (_isLoading || !_hasInput) ? null : _addTerm,
@@ -2225,7 +2220,7 @@ class _SelectFromPantryPageState extends ConsumerState<SelectFromPantryPage> {
           child: Align(
             alignment: Alignment.centerLeft,
             child: Text(
-              'Select Item for "$displayName"',
+              context.l10n.ingredientMatchSelectItemFor(displayName),
               style: AppTypography.h4.copyWith(
                 color: colors.textPrimary,
               ),
@@ -2239,7 +2234,7 @@ class _SelectFromPantryPageState extends ConsumerState<SelectFromPantryPage> {
           child: CupertinoSearchTextField(
             controller: _searchController,
             focusNode: _searchFocusNode,
-            placeholder: 'Search pantry items...',
+            placeholder: context.l10n.ingredientMatchSearchPantry,
             style: CupertinoTheme.of(context).textTheme.textStyle,
           ),
         ),
@@ -2390,14 +2385,14 @@ class _SelectFromPantryPageState extends ConsumerState<SelectFromPantryPage> {
             ),
             SizedBox(height: AppSpacing.lg),
             Text(
-              'No pantry items found',
+              context.l10n.ingredientMatchNoPantryItems,
               style: AppTypography.body.copyWith(
                 color: colors.textSecondary,
               ),
             ),
             SizedBox(height: AppSpacing.xs),
             Text(
-              'Add items in the Pantry tab',
+              context.l10n.ingredientMatchAddInPantryTab,
               style: AppTypography.bodySmall.copyWith(
                 color: colors.textTertiary,
               ),
@@ -2424,14 +2419,14 @@ class _SelectFromPantryPageState extends ConsumerState<SelectFromPantryPage> {
             ),
             SizedBox(height: AppSpacing.lg),
             Text(
-              'No items found',
+              context.l10n.ingredientMatchNoItemsFound,
               style: AppTypography.body.copyWith(
                 color: colors.textSecondary,
               ),
             ),
             SizedBox(height: AppSpacing.xs),
             Text(
-              'Try a different search term',
+              context.l10n.ingredientMatchTryDifferentSearch,
               style: AppTypography.bodySmall.copyWith(
                 color: colors.textTertiary,
               ),
