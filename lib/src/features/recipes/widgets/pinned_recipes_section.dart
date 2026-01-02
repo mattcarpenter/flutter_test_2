@@ -2,6 +2,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import '../../../localization/l10n_extension.dart';
 import '../../../providers/recipe_provider.dart';
 import '../../../theme/colors.dart';
 import '../../../theme/spacing.dart';
@@ -36,7 +37,7 @@ class PinnedRecipesSection extends ConsumerWidget {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Text(
-                    'Pinned Recipes',
+                    context.l10n.recipePinnedTitle,
                     style: AppTypography.h2Serif.copyWith(
                       color: AppColors.of(context).headingSecondary,
                     ),
@@ -45,7 +46,7 @@ class PinnedRecipesSection extends ConsumerWidget {
                     onPressed: () {
                       context.push('/recipes/pinned');
                     },
-                    child: const Text('View All'),
+                    child: Text(context.l10n.commonViewAll),
                   ),
                 ],
               ),
@@ -76,7 +77,7 @@ class PinnedRecipesSection extends ConsumerWidget {
                       isLocked: isLocked,
                       onTap: () {
                         context.push('/recipe/${recipe.id}', extra: {
-                          'previousPageTitle': 'Recipes',
+                          'previousPageTitle': context.l10n.recipesTitle,
                         });
                       },
                     ),

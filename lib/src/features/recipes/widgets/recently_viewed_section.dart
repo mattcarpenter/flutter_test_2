@@ -2,6 +2,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import '../../../localization/l10n_extension.dart';
 import '../../../providers/recently_viewed_provider.dart';
 import '../../../providers/recipe_provider.dart';
 import '../../../theme/colors.dart';
@@ -38,7 +39,7 @@ class RecentlyViewedSection extends ConsumerWidget {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Text(
-                    'Recently Viewed',
+                    context.l10n.recipeRecentlyViewedTitle,
                     style: AppTypography.h2Serif.copyWith(
                       color: AppColors.of(context).headingSecondary,
                     ),
@@ -47,7 +48,7 @@ class RecentlyViewedSection extends ConsumerWidget {
                     onPressed: () {
                       context.push('/recipes/recent');
                     },
-                    child: const Text('View All'),
+                    child: Text(context.l10n.commonViewAll),
                   ),
                 ],
               ),
@@ -61,7 +62,7 @@ class RecentlyViewedSection extends ConsumerWidget {
               return GestureDetector(
                 onTap: () {
                   context.push('/recipe/${recipe.id}', extra: {
-                    'previousPageTitle': 'Recipes',
+                    'previousPageTitle': context.l10n.recipesTitle,
                   });
                 },
                 child: AbsorbPointer(

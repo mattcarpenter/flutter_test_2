@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../database/database.dart';
+import '../../../localization/l10n_extension.dart';
 import '../../../mobile/utils/adaptive_sliver_page.dart';
 import '../../../providers/recently_viewed_provider.dart';
 import '../../../widgets/recipe_list_item.dart';
@@ -16,7 +17,7 @@ class RecentlyViewedPage extends ConsumerWidget {
     final recentlyViewedAsync = ref.watch(recentlyViewedProvider);
 
     return AdaptiveSliverPage(
-      title: 'Recently Viewed',
+      title: context.l10n.recipeRecentlyViewedTitle,
       searchEnabled: false, // No search filtering per requirements
       slivers: [
         recentlyViewedAsync.when(
@@ -40,7 +41,7 @@ class RecentlyViewedPage extends ConsumerWidget {
                       ),
                       const SizedBox(height: AppSpacing.lg),
                       Text(
-                        'No recently viewed recipes yet.\nStart exploring recipes to see them here.',
+                        context.l10n.recipeRecentlyViewedEmpty,
                         textAlign: TextAlign.center,
                         style: Theme.of(context).textTheme.bodyLarge?.copyWith(
                           color: AppColors.of(context).textSecondary,
@@ -56,7 +57,7 @@ class RecentlyViewedPage extends ConsumerWidget {
           },
         ),
       ],
-      previousPageTitle: 'Recipes',
+      previousPageTitle: context.l10n.recipesTitle,
       automaticallyImplyLeading: true,
     );
   }
@@ -77,7 +78,7 @@ class RecentlyViewedPage extends ConsumerWidget {
             recipe: recipe,
             onTap: () {
               context.push('/recipe/${recipe.id}', extra: {
-                'previousPageTitle': 'Recently Viewed',
+                'previousPageTitle': context.l10n.recipeRecentlyViewedTitle,
               });
             },
           );
@@ -101,7 +102,7 @@ class RecentlyViewedPage extends ConsumerWidget {
                 recipe: recipe,
                 onTap: () {
                   context.push('/recipe/${recipe.id}', extra: {
-                    'previousPageTitle': 'Recently Viewed',
+                    'previousPageTitle': context.l10n.recipeRecentlyViewedTitle,
                   });
                 },
               );

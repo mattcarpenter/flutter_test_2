@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import '../../../../database/database.dart';
 import '../../../constants/folder_constants.dart';
 import '../../../features/settings/providers/app_settings_provider.dart';
+import '../../../localization/l10n_extension.dart';
 import '../../../providers/recipe_folder_provider.dart';
 import '../../../providers/recipe_provider.dart';
 import '../../../providers/smart_folder_provider.dart';
@@ -68,7 +69,7 @@ class _FolderListState extends ConsumerState<FolderList> {
           foldersAsyncValue.when(
             data: (folders) {
               // Create list with uncategorized folder included
-              final uncategorizedFolder = _createUncategorizedFolder();
+              final uncategorizedFolder = _createUncategorizedFolder(context);
 
               // Apply sorting to all folders (including uncategorized)
               List<dynamic> allFolders = _applySortOrder(
@@ -207,10 +208,10 @@ class _FolderListState extends ConsumerState<FolderList> {
   }
 
   // Helper method to create the uncategorized virtual folder
-  VirtualFolder _createUncategorizedFolder() {
+  VirtualFolder _createUncategorizedFolder(BuildContext context) {
     return VirtualFolder(
       id: kUncategorizedFolderId,
-      name: kUncategorizedFolderName,
+      name: context.l10n.folderUncategorized,
     );
   }
 

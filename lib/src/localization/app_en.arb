@@ -2042,5 +2042,53 @@
   "durationPickerSeconds": "seconds",
   "@durationPickerSeconds": {
     "description": "Seconds label in duration picker"
+  },
+
+  "folderUncategorized": "Uncategorized",
+  "@folderUncategorized": {
+    "description": "Name for the uncategorized folder"
+  },
+  "folderNoRecipes": "no recipes",
+  "@folderNoRecipes": {
+    "description": "Text shown when folder has no recipes"
+  },
+  "folderOneRecipe": "1 recipe",
+  "@folderOneRecipe": {
+    "description": "Text shown when folder has one recipe"
+  },
+  "folderRecipeCount": "{count} recipes",
+  "@folderRecipeCount": {
+    "description": "Text shown for recipe count in folder",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "folderRename": "Rename Folder",
+  "@folderRename": {
+    "description": "Rename folder menu item"
+  },
+  "folderEditSmart": "Edit Smart Folder",
+  "@folderEditSmart": {
+    "description": "Edit smart folder menu item"
+  },
+  "folderDelete": "Delete Folder",
+  "@folderDelete": {
+    "description": "Delete folder menu item"
+  },
+
+  "commonViewAll": "View All",
+  "@commonViewAll": {
+    "description": "View all button text"
+  },
+
+  "recipeRecentlyViewedTitle": "Recently Viewed",
+  "@recipeRecentlyViewedTitle": {
+    "description": "Recently viewed section title"
+  },
+  "recipeRecentlyViewedEmpty": "No recently viewed recipes yet.\nStart exploring recipes to see them here.",
+  "@recipeRecentlyViewedEmpty": {
+    "description": "Empty state message for recently viewed"
   }
 }

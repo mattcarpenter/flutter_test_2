@@ -1462,4 +1462,36 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get durationPickerSeconds => '秒';
+
+  @override
+  String get folderUncategorized => '未分類';
+
+  @override
+  String get folderNoRecipes => 'レシピなし';
+
+  @override
+  String get folderOneRecipe => '1件のレシピ';
+
+  @override
+  String folderRecipeCount(int count) {
+    return '$count件のレシピ';
+  }
+
+  @override
+  String get folderRename => 'フォルダ名を変更';
+
+  @override
+  String get folderEditSmart => 'スマートフォルダを編集';
+
+  @override
+  String get folderDelete => 'フォルダを削除';
+
+  @override
+  String get commonViewAll => 'すべて表示';
+
+  @override
+  String get recipeRecentlyViewedTitle => '最近見たレシピ';
+
+  @override
+  String get recipeRecentlyViewedEmpty => '最近見たレシピはありません。\nレシピを探索してここに表示しましょう。';
 }

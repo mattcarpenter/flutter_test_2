@@ -1503,4 +1503,37 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get durationPickerSeconds => 'seconds';
+
+  @override
+  String get folderUncategorized => 'Uncategorized';
+
+  @override
+  String get folderNoRecipes => 'no recipes';
+
+  @override
+  String get folderOneRecipe => '1 recipe';
+
+  @override
+  String folderRecipeCount(int count) {
+    return '$count recipes';
+  }
+
+  @override
+  String get folderRename => 'Rename Folder';
+
+  @override
+  String get folderEditSmart => 'Edit Smart Folder';
+
+  @override
+  String get folderDelete => 'Delete Folder';
+
+  @override
+  String get commonViewAll => 'View All';
+
+  @override
+  String get recipeRecentlyViewedTitle => 'Recently Viewed';
+
+  @override
+  String get recipeRecentlyViewedEmpty =>
+      'No recently viewed recipes yet.\nStart exploring recipes to see them here.';
 }

@@ -5,6 +5,7 @@ import 'package:super_context_menu/super_context_menu.dart';
 import '../../../providers/folder_thumbnail_provider.dart';
 import '../../../theme/colors.dart';
 import '../../../theme/spacing.dart';
+import '../../../localization/l10n_extension.dart';
 import '../../../widgets/local_or_network_image.dart';
 import '../../../widgets/recipe_placeholder_image.dart';
 import '../../../../database/models/recipe_images.dart';
@@ -160,24 +161,25 @@ class _FolderCardContextMenu extends ConsumerWidget {
         isChild: true,
       ),
       menuProvider: (_) {
+        final l10n = context.l10n;
         return Menu(
           children: [
             // Show rename option for all folders
             if (onRename != null)
               MenuAction(
-                title: 'Rename Folder',
+                title: l10n.folderRename,
                 image: MenuImage.icon(Icons.drive_file_rename_outline),
                 callback: onRename!,
               ),
             // Show edit option for smart folders
             if (isSmartFolder && onEdit != null)
               MenuAction(
-                title: 'Edit Smart Folder',
+                title: l10n.folderEditSmart,
                 image: MenuImage.icon(Icons.tune),
                 callback: onEdit!,
               ),
             MenuAction(
-              title: 'Delete Folder',
+              title: l10n.folderDelete,
               image: MenuImage.icon(Icons.delete),
               attributes: const MenuActionAttributes(destructive: true),
               callback: onDelete,
@@ -275,7 +277,7 @@ class _FolderCardContent extends ConsumerWidget {
                   ),
                   const SizedBox(height: 1.0), // Reduced spacing
                   Text(
-                    _formatRecipeCount(recipeCount),
+                    _formatRecipeCount(context, recipeCount),
                     style: CupertinoTheme.of(context)
                         .textTheme
                         .textStyle
@@ -301,13 +303,14 @@ class _FolderCardContent extends ConsumerWidget {
     );
   }
 
-  String _formatRecipeCount(int count) {
+  String _formatRecipeCount(BuildContext context, int count) {
+    final l10n = context.l10n;
     if (count == 0) {
-      return 'no recipes';
+      return l10n.folderNoRecipes;
     } else if (count == 1) {
-      return '1 recipe';
+      return l10n.folderOneRecipe;
     } else {
-      return '$count recipes';
+      return l10n.folderRecipeCount(count);
     }
   }
 }

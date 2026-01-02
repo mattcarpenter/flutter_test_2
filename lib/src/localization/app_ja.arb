@@ -496,5 +496,18 @@
   "durationPickerTitle": "時間を選択",
   "durationPickerHours": "時間",
   "durationPickerMinutes": "分",
-  "durationPickerSeconds": "秒"
+  "durationPickerSeconds": "秒",
+
+  "folderUncategorized": "未分類",
+  "folderNoRecipes": "レシピなし",
+  "folderOneRecipe": "1件のレシピ",
+  "folderRecipeCount": "{count}件のレシピ",
+  "folderRename": "フォルダ名を変更",
+  "folderEditSmart": "スマートフォルダを編集",
+  "folderDelete": "フォルダを削除",
+
+  "commonViewAll": "すべて表示",
+
+  "recipeRecentlyViewedTitle": "最近見たレシピ",
+  "recipeRecentlyViewedEmpty": "最近見たレシピはありません。\nレシピを探索してここに表示しましょう。"
 }

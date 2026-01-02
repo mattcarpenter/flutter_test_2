@@ -2756,6 +2756,66 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'seconds'**
   String get durationPickerSeconds;
+
+  /// Name for the uncategorized folder
+  ///
+  /// In en, this message translates to:
+  /// **'Uncategorized'**
+  String get folderUncategorized;
+
+  /// Text shown when folder has no recipes
+  ///
+  /// In en, this message translates to:
+  /// **'no recipes'**
+  String get folderNoRecipes;
+
+  /// Text shown when folder has one recipe
+  ///
+  /// In en, this message translates to:
+  /// **'1 recipe'**
+  String get folderOneRecipe;
+
+  /// Text shown for recipe count in folder
+  ///
+  /// In en, this message translates to:
+  /// **'{count} recipes'**
+  String folderRecipeCount(int count);
+
+  /// Rename folder menu item
+  ///
+  /// In en, this message translates to:
+  /// **'Rename Folder'**
+  String get folderRename;
+
+  /// Edit smart folder menu item
+  ///
+  /// In en, this message translates to:
+  /// **'Edit Smart Folder'**
+  String get folderEditSmart;
+
+  /// Delete folder menu item
+  ///
+  /// In en, this message translates to:
+  /// **'Delete Folder'**
+  String get folderDelete;
+
+  /// View all button text
+  ///
+  /// In en, this message translates to:
+  /// **'View All'**
+  String get commonViewAll;
+
+  /// Recently viewed section title
+  ///
+  /// In en, this message translates to:
+  /// **'Recently Viewed'**
+  String get recipeRecentlyViewedTitle;
+
+  /// Empty state message for recently viewed
+  ///
+  /// In en, this message translates to:
+  /// **'No recently viewed recipes yet.\nStart exploring recipes to see them here.'**
+  String get recipeRecentlyViewedEmpty;
 }
 
 class _AppLocalizationsDelegate
