@@ -2,6 +2,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:hugeicons/hugeicons.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../../localization/l10n_extension.dart';
 import '../../../theme/colors.dart';
 import '../../../widgets/adaptive_pull_down/adaptive_menu_item.dart';
 import '../../../widgets/adaptive_pull_down/adaptive_pull_down.dart';
@@ -332,7 +333,7 @@ class _RecipePageState extends ConsumerState<RecipePage> {
               AdaptivePullDownButton(
                 items: [
                   AdaptiveMenuItem(
-                    title: 'Edit Recipe',
+                    title: context.l10n.recipePageEditRecipe,
                     icon: const HugeIcon(icon: HugeIcons.strokeRoundedPencilEdit01),
                     onTap: () {
                       final recipeAsync = ref.read(recipe_provider.recipeByIdStreamProvider(widget.recipeId));
@@ -347,7 +348,7 @@ class _RecipePageState extends ConsumerState<RecipePage> {
                   ),
                   AdaptiveMenuItem.divider(),
                   AdaptiveMenuItem(
-                    title: 'Check Pantry Stock',
+                    title: context.l10n.recipePageCheckPantryStock,
                     icon: const Icon(CupertinoIcons.checkmark_alt_circle),
                     onTap: () {
                       // Read the matches when the menu item is tapped (not during build)

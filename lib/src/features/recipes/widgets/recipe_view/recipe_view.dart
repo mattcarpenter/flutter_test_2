@@ -6,6 +6,7 @@ import 'package:recipe_app/src/features/recipes/widgets/recipe_view/recipe_ingre
 import 'package:recipe_app/src/features/recipes/widgets/recipe_view/recipe_steps_view.dart';
 import 'package:recipe_app/src/providers/pantry_provider.dart';
 import '../../../settings/providers/app_settings_provider.dart';
+import '../../../../localization/l10n_extension.dart';
 import '../../../../providers/recipe_provider.dart' as recipe_provider;
 import '../../../../providers/recently_viewed_provider.dart';
 import '../../../../providers/cook_provider.dart';
@@ -87,8 +88,10 @@ class _RecipeViewState extends ConsumerState<RecipeView> {
         String totalTime = '';
         if (recipe.prepTime != null && recipe.cookTime != null) {
           final total = recipe.prepTime! + recipe.cookTime!;
-          totalTime = DurationFormatter.formatMinutes(total);
+          totalTime = DurationFormatter.formatMinutesLocalized(total, context);
         }
+
+        final l10n = context.l10n;
 
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -147,7 +150,7 @@ class _RecipeViewState extends ConsumerState<RecipeView> {
                           : recipe.servings!;
                       return _buildInfoItem(
                         context,
-                        label: 'Servings',
+                        label: l10n.recipeMetadataServings,
                         value: '$scaledServings',
                         fontScale: fontScale,
                       );
@@ -156,26 +159,26 @@ class _RecipeViewState extends ConsumerState<RecipeView> {
                 if (recipe.prepTime != null)
                   _buildInfoItem(
                     context,
-                    label: 'Prep Time',
-                    value: DurationFormatter.formatMinutes(recipe.prepTime!),
+                    label: l10n.recipeMetadataPrepTime,
+                    value: DurationFormatter.formatMinutesLocalized(recipe.prepTime!, context),
                     fontScale: fontScale,
                   ),
                 if (recipe.cookTime != null)
                   _buildInfoItem(
                     context,
-                    label: 'Cook Time',
-                    value: DurationFormatter.formatMinutes(recipe.cookTime!),
+                    label: l10n.recipeMetadataCookTime,
+                    value: DurationFormatter.formatMinutesLocalized(recipe.cookTime!, context),
                     fontScale: fontScale,
                   ),
                 if (totalTime.isNotEmpty)
                   _buildInfoItem(
                     context,
-                    label: 'Total',
+                    label: l10n.recipeMetadataTotal,
                     value: totalTime,
                     fontScale: fontScale,
                   ),
                 if (recipe.rating != null && recipe.rating! > 0)
-                  _buildRatingItem(context, recipe.rating!),
+                  _buildRatingItem(context, recipe.rating!, l10n.recipeMetadataRating),
               ],
             ),
 
@@ -208,7 +211,7 @@ class _RecipeViewState extends ConsumerState<RecipeView> {
             if (recipe.generalNotes != null && recipe.generalNotes!.isNotEmpty) ...[
               const SizedBox(height: 24),
               Text(
-                'Notes',
+                l10n.recipeMetadataNotes,
                 style: AppTypography.h3Serif.copyWith(
                   color: AppColors.of(context).headingSecondary,
                 ),
@@ -260,12 +263,12 @@ class _RecipeViewState extends ConsumerState<RecipeView> {
     );
   }
 
-  Widget _buildRatingItem(BuildContext context, int rating) {
+  Widget _buildRatingItem(BuildContext context, int rating, String label) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          'Rating',
+          label,
           style: AppTypography.caption.copyWith(
             color: AppColors.of(context).textSecondary,
           ),
@@ -290,9 +293,10 @@ class _RecipeViewState extends ConsumerState<RecipeView> {
     final activeCook = ref.watch(activeCookForRecipeProvider(recipe.id));
     final cookNotifier = ref.read(cookNotifierProvider.notifier);
     final userId = Supabase.instance.client.auth.currentUser?.id;
+    final l10n = context.l10n;
 
     final isActive = activeCook != null;
-    final buttonText = isActive ? 'Resume Cooking' : 'Start Cooking';
+    final buttonText = isActive ? l10n.recipeCookResumeCooking : l10n.recipeCookStartCooking;
 
     return AppButton(
       text: buttonText,
@@ -337,12 +341,13 @@ class _RecipeViewState extends ConsumerState<RecipeView> {
   /// Build the source widget - linkified if URL, plain text otherwise
   Widget _buildSourceWidget(BuildContext context, String source, double fontSize) {
     final colors = AppColors.of(context);
+    final l10n = context.l10n;
     final isUrl = _isUrl(source);
 
     if (!isUrl) {
       // Plain text source
       return Text(
-        'Source: $source',
+        l10n.recipeMetadataSource(source),
         style: AppTypography.body.copyWith(
           fontSize: fontSize,
           color: colors.textSecondary,
@@ -362,7 +367,7 @@ class _RecipeViewState extends ConsumerState<RecipeView> {
         TextSpan(
           children: [
             TextSpan(
-              text: 'Source: ',
+              text: l10n.recipeMetadataSourceLabel,
               style: AppTypography.body.copyWith(
                 fontSize: fontSize,
                 color: colors.textSecondary,

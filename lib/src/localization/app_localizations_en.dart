@@ -1536,4 +1536,68 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get recipeRecentlyViewedEmpty =>
       'No recently viewed recipes yet.\nStart exploring recipes to see them here.';
+
+  @override
+  String durationMinutesShort(int count) {
+    return '$count min';
+  }
+
+  @override
+  String durationHoursShort(int count) {
+    return '$count hr';
+  }
+
+  @override
+  String durationHoursMinutesShort(int hours, int minutes) {
+    return '${hours}h ${minutes}m';
+  }
+
+  @override
+  String recipeServingsCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count servings',
+      one: '1 serving',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get recipeMetadataServings => 'Servings';
+
+  @override
+  String get recipeMetadataPrepTime => 'Prep Time';
+
+  @override
+  String get recipeMetadataCookTime => 'Cook Time';
+
+  @override
+  String get recipeMetadataTotal => 'Total';
+
+  @override
+  String get recipeMetadataRating => 'Rating';
+
+  @override
+  String get recipeMetadataNotes => 'Notes';
+
+  @override
+  String recipeMetadataSource(String source) {
+    return 'Source: $source';
+  }
+
+  @override
+  String get recipeMetadataSourceLabel => 'Source: ';
+
+  @override
+  String get recipeCookStartCooking => 'Start Cooking';
+
+  @override
+  String get recipeCookResumeCooking => 'Resume Cooking';
+
+  @override
+  String get recipePageEditRecipe => 'Edit Recipe';
+
+  @override
+  String get recipePageCheckPantryStock => 'Check Pantry Stock';
 }

@@ -2,6 +2,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import '../../../../database/database.dart';
 import '../../../../database/models/recipe_images.dart';
+import '../../../localization/l10n_extension.dart';
 import '../../../theme/colors.dart';
 import '../../../utils/duration_formatter.dart';
 import '../../../widgets/local_or_network_image.dart';
@@ -28,22 +29,22 @@ class PinnedRecipeCard extends StatelessWidget {
     // Format time display
     String timeDisplay = '';
     if (recipe.totalTime != null) {
-      timeDisplay = DurationFormatter.formatMinutes(recipe.totalTime!);
+      timeDisplay = DurationFormatter.formatMinutesLocalized(recipe.totalTime!, context);
     } else if (recipe.prepTime != null && recipe.cookTime != null) {
       final totalTime = (recipe.prepTime ?? 0) + (recipe.cookTime ?? 0);
       if (totalTime > 0) {
-        timeDisplay = DurationFormatter.formatMinutes(totalTime);
+        timeDisplay = DurationFormatter.formatMinutesLocalized(totalTime, context);
       }
     } else if (recipe.prepTime != null && recipe.prepTime! > 0) {
-      timeDisplay = DurationFormatter.formatMinutes(recipe.prepTime!);
+      timeDisplay = DurationFormatter.formatMinutesLocalized(recipe.prepTime!, context);
     } else if (recipe.cookTime != null && recipe.cookTime! > 0) {
-      timeDisplay = DurationFormatter.formatMinutes(recipe.cookTime!);
+      timeDisplay = DurationFormatter.formatMinutesLocalized(recipe.cookTime!, context);
     }
 
     // Format servings display
     String servingsDisplay = '';
     if (recipe.servings != null && recipe.servings! > 0) {
-      servingsDisplay = '${recipe.servings} serving${recipe.servings! > 1 ? 's' : ''}';
+      servingsDisplay = context.l10n.recipeServingsCount(recipe.servings!);
     }
 
     // Combine time and servings with bullet separator

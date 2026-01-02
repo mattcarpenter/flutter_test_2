@@ -1494,4 +1494,62 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get recipeRecentlyViewedEmpty => '最近見たレシピはありません。\nレシピを探索してここに表示しましょう。';
+
+  @override
+  String durationMinutesShort(int count) {
+    return '$count分';
+  }
+
+  @override
+  String durationHoursShort(int count) {
+    return '$count時間';
+  }
+
+  @override
+  String durationHoursMinutesShort(int hours, int minutes) {
+    return '$hours時間$minutes分';
+  }
+
+  @override
+  String recipeServingsCount(int count) {
+    return '$count人前';
+  }
+
+  @override
+  String get recipeMetadataServings => '人数';
+
+  @override
+  String get recipeMetadataPrepTime => '下準備';
+
+  @override
+  String get recipeMetadataCookTime => '調理時間';
+
+  @override
+  String get recipeMetadataTotal => '合計';
+
+  @override
+  String get recipeMetadataRating => '評価';
+
+  @override
+  String get recipeMetadataNotes => 'メモ';
+
+  @override
+  String recipeMetadataSource(String source) {
+    return '出典: $source';
+  }
+
+  @override
+  String get recipeMetadataSourceLabel => '出典: ';
+
+  @override
+  String get recipeCookStartCooking => '調理を開始';
+
+  @override
+  String get recipeCookResumeCooking => '調理を再開';
+
+  @override
+  String get recipePageEditRecipe => 'レシピを編集';
+
+  @override
+  String get recipePageCheckPantryStock => 'パントリー在庫を確認';
 }

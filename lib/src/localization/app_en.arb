@@ -2090,5 +2090,102 @@
   "recipeRecentlyViewedEmpty": "No recently viewed recipes yet.\nStart exploring recipes to see them here.",
   "@recipeRecentlyViewedEmpty": {
     "description": "Empty state message for recently viewed"
+  },
+
+  "durationMinutesShort": "{count} min",
+  "@durationMinutesShort": {
+    "description": "Short format for minutes duration",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "durationHoursShort": "{count} hr",
+  "@durationHoursShort": {
+    "description": "Short format for hours duration",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "durationHoursMinutesShort": "{hours}h {minutes}m",
+  "@durationHoursMinutesShort": {
+    "description": "Short format for hours and minutes duration",
+    "placeholders": {
+      "hours": {
+        "type": "int"
+      },
+      "minutes": {
+        "type": "int"
+      }
+    }
+  },
+
+  "recipeServingsCount": "{count, plural, =1{1 serving} other{{count} servings}}",
+  "@recipeServingsCount": {
+    "description": "Servings count for recipe cards",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+
+  "recipeMetadataServings": "Servings",
+  "@recipeMetadataServings": {
+    "description": "Servings label in recipe metadata"
+  },
+  "recipeMetadataPrepTime": "Prep Time",
+  "@recipeMetadataPrepTime": {
+    "description": "Prep time label in recipe metadata"
+  },
+  "recipeMetadataCookTime": "Cook Time",
+  "@recipeMetadataCookTime": {
+    "description": "Cook time label in recipe metadata"
+  },
+  "recipeMetadataTotal": "Total",
+  "@recipeMetadataTotal": {
+    "description": "Total time label in recipe metadata"
+  },
+  "recipeMetadataRating": "Rating",
+  "@recipeMetadataRating": {
+    "description": "Rating label in recipe metadata"
+  },
+  "recipeMetadataNotes": "Notes",
+  "@recipeMetadataNotes": {
+    "description": "Notes section heading in recipe view"
+  },
+  "recipeMetadataSource": "Source: {source}",
+  "@recipeMetadataSource": {
+    "description": "Source label with value in recipe view",
+    "placeholders": {
+      "source": {
+        "type": "String"
+      }
+    }
+  },
+  "recipeMetadataSourceLabel": "Source: ",
+  "@recipeMetadataSourceLabel": {
+    "description": "Source label prefix for URL sources"
+  },
+
+  "recipeCookStartCooking": "Start Cooking",
+  "@recipeCookStartCooking": {
+    "description": "Start cooking button text"
+  },
+  "recipeCookResumeCooking": "Resume Cooking",
+  "@recipeCookResumeCooking": {
+    "description": "Resume cooking button text"
+  },
+
+  "recipePageEditRecipe": "Edit Recipe",
+  "@recipePageEditRecipe": {
+    "description": "Edit recipe menu item on recipe page"
+  },
+  "recipePageCheckPantryStock": "Check Pantry Stock",
+  "@recipePageCheckPantryStock": {
+    "description": "Check pantry stock menu item on recipe page"
   }
 }

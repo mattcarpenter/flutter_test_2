@@ -509,5 +509,26 @@
   "commonViewAll": "すべて表示",
 
   "recipeRecentlyViewedTitle": "最近見たレシピ",
-  "recipeRecentlyViewedEmpty": "最近見たレシピはありません。\nレシピを探索してここに表示しましょう。"
+  "recipeRecentlyViewedEmpty": "最近見たレシピはありません。\nレシピを探索してここに表示しましょう。",
+
+  "durationMinutesShort": "{count}分",
+  "durationHoursShort": "{count}時間",
+  "durationHoursMinutesShort": "{hours}時間{minutes}分",
+
+  "recipeServingsCount": "{count}人前",
+
+  "recipeMetadataServings": "人数",
+  "recipeMetadataPrepTime": "下準備",
+  "recipeMetadataCookTime": "調理時間",
+  "recipeMetadataTotal": "合計",
+  "recipeMetadataRating": "評価",
+  "recipeMetadataNotes": "メモ",
+  "recipeMetadataSource": "出典: {source}",
+  "recipeMetadataSourceLabel": "出典: ",
+
+  "recipeCookStartCooking": "調理を開始",
+  "recipeCookResumeCooking": "調理を再開",
+
+  "recipePageEditRecipe": "レシピを編集",
+  "recipePageCheckPantryStock": "パントリー在庫を確認"
 }

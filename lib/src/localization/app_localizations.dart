@@ -2816,6 +2816,102 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'No recently viewed recipes yet.\nStart exploring recipes to see them here.'**
   String get recipeRecentlyViewedEmpty;
+
+  /// Short format for minutes duration
+  ///
+  /// In en, this message translates to:
+  /// **'{count} min'**
+  String durationMinutesShort(int count);
+
+  /// Short format for hours duration
+  ///
+  /// In en, this message translates to:
+  /// **'{count} hr'**
+  String durationHoursShort(int count);
+
+  /// Short format for hours and minutes duration
+  ///
+  /// In en, this message translates to:
+  /// **'{hours}h {minutes}m'**
+  String durationHoursMinutesShort(int hours, int minutes);
+
+  /// Servings count for recipe cards
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 serving} other{{count} servings}}'**
+  String recipeServingsCount(int count);
+
+  /// Servings label in recipe metadata
+  ///
+  /// In en, this message translates to:
+  /// **'Servings'**
+  String get recipeMetadataServings;
+
+  /// Prep time label in recipe metadata
+  ///
+  /// In en, this message translates to:
+  /// **'Prep Time'**
+  String get recipeMetadataPrepTime;
+
+  /// Cook time label in recipe metadata
+  ///
+  /// In en, this message translates to:
+  /// **'Cook Time'**
+  String get recipeMetadataCookTime;
+
+  /// Total time label in recipe metadata
+  ///
+  /// In en, this message translates to:
+  /// **'Total'**
+  String get recipeMetadataTotal;
+
+  /// Rating label in recipe metadata
+  ///
+  /// In en, this message translates to:
+  /// **'Rating'**
+  String get recipeMetadataRating;
+
+  /// Notes section heading in recipe view
+  ///
+  /// In en, this message translates to:
+  /// **'Notes'**
+  String get recipeMetadataNotes;
+
+  /// Source label with value in recipe view
+  ///
+  /// In en, this message translates to:
+  /// **'Source: {source}'**
+  String recipeMetadataSource(String source);
+
+  /// Source label prefix for URL sources
+  ///
+  /// In en, this message translates to:
+  /// **'Source: '**
+  String get recipeMetadataSourceLabel;
+
+  /// Start cooking button text
+  ///
+  /// In en, this message translates to:
+  /// **'Start Cooking'**
+  String get recipeCookStartCooking;
+
+  /// Resume cooking button text
+  ///
+  /// In en, this message translates to:
+  /// **'Resume Cooking'**
+  String get recipeCookResumeCooking;
+
+  /// Edit recipe menu item on recipe page
+  ///
+  /// In en, this message translates to:
+  /// **'Edit Recipe'**
+  String get recipePageEditRecipe;
+
+  /// Check pantry stock menu item on recipe page
+  ///
+  /// In en, this message translates to:
+  /// **'Check Pantry Stock'**
+  String get recipePageCheckPantryStock;
 }
 
 class _AppLocalizationsDelegate
