@@ -1696,4 +1696,65 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get timerNotificationsEnable => 'Enable';
+
+  @override
+  String get statusBarCooking => 'Cooking';
+
+  @override
+  String statusBarRecipesCount(int count) {
+    return '$count recipes';
+  }
+
+  @override
+  String get statusBarInstructions => 'Instructions';
+
+  @override
+  String get statusBarRecipe => 'Recipe';
+
+  @override
+  String get statusBarCompleteCookTitle => 'Complete Cook?';
+
+  @override
+  String statusBarCompleteCookMessage(String recipeName) {
+    return 'Mark \"$recipeName\" as complete?';
+  }
+
+  @override
+  String get statusBarComplete => 'Complete';
+
+  @override
+  String get statusBarTimers => 'Timers';
+
+  @override
+  String statusBarTimerStep(String stepDisplay) {
+    return 'Step $stepDisplay';
+  }
+
+  @override
+  String statusBarTimerSheetMessage(String stepDisplay, String detectedText) {
+    return 'Step $stepDisplay · $detectedText';
+  }
+
+  @override
+  String get statusBarExtend1Min => 'Extend 1 min';
+
+  @override
+  String get statusBarExtend5Min => 'Extend 5 min';
+
+  @override
+  String get statusBarViewRecipe => 'View Recipe';
+
+  @override
+  String get statusBarCancelTimer => 'Cancel Timer';
+
+  @override
+  String get statusBarCancelTimerTitle => 'Cancel Timer?';
+
+  @override
+  String statusBarCancelTimerMessage(String detectedText, String recipeName) {
+    return 'Cancel the $detectedText timer for \"$recipeName\"?';
+  }
+
+  @override
+  String get statusBarKeep => 'Keep';
 }

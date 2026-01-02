@@ -3075,6 +3075,108 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Enable'**
   String get timerNotificationsEnable;
+
+  /// Header label when cooking is active
+  ///
+  /// In en, this message translates to:
+  /// **'Cooking'**
+  String get statusBarCooking;
+
+  /// Count of recipes being cooked
+  ///
+  /// In en, this message translates to:
+  /// **'{count} recipes'**
+  String statusBarRecipesCount(int count);
+
+  /// Button to show cooking instructions
+  ///
+  /// In en, this message translates to:
+  /// **'Instructions'**
+  String get statusBarInstructions;
+
+  /// Button to view recipe
+  ///
+  /// In en, this message translates to:
+  /// **'Recipe'**
+  String get statusBarRecipe;
+
+  /// Title for complete cook confirmation dialog
+  ///
+  /// In en, this message translates to:
+  /// **'Complete Cook?'**
+  String get statusBarCompleteCookTitle;
+
+  /// Message for complete cook confirmation
+  ///
+  /// In en, this message translates to:
+  /// **'Mark \"{recipeName}\" as complete?'**
+  String statusBarCompleteCookMessage(String recipeName);
+
+  /// Button to complete cooking
+  ///
+  /// In en, this message translates to:
+  /// **'Complete'**
+  String get statusBarComplete;
+
+  /// Timer section header
+  ///
+  /// In en, this message translates to:
+  /// **'Timers'**
+  String get statusBarTimers;
+
+  /// Timer step display
+  ///
+  /// In en, this message translates to:
+  /// **'Step {stepDisplay}'**
+  String statusBarTimerStep(String stepDisplay);
+
+  /// Timer action sheet message
+  ///
+  /// In en, this message translates to:
+  /// **'Step {stepDisplay} · {detectedText}'**
+  String statusBarTimerSheetMessage(String stepDisplay, String detectedText);
+
+  /// Extend timer by 1 minute option
+  ///
+  /// In en, this message translates to:
+  /// **'Extend 1 min'**
+  String get statusBarExtend1Min;
+
+  /// Extend timer by 5 minutes option
+  ///
+  /// In en, this message translates to:
+  /// **'Extend 5 min'**
+  String get statusBarExtend5Min;
+
+  /// View recipe option in timer menu
+  ///
+  /// In en, this message translates to:
+  /// **'View Recipe'**
+  String get statusBarViewRecipe;
+
+  /// Cancel timer option
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel Timer'**
+  String get statusBarCancelTimer;
+
+  /// Cancel timer confirmation title
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel Timer?'**
+  String get statusBarCancelTimerTitle;
+
+  /// Cancel timer confirmation message
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel the {detectedText} timer for \"{recipeName}\"?'**
+  String statusBarCancelTimerMessage(String detectedText, String recipeName);
+
+  /// Keep timer button
+  ///
+  /// In en, this message translates to:
+  /// **'Keep'**
+  String get statusBarKeep;
 }
 
 class _AppLocalizationsDelegate

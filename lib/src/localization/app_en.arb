@@ -2344,5 +2344,105 @@
   "timerNotificationsEnable": "Enable",
   "@timerNotificationsEnable": {
     "description": "Enable button for notification permission"
+  },
+
+  "statusBarCooking": "Cooking",
+  "@statusBarCooking": {
+    "description": "Header label when cooking is active"
+  },
+  "statusBarRecipesCount": "{count} recipes",
+  "@statusBarRecipesCount": {
+    "description": "Count of recipes being cooked",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "statusBarInstructions": "Instructions",
+  "@statusBarInstructions": {
+    "description": "Button to show cooking instructions"
+  },
+  "statusBarRecipe": "Recipe",
+  "@statusBarRecipe": {
+    "description": "Button to view recipe"
+  },
+  "statusBarCompleteCookTitle": "Complete Cook?",
+  "@statusBarCompleteCookTitle": {
+    "description": "Title for complete cook confirmation dialog"
+  },
+  "statusBarCompleteCookMessage": "Mark \"{recipeName}\" as complete?",
+  "@statusBarCompleteCookMessage": {
+    "description": "Message for complete cook confirmation",
+    "placeholders": {
+      "recipeName": {
+        "type": "String"
+      }
+    }
+  },
+  "statusBarComplete": "Complete",
+  "@statusBarComplete": {
+    "description": "Button to complete cooking"
+  },
+  "statusBarTimers": "Timers",
+  "@statusBarTimers": {
+    "description": "Timer section header"
+  },
+  "statusBarTimerStep": "Step {stepDisplay}",
+  "@statusBarTimerStep": {
+    "description": "Timer step display",
+    "placeholders": {
+      "stepDisplay": {
+        "type": "String"
+      }
+    }
+  },
+  "statusBarTimerSheetMessage": "Step {stepDisplay} · {detectedText}",
+  "@statusBarTimerSheetMessage": {
+    "description": "Timer action sheet message",
+    "placeholders": {
+      "stepDisplay": {
+        "type": "String"
+      },
+      "detectedText": {
+        "type": "String"
+      }
+    }
+  },
+  "statusBarExtend1Min": "Extend 1 min",
+  "@statusBarExtend1Min": {
+    "description": "Extend timer by 1 minute option"
+  },
+  "statusBarExtend5Min": "Extend 5 min",
+  "@statusBarExtend5Min": {
+    "description": "Extend timer by 5 minutes option"
+  },
+  "statusBarViewRecipe": "View Recipe",
+  "@statusBarViewRecipe": {
+    "description": "View recipe option in timer menu"
+  },
+  "statusBarCancelTimer": "Cancel Timer",
+  "@statusBarCancelTimer": {
+    "description": "Cancel timer option"
+  },
+  "statusBarCancelTimerTitle": "Cancel Timer?",
+  "@statusBarCancelTimerTitle": {
+    "description": "Cancel timer confirmation title"
+  },
+  "statusBarCancelTimerMessage": "Cancel the {detectedText} timer for \"{recipeName}\"?",
+  "@statusBarCancelTimerMessage": {
+    "description": "Cancel timer confirmation message",
+    "placeholders": {
+      "detectedText": {
+        "type": "String"
+      },
+      "recipeName": {
+        "type": "String"
+      }
+    }
+  },
+  "statusBarKeep": "Keep",
+  "@statusBarKeep": {
+    "description": "Keep timer button"
   }
 }

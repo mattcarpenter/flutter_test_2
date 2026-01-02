@@ -7,6 +7,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../database/database.dart';
+import '../localization/l10n_extension.dart';
+import '../utils/duration_formatter.dart';
 import '../../database/models/timers.dart';
 import '../features/recipes/widgets/cook_modal/cook_modal.dart';
 import '../features/timers/widgets/timer_expiration_listener.dart';
@@ -333,7 +335,7 @@ class _CollapsedHeader extends StatelessWidget {
     if (count == 1) {
       mainText = activeCooks.first.recipeName;
     } else {
-      mainText = '$count recipes';
+      mainText = context.l10n.statusBarRecipesCount(count);
     }
 
     final textStyle = AppTypography.body.copyWith(
@@ -352,7 +354,7 @@ class _CollapsedHeader extends StatelessWidget {
         const SizedBox(width: 6),
         if (showCookingPrefix) ...[
           Text(
-            'Cooking',
+            context.l10n.statusBarCooking,
             style: count == 1
                 ? textStyle.copyWith(fontWeight: FontWeight.w800)
                 : textStyle,
@@ -399,7 +401,7 @@ class _CookHeaderRow extends StatelessWidget {
         const SizedBox(width: 6),
         if (isWideScreen) ...[
           Text(
-            'Cooking',
+            context.l10n.statusBarCooking,
             style: textStyle.copyWith(fontWeight: FontWeight.w800),
           ),
           const SizedBox(width: 4),
@@ -429,19 +431,19 @@ class _CookButtonRow extends ConsumerWidget {
 
     final confirmed = await showCupertinoDialog<bool>(
       context: navigatorContext,
-      builder: (context) => CupertinoAlertDialog(
-        title: const Text('Complete Cook?'),
-        content: Text('Mark "${cook.recipeName}" as complete?'),
+      builder: (dialogContext) => CupertinoAlertDialog(
+        title: Text(navigatorContext.l10n.statusBarCompleteCookTitle),
+        content: Text(navigatorContext.l10n.statusBarCompleteCookMessage(cook.recipeName)),
         actions: [
           CupertinoDialogAction(
             isDestructiveAction: true,
-            onPressed: () => Navigator.of(context).pop(false),
-            child: const Text('Cancel'),
+            onPressed: () => Navigator.of(dialogContext).pop(false),
+            child: Text(navigatorContext.l10n.commonCancel),
           ),
           CupertinoDialogAction(
             isDefaultAction: true,
-            onPressed: () => Navigator.of(context).pop(true),
-            child: const Text('Complete'),
+            onPressed: () => Navigator.of(dialogContext).pop(true),
+            child: Text(navigatorContext.l10n.statusBarComplete),
           ),
         ],
       ),
@@ -507,7 +509,7 @@ class _CookButtonRow extends ConsumerWidget {
                 );
               }
             },
-            child: Text('Instructions', style: textStyle.copyWith(
+            child: Text(context.l10n.statusBarInstructions, style: textStyle.copyWith(
               color: AppColorSwatches.primary[500],
             )),
           ),
@@ -528,7 +530,7 @@ class _CookButtonRow extends ConsumerWidget {
                 }
               }
             },
-            child: Text('Recipe', style: textStyle.copyWith(
+            child: Text(context.l10n.statusBarRecipe, style: textStyle.copyWith(
               color: Colors.white,
             )),
           ),
@@ -660,7 +662,7 @@ class _TimerSection extends ConsumerWidget {
             ),
             const SizedBox(width: 6),
             Text(
-              'Timers',
+              context.l10n.statusBarTimers,
               style: textStyle.copyWith(fontWeight: FontWeight.w800),
             ),
           ],
@@ -713,7 +715,7 @@ class _TimerItem extends ConsumerWidget {
             // Recipe name and step
             Expanded(
               child: Text(
-                '${timer.recipeName} · Step ${timer.stepDisplay}',
+                '${timer.recipeName} · ${context.l10n.statusBarTimerStep(timer.stepDisplay)}',
                 style: textStyle.copyWith(fontWeight: FontWeight.w500),
                 overflow: TextOverflow.ellipsis,
                 maxLines: 1,
@@ -767,7 +769,10 @@ class _TimerMenuButton extends ConsumerWidget {
       context: navigatorContext,
       builder: (sheetContext) => CupertinoActionSheet(
         title: Text(timer.recipeName),
-        message: Text('Step ${timer.stepDisplay} · ${timer.detectedText}'),
+        message: Text(navigatorContext.l10n.statusBarTimerSheetMessage(
+          timer.stepDisplay,
+          DurationFormatter.formatDurationLocalized(timer.originalDuration, navigatorContext),
+        )),
         actions: [
           CupertinoActionSheetAction(
             onPressed: () async {
@@ -777,7 +782,7 @@ class _TimerMenuButton extends ConsumerWidget {
                 const Duration(minutes: 1),
               );
             },
-            child: const Text('Extend 1 min'),
+            child: Text(navigatorContext.l10n.statusBarExtend1Min),
           ),
           CupertinoActionSheetAction(
             onPressed: () async {
@@ -787,7 +792,7 @@ class _TimerMenuButton extends ConsumerWidget {
                 const Duration(minutes: 5),
               );
             },
-            child: const Text('Extend 5 min'),
+            child: Text(navigatorContext.l10n.statusBarExtend5Min),
           ),
           // Divider
           const _ActionSheetDivider(),
@@ -807,14 +812,14 @@ class _TimerMenuButton extends ConsumerWidget {
                 GoRouter.of(navigatorContext).push('/recipe/${timer.recipeId}');
               }
             },
-            child: const Text('Instructions'),
+            child: Text(navigatorContext.l10n.statusBarInstructions),
           ),
           CupertinoActionSheetAction(
             onPressed: () {
               Navigator.of(sheetContext).pop();
               GoRouter.of(navigatorContext).push('/recipe/${timer.recipeId}');
             },
-            child: const Text('View Recipe'),
+            child: Text(navigatorContext.l10n.statusBarViewRecipe),
           ),
           // Divider
           const _ActionSheetDivider(),
@@ -826,19 +831,22 @@ class _TimerMenuButton extends ConsumerWidget {
               final confirmed = await showCupertinoDialog<bool>(
                 context: navigatorContext,
                 builder: (dialogContext) => CupertinoAlertDialog(
-                  title: const Text('Cancel Timer?'),
+                  title: Text(navigatorContext.l10n.statusBarCancelTimerTitle),
                   content: Text(
-                    'Cancel the ${timer.detectedText} timer for "${timer.recipeName}"?',
+                    navigatorContext.l10n.statusBarCancelTimerMessage(
+                      DurationFormatter.formatDurationLocalized(timer.originalDuration, navigatorContext),
+                      timer.recipeName,
+                    ),
                   ),
                   actions: [
                     CupertinoDialogAction(
                       onPressed: () => Navigator.of(dialogContext).pop(false),
-                      child: const Text('Keep'),
+                      child: Text(navigatorContext.l10n.statusBarKeep),
                     ),
                     CupertinoDialogAction(
                       isDestructiveAction: true,
                       onPressed: () => Navigator.of(dialogContext).pop(true),
-                      child: const Text('Cancel Timer'),
+                      child: Text(navigatorContext.l10n.statusBarCancelTimer),
                     ),
                   ],
                 ),
@@ -848,12 +856,12 @@ class _TimerMenuButton extends ConsumerWidget {
                 await timerNotifier.cancelTimer(timer.id);
               }
             },
-            child: const Text('Cancel Timer'),
+            child: Text(navigatorContext.l10n.statusBarCancelTimer),
           ),
         ],
         cancelButton: CupertinoActionSheetAction(
           onPressed: () => Navigator.of(sheetContext).pop(),
-          child: const Text('Cancel'),
+          child: Text(navigatorContext.l10n.commonCancel),
         ),
       ),
     ).then((_) {

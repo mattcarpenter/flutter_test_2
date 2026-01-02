@@ -1648,4 +1648,65 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get timerNotificationsEnable => '有効にする';
+
+  @override
+  String get statusBarCooking => '調理中';
+
+  @override
+  String statusBarRecipesCount(int count) {
+    return '$count件のレシピ';
+  }
+
+  @override
+  String get statusBarInstructions => '手順';
+
+  @override
+  String get statusBarRecipe => 'レシピ';
+
+  @override
+  String get statusBarCompleteCookTitle => '調理を完了しますか？';
+
+  @override
+  String statusBarCompleteCookMessage(String recipeName) {
+    return '「$recipeName」を完了としてマークしますか？';
+  }
+
+  @override
+  String get statusBarComplete => '完了';
+
+  @override
+  String get statusBarTimers => 'タイマー';
+
+  @override
+  String statusBarTimerStep(String stepDisplay) {
+    return 'ステップ $stepDisplay';
+  }
+
+  @override
+  String statusBarTimerSheetMessage(String stepDisplay, String detectedText) {
+    return 'ステップ $stepDisplay · $detectedText';
+  }
+
+  @override
+  String get statusBarExtend1Min => '1分延長';
+
+  @override
+  String get statusBarExtend5Min => '5分延長';
+
+  @override
+  String get statusBarViewRecipe => 'レシピを見る';
+
+  @override
+  String get statusBarCancelTimer => 'タイマーをキャンセル';
+
+  @override
+  String get statusBarCancelTimerTitle => 'タイマーをキャンセルしますか？';
+
+  @override
+  String statusBarCancelTimerMessage(String detectedText, String recipeName) {
+    return '「$recipeName」の$detectedTextタイマーをキャンセルしますか？';
+  }
+
+  @override
+  String get statusBarKeep => '保持';
 }

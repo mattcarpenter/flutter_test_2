@@ -564,5 +564,23 @@
   "timerNotificationsTitle": "タイマー通知を有効にする",
   "timerNotificationsMessage": "アプリがバックグラウンドにあっても、調理タイマーが完了したときに通知を受け取れます。",
   "timerNotificationsNotNow": "後で",
-  "timerNotificationsEnable": "有効にする"
+  "timerNotificationsEnable": "有効にする",
+
+  "statusBarCooking": "調理中",
+  "statusBarRecipesCount": "{count}件のレシピ",
+  "statusBarInstructions": "手順",
+  "statusBarRecipe": "レシピ",
+  "statusBarCompleteCookTitle": "調理を完了しますか？",
+  "statusBarCompleteCookMessage": "「{recipeName}」を完了としてマークしますか？",
+  "statusBarComplete": "完了",
+  "statusBarTimers": "タイマー",
+  "statusBarTimerStep": "ステップ {stepDisplay}",
+  "statusBarTimerSheetMessage": "ステップ {stepDisplay} · {detectedText}",
+  "statusBarExtend1Min": "1分延長",
+  "statusBarExtend5Min": "5分延長",
+  "statusBarViewRecipe": "レシピを見る",
+  "statusBarCancelTimer": "タイマーをキャンセル",
+  "statusBarCancelTimerTitle": "タイマーをキャンセルしますか？",
+  "statusBarCancelTimerMessage": "「{recipeName}」の{detectedText}タイマーをキャンセルしますか？",
+  "statusBarKeep": "保持"
 }
