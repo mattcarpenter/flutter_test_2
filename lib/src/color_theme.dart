@@ -61,7 +61,7 @@ class AppTheme {
         fontFamily: 'SF Pro Rounded',
         fontSize: 28,
         fontWeight: FontWeight.w700,
-        letterSpacing: -0.41,
+        letterSpacing: 0.37, // was -0.41
         color: AppColorSwatches.neutral[900]!,
         decoration: TextDecoration.none,
       ),
@@ -70,7 +70,7 @@ class AppTheme {
         fontFamily: 'SF Pro Rounded',
         fontSize: 17,
         fontWeight: FontWeight.w600,
-        letterSpacing: -0.41,
+        //letterSpacing: -0.37,
         color: AppColorSwatches.neutral[900]!,
         decoration: TextDecoration.none,
       ),
