@@ -223,11 +223,16 @@ class _UpgradeBannerState extends State<_UpgradeBanner> {
 
   @override
   Widget build(BuildContext context) {
-    // Gradient from orange to gold/amber
-    const goldColor = Color(0xFFFFAB00); // Amber/gold
-    final gradientColors = widget.isDarkMode
-        ? [AppColorSwatches.primary[400]!, goldColor]
-        : [AppColorSwatches.primary[500]!, goldColor];
+    // Muted fill - light background with darker text
+    final backgroundColor = widget.isDarkMode
+        ? AppColorSwatches.primary[900]!.withOpacity(0.2)
+        : AppColorSwatches.primary[50]!;
+    final textColor = widget.isDarkMode
+        ? AppColorSwatches.primary[300]!
+        : AppColorSwatches.primary[600]!;
+    final subtitleColor = widget.isDarkMode
+        ? AppColorSwatches.primary[400]!
+        : AppColorSwatches.primary[400]!;
 
     return GestureDetector(
       onTapDown: (_) => setState(() => _isPressed = true),
@@ -241,40 +246,36 @@ class _UpgradeBannerState extends State<_UpgradeBanner> {
         opacity: _isPressed ? 0.7 : 1.0,
         child: Container(
           margin: const EdgeInsets.only(bottom: 20, left: 16, right: 16),
-          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 18),
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
           decoration: BoxDecoration(
-            gradient: LinearGradient(
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-              colors: gradientColors,
-            ),
+            color: backgroundColor,
             borderRadius: BorderRadius.circular(10),
           ),
           child: Row(
             children: [
               HugeIcon(
                 icon: HugeIcons.strokeRoundedAiMagic,
-                color: Colors.white,
-                size: 22,
+                color: textColor,
+                size: 20,
               ),
               const SizedBox(width: 12),
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  const Text(
+                  Text(
                     'Upgrade to Plus',
                     style: TextStyle(
-                      color: Colors.white,
+                      color: textColor,
                       fontWeight: FontWeight.w600,
                       fontSize: 15,
                     ),
                   ),
-                  const SizedBox(height: 3),
-                  const Text(
+                  const SizedBox(height: 2),
+                  Text(
                     'Import from social media & more',
                     style: TextStyle(
-                      color: Colors.white,
+                      color: textColor,
                       fontWeight: FontWeight.w400,
                       fontSize: 13,
                     ),
