@@ -236,16 +236,16 @@ Test by changing device language or using a test override.
 |----------|---------|-------|------------|--------|-------|
 | 1 | auth | 12 | Low | ✅ Done | Pilot feature, high visibility |
 | 2 | settings | 25 | Medium | ✅ Done | User-facing settings, many labels |
-| 3 | recipes | 71 | High | ⏳ Pending | Largest feature, core functionality |
+| 3 | recipes | 71 | High | ✅ Done | Largest feature, core functionality |
 | 4 | shopping_list | 17 | Medium | ⏳ Pending | Core feature |
 | 5 | meal_plans | 22 | Medium | ⏳ Pending | Core feature |
 | 6 | pantry | 11 | Low | ⏳ Pending | Core feature |
 | 7 | clippings | 18 | Medium | ⏳ Pending | Labs feature |
-| 8 | import_export | 22 | Medium | ⏳ Pending | Utility feature |
+| 8 | import_export | 22 | Medium | ✅ Done | Utility feature |
 | 9 | household | 15 | Medium | ⏳ Pending | Sharing feature |
-| 10 | help | 4 | Low | ⏳ Pending | Help documentation |
+| 10 | help | 4 | Low | ✅ Done | Help documentation |
 | 11 | share | 3 | Low | ⏳ Pending | Share previews |
-| 12 | timers | 3 | Low | ⏳ Pending | Timer UI |
+| 12 | timers | 3 | Low | ✅ Done | Timer UI |
 | 13 | discover | 1 | Low | ⏳ Pending | Discovery page |
 | 14 | subscription | 1 | Low | ⏳ Pending | Paywall |
 
@@ -479,18 +479,18 @@ validator: (value) {
 
 ### Phase 3: Core Features
 - [x] settings (25 files) - ✅ Done
-- [ ] recipes (71 files)
+- [x] recipes (71 files) - ✅ Done
 - [ ] shopping_list (17 files)
 - [ ] meal_plans (22 files)
 - [ ] pantry (11 files)
 
 ### Phase 4: Secondary Features
 - [ ] clippings (18 files)
-- [ ] import_export (22 files)
+- [x] import_export (22 files) - ✅ Done
 - [ ] household (15 files)
-- [ ] help (4 files)
+- [x] help (4 files) - ✅ Done
 - [ ] share (3 files)
-- [ ] timers (3 files)
+- [x] timers (3 files) - ✅ Done
 - [ ] discover (1 file)
 - [ ] subscription (1 file)
 
