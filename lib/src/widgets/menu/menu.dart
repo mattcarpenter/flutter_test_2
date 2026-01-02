@@ -141,6 +141,8 @@ class Menu extends ConsumerWidget {
         if (!hasPlus)
           _UpgradeBanner(
             isDarkMode: isDarkMode,
+            backgroundColor: backgroundColor,
+            textColor: activeTextColor,
             onTap: () async {
               await ref.read(subscriptionProvider.notifier).presentPaywall(context);
             },
@@ -207,10 +209,14 @@ class Menu extends ConsumerWidget {
 /// Upgrade banner CTA for non-Plus users
 class _UpgradeBanner extends StatefulWidget {
   final bool isDarkMode;
+  final Color backgroundColor;
+  final Color textColor;
   final VoidCallback onTap;
 
   const _UpgradeBanner({
     required this.isDarkMode,
+    required this.backgroundColor,
+    required this.textColor,
     required this.onTap,
   });
 
@@ -223,17 +229,6 @@ class _UpgradeBannerState extends State<_UpgradeBanner> {
 
   @override
   Widget build(BuildContext context) {
-    // Muted fill - light background with darker text
-    final backgroundColor = widget.isDarkMode
-        ? AppColorSwatches.primary[900]!.withOpacity(0.2)
-        : AppColorSwatches.primary[50]!;
-    final textColor = widget.isDarkMode
-        ? AppColorSwatches.primary[300]!
-        : AppColorSwatches.primary[600]!;
-    final subtitleColor = widget.isDarkMode
-        ? AppColorSwatches.primary[400]!
-        : AppColorSwatches.primary[400]!;
-
     return GestureDetector(
       onTapDown: (_) => setState(() => _isPressed = true),
       onTapUp: (_) {
@@ -248,14 +243,18 @@ class _UpgradeBannerState extends State<_UpgradeBanner> {
           margin: const EdgeInsets.only(bottom: 20, left: 16, right: 16),
           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
           decoration: BoxDecoration(
-            color: backgroundColor,
+            color: widget.backgroundColor,
             borderRadius: BorderRadius.circular(10),
+            border: Border.all(
+              color: widget.textColor.withOpacity(0.3),
+              width: 1,
+            ),
           ),
           child: Row(
             children: [
               HugeIcon(
                 icon: HugeIcons.strokeRoundedAiMagic,
-                color: textColor,
+                color: widget.textColor,
                 size: 20,
               ),
               const SizedBox(width: 12),
@@ -266,7 +265,7 @@ class _UpgradeBannerState extends State<_UpgradeBanner> {
                   Text(
                     'Upgrade to Plus',
                     style: TextStyle(
-                      color: textColor,
+                      color: widget.textColor,
                       fontWeight: FontWeight.w600,
                       fontSize: 15,
                     ),
@@ -275,7 +274,7 @@ class _UpgradeBannerState extends State<_UpgradeBanner> {
                   Text(
                     'Import from social media & more',
                     style: TextStyle(
-                      color: textColor,
+                      color: widget.textColor,
                       fontWeight: FontWeight.w400,
                       fontSize: 13,
                     ),
