@@ -4,29 +4,39 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../models/help_topic.dart';
 
 /// Section definitions in display order.
-const _sectionDefinitions = [
-  ('Adding Recipes', 'adding-recipes'),
-  ('Quick Questions', 'quick-questions'),
-  ('Learn More', 'learn-more'),
-  ('Troubleshooting', 'troubleshooting'),
+/// Maps folder key to localization key suffix.
+const _sectionFolderKeys = [
+  'adding-recipes',
+  'quick-questions',
+  'learn-more',
+  'troubleshooting',
 ];
 
 /// Provider that loads and parses all help topics from asset markdown files.
-final helpTopicsProvider = FutureProvider<List<HelpSection>>((ref) async {
+/// Takes a locale code (e.g., 'en', 'ja') as a family parameter.
+final helpTopicsProvider = FutureProvider.family<List<HelpSection>, String>((ref, localeCode) async {
   final sections = <HelpSection>[];
 
   // Load asset manifest using modern API (supports both JSON and binary formats)
   final manifest = await AssetManifest.loadFromAssetBundle(rootBundle);
 
-  for (final (sectionName, folderKey) in _sectionDefinitions) {
-    final prefix = 'assets/docs/$folderKey/';
+  for (final folderKey in _sectionFolderKeys) {
+    final prefix = 'assets/docs/$localeCode/$folderKey/';
+    final fallbackPrefix = 'assets/docs/en/$folderKey/';
     final topics = <HelpTopic>[];
 
     // Find all markdown files in this section's folder
     final allAssets = manifest.listAssets();
-    final sectionFiles = allAssets
+    var sectionFiles = allAssets
         .where((path) => path.startsWith(prefix) && path.endsWith('.md'))
         .toList();
+
+    // If no files found for this locale, fall back to English
+    if (sectionFiles.isEmpty && localeCode != 'en') {
+      sectionFiles = allAssets
+          .where((path) => path.startsWith(fallbackPrefix) && path.endsWith('.md'))
+          .toList();
+    }
 
     // Sort alphabetically for consistent ordering
     sectionFiles.sort();
@@ -45,7 +55,7 @@ final helpTopicsProvider = FutureProvider<List<HelpSection>>((ref) async {
     }
 
     sections.add(HelpSection(
-      name: sectionName,
+      name: '', // Name will be set by the UI using localized strings
       folderKey: folderKey,
       topics: topics,
     ));

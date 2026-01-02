@@ -1,6 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../localization/l10n_extension.dart';
 import '../../../mobile/utils/adaptive_sliver_page.dart';
 import '../../../theme/spacing.dart';
 import '../../settings/widgets/settings_group_condensed.dart';
@@ -32,14 +33,27 @@ class _HelpPageState extends ConsumerState<HelpPage> {
     });
   }
 
+  /// Get localized section name from folder key
+  String _getSectionName(BuildContext context, String folderKey) {
+    return switch (folderKey) {
+      'adding-recipes' => context.l10n.helpSectionAddingRecipes,
+      'quick-questions' => context.l10n.helpSectionQuickQuestions,
+      'learn-more' => context.l10n.helpSectionLearnMore,
+      'troubleshooting' => context.l10n.helpSectionTroubleshooting,
+      _ => folderKey,
+    };
+  }
+
   @override
   Widget build(BuildContext context) {
-    final helpTopicsAsync = ref.watch(helpTopicsProvider);
+    // Get current locale code
+    final localeCode = Localizations.localeOf(context).languageCode;
+    final helpTopicsAsync = ref.watch(helpTopicsProvider(localeCode));
 
     return AdaptiveSliverPage(
-      title: 'Help',
+      title: context.l10n.helpTitle,
       automaticallyImplyLeading: true,
-      previousPageTitle: 'Settings',
+      previousPageTitle: context.l10n.settingsTitle,
       slivers: [
         helpTopicsAsync.when(
           data: (sections) => SliverToBoxAdapter(
@@ -52,7 +66,7 @@ class _HelpPageState extends ConsumerState<HelpPage> {
           ),
           error: (error, stack) => SliverFillRemaining(
             child: Center(
-              child: Text('Failed to load help topics: $error'),
+              child: Text('${context.l10n.helpLoadError}: $error'),
             ),
           ),
         ),
@@ -84,7 +98,7 @@ class _HelpPageState extends ConsumerState<HelpPage> {
     }
 
     return SettingsGroupCondensed(
-      header: section.name,
+      header: _getSectionName(context, section.folderKey),
       children: [
         for (final topic in section.topics)
           HelpTopicAccordion(

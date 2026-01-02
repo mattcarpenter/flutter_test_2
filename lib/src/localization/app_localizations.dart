@@ -1226,6 +1226,42 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Failed to export recipes: {error}'**
   String exportFailedMessage(String error);
+
+  /// Help page title
+  ///
+  /// In en, this message translates to:
+  /// **'Help'**
+  String get helpTitle;
+
+  /// Error message when help topics fail to load
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to load help topics'**
+  String get helpLoadError;
+
+  /// Help section name
+  ///
+  /// In en, this message translates to:
+  /// **'Adding Recipes'**
+  String get helpSectionAddingRecipes;
+
+  /// Help section name
+  ///
+  /// In en, this message translates to:
+  /// **'Quick Questions'**
+  String get helpSectionQuickQuestions;
+
+  /// Help section name
+  ///
+  /// In en, this message translates to:
+  /// **'Learn More'**
+  String get helpSectionLearnMore;
+
+  /// Help section name
+  ///
+  /// In en, this message translates to:
+  /// **'Troubleshooting'**
+  String get helpSectionTroubleshooting;
 }
 
 class _AppLocalizationsDelegate

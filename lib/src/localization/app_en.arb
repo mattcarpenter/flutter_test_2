@@ -910,5 +910,30 @@
         "type": "String"
       }
     }
+  },
+
+  "helpTitle": "Help",
+  "@helpTitle": {
+    "description": "Help page title"
+  },
+  "helpLoadError": "Failed to load help topics",
+  "@helpLoadError": {
+    "description": "Error message when help topics fail to load"
+  },
+  "helpSectionAddingRecipes": "Adding Recipes",
+  "@helpSectionAddingRecipes": {
+    "description": "Help section name"
+  },
+  "helpSectionQuickQuestions": "Quick Questions",
+  "@helpSectionQuickQuestions": {
+    "description": "Help section name"
+  },
+  "helpSectionLearnMore": "Learn More",
+  "@helpSectionLearnMore": {
+    "description": "Help section name"
+  },
+  "helpSectionTroubleshooting": "Troubleshooting",
+  "@helpSectionTroubleshooting": {
+    "description": "Help section name"
   }
 }

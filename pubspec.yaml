@@ -154,9 +154,13 @@ flutter:
     - assets/ipadic.tar.xz
     - assets/recipes.json
     - assets/recipes-matt.json
-    # Help documentation
-    - assets/docs/adding-recipes/
-    - assets/docs/quick-questions/
-    - assets/docs/learn-more/
-    - assets/docs/troubleshooting/
+    # Help documentation (locale-specific)
+    - assets/docs/en/adding-recipes/
+    - assets/docs/en/quick-questions/
+    - assets/docs/en/learn-more/
+    - assets/docs/en/troubleshooting/
+    - assets/docs/ja/adding-recipes/
+    - assets/docs/ja/quick-questions/
+    - assets/docs/ja/learn-more/
+    - assets/docs/ja/troubleshooting/
     - assets/audio/

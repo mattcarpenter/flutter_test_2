@@ -687,4 +687,22 @@ class AppLocalizationsEn extends AppLocalizations {
   String exportFailedMessage(String error) {
     return 'Failed to export recipes: $error';
   }
+
+  @override
+  String get helpTitle => 'Help';
+
+  @override
+  String get helpLoadError => 'Failed to load help topics';
+
+  @override
+  String get helpSectionAddingRecipes => 'Adding Recipes';
+
+  @override
+  String get helpSectionQuickQuestions => 'Quick Questions';
+
+  @override
+  String get helpSectionLearnMore => 'Learn More';
+
+  @override
+  String get helpSectionTroubleshooting => 'Troubleshooting';
 }

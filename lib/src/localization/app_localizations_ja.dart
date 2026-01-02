@@ -664,4 +664,22 @@ class AppLocalizationsJa extends AppLocalizations {
   String exportFailedMessage(String error) {
     return 'レシピのエクスポートに失敗しました: $error';
   }
+
+  @override
+  String get helpTitle => 'ヘルプ';
+
+  @override
+  String get helpLoadError => 'ヘルプトピックの読み込みに失敗しました';
+
+  @override
+  String get helpSectionAddingRecipes => 'レシピの追加';
+
+  @override
+  String get helpSectionQuickQuestions => 'よくある質問';
+
+  @override
+  String get helpSectionLearnMore => '詳しく知る';
+
+  @override
+  String get helpSectionTroubleshooting => 'トラブルシューティング';
 }

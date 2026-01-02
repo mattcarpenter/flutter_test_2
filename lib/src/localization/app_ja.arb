@@ -209,5 +209,12 @@
   "exportComplete": "エクスポート完了",
   "exportSuccessMessage": "{count, plural, other{{count}件のレシピをエクスポートしました}}。",
   "exportFailed": "エクスポート失敗",
-  "exportFailedMessage": "レシピのエクスポートに失敗しました: {error}"
+  "exportFailedMessage": "レシピのエクスポートに失敗しました: {error}",
+
+  "helpTitle": "ヘルプ",
+  "helpLoadError": "ヘルプトピックの読み込みに失敗しました",
+  "helpSectionAddingRecipes": "レシピの追加",
+  "helpSectionQuickQuestions": "よくある質問",
+  "helpSectionLearnMore": "詳しく知る",
+  "helpSectionTroubleshooting": "トラブルシューティング"
 }
