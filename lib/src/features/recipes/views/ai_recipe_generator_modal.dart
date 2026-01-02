@@ -666,6 +666,7 @@ class _ResultsPageContentState extends State<_ResultsPageContent>
       delegate: SliverChildListDelegate([
         ShareRecipePreviewResultContent(
           preview: preview,
+          source: RecipePreviewSource.aiGeneration,
           onSubscribe: () async {
             if (!context.mounted) return;
             final purchased = await viewModel.presentPaywall(context);

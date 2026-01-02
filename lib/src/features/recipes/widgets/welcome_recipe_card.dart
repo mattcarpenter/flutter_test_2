@@ -37,9 +37,18 @@ class WelcomeRecipeCard extends ConsumerWidget {
         AppSpacing.lg,
         AppSpacing.sm,
       ),
-      child: Align(
-        alignment: Alignment.centerLeft,
-        child: ConstrainedBox(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text(
+            'Getting Started',
+            style: AppTypography.h2Serif.copyWith(
+              color: colors.headingSecondary,
+            ),
+          ),
+          SizedBox(height: AppSpacing.md),
+          ConstrainedBox(
           constraints: BoxConstraints(
             maxWidth: isLargeScreen ? _maxCardWidth : double.infinity,
           ),
@@ -47,6 +56,13 @@ class WelcomeRecipeCard extends ConsumerWidget {
             decoration: BoxDecoration(
               color: colors.surface,
               borderRadius: BorderRadius.circular(16),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.06),
+                  blurRadius: 16,
+                  spreadRadius: 4,
+                ),
+              ],
             ),
             clipBehavior: Clip.antiAlias,
             child: Column(
@@ -131,7 +147,8 @@ class WelcomeRecipeCard extends ConsumerWidget {
               ],
             ),
           ),
-        ),
+          ),
+        ],
       ),
     );
   }

@@ -905,6 +905,7 @@ class _ShareSessionLoadedState extends ConsumerState<_ShareSessionLoaded>
           ),
           child: ShareRecipePreviewResultContent(
             preview: preview,
+            source: RecipePreviewSource.socialShare,
             onSubscribe: () async {
               if (!context.mounted) return;
 
@@ -1671,6 +1672,7 @@ class _ShareSessionLoadedState extends ConsumerState<_ShareSessionLoaded>
           ),
           child: ShareRecipePreviewResultContent(
             preview: preview,
+            source: RecipePreviewSource.socialShare,
             onSubscribe: () async {
               if (!context.mounted) return;
 

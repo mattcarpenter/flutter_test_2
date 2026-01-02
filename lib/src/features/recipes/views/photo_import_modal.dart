@@ -347,6 +347,7 @@ class _PhotoImportContentState extends ConsumerState<_PhotoImportContent> {
           ),
           child: ShareRecipePreviewResultContent(
             preview: preview,
+            source: RecipePreviewSource.photoImport,
             onSubscribe: () async {
               if (!context.mounted) return;
 

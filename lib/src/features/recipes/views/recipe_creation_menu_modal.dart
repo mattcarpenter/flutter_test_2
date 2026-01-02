@@ -1,5 +1,5 @@
 import 'package:flutter/cupertino.dart';
-import 'package:flutter/material.dart' show Theme, Brightness;
+import 'package:flutter/material.dart' show Theme, Brightness, Colors;
 import 'package:flutter/services.dart';
 import 'package:hugeicons/hugeicons.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -53,6 +53,7 @@ class _CreationOptionsPage {
   ) {
     return SliverWoltModalSheetPage(
       hasTopBarLayer: false, // Required: prevents duplicate drag handle
+      surfaceTintColor: Colors.transparent,
       trailingNavBarWidget: Padding(
         padding: EdgeInsets.only(right: AppSpacing.lg),
         child: AppCircleButton(
@@ -380,6 +381,7 @@ class _SocialImportGuidePage {
   static WoltModalSheetPage build(BuildContext context) {
     return WoltModalSheetPage(
       hasTopBarLayer: false, // Required: prevents duplicate drag handle
+      surfaceTintColor: Colors.transparent,
       leadingNavBarWidget: Padding(
         padding: EdgeInsets.only(left: AppSpacing.lg),
         child: AppCircleButton(

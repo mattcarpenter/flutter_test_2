@@ -296,7 +296,7 @@ class AppColors {
 
   // Grouped list specific colors - optimized for dark mode contrast
   Color get groupedListBackground => brightness == Brightness.light
-      ? const Color(0xFFFAFAFA)  // Same as surface in light mode
+      ? const Color(0xFFFFFFFF)  // White in light mode
       : AppColorSwatches.neutral[925]!;  // Slightly darker in dark mode
 
   Color get groupedListBorder => brightness == Brightness.light
