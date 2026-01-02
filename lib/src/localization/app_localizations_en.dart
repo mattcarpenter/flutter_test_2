@@ -1434,4 +1434,73 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get recipeMatchTermHint =>
       'Enter a matching term (e.g., pantry item name)';
+
+  @override
+  String get recipeEditorRecipeTitle => 'Recipe Title';
+
+  @override
+  String get recipeEditorDescriptionOptional => 'Description (optional)';
+
+  @override
+  String get recipeEditorPrepTime => 'Prep Time';
+
+  @override
+  String get recipeEditorCookTime => 'Cook Time';
+
+  @override
+  String get recipeEditorServings => 'Servings';
+
+  @override
+  String get recipeEditorFolders => 'Folders';
+
+  @override
+  String get recipeEditorNoFolders => 'No folders';
+
+  @override
+  String get recipeEditorOneFolder => '1 folder';
+
+  @override
+  String recipeEditorFolderCount(int count) {
+    return '$count folders';
+  }
+
+  @override
+  String get recipeEditorTakePhoto => 'Take Photo';
+
+  @override
+  String get recipeEditorChooseFromGallery => 'Choose from Gallery';
+
+  @override
+  String get recipeEditorDeleteImage => 'Delete Image';
+
+  @override
+  String get recipeEditorDeleteImageConfirm =>
+      'Are you sure you want to remove this image?';
+
+  @override
+  String get recipeEditorTags => 'Tags';
+
+  @override
+  String get recipeEditorEditTags => 'Edit Tags';
+
+  @override
+  String get recipeEditorNoTagsAssigned => 'No tags assigned';
+
+  @override
+  String get commonEnterValue => 'Enter value';
+
+  @override
+  String get commonUpdate => 'Update';
+
+  @override
+  String get durationPickerTitle => 'Select Duration';
+
+  @override
+  String get durationPickerHours => 'hours';
+
+  @override
+  String get durationPickerMinutes => 'minutes';
+
+  @override
+  String get durationPickerSeconds => 'seconds';
 }

@@ -2624,6 +2624,138 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Enter a matching term (e.g., pantry item name)'**
   String get recipeMatchTermHint;
+
+  /// Recipe title placeholder
+  ///
+  /// In en, this message translates to:
+  /// **'Recipe Title'**
+  String get recipeEditorRecipeTitle;
+
+  /// Description field placeholder
+  ///
+  /// In en, this message translates to:
+  /// **'Description (optional)'**
+  String get recipeEditorDescriptionOptional;
+
+  /// Prep time placeholder
+  ///
+  /// In en, this message translates to:
+  /// **'Prep Time'**
+  String get recipeEditorPrepTime;
+
+  /// Cook time placeholder
+  ///
+  /// In en, this message translates to:
+  /// **'Cook Time'**
+  String get recipeEditorCookTime;
+
+  /// Servings placeholder
+  ///
+  /// In en, this message translates to:
+  /// **'Servings'**
+  String get recipeEditorServings;
+
+  /// Folders label
+  ///
+  /// In en, this message translates to:
+  /// **'Folders'**
+  String get recipeEditorFolders;
+
+  /// No folders selected
+  ///
+  /// In en, this message translates to:
+  /// **'No folders'**
+  String get recipeEditorNoFolders;
+
+  /// One folder selected
+  ///
+  /// In en, this message translates to:
+  /// **'1 folder'**
+  String get recipeEditorOneFolder;
+
+  /// Number of folders selected
+  ///
+  /// In en, this message translates to:
+  /// **'{count} folders'**
+  String recipeEditorFolderCount(int count);
+
+  /// Take photo option
+  ///
+  /// In en, this message translates to:
+  /// **'Take Photo'**
+  String get recipeEditorTakePhoto;
+
+  /// Choose from gallery option
+  ///
+  /// In en, this message translates to:
+  /// **'Choose from Gallery'**
+  String get recipeEditorChooseFromGallery;
+
+  /// Delete image dialog title
+  ///
+  /// In en, this message translates to:
+  /// **'Delete Image'**
+  String get recipeEditorDeleteImage;
+
+  /// Delete image confirmation
+  ///
+  /// In en, this message translates to:
+  /// **'Are you sure you want to remove this image?'**
+  String get recipeEditorDeleteImageConfirm;
+
+  /// Tags section label
+  ///
+  /// In en, this message translates to:
+  /// **'Tags'**
+  String get recipeEditorTags;
+
+  /// Edit tags button
+  ///
+  /// In en, this message translates to:
+  /// **'Edit Tags'**
+  String get recipeEditorEditTags;
+
+  /// No tags assigned message
+  ///
+  /// In en, this message translates to:
+  /// **'No tags assigned'**
+  String get recipeEditorNoTagsAssigned;
+
+  /// Placeholder for empty input fields
+  ///
+  /// In en, this message translates to:
+  /// **'Enter value'**
+  String get commonEnterValue;
+
+  /// Update button
+  ///
+  /// In en, this message translates to:
+  /// **'Update'**
+  String get commonUpdate;
+
+  /// Duration picker title
+  ///
+  /// In en, this message translates to:
+  /// **'Select Duration'**
+  String get durationPickerTitle;
+
+  /// Hours label in duration picker
+  ///
+  /// In en, this message translates to:
+  /// **'hours'**
+  String get durationPickerHours;
+
+  /// Minutes label in duration picker
+  ///
+  /// In en, this message translates to:
+  /// **'minutes'**
+  String get durationPickerMinutes;
+
+  /// Seconds label in duration picker
+  ///
+  /// In en, this message translates to:
+  /// **'seconds'**
+  String get durationPickerSeconds;
 }
 
 class _AppLocalizationsDelegate

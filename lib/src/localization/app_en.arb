@@ -1943,5 +1943,104 @@
   "recipeMatchTermHint": "Enter a matching term (e.g., pantry item name)",
   "@recipeMatchTermHint": {
     "description": "Term input hint"
+  },
+
+  "recipeEditorRecipeTitle": "Recipe Title",
+  "@recipeEditorRecipeTitle": {
+    "description": "Recipe title placeholder"
+  },
+  "recipeEditorDescriptionOptional": "Description (optional)",
+  "@recipeEditorDescriptionOptional": {
+    "description": "Description field placeholder"
+  },
+  "recipeEditorPrepTime": "Prep Time",
+  "@recipeEditorPrepTime": {
+    "description": "Prep time placeholder"
+  },
+  "recipeEditorCookTime": "Cook Time",
+  "@recipeEditorCookTime": {
+    "description": "Cook time placeholder"
+  },
+  "recipeEditorServings": "Servings",
+  "@recipeEditorServings": {
+    "description": "Servings placeholder"
+  },
+
+  "recipeEditorFolders": "Folders",
+  "@recipeEditorFolders": {
+    "description": "Folders label"
+  },
+  "recipeEditorNoFolders": "No folders",
+  "@recipeEditorNoFolders": {
+    "description": "No folders selected"
+  },
+  "recipeEditorOneFolder": "1 folder",
+  "@recipeEditorOneFolder": {
+    "description": "One folder selected"
+  },
+  "recipeEditorFolderCount": "{count} folders",
+  "@recipeEditorFolderCount": {
+    "description": "Number of folders selected",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+
+  "recipeEditorTakePhoto": "Take Photo",
+  "@recipeEditorTakePhoto": {
+    "description": "Take photo option"
+  },
+  "recipeEditorChooseFromGallery": "Choose from Gallery",
+  "@recipeEditorChooseFromGallery": {
+    "description": "Choose from gallery option"
+  },
+  "recipeEditorDeleteImage": "Delete Image",
+  "@recipeEditorDeleteImage": {
+    "description": "Delete image dialog title"
+  },
+  "recipeEditorDeleteImageConfirm": "Are you sure you want to remove this image?",
+  "@recipeEditorDeleteImageConfirm": {
+    "description": "Delete image confirmation"
+  },
+
+  "recipeEditorTags": "Tags",
+  "@recipeEditorTags": {
+    "description": "Tags section label"
+  },
+  "recipeEditorEditTags": "Edit Tags",
+  "@recipeEditorEditTags": {
+    "description": "Edit tags button"
+  },
+  "recipeEditorNoTagsAssigned": "No tags assigned",
+  "@recipeEditorNoTagsAssigned": {
+    "description": "No tags assigned message"
+  },
+
+  "commonEnterValue": "Enter value",
+  "@commonEnterValue": {
+    "description": "Placeholder for empty input fields"
+  },
+  "commonUpdate": "Update",
+  "@commonUpdate": {
+    "description": "Update button"
+  },
+
+  "durationPickerTitle": "Select Duration",
+  "@durationPickerTitle": {
+    "description": "Duration picker title"
+  },
+  "durationPickerHours": "hours",
+  "@durationPickerHours": {
+    "description": "Hours label in duration picker"
+  },
+  "durationPickerMinutes": "minutes",
+  "@durationPickerMinutes": {
+    "description": "Minutes label in duration picker"
+  },
+  "durationPickerSeconds": "seconds",
+  "@durationPickerSeconds": {
+    "description": "Seconds label in duration picker"
   }
 }

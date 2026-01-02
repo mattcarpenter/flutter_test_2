@@ -30,6 +30,7 @@ class AppTextFieldCondensed extends StatefulWidget {
   final bool first;
   final bool last;
   final bool grouped;
+  final String? valueHint;
 
   const AppTextFieldCondensed({
     Key? key,
@@ -58,6 +59,7 @@ class AppTextFieldCondensed extends StatefulWidget {
     this.first = true,
     this.last = true,
     this.grouped = false,
+    this.valueHint,
   }) : super(key: key);
 
   @override
@@ -305,7 +307,7 @@ class _AppTextFieldCondensedState extends State<AppTextFieldCondensed>
                       contentPadding: EdgeInsets.zero,
                       border: InputBorder.none,
                       counterText: '',
-                      hintText: _hasValue ? null : 'Enter value',
+                      hintText: _hasValue ? null : widget.valueHint,
                       hintStyle: AppTypography.fieldInput.copyWith(
                         color: colors.inputPlaceholder,
                       ),
@@ -420,7 +422,7 @@ class _AppTextFieldCondensedState extends State<AppTextFieldCondensed>
                           contentPadding: EdgeInsets.zero,
                           border: InputBorder.none,
                           counterText: '',
-                          hintText: _hasValue ? null : 'Enter value',
+                          hintText: _hasValue ? null : widget.valueHint,
                           hintStyle: AppTypography.fieldInput.copyWith(
                             color: colors.inputPlaceholder,
                           ),

@@ -13,6 +13,7 @@ import 'package:recipe_app/src/managers/upload_queue_manager.dart';
 
 import '../../../../../widgets/local_or_network_image.dart';
 import '../../../../../services/logging/app_logger.dart';
+import '../../../../../localization/l10n_extension.dart';
 
 /// Represents the state of an image in the picker, tracking whether it's fresh or persisted
 class ImageState {
@@ -142,51 +143,52 @@ class _ImagePickerSectionState extends ConsumerState<ImagePickerSection> {
   }
 
   Future<void> _showImagePickerDialog(BuildContext context) async {
+    final l10n = context.l10n;
     if (Platform.isIOS) {
       showCupertinoModalPopup(
         context: context,
-        builder: (context) => CupertinoActionSheet(
+        builder: (sheetContext) => CupertinoActionSheet(
           actions: [
             CupertinoActionSheetAction(
-              child: const Text("Take Photo"),
+              child: Text(l10n.recipeEditorTakePhoto),
               onPressed: () {
-                Navigator.pop(context);
+                Navigator.pop(sheetContext);
                 _pickImage(ImageSource.camera);
               },
             ),
             CupertinoActionSheetAction(
-              child: const Text("Choose from Gallery"),
+              child: Text(l10n.recipeEditorChooseFromGallery),
               onPressed: () {
-                Navigator.pop(context);
+                Navigator.pop(sheetContext);
                 _pickImage(ImageSource.gallery);
               },
             ),
           ],
           cancelButton: CupertinoActionSheetAction(
             isDefaultAction: true,
-            child: const Text("Cancel"),
-            onPressed: () => Navigator.pop(context),
+            child: Text(l10n.commonCancel),
+            onPressed: () => Navigator.pop(sheetContext),
           ),
         ),
       );
     } else {
       showModalBottomSheet(
         context: context,
-        builder: (context) => Wrap(
+        builder: (sheetContext) => Wrap(
           children: [
             ListTile(
               leading: const Icon(Icons.camera_alt),
-              title: const Text("Take Photo"),
+              title: Text(l10n.recipeEditorTakePhoto),
               onTap: () {
-                Navigator.pop(context);
+                Navigator.pop(sheetContext);
                 _pickImage(ImageSource.camera);
               },
             ),
             ListTile(
               leading: const Icon(Icons.photo_library),
-              title: const Text("Choose from Gallery"),
+              title: Text(l10n.recipeEditorChooseFromGallery),
               onTap: () {
-                Navigator.pop(context);
+                Navigator.pop(sheetContext);
                 _pickImage(ImageSource.gallery);
               },
             ),
@@ -264,22 +266,23 @@ class _ImagePickerSectionState extends ConsumerState<ImagePickerSection> {
   }
 
   Future<void> _confirmDeleteImage(int index) async {
+    final l10n = context.l10n;
     if (Platform.isIOS) {
       showCupertinoDialog(
         context: context,
-        builder: (context) => CupertinoAlertDialog(
-          title: const Text("Delete Image"),
-          content: const Text("Are you sure you want to remove this image?"),
+        builder: (dialogContext) => CupertinoAlertDialog(
+          title: Text(l10n.recipeEditorDeleteImage),
+          content: Text(l10n.recipeEditorDeleteImageConfirm),
           actions: [
             CupertinoDialogAction(
-              child: const Text("Cancel"),
-              onPressed: () => Navigator.pop(context),
+              child: Text(l10n.commonCancel),
+              onPressed: () => Navigator.pop(dialogContext),
             ),
             CupertinoDialogAction(
               isDestructiveAction: true,
-              child: const Text("Delete"),
+              child: Text(l10n.commonDelete),
               onPressed: () {
-                Navigator.pop(context);
+                Navigator.pop(dialogContext);
                 _deleteImage(index);
               },
             ),
@@ -289,18 +292,18 @@ class _ImagePickerSectionState extends ConsumerState<ImagePickerSection> {
     } else {
       showDialog(
         context: context,
-        builder: (context) => AlertDialog(
-          title: const Text("Delete Image"),
-          content: const Text("Are you sure you want to remove this image?"),
+        builder: (dialogContext) => AlertDialog(
+          title: Text(l10n.recipeEditorDeleteImage),
+          content: Text(l10n.recipeEditorDeleteImageConfirm),
           actions: [
             TextButton(
-              child: const Text("Cancel"),
-              onPressed: () => Navigator.pop(context),
+              child: Text(l10n.commonCancel),
+              onPressed: () => Navigator.pop(dialogContext),
             ),
             TextButton(
-              child: const Text("Delete", style: TextStyle(color: Colors.red)),
+              child: Text(l10n.commonDelete, style: const TextStyle(color: Colors.red)),
               onPressed: () {
-                Navigator.pop(context);
+                Navigator.pop(dialogContext);
                 _deleteImage(index);
               },
             ),

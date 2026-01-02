@@ -7,6 +7,7 @@ import '../../../../../widgets/app_text_field_group.dart';
 import '../../../../../widgets/app_duration_picker.dart';
 import '../../../../../widgets/app_duration_picker_condensed.dart';
 import '../../../../../theme/spacing.dart';
+import '../../../../../localization/l10n_extension.dart';
 import '../items/folder_assignment_row.dart';
 
 class RecipeMetadataSection extends StatelessWidget {
@@ -42,12 +43,12 @@ class RecipeMetadataSection extends StatelessWidget {
           children: [
             AppTextFieldCondensed(
               controller: titleController,
-              placeholder: "Recipe Title",
+              placeholder: context.l10n.recipeEditorRecipeTitle,
               grouped: true,
             ),
             AppTextFieldCondensed(
               controller: descriptionController,
-              placeholder: "Description (optional)",
+              placeholder: context.l10n.recipeEditorDescriptionOptional,
               multiline: true,
               minLines: 2,
               grouped: true,
@@ -63,19 +64,20 @@ class RecipeMetadataSection extends StatelessWidget {
           children: [
             AppDurationPickerCondensed(
               controller: prepTimeController,
-              placeholder: "Prep Time",
+              placeholder: context.l10n.recipeEditorPrepTime,
               mode: DurationPickerMode.hoursMinutes,
               grouped: true,
             ),
             AppDurationPickerCondensed(
               controller: cookTimeController,
-              placeholder: "Cook Time",
+              placeholder: context.l10n.recipeEditorCookTime,
               mode: DurationPickerMode.hoursMinutes,
               grouped: true,
             ),
             AppTextFieldCondensed(
               controller: servingsController,
-              placeholder: "Servings",
+              placeholder: context.l10n.recipeEditorServings,
+              valueHint: context.l10n.commonEnterValue,
               keyboardType: TextInputType.number,
               inputFormatters: [FilteringTextInputFormatter.digitsOnly],
               grouped: true,

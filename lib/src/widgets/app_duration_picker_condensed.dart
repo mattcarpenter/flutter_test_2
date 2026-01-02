@@ -5,6 +5,7 @@ import 'package:wolt_modal_sheet/wolt_modal_sheet.dart';
 import '../theme/colors.dart';
 import '../theme/typography.dart';
 import '../theme/spacing.dart';
+import '../localization/l10n_extension.dart';
 import '../utils/duration_formatter.dart';
 import 'app_duration_picker.dart' show DurationPickerMode;
 import 'app_text_field.dart' show AppTextFieldVariant;
@@ -95,9 +96,9 @@ class _AppDurationPickerCondensedState extends State<AppDurationPickerCondensed>
 
   void _showDurationPicker() {
     if (!widget.enabled) return;
-    
+
     HapticFeedback.selectionClick();
-    
+
     final duration = _parseDuration();
     _hoursScrollController.jumpToItem(duration.inHours);
     _minutesScrollController.jumpToItem(
@@ -107,17 +108,18 @@ class _AppDurationPickerCondensedState extends State<AppDurationPickerCondensed>
     );
     _secondsScrollController.jumpToItem(duration.inSeconds % 60);
 
+    final l10n = context.l10n;
     WoltModalSheet.show(
       context: context,
-      pageListBuilder: (context) => [
+      pageListBuilder: (sheetContext) => [
         WoltModalSheetPage(
-          backgroundColor: AppColors.of(context).background,
+          backgroundColor: AppColors.of(sheetContext).background,
           surfaceTintColor: Colors.transparent,
           hasSabGradient: false,
           leadingNavBarWidget: CupertinoButton(
             padding: const EdgeInsets.symmetric(horizontal: 16.0),
-            onPressed: () => Navigator.of(context).pop(),
-            child: const Text('Cancel'),
+            onPressed: () => Navigator.of(sheetContext).pop(),
+            child: Text(l10n.commonCancel),
           ),
           trailingNavBarWidget: CupertinoButton(
             padding: const EdgeInsets.symmetric(horizontal: 16.0),
@@ -131,20 +133,20 @@ class _AppDurationPickerCondensedState extends State<AppDurationPickerCondensed>
               final seconds = widget.mode == DurationPickerMode.hoursMinutesSeconds
                   ? _secondsScrollController.selectedItem
                   : 0;
-              
+
               final totalMinutes = hours * 60 + minutes + (seconds > 0 ? 1 : 0);
               widget.controller.text = totalMinutes.toString();
               HapticFeedback.selectionClick();
-              Navigator.of(context).pop();
+              Navigator.of(sheetContext).pop();
             },
-            child: const Text('Update'),
+            child: Text(l10n.commonUpdate),
           ),
           pageTitle: Padding(
             padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
             child: Text(
-              'Select Duration',
+              l10n.durationPickerTitle,
               style: AppTypography.h4.copyWith(
-                color: AppColors.of(context).textPrimary,
+                color: AppColors.of(sheetContext).textPrimary,
               ),
             ),
           ),
@@ -159,6 +161,7 @@ class _AppDurationPickerCondensedState extends State<AppDurationPickerCondensed>
   }
 
   Widget _buildPickerContent() {
+    final l10n = context.l10n;
     switch (widget.mode) {
       case DurationPickerMode.hoursMinutes:
         return Row(
@@ -167,7 +170,7 @@ class _AppDurationPickerCondensedState extends State<AppDurationPickerCondensed>
             _buildPicker(
               controller: _hoursScrollController,
               itemCount: 24,
-              label: 'hours',
+              label: l10n.durationPickerHours,
             ),
             Padding(
               padding: const EdgeInsets.only(top: AppSpacing.lg + AppSpacing.xs), // Align with picker content
@@ -183,7 +186,7 @@ class _AppDurationPickerCondensedState extends State<AppDurationPickerCondensed>
             _buildPicker(
               controller: _minutesScrollController,
               itemCount: 60,
-              label: 'minutes',
+              label: l10n.durationPickerMinutes,
             ),
           ],
         );
@@ -191,7 +194,7 @@ class _AppDurationPickerCondensedState extends State<AppDurationPickerCondensed>
         return _buildPicker(
           controller: _minutesScrollController,
           itemCount: 1000,
-          label: 'minutes',
+          label: l10n.durationPickerMinutes,
         );
       case DurationPickerMode.hoursMinutesSeconds:
         return Row(
@@ -200,7 +203,7 @@ class _AppDurationPickerCondensedState extends State<AppDurationPickerCondensed>
             _buildPicker(
               controller: _hoursScrollController,
               itemCount: 24,
-              label: 'hours',
+              label: l10n.durationPickerHours,
             ),
             Padding(
               padding: const EdgeInsets.only(top: AppSpacing.lg + AppSpacing.xs), // Align with picker content
@@ -216,7 +219,7 @@ class _AppDurationPickerCondensedState extends State<AppDurationPickerCondensed>
             _buildPicker(
               controller: _minutesScrollController,
               itemCount: 60,
-              label: 'minutes',
+              label: l10n.durationPickerMinutes,
             ),
             Padding(
               padding: const EdgeInsets.only(top: AppSpacing.lg + AppSpacing.xs), // Align with picker content
@@ -232,7 +235,7 @@ class _AppDurationPickerCondensedState extends State<AppDurationPickerCondensed>
             _buildPicker(
               controller: _secondsScrollController,
               itemCount: 60,
-              label: 'seconds',
+              label: l10n.durationPickerSeconds,
             ),
           ],
         );

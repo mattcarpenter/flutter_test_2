@@ -7,6 +7,7 @@ import '../../../../../providers/recipe_tag_provider.dart';
 import '../../../../../theme/colors.dart';
 import '../../../../../theme/spacing.dart';
 import '../../../../../theme/typography.dart';
+import '../../../../../localization/l10n_extension.dart';
 
 /// A row displaying assigned tags as chips with an "Edit Tags" button
 class TagChipsRow extends ConsumerWidget {
@@ -36,21 +37,21 @@ class TagChipsRow extends ConsumerWidget {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text(
-                  'Tags',
+                  context.l10n.recipeEditorTags,
                   style: AppTypography.fieldLabel.copyWith(
                     color: AppColors.of(context).textPrimary,
                   ),
                 ),
                 TextButton(
                   onPressed: onEditTags,
-                  child: const Text('Edit Tags'),
+                  child: Text(context.l10n.recipeEditorEditTags),
                 ),
               ],
             ),
             SizedBox(height: AppSpacing.sm),
             if (selectedTags.isEmpty)
               Text(
-                'No tags assigned',
+                context.l10n.recipeEditorNoTagsAssigned,
                 style: AppTypography.body.copyWith(
                   color: AppColors.of(context).textSecondary,
                 ),

@@ -468,5 +468,33 @@
   "recipeMatchSource": "ソース: {source}",
   "recipeMatchAddTermTitle": "マッチング用語を追加",
   "recipeMatchTermLabel": "用語",
-  "recipeMatchTermHint": "マッチング用語を入力（例: パントリーアイテム名）"
+  "recipeMatchTermHint": "マッチング用語を入力（例: パントリーアイテム名）",
+
+  "recipeEditorRecipeTitle": "レシピタイトル",
+  "recipeEditorDescriptionOptional": "説明（任意）",
+  "recipeEditorPrepTime": "下準備時間",
+  "recipeEditorCookTime": "調理時間",
+  "recipeEditorServings": "人数",
+
+  "recipeEditorFolders": "フォルダ",
+  "recipeEditorNoFolders": "フォルダなし",
+  "recipeEditorOneFolder": "1つのフォルダ",
+  "recipeEditorFolderCount": "{count}個のフォルダ",
+
+  "recipeEditorTakePhoto": "写真を撮る",
+  "recipeEditorChooseFromGallery": "ギャラリーから選択",
+  "recipeEditorDeleteImage": "画像を削除",
+  "recipeEditorDeleteImageConfirm": "この画像を削除してもよろしいですか？",
+
+  "recipeEditorTags": "タグ",
+  "recipeEditorEditTags": "タグを編集",
+  "recipeEditorNoTagsAssigned": "タグが設定されていません",
+
+  "commonEnterValue": "値を入力",
+  "commonUpdate": "更新",
+
+  "durationPickerTitle": "時間を選択",
+  "durationPickerHours": "時間",
+  "durationPickerMinutes": "分",
+  "durationPickerSeconds": "秒"
 }

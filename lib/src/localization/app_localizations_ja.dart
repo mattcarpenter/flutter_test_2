@@ -1394,4 +1394,72 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get recipeMatchTermHint => 'マッチング用語を入力（例: パントリーアイテム名）';
+
+  @override
+  String get recipeEditorRecipeTitle => 'レシピタイトル';
+
+  @override
+  String get recipeEditorDescriptionOptional => '説明（任意）';
+
+  @override
+  String get recipeEditorPrepTime => '下準備時間';
+
+  @override
+  String get recipeEditorCookTime => '調理時間';
+
+  @override
+  String get recipeEditorServings => '人数';
+
+  @override
+  String get recipeEditorFolders => 'フォルダ';
+
+  @override
+  String get recipeEditorNoFolders => 'フォルダなし';
+
+  @override
+  String get recipeEditorOneFolder => '1つのフォルダ';
+
+  @override
+  String recipeEditorFolderCount(int count) {
+    return '$count個のフォルダ';
+  }
+
+  @override
+  String get recipeEditorTakePhoto => '写真を撮る';
+
+  @override
+  String get recipeEditorChooseFromGallery => 'ギャラリーから選択';
+
+  @override
+  String get recipeEditorDeleteImage => '画像を削除';
+
+  @override
+  String get recipeEditorDeleteImageConfirm => 'この画像を削除してもよろしいですか？';
+
+  @override
+  String get recipeEditorTags => 'タグ';
+
+  @override
+  String get recipeEditorEditTags => 'タグを編集';
+
+  @override
+  String get recipeEditorNoTagsAssigned => 'タグが設定されていません';
+
+  @override
+  String get commonEnterValue => '値を入力';
+
+  @override
+  String get commonUpdate => '更新';
+
+  @override
+  String get durationPickerTitle => '時間を選択';
+
+  @override
+  String get durationPickerHours => '時間';
+
+  @override
+  String get durationPickerMinutes => '分';
+
+  @override
+  String get durationPickerSeconds => '秒';
 }

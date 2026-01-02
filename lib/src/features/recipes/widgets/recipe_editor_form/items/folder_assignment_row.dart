@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../../theme/colors.dart';
 import '../../../../../theme/typography.dart';
+import '../../../../../localization/l10n_extension.dart';
 import '../../../../../providers/recipe_folder_provider.dart';
 import '../../folder_selection_modal.dart';
 
@@ -18,13 +19,13 @@ class FolderAssignmentRow extends ConsumerWidget {
     this.grouped = false,
   });
 
-  String _getFolderDisplayText(List<String> folderIds) {
+  String _getFolderDisplayText(BuildContext context, List<String> folderIds) {
     if (folderIds.isEmpty) {
-      return 'No folders';
+      return context.l10n.recipeEditorNoFolders;
     } else if (folderIds.length == 1) {
-      return '1 folder';
+      return context.l10n.recipeEditorOneFolder;
     } else {
-      return '${folderIds.length} folders';
+      return context.l10n.recipeEditorFolderCount(folderIds.length);
     }
   }
 
@@ -59,7 +60,7 @@ class FolderAssignmentRow extends ConsumerWidget {
         child: Row(
           children: [
             Text(
-              'Folders',
+              context.l10n.recipeEditorFolders,
               style: AppTypography.fieldInput.copyWith(
                 color: colors.textPrimary,
               ),
@@ -68,20 +69,20 @@ class FolderAssignmentRow extends ConsumerWidget {
             foldersAsync.when(
               data: (folders) {
                 return Text(
-                  _getFolderDisplayText(currentFolderIds),
+                  _getFolderDisplayText(context, currentFolderIds),
                   style: AppTypography.fieldInput.copyWith(
                     color: colors.textSecondary,
                   ),
                 );
               },
               loading: () => Text(
-                'Loading...',
+                context.l10n.commonLoading,
                 style: AppTypography.fieldInput.copyWith(
                   color: colors.textSecondary,
                 ),
               ),
               error: (_, __) => Text(
-                _getFolderDisplayText(currentFolderIds),
+                _getFolderDisplayText(context, currentFolderIds),
                 style: AppTypography.fieldInput.copyWith(
                   color: colors.textSecondary,
                 ),

@@ -572,6 +572,7 @@ class RecipeEditorFormState extends ConsumerState<RecipeEditorForm> {
                 AppTextFieldCondensed(
                   controller: _sourceController,
                   placeholder: context.l10n.recipeEditorSourcePlaceholder,
+                  valueHint: context.l10n.commonEnterValue,
                   keyboardType: TextInputType.url,
                   grouped: true,
                 ),
