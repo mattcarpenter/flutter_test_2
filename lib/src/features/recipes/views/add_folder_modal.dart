@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart' as supabase_flutter;
 import 'package:wolt_modal_sheet/wolt_modal_sheet.dart';
 
+import '../../../localization/l10n_extension.dart';
 import '../../../providers/recipe_folder_provider.dart';
 import '../../../theme/colors.dart';
 import '../../../theme/spacing.dart';
@@ -68,7 +69,7 @@ class AddFolderModalPage {
           mainAxisSize: MainAxisSize.min,
           children: [
             Text(
-              'New Recipe Folder',
+              context.l10n.recipeFolderNew,
               style: AppTypography.h4.copyWith(
                 color: AppColors.of(context).textPrimary,
               ),
@@ -172,17 +173,17 @@ class _AddFolderFormState extends ConsumerState<AddFolderForm> {
       children: [
         AppTextFieldSimple(
           controller: widget.controller,
-          placeholder: 'Enter Folder Name',
+          placeholder: context.l10n.recipeFolderEnterName,
           autofocus: true,
           enabled: !_isCreating,
           onChanged: _onTextChanged,
           onSubmitted: (_) => _submitForm(),
           textInputAction: TextInputAction.done,
-          errorText: _showError ? 'Folder name is required' : null,
+          errorText: _showError ? context.l10n.recipeFolderNameRequired : null,
         ),
         SizedBox(height: AppSpacing.lg),
         AppButtonVariants.primaryFilled(
-          text: 'Create New Folder',
+          text: context.l10n.recipeFolderCreateNew,
           size: AppButtonSize.large,
           shape: AppButtonShape.square,
           onPressed: (_isCreating || !_hasInput) ? null : _submitForm,

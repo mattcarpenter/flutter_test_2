@@ -184,6 +184,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get commonDelete => 'Delete';
 
   @override
+  String get commonAdd => 'Add';
+
+  @override
   String get commonClear => 'Clear';
 
   @override
@@ -705,4 +708,730 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get helpSectionTroubleshooting => 'Troubleshooting';
+
+  @override
+  String get recipesTitle => 'Recipes';
+
+  @override
+  String get recipesFolders => 'Recipe Folders';
+
+  @override
+  String get recipesAddFolder => 'Add Folder';
+
+  @override
+  String get recipesAddSmartFolder => 'Add Smart Folder';
+
+  @override
+  String get recipesRecentlyViewed => 'Recently Viewed';
+
+  @override
+  String get recipesPinnedRecipes => 'Pinned Recipes';
+
+  @override
+  String get recipesViewAll => 'View All';
+
+  @override
+  String get recipesNotFound => 'Recipe not found';
+
+  @override
+  String recipesLoadError(String error) {
+    return 'Error loading recipe: $error';
+  }
+
+  @override
+  String get recipeCreateTitle => 'Create a Recipe';
+
+  @override
+  String get recipeCreateManually => 'Create Manually';
+
+  @override
+  String get recipeCreateManuallyDesc => 'Start from scratch';
+
+  @override
+  String get recipeImportFromUrl => 'Import from URL';
+
+  @override
+  String get recipeImportFromUrlDesc => 'Paste a recipe link';
+
+  @override
+  String get recipeGenerateWithAi => 'Generate with AI';
+
+  @override
+  String get recipeGenerateWithAiDesc => 'Describe what you want';
+
+  @override
+  String get recipeImportFromSocial => 'Import from Social';
+
+  @override
+  String get recipeImportFromSocialDesc => 'Instagram, TikTok, YouTube';
+
+  @override
+  String get recipeImportFromCamera => 'Import from Camera';
+
+  @override
+  String get recipeImportFromCameraDesc => 'Photograph a recipe';
+
+  @override
+  String get recipeImportFromPhotos => 'Import from Photos';
+
+  @override
+  String get recipeImportFromPhotosDesc => 'Select from your library';
+
+  @override
+  String get recipeDiscoverRecipes => 'Discover Recipes';
+
+  @override
+  String get recipeDiscoverRecipesDesc => 'Browse and import from the web';
+
+  @override
+  String get recipePlus => 'PLUS';
+
+  @override
+  String get recipeSocialImportTitle => 'Import from Social Media';
+
+  @override
+  String get recipeSocialImportInstructions =>
+      'To import a recipe from Instagram, TikTok, or YouTube:';
+
+  @override
+  String get recipeSocialImportStep1 => 'Open the app and find a recipe video';
+
+  @override
+  String get recipeSocialImportStep2 => 'Tap the Share button';
+
+  @override
+  String get recipeSocialImportStep3 =>
+      'Select \"Stockpot\" from the share menu';
+
+  @override
+  String get recipeSocialImportStep4 =>
+      'We\'ll extract the recipe automatically';
+
+  @override
+  String get recipeGotIt => 'Got it';
+
+  @override
+  String get recipeFolderNew => 'New Recipe Folder';
+
+  @override
+  String get recipeFolderEnterName => 'Enter Folder Name';
+
+  @override
+  String get recipeFolderNameRequired => 'Folder name is required';
+
+  @override
+  String get recipeFolderCreateNew => 'Create New Folder';
+
+  @override
+  String get recipeFolderRename => 'Rename Folder';
+
+  @override
+  String get recipeFolderName => 'Folder name';
+
+  @override
+  String get recipeFolderRenameButton => 'Rename';
+
+  @override
+  String get recipeFolderDelete => 'Delete Folder';
+
+  @override
+  String get recipeFolderNoFolders => 'No folders yet';
+
+  @override
+  String get recipeFolders => 'Folders';
+
+  @override
+  String get recipeAiTitle => 'Generate with AI';
+
+  @override
+  String get recipeAiDescribe => 'Describe what you want to eat';
+
+  @override
+  String get recipeAiPlaceholder => 'e.g., \"I want a warm soup with chicken\"';
+
+  @override
+  String get recipeAiUsePantry => 'Use pantry items';
+
+  @override
+  String recipeAiItemsInStock(int count) {
+    return '$count items in stock';
+  }
+
+  @override
+  String recipeAiSelected(int count) {
+    return '$count selected';
+  }
+
+  @override
+  String get recipeAiGenerateIdeas => 'Generate Ideas';
+
+  @override
+  String get recipeAiRecipeIdeas => 'Recipe Ideas';
+
+  @override
+  String get recipeAiSelectToGenerate => 'Select a recipe to generate';
+
+  @override
+  String get recipeAiBrainstorming => 'Brainstorming recipes...';
+
+  @override
+  String get recipeAiConsidering => 'Considering your preferences...';
+
+  @override
+  String get recipeAiFinding => 'Finding delicious ideas...';
+
+  @override
+  String get recipeAiGenerating => 'Generating recipe...';
+
+  @override
+  String get recipeAiWritingIngredients => 'Writing ingredients...';
+
+  @override
+  String get recipeAiCraftingInstructions => 'Crafting instructions...';
+
+  @override
+  String get recipeAiLimitReached => 'Limit Reached';
+
+  @override
+  String get recipeAiGenerationFailed => 'Generation Failed';
+
+  @override
+  String get recipeAiUpgradeToPlus => 'Upgrade to Plus';
+
+  @override
+  String get recipeAiTryAgain => 'Try Again';
+
+  @override
+  String get recipeAiSelectPantryItems => 'Select Pantry Items';
+
+  @override
+  String get recipeAiSelectAll => 'Select All';
+
+  @override
+  String get recipeAiDeselectAll => 'Deselect All';
+
+  @override
+  String get recipeAiNoPantryItems => 'No pantry items available';
+
+  @override
+  String get recipeAiDifficultyEasy => 'Easy';
+
+  @override
+  String get recipeAiDifficultyMedium => 'Medium';
+
+  @override
+  String get recipeAiDifficultyHard => 'Hard';
+
+  @override
+  String get recipeUrlImportTitle => 'Import from URL';
+
+  @override
+  String get recipeUrlImportSubtitle => 'Paste a recipe URL to import';
+
+  @override
+  String get recipeUrlImportPlaceholder => 'https://example.com/recipe';
+
+  @override
+  String get recipeUrlImportButton => 'Import Recipe';
+
+  @override
+  String get recipeUrlImporting => 'Importing Recipe';
+
+  @override
+  String get recipeUrlFetching => 'Fetching recipe...';
+
+  @override
+  String get recipeUrlExtracting => 'Extracting recipe...';
+
+  @override
+  String get recipeUrlExtractionFailed => 'Extraction Failed';
+
+  @override
+  String get recipeUrlOffline =>
+      'You\'re offline. Please check your internet connection.';
+
+  @override
+  String get recipeUrlInvalid => 'Please enter a valid URL.';
+
+  @override
+  String get recipeUrlNoRecipe =>
+      'This page doesn\'t appear to contain recipe information.';
+
+  @override
+  String get recipeUrlPreviewLimitReached => 'Preview Limit Reached';
+
+  @override
+  String get recipeUrlImportFailed => 'Import Failed';
+
+  @override
+  String get recipeUrlPreviewLimit =>
+      'Recipe previews are limited for free users. Upgrade to Plus for unlimited imports.';
+
+  @override
+  String get recipeUrlPlusRequired =>
+      'This page requires Plus subscription for recipe extraction.';
+
+  @override
+  String get recipeUrlSomethingWrong =>
+      'Something went wrong. Please try again.';
+
+  @override
+  String get recipeUrlNoRecipeFound => 'No recipe found on this page.';
+
+  @override
+  String get recipeUrlFailedExtract =>
+      'Failed to extract recipe. Please try again.';
+
+  @override
+  String get recipePhotoProcessing => 'Processing Photo';
+
+  @override
+  String get recipePhotoReading => 'Reading photo...';
+
+  @override
+  String get recipePhotoProcessingStatus => 'Processing photo...';
+
+  @override
+  String get recipePhotoExtracting => 'Extracting recipe...';
+
+  @override
+  String get recipePhotoNoRecipe =>
+      'No recipe found in the photo.\n\nTry a photo of a recipe card or cookbook page.';
+
+  @override
+  String get recipePhotoFailed =>
+      'Failed to process the image(s). Please try again.';
+
+  @override
+  String get recipePhotoOffline =>
+      'You\'re offline. Please check your internet connection and try again.';
+
+  @override
+  String get recipeEditorNewRecipe => 'New Recipe';
+
+  @override
+  String get recipeEditorAddImages => 'Add Images';
+
+  @override
+  String get recipeEditorAddIngredients => 'Add Ingredients';
+
+  @override
+  String get recipeEditorAddInstructions => 'Add Instructions';
+
+  @override
+  String get recipeEditorAddNotes => 'Add Notes';
+
+  @override
+  String get recipeEditorNotesPlaceholder => 'General notes about this recipe';
+
+  @override
+  String get recipeEditorSourcePlaceholder => 'Source (optional)';
+
+  @override
+  String get recipeEditorRating => 'Rating';
+
+  @override
+  String get recipeEditorClearAllIngredients => 'Clear All Ingredients?';
+
+  @override
+  String get recipeEditorClearAllSteps => 'Clear All Steps?';
+
+  @override
+  String recipeEditorClearConfirm(int count, String type) {
+    return 'This will remove all $count $type. This action cannot be undone.';
+  }
+
+  @override
+  String get recipeEditorClearAll => 'Clear All';
+
+  @override
+  String get recipeEditorNewSection => 'New Section';
+
+  @override
+  String recipeEditorSaveFailed(String error) {
+    return 'Failed to save recipe: $error';
+  }
+
+  @override
+  String get recipeViewIngredients => 'Ingredients';
+
+  @override
+  String get recipeViewInstructions => 'Instructions';
+
+  @override
+  String get recipeViewScaleConvert => 'Scale or Convert';
+
+  @override
+  String get recipeViewNoIngredients => 'No ingredients listed.';
+
+  @override
+  String get recipeViewNoInstructions => 'No instructions listed.';
+
+  @override
+  String get recipeTagSelectTitle => 'Select Tags';
+
+  @override
+  String get recipeTagCreateNew => 'Create New Tag';
+
+  @override
+  String get recipeTagNoTags => 'No tags yet';
+
+  @override
+  String get recipeTagCreateFirst =>
+      'Create your first tag using the button above';
+
+  @override
+  String get recipeTagName => 'Tag Name';
+
+  @override
+  String get recipeTagEnterName => 'Enter tag name';
+
+  @override
+  String get recipeTagColor => 'Tag Color';
+
+  @override
+  String get recipeTagCreate => 'Create';
+
+  @override
+  String get recipeTagExists => 'A tag with this name already exists';
+
+  @override
+  String get recipeFolderSelectTitle => 'Add Recipe to Folders';
+
+  @override
+  String get recipeFolderCreateFirst =>
+      'Create your first folder using the button above';
+
+  @override
+  String get recipeFolderExists => 'A folder with this name already exists';
+
+  @override
+  String get recipeFilterResetAll => 'Reset All';
+
+  @override
+  String get recipeFilterApply => 'Apply Changes';
+
+  @override
+  String get recipeFilterCookTime => 'Cook Time';
+
+  @override
+  String get recipeFilterRating => 'Rating';
+
+  @override
+  String get recipeFilterPantryMatch => 'Pantry Match';
+
+  @override
+  String get recipeFilterTags => 'Tags';
+
+  @override
+  String get recipeFilterMustHaveAllTags => 'Must have all tags';
+
+  @override
+  String get recipeFilterSort => 'Sort';
+
+  @override
+  String recipeFilterSortBy(String option) {
+    return 'Sort by $option';
+  }
+
+  @override
+  String get recipeFilterMatchAny => 'Match any recipe (Stock not required)';
+
+  @override
+  String get recipeFilterFewIngredients => 'A few ingredients in stock (25%)';
+
+  @override
+  String get recipeFilterHalfIngredients =>
+      'At least half ingredients in stock (50%)';
+
+  @override
+  String get recipeFilterMostIngredients => 'Most ingredients in stock (75%)';
+
+  @override
+  String get recipeFilterAllIngredients => 'All ingredients in stock (100%)';
+
+  @override
+  String recipeFilterPercentMatch(int percent) {
+    return '$percent% match';
+  }
+
+  @override
+  String get recipeCookAddRecipe => 'Add Recipe';
+
+  @override
+  String get recipeCookComplete => 'Complete Cook';
+
+  @override
+  String get recipeCookAddRecipeTitle => 'Add Recipe to Cook';
+
+  @override
+  String get recipeCookNoSteps => 'No steps found for this recipe';
+
+  @override
+  String get recipeCookPrevious => 'Previous';
+
+  @override
+  String get recipeCookNext => 'Next';
+
+  @override
+  String get recipeIngredientLinkToRecipe => 'Link to Recipe';
+
+  @override
+  String get recipeIngredientConvertToIngredient => 'Convert to ingredient';
+
+  @override
+  String get recipeIngredientSectionName => 'Section name';
+
+  @override
+  String get recipeIngredientLinkExisting => 'Link to Existing Recipe';
+
+  @override
+  String get recipeIngredientChangeLinked => 'Change Linked Recipe';
+
+  @override
+  String get recipeIngredientRemoveLink => 'Remove Recipe Link';
+
+  @override
+  String get recipeIngredientNoRecipesFound => 'No recipes found';
+
+  @override
+  String get recipeIngredientNoRecipesMatch => 'No recipes match your search';
+
+  @override
+  String get recipeStepNextStep => 'Next Step';
+
+  @override
+  String get recipeStepConvertToStep => 'Convert to step';
+
+  @override
+  String get recipeStepConvertToSection => 'Convert to section';
+
+  @override
+  String get recipeStepDescribe => 'Describe this step';
+
+  @override
+  String get recipeEditIngredientsTitle => 'Edit Ingredients';
+
+  @override
+  String get recipeEditStepsTitle => 'Edit Steps';
+
+  @override
+  String get recipeEditUpdate => 'Update';
+
+  @override
+  String get recipeAddToShoppingList => 'Add to Shopping List';
+
+  @override
+  String get recipeAddToShoppingListButton => 'Add to Shopping List';
+
+  @override
+  String get recipeAddToShoppingListAdding => 'Adding...';
+
+  @override
+  String get recipeAddToShoppingListNoIngredients => 'No ingredients to add';
+
+  @override
+  String get recipeAddToShoppingListDefault => 'My Shopping List';
+
+  @override
+  String get recipeWelcomeGettingStarted => 'Getting Started';
+
+  @override
+  String get recipeWelcomeTitle => 'Welcome to Stockpot!';
+
+  @override
+  String get recipeWelcomeSubtitle =>
+      'Create your first recipe and start\nbuilding your collection';
+
+  @override
+  String get recipeTileEdit => 'Edit Recipe';
+
+  @override
+  String get recipeTileDelete => 'Delete Recipe';
+
+  @override
+  String get recipeSearchPlaceholder => 'Search for recipes to add';
+
+  @override
+  String get recipeSearchNoResults => 'No recipes found';
+
+  @override
+  String get recipeSearchTryDifferent => 'Try a different search term';
+
+  @override
+  String get recipeSearchClearFilters => 'Clear Filters';
+
+  @override
+  String get recipeSearchFilterSort => 'Filter and Sort';
+
+  @override
+  String get recipeAddRecipeButton => 'Add Recipe';
+
+  @override
+  String get recipeFolderNoRecipesMatch =>
+      'No recipes match the current filters';
+
+  @override
+  String get recipeFolderNoTagsMatch => 'No recipes match the selected tags';
+
+  @override
+  String get recipeFolderNoIngredientsMatch =>
+      'No recipes match the selected ingredients';
+
+  @override
+  String get recipeEditSmartFolder => 'Edit Smart Folder';
+
+  @override
+  String get recipeCookTimeUnder30 => 'Under 30 minutes';
+
+  @override
+  String get recipeCookTime30To60 => '30-60 minutes';
+
+  @override
+  String get recipeCookTime1To2Hours => '1-2 hours';
+
+  @override
+  String get recipeCookTimeOver2Hours => 'Over 2 hours';
+
+  @override
+  String get recipeSortPantryMatch => 'Pantry Match %';
+
+  @override
+  String get recipeSortAlphabetical => 'Alphabetical';
+
+  @override
+  String get recipeSortRating => 'Rating';
+
+  @override
+  String get recipeSortTime => 'Time';
+
+  @override
+  String get recipeSortAddedDate => 'Added Date';
+
+  @override
+  String get recipeSortUpdatedDate => 'Updated Date';
+
+  @override
+  String recipeSearchError(String error) {
+    return 'Error: $error';
+  }
+
+  @override
+  String get recipeAddModalNew => 'New Recipe';
+
+  @override
+  String get recipeAddModalEdit => 'Edit Recipe';
+
+  @override
+  String get recipeAddModalCreate => 'Create';
+
+  @override
+  String get recipeAddModalUpdate => 'Update';
+
+  @override
+  String recipeAddModalFailed(String message) {
+    return 'Failed to add recipe: $message';
+  }
+
+  @override
+  String get recipeAddModalCannotAdd => 'Cannot Add Recipe';
+
+  @override
+  String get recipeAddModalAdd => 'Add';
+
+  @override
+  String get commonSave => 'Save';
+
+  @override
+  String get commonDone => 'Done';
+
+  @override
+  String get commonClose => 'Close';
+
+  @override
+  String get commonBack => 'Back';
+
+  @override
+  String get commonIngredient => 'ingredient';
+
+  @override
+  String get commonIngredients => 'ingredients';
+
+  @override
+  String get commonStep => 'step';
+
+  @override
+  String get commonSteps => 'steps';
+
+  @override
+  String get recipeStepAddStep => 'Add Step';
+
+  @override
+  String get recipeStepAddSection => 'Add Section';
+
+  @override
+  String get recipeStepEditAsText => 'Edit as Text';
+
+  @override
+  String get recipeStepClearAll => 'Clear All Steps';
+
+  @override
+  String get recipeStepNoSteps => 'No steps added yet.';
+
+  @override
+  String get recipePinnedTitle => 'Pinned Recipes';
+
+  @override
+  String recipePinnedNoMatch(String query) {
+    return 'No pinned recipes match \"$query\"';
+  }
+
+  @override
+  String get recipePinnedEmpty =>
+      'No pinned recipes yet.\nPin your favorite recipes to see them here.';
+
+  @override
+  String get recipePinnedNoResults => 'No recipes found';
+
+  @override
+  String get recipeMatchTitle => 'Pantry Matches';
+
+  @override
+  String recipeMatchSummary(int matched, int total) {
+    return 'Pantry matches: $matched of $total ingredients';
+  }
+
+  @override
+  String recipeMatchMatchedWith(String name) {
+    return 'Matched with: $name';
+  }
+
+  @override
+  String get recipeMatchTermsTitle => 'Matching Terms';
+
+  @override
+  String get recipeMatchAddTerm => 'Add New Term';
+
+  @override
+  String get recipeMatchNoTerms =>
+      'No additional terms for this ingredient. Add terms to improve pantry matching.';
+
+  @override
+  String get recipeMatchTip =>
+      'Tip: Add terms that match pantry item names to improve matching.';
+
+  @override
+  String recipeMatchSource(String source) {
+    return 'Source: $source';
+  }
+
+  @override
+  String get recipeMatchAddTermTitle => 'Add Matching Term';
+
+  @override
+  String get recipeMatchTermLabel => 'Term';
+
+  @override
+  String get recipeMatchTermHint =>
+      'Enter a matching term (e.g., pantry item name)';
 }

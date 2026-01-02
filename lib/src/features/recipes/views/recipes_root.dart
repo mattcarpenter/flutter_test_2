@@ -8,6 +8,7 @@ import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
 import 'package:wolt_modal_sheet/wolt_modal_sheet.dart';
+import '../../../localization/l10n_extension.dart';
 import '../../../mobile/utils/adaptive_sliver_page.dart';
 import '../../../providers/recipe_provider.dart';
 import '../../../theme/colors.dart';
@@ -35,13 +36,13 @@ class RecipesTab extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     return AdaptiveSliverPage(
-      title: 'Recipes',
+      title: context.l10n.recipesTitle,
       searchEnabled: true,
       searchResultsBuilder: (context, query) => RecipeSearchResults(
         onResultSelected: (recipe) async {
           FocusScope.of(context).unfocus();
           context.push('/recipe/${recipe.id}', extra: {
-            'previousPageTitle': 'Recipes',
+            'previousPageTitle': context.l10n.recipesTitle,
           });
         },
       ),
@@ -59,7 +60,7 @@ class RecipesTab extends ConsumerWidget {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text(
-                  'Recipe Folders',
+                  context.l10n.recipesFolders,
                   style: AppTypography.h2Serif.copyWith(
                     color: AppColors.of(context).headingSecondary,
                   ),
@@ -67,14 +68,14 @@ class RecipesTab extends ConsumerWidget {
                 AdaptivePullDownButton(
                   items: [
                     AdaptiveMenuItem(
-                      title: 'Add Folder',
+                      title: context.l10n.recipesAddFolder,
                       icon: const HugeIcon(icon: HugeIcons.strokeRoundedFolder01),
                       onTap: () {
                         showAddFolderModal(context);
                       },
                     ),
                     AdaptiveMenuItem(
-                      title: 'Add Smart Folder',
+                      title: context.l10n.recipesAddSmartFolder,
                       icon: const HugeIcon(icon: HugeIcons.strokeRoundedAiMagic),
                       onTap: () {
                         showAddSmartFolderModal(context);
@@ -89,8 +90,8 @@ class RecipesTab extends ConsumerWidget {
             ),
           ),
         ),
-        const SliverToBoxAdapter(
-          child: FolderList(currentPageTitle: 'Recipes')
+        SliverToBoxAdapter(
+          child: FolderList(currentPageTitle: context.l10n.recipesTitle)
         ),
         // Pinned recipes section
         const SliverToBoxAdapter(
@@ -108,12 +109,12 @@ class RecipesTab extends ConsumerWidget {
       trailing: AdaptivePullDownButton(
         items: [
           AdaptiveMenuItem(
-            title: 'Add Folder', icon: const HugeIcon(icon: HugeIcons.strokeRoundedFolder01), onTap: () {
+            title: context.l10n.recipesAddFolder, icon: const HugeIcon(icon: HugeIcons.strokeRoundedFolder01), onTap: () {
               showAddFolderModal(context);
             }
           ),
           AdaptiveMenuItem(
-            title: 'Add Smart Folder',
+            title: context.l10n.recipesAddSmartFolder,
             icon: const HugeIcon(icon: HugeIcons.strokeRoundedAiMagic),
             onTap: () {
               showAddSmartFolderModal(context);
@@ -121,7 +122,7 @@ class RecipesTab extends ConsumerWidget {
           ),
           AdaptiveMenuItem.divider(),
           AdaptiveMenuItem(
-            title: 'New Recipe',
+            title: context.l10n.recipeEditorNewRecipe,
             icon: const HugeIcon(icon: HugeIcons.strokeRoundedBook01),
             onTap: () {
               // Don't pass folderId for uncategorized folder
@@ -129,28 +130,28 @@ class RecipesTab extends ConsumerWidget {
             },
           ),
           AdaptiveMenuItem(
-            title: 'Generate with AI',
+            title: context.l10n.recipeGenerateWithAi,
             icon: const HugeIcon(icon: HugeIcons.strokeRoundedMagicWand01),
             onTap: () {
               showAiRecipeGeneratorModal(context, ref: ref);
             },
           ),
           AdaptiveMenuItem(
-            title: 'Import from Camera',
+            title: context.l10n.recipeImportFromCamera,
             icon: const HugeIcon(icon: HugeIcons.strokeRoundedCamera01),
             onTap: () {
               showPhotoCaptureReviewModal(context, ref: ref);
             },
           ),
           AdaptiveMenuItem(
-            title: 'Import from Photos',
+            title: context.l10n.recipeImportFromPhotos,
             icon: const HugeIcon(icon: HugeIcons.strokeRoundedImage01),
             onTap: () {
               showPhotoImportModal(context, ref: ref, source: ImageSource.gallery);
             },
           ),
           AdaptiveMenuItem(
-            title: 'Import from URL',
+            title: context.l10n.recipeImportFromUrl,
             icon: const HugeIcon(icon: HugeIcons.strokeRoundedLink01),
             onTap: () {
               showUrlImportModal(context, ref: ref);

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../../../../database/models/ingredients.dart';
+import '../../../../../localization/l10n_extension.dart';
 import '../../../../../widgets/app_button.dart';
 import '../../../../../widgets/app_overflow_button.dart';
 import '../../../../../widgets/adaptive_pull_down/adaptive_menu_item.dart';
@@ -112,9 +113,9 @@ class _IngredientsSectionState extends State<IngredientsSection> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         if (widget.ingredients.isEmpty)
-          const Padding(
-            padding: EdgeInsets.symmetric(vertical: 16.0),
-            child: Text("No ingredients added yet."),
+          Padding(
+            padding: const EdgeInsets.symmetric(vertical: 16.0),
+            child: Text(context.l10n.recipeViewNoIngredients),
           )
         else
           ReorderableListView.builder(
@@ -159,7 +160,7 @@ class _IngredientsSectionState extends State<IngredientsSection> {
               Expanded(
                 flex: 1,
                 child: AppButton(
-                  text: 'Add Ingredient',
+                  text: context.l10n.recipeEditorAddIngredients,
                   onPressed: () => widget.onAddIngredient(false),
                   theme: AppButtonTheme.secondary,
                   style: AppButtonStyle.outline,
@@ -170,12 +171,12 @@ class _IngredientsSectionState extends State<IngredientsSection> {
                 ),
               ),
               const SizedBox(width: AppSpacing.sm),
-              
-              // Add Section button - flex column 2  
+
+              // Add Section button - flex column 2
               Expanded(
                 flex: 1,
                 child: AppButton(
-                  text: 'Add Section',
+                  text: context.l10n.recipeStepAddSection,
                   onPressed: () => widget.onAddIngredient(true),
                   theme: AppButtonTheme.secondary,
                   style: AppButtonStyle.outline,
@@ -186,18 +187,18 @@ class _IngredientsSectionState extends State<IngredientsSection> {
                 ),
               ),
               const SizedBox(width: AppSpacing.sm),
-              
+
               // Context menu button - compact overflow style
               AppOverflowButton(
                 items: [
                   AdaptiveMenuItem(
-                    title: 'Edit as Text',
+                    title: context.l10n.recipeStepEditAsText,
                     icon: const Icon(Icons.edit_note),
                     onTap: () => widget.onEditAsText?.call(),
                   ),
                   AdaptiveMenuItem.divider(),
                   AdaptiveMenuItem(
-                    title: 'Clear All Ingredients',
+                    title: context.l10n.recipeEditorClearAllIngredients,
                     icon: const Icon(Icons.clear_all),
                     isDestructive: true,
                     onTap: () => widget.onClearAll?.call(),

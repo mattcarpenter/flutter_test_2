@@ -178,6 +178,9 @@ class AppLocalizationsJa extends AppLocalizations {
   String get commonDelete => '削除';
 
   @override
+  String get commonAdd => '追加';
+
+  @override
   String get commonClear => 'クリア';
 
   @override
@@ -682,4 +685,713 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get helpSectionTroubleshooting => 'トラブルシューティング';
+
+  @override
+  String get recipesTitle => 'レシピ';
+
+  @override
+  String get recipesFolders => 'レシピフォルダ';
+
+  @override
+  String get recipesAddFolder => 'フォルダを追加';
+
+  @override
+  String get recipesAddSmartFolder => 'スマートフォルダを追加';
+
+  @override
+  String get recipesRecentlyViewed => '最近見たレシピ';
+
+  @override
+  String get recipesPinnedRecipes => 'ピン留めしたレシピ';
+
+  @override
+  String get recipesViewAll => 'すべて見る';
+
+  @override
+  String get recipesNotFound => 'レシピが見つかりません';
+
+  @override
+  String recipesLoadError(String error) {
+    return 'レシピの読み込みエラー: $error';
+  }
+
+  @override
+  String get recipeCreateTitle => 'レシピを作成';
+
+  @override
+  String get recipeCreateManually => '手動で作成';
+
+  @override
+  String get recipeCreateManuallyDesc => '最初から作成';
+
+  @override
+  String get recipeImportFromUrl => 'URLからインポート';
+
+  @override
+  String get recipeImportFromUrlDesc => 'レシピリンクを貼り付け';
+
+  @override
+  String get recipeGenerateWithAi => 'AIで生成';
+
+  @override
+  String get recipeGenerateWithAiDesc => '食べたいものを説明';
+
+  @override
+  String get recipeImportFromSocial => 'SNSからインポート';
+
+  @override
+  String get recipeImportFromSocialDesc => 'Instagram、TikTok、YouTube';
+
+  @override
+  String get recipeImportFromCamera => 'カメラからインポート';
+
+  @override
+  String get recipeImportFromCameraDesc => 'レシピを撮影';
+
+  @override
+  String get recipeImportFromPhotos => '写真からインポート';
+
+  @override
+  String get recipeImportFromPhotosDesc => 'ライブラリから選択';
+
+  @override
+  String get recipeDiscoverRecipes => 'レシピを探す';
+
+  @override
+  String get recipeDiscoverRecipesDesc => 'ウェブから閲覧・インポート';
+
+  @override
+  String get recipePlus => 'PLUS';
+
+  @override
+  String get recipeSocialImportTitle => 'SNSからインポート';
+
+  @override
+  String get recipeSocialImportInstructions =>
+      'Instagram、TikTok、YouTubeからレシピをインポートするには：';
+
+  @override
+  String get recipeSocialImportStep1 => 'アプリを開いてレシピ動画を見つける';
+
+  @override
+  String get recipeSocialImportStep2 => '共有ボタンをタップ';
+
+  @override
+  String get recipeSocialImportStep3 => '共有メニューから「Stockpot」を選択';
+
+  @override
+  String get recipeSocialImportStep4 => 'レシピを自動的に抽出します';
+
+  @override
+  String get recipeGotIt => '了解';
+
+  @override
+  String get recipeFolderNew => '新しいレシピフォルダ';
+
+  @override
+  String get recipeFolderEnterName => 'フォルダ名を入力';
+
+  @override
+  String get recipeFolderNameRequired => 'フォルダ名は必須です';
+
+  @override
+  String get recipeFolderCreateNew => '新しいフォルダを作成';
+
+  @override
+  String get recipeFolderRename => 'フォルダ名を変更';
+
+  @override
+  String get recipeFolderName => 'フォルダ名';
+
+  @override
+  String get recipeFolderRenameButton => '名前を変更';
+
+  @override
+  String get recipeFolderDelete => 'フォルダを削除';
+
+  @override
+  String get recipeFolderNoFolders => 'フォルダなし';
+
+  @override
+  String get recipeFolders => 'フォルダ';
+
+  @override
+  String get recipeAiTitle => 'AIで生成';
+
+  @override
+  String get recipeAiDescribe => '食べたいものを説明してください';
+
+  @override
+  String get recipeAiPlaceholder => '例：「鶏肉を使った温かいスープが食べたい」';
+
+  @override
+  String get recipeAiUsePantry => 'パントリーのアイテムを使う';
+
+  @override
+  String recipeAiItemsInStock(int count) {
+    return '$count個の在庫アイテム';
+  }
+
+  @override
+  String recipeAiSelected(int count) {
+    return '$count個選択中';
+  }
+
+  @override
+  String get recipeAiGenerateIdeas => 'アイデアを生成';
+
+  @override
+  String get recipeAiRecipeIdeas => 'レシピのアイデア';
+
+  @override
+  String get recipeAiSelectToGenerate => '生成するレシピを選択';
+
+  @override
+  String get recipeAiBrainstorming => 'レシピを考案中...';
+
+  @override
+  String get recipeAiConsidering => 'お好みを考慮中...';
+
+  @override
+  String get recipeAiFinding => 'おいしいアイデアを探索中...';
+
+  @override
+  String get recipeAiGenerating => 'レシピを生成中...';
+
+  @override
+  String get recipeAiWritingIngredients => '材料を書き出し中...';
+
+  @override
+  String get recipeAiCraftingInstructions => '手順を作成中...';
+
+  @override
+  String get recipeAiLimitReached => '上限に達しました';
+
+  @override
+  String get recipeAiGenerationFailed => '生成に失敗しました';
+
+  @override
+  String get recipeAiUpgradeToPlus => 'Plusにアップグレード';
+
+  @override
+  String get recipeAiTryAgain => 'もう一度試す';
+
+  @override
+  String get recipeAiSelectPantryItems => 'パントリーアイテムを選択';
+
+  @override
+  String get recipeAiSelectAll => 'すべて選択';
+
+  @override
+  String get recipeAiDeselectAll => 'すべて解除';
+
+  @override
+  String get recipeAiNoPantryItems => 'パントリーにアイテムがありません';
+
+  @override
+  String get recipeAiDifficultyEasy => '簡単';
+
+  @override
+  String get recipeAiDifficultyMedium => '普通';
+
+  @override
+  String get recipeAiDifficultyHard => '難しい';
+
+  @override
+  String get recipeUrlImportTitle => 'URLからインポート';
+
+  @override
+  String get recipeUrlImportSubtitle => 'レシピのURLを貼り付けてインポート';
+
+  @override
+  String get recipeUrlImportPlaceholder => 'https://example.com/recipe';
+
+  @override
+  String get recipeUrlImportButton => 'レシピをインポート';
+
+  @override
+  String get recipeUrlImporting => 'レシピをインポート中';
+
+  @override
+  String get recipeUrlFetching => 'レシピを取得中...';
+
+  @override
+  String get recipeUrlExtracting => 'レシピを抽出中...';
+
+  @override
+  String get recipeUrlExtractionFailed => '抽出に失敗しました';
+
+  @override
+  String get recipeUrlOffline => 'オフラインです。インターネット接続を確認してください。';
+
+  @override
+  String get recipeUrlInvalid => '有効なURLを入力してください。';
+
+  @override
+  String get recipeUrlNoRecipe => 'このページにはレシピ情報が含まれていないようです。';
+
+  @override
+  String get recipeUrlPreviewLimitReached => 'プレビュー上限に達しました';
+
+  @override
+  String get recipeUrlImportFailed => 'インポートに失敗しました';
+
+  @override
+  String get recipeUrlPreviewLimit =>
+      '無料ユーザーはレシピのプレビューが制限されています。Plusにアップグレードすると無制限でインポートできます。';
+
+  @override
+  String get recipeUrlPlusRequired => 'このページのレシピ抽出にはPlusサブスクリプションが必要です。';
+
+  @override
+  String get recipeUrlSomethingWrong => 'エラーが発生しました。もう一度お試しください。';
+
+  @override
+  String get recipeUrlNoRecipeFound => 'このページにレシピが見つかりませんでした。';
+
+  @override
+  String get recipeUrlFailedExtract => 'レシピの抽出に失敗しました。もう一度お試しください。';
+
+  @override
+  String get recipePhotoProcessing => '写真を処理中';
+
+  @override
+  String get recipePhotoReading => '写真を読み取り中...';
+
+  @override
+  String get recipePhotoProcessingStatus => '写真を処理中...';
+
+  @override
+  String get recipePhotoExtracting => 'レシピを抽出中...';
+
+  @override
+  String get recipePhotoNoRecipe =>
+      '写真にレシピが見つかりませんでした。\n\nレシピカードや料理本のページの写真をお試しください。';
+
+  @override
+  String get recipePhotoFailed => '画像の処理に失敗しました。もう一度お試しください。';
+
+  @override
+  String get recipePhotoOffline => 'オフラインです。インターネット接続を確認して、もう一度お試しください。';
+
+  @override
+  String get recipeEditorNewRecipe => '新しいレシピ';
+
+  @override
+  String get recipeEditorAddImages => '画像を追加';
+
+  @override
+  String get recipeEditorAddIngredients => '材料を追加';
+
+  @override
+  String get recipeEditorAddInstructions => '手順を追加';
+
+  @override
+  String get recipeEditorAddNotes => 'メモを追加';
+
+  @override
+  String get recipeEditorNotesPlaceholder => 'このレシピに関するメモ';
+
+  @override
+  String get recipeEditorSourcePlaceholder => '出典（任意）';
+
+  @override
+  String get recipeEditorRating => '評価';
+
+  @override
+  String get recipeEditorClearAllIngredients => 'すべての材料をクリア？';
+
+  @override
+  String get recipeEditorClearAllSteps => 'すべての手順をクリア？';
+
+  @override
+  String recipeEditorClearConfirm(int count, String type) {
+    return '$count個の$typeがすべて削除されます。この操作は取り消せません。';
+  }
+
+  @override
+  String get recipeEditorClearAll => 'すべてクリア';
+
+  @override
+  String get recipeEditorNewSection => '新しいセクション';
+
+  @override
+  String recipeEditorSaveFailed(String error) {
+    return 'レシピの保存に失敗しました: $error';
+  }
+
+  @override
+  String get recipeViewIngredients => '材料';
+
+  @override
+  String get recipeViewInstructions => '手順';
+
+  @override
+  String get recipeViewScaleConvert => '分量の変換';
+
+  @override
+  String get recipeViewNoIngredients => '材料が登録されていません。';
+
+  @override
+  String get recipeViewNoInstructions => '手順が登録されていません。';
+
+  @override
+  String get recipeTagSelectTitle => 'タグを選択';
+
+  @override
+  String get recipeTagCreateNew => '新しいタグを作成';
+
+  @override
+  String get recipeTagNoTags => 'タグがありません';
+
+  @override
+  String get recipeTagCreateFirst => '上のボタンから最初のタグを作成してください';
+
+  @override
+  String get recipeTagName => 'タグ名';
+
+  @override
+  String get recipeTagEnterName => 'タグ名を入力';
+
+  @override
+  String get recipeTagColor => 'タグの色';
+
+  @override
+  String get recipeTagCreate => '作成';
+
+  @override
+  String get recipeTagExists => 'この名前のタグは既に存在します';
+
+  @override
+  String get recipeFolderSelectTitle => 'レシピをフォルダに追加';
+
+  @override
+  String get recipeFolderCreateFirst => '上のボタンから最初のフォルダを作成してください';
+
+  @override
+  String get recipeFolderExists => 'この名前のフォルダは既に存在します';
+
+  @override
+  String get recipeFilterResetAll => 'すべてリセット';
+
+  @override
+  String get recipeFilterApply => '変更を適用';
+
+  @override
+  String get recipeFilterCookTime => '調理時間';
+
+  @override
+  String get recipeFilterRating => '評価';
+
+  @override
+  String get recipeFilterPantryMatch => 'パントリー一致';
+
+  @override
+  String get recipeFilterTags => 'タグ';
+
+  @override
+  String get recipeFilterMustHaveAllTags => 'すべてのタグを含む';
+
+  @override
+  String get recipeFilterSort => '並び替え';
+
+  @override
+  String recipeFilterSortBy(String option) {
+    return '$optionで並び替え';
+  }
+
+  @override
+  String get recipeFilterMatchAny => 'すべてのレシピを表示（在庫不要）';
+
+  @override
+  String get recipeFilterFewIngredients => '一部の材料が在庫あり（25%）';
+
+  @override
+  String get recipeFilterHalfIngredients => '半分以上の材料が在庫あり（50%）';
+
+  @override
+  String get recipeFilterMostIngredients => 'ほとんどの材料が在庫あり（75%）';
+
+  @override
+  String get recipeFilterAllIngredients => 'すべての材料が在庫あり（100%）';
+
+  @override
+  String recipeFilterPercentMatch(int percent) {
+    return '$percent%一致';
+  }
+
+  @override
+  String get recipeCookAddRecipe => 'レシピを追加';
+
+  @override
+  String get recipeCookComplete => '調理完了';
+
+  @override
+  String get recipeCookAddRecipeTitle => '調理するレシピを追加';
+
+  @override
+  String get recipeCookNoSteps => 'このレシピには手順がありません';
+
+  @override
+  String get recipeCookPrevious => '前へ';
+
+  @override
+  String get recipeCookNext => '次へ';
+
+  @override
+  String get recipeIngredientLinkToRecipe => 'レシピにリンク';
+
+  @override
+  String get recipeIngredientConvertToIngredient => '材料に変換';
+
+  @override
+  String get recipeIngredientSectionName => 'セクション名';
+
+  @override
+  String get recipeIngredientLinkExisting => '既存のレシピにリンク';
+
+  @override
+  String get recipeIngredientChangeLinked => 'リンク先のレシピを変更';
+
+  @override
+  String get recipeIngredientRemoveLink => 'レシピリンクを削除';
+
+  @override
+  String get recipeIngredientNoRecipesFound => 'レシピが見つかりません';
+
+  @override
+  String get recipeIngredientNoRecipesMatch => '検索に一致するレシピがありません';
+
+  @override
+  String get recipeStepNextStep => '次のステップ';
+
+  @override
+  String get recipeStepConvertToStep => '手順に変換';
+
+  @override
+  String get recipeStepConvertToSection => 'セクションに変換';
+
+  @override
+  String get recipeStepDescribe => 'この手順を説明してください';
+
+  @override
+  String get recipeEditIngredientsTitle => '材料を編集';
+
+  @override
+  String get recipeEditStepsTitle => '手順を編集';
+
+  @override
+  String get recipeEditUpdate => '更新';
+
+  @override
+  String get recipeAddToShoppingList => '買い物リストに追加';
+
+  @override
+  String get recipeAddToShoppingListButton => '買い物リストに追加';
+
+  @override
+  String get recipeAddToShoppingListAdding => '追加中...';
+
+  @override
+  String get recipeAddToShoppingListNoIngredients => '追加する材料がありません';
+
+  @override
+  String get recipeAddToShoppingListDefault => '買い物リスト';
+
+  @override
+  String get recipeWelcomeGettingStarted => 'はじめに';
+
+  @override
+  String get recipeWelcomeTitle => 'Stockpotへようこそ！';
+
+  @override
+  String get recipeWelcomeSubtitle => '最初のレシピを作成して\nコレクションを始めましょう';
+
+  @override
+  String get recipeTileEdit => 'レシピを編集';
+
+  @override
+  String get recipeTileDelete => 'レシピを削除';
+
+  @override
+  String get recipeSearchPlaceholder => '追加するレシピを検索';
+
+  @override
+  String get recipeSearchNoResults => 'レシピが見つかりません';
+
+  @override
+  String get recipeSearchTryDifferent => '別の検索ワードをお試しください';
+
+  @override
+  String get recipeSearchClearFilters => 'フィルターをクリア';
+
+  @override
+  String get recipeSearchFilterSort => 'フィルターと並び替え';
+
+  @override
+  String get recipeAddRecipeButton => 'レシピを追加';
+
+  @override
+  String get recipeFolderNoRecipesMatch => '現在のフィルターに一致するレシピはありません';
+
+  @override
+  String get recipeFolderNoTagsMatch => '選択したタグに一致するレシピはありません';
+
+  @override
+  String get recipeFolderNoIngredientsMatch => '選択した材料に一致するレシピはありません';
+
+  @override
+  String get recipeEditSmartFolder => 'スマートフォルダを編集';
+
+  @override
+  String get recipeCookTimeUnder30 => '30分未満';
+
+  @override
+  String get recipeCookTime30To60 => '30〜60分';
+
+  @override
+  String get recipeCookTime1To2Hours => '1〜2時間';
+
+  @override
+  String get recipeCookTimeOver2Hours => '2時間以上';
+
+  @override
+  String get recipeSortPantryMatch => 'パントリーマッチ %';
+
+  @override
+  String get recipeSortAlphabetical => 'アルファベット順';
+
+  @override
+  String get recipeSortRating => '評価';
+
+  @override
+  String get recipeSortTime => '時間';
+
+  @override
+  String get recipeSortAddedDate => '追加日';
+
+  @override
+  String get recipeSortUpdatedDate => '更新日';
+
+  @override
+  String recipeSearchError(String error) {
+    return 'エラー: $error';
+  }
+
+  @override
+  String get recipeAddModalNew => '新しいレシピ';
+
+  @override
+  String get recipeAddModalEdit => 'レシピを編集';
+
+  @override
+  String get recipeAddModalCreate => '作成';
+
+  @override
+  String get recipeAddModalUpdate => '更新';
+
+  @override
+  String recipeAddModalFailed(String message) {
+    return 'レシピの追加に失敗しました: $message';
+  }
+
+  @override
+  String get recipeAddModalCannotAdd => 'レシピを追加できません';
+
+  @override
+  String get recipeAddModalAdd => '追加';
+
+  @override
+  String get commonSave => '保存';
+
+  @override
+  String get commonDone => '完了';
+
+  @override
+  String get commonClose => '閉じる';
+
+  @override
+  String get commonBack => '戻る';
+
+  @override
+  String get commonIngredient => '材料';
+
+  @override
+  String get commonIngredients => '材料';
+
+  @override
+  String get commonStep => '手順';
+
+  @override
+  String get commonSteps => '手順';
+
+  @override
+  String get recipeStepAddStep => '手順を追加';
+
+  @override
+  String get recipeStepAddSection => 'セクションを追加';
+
+  @override
+  String get recipeStepEditAsText => 'テキストとして編集';
+
+  @override
+  String get recipeStepClearAll => 'すべての手順をクリア';
+
+  @override
+  String get recipeStepNoSteps => '手順がまだ追加されていません。';
+
+  @override
+  String get recipePinnedTitle => 'ピン留めしたレシピ';
+
+  @override
+  String recipePinnedNoMatch(String query) {
+    return '「$query」に一致するピン留めレシピはありません';
+  }
+
+  @override
+  String get recipePinnedEmpty =>
+      'ピン留めしたレシピはまだありません。\nお気に入りのレシピをピン留めしてここに表示しましょう。';
+
+  @override
+  String get recipePinnedNoResults => 'レシピが見つかりません';
+
+  @override
+  String get recipeMatchTitle => 'パントリーマッチ';
+
+  @override
+  String recipeMatchSummary(int matched, int total) {
+    return 'パントリーマッチ: $total材料中$matched個';
+  }
+
+  @override
+  String recipeMatchMatchedWith(String name) {
+    return 'マッチ: $name';
+  }
+
+  @override
+  String get recipeMatchTermsTitle => 'マッチング用語';
+
+  @override
+  String get recipeMatchAddTerm => '用語を追加';
+
+  @override
+  String get recipeMatchNoTerms =>
+      'この材料には追加の用語がありません。パントリーマッチを改善するには用語を追加してください。';
+
+  @override
+  String get recipeMatchTip => 'ヒント: パントリーアイテム名に一致する用語を追加してマッチングを改善しましょう。';
+
+  @override
+  String recipeMatchSource(String source) {
+    return 'ソース: $source';
+  }
+
+  @override
+  String get recipeMatchAddTermTitle => 'マッチング用語を追加';
+
+  @override
+  String get recipeMatchTermLabel => '用語';
+
+  @override
+  String get recipeMatchTermHint => 'マッチング用語を入力（例: パントリーアイテム名）';
 }

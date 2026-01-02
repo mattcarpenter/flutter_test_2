@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:wolt_modal_sheet/wolt_modal_sheet.dart';
 
 import '../../../../database/database.dart';
+import '../../../localization/l10n_extension.dart';
 import '../../../providers/recipe_provider.dart';
 import '../../../providers/subscription_provider.dart';
 import '../../../services/logging/app_logger.dart';
@@ -37,7 +38,7 @@ Future<void> showRecipeEditorModal(
     AppLogger.debug('[showRecipeEditorModal] Has slots, showing form');
   }
 
-  final pageTitle = isEditing ? 'Edit Recipe' : 'New Recipe';
+  final pageTitle = isEditing ? context.l10n.recipeAddModalEdit : context.l10n.recipeAddModalNew;
 
   WoltModalSheet.show(
     useRootNavigator: true,
@@ -78,7 +79,7 @@ class RecipeEditorModalPage {
         onPressed: () {
           Navigator.of(context).pop();
         },
-        child: const Text('Cancel'),
+        child: Text(context.l10n.commonCancel),
       ),
       // Trailing (right) nav bar widget: Create/Update button with horizontal padding.
       trailingNavBarWidget: CupertinoButton(
@@ -87,7 +88,7 @@ class RecipeEditorModalPage {
           await formKey.currentState?.saveRecipe();
           Navigator.of(context).pop();
         },
-        child: Text(isEditing ? 'Update' : 'Create'),
+        child: Text(isEditing ? context.l10n.recipeAddModalUpdate : context.l10n.recipeAddModalCreate),
       ),
       pageTitle: ModalSheetTitle(pageTitle),
       child: Padding(

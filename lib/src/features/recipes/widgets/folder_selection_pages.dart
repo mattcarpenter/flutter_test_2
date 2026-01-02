@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:provider/provider.dart' as provider;
 import 'package:wolt_modal_sheet/wolt_modal_sheet.dart';
 
+import '../../../localization/l10n_extension.dart';
 import '../../../theme/colors.dart';
 import '../../../theme/spacing.dart';
 import '../../../theme/typography.dart';
@@ -24,7 +25,7 @@ class FolderSelectionPage {
       surfaceTintColor: Colors.transparent,
       hasTopBarLayer: true,
       isTopBarLayerAlwaysVisible: false,
-      topBarTitle: ModalSheetTitle('Add Recipe to Folders'),
+      topBarTitle: ModalSheetTitle(context.l10n.recipeFolderSelectTitle),
       leadingNavBarWidget: CupertinoButton(
         padding: const EdgeInsets.symmetric(horizontal: 16.0),
         onPressed: () {
@@ -33,7 +34,7 @@ class FolderSelectionPage {
           viewModel.cancelAllChanges();
           Navigator.of(context).pop();
         },
-        child: const Text('Cancel'),
+        child: Text(context.l10n.commonCancel),
       ),
       trailingNavBarWidget: CupertinoButton(
         padding: const EdgeInsets.symmetric(horizontal: 16.0),
@@ -46,7 +47,7 @@ class FolderSelectionPage {
           }
           // If failed, stay on modal to show error
         },
-        child: const Text('Save'),
+        child: Text(context.l10n.commonSave),
       ),
       mainContentSliversBuilder: (context) => [
         SliverToBoxAdapter(
@@ -78,7 +79,7 @@ class FolderSelectionPageContent extends ConsumerWidget {
               Align(
                 alignment: Alignment.centerRight,
                 child: AppButton(
-                  text: 'Create New Folder',
+                  text: context.l10n.recipeFolderCreateNew,
                   onPressed: () {
                     WoltModalSheet.of(context).showNext();
                   },
@@ -127,14 +128,14 @@ class FolderSelectionPageContent extends ConsumerWidget {
                       mainAxisSize: MainAxisSize.min,
                       children: [
                         Text(
-                          'No folders yet',
+                          context.l10n.recipeFolderNoFolders,
                           style: AppTypography.body.copyWith(
                             color: colors.textSecondary,
                           ),
                         ),
                         SizedBox(height: AppSpacing.md),
                         Text(
-                          'Create your first folder using the button above',
+                          context.l10n.recipeFolderCreateFirst,
                           style: AppTypography.bodySmall.copyWith(
                             color: colors.textSecondary,
                           ),
@@ -241,16 +242,16 @@ class _CreateFolderPageContentState extends State<CreateFolderPageContent> {
           children: [
             // Title
             Text(
-              'Create New Folder',
+              context.l10n.recipeFolderCreateNew,
               style: AppTypography.h4.copyWith(
                 color: colors.textPrimary,
               ),
             ),
             SizedBox(height: AppSpacing.lg),
-            
+
             // Folder name input
             Text(
-              'Folder Name',
+              context.l10n.recipeFolderName,
               style: AppTypography.label.copyWith(
                 color: colors.textPrimary,
               ),
@@ -258,7 +259,7 @@ class _CreateFolderPageContentState extends State<CreateFolderPageContent> {
             SizedBox(height: AppSpacing.sm),
             AppTextFieldSimple(
               controller: _nameController,
-              placeholder: 'Enter folder name',
+              placeholder: context.l10n.recipeFolderEnterName,
               onChanged: (_) {
                 setState(() {}); // Rebuild to update button state
                 viewModel.clearError();
@@ -269,7 +270,7 @@ class _CreateFolderPageContentState extends State<CreateFolderPageContent> {
             
             // Create button
             AppButton(
-              text: 'Create',
+              text: context.l10n.commonDone,
               onPressed: _nameController.text.trim().isEmpty ? null : _createFolderAndReturn,
               theme: AppButtonTheme.primary,
               style: AppButtonStyle.fill,

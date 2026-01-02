@@ -2,6 +2,7 @@ import 'package:flutter/material.dart' hide Step;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../../database/models/steps.dart';
+import '../../../../localization/l10n_extension.dart';
 import '../../../settings/providers/app_settings_provider.dart';
 import '../../../timers/widgets/start_timer_dialog.dart';
 import '../../../../theme/typography.dart';
@@ -44,7 +45,7 @@ class RecipeStepsView extends ConsumerWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          'Instructions',
+          context.l10n.recipeViewInstructions,
           style: AppTypography.h3Serif.copyWith(
             color: colors.headingSecondary,
           ),
@@ -54,7 +55,7 @@ class RecipeStepsView extends ConsumerWidget {
 
         if (steps.isEmpty)
           Text(
-            'No instructions listed.',
+            context.l10n.recipeViewNoInstructions,
             style: TextStyle(
               color: colors.textSecondary,
             ),

@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:wolt_modal_sheet/wolt_modal_sheet.dart';
 
+import '../../../localization/l10n_extension.dart';
 import '../../../providers/recipe_folder_provider.dart';
 import '../../../theme/colors.dart';
 import '../../../theme/spacing.dart';
@@ -126,7 +127,7 @@ class _RenameFolderContentState extends ConsumerState<_RenameFolderContent> {
         mainAxisSize: MainAxisSize.min,
         children: [
           Text(
-            'Rename Folder',
+            context.l10n.recipeFolderRename,
             style: AppTypography.h4.copyWith(color: colors.textPrimary),
           ),
           SizedBox(height: AppSpacing.lg),
@@ -134,7 +135,7 @@ class _RenameFolderContentState extends ConsumerState<_RenameFolderContent> {
           // Name input
           AppTextFieldSimple(
             controller: _nameController,
-            placeholder: 'Folder name',
+            placeholder: context.l10n.recipeFolderName,
             autofocus: true,
             onChanged: (_) => setState(() {}),
           ),
@@ -143,7 +144,7 @@ class _RenameFolderContentState extends ConsumerState<_RenameFolderContent> {
 
           // Save button
           AppButtonVariants.primaryFilled(
-            text: 'Rename',
+            text: context.l10n.recipeFolderRenameButton,
             size: AppButtonSize.large,
             shape: AppButtonShape.square,
             fullWidth: true,

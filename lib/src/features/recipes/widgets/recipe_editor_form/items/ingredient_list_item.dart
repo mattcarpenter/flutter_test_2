@@ -6,6 +6,7 @@ import 'package:wolt_modal_sheet/wolt_modal_sheet.dart';
 
 import '../../../../../../database/models/ingredients.dart';
 import '../../../../../../database/database.dart';
+import '../../../../../localization/l10n_extension.dart';
 import '../../../../../providers/recipe_provider.dart' as recipe_provider;
 import '../../../../../services/ingredient_parser_service.dart';
 import '../../../../../widgets/ingredient_text_editing_controller.dart';
@@ -251,7 +252,7 @@ class _IngredientListItemState extends ConsumerState<IngredientListItem> with Si
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   Text(
-                    'Link to Recipe',
+                    modalContext.l10n.recipeIngredientLinkToRecipe,
                     style: AppTypography.h4.copyWith(
                       color: AppColors.of(modalContext).textPrimary,
                     ),
@@ -334,7 +335,7 @@ class _IngredientListItemState extends ConsumerState<IngredientListItem> with Si
               return Menu(
                 children: [
                   MenuAction(
-                    title: 'Convert to ingredient',
+                    title: context.l10n.recipeIngredientConvertToIngredient,
                     image: MenuImage.icon(Icons.food_bank),
                     callback: () {
                       // Convert the section to an ingredient
@@ -348,7 +349,7 @@ class _IngredientListItemState extends ConsumerState<IngredientListItem> with Si
                     },
                   ),
                   MenuAction(
-                    title: 'Delete',
+                    title: context.l10n.commonDelete,
                     image: MenuImage.icon(Icons.delete_outline),
                     callback: _handleDelete,
                   ),
@@ -375,7 +376,7 @@ class _IngredientListItemState extends ConsumerState<IngredientListItem> with Si
                             color: colors.contentSecondary,
                           ),
                           decoration: InputDecoration(
-                            hintText: 'Section name',
+                            hintText: context.l10n.recipeIngredientSectionName,
                             hintStyle: AppTypography.fieldInput.copyWith(
                               color: colors.contentHint,
                             ),
@@ -453,7 +454,7 @@ class _IngredientListItemState extends ConsumerState<IngredientListItem> with Si
           return Menu(
             children: [
               MenuAction(
-                title: 'Convert to section',
+                title: context.l10n.recipeStepConvertToSection,
                 image: MenuImage.icon(Icons.segment),
                 callback: () {
                   // Convert the ingredient to a section
@@ -468,8 +469,8 @@ class _IngredientListItemState extends ConsumerState<IngredientListItem> with Si
               ),
               MenuAction(
                 title: widget.ingredient.recipeId == null
-                    ? 'Link to Existing Recipe'
-                    : 'Change Linked Recipe',
+                    ? context.l10n.recipeIngredientLinkExisting
+                    : context.l10n.recipeIngredientChangeLinked,
                 image: MenuImage.icon(Icons.link),
                 callback: () {
                   _showRecipeSelector(context);
@@ -477,14 +478,14 @@ class _IngredientListItemState extends ConsumerState<IngredientListItem> with Si
               ),
               if (widget.ingredient.recipeId != null)
                 MenuAction(
-                  title: 'Remove Recipe Link',
+                  title: context.l10n.recipeIngredientRemoveLink,
                   image: MenuImage.icon(Icons.link_off),
                   callback: () {
                     widget.onUpdate(widget.ingredient.copyWith(recipeId: ''));
                   },
                 ),
               MenuAction(
-                title: 'Delete',
+                title: context.l10n.commonDelete,
                 image: MenuImage.icon(Icons.delete_outline),
                 callback: _handleDelete,
               ),
@@ -646,7 +647,7 @@ class _RecipeSelectorContentState extends ConsumerState<RecipeSelectorContent> {
               controller: _searchController,
               focusNode: _searchFocusNode,
               decoration: InputDecoration(
-                hintText: 'Search recipes...',
+                hintText: context.l10n.recipeSearchPlaceholder,
                 prefixIcon: const Icon(Icons.search),
                 fillColor: AppColors.of(context).input,
                 filled: true,
@@ -678,9 +679,9 @@ class _RecipeSelectorContentState extends ConsumerState<RecipeSelectorContent> {
                                   ),
                                   const SizedBox(height: AppSpacing.md),
                                   Text(
-                                    _searchQuery.isEmpty 
-                                        ? 'No recipes found'
-                                        : 'No recipes match "$_searchQuery"',
+                                    _searchQuery.isEmpty
+                                        ? context.l10n.recipeIngredientNoRecipesFound
+                                        : context.l10n.recipeIngredientNoRecipesMatch,
                                     style: AppTypography.body.copyWith(
                                       color: AppColors.of(context).textSecondary,
                                     ),

@@ -4,6 +4,7 @@ import 'package:keyboard_actions/keyboard_actions.dart';
 import 'package:recipe_app/database/models/steps.dart';
 import 'package:super_context_menu/super_context_menu.dart';
 
+import '../../../../../localization/l10n_extension.dart';
 import '../../../../../theme/colors.dart';
 import '../../../../../theme/typography.dart';
 import '../utils/context_menu_utils.dart';
@@ -236,7 +237,7 @@ class _StepListItemState extends State<StepListItem> with SingleTickerProviderSt
                 child: Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                   child: Text(
-                    'Next Step',
+                    context.l10n.recipeStepNextStep,
                     style: TextStyle(
                       color: colors.primary,
                       fontSize: 17,
@@ -321,7 +322,7 @@ class _StepListItemState extends State<StepListItem> with SingleTickerProviderSt
               return Menu(
                 children: [
                   MenuAction(
-                    title: 'Convert to step',
+                    title: context.l10n.recipeStepConvertToStep,
                     image: MenuImage.icon(Icons.format_list_numbered),
                     callback: () {
                       // Convert the section to a step
@@ -332,7 +333,7 @@ class _StepListItemState extends State<StepListItem> with SingleTickerProviderSt
                     },
                   ),
                   MenuAction(
-                    title: 'Delete',
+                    title: context.l10n.commonDelete,
                     image: MenuImage.icon(Icons.delete_outline),
                     callback: _handleDelete,
                   ),
@@ -359,7 +360,7 @@ class _StepListItemState extends State<StepListItem> with SingleTickerProviderSt
                               color: colors.contentSecondary,
                             ),
                             decoration: InputDecoration(
-                              hintText: 'Section name',
+                              hintText: context.l10n.recipeIngredientSectionName,
                               hintStyle: AppTypography.fieldInput.copyWith(
                                 color: colors.contentHint,
                               ),
@@ -433,18 +434,18 @@ class _StepListItemState extends State<StepListItem> with SingleTickerProviderSt
               return Menu(
                 children: [
                   MenuAction(
-                    title: 'Convert to section',
+                    title: context.l10n.recipeStepConvertToSection,
                     image: MenuImage.icon(Icons.segment),
                     callback: () {
                       // Convert the step to a section
                       widget.onUpdate(widget.step.copyWith(
                           type: 'section',
-                          text: widget.step.text.isEmpty ? 'New Section' : widget.step.text
+                          text: widget.step.text.isEmpty ? context.l10n.recipeEditorNewSection : widget.step.text
                       ));
                     },
                   ),
                   MenuAction(
-                    title: 'Delete',
+                    title: context.l10n.commonDelete,
                     image: MenuImage.icon(Icons.delete_outline),
                     callback: _handleDelete,
                   ),
@@ -472,7 +473,7 @@ class _StepListItemState extends State<StepListItem> with SingleTickerProviderSt
                             color: colors.contentPrimary,
                           ),
                           decoration: InputDecoration(
-                            hintText: 'Describe this step',
+                            hintText: context.l10n.recipeStepDescribe,
                             hintStyle: AppTypography.fieldInput.copyWith(
                               color: colors.contentHint,
                             ),

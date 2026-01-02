@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../database/database.dart';
 import '../../../constants/folder_constants.dart';
+import '../../../localization/l10n_extension.dart';
 import '../../../providers/recipe_filter_sort_provider.dart';
 import '../../../providers/recipe_provider.dart';
 import '../../../theme/colors.dart';
@@ -48,7 +49,7 @@ class RecipeSearchResults extends ConsumerWidget {
     }
 
     if (searchState.error != null) {
-      return Center(child: Text('Error: ${searchState.error}'));
+      return Center(child: Text(context.l10n.recipeSearchError(searchState.error.toString())));
     }
 
     // Show loading if pantry match filter is active and we're still loading matches
@@ -105,8 +106,8 @@ class RecipeSearchResults extends ConsumerWidget {
           children: [
             Text(
               hasSearchQuery
-                ? 'No recipes match your search.'
-                : 'Start typing to search for recipes.',
+                ? context.l10n.recipeSearchNoResults
+                : context.l10n.recipeSearchPlaceholder,
               style: TextStyle(
                 color: AppColors.of(context).textSecondary,
               ),
@@ -121,7 +122,7 @@ class RecipeSearchResults extends ConsumerWidget {
                     ));
                   }
                 },
-                child: const Text('Clear Filters'),
+                child: Text(context.l10n.recipeSearchClearFilters),
               ),
           ],
         ),
@@ -141,7 +142,7 @@ class RecipeSearchResults extends ConsumerWidget {
                 clipBehavior: Clip.none,
                 children: [
                   AppButton(
-                    text: 'Filter and Sort',
+                    text: context.l10n.recipeSearchFilterSort,
                     leadingIcon: const Icon(Icons.tune),
                     style: AppButtonStyle.mutedOutline,
                     shape: AppButtonShape.square,

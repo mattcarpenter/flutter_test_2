@@ -17,6 +17,7 @@ import 'package:recipe_app/src/widgets/utils/grouped_list_styling.dart';
 import 'package:recipe_app/src/widgets/wolt/text/modal_sheet_title.dart';
 import 'package:recipe_app/src/features/shopping_list/views/shopping_list_selection_modal.dart';
 import 'package:recipe_app/src/features/meal_plans/models/aggregated_ingredient.dart';
+import '../../../../localization/l10n_extension.dart';
 
 void showAddRecipeIngredientsToShoppingListModal(
   BuildContext context,
@@ -82,7 +83,7 @@ class _AddRecipeIngredientsToShoppingListModalPage {
       hasTopBarLayer: true,
       isTopBarLayerAlwaysVisible: false,
       hasSabGradient: true,
-      topBarTitle: const ModalSheetTitle('Add to Shopping List'),
+      topBarTitle: ModalSheetTitle(context.l10n.recipeAddToShoppingList),
       trailingNavBarWidget: Padding(
         padding: EdgeInsets.only(right: AppSpacing.lg),
         child: AppCircleButton(
@@ -111,7 +112,7 @@ class _AddRecipeIngredientsToShoppingListModalPage {
                 listenable: controller,
                 builder: (buttonContext, child) {
                   return AppButtonVariants.primaryFilled(
-                    text: controller.isLoading ? 'Adding...' : 'Add to Shopping List',
+                    text: controller.isLoading ? context.l10n.recipeAddToShoppingListAdding : context.l10n.recipeAddToShoppingListButton,
                     size: AppButtonSize.large,
                     shape: AppButtonShape.square,
                     fullWidth: true,
@@ -200,10 +201,10 @@ class _AddRecipeIngredientsToShoppingListModalPage {
     final shoppingLists = shoppingListsAsync.valueOrNull ?? [];
 
     // Get current list name
-    String listName = 'My Shopping List';
+    String listName = context.l10n.recipeAddToShoppingListDefault;
     if (currentListId != null) {
       final list = shoppingLists.where((l) => l.id == currentListId).firstOrNull;
-      listName = list?.name ?? 'My Shopping List';
+      listName = list?.name ?? context.l10n.recipeAddToShoppingListDefault;
     }
 
     return Container(
@@ -249,7 +250,7 @@ class _AddRecipeIngredientsToShoppingListModalPage {
           ),
           const SizedBox(height: 16),
           Text(
-            'No ingredients to add',
+            context.l10n.recipeAddToShoppingListNoIngredients,
             style: CupertinoTheme.of(context).textTheme.textStyle.copyWith(
               fontSize: 18,
               fontWeight: FontWeight.w600,

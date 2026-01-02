@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:image_picker/image_picker.dart';
 import '../../../../database/database.dart';
 import '../../../constants/folder_constants.dart';
+import '../../../localization/l10n_extension.dart';
 import '../../../mobile/utils/adaptive_sliver_page.dart';
 import '../../../providers/recipe_filter_sort_provider.dart';
 import '../../../providers/recipe_folder_provider.dart';
@@ -44,35 +45,35 @@ class RecipesFolderPage extends ConsumerWidget {
     final saveFolderId = folderId == kUncategorizedFolderId ? null : folderId;
     return [
       AdaptiveMenuItem(
-        title: 'New Recipe',
+        title: context.l10n.recipeEditorNewRecipe,
         icon: const HugeIcon(icon: HugeIcons.strokeRoundedBook01),
         onTap: () {
           showRecipeEditorModal(context, ref: ref, folderId: saveFolderId);
         },
       ),
       AdaptiveMenuItem(
-        title: 'Generate with AI',
+        title: context.l10n.recipeGenerateWithAi,
         icon: const HugeIcon(icon: HugeIcons.strokeRoundedMagicWand01),
         onTap: () {
           showAiRecipeGeneratorModal(context, ref: ref, folderId: saveFolderId);
         },
       ),
       AdaptiveMenuItem(
-        title: 'Import from Camera',
+        title: context.l10n.recipeImportFromCamera,
         icon: const HugeIcon(icon: HugeIcons.strokeRoundedCamera01),
         onTap: () {
           showPhotoCaptureReviewModal(context, ref: ref, folderId: saveFolderId);
         },
       ),
       AdaptiveMenuItem(
-        title: 'Import from Photos',
+        title: context.l10n.recipeImportFromPhotos,
         icon: const HugeIcon(icon: HugeIcons.strokeRoundedImage01),
         onTap: () {
           showPhotoImportModal(context, ref: ref, source: ImageSource.gallery, folderId: saveFolderId);
         },
       ),
       AdaptiveMenuItem(
-        title: 'Import from URL',
+        title: context.l10n.recipeImportFromUrl,
         icon: const HugeIcon(icon: HugeIcons.strokeRoundedLink01),
         onTap: () {
           showUrlImportModal(context, ref: ref, folderId: saveFolderId);
@@ -237,13 +238,13 @@ class RecipesFolderPage extends ConsumerWidget {
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      const Text('No recipes match the current filters'),
+                      Text(context.l10n.recipeFolderNoRecipesMatch),
                       if (filterSortState.hasFilters)
                         TextButton(
                           onPressed: () {
                             ref.read(recipeFolderFilterSortProvider.notifier).clearFilters();
                           },
-                          child: const Text('Clear Filters'),
+                          child: Text(context.l10n.recipeSearchClearFilters),
                         ),
                     ],
                   ),
@@ -296,8 +297,8 @@ class RecipesFolderPage extends ConsumerWidget {
                 child: Center(
                   child: Text(
                     folder.folderType == 1
-                        ? 'No recipes match the selected tags'
-                        : 'No recipes match the selected ingredients',
+                        ? context.l10n.recipeFolderNoTagsMatch
+                        : context.l10n.recipeFolderNoIngredientsMatch,
                   ),
                 ),
               );
@@ -310,7 +311,7 @@ class RecipesFolderPage extends ConsumerWidget {
       trailing: AdaptivePullDownButton(
         items: [
           AdaptiveMenuItem(
-            title: 'Edit Smart Folder',
+            title: context.l10n.recipeEditSmartFolder,
             icon: const Icon(Icons.tune),
             onTap: () {
               showEditSmartFolderModal(context, folder);
@@ -352,7 +353,7 @@ class _UnifiedHeaderDelegate extends SliverPersistentHeaderDelegate {
       clipBehavior: Clip.none,
       children: [
         AppButton(
-          text: 'Filter and Sort',
+          text: context.l10n.recipeSearchFilterSort,
           leadingIcon: const Icon(Icons.tune),
           style: AppButtonStyle.mutedOutline,
           shape: AppButtonShape.square,
@@ -388,9 +389,9 @@ class _UnifiedHeaderDelegate extends SliverPersistentHeaderDelegate {
     // Add Recipe button with dropdown menu
     Widget addRecipeButton() => AdaptivePullDownButton(
       items: addRecipeMenuItems,
-      child: const AppButton(
-        text: 'Add Recipe',
-        leadingIcon: Icon(Icons.add),
+      child: AppButton(
+        text: context.l10n.recipeAddRecipeButton,
+        leadingIcon: const Icon(Icons.add),
         style: AppButtonStyle.outline,
         shape: AppButtonShape.square,
         size: AppButtonSize.medium,

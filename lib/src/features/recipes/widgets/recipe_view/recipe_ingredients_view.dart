@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../../../../../database/models/ingredients.dart';
+import '../../../../localization/l10n_extension.dart';
 import '../../../../models/ingredient_pantry_match.dart';
 import '../../../../providers/recipe_provider.dart' show recipeIngredientMatchesProvider, recipeByIdStreamProvider;
 import '../../../../providers/scale_convert_provider.dart';
@@ -133,7 +134,7 @@ class _RecipeIngredientsViewState extends ConsumerState<RecipeIngredientsView>
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             Text(
-              'Ingredients',
+              context.l10n.recipeViewIngredients,
               style: AppTypography.h3Serif.copyWith(
                 color: AppColors.of(context).headingSecondary,
               ),
@@ -166,7 +167,7 @@ class _RecipeIngredientsViewState extends ConsumerState<RecipeIngredientsView>
                         ),
                         const SizedBox(width: 6),
                       ],
-                      const Text('Scale or Convert'),
+                      Text(context.l10n.recipeViewScaleConvert),
                       const SizedBox(width: 4),
                       Icon(
                         _accordionController.value > 0.5
@@ -203,7 +204,7 @@ class _RecipeIngredientsViewState extends ConsumerState<RecipeIngredientsView>
 
         if (widget.ingredients.isEmpty)
           Text(
-            'No ingredients listed.',
+            context.l10n.recipeViewNoIngredients,
             style: TextStyle(
               color: AppColors.of(context).textSecondary,
             ),

@@ -410,6 +410,12 @@ abstract class AppLocalizations {
   /// **'Delete'**
   String get commonDelete;
 
+  /// Add button text
+  ///
+  /// In en, this message translates to:
+  /// **'Add'**
+  String get commonAdd;
+
   /// Clear button text
   ///
   /// In en, this message translates to:
@@ -1262,6 +1268,1362 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Troubleshooting'**
   String get helpSectionTroubleshooting;
+
+  /// Recipes page title
+  ///
+  /// In en, this message translates to:
+  /// **'Recipes'**
+  String get recipesTitle;
+
+  /// Recipe folders section header
+  ///
+  /// In en, this message translates to:
+  /// **'Recipe Folders'**
+  String get recipesFolders;
+
+  /// Add folder button
+  ///
+  /// In en, this message translates to:
+  /// **'Add Folder'**
+  String get recipesAddFolder;
+
+  /// Add smart folder button
+  ///
+  /// In en, this message translates to:
+  /// **'Add Smart Folder'**
+  String get recipesAddSmartFolder;
+
+  /// Recently viewed section title
+  ///
+  /// In en, this message translates to:
+  /// **'Recently Viewed'**
+  String get recipesRecentlyViewed;
+
+  /// Pinned recipes section title
+  ///
+  /// In en, this message translates to:
+  /// **'Pinned Recipes'**
+  String get recipesPinnedRecipes;
+
+  /// View all button
+  ///
+  /// In en, this message translates to:
+  /// **'View All'**
+  String get recipesViewAll;
+
+  /// Recipe not found message
+  ///
+  /// In en, this message translates to:
+  /// **'Recipe not found'**
+  String get recipesNotFound;
+
+  /// Recipe loading error
+  ///
+  /// In en, this message translates to:
+  /// **'Error loading recipe: {error}'**
+  String recipesLoadError(String error);
+
+  /// Create recipe modal title
+  ///
+  /// In en, this message translates to:
+  /// **'Create a Recipe'**
+  String get recipeCreateTitle;
+
+  /// Create manually option
+  ///
+  /// In en, this message translates to:
+  /// **'Create Manually'**
+  String get recipeCreateManually;
+
+  /// Create manually description
+  ///
+  /// In en, this message translates to:
+  /// **'Start from scratch'**
+  String get recipeCreateManuallyDesc;
+
+  /// Import from URL option
+  ///
+  /// In en, this message translates to:
+  /// **'Import from URL'**
+  String get recipeImportFromUrl;
+
+  /// Import from URL description
+  ///
+  /// In en, this message translates to:
+  /// **'Paste a recipe link'**
+  String get recipeImportFromUrlDesc;
+
+  /// Generate with AI option
+  ///
+  /// In en, this message translates to:
+  /// **'Generate with AI'**
+  String get recipeGenerateWithAi;
+
+  /// Generate with AI description
+  ///
+  /// In en, this message translates to:
+  /// **'Describe what you want'**
+  String get recipeGenerateWithAiDesc;
+
+  /// Import from social option
+  ///
+  /// In en, this message translates to:
+  /// **'Import from Social'**
+  String get recipeImportFromSocial;
+
+  /// Import from social description
+  ///
+  /// In en, this message translates to:
+  /// **'Instagram, TikTok, YouTube'**
+  String get recipeImportFromSocialDesc;
+
+  /// Import from camera option
+  ///
+  /// In en, this message translates to:
+  /// **'Import from Camera'**
+  String get recipeImportFromCamera;
+
+  /// Import from camera description
+  ///
+  /// In en, this message translates to:
+  /// **'Photograph a recipe'**
+  String get recipeImportFromCameraDesc;
+
+  /// Import from photos option
+  ///
+  /// In en, this message translates to:
+  /// **'Import from Photos'**
+  String get recipeImportFromPhotos;
+
+  /// Import from photos description
+  ///
+  /// In en, this message translates to:
+  /// **'Select from your library'**
+  String get recipeImportFromPhotosDesc;
+
+  /// Discover recipes option
+  ///
+  /// In en, this message translates to:
+  /// **'Discover Recipes'**
+  String get recipeDiscoverRecipes;
+
+  /// Discover recipes description
+  ///
+  /// In en, this message translates to:
+  /// **'Browse and import from the web'**
+  String get recipeDiscoverRecipesDesc;
+
+  /// Plus badge text
+  ///
+  /// In en, this message translates to:
+  /// **'PLUS'**
+  String get recipePlus;
+
+  /// Social import modal title
+  ///
+  /// In en, this message translates to:
+  /// **'Import from Social Media'**
+  String get recipeSocialImportTitle;
+
+  /// Social import instructions
+  ///
+  /// In en, this message translates to:
+  /// **'To import a recipe from Instagram, TikTok, or YouTube:'**
+  String get recipeSocialImportInstructions;
+
+  /// Social import step 1
+  ///
+  /// In en, this message translates to:
+  /// **'Open the app and find a recipe video'**
+  String get recipeSocialImportStep1;
+
+  /// Social import step 2
+  ///
+  /// In en, this message translates to:
+  /// **'Tap the Share button'**
+  String get recipeSocialImportStep2;
+
+  /// Social import step 3
+  ///
+  /// In en, this message translates to:
+  /// **'Select \"Stockpot\" from the share menu'**
+  String get recipeSocialImportStep3;
+
+  /// Social import step 4
+  ///
+  /// In en, this message translates to:
+  /// **'We\'ll extract the recipe automatically'**
+  String get recipeSocialImportStep4;
+
+  /// Got it button
+  ///
+  /// In en, this message translates to:
+  /// **'Got it'**
+  String get recipeGotIt;
+
+  /// New folder modal title
+  ///
+  /// In en, this message translates to:
+  /// **'New Recipe Folder'**
+  String get recipeFolderNew;
+
+  /// Folder name placeholder
+  ///
+  /// In en, this message translates to:
+  /// **'Enter Folder Name'**
+  String get recipeFolderEnterName;
+
+  /// Folder name required error
+  ///
+  /// In en, this message translates to:
+  /// **'Folder name is required'**
+  String get recipeFolderNameRequired;
+
+  /// Create folder button
+  ///
+  /// In en, this message translates to:
+  /// **'Create New Folder'**
+  String get recipeFolderCreateNew;
+
+  /// Rename folder modal title
+  ///
+  /// In en, this message translates to:
+  /// **'Rename Folder'**
+  String get recipeFolderRename;
+
+  /// Folder name label
+  ///
+  /// In en, this message translates to:
+  /// **'Folder name'**
+  String get recipeFolderName;
+
+  /// Rename button
+  ///
+  /// In en, this message translates to:
+  /// **'Rename'**
+  String get recipeFolderRenameButton;
+
+  /// Delete folder action
+  ///
+  /// In en, this message translates to:
+  /// **'Delete Folder'**
+  String get recipeFolderDelete;
+
+  /// No folders message
+  ///
+  /// In en, this message translates to:
+  /// **'No folders yet'**
+  String get recipeFolderNoFolders;
+
+  /// Folders label
+  ///
+  /// In en, this message translates to:
+  /// **'Folders'**
+  String get recipeFolders;
+
+  /// AI generator title
+  ///
+  /// In en, this message translates to:
+  /// **'Generate with AI'**
+  String get recipeAiTitle;
+
+  /// AI generator subtitle
+  ///
+  /// In en, this message translates to:
+  /// **'Describe what you want to eat'**
+  String get recipeAiDescribe;
+
+  /// AI generator input placeholder
+  ///
+  /// In en, this message translates to:
+  /// **'e.g., \"I want a warm soup with chicken\"'**
+  String get recipeAiPlaceholder;
+
+  /// Use pantry items toggle
+  ///
+  /// In en, this message translates to:
+  /// **'Use pantry items'**
+  String get recipeAiUsePantry;
+
+  /// Items in stock count
+  ///
+  /// In en, this message translates to:
+  /// **'{count} items in stock'**
+  String recipeAiItemsInStock(int count);
+
+  /// Selected items count
+  ///
+  /// In en, this message translates to:
+  /// **'{count} selected'**
+  String recipeAiSelected(int count);
+
+  /// Generate ideas button
+  ///
+  /// In en, this message translates to:
+  /// **'Generate Ideas'**
+  String get recipeAiGenerateIdeas;
+
+  /// Recipe ideas title
+  ///
+  /// In en, this message translates to:
+  /// **'Recipe Ideas'**
+  String get recipeAiRecipeIdeas;
+
+  /// Select recipe instruction
+  ///
+  /// In en, this message translates to:
+  /// **'Select a recipe to generate'**
+  String get recipeAiSelectToGenerate;
+
+  /// Brainstorming status
+  ///
+  /// In en, this message translates to:
+  /// **'Brainstorming recipes...'**
+  String get recipeAiBrainstorming;
+
+  /// Considering status
+  ///
+  /// In en, this message translates to:
+  /// **'Considering your preferences...'**
+  String get recipeAiConsidering;
+
+  /// Finding ideas status
+  ///
+  /// In en, this message translates to:
+  /// **'Finding delicious ideas...'**
+  String get recipeAiFinding;
+
+  /// Generating recipe status
+  ///
+  /// In en, this message translates to:
+  /// **'Generating recipe...'**
+  String get recipeAiGenerating;
+
+  /// Writing ingredients status
+  ///
+  /// In en, this message translates to:
+  /// **'Writing ingredients...'**
+  String get recipeAiWritingIngredients;
+
+  /// Crafting instructions status
+  ///
+  /// In en, this message translates to:
+  /// **'Crafting instructions...'**
+  String get recipeAiCraftingInstructions;
+
+  /// Limit reached error title
+  ///
+  /// In en, this message translates to:
+  /// **'Limit Reached'**
+  String get recipeAiLimitReached;
+
+  /// Generation failed error title
+  ///
+  /// In en, this message translates to:
+  /// **'Generation Failed'**
+  String get recipeAiGenerationFailed;
+
+  /// Upgrade to Plus button
+  ///
+  /// In en, this message translates to:
+  /// **'Upgrade to Plus'**
+  String get recipeAiUpgradeToPlus;
+
+  /// Try again button
+  ///
+  /// In en, this message translates to:
+  /// **'Try Again'**
+  String get recipeAiTryAgain;
+
+  /// Select pantry items title
+  ///
+  /// In en, this message translates to:
+  /// **'Select Pantry Items'**
+  String get recipeAiSelectPantryItems;
+
+  /// Select all button
+  ///
+  /// In en, this message translates to:
+  /// **'Select All'**
+  String get recipeAiSelectAll;
+
+  /// Deselect all button
+  ///
+  /// In en, this message translates to:
+  /// **'Deselect All'**
+  String get recipeAiDeselectAll;
+
+  /// No pantry items message
+  ///
+  /// In en, this message translates to:
+  /// **'No pantry items available'**
+  String get recipeAiNoPantryItems;
+
+  /// Easy difficulty
+  ///
+  /// In en, this message translates to:
+  /// **'Easy'**
+  String get recipeAiDifficultyEasy;
+
+  /// Medium difficulty
+  ///
+  /// In en, this message translates to:
+  /// **'Medium'**
+  String get recipeAiDifficultyMedium;
+
+  /// Hard difficulty
+  ///
+  /// In en, this message translates to:
+  /// **'Hard'**
+  String get recipeAiDifficultyHard;
+
+  /// URL import modal title
+  ///
+  /// In en, this message translates to:
+  /// **'Import from URL'**
+  String get recipeUrlImportTitle;
+
+  /// URL import subtitle
+  ///
+  /// In en, this message translates to:
+  /// **'Paste a recipe URL to import'**
+  String get recipeUrlImportSubtitle;
+
+  /// URL import placeholder
+  ///
+  /// In en, this message translates to:
+  /// **'https://example.com/recipe'**
+  String get recipeUrlImportPlaceholder;
+
+  /// Import recipe button
+  ///
+  /// In en, this message translates to:
+  /// **'Import Recipe'**
+  String get recipeUrlImportButton;
+
+  /// Importing recipe title
+  ///
+  /// In en, this message translates to:
+  /// **'Importing Recipe'**
+  String get recipeUrlImporting;
+
+  /// Fetching recipe status
+  ///
+  /// In en, this message translates to:
+  /// **'Fetching recipe...'**
+  String get recipeUrlFetching;
+
+  /// Extracting recipe status
+  ///
+  /// In en, this message translates to:
+  /// **'Extracting recipe...'**
+  String get recipeUrlExtracting;
+
+  /// Extraction failed title
+  ///
+  /// In en, this message translates to:
+  /// **'Extraction Failed'**
+  String get recipeUrlExtractionFailed;
+
+  /// Offline error message
+  ///
+  /// In en, this message translates to:
+  /// **'You\'re offline. Please check your internet connection.'**
+  String get recipeUrlOffline;
+
+  /// Invalid URL error
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter a valid URL.'**
+  String get recipeUrlInvalid;
+
+  /// No recipe found error
+  ///
+  /// In en, this message translates to:
+  /// **'This page doesn\'t appear to contain recipe information.'**
+  String get recipeUrlNoRecipe;
+
+  /// Preview limit reached title
+  ///
+  /// In en, this message translates to:
+  /// **'Preview Limit Reached'**
+  String get recipeUrlPreviewLimitReached;
+
+  /// Import failed title
+  ///
+  /// In en, this message translates to:
+  /// **'Import Failed'**
+  String get recipeUrlImportFailed;
+
+  /// Preview limit message
+  ///
+  /// In en, this message translates to:
+  /// **'Recipe previews are limited for free users. Upgrade to Plus for unlimited imports.'**
+  String get recipeUrlPreviewLimit;
+
+  /// Plus required message
+  ///
+  /// In en, this message translates to:
+  /// **'This page requires Plus subscription for recipe extraction.'**
+  String get recipeUrlPlusRequired;
+
+  /// Something went wrong error
+  ///
+  /// In en, this message translates to:
+  /// **'Something went wrong. Please try again.'**
+  String get recipeUrlSomethingWrong;
+
+  /// No recipe found message
+  ///
+  /// In en, this message translates to:
+  /// **'No recipe found on this page.'**
+  String get recipeUrlNoRecipeFound;
+
+  /// Failed to extract error
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to extract recipe. Please try again.'**
+  String get recipeUrlFailedExtract;
+
+  /// Processing photo title
+  ///
+  /// In en, this message translates to:
+  /// **'Processing Photo'**
+  String get recipePhotoProcessing;
+
+  /// Reading photo status
+  ///
+  /// In en, this message translates to:
+  /// **'Reading photo...'**
+  String get recipePhotoReading;
+
+  /// Processing photo status
+  ///
+  /// In en, this message translates to:
+  /// **'Processing photo...'**
+  String get recipePhotoProcessingStatus;
+
+  /// Extracting recipe status
+  ///
+  /// In en, this message translates to:
+  /// **'Extracting recipe...'**
+  String get recipePhotoExtracting;
+
+  /// No recipe in photo error
+  ///
+  /// In en, this message translates to:
+  /// **'No recipe found in the photo.\n\nTry a photo of a recipe card or cookbook page.'**
+  String get recipePhotoNoRecipe;
+
+  /// Photo processing failed error
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to process the image(s). Please try again.'**
+  String get recipePhotoFailed;
+
+  /// Photo import offline error
+  ///
+  /// In en, this message translates to:
+  /// **'You\'re offline. Please check your internet connection and try again.'**
+  String get recipePhotoOffline;
+
+  /// New recipe title
+  ///
+  /// In en, this message translates to:
+  /// **'New Recipe'**
+  String get recipeEditorNewRecipe;
+
+  /// Add images section
+  ///
+  /// In en, this message translates to:
+  /// **'Add Images'**
+  String get recipeEditorAddImages;
+
+  /// Add ingredients section
+  ///
+  /// In en, this message translates to:
+  /// **'Add Ingredients'**
+  String get recipeEditorAddIngredients;
+
+  /// Add instructions section
+  ///
+  /// In en, this message translates to:
+  /// **'Add Instructions'**
+  String get recipeEditorAddInstructions;
+
+  /// Add notes section
+  ///
+  /// In en, this message translates to:
+  /// **'Add Notes'**
+  String get recipeEditorAddNotes;
+
+  /// Notes placeholder
+  ///
+  /// In en, this message translates to:
+  /// **'General notes about this recipe'**
+  String get recipeEditorNotesPlaceholder;
+
+  /// Source placeholder
+  ///
+  /// In en, this message translates to:
+  /// **'Source (optional)'**
+  String get recipeEditorSourcePlaceholder;
+
+  /// Rating section
+  ///
+  /// In en, this message translates to:
+  /// **'Rating'**
+  String get recipeEditorRating;
+
+  /// Clear all ingredients dialog title
+  ///
+  /// In en, this message translates to:
+  /// **'Clear All Ingredients?'**
+  String get recipeEditorClearAllIngredients;
+
+  /// Clear all steps dialog title
+  ///
+  /// In en, this message translates to:
+  /// **'Clear All Steps?'**
+  String get recipeEditorClearAllSteps;
+
+  /// Clear confirmation message
+  ///
+  /// In en, this message translates to:
+  /// **'This will remove all {count} {type}. This action cannot be undone.'**
+  String recipeEditorClearConfirm(int count, String type);
+
+  /// Clear all button
+  ///
+  /// In en, this message translates to:
+  /// **'Clear All'**
+  String get recipeEditorClearAll;
+
+  /// New section default text
+  ///
+  /// In en, this message translates to:
+  /// **'New Section'**
+  String get recipeEditorNewSection;
+
+  /// Save failed error
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to save recipe: {error}'**
+  String recipeEditorSaveFailed(String error);
+
+  /// Ingredients section title
+  ///
+  /// In en, this message translates to:
+  /// **'Ingredients'**
+  String get recipeViewIngredients;
+
+  /// Instructions section title
+  ///
+  /// In en, this message translates to:
+  /// **'Instructions'**
+  String get recipeViewInstructions;
+
+  /// Scale or convert button
+  ///
+  /// In en, this message translates to:
+  /// **'Scale or Convert'**
+  String get recipeViewScaleConvert;
+
+  /// No ingredients message
+  ///
+  /// In en, this message translates to:
+  /// **'No ingredients listed.'**
+  String get recipeViewNoIngredients;
+
+  /// No instructions message
+  ///
+  /// In en, this message translates to:
+  /// **'No instructions listed.'**
+  String get recipeViewNoInstructions;
+
+  /// Select tags modal title
+  ///
+  /// In en, this message translates to:
+  /// **'Select Tags'**
+  String get recipeTagSelectTitle;
+
+  /// Create new tag button
+  ///
+  /// In en, this message translates to:
+  /// **'Create New Tag'**
+  String get recipeTagCreateNew;
+
+  /// No tags message
+  ///
+  /// In en, this message translates to:
+  /// **'No tags yet'**
+  String get recipeTagNoTags;
+
+  /// Create first tag message
+  ///
+  /// In en, this message translates to:
+  /// **'Create your first tag using the button above'**
+  String get recipeTagCreateFirst;
+
+  /// Tag name label
+  ///
+  /// In en, this message translates to:
+  /// **'Tag Name'**
+  String get recipeTagName;
+
+  /// Tag name placeholder
+  ///
+  /// In en, this message translates to:
+  /// **'Enter tag name'**
+  String get recipeTagEnterName;
+
+  /// Tag color label
+  ///
+  /// In en, this message translates to:
+  /// **'Tag Color'**
+  String get recipeTagColor;
+
+  /// Create tag button
+  ///
+  /// In en, this message translates to:
+  /// **'Create'**
+  String get recipeTagCreate;
+
+  /// Tag exists error
+  ///
+  /// In en, this message translates to:
+  /// **'A tag with this name already exists'**
+  String get recipeTagExists;
+
+  /// Add to folders modal title
+  ///
+  /// In en, this message translates to:
+  /// **'Add Recipe to Folders'**
+  String get recipeFolderSelectTitle;
+
+  /// Create first folder message
+  ///
+  /// In en, this message translates to:
+  /// **'Create your first folder using the button above'**
+  String get recipeFolderCreateFirst;
+
+  /// Folder exists error
+  ///
+  /// In en, this message translates to:
+  /// **'A folder with this name already exists'**
+  String get recipeFolderExists;
+
+  /// Reset all filters button
+  ///
+  /// In en, this message translates to:
+  /// **'Reset All'**
+  String get recipeFilterResetAll;
+
+  /// Apply changes button
+  ///
+  /// In en, this message translates to:
+  /// **'Apply Changes'**
+  String get recipeFilterApply;
+
+  /// Cook time filter title
+  ///
+  /// In en, this message translates to:
+  /// **'Cook Time'**
+  String get recipeFilterCookTime;
+
+  /// Rating filter title
+  ///
+  /// In en, this message translates to:
+  /// **'Rating'**
+  String get recipeFilterRating;
+
+  /// Pantry match filter title
+  ///
+  /// In en, this message translates to:
+  /// **'Pantry Match'**
+  String get recipeFilterPantryMatch;
+
+  /// Tags filter title
+  ///
+  /// In en, this message translates to:
+  /// **'Tags'**
+  String get recipeFilterTags;
+
+  /// Must have all tags toggle
+  ///
+  /// In en, this message translates to:
+  /// **'Must have all tags'**
+  String get recipeFilterMustHaveAllTags;
+
+  /// Sort section title
+  ///
+  /// In en, this message translates to:
+  /// **'Sort'**
+  String get recipeFilterSort;
+
+  /// Sort by label
+  ///
+  /// In en, this message translates to:
+  /// **'Sort by {option}'**
+  String recipeFilterSortBy(String option);
+
+  /// 0% pantry match label
+  ///
+  /// In en, this message translates to:
+  /// **'Match any recipe (Stock not required)'**
+  String get recipeFilterMatchAny;
+
+  /// 25% pantry match label
+  ///
+  /// In en, this message translates to:
+  /// **'A few ingredients in stock (25%)'**
+  String get recipeFilterFewIngredients;
+
+  /// 50% pantry match label
+  ///
+  /// In en, this message translates to:
+  /// **'At least half ingredients in stock (50%)'**
+  String get recipeFilterHalfIngredients;
+
+  /// 75% pantry match label
+  ///
+  /// In en, this message translates to:
+  /// **'Most ingredients in stock (75%)'**
+  String get recipeFilterMostIngredients;
+
+  /// 100% pantry match label
+  ///
+  /// In en, this message translates to:
+  /// **'All ingredients in stock (100%)'**
+  String get recipeFilterAllIngredients;
+
+  /// Percent match label
+  ///
+  /// In en, this message translates to:
+  /// **'{percent}% match'**
+  String recipeFilterPercentMatch(int percent);
+
+  /// Add recipe to cook button
+  ///
+  /// In en, this message translates to:
+  /// **'Add Recipe'**
+  String get recipeCookAddRecipe;
+
+  /// Complete cook button
+  ///
+  /// In en, this message translates to:
+  /// **'Complete Cook'**
+  String get recipeCookComplete;
+
+  /// Add recipe to cook modal title
+  ///
+  /// In en, this message translates to:
+  /// **'Add Recipe to Cook'**
+  String get recipeCookAddRecipeTitle;
+
+  /// No steps message
+  ///
+  /// In en, this message translates to:
+  /// **'No steps found for this recipe'**
+  String get recipeCookNoSteps;
+
+  /// Previous step button
+  ///
+  /// In en, this message translates to:
+  /// **'Previous'**
+  String get recipeCookPrevious;
+
+  /// Next step button
+  ///
+  /// In en, this message translates to:
+  /// **'Next'**
+  String get recipeCookNext;
+
+  /// Link to recipe option
+  ///
+  /// In en, this message translates to:
+  /// **'Link to Recipe'**
+  String get recipeIngredientLinkToRecipe;
+
+  /// Convert to ingredient option
+  ///
+  /// In en, this message translates to:
+  /// **'Convert to ingredient'**
+  String get recipeIngredientConvertToIngredient;
+
+  /// Section name hint
+  ///
+  /// In en, this message translates to:
+  /// **'Section name'**
+  String get recipeIngredientSectionName;
+
+  /// Link to existing recipe option
+  ///
+  /// In en, this message translates to:
+  /// **'Link to Existing Recipe'**
+  String get recipeIngredientLinkExisting;
+
+  /// Change linked recipe option
+  ///
+  /// In en, this message translates to:
+  /// **'Change Linked Recipe'**
+  String get recipeIngredientChangeLinked;
+
+  /// Remove recipe link option
+  ///
+  /// In en, this message translates to:
+  /// **'Remove Recipe Link'**
+  String get recipeIngredientRemoveLink;
+
+  /// No recipes found message
+  ///
+  /// In en, this message translates to:
+  /// **'No recipes found'**
+  String get recipeIngredientNoRecipesFound;
+
+  /// No recipes match message
+  ///
+  /// In en, this message translates to:
+  /// **'No recipes match your search'**
+  String get recipeIngredientNoRecipesMatch;
+
+  /// Next step button
+  ///
+  /// In en, this message translates to:
+  /// **'Next Step'**
+  String get recipeStepNextStep;
+
+  /// Convert to step option
+  ///
+  /// In en, this message translates to:
+  /// **'Convert to step'**
+  String get recipeStepConvertToStep;
+
+  /// Convert to section option
+  ///
+  /// In en, this message translates to:
+  /// **'Convert to section'**
+  String get recipeStepConvertToSection;
+
+  /// Step description placeholder
+  ///
+  /// In en, this message translates to:
+  /// **'Describe this step'**
+  String get recipeStepDescribe;
+
+  /// Edit ingredients modal title
+  ///
+  /// In en, this message translates to:
+  /// **'Edit Ingredients'**
+  String get recipeEditIngredientsTitle;
+
+  /// Edit steps modal title
+  ///
+  /// In en, this message translates to:
+  /// **'Edit Steps'**
+  String get recipeEditStepsTitle;
+
+  /// Update button
+  ///
+  /// In en, this message translates to:
+  /// **'Update'**
+  String get recipeEditUpdate;
+
+  /// Add to shopping list modal title
+  ///
+  /// In en, this message translates to:
+  /// **'Add to Shopping List'**
+  String get recipeAddToShoppingList;
+
+  /// Add to shopping list button
+  ///
+  /// In en, this message translates to:
+  /// **'Add to Shopping List'**
+  String get recipeAddToShoppingListButton;
+
+  /// Adding to shopping list status
+  ///
+  /// In en, this message translates to:
+  /// **'Adding...'**
+  String get recipeAddToShoppingListAdding;
+
+  /// No ingredients to add message
+  ///
+  /// In en, this message translates to:
+  /// **'No ingredients to add'**
+  String get recipeAddToShoppingListNoIngredients;
+
+  /// Default shopping list name
+  ///
+  /// In en, this message translates to:
+  /// **'My Shopping List'**
+  String get recipeAddToShoppingListDefault;
+
+  /// Getting started title
+  ///
+  /// In en, this message translates to:
+  /// **'Getting Started'**
+  String get recipeWelcomeGettingStarted;
+
+  /// Welcome card title
+  ///
+  /// In en, this message translates to:
+  /// **'Welcome to Stockpot!'**
+  String get recipeWelcomeTitle;
+
+  /// Welcome card subtitle
+  ///
+  /// In en, this message translates to:
+  /// **'Create your first recipe and start\nbuilding your collection'**
+  String get recipeWelcomeSubtitle;
+
+  /// Edit recipe option
+  ///
+  /// In en, this message translates to:
+  /// **'Edit Recipe'**
+  String get recipeTileEdit;
+
+  /// Delete recipe option
+  ///
+  /// In en, this message translates to:
+  /// **'Delete Recipe'**
+  String get recipeTileDelete;
+
+  /// Recipe search placeholder
+  ///
+  /// In en, this message translates to:
+  /// **'Search for recipes to add'**
+  String get recipeSearchPlaceholder;
+
+  /// No search results message
+  ///
+  /// In en, this message translates to:
+  /// **'No recipes found'**
+  String get recipeSearchNoResults;
+
+  /// Try different search suggestion
+  ///
+  /// In en, this message translates to:
+  /// **'Try a different search term'**
+  String get recipeSearchTryDifferent;
+
+  /// Clear filters button
+  ///
+  /// In en, this message translates to:
+  /// **'Clear Filters'**
+  String get recipeSearchClearFilters;
+
+  /// Filter and sort button
+  ///
+  /// In en, this message translates to:
+  /// **'Filter and Sort'**
+  String get recipeSearchFilterSort;
+
+  /// Add recipe button
+  ///
+  /// In en, this message translates to:
+  /// **'Add Recipe'**
+  String get recipeAddRecipeButton;
+
+  /// No recipes match filters message
+  ///
+  /// In en, this message translates to:
+  /// **'No recipes match the current filters'**
+  String get recipeFolderNoRecipesMatch;
+
+  /// No recipes match tags message
+  ///
+  /// In en, this message translates to:
+  /// **'No recipes match the selected tags'**
+  String get recipeFolderNoTagsMatch;
+
+  /// No recipes match ingredients message
+  ///
+  /// In en, this message translates to:
+  /// **'No recipes match the selected ingredients'**
+  String get recipeFolderNoIngredientsMatch;
+
+  /// Edit smart folder menu item
+  ///
+  /// In en, this message translates to:
+  /// **'Edit Smart Folder'**
+  String get recipeEditSmartFolder;
+
+  /// Cook time filter under 30 minutes
+  ///
+  /// In en, this message translates to:
+  /// **'Under 30 minutes'**
+  String get recipeCookTimeUnder30;
+
+  /// Cook time filter 30-60 minutes
+  ///
+  /// In en, this message translates to:
+  /// **'30-60 minutes'**
+  String get recipeCookTime30To60;
+
+  /// Cook time filter 1-2 hours
+  ///
+  /// In en, this message translates to:
+  /// **'1-2 hours'**
+  String get recipeCookTime1To2Hours;
+
+  /// Cook time filter over 2 hours
+  ///
+  /// In en, this message translates to:
+  /// **'Over 2 hours'**
+  String get recipeCookTimeOver2Hours;
+
+  /// Sort by pantry match option
+  ///
+  /// In en, this message translates to:
+  /// **'Pantry Match %'**
+  String get recipeSortPantryMatch;
+
+  /// Sort alphabetically option
+  ///
+  /// In en, this message translates to:
+  /// **'Alphabetical'**
+  String get recipeSortAlphabetical;
+
+  /// Sort by rating option
+  ///
+  /// In en, this message translates to:
+  /// **'Rating'**
+  String get recipeSortRating;
+
+  /// Sort by time option
+  ///
+  /// In en, this message translates to:
+  /// **'Time'**
+  String get recipeSortTime;
+
+  /// Sort by added date option
+  ///
+  /// In en, this message translates to:
+  /// **'Added Date'**
+  String get recipeSortAddedDate;
+
+  /// Sort by updated date option
+  ///
+  /// In en, this message translates to:
+  /// **'Updated Date'**
+  String get recipeSortUpdatedDate;
+
+  /// Search error message
+  ///
+  /// In en, this message translates to:
+  /// **'Error: {error}'**
+  String recipeSearchError(String error);
+
+  /// New recipe modal title
+  ///
+  /// In en, this message translates to:
+  /// **'New Recipe'**
+  String get recipeAddModalNew;
+
+  /// Edit recipe modal title
+  ///
+  /// In en, this message translates to:
+  /// **'Edit Recipe'**
+  String get recipeAddModalEdit;
+
+  /// Create button
+  ///
+  /// In en, this message translates to:
+  /// **'Create'**
+  String get recipeAddModalCreate;
+
+  /// Update button
+  ///
+  /// In en, this message translates to:
+  /// **'Update'**
+  String get recipeAddModalUpdate;
+
+  /// Failed to add recipe message
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to add recipe: {message}'**
+  String recipeAddModalFailed(String message);
+
+  /// Cannot add recipe dialog title
+  ///
+  /// In en, this message translates to:
+  /// **'Cannot Add Recipe'**
+  String get recipeAddModalCannotAdd;
+
+  /// Add button
+  ///
+  /// In en, this message translates to:
+  /// **'Add'**
+  String get recipeAddModalAdd;
+
+  /// Save button
+  ///
+  /// In en, this message translates to:
+  /// **'Save'**
+  String get commonSave;
+
+  /// Done button
+  ///
+  /// In en, this message translates to:
+  /// **'Done'**
+  String get commonDone;
+
+  /// Close button
+  ///
+  /// In en, this message translates to:
+  /// **'Close'**
+  String get commonClose;
+
+  /// Back button
+  ///
+  /// In en, this message translates to:
+  /// **'Back'**
+  String get commonBack;
+
+  /// Ingredient singular
+  ///
+  /// In en, this message translates to:
+  /// **'ingredient'**
+  String get commonIngredient;
+
+  /// Ingredients plural
+  ///
+  /// In en, this message translates to:
+  /// **'ingredients'**
+  String get commonIngredients;
+
+  /// Step singular
+  ///
+  /// In en, this message translates to:
+  /// **'step'**
+  String get commonStep;
+
+  /// Steps plural
+  ///
+  /// In en, this message translates to:
+  /// **'steps'**
+  String get commonSteps;
+
+  /// Add step button
+  ///
+  /// In en, this message translates to:
+  /// **'Add Step'**
+  String get recipeStepAddStep;
+
+  /// Add section button
+  ///
+  /// In en, this message translates to:
+  /// **'Add Section'**
+  String get recipeStepAddSection;
+
+  /// Edit as text menu option
+  ///
+  /// In en, this message translates to:
+  /// **'Edit as Text'**
+  String get recipeStepEditAsText;
+
+  /// Clear all steps menu option
+  ///
+  /// In en, this message translates to:
+  /// **'Clear All Steps'**
+  String get recipeStepClearAll;
+
+  /// Empty steps message
+  ///
+  /// In en, this message translates to:
+  /// **'No steps added yet.'**
+  String get recipeStepNoSteps;
+
+  /// Pinned recipes page title
+  ///
+  /// In en, this message translates to:
+  /// **'Pinned Recipes'**
+  String get recipePinnedTitle;
+
+  /// Message when search finds no pinned recipes
+  ///
+  /// In en, this message translates to:
+  /// **'No pinned recipes match \"{query}\"'**
+  String recipePinnedNoMatch(String query);
+
+  /// Message when no recipes are pinned
+  ///
+  /// In en, this message translates to:
+  /// **'No pinned recipes yet.\nPin your favorite recipes to see them here.'**
+  String get recipePinnedEmpty;
+
+  /// Generic no results message
+  ///
+  /// In en, this message translates to:
+  /// **'No recipes found'**
+  String get recipePinnedNoResults;
+
+  /// Pantry matches page title
+  ///
+  /// In en, this message translates to:
+  /// **'Pantry Matches'**
+  String get recipeMatchTitle;
+
+  /// Summary of pantry matches
+  ///
+  /// In en, this message translates to:
+  /// **'Pantry matches: {matched} of {total} ingredients'**
+  String recipeMatchSummary(int matched, int total);
+
+  /// Matched pantry item label
+  ///
+  /// In en, this message translates to:
+  /// **'Matched with: {name}'**
+  String recipeMatchMatchedWith(String name);
+
+  /// Matching terms section title
+  ///
+  /// In en, this message translates to:
+  /// **'Matching Terms'**
+  String get recipeMatchTermsTitle;
+
+  /// Add term tooltip
+  ///
+  /// In en, this message translates to:
+  /// **'Add New Term'**
+  String get recipeMatchAddTerm;
+
+  /// Message when no terms exist
+  ///
+  /// In en, this message translates to:
+  /// **'No additional terms for this ingredient. Add terms to improve pantry matching.'**
+  String get recipeMatchNoTerms;
+
+  /// Helpful tip for adding terms
+  ///
+  /// In en, this message translates to:
+  /// **'Tip: Add terms that match pantry item names to improve matching.'**
+  String get recipeMatchTip;
+
+  /// Term source label
+  ///
+  /// In en, this message translates to:
+  /// **'Source: {source}'**
+  String recipeMatchSource(String source);
+
+  /// Add term dialog title
+  ///
+  /// In en, this message translates to:
+  /// **'Add Matching Term'**
+  String get recipeMatchAddTermTitle;
+
+  /// Term input label
+  ///
+  /// In en, this message translates to:
+  /// **'Term'**
+  String get recipeMatchTermLabel;
+
+  /// Term input hint
+  ///
+  /// In en, this message translates to:
+  /// **'Enter a matching term (e.g., pantry item name)'**
+  String get recipeMatchTermHint;
 }
 
 class _AppLocalizationsDelegate

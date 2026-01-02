@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../database/database.dart';
+import '../../../localization/l10n_extension.dart';
 import '../../../providers/smart_folder_provider.dart';
 import '../../../theme/colors.dart';
 import '../../../theme/spacing.dart';
@@ -29,7 +30,7 @@ class SmartFolderSearchResults extends ConsumerWidget {
     if (query.isEmpty) {
       return Center(
         child: Text(
-          'Start typing to search for recipes.',
+          context.l10n.recipeSearchPlaceholder,
           style: TextStyle(color: AppColors.of(context).textSecondary),
         ),
       );
@@ -37,7 +38,7 @@ class SmartFolderSearchResults extends ConsumerWidget {
 
     return recipesAsync.when(
       loading: () => const Center(child: CircularProgressIndicator()),
-      error: (e, _) => Center(child: Text('Error: $e')),
+      error: (e, _) => Center(child: Text(context.l10n.recipeSearchError(e.toString()))),
       data: (recipes) {
         // Filter recipes based on search query
         final filteredRecipes = recipes.where((recipe) {
@@ -47,7 +48,7 @@ class SmartFolderSearchResults extends ConsumerWidget {
         if (filteredRecipes.isEmpty) {
           return Center(
             child: Text(
-              'No recipes match your search.',
+              context.l10n.recipeSearchNoResults,
               style: TextStyle(color: AppColors.of(context).textSecondary),
             ),
           );

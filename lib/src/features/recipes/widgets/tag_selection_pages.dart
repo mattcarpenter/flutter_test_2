@@ -5,6 +5,7 @@ import 'package:provider/provider.dart' as provider;
 import 'package:wolt_modal_sheet/wolt_modal_sheet.dart';
 
 import '../../../constants/tag_colors.dart';
+import '../../../localization/l10n_extension.dart';
 import '../../../theme/colors.dart';
 import '../../../theme/spacing.dart';
 import '../../../theme/typography.dart';
@@ -26,7 +27,7 @@ class TagSelectionPage {
       surfaceTintColor: Colors.transparent,
       hasTopBarLayer: true,
       isTopBarLayerAlwaysVisible: false,
-      topBarTitle: ModalSheetTitle('Select Tags'),
+      topBarTitle: ModalSheetTitle(context.l10n.recipeTagSelectTitle),
       leadingNavBarWidget: CupertinoButton(
         padding: const EdgeInsets.symmetric(horizontal: 16.0),
         onPressed: () {
@@ -35,7 +36,7 @@ class TagSelectionPage {
           viewModel.cancelAllChanges();
           Navigator.of(context).pop();
         },
-        child: const Text('Cancel'),
+        child: Text(context.l10n.commonCancel),
       ),
       trailingNavBarWidget: CupertinoButton(
         padding: const EdgeInsets.symmetric(horizontal: 16.0),
@@ -48,7 +49,7 @@ class TagSelectionPage {
           }
           // If failed, stay on modal to show error
         },
-        child: const Text('Save'),
+        child: Text(context.l10n.commonSave),
       ),
       mainContentSliversBuilder: (context) => [
         SliverToBoxAdapter(
@@ -80,7 +81,7 @@ class TagSelectionPageContent extends ConsumerWidget {
               Align(
                 alignment: Alignment.centerRight,
                 child: AppButton(
-                  text: 'Create New Tag',
+                  text: context.l10n.recipeTagCreateNew,
                   onPressed: () {
                     WoltModalSheet.of(context).showNext();
                   },
@@ -129,14 +130,14 @@ class TagSelectionPageContent extends ConsumerWidget {
                       mainAxisSize: MainAxisSize.min,
                       children: [
                         Text(
-                          'No tags yet',
+                          context.l10n.recipeTagNoTags,
                           style: AppTypography.body.copyWith(
                             color: colors.textSecondary,
                           ),
                         ),
                         SizedBox(height: AppSpacing.md),
                         Text(
-                          'Create your first tag using the button above',
+                          context.l10n.recipeTagCreateFirst,
                           style: AppTypography.bodySmall.copyWith(
                             color: colors.textSecondary,
                           ),
@@ -257,16 +258,16 @@ class _CreateTagPageContentState extends State<CreateTagPageContent> {
           children: [
             // Title
             Text(
-              'Create New Tag',
+              context.l10n.recipeTagCreateNew,
               style: AppTypography.h4.copyWith(
                 color: colors.textPrimary,
               ),
             ),
             SizedBox(height: AppSpacing.lg),
-            
+
             // Tag name input
             Text(
-              'Tag Name',
+              context.l10n.recipeTagName,
               style: AppTypography.label.copyWith(
                 color: colors.textPrimary,
               ),
@@ -274,7 +275,7 @@ class _CreateTagPageContentState extends State<CreateTagPageContent> {
             SizedBox(height: AppSpacing.sm),
             AppTextFieldSimple(
               controller: _nameController,
-              placeholder: 'Enter tag name',
+              placeholder: context.l10n.recipeTagEnterName,
               onChanged: (_) {
                 setState(() {}); // Rebuild to update button state
                 viewModel.clearError();
@@ -285,7 +286,7 @@ class _CreateTagPageContentState extends State<CreateTagPageContent> {
             
             // Color selection
             Text(
-              'Tag Color',
+              context.l10n.recipeTagColor,
               style: AppTypography.label.copyWith(
                 color: colors.textPrimary,
               ),
@@ -333,7 +334,7 @@ class _CreateTagPageContentState extends State<CreateTagPageContent> {
             
             // Create button
             AppButton(
-              text: 'Create',
+              text: context.l10n.recipeTagCreate,
               onPressed: _nameController.text.trim().isEmpty ? null : _createTagAndReturn,
               theme: AppButtonTheme.primary,
               style: AppButtonStyle.fill,

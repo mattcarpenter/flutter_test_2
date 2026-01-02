@@ -8,6 +8,7 @@ import 'package:uuid/uuid.dart';
 import 'package:wolt_modal_sheet/wolt_modal_sheet.dart';
 
 import '../../../../database/database.dart';
+import '../../../localization/l10n_extension.dart';
 import '../../../../database/models/ingredients.dart';
 import '../../../../database/models/steps.dart' as db;
 import '../../../theme/colors.dart';
@@ -136,7 +137,7 @@ class _InputPageContentState extends State<_InputPageContent> {
       Padding(
         padding: EdgeInsets.fromLTRB(AppSpacing.lg, 0, AppSpacing.lg, AppSpacing.sm),
         child: Text(
-          'Generate with AI',
+          context.l10n.recipeAiTitle,
           style: AppTypography.h4.copyWith(
             color: colors.textPrimary,
           ),
@@ -149,7 +150,7 @@ class _InputPageContentState extends State<_InputPageContent> {
       Padding(
         padding: EdgeInsets.fromLTRB(AppSpacing.lg, 0, AppSpacing.lg, AppSpacing.lg),
         child: Text(
-          'Describe what you want to eat',
+          context.l10n.recipeAiDescribe,
           style: AppTypography.body.copyWith(
             color: colors.textSecondary,
           ),
@@ -163,7 +164,7 @@ class _InputPageContentState extends State<_InputPageContent> {
         padding: EdgeInsets.fromLTRB(AppSpacing.lg, 0, AppSpacing.lg, AppSpacing.lg),
         child: AppTextFieldSimple(
           controller: _textController,
-          placeholder: 'e.g., "I want a warm soup with chicken"',
+          placeholder: context.l10n.recipeAiPlaceholder,
           autofocus: true,
           multiline: true,
           minLines: 3,
@@ -207,7 +208,7 @@ class _InputPageContentState extends State<_InputPageContent> {
           listenable: viewModel,
           builder: (context, _) {
             return AppButton(
-              text: 'Generate Ideas',
+              text: context.l10n.recipeAiGenerateIdeas,
               onPressed: viewModel.hasInput
                   ? () {
                       HapticFeedback.lightImpact();
@@ -259,14 +260,14 @@ class _PantryToggle extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                'Use pantry items',
+                context.l10n.recipeAiUsePantry,
                 style: AppTypography.body.copyWith(
                   color: colors.textPrimary,
                 ),
               ),
               SizedBox(height: 2),
               Text(
-                '$pantryItemCount items in stock',
+                context.l10n.recipeAiItemsInStock(pantryItemCount),
                 style: AppTypography.caption.copyWith(
                   color: colors.textSecondary,
                 ),
@@ -282,7 +283,7 @@ class _PantryToggle extends StatelessWidget {
               mainAxisSize: MainAxisSize.min,
               children: [
                 Text(
-                  '$selectedCount selected',
+                  context.l10n.recipeAiSelected(selectedCount),
                   style: AppTypography.body.copyWith(
                     color: colors.primary,
                   ),
@@ -319,21 +320,23 @@ class _AiRecipeResultsPage {
       surfaceTintColor: Colors.transparent,
       hasTopBarLayer: false,
       isTopBarLayerAlwaysVisible: false,
-      leadingNavBarWidget: CupertinoButton(
-        padding: EdgeInsets.only(left: AppSpacing.md),
-        onPressed: () {
-          final viewModel = provider.Provider.of<AiRecipeGeneratorViewModel>(
-            context,
-            listen: false,
-          );
-          viewModel.resetToInput();
-          pageIndexNotifier.value = 0;
-        },
-        child: Text(
-          'Back',
-          style: TextStyle(
-            color: AppColors.of(context).primary,
-            fontSize: 17,
+      leadingNavBarWidget: Builder(
+        builder: (ctx) => CupertinoButton(
+          padding: EdgeInsets.only(left: AppSpacing.md),
+          onPressed: () {
+            final viewModel = provider.Provider.of<AiRecipeGeneratorViewModel>(
+              context,
+              listen: false,
+            );
+            viewModel.resetToInput();
+            pageIndexNotifier.value = 0;
+          },
+          child: Text(
+            ctx.l10n.commonBack,
+            style: TextStyle(
+              color: AppColors.of(context).primary,
+              fontSize: 17,
+            ),
           ),
         ),
       ),
@@ -445,10 +448,10 @@ class _ResultsPageContentState extends State<_ResultsPageContent>
                 const CupertinoActivityIndicator(radius: 16),
                 SizedBox(height: AppSpacing.lg),
                 _AnimatedLoadingText(
-                  messages: const [
-                    'Brainstorming recipes...',
-                    'Considering your preferences...',
-                    'Finding delicious ideas...',
+                  messages: [
+                    context.l10n.recipeAiBrainstorming,
+                    context.l10n.recipeAiConsidering,
+                    context.l10n.recipeAiFinding,
                   ],
                 ),
               ],
@@ -479,7 +482,7 @@ class _ResultsPageContentState extends State<_ResultsPageContent>
       Padding(
         padding: EdgeInsets.fromLTRB(AppSpacing.lg, 0, AppSpacing.lg, AppSpacing.sm),
         child: Text(
-          'Recipe Ideas',
+          context.l10n.recipeAiRecipeIdeas,
           style: AppTypography.h4.copyWith(
             color: colors.textPrimary,
           ),
@@ -492,7 +495,7 @@ class _ResultsPageContentState extends State<_ResultsPageContent>
       Padding(
         padding: EdgeInsets.fromLTRB(AppSpacing.lg, 0, AppSpacing.lg, AppSpacing.lg),
         child: Text(
-          'Select a recipe to generate',
+          context.l10n.recipeAiSelectToGenerate,
           style: AppTypography.body.copyWith(
             color: colors.textSecondary,
           ),
@@ -607,10 +610,10 @@ class _ResultsPageContentState extends State<_ResultsPageContent>
               const CupertinoActivityIndicator(radius: 16),
               SizedBox(height: AppSpacing.lg),
               _AnimatedLoadingText(
-                messages: const [
-                  'Generating recipe...',
-                  'Writing ingredients...',
-                  'Crafting instructions...',
+                messages: [
+                  context.l10n.recipeAiGenerating,
+                  context.l10n.recipeAiWritingIngredients,
+                  context.l10n.recipeAiCraftingInstructions,
                 ],
               ),
             ],
@@ -687,7 +690,7 @@ class _ResultsPageContentState extends State<_ResultsPageContent>
       Padding(
         padding: EdgeInsets.fromLTRB(AppSpacing.xl, AppSpacing.xl, AppSpacing.xl, AppSpacing.lg),
         child: Text(
-          viewModel.isRateLimitError ? 'Limit Reached' : 'Generation Failed',
+          viewModel.isRateLimitError ? context.l10n.recipeAiLimitReached : context.l10n.recipeAiGenerationFailed,
           style: AppTypography.h4.copyWith(
             color: colors.textPrimary,
           ),
@@ -714,7 +717,7 @@ class _ResultsPageContentState extends State<_ResultsPageContent>
         padding: EdgeInsets.fromLTRB(AppSpacing.xl, 0, AppSpacing.xl, AppSpacing.xl),
         child: viewModel.isRateLimitError
             ? AppButton(
-                text: 'Upgrade to Plus',
+                text: context.l10n.recipeAiUpgradeToPlus,
                 onPressed: () async {
                   final purchased = await viewModel.presentPaywall(context);
                   if (purchased && context.mounted) {
@@ -729,7 +732,7 @@ class _ResultsPageContentState extends State<_ResultsPageContent>
                 fullWidth: true,
               )
             : AppButton(
-                text: 'Try Again',
+                text: context.l10n.recipeAiTryAgain,
                 onPressed: () {
                   viewModel.resetToInput();
                   widget.pageIndexNotifier.value = 0;
@@ -815,7 +818,7 @@ class _RecipeIdeaCard extends StatelessWidget {
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
                   ),
-                  if (idea.formattedTime != null || idea.difficultyLabel != null) ...[
+                  if (idea.formattedTime != null || idea.difficulty != null) ...[
                     SizedBox(height: AppSpacing.sm),
                     Row(
                       children: [
@@ -832,10 +835,10 @@ class _RecipeIdeaCard extends StatelessWidget {
                               color: colors.textSecondary,
                             ),
                           ),
-                          if (idea.difficultyLabel != null)
+                          if (idea.difficulty != null)
                             SizedBox(width: AppSpacing.md),
                         ],
-                        if (idea.difficultyLabel != null) ...[
+                        if (idea.difficulty != null) ...[
                           Icon(
                             Icons.bar_chart,
                             size: 14,
@@ -843,7 +846,7 @@ class _RecipeIdeaCard extends StatelessWidget {
                           ),
                           SizedBox(width: 4),
                           Text(
-                            idea.difficultyLabel!,
+                            _getLocalizedDifficulty(context, idea.difficulty!),
                             style: AppTypography.caption.copyWith(
                               color: colors.textSecondary,
                             ),
@@ -866,6 +869,19 @@ class _RecipeIdeaCard extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  String _getLocalizedDifficulty(BuildContext context, String difficulty) {
+    switch (difficulty) {
+      case 'easy':
+        return context.l10n.recipeAiDifficultyEasy;
+      case 'medium':
+        return context.l10n.recipeAiDifficultyMedium;
+      case 'hard':
+        return context.l10n.recipeAiDifficultyHard;
+      default:
+        return difficulty;
+    }
   }
 }
 
@@ -931,16 +947,18 @@ class _PantrySelectionPage {
       surfaceTintColor: Colors.transparent,
       hasTopBarLayer: false,
       isTopBarLayerAlwaysVisible: false,
-      leadingNavBarWidget: CupertinoButton(
-        padding: EdgeInsets.only(left: AppSpacing.md),
-        onPressed: () {
-          pageIndexNotifier.value = 0;
-        },
-        child: Text(
-          'Back',
-          style: TextStyle(
-            color: AppColors.of(context).primary,
-            fontSize: 17,
+      leadingNavBarWidget: Builder(
+        builder: (ctx) => CupertinoButton(
+          padding: EdgeInsets.only(left: AppSpacing.md),
+          onPressed: () {
+            pageIndexNotifier.value = 0;
+          },
+          child: Text(
+            ctx.l10n.commonBack,
+            style: TextStyle(
+              color: AppColors.of(context).primary,
+              fontSize: 17,
+            ),
           ),
         ),
       ),
@@ -959,18 +977,20 @@ class _PantrySelectionPage {
           child: _PantrySelectionScrollableContent(),
         ),
       ],
-      stickyActionBar: Padding(
-        padding: EdgeInsets.fromLTRB(AppSpacing.lg, AppSpacing.sm, AppSpacing.lg, AppSpacing.lg),
-        child: AppButton(
-          text: 'Done',
-          onPressed: () {
-            pageIndexNotifier.value = 0;
-          },
-          style: AppButtonStyle.fill,
-          theme: AppButtonTheme.primary,
-          size: AppButtonSize.large,
-          shape: AppButtonShape.square,
-          fullWidth: true,
+      stickyActionBar: Builder(
+        builder: (context) => Padding(
+          padding: EdgeInsets.fromLTRB(AppSpacing.lg, AppSpacing.sm, AppSpacing.lg, AppSpacing.lg),
+          child: AppButton(
+            text: context.l10n.commonDone,
+            onPressed: () {
+              pageIndexNotifier.value = 0;
+            },
+            style: AppButtonStyle.fill,
+            theme: AppButtonTheme.primary,
+            size: AppButtonSize.large,
+            shape: AppButtonShape.square,
+            fullWidth: true,
+          ),
         ),
       ),
     );
@@ -991,7 +1011,7 @@ class _PantrySelectionScrollableContent extends StatelessWidget {
             child: Padding(
               padding: EdgeInsets.all(AppSpacing.xl),
               child: Text(
-                'No pantry items available',
+                context.l10n.recipeAiNoPantryItems,
                 style: AppTypography.body.copyWith(
                   color: colors.textSecondary,
                 ),
@@ -1009,7 +1029,7 @@ class _PantrySelectionScrollableContent extends StatelessWidget {
               return Padding(
                 padding: EdgeInsets.only(bottom: AppSpacing.lg),
                 child: Text(
-                  'Select Pantry Items',
+                  context.l10n.recipeAiSelectPantryItems,
                   style: AppTypography.h4.copyWith(
                     color: colors.textPrimary,
                   ),
@@ -1035,8 +1055,8 @@ class _PantrySelectionScrollableContent extends StatelessWidget {
                       },
                       child: Text(
                         viewModel.selectedPantryItemCount == items.length
-                            ? 'Deselect All'
-                            : 'Select All',
+                            ? context.l10n.recipeAiDeselectAll
+                            : context.l10n.recipeAiSelectAll,
                         style: AppTypography.body.copyWith(
                           color: colors.primary,
                         ),

@@ -10,6 +10,7 @@ import 'package:uuid/uuid.dart';
 
 import '../../../../theme/spacing.dart';
 import '../../../../services/logging/app_logger.dart';
+import '../../../../localization/l10n_extension.dart';
 
 import '../../../../../database/database.dart';
 import '../../../../../database/models/ingredients.dart';
@@ -78,10 +79,24 @@ class RecipeEditorFormState extends ConsumerState<RecipeEditorForm> {
   // Parser for detecting ingredient name changes
   final _parser = IngredientParserService();
 
+  bool _didSetLocalizedTitle = false;
+
   @override
   void initState() {
     super.initState();
     _initializeRecipe();
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    // Set localized title for new recipes after context is available
+    if (!_didSetLocalizedTitle && _isNewRecipe && widget.initialRecipe == null) {
+      _didSetLocalizedTitle = true;
+      final localizedTitle = context.l10n.recipeEditorNewRecipe;
+      _recipe = _recipe.copyWith(title: localizedTitle);
+      _titleController.text = localizedTitle;
+    }
   }
 
   @override
@@ -117,11 +132,12 @@ class RecipeEditorFormState extends ConsumerState<RecipeEditorForm> {
       _steps = List<Step>.from(_recipe.steps ?? []);
     } else {
       // New recipe: initialize empty state
+      // Note: title will be set to localized value in didChangeDependencies()
       final List<String> folderIds = widget.folderId != null ? [widget.folderId!] : [];
       final userId = supabase_flutter.Supabase.instance.client.auth.currentUser?.id ?? '';
       _recipe = RecipeEntry(
         id: const Uuid().v4(),
-        title: 'New Recipe',
+        title: '', // Placeholder, will be set in didChangeDependencies
         language: 'en',
         userId: userId,
         ingredients: [],
@@ -130,7 +146,6 @@ class RecipeEditorFormState extends ConsumerState<RecipeEditorForm> {
         pinned: 0,
         pinnedAt: null,
       );
-      _titleController.text = _recipe.title;
     }
     setState(() {
       _isInitialized = true;
@@ -210,7 +225,7 @@ class RecipeEditorFormState extends ConsumerState<RecipeEditorForm> {
     } catch (e) {
       AppLogger.error('Error saving recipe', e);
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Failed to save recipe: $e')),
+        SnackBar(content: Text(context.l10n.recipeEditorSaveFailed(e.toString()))),
       );
     }
   }
@@ -221,7 +236,7 @@ class RecipeEditorFormState extends ConsumerState<RecipeEditorForm> {
     final newIngredient = Ingredient(
       id: const Uuid().v4(),
       type: isSection ? 'section' : 'ingredient',
-      name: isSection ? 'New Section' : '',
+      name: isSection ? context.l10n.recipeEditorNewSection : '',
       primaryAmount1Value: isSection ? null : '',
       primaryAmount1Unit: isSection ? null : 'g',
       primaryAmount1Type: isSection ? null : 'weight',
@@ -285,7 +300,7 @@ class RecipeEditorFormState extends ConsumerState<RecipeEditorForm> {
     final newStep = Step(
       id: const Uuid().v4(),
       type: isSection ? 'section' : 'step',
-      text: isSection ? 'New Section' : '',
+      text: isSection ? context.l10n.recipeEditorNewSection : '',
     );
     // Don't unfocus - let Flutter handle the focus transition smoothly
     setState(() {
@@ -322,22 +337,23 @@ class RecipeEditorFormState extends ConsumerState<RecipeEditorForm> {
   Future<void> _clearAllIngredients() async {
     if (_ingredients.isEmpty) return;
 
+    final l10n = context.l10n;
     final confirmed = await showCupertinoDialog<bool>(
       context: context,
-      builder: (context) => CupertinoAlertDialog(
-        title: const Text('Clear All Ingredients?'),
+      builder: (dialogContext) => CupertinoAlertDialog(
+        title: Text(l10n.recipeEditorClearAllIngredients),
         content: Text(
-          'This will remove all ${_ingredients.length} ingredient${_ingredients.length == 1 ? '' : 's'}. This action cannot be undone.',
+          l10n.recipeEditorClearConfirm(_ingredients.length, _ingredients.length == 1 ? 'ingredient' : 'ingredients'),
         ),
         actions: [
           CupertinoDialogAction(
-            onPressed: () => Navigator.of(context).pop(false),
-            child: const Text('Cancel'),
+            onPressed: () => Navigator.of(dialogContext).pop(false),
+            child: Text(l10n.commonCancel),
           ),
           CupertinoDialogAction(
             isDestructiveAction: true,
-            onPressed: () => Navigator.of(context).pop(true),
-            child: const Text('Clear All'),
+            onPressed: () => Navigator.of(dialogContext).pop(true),
+            child: Text(l10n.recipeEditorClearAll),
           ),
         ],
       ),
@@ -354,22 +370,23 @@ class RecipeEditorFormState extends ConsumerState<RecipeEditorForm> {
   Future<void> _clearAllSteps() async {
     if (_steps.isEmpty) return;
 
+    final l10n = context.l10n;
     final confirmed = await showCupertinoDialog<bool>(
       context: context,
-      builder: (context) => CupertinoAlertDialog(
-        title: const Text('Clear All Steps?'),
+      builder: (dialogContext) => CupertinoAlertDialog(
+        title: Text(l10n.recipeEditorClearAllSteps),
         content: Text(
-          'This will remove all ${_steps.length} step${_steps.length == 1 ? '' : 's'}. This action cannot be undone.',
+          l10n.recipeEditorClearConfirm(_steps.length, _steps.length == 1 ? 'step' : 'steps'),
         ),
         actions: [
           CupertinoDialogAction(
-            onPressed: () => Navigator.of(context).pop(false),
-            child: const Text('Cancel'),
+            onPressed: () => Navigator.of(dialogContext).pop(false),
+            child: Text(l10n.commonCancel),
           ),
           CupertinoDialogAction(
             isDestructiveAction: true,
-            onPressed: () => Navigator.of(context).pop(true),
-            child: const Text('Clear All'),
+            onPressed: () => Navigator.of(dialogContext).pop(true),
+            child: Text(l10n.recipeEditorClearAll),
           ),
         ],
       ),
@@ -464,8 +481,8 @@ class RecipeEditorFormState extends ConsumerState<RecipeEditorForm> {
             ),
 
             // Images Section Header
-            const SectionHeader(
-              "Add Images",
+            SectionHeader(
+              context.l10n.recipeEditorAddImages,
               topSpacing: AppSpacing.xl,
             ),
 
@@ -488,8 +505,8 @@ class RecipeEditorFormState extends ConsumerState<RecipeEditorForm> {
             const SizedBox(height: AppSpacing.xl),
 
             // Ingredients Section Header
-            const SectionHeader(
-              "Add Ingredients",
+            SectionHeader(
+              context.l10n.recipeEditorAddIngredients,
               topSpacing: 0,
             ),
 
@@ -515,8 +532,8 @@ class RecipeEditorFormState extends ConsumerState<RecipeEditorForm> {
             const SizedBox(height: AppSpacing.xl),
 
             // Steps Section Header
-            const SectionHeader(
-              "Add Instructions",
+            SectionHeader(
+              context.l10n.recipeEditorAddInstructions,
               topSpacing: 0,
             ),
 
@@ -543,8 +560,8 @@ class RecipeEditorFormState extends ConsumerState<RecipeEditorForm> {
             const SizedBox(height: AppSpacing.xl),
 
             // Notes Section Header
-            const SectionHeader(
-              "Add Notes",
+            SectionHeader(
+              context.l10n.recipeEditorAddNotes,
               topSpacing: 0,
             ),
 
@@ -554,13 +571,13 @@ class RecipeEditorFormState extends ConsumerState<RecipeEditorForm> {
               children: [
                 AppTextFieldCondensed(
                   controller: _sourceController,
-                  placeholder: "Source (optional)",
+                  placeholder: context.l10n.recipeEditorSourcePlaceholder,
                   keyboardType: TextInputType.url,
                   grouped: true,
                 ),
                 AppTextFieldCondensed(
                   controller: _notesController,
-                  placeholder: "General notes about this recipe",
+                  placeholder: context.l10n.recipeEditorNotesPlaceholder,
                   multiline: true,
                   minLines: 2,
                   grouped: true,
@@ -571,8 +588,8 @@ class RecipeEditorFormState extends ConsumerState<RecipeEditorForm> {
             const SizedBox(height: AppSpacing.xl),
 
             // Rating Section Header
-            const SectionHeader(
-              "Rating",
+            SectionHeader(
+              context.l10n.recipeEditorRating,
               topSpacing: 0,
             ),
 

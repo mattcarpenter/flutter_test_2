@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:wolt_modal_sheet/wolt_modal_sheet.dart';
 import 'package:recipe_app/src/providers/cook_provider.dart';
+import '../../../../localization/l10n_extension.dart';
 import '../../../../theme/colors.dart';
 import '../../../../theme/spacing.dart';
 import '../../../../widgets/app_circle_button.dart';
@@ -76,14 +77,14 @@ void showCookModal(BuildContext context, {
                     AdaptivePullDownButton(
                       items: [
                         AdaptiveMenuItem(
-                          title: 'Add Recipe',
+                          title: context.l10n.recipeCookAddRecipe,
                           icon: const HugeIcon(icon: HugeIcons.strokeRoundedAdd01),
                           onTap: () {
                             contentKey.currentState?.showAddRecipeSheet();
                           },
                         ),
                         AdaptiveMenuItem(
-                          title: 'Complete Cook',
+                          title: context.l10n.recipeCookComplete,
                           icon: const Icon(CupertinoIcons.checkmark_alt_circle),
                           onTap: () {
                             if (activeCookId != null) {

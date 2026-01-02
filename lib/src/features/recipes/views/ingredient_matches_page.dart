@@ -7,6 +7,7 @@ import 'package:recipe_app/database/models/ingredient_terms.dart';
 import 'package:recipe_app/src/providers/recipe_provider.dart' show recipeIngredientMatchesProvider;
 import 'package:recipe_app/src/repositories/recipe_repository.dart' show recipeRepositoryProvider;
 import 'package:disclosure/disclosure.dart';
+import '../../../localization/l10n_extension.dart';
 import '../../../mobile/utils/adaptive_sliver_page.dart';
 
 class IngredientMatchesPage extends ConsumerStatefulWidget {
@@ -58,7 +59,7 @@ class _IngredientMatchesPageState extends ConsumerState<IngredientMatchesPage> {
     
     return matchesAsync.when(
       loading: () => AdaptiveSliverPage(
-        title: 'Pantry Matches',
+        title: context.l10n.recipeMatchTitle,
         automaticallyImplyLeading: true,
         previousPageTitle: widget.previousPageTitle,
         slivers: [
@@ -68,7 +69,7 @@ class _IngredientMatchesPageState extends ConsumerState<IngredientMatchesPage> {
         ],
       ),
       error: (error, stack) => AdaptiveSliverPage(
-        title: 'Pantry Matches',
+        title: context.l10n.recipeMatchTitle,
         automaticallyImplyLeading: true,
         previousPageTitle: widget.previousPageTitle,
         slivers: [
@@ -78,7 +79,7 @@ class _IngredientMatchesPageState extends ConsumerState<IngredientMatchesPage> {
         ],
       ),
       data: (currentMatches) => AdaptiveSliverPage(
-        title: 'Pantry Matches',
+        title: context.l10n.recipeMatchTitle,
         automaticallyImplyLeading: true,
         previousPageTitle: widget.previousPageTitle,
         slivers: [
@@ -90,7 +91,10 @@ class _IngredientMatchesPageState extends ConsumerState<IngredientMatchesPage> {
                 children: [
                   // Summary text with live data
                   Text(
-                    'Pantry matches: ${currentMatches.matches.where((m) => m.hasMatch).length} of ${currentMatches.matches.length} ingredients',
+                    context.l10n.recipeMatchSummary(
+                      currentMatches.matches.where((m) => m.hasMatch).length,
+                      currentMatches.matches.length,
+                    ),
                     style: Theme.of(context).textTheme.titleMedium,
                   ),
 
@@ -165,7 +169,7 @@ class _IngredientMatchesPageState extends ConsumerState<IngredientMatchesPage> {
                           Padding(
                             padding: const EdgeInsets.only(top: 4.0),
                             child: Text(
-                              'Matched with: ${match.pantryItem!.name}',
+                              context.l10n.recipeMatchMatchedWith(match.pantryItem!.name),
                               style: TextStyle(
                                 fontSize: 14,
                                 color: _getStockStatusColor(match.pantryItem!.stockStatus),
@@ -220,9 +224,9 @@ class _IngredientMatchesPageState extends ConsumerState<IngredientMatchesPage> {
         // Terms heading
         Row(
           children: [
-            const Text(
-              'Matching Terms',
-              style: TextStyle(
+            Text(
+              context.l10n.recipeMatchTermsTitle,
+              style: const TextStyle(
                 fontWeight: FontWeight.bold,
                 fontSize: 16,
               ),
@@ -233,7 +237,7 @@ class _IngredientMatchesPageState extends ConsumerState<IngredientMatchesPage> {
             IconButton(
               icon: const Icon(Icons.add_circle_outline),
               onPressed: () => _addNewTerm(ingredient.id),
-              tooltip: 'Add New Term',
+              tooltip: context.l10n.recipeMatchAddTerm,
             ),
           ],
         ),
@@ -242,11 +246,11 @@ class _IngredientMatchesPageState extends ConsumerState<IngredientMatchesPage> {
 
         // No terms placeholder
         if (terms.isEmpty)
-          const Padding(
-            padding: EdgeInsets.all(8.0),
+          Padding(
+            padding: const EdgeInsets.all(8.0),
             child: Text(
-              'No additional terms for this ingredient. Add terms to improve pantry matching.',
-              style: TextStyle(fontStyle: FontStyle.italic, color: Colors.grey),
+              context.l10n.recipeMatchNoTerms,
+              style: const TextStyle(fontStyle: FontStyle.italic, color: Colors.grey),
             ),
           ),
 
@@ -296,9 +300,9 @@ class _IngredientMatchesPageState extends ConsumerState<IngredientMatchesPage> {
         const SizedBox(height: 16),
 
         // Help text
-        const Text(
-          'Tip: Add terms that match pantry item names to improve matching.',
-          style: TextStyle(fontSize: 12, color: Colors.grey),
+        Text(
+          context.l10n.recipeMatchTip,
+          style: const TextStyle(fontSize: 12, color: Colors.grey),
         ),
       ],
     );
@@ -315,7 +319,7 @@ class _IngredientMatchesPageState extends ConsumerState<IngredientMatchesPage> {
       margin: const EdgeInsets.symmetric(vertical: 4),
       child: ListTile(
         title: Text(term.value),
-        subtitle: Text('Source: ${term.source}'),
+        subtitle: Text(context.l10n.recipeMatchSource(term.source)),
         trailing: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
@@ -344,9 +348,9 @@ class _IngredientMatchesPageState extends ConsumerState<IngredientMatchesPage> {
                 }
               },
               itemBuilder: (context) => [
-                const PopupMenuItem<String>(
+                PopupMenuItem<String>(
                   value: 'delete',
-                  child: Text('Delete'),
+                  child: Text(context.l10n.commonDelete),
                 ),
               ],
             ),
@@ -362,21 +366,21 @@ class _IngredientMatchesPageState extends ConsumerState<IngredientMatchesPage> {
 
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Add Matching Term'),
+      builder: (dialogContext) => AlertDialog(
+        title: Text(context.l10n.recipeMatchAddTermTitle),
         content: TextField(
           controller: controller,
-          decoration: const InputDecoration(
-            labelText: 'Term',
-            hintText: 'Enter a matching term (e.g., pantry item name)',
+          decoration: InputDecoration(
+            labelText: context.l10n.recipeMatchTermLabel,
+            hintText: context.l10n.recipeMatchTermHint,
           ),
           autofocus: true,
           textCapitalization: TextCapitalization.words,
         ),
         actions: [
           TextButton(
-            onPressed: () => Navigator.of(context).pop(),
-            child: const Text('Cancel'),
+            onPressed: () => Navigator.of(dialogContext).pop(),
+            child: Text(context.l10n.commonCancel),
           ),
           TextButton(
             onPressed: () async {
@@ -401,11 +405,11 @@ class _IngredientMatchesPageState extends ConsumerState<IngredientMatchesPage> {
                 // Save changes immediately
                 await _saveIngredientChanges(ingredientId);
               }
-              if (context.mounted) {
-                Navigator.of(context).pop();
+              if (dialogContext.mounted) {
+                Navigator.of(dialogContext).pop();
               }
             },
-            child: const Text('Add'),
+            child: Text(context.l10n.commonAdd),
           ),
         ],
       ),

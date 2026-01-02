@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart' hide Step;
 import 'package:recipe_app/database/models/steps.dart';
 
+import '../../../../../localization/l10n_extension.dart';
 import '../../../../../widgets/app_button.dart';
 import '../../../../../widgets/app_overflow_button.dart';
 import '../../../../../widgets/adaptive_pull_down/adaptive_menu_item.dart';
@@ -113,9 +114,9 @@ class _StepsSectionState extends State<StepsSection> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         if (widget.steps.isEmpty)
-          const Padding(
-            padding: EdgeInsets.all(16.0),
-            child: Text("No steps added yet."),
+          Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Text(context.l10n.recipeStepNoSteps),
           )
         else
           ReorderableListView.builder(
@@ -159,7 +160,7 @@ class _StepsSectionState extends State<StepsSection> {
               Expanded(
                 flex: 1,
                 child: AppButton(
-                  text: 'Add Step',
+                  text: context.l10n.recipeStepAddStep,
                   onPressed: () => widget.onAddStep(false),
                   theme: AppButtonTheme.secondary,
                   style: AppButtonStyle.outline,
@@ -170,12 +171,12 @@ class _StepsSectionState extends State<StepsSection> {
                 ),
               ),
               const SizedBox(width: AppSpacing.sm),
-              
-              // Add Section button - flex column 2  
+
+              // Add Section button - flex column 2
               Expanded(
                 flex: 1,
                 child: AppButton(
-                  text: 'Add Section',
+                  text: context.l10n.recipeStepAddSection,
                   onPressed: () => widget.onAddStep(true),
                   theme: AppButtonTheme.secondary,
                   style: AppButtonStyle.outline,
@@ -191,13 +192,13 @@ class _StepsSectionState extends State<StepsSection> {
               AppOverflowButton(
                 items: [
                   AdaptiveMenuItem(
-                    title: 'Edit as Text',
+                    title: context.l10n.recipeStepEditAsText,
                     icon: const Icon(Icons.edit_note),
                     onTap: () => widget.onEditAsText?.call(),
                   ),
                   AdaptiveMenuItem.divider(),
                   AdaptiveMenuItem(
-                    title: 'Clear All Steps',
+                    title: context.l10n.recipeStepClearAll,
                     icon: const Icon(Icons.clear_all),
                     isDestructive: true,
                     onTap: () => widget.onClearAll?.call(),

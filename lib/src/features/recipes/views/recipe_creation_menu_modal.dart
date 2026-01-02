@@ -7,6 +7,7 @@ import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:wolt_modal_sheet/wolt_modal_sheet.dart';
 
+import '../../../localization/l10n_extension.dart';
 import '../../../theme/colors.dart';
 import '../../../theme/spacing.dart';
 import '../../../theme/typography.dart';
@@ -102,7 +103,7 @@ class _CreationOptionsContent extends StatelessWidget {
       Padding(
         padding: EdgeInsets.only(bottom: AppSpacing.lg),
         child: Text(
-          'Create a Recipe',
+          context.l10n.recipeCreateTitle,
           style: AppTypography.h3.copyWith(color: colors.textPrimary),
         ),
       ),
@@ -146,8 +147,8 @@ class _CreationOptionsContent extends StatelessWidget {
       // Group 1: Basic
       [
         _CreationOption(
-          title: 'Create Manually',
-          subtitle: 'Start from scratch',
+          title: rootContext.l10n.recipeCreateManually,
+          subtitle: rootContext.l10n.recipeCreateManuallyDesc,
           icon: HugeIcon(icon: HugeIcons.strokeRoundedPencilEdit01, size: 22),
           onTap: () {
             Navigator.of(modalContext).pop();
@@ -155,8 +156,8 @@ class _CreationOptionsContent extends StatelessWidget {
           },
         ),
         _CreationOption(
-          title: 'Import from URL',
-          subtitle: 'Paste a recipe link',
+          title: rootContext.l10n.recipeImportFromUrl,
+          subtitle: rootContext.l10n.recipeImportFromUrlDesc,
           icon: HugeIcon(icon: HugeIcons.strokeRoundedLink01, size: 22),
           onTap: () {
             Navigator.of(modalContext).pop();
@@ -167,8 +168,8 @@ class _CreationOptionsContent extends StatelessWidget {
       // Group 2: AI-Powered (Plus features)
       [
         _CreationOption(
-          title: 'Generate with AI',
-          subtitle: 'Describe what you want',
+          title: rootContext.l10n.recipeGenerateWithAi,
+          subtitle: rootContext.l10n.recipeGenerateWithAiDesc,
           icon: HugeIcon(icon: HugeIcons.strokeRoundedMagicWand01, size: 22),
           requiresPlus: true,
           onTap: () {
@@ -177,8 +178,8 @@ class _CreationOptionsContent extends StatelessWidget {
           },
         ),
         _CreationOption(
-          title: 'Import from Social',
-          subtitle: 'Instagram, TikTok, YouTube',
+          title: rootContext.l10n.recipeImportFromSocial,
+          subtitle: rootContext.l10n.recipeImportFromSocialDesc,
           icon: HugeIcon(icon: HugeIcons.strokeRoundedShare01, size: 22),
           requiresPlus: true,
           onTap: () {
@@ -187,8 +188,8 @@ class _CreationOptionsContent extends StatelessWidget {
           },
         ),
         _CreationOption(
-          title: 'Import from Camera',
-          subtitle: 'Photograph a recipe',
+          title: rootContext.l10n.recipeImportFromCamera,
+          subtitle: rootContext.l10n.recipeImportFromCameraDesc,
           icon: HugeIcon(icon: HugeIcons.strokeRoundedCamera01, size: 22),
           requiresPlus: true,
           onTap: () {
@@ -197,8 +198,8 @@ class _CreationOptionsContent extends StatelessWidget {
           },
         ),
         _CreationOption(
-          title: 'Import from Photos',
-          subtitle: 'Select from your library',
+          title: rootContext.l10n.recipeImportFromPhotos,
+          subtitle: rootContext.l10n.recipeImportFromPhotosDesc,
           icon: HugeIcon(icon: HugeIcons.strokeRoundedImage01, size: 22),
           requiresPlus: true,
           onTap: () {
@@ -215,8 +216,8 @@ class _CreationOptionsContent extends StatelessWidget {
       // Group 3: Discover
       [
         _CreationOption(
-          title: 'Discover Recipes',
-          subtitle: 'Browse and import from the web',
+          title: rootContext.l10n.recipeDiscoverRecipes,
+          subtitle: rootContext.l10n.recipeDiscoverRecipesDesc,
           icon: HugeIcon(icon: HugeIcons.strokeRoundedGlobal, size: 22),
           onTap: () {
             Navigator.of(modalContext).pop();
@@ -361,7 +362,7 @@ class _PlusPill extends StatelessWidget {
         borderRadius: BorderRadius.circular(10),
       ),
       child: Text(
-        'PLUS',
+        context.l10n.recipePlus,
         style: TextStyle(
           fontSize: 10,
           fontWeight: FontWeight.w700,
@@ -425,22 +426,22 @@ class _SocialImportGuideContent extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         children: [
           Text(
-            'Import from Social Media',
+            context.l10n.recipeSocialImportTitle,
             style: AppTypography.h3.copyWith(color: colors.textPrimary),
           ),
           SizedBox(height: AppSpacing.lg),
           Text(
-            'To import a recipe from Instagram, TikTok, or YouTube:',
+            context.l10n.recipeSocialImportInstructions,
             style: AppTypography.body.copyWith(color: colors.textSecondary),
           ),
           SizedBox(height: AppSpacing.lg),
-          _StepItem(number: 1, text: 'Open the app and find a recipe video'),
-          _StepItem(number: 2, text: 'Tap the Share button'),
-          _StepItem(number: 3, text: 'Select "Stockpot" from the share menu'),
-          _StepItem(number: 4, text: "We'll extract the recipe automatically"),
+          _StepItem(number: 1, text: context.l10n.recipeSocialImportStep1),
+          _StepItem(number: 2, text: context.l10n.recipeSocialImportStep2),
+          _StepItem(number: 3, text: context.l10n.recipeSocialImportStep3),
+          _StepItem(number: 4, text: context.l10n.recipeSocialImportStep4),
           SizedBox(height: AppSpacing.xl),
           AppButtonVariants.primaryFilled(
-            text: 'Got it',
+            text: context.l10n.recipeGotIt,
             onPressed: () => WoltModalSheet.of(context).showPrevious(),
             size: AppButtonSize.large,
             shape: AppButtonShape.square,

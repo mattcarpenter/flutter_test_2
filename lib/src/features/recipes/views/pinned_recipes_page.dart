@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../database/database.dart';
+import '../../../localization/l10n_extension.dart';
 import '../../../mobile/utils/adaptive_sliver_page.dart';
 import '../../../providers/recipe_provider.dart';
 import '../../../widgets/recipe_list_item.dart';
@@ -30,7 +31,7 @@ class _PinnedRecipesPageState extends ConsumerState<PinnedRecipesPage> {
     final pinnedRecipesAsync = ref.watch(pinnedRecipesProvider);
 
     return AdaptiveSliverPage(
-      title: 'Pinned Recipes',
+      title: context.l10n.recipePinnedTitle,
       searchEnabled: true,
       onSearchChanged: (query) {
         setState(() {
@@ -47,15 +48,15 @@ class _PinnedRecipesPageState extends ConsumerState<PinnedRecipesPage> {
           ),
           data: (pinnedRecipes) {
             final filteredRecipes = _filterRecipes(pinnedRecipes, _searchQuery);
-            
+
             if (filteredRecipes.isEmpty) {
               String emptyMessage;
               if (_searchQuery.isNotEmpty) {
-                emptyMessage = 'No pinned recipes match "$_searchQuery"';
+                emptyMessage = context.l10n.recipePinnedNoMatch(_searchQuery);
               } else if (pinnedRecipes.isEmpty) {
-                emptyMessage = 'No pinned recipes yet.\nPin your favorite recipes to see them here.';
+                emptyMessage = context.l10n.recipePinnedEmpty;
               } else {
-                emptyMessage = 'No recipes found';
+                emptyMessage = context.l10n.recipePinnedNoResults;
               }
               
               return SliverFillRemaining(
@@ -90,7 +91,7 @@ class _PinnedRecipesPageState extends ConsumerState<PinnedRecipesPage> {
                   recipe: recipe,
                   onTap: () {
                     context.push('/recipe/${recipe.id}', extra: {
-                      'previousPageTitle': 'Pinned Recipes',
+                      'previousPageTitle': context.l10n.recipePinnedTitle,
                     });
                   },
                 );
@@ -99,7 +100,7 @@ class _PinnedRecipesPageState extends ConsumerState<PinnedRecipesPage> {
           },
         ),
       ],
-      previousPageTitle: 'Recipes',
+      previousPageTitle: context.l10n.recipesTitle,
       automaticallyImplyLeading: true,
     );
   }

@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:wolt_modal_sheet/wolt_modal_sheet.dart';
 import '../../../../constants/tag_colors.dart';
+import '../../../../localization/l10n_extension.dart';
 import '../../../../providers/recipe_tag_provider.dart';
 import '../../../../theme/colors.dart';
 import '../../../../theme/typography.dart';
@@ -13,6 +14,42 @@ import '../../../../widgets/adaptive_pull_down/adaptive_pull_down.dart';
 import '../../../../widgets/adaptive_pull_down/adaptive_menu_item.dart';
 import '../../../../widgets/wolt/text/modal_sheet_title.dart';
 import '../../models/recipe_filter_sort.dart';
+
+/// Extension to get localized labels for CookTimeFilter
+extension CookTimeFilterL10n on CookTimeFilter {
+  String localizedLabel(BuildContext context) {
+    switch (this) {
+      case CookTimeFilter.under30Min:
+        return context.l10n.recipeCookTimeUnder30;
+      case CookTimeFilter.between30And60Min:
+        return context.l10n.recipeCookTime30To60;
+      case CookTimeFilter.between1And2Hours:
+        return context.l10n.recipeCookTime1To2Hours;
+      case CookTimeFilter.over2Hours:
+        return context.l10n.recipeCookTimeOver2Hours;
+    }
+  }
+}
+
+/// Extension to get localized labels for SortOption
+extension SortOptionL10n on SortOption {
+  String localizedLabel(BuildContext context) {
+    switch (this) {
+      case SortOption.pantryMatch:
+        return context.l10n.recipeSortPantryMatch;
+      case SortOption.alphabetical:
+        return context.l10n.recipeSortAlphabetical;
+      case SortOption.rating:
+        return context.l10n.recipeSortRating;
+      case SortOption.time:
+        return context.l10n.recipeSortTime;
+      case SortOption.recentlyAdded:
+        return context.l10n.recipeSortAddedDate;
+      case SortOption.recentlyUpdated:
+        return context.l10n.recipeSortUpdatedDate;
+    }
+  }
+}
 
 /// Shows a unified bottom sheet with both sort and filter options
 // Central controller class to manage all filter state and sticky button
@@ -220,7 +257,7 @@ class _UnifiedSortFilterModalPage {
           onStateChanged(clearedState);
           Navigator.of(modalContext).pop();
         },
-        child: const Text('Reset All'),
+        child: Text(modalContext.l10n.recipeFilterResetAll),
       ),
       trailingNavBarWidget: Padding(
         padding: EdgeInsets.only(right: AppSpacing.lg),
@@ -242,7 +279,7 @@ class _UnifiedSortFilterModalPage {
             listenable: controller,
             builder: (context, child) {
               return AppButton(
-                text: 'Apply Changes',
+                text: context.l10n.recipeFilterApply,
                 theme: AppButtonTheme.secondary,
                 onPressed: controller.isButtonEnabled
                     ? () {
@@ -351,7 +388,7 @@ class _IndividualCookTimeFilterState extends ConsumerState<_IndividualCookTimeFi
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              'Cook Time',
+              context.l10n.recipeFilterCookTime,
               style: AppTypography.h5.copyWith(color: colors.textPrimary),
             ),
             SizedBox(height: AppSpacing.md),
@@ -364,7 +401,7 @@ class _IndividualCookTimeFilterState extends ConsumerState<_IndividualCookTimeFi
                 children: CookTimeFilter.values.map((filter) {
                   final isSelected = widget.controller.cookTimeFilters.contains(filter);
                   return AppButton(
-                    text: filter.label,
+                    text: filter.localizedLabel(context),
                     size: AppButtonSize.small,
                     style: isSelected ? AppButtonStyle.fill : AppButtonStyle.mutedOutline,
                     onPressed: () {
@@ -412,7 +449,7 @@ class _IndividualRatingFilterState extends ConsumerState<_IndividualRatingFilter
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              'Rating',
+              context.l10n.recipeFilterRating,
               style: AppTypography.h5.copyWith(color: colors.textPrimary),
             ),
             SizedBox(height: AppSpacing.md),
@@ -461,14 +498,14 @@ class _IndividualPantryMatchFilter extends ConsumerStatefulWidget {
 
 class _IndividualPantryMatchFilterState extends ConsumerState<_IndividualPantryMatchFilter> {
 
-  String _getSliderLabel(double value) {
+  String _getSliderLabel(BuildContext context, double value) {
     final percent = (value * 100).round();
-    if (percent == 0) return "Match any recipe (Stock not required)";
-    if (percent == 25) return 'A few ingredients in stock (25%)';
-    if (percent == 50) return 'At least half ingredients in stock (50%)';
-    if (percent == 75) return 'Most ingredients in stock (75%)';
-    if (percent == 100) return 'All ingredients in stock (100%)';
-    return '$percent% match';
+    if (percent == 0) return context.l10n.recipeFilterMatchAny;
+    if (percent == 25) return context.l10n.recipeFilterFewIngredients;
+    if (percent == 50) return context.l10n.recipeFilterHalfIngredients;
+    if (percent == 75) return context.l10n.recipeFilterMostIngredients;
+    if (percent == 100) return context.l10n.recipeFilterAllIngredients;
+    return context.l10n.recipeFilterPercentMatch(percent);
   }
 
   @override
@@ -479,7 +516,7 @@ class _IndividualPantryMatchFilterState extends ConsumerState<_IndividualPantryM
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          'Pantry Match',
+          context.l10n.recipeFilterPantryMatch,
           style: AppTypography.h5.copyWith(color: colors.textPrimary),
         ),
         SizedBox(height: AppSpacing.md),
@@ -512,7 +549,7 @@ class _IndividualPantryMatchFilterState extends ConsumerState<_IndividualPantryM
                 Padding(
                   padding: EdgeInsets.only(top: AppSpacing.xs),
                   child: Text(
-                    _getSliderLabel(widget.controller.pantryMatchPercentage),
+                    _getSliderLabel(context, widget.controller.pantryMatchPercentage),
                     style: AppTypography.body.copyWith(color: colors.textSecondary),
                     textAlign: TextAlign.left,
                   ),
@@ -561,13 +598,13 @@ class _IndividualTagsFilterState extends ConsumerState<_IndividualTagsFilter> {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text(
-                  'Tags',
+                  context.l10n.recipeFilterTags,
                   style: AppTypography.h5.copyWith(color: colors.textPrimary),
                 ),
                 Row(
                   children: [
                     Text(
-                      'Must have all tags',
+                      context.l10n.recipeFilterMustHaveAllTags,
                       style: AppTypography.caption.copyWith(color: colors.textSecondary),
                     ),
                     SizedBox(width: AppSpacing.xs),
@@ -649,7 +686,7 @@ class _SortSectionState extends ConsumerState<_SortSection> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          'Sort',
+          context.l10n.recipeFilterSort,
           style: AppTypography.h5.copyWith(
             color: colors.textPrimary,
           ),
@@ -667,7 +704,7 @@ class _SortSectionState extends ConsumerState<_SortSection> {
                     items: _buildSortOptions().map((option) {
                   final isSelected = widget.controller.sortOption == option;
                   return AdaptiveMenuItem(
-                    title: option.label,
+                    title: option.localizedLabel(context),
                     icon: Icon(
                       isSelected ? Icons.check_circle : Icons.sort,
                       size: 16,
@@ -680,7 +717,7 @@ class _SortSectionState extends ConsumerState<_SortSection> {
                   );
                 }).toList(),
                 child: AppButton(
-                  text: 'Sort by ${widget.controller.sortOption.label}',
+                  text: context.l10n.recipeFilterSortBy(widget.controller.sortOption.localizedLabel(context)),
                   trailingIcon: Icon(
                     Icons.keyboard_arrow_down,
                     size: 16,

@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hugeicons/hugeicons.dart';
 import 'package:wolt_modal_sheet/wolt_modal_sheet.dart';
 import '../../../../database/database.dart';
+import '../../../localization/l10n_extension.dart';
 import '../../../providers/recipe_provider.dart' as recipe_provider;
 import '../../../providers/recently_viewed_provider.dart';
 import '../../../theme/colors.dart';
@@ -144,13 +145,13 @@ class _AddRecipeContentState extends ConsumerState<_AddRecipeContent> {
   void _showError(String message) {
     showCupertinoDialog(
       context: context,
-      builder: (context) => CupertinoAlertDialog(
-        title: const Text('Error'),
-        content: Text('Failed to add recipe: $message'),
+      builder: (dialogContext) => CupertinoAlertDialog(
+        title: Text(context.l10n.commonError),
+        content: Text(context.l10n.recipeAddModalFailed(message)),
         actions: [
           CupertinoDialogAction(
-            child: const Text('OK'),
-            onPressed: () => Navigator.pop(context),
+            child: Text(context.l10n.commonOk),
+            onPressed: () => Navigator.pop(dialogContext),
           ),
         ],
       ),
@@ -160,13 +161,13 @@ class _AddRecipeContentState extends ConsumerState<_AddRecipeContent> {
   void _showValidationError(String message) {
     showCupertinoDialog(
       context: context,
-      builder: (context) => CupertinoAlertDialog(
-        title: const Text('Cannot Add Recipe'),
+      builder: (dialogContext) => CupertinoAlertDialog(
+        title: Text(context.l10n.recipeAddModalCannotAdd),
         content: Text(message),
         actions: [
           CupertinoDialogAction(
-            child: const Text('OK'),
-            onPressed: () => Navigator.pop(context),
+            child: Text(context.l10n.commonOk),
+            onPressed: () => Navigator.pop(dialogContext),
           ),
         ],
       ),
@@ -329,7 +330,7 @@ class _AddRecipeContentState extends ConsumerState<_AddRecipeContent> {
           recipe: recipe,
           onTap: null,
           trailing: AppButton(
-            text: 'Add',
+            text: context.l10n.recipeAddModalAdd,
             onPressed: () => _onRecipeSelected(recipe),
             size: AppButtonSize.small,
             style: AppButtonStyle.outline,
@@ -362,7 +363,7 @@ class _AddRecipeContentState extends ConsumerState<_AddRecipeContent> {
               recipe: recipe,
               onTap: null,
               trailing: AppButton(
-                text: 'Add',
+                text: context.l10n.recipeAddModalAdd,
                 onPressed: () => _onRecipeSelected(recipe),
                 size: AppButtonSize.small,
                 style: AppButtonStyle.outline,

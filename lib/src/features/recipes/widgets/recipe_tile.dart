@@ -5,6 +5,7 @@ import 'package:super_context_menu/super_context_menu.dart';
 
 import '../../../../database/database.dart';
 import '../../../../database/models/recipe_images.dart';
+import '../../../localization/l10n_extension.dart';
 import '../../../providers/recipe_provider.dart';
 import '../../../widgets/local_or_network_image.dart';
 import '../../../widgets/recipe_placeholder_image.dart';
@@ -93,7 +94,7 @@ class _RecipeTileState extends ConsumerState<RecipeTile> with SingleTickerProvid
                 children: [
                   // menu action for editing:
                   MenuAction(
-                    title: 'Edit Recipe',
+                    title: context.l10n.recipeTileEdit,
                     image: MenuImage.icon(Icons.edit),
                     callback: () {
                       // Show the recipe editor modal
@@ -105,7 +106,7 @@ class _RecipeTileState extends ConsumerState<RecipeTile> with SingleTickerProvid
                     },
                   ),
                   MenuAction(
-                    title: 'Delete Recipe',
+                    title: context.l10n.recipeTileDelete,
                     image: MenuImage.icon(Icons.delete),
                     attributes: const MenuActionAttributes(destructive: true),
                     callback: _startDeletionAnimation,

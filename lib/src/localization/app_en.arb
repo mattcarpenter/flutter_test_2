@@ -240,6 +240,10 @@
   "@commonDelete": {
     "description": "Delete button text"
   },
+  "commonAdd": "Add",
+  "@commonAdd": {
+    "description": "Add button text"
+  },
   "commonClear": "Clear",
   "@commonClear": {
     "description": "Clear button text"
@@ -935,5 +939,1009 @@
   "helpSectionTroubleshooting": "Troubleshooting",
   "@helpSectionTroubleshooting": {
     "description": "Help section name"
+  },
+
+  "recipesTitle": "Recipes",
+  "@recipesTitle": {
+    "description": "Recipes page title"
+  },
+  "recipesFolders": "Recipe Folders",
+  "@recipesFolders": {
+    "description": "Recipe folders section header"
+  },
+  "recipesAddFolder": "Add Folder",
+  "@recipesAddFolder": {
+    "description": "Add folder button"
+  },
+  "recipesAddSmartFolder": "Add Smart Folder",
+  "@recipesAddSmartFolder": {
+    "description": "Add smart folder button"
+  },
+  "recipesRecentlyViewed": "Recently Viewed",
+  "@recipesRecentlyViewed": {
+    "description": "Recently viewed section title"
+  },
+  "recipesPinnedRecipes": "Pinned Recipes",
+  "@recipesPinnedRecipes": {
+    "description": "Pinned recipes section title"
+  },
+  "recipesViewAll": "View All",
+  "@recipesViewAll": {
+    "description": "View all button"
+  },
+  "recipesNotFound": "Recipe not found",
+  "@recipesNotFound": {
+    "description": "Recipe not found message"
+  },
+  "recipesLoadError": "Error loading recipe: {error}",
+  "@recipesLoadError": {
+    "description": "Recipe loading error",
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+
+  "recipeCreateTitle": "Create a Recipe",
+  "@recipeCreateTitle": {
+    "description": "Create recipe modal title"
+  },
+  "recipeCreateManually": "Create Manually",
+  "@recipeCreateManually": {
+    "description": "Create manually option"
+  },
+  "recipeCreateManuallyDesc": "Start from scratch",
+  "@recipeCreateManuallyDesc": {
+    "description": "Create manually description"
+  },
+  "recipeImportFromUrl": "Import from URL",
+  "@recipeImportFromUrl": {
+    "description": "Import from URL option"
+  },
+  "recipeImportFromUrlDesc": "Paste a recipe link",
+  "@recipeImportFromUrlDesc": {
+    "description": "Import from URL description"
+  },
+  "recipeGenerateWithAi": "Generate with AI",
+  "@recipeGenerateWithAi": {
+    "description": "Generate with AI option"
+  },
+  "recipeGenerateWithAiDesc": "Describe what you want",
+  "@recipeGenerateWithAiDesc": {
+    "description": "Generate with AI description"
+  },
+  "recipeImportFromSocial": "Import from Social",
+  "@recipeImportFromSocial": {
+    "description": "Import from social option"
+  },
+  "recipeImportFromSocialDesc": "Instagram, TikTok, YouTube",
+  "@recipeImportFromSocialDesc": {
+    "description": "Import from social description"
+  },
+  "recipeImportFromCamera": "Import from Camera",
+  "@recipeImportFromCamera": {
+    "description": "Import from camera option"
+  },
+  "recipeImportFromCameraDesc": "Photograph a recipe",
+  "@recipeImportFromCameraDesc": {
+    "description": "Import from camera description"
+  },
+  "recipeImportFromPhotos": "Import from Photos",
+  "@recipeImportFromPhotos": {
+    "description": "Import from photos option"
+  },
+  "recipeImportFromPhotosDesc": "Select from your library",
+  "@recipeImportFromPhotosDesc": {
+    "description": "Import from photos description"
+  },
+  "recipeDiscoverRecipes": "Discover Recipes",
+  "@recipeDiscoverRecipes": {
+    "description": "Discover recipes option"
+  },
+  "recipeDiscoverRecipesDesc": "Browse and import from the web",
+  "@recipeDiscoverRecipesDesc": {
+    "description": "Discover recipes description"
+  },
+  "recipePlus": "PLUS",
+  "@recipePlus": {
+    "description": "Plus badge text"
+  },
+
+  "recipeSocialImportTitle": "Import from Social Media",
+  "@recipeSocialImportTitle": {
+    "description": "Social import modal title"
+  },
+  "recipeSocialImportInstructions": "To import a recipe from Instagram, TikTok, or YouTube:",
+  "@recipeSocialImportInstructions": {
+    "description": "Social import instructions"
+  },
+  "recipeSocialImportStep1": "Open the app and find a recipe video",
+  "@recipeSocialImportStep1": {
+    "description": "Social import step 1"
+  },
+  "recipeSocialImportStep2": "Tap the Share button",
+  "@recipeSocialImportStep2": {
+    "description": "Social import step 2"
+  },
+  "recipeSocialImportStep3": "Select \"Stockpot\" from the share menu",
+  "@recipeSocialImportStep3": {
+    "description": "Social import step 3"
+  },
+  "recipeSocialImportStep4": "We'll extract the recipe automatically",
+  "@recipeSocialImportStep4": {
+    "description": "Social import step 4"
+  },
+  "recipeGotIt": "Got it",
+  "@recipeGotIt": {
+    "description": "Got it button"
+  },
+
+  "recipeFolderNew": "New Recipe Folder",
+  "@recipeFolderNew": {
+    "description": "New folder modal title"
+  },
+  "recipeFolderEnterName": "Enter Folder Name",
+  "@recipeFolderEnterName": {
+    "description": "Folder name placeholder"
+  },
+  "recipeFolderNameRequired": "Folder name is required",
+  "@recipeFolderNameRequired": {
+    "description": "Folder name required error"
+  },
+  "recipeFolderCreateNew": "Create New Folder",
+  "@recipeFolderCreateNew": {
+    "description": "Create folder button"
+  },
+  "recipeFolderRename": "Rename Folder",
+  "@recipeFolderRename": {
+    "description": "Rename folder modal title"
+  },
+  "recipeFolderName": "Folder name",
+  "@recipeFolderName": {
+    "description": "Folder name label"
+  },
+  "recipeFolderRenameButton": "Rename",
+  "@recipeFolderRenameButton": {
+    "description": "Rename button"
+  },
+  "recipeFolderDelete": "Delete Folder",
+  "@recipeFolderDelete": {
+    "description": "Delete folder action"
+  },
+  "recipeFolderNoFolders": "No folders",
+  "@recipeFolderNoFolders": {
+    "description": "No folders message"
+  },
+  "recipeFolders": "Folders",
+  "@recipeFolders": {
+    "description": "Folders label"
+  },
+
+  "recipeAiTitle": "Generate with AI",
+  "@recipeAiTitle": {
+    "description": "AI generator title"
+  },
+  "recipeAiDescribe": "Describe what you want to eat",
+  "@recipeAiDescribe": {
+    "description": "AI generator subtitle"
+  },
+  "recipeAiPlaceholder": "e.g., \"I want a warm soup with chicken\"",
+  "@recipeAiPlaceholder": {
+    "description": "AI generator input placeholder"
+  },
+  "recipeAiUsePantry": "Use pantry items",
+  "@recipeAiUsePantry": {
+    "description": "Use pantry items toggle"
+  },
+  "recipeAiItemsInStock": "{count} items in stock",
+  "@recipeAiItemsInStock": {
+    "description": "Items in stock count",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "recipeAiSelected": "{count} selected",
+  "@recipeAiSelected": {
+    "description": "Selected items count",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "recipeAiGenerateIdeas": "Generate Ideas",
+  "@recipeAiGenerateIdeas": {
+    "description": "Generate ideas button"
+  },
+  "recipeAiRecipeIdeas": "Recipe Ideas",
+  "@recipeAiRecipeIdeas": {
+    "description": "Recipe ideas title"
+  },
+  "recipeAiSelectToGenerate": "Select a recipe to generate",
+  "@recipeAiSelectToGenerate": {
+    "description": "Select recipe instruction"
+  },
+  "recipeAiBrainstorming": "Brainstorming recipes...",
+  "@recipeAiBrainstorming": {
+    "description": "Brainstorming status"
+  },
+  "recipeAiConsidering": "Considering your preferences...",
+  "@recipeAiConsidering": {
+    "description": "Considering status"
+  },
+  "recipeAiFinding": "Finding delicious ideas...",
+  "@recipeAiFinding": {
+    "description": "Finding ideas status"
+  },
+  "recipeAiGenerating": "Generating recipe...",
+  "@recipeAiGenerating": {
+    "description": "Generating recipe status"
+  },
+  "recipeAiWritingIngredients": "Writing ingredients...",
+  "@recipeAiWritingIngredients": {
+    "description": "Writing ingredients status"
+  },
+  "recipeAiCraftingInstructions": "Crafting instructions...",
+  "@recipeAiCraftingInstructions": {
+    "description": "Crafting instructions status"
+  },
+  "recipeAiLimitReached": "Limit Reached",
+  "@recipeAiLimitReached": {
+    "description": "Limit reached error title"
+  },
+  "recipeAiGenerationFailed": "Generation Failed",
+  "@recipeAiGenerationFailed": {
+    "description": "Generation failed error title"
+  },
+  "recipeAiUpgradeToPlus": "Upgrade to Plus",
+  "@recipeAiUpgradeToPlus": {
+    "description": "Upgrade to Plus button"
+  },
+  "recipeAiTryAgain": "Try Again",
+  "@recipeAiTryAgain": {
+    "description": "Try again button"
+  },
+  "recipeAiSelectPantryItems": "Select Pantry Items",
+  "@recipeAiSelectPantryItems": {
+    "description": "Select pantry items title"
+  },
+  "recipeAiSelectAll": "Select All",
+  "@recipeAiSelectAll": {
+    "description": "Select all button"
+  },
+  "recipeAiDeselectAll": "Deselect All",
+  "@recipeAiDeselectAll": {
+    "description": "Deselect all button"
+  },
+  "recipeAiNoPantryItems": "No pantry items available",
+  "@recipeAiNoPantryItems": {
+    "description": "No pantry items message"
+  },
+  "recipeAiDifficultyEasy": "Easy",
+  "@recipeAiDifficultyEasy": {
+    "description": "Easy difficulty"
+  },
+  "recipeAiDifficultyMedium": "Medium",
+  "@recipeAiDifficultyMedium": {
+    "description": "Medium difficulty"
+  },
+  "recipeAiDifficultyHard": "Hard",
+  "@recipeAiDifficultyHard": {
+    "description": "Hard difficulty"
+  },
+
+  "recipeUrlImportTitle": "Import from URL",
+  "@recipeUrlImportTitle": {
+    "description": "URL import modal title"
+  },
+  "recipeUrlImportSubtitle": "Paste a recipe URL to import",
+  "@recipeUrlImportSubtitle": {
+    "description": "URL import subtitle"
+  },
+  "recipeUrlImportPlaceholder": "https://example.com/recipe",
+  "@recipeUrlImportPlaceholder": {
+    "description": "URL import placeholder"
+  },
+  "recipeUrlImportButton": "Import Recipe",
+  "@recipeUrlImportButton": {
+    "description": "Import recipe button"
+  },
+  "recipeUrlImporting": "Importing Recipe",
+  "@recipeUrlImporting": {
+    "description": "Importing recipe title"
+  },
+  "recipeUrlFetching": "Fetching recipe...",
+  "@recipeUrlFetching": {
+    "description": "Fetching recipe status"
+  },
+  "recipeUrlExtracting": "Extracting recipe...",
+  "@recipeUrlExtracting": {
+    "description": "Extracting recipe status"
+  },
+  "recipeUrlExtractionFailed": "Extraction Failed",
+  "@recipeUrlExtractionFailed": {
+    "description": "Extraction failed title"
+  },
+  "recipeUrlOffline": "You're offline. Please check your internet connection.",
+  "@recipeUrlOffline": {
+    "description": "Offline error message"
+  },
+  "recipeUrlInvalid": "Please enter a valid URL.",
+  "@recipeUrlInvalid": {
+    "description": "Invalid URL error"
+  },
+  "recipeUrlNoRecipe": "This page doesn't appear to contain recipe information.",
+  "@recipeUrlNoRecipe": {
+    "description": "No recipe found error"
+  },
+  "recipeUrlPreviewLimitReached": "Preview Limit Reached",
+  "@recipeUrlPreviewLimitReached": {
+    "description": "Preview limit reached title"
+  },
+  "recipeUrlImportFailed": "Import Failed",
+  "@recipeUrlImportFailed": {
+    "description": "Import failed title"
+  },
+  "recipeUrlPreviewLimit": "Recipe previews are limited for free users. Upgrade to Plus for unlimited imports.",
+  "@recipeUrlPreviewLimit": {
+    "description": "Preview limit message"
+  },
+  "recipeUrlPlusRequired": "This page requires Plus subscription for recipe extraction.",
+  "@recipeUrlPlusRequired": {
+    "description": "Plus required message"
+  },
+  "recipeUrlSomethingWrong": "Something went wrong. Please try again.",
+  "@recipeUrlSomethingWrong": {
+    "description": "Something went wrong error"
+  },
+  "recipeUrlNoRecipeFound": "No recipe found on this page.",
+  "@recipeUrlNoRecipeFound": {
+    "description": "No recipe found message"
+  },
+  "recipeUrlFailedExtract": "Failed to extract recipe. Please try again.",
+  "@recipeUrlFailedExtract": {
+    "description": "Failed to extract error"
+  },
+
+  "recipePhotoProcessing": "Processing Photo",
+  "@recipePhotoProcessing": {
+    "description": "Processing photo title"
+  },
+  "recipePhotoReading": "Reading photo...",
+  "@recipePhotoReading": {
+    "description": "Reading photo status"
+  },
+  "recipePhotoProcessingStatus": "Processing photo...",
+  "@recipePhotoProcessingStatus": {
+    "description": "Processing photo status"
+  },
+  "recipePhotoExtracting": "Extracting recipe...",
+  "@recipePhotoExtracting": {
+    "description": "Extracting recipe status"
+  },
+  "recipePhotoNoRecipe": "No recipe found in the photo.\n\nTry a photo of a recipe card or cookbook page.",
+  "@recipePhotoNoRecipe": {
+    "description": "No recipe in photo error"
+  },
+  "recipePhotoFailed": "Failed to process the image(s). Please try again.",
+  "@recipePhotoFailed": {
+    "description": "Photo processing failed error"
+  },
+  "recipePhotoOffline": "You're offline. Please check your internet connection and try again.",
+  "@recipePhotoOffline": {
+    "description": "Photo import offline error"
+  },
+
+  "recipeEditorNewRecipe": "New Recipe",
+  "@recipeEditorNewRecipe": {
+    "description": "New recipe title"
+  },
+  "recipeEditorAddImages": "Add Images",
+  "@recipeEditorAddImages": {
+    "description": "Add images section"
+  },
+  "recipeEditorAddIngredients": "Add Ingredients",
+  "@recipeEditorAddIngredients": {
+    "description": "Add ingredients section"
+  },
+  "recipeEditorAddInstructions": "Add Instructions",
+  "@recipeEditorAddInstructions": {
+    "description": "Add instructions section"
+  },
+  "recipeEditorAddNotes": "Add Notes",
+  "@recipeEditorAddNotes": {
+    "description": "Add notes section"
+  },
+  "recipeEditorNotesPlaceholder": "General notes about this recipe",
+  "@recipeEditorNotesPlaceholder": {
+    "description": "Notes placeholder"
+  },
+  "recipeEditorSourcePlaceholder": "Source (optional)",
+  "@recipeEditorSourcePlaceholder": {
+    "description": "Source placeholder"
+  },
+  "recipeEditorRating": "Rating",
+  "@recipeEditorRating": {
+    "description": "Rating section"
+  },
+  "recipeEditorClearAllIngredients": "Clear All Ingredients?",
+  "@recipeEditorClearAllIngredients": {
+    "description": "Clear all ingredients dialog title"
+  },
+  "recipeEditorClearAllSteps": "Clear All Steps?",
+  "@recipeEditorClearAllSteps": {
+    "description": "Clear all steps dialog title"
+  },
+  "recipeEditorClearConfirm": "This will remove all {count} {type}. This action cannot be undone.",
+  "@recipeEditorClearConfirm": {
+    "description": "Clear confirmation message",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "type": {
+        "type": "String"
+      }
+    }
+  },
+  "recipeEditorClearAll": "Clear All",
+  "@recipeEditorClearAll": {
+    "description": "Clear all button"
+  },
+  "recipeEditorNewSection": "New Section",
+  "@recipeEditorNewSection": {
+    "description": "New section default text"
+  },
+  "recipeEditorSaveFailed": "Failed to save recipe: {error}",
+  "@recipeEditorSaveFailed": {
+    "description": "Save failed error",
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+
+  "recipeViewIngredients": "Ingredients",
+  "@recipeViewIngredients": {
+    "description": "Ingredients section title"
+  },
+  "recipeViewInstructions": "Instructions",
+  "@recipeViewInstructions": {
+    "description": "Instructions section title"
+  },
+  "recipeViewScaleConvert": "Scale or Convert",
+  "@recipeViewScaleConvert": {
+    "description": "Scale or convert button"
+  },
+  "recipeViewNoIngredients": "No ingredients listed.",
+  "@recipeViewNoIngredients": {
+    "description": "No ingredients message"
+  },
+  "recipeViewNoInstructions": "No instructions listed.",
+  "@recipeViewNoInstructions": {
+    "description": "No instructions message"
+  },
+
+  "recipeTagSelectTitle": "Select Tags",
+  "@recipeTagSelectTitle": {
+    "description": "Select tags modal title"
+  },
+  "recipeTagCreateNew": "Create New Tag",
+  "@recipeTagCreateNew": {
+    "description": "Create new tag button"
+  },
+  "recipeTagNoTags": "No tags yet",
+  "@recipeTagNoTags": {
+    "description": "No tags message"
+  },
+  "recipeTagCreateFirst": "Create your first tag using the button above",
+  "@recipeTagCreateFirst": {
+    "description": "Create first tag message"
+  },
+  "recipeTagName": "Tag Name",
+  "@recipeTagName": {
+    "description": "Tag name label"
+  },
+  "recipeTagEnterName": "Enter tag name",
+  "@recipeTagEnterName": {
+    "description": "Tag name placeholder"
+  },
+  "recipeTagColor": "Tag Color",
+  "@recipeTagColor": {
+    "description": "Tag color label"
+  },
+  "recipeTagCreate": "Create",
+  "@recipeTagCreate": {
+    "description": "Create tag button"
+  },
+  "recipeTagExists": "A tag with this name already exists",
+  "@recipeTagExists": {
+    "description": "Tag exists error"
+  },
+
+  "recipeFolderSelectTitle": "Add Recipe to Folders",
+  "@recipeFolderSelectTitle": {
+    "description": "Add to folders modal title"
+  },
+  "recipeFolderNoFolders": "No folders yet",
+  "@recipeFolderNoFolders": {
+    "description": "No folders message"
+  },
+  "recipeFolderCreateFirst": "Create your first folder using the button above",
+  "@recipeFolderCreateFirst": {
+    "description": "Create first folder message"
+  },
+  "recipeFolderExists": "A folder with this name already exists",
+  "@recipeFolderExists": {
+    "description": "Folder exists error"
+  },
+
+  "recipeFilterResetAll": "Reset All",
+  "@recipeFilterResetAll": {
+    "description": "Reset all filters button"
+  },
+  "recipeFilterApply": "Apply Changes",
+  "@recipeFilterApply": {
+    "description": "Apply changes button"
+  },
+  "recipeFilterCookTime": "Cook Time",
+  "@recipeFilterCookTime": {
+    "description": "Cook time filter title"
+  },
+  "recipeFilterRating": "Rating",
+  "@recipeFilterRating": {
+    "description": "Rating filter title"
+  },
+  "recipeFilterPantryMatch": "Pantry Match",
+  "@recipeFilterPantryMatch": {
+    "description": "Pantry match filter title"
+  },
+  "recipeFilterTags": "Tags",
+  "@recipeFilterTags": {
+    "description": "Tags filter title"
+  },
+  "recipeFilterMustHaveAllTags": "Must have all tags",
+  "@recipeFilterMustHaveAllTags": {
+    "description": "Must have all tags toggle"
+  },
+  "recipeFilterSort": "Sort",
+  "@recipeFilterSort": {
+    "description": "Sort section title"
+  },
+  "recipeFilterSortBy": "Sort by {option}",
+  "@recipeFilterSortBy": {
+    "description": "Sort by label",
+    "placeholders": {
+      "option": {
+        "type": "String"
+      }
+    }
+  },
+  "recipeFilterMatchAny": "Match any recipe (Stock not required)",
+  "@recipeFilterMatchAny": {
+    "description": "0% pantry match label"
+  },
+  "recipeFilterFewIngredients": "A few ingredients in stock (25%)",
+  "@recipeFilterFewIngredients": {
+    "description": "25% pantry match label"
+  },
+  "recipeFilterHalfIngredients": "At least half ingredients in stock (50%)",
+  "@recipeFilterHalfIngredients": {
+    "description": "50% pantry match label"
+  },
+  "recipeFilterMostIngredients": "Most ingredients in stock (75%)",
+  "@recipeFilterMostIngredients": {
+    "description": "75% pantry match label"
+  },
+  "recipeFilterAllIngredients": "All ingredients in stock (100%)",
+  "@recipeFilterAllIngredients": {
+    "description": "100% pantry match label"
+  },
+  "recipeFilterPercentMatch": "{percent}% match",
+  "@recipeFilterPercentMatch": {
+    "description": "Percent match label",
+    "placeholders": {
+      "percent": {
+        "type": "int"
+      }
+    }
+  },
+
+  "recipeCookAddRecipe": "Add Recipe",
+  "@recipeCookAddRecipe": {
+    "description": "Add recipe to cook button"
+  },
+  "recipeCookComplete": "Complete Cook",
+  "@recipeCookComplete": {
+    "description": "Complete cook button"
+  },
+  "recipeCookAddRecipeTitle": "Add Recipe to Cook",
+  "@recipeCookAddRecipeTitle": {
+    "description": "Add recipe to cook modal title"
+  },
+  "recipeCookNoSteps": "No steps found for this recipe",
+  "@recipeCookNoSteps": {
+    "description": "No steps message"
+  },
+  "recipeCookPrevious": "Previous",
+  "@recipeCookPrevious": {
+    "description": "Previous step button"
+  },
+  "recipeCookNext": "Next",
+  "@recipeCookNext": {
+    "description": "Next step button"
+  },
+
+  "recipeIngredientLinkToRecipe": "Link to Recipe",
+  "@recipeIngredientLinkToRecipe": {
+    "description": "Link to recipe option"
+  },
+  "recipeIngredientConvertToIngredient": "Convert to ingredient",
+  "@recipeIngredientConvertToIngredient": {
+    "description": "Convert to ingredient option"
+  },
+  "recipeIngredientSectionName": "Section name",
+  "@recipeIngredientSectionName": {
+    "description": "Section name hint"
+  },
+  "recipeIngredientLinkExisting": "Link to Existing Recipe",
+  "@recipeIngredientLinkExisting": {
+    "description": "Link to existing recipe option"
+  },
+  "recipeIngredientChangeLinked": "Change Linked Recipe",
+  "@recipeIngredientChangeLinked": {
+    "description": "Change linked recipe option"
+  },
+  "recipeIngredientRemoveLink": "Remove Recipe Link",
+  "@recipeIngredientRemoveLink": {
+    "description": "Remove recipe link option"
+  },
+  "recipeIngredientNoRecipesFound": "No recipes found",
+  "@recipeIngredientNoRecipesFound": {
+    "description": "No recipes found message"
+  },
+  "recipeIngredientNoRecipesMatch": "No recipes match your search",
+  "@recipeIngredientNoRecipesMatch": {
+    "description": "No recipes match message"
+  },
+
+  "recipeStepNextStep": "Next Step",
+  "@recipeStepNextStep": {
+    "description": "Next step button"
+  },
+  "recipeStepConvertToStep": "Convert to step",
+  "@recipeStepConvertToStep": {
+    "description": "Convert to step option"
+  },
+  "recipeStepConvertToSection": "Convert to section",
+  "@recipeStepConvertToSection": {
+    "description": "Convert to section option"
+  },
+  "recipeStepDescribe": "Describe this step",
+  "@recipeStepDescribe": {
+    "description": "Step description placeholder"
+  },
+
+  "recipeEditIngredientsTitle": "Edit Ingredients",
+  "@recipeEditIngredientsTitle": {
+    "description": "Edit ingredients modal title"
+  },
+  "recipeEditStepsTitle": "Edit Steps",
+  "@recipeEditStepsTitle": {
+    "description": "Edit steps modal title"
+  },
+  "recipeEditUpdate": "Update",
+  "@recipeEditUpdate": {
+    "description": "Update button"
+  },
+
+  "recipeAddToShoppingList": "Add to Shopping List",
+  "@recipeAddToShoppingList": {
+    "description": "Add to shopping list modal title"
+  },
+  "recipeAddToShoppingListButton": "Add to Shopping List",
+  "@recipeAddToShoppingListButton": {
+    "description": "Add to shopping list button"
+  },
+  "recipeAddToShoppingListAdding": "Adding...",
+  "@recipeAddToShoppingListAdding": {
+    "description": "Adding to shopping list status"
+  },
+  "recipeAddToShoppingListNoIngredients": "No ingredients to add",
+  "@recipeAddToShoppingListNoIngredients": {
+    "description": "No ingredients to add message"
+  },
+  "recipeAddToShoppingListDefault": "My Shopping List",
+  "@recipeAddToShoppingListDefault": {
+    "description": "Default shopping list name"
+  },
+
+  "recipeWelcomeGettingStarted": "Getting Started",
+  "@recipeWelcomeGettingStarted": {
+    "description": "Getting started title"
+  },
+  "recipeWelcomeTitle": "Welcome to Stockpot!",
+  "@recipeWelcomeTitle": {
+    "description": "Welcome card title"
+  },
+  "recipeWelcomeSubtitle": "Create your first recipe and start\nbuilding your collection",
+  "@recipeWelcomeSubtitle": {
+    "description": "Welcome card subtitle"
+  },
+
+  "recipeTileEdit": "Edit Recipe",
+  "@recipeTileEdit": {
+    "description": "Edit recipe option"
+  },
+  "recipeTileDelete": "Delete Recipe",
+  "@recipeTileDelete": {
+    "description": "Delete recipe option"
+  },
+
+  "recipeSearchPlaceholder": "Search for recipes to add",
+  "@recipeSearchPlaceholder": {
+    "description": "Recipe search placeholder"
+  },
+  "recipeSearchNoResults": "No recipes found",
+  "@recipeSearchNoResults": {
+    "description": "No search results message"
+  },
+  "recipeSearchTryDifferent": "Try a different search term",
+  "@recipeSearchTryDifferent": {
+    "description": "Try different search suggestion"
+  },
+  "recipeSearchClearFilters": "Clear Filters",
+  "@recipeSearchClearFilters": {
+    "description": "Clear filters button"
+  },
+  "recipeSearchFilterSort": "Filter and Sort",
+  "@recipeSearchFilterSort": {
+    "description": "Filter and sort button"
+  },
+  "recipeAddRecipeButton": "Add Recipe",
+  "@recipeAddRecipeButton": {
+    "description": "Add recipe button"
+  },
+  "recipeFolderNoRecipesMatch": "No recipes match the current filters",
+  "@recipeFolderNoRecipesMatch": {
+    "description": "No recipes match filters message"
+  },
+  "recipeFolderNoTagsMatch": "No recipes match the selected tags",
+  "@recipeFolderNoTagsMatch": {
+    "description": "No recipes match tags message"
+  },
+  "recipeFolderNoIngredientsMatch": "No recipes match the selected ingredients",
+  "@recipeFolderNoIngredientsMatch": {
+    "description": "No recipes match ingredients message"
+  },
+  "recipeEditSmartFolder": "Edit Smart Folder",
+  "@recipeEditSmartFolder": {
+    "description": "Edit smart folder menu item"
+  },
+  "recipeCookTimeUnder30": "Under 30 minutes",
+  "@recipeCookTimeUnder30": {
+    "description": "Cook time filter under 30 minutes"
+  },
+  "recipeCookTime30To60": "30-60 minutes",
+  "@recipeCookTime30To60": {
+    "description": "Cook time filter 30-60 minutes"
+  },
+  "recipeCookTime1To2Hours": "1-2 hours",
+  "@recipeCookTime1To2Hours": {
+    "description": "Cook time filter 1-2 hours"
+  },
+  "recipeCookTimeOver2Hours": "Over 2 hours",
+  "@recipeCookTimeOver2Hours": {
+    "description": "Cook time filter over 2 hours"
+  },
+  "recipeSortPantryMatch": "Pantry Match %",
+  "@recipeSortPantryMatch": {
+    "description": "Sort by pantry match option"
+  },
+  "recipeSortAlphabetical": "Alphabetical",
+  "@recipeSortAlphabetical": {
+    "description": "Sort alphabetically option"
+  },
+  "recipeSortRating": "Rating",
+  "@recipeSortRating": {
+    "description": "Sort by rating option"
+  },
+  "recipeSortTime": "Time",
+  "@recipeSortTime": {
+    "description": "Sort by time option"
+  },
+  "recipeSortAddedDate": "Added Date",
+  "@recipeSortAddedDate": {
+    "description": "Sort by added date option"
+  },
+  "recipeSortUpdatedDate": "Updated Date",
+  "@recipeSortUpdatedDate": {
+    "description": "Sort by updated date option"
+  },
+  "recipeSearchError": "Error: {error}",
+  "@recipeSearchError": {
+    "description": "Search error message",
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+
+  "recipeAddModalNew": "New Recipe",
+  "@recipeAddModalNew": {
+    "description": "New recipe modal title"
+  },
+  "recipeAddModalEdit": "Edit Recipe",
+  "@recipeAddModalEdit": {
+    "description": "Edit recipe modal title"
+  },
+  "recipeAddModalCreate": "Create",
+  "@recipeAddModalCreate": {
+    "description": "Create button"
+  },
+  "recipeAddModalUpdate": "Update",
+  "@recipeAddModalUpdate": {
+    "description": "Update button"
+  },
+  "recipeAddModalFailed": "Failed to add recipe: {message}",
+  "@recipeAddModalFailed": {
+    "description": "Failed to add recipe message",
+    "placeholders": {
+      "message": {
+        "type": "String"
+      }
+    }
+  },
+  "recipeAddModalCannotAdd": "Cannot Add Recipe",
+  "@recipeAddModalCannotAdd": {
+    "description": "Cannot add recipe dialog title"
+  },
+  "recipeAddModalAdd": "Add",
+  "@recipeAddModalAdd": {
+    "description": "Add button"
+  },
+
+  "commonSave": "Save",
+  "@commonSave": {
+    "description": "Save button"
+  },
+  "commonDone": "Done",
+  "@commonDone": {
+    "description": "Done button"
+  },
+  "commonClose": "Close",
+  "@commonClose": {
+    "description": "Close button"
+  },
+  "commonBack": "Back",
+  "@commonBack": {
+    "description": "Back button"
+  },
+  "commonIngredient": "ingredient",
+  "@commonIngredient": {
+    "description": "Ingredient singular"
+  },
+  "commonIngredients": "ingredients",
+  "@commonIngredients": {
+    "description": "Ingredients plural"
+  },
+  "commonStep": "step",
+  "@commonStep": {
+    "description": "Step singular"
+  },
+  "commonSteps": "steps",
+  "@commonSteps": {
+    "description": "Steps plural"
+  },
+
+  "recipeStepAddStep": "Add Step",
+  "@recipeStepAddStep": {
+    "description": "Add step button"
+  },
+  "recipeStepAddSection": "Add Section",
+  "@recipeStepAddSection": {
+    "description": "Add section button"
+  },
+  "recipeStepEditAsText": "Edit as Text",
+  "@recipeStepEditAsText": {
+    "description": "Edit as text menu option"
+  },
+  "recipeStepClearAll": "Clear All Steps",
+  "@recipeStepClearAll": {
+    "description": "Clear all steps menu option"
+  },
+  "recipeStepNoSteps": "No steps added yet.",
+  "@recipeStepNoSteps": {
+    "description": "Empty steps message"
+  },
+
+  "recipePinnedTitle": "Pinned Recipes",
+  "@recipePinnedTitle": {
+    "description": "Pinned recipes page title"
+  },
+  "recipePinnedNoMatch": "No pinned recipes match \"{query}\"",
+  "@recipePinnedNoMatch": {
+    "description": "Message when search finds no pinned recipes",
+    "placeholders": {
+      "query": {
+        "type": "String"
+      }
+    }
+  },
+  "recipePinnedEmpty": "No pinned recipes yet.\nPin your favorite recipes to see them here.",
+  "@recipePinnedEmpty": {
+    "description": "Message when no recipes are pinned"
+  },
+  "recipePinnedNoResults": "No recipes found",
+  "@recipePinnedNoResults": {
+    "description": "Generic no results message"
+  },
+
+  "recipeMatchTitle": "Pantry Matches",
+  "@recipeMatchTitle": {
+    "description": "Pantry matches page title"
+  },
+  "recipeMatchSummary": "Pantry matches: {matched} of {total} ingredients",
+  "@recipeMatchSummary": {
+    "description": "Summary of pantry matches",
+    "placeholders": {
+      "matched": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "recipeMatchMatchedWith": "Matched with: {name}",
+  "@recipeMatchMatchedWith": {
+    "description": "Matched pantry item label",
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "recipeMatchTermsTitle": "Matching Terms",
+  "@recipeMatchTermsTitle": {
+    "description": "Matching terms section title"
+  },
+  "recipeMatchAddTerm": "Add New Term",
+  "@recipeMatchAddTerm": {
+    "description": "Add term tooltip"
+  },
+  "recipeMatchNoTerms": "No additional terms for this ingredient. Add terms to improve pantry matching.",
+  "@recipeMatchNoTerms": {
+    "description": "Message when no terms exist"
+  },
+  "recipeMatchTip": "Tip: Add terms that match pantry item names to improve matching.",
+  "@recipeMatchTip": {
+    "description": "Helpful tip for adding terms"
+  },
+  "recipeMatchSource": "Source: {source}",
+  "@recipeMatchSource": {
+    "description": "Term source label",
+    "placeholders": {
+      "source": {
+        "type": "String"
+      }
+    }
+  },
+  "recipeMatchAddTermTitle": "Add Matching Term",
+  "@recipeMatchAddTermTitle": {
+    "description": "Add term dialog title"
+  },
+  "recipeMatchTermLabel": "Term",
+  "@recipeMatchTermLabel": {
+    "description": "Term input label"
+  },
+  "recipeMatchTermHint": "Enter a matching term (e.g., pantry item name)",
+  "@recipeMatchTermHint": {
+    "description": "Term input hint"
   }
 }

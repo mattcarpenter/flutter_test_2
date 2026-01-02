@@ -2,6 +2,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../localization/l10n_extension.dart';
 import '../../../providers/recipe_provider.dart';
 import '../../../theme/colors.dart';
 import '../../../theme/spacing.dart';
@@ -42,7 +43,7 @@ class WelcomeRecipeCard extends ConsumerWidget {
         mainAxisSize: MainAxisSize.min,
         children: [
           Text(
-            'Getting Started',
+            context.l10n.recipeWelcomeGettingStarted,
             style: AppTypography.h2Serif.copyWith(
               color: colors.headingSecondary,
             ),
@@ -100,7 +101,7 @@ class WelcomeRecipeCard extends ConsumerWidget {
                       children: [
                         // Title
                         Text(
-                          'Welcome to Stockpot!',
+                          context.l10n.recipeWelcomeTitle,
                           style: AppTypography.h3.copyWith(
                             color: colors.textPrimary,
                           ),
@@ -111,7 +112,7 @@ class WelcomeRecipeCard extends ConsumerWidget {
 
                         // Subtitle
                         Text(
-                          'Create your first recipe and start\nbuilding your collection',
+                          context.l10n.recipeWelcomeSubtitle,
                           style: AppTypography.body.copyWith(
                             color: colors.textSecondary,
                           ),
@@ -124,7 +125,7 @@ class WelcomeRecipeCard extends ConsumerWidget {
                         Padding(
                           padding: EdgeInsets.symmetric(horizontal: AppSpacing.xl * 2),
                           child: AppButton(
-                            text: 'Create a Recipe',
+                            text: context.l10n.recipeCreateTitle,
                             onPressed: () {
                               showRecipeCreationMenuModal(
                                 context,

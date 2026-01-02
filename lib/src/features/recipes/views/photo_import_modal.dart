@@ -30,6 +30,7 @@ import '../../clippings/models/extracted_recipe.dart';
 import '../../clippings/models/recipe_preview.dart';
 import '../../clippings/providers/preview_usage_provider.dart';
 import '../../share/widgets/share_recipe_preview_result.dart';
+import '../../../localization/l10n_extension.dart';
 import 'add_recipe_modal.dart';
 
 /// Shows a photo import flow to extract recipes from photos.
@@ -46,7 +47,7 @@ Future<void> showPhotoImportModal(
   final connectivityResult = await Connectivity().checkConnectivity();
   if (connectivityResult.contains(ConnectivityResult.none)) {
     if (context.mounted) {
-      _showError(context, 'You\'re offline. Please check your internet connection and try again.');
+      _showError(context, context.l10n.recipePhotoOffline);
     }
     return;
   }
@@ -142,12 +143,26 @@ class _PhotoImportContentState extends ConsumerState<_PhotoImportContent> {
   String? _errorMessage;
   bool _isRateLimitError = false;
   bool _isUpgradeLoading = false;
-  String _statusMessage = 'Reading photo...';
+  late String _statusMessage;
 
   @override
   void initState() {
     super.initState();
+    // Defer initialization to avoid using context in initState
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) {
+        setState(() {
+          _statusMessage = context.l10n.recipePhotoReading;
+        });
+      }
+    });
     _startExtraction();
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _statusMessage = context.l10n.recipePhotoReading;
   }
 
   Future<void> _startExtraction() async {
@@ -186,7 +201,7 @@ class _PhotoImportContentState extends ConsumerState<_PhotoImportContent> {
       if (mounted) {
         setState(() {
           _modalState = _ModalState.error;
-          _errorMessage = 'Something went wrong. Please try again.';
+          _errorMessage = context.l10n.recipePhotoFailed;
           _isRateLimitError = false;
         });
       }
@@ -196,7 +211,7 @@ class _PhotoImportContentState extends ConsumerState<_PhotoImportContent> {
   Future<void> _performFullExtraction() async {
     try {
       setState(() {
-        _statusMessage = 'Processing photo...';
+        _statusMessage = context.l10n.recipePhotoProcessingStatus;
       });
 
       // Prepare images
@@ -208,13 +223,13 @@ class _PhotoImportContentState extends ConsumerState<_PhotoImportContent> {
       if (images.isEmpty) {
         setState(() {
           _modalState = _ModalState.error;
-          _errorMessage = 'Failed to process the image(s). Please try again.';
+          _errorMessage = context.l10n.recipePhotoFailed;
         });
         return;
       }
 
       setState(() {
-        _statusMessage = 'Extracting recipe...';
+        _statusMessage = context.l10n.recipePhotoExtracting;
       });
 
       // Call extraction API
@@ -226,7 +241,7 @@ class _PhotoImportContentState extends ConsumerState<_PhotoImportContent> {
       if (recipe == null) {
         setState(() {
           _modalState = _ModalState.error;
-          _errorMessage = 'No recipe found in the photo.\n\nTry a photo of a recipe card or cookbook page.';
+          _errorMessage = context.l10n.recipePhotoNoRecipe;
         });
         return;
       }
@@ -267,7 +282,7 @@ class _PhotoImportContentState extends ConsumerState<_PhotoImportContent> {
   Future<void> _performPreviewExtraction() async {
     try {
       setState(() {
-        _statusMessage = 'Processing photo...';
+        _statusMessage = context.l10n.recipePhotoProcessingStatus;
       });
 
       // Prepare images
@@ -279,13 +294,13 @@ class _PhotoImportContentState extends ConsumerState<_PhotoImportContent> {
       if (images.isEmpty) {
         setState(() {
           _modalState = _ModalState.error;
-          _errorMessage = 'Failed to process the image(s). Please try again.';
+          _errorMessage = context.l10n.recipePhotoFailed;
         });
         return;
       }
 
       setState(() {
-        _statusMessage = 'Extracting recipe...';
+        _statusMessage = context.l10n.recipePhotoExtracting;
       });
 
       // Call preview API
@@ -297,7 +312,7 @@ class _PhotoImportContentState extends ConsumerState<_PhotoImportContent> {
       if (preview == null) {
         setState(() {
           _modalState = _ModalState.error;
-          _errorMessage = 'No recipe found in the photo.\n\nTry a photo of a recipe card or cookbook page.';
+          _errorMessage = context.l10n.recipePhotoNoRecipe;
         });
         return;
       }
@@ -403,7 +418,7 @@ class _PhotoImportContentState extends ConsumerState<_PhotoImportContent> {
                     if (images.isEmpty) {
                       setModalState(() {
                         isExtracting = false;
-                        errorMessage = 'Failed to process the image(s).';
+                        errorMessage = builderContext.l10n.recipePhotoFailed;
                       });
                       return;
                     }
@@ -416,7 +431,7 @@ class _PhotoImportContentState extends ConsumerState<_PhotoImportContent> {
                     if (recipe == null) {
                       setModalState(() {
                         isExtracting = false;
-                        errorMessage = 'No recipe found in the photo.';
+                        errorMessage = builderContext.l10n.recipePhotoNoRecipe;
                       });
                       return;
                     }
@@ -455,7 +470,7 @@ class _PhotoImportContentState extends ConsumerState<_PhotoImportContent> {
                     if (modalContext.mounted) {
                       setModalState(() {
                         isExtracting = false;
-                        errorMessage = 'Failed to extract recipe. Please try again.';
+                        errorMessage = builderContext.l10n.recipePhotoFailed;
                       });
                     }
                   }
@@ -472,7 +487,7 @@ class _PhotoImportContentState extends ConsumerState<_PhotoImportContent> {
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           Text(
-                            'Importing Recipe',
+                            builderContext.l10n.recipePhotoProcessing,
                             style: AppTypography.h4.copyWith(
                               color: AppColors.of(builderContext).textPrimary,
                             ),
@@ -483,7 +498,7 @@ class _PhotoImportContentState extends ConsumerState<_PhotoImportContent> {
                       const CupertinoActivityIndicator(radius: 16),
                       SizedBox(height: AppSpacing.lg),
                       Text(
-                        'Processing photo...',
+                        builderContext.l10n.recipePhotoProcessingStatus,
                         style: AppTypography.body.copyWith(
                           color: AppColors.of(builderContext).textSecondary,
                         ),
@@ -503,7 +518,7 @@ class _PhotoImportContentState extends ConsumerState<_PhotoImportContent> {
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           Text(
-                            'Extraction Failed',
+                            builderContext.l10n.recipePhotoFailed,
                             style: AppTypography.h4.copyWith(
                               color: AppColors.of(builderContext).textPrimary,
                             ),
@@ -657,7 +672,7 @@ class _PhotoImportContentState extends ConsumerState<_PhotoImportContent> {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                'Processing Photo',
+                context.l10n.recipePhotoProcessing,
                 style: AppTypography.h4.copyWith(
                   color: AppColors.of(context).textPrimary,
                 ),
@@ -696,7 +711,7 @@ class _PhotoImportContentState extends ConsumerState<_PhotoImportContent> {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                _isRateLimitError ? 'Preview Limit Reached' : 'Import Failed',
+                _isRateLimitError ? context.l10n.recipeUrlPreviewLimitReached : context.l10n.recipePhotoFailed,
                 style: AppTypography.h4.copyWith(
                   color: AppColors.of(context).textPrimary,
                 ),
@@ -711,7 +726,7 @@ class _PhotoImportContentState extends ConsumerState<_PhotoImportContent> {
           ),
           SizedBox(height: AppSpacing.lg),
           Text(
-            _errorMessage ?? 'Something went wrong.',
+            _errorMessage ?? context.l10n.recipePhotoFailed,
             style: AppTypography.body.copyWith(
               color: AppColors.of(context).textSecondary,
             ),
@@ -719,7 +734,7 @@ class _PhotoImportContentState extends ConsumerState<_PhotoImportContent> {
           SizedBox(height: AppSpacing.xl),
           if (_isRateLimitError)
             AppButton(
-              text: 'Upgrade to Plus',
+              text: context.l10n.recipeAiUpgradeToPlus,
               onPressed: _isUpgradeLoading ? null : () async {
                 setState(() {
                   _isUpgradeLoading = true;

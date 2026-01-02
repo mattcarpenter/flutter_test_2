@@ -7,6 +7,7 @@ import 'package:recipe_app/src/providers/cook_provider.dart';
 import 'package:recipe_app/src/providers/recipe_provider.dart' as recipe_provider;
 import '../../../../../database/database.dart';
 import '../../../../../database/models/cooks.dart';
+import '../../../../localization/l10n_extension.dart';
 import '../../../../theme/colors.dart';
 import '../../../../widgets/app_button.dart';
 import '../../../../utils/recipe_text_renderer.dart';
@@ -51,7 +52,7 @@ class CookContentState extends ConsumerState<CookContent> {
   void showAddRecipeSheet() {
     showAddRecipeModal(
       context,
-      title: 'Add Recipe to Cook',
+      title: context.l10n.recipeCookAddRecipeTitle,
       onRecipeSelected: (recipe) async {
         // Add the selected recipe to cook session
         final cookNotifier = ref.read(cookNotifierProvider.notifier);
@@ -259,7 +260,7 @@ class CookContentState extends ConsumerState<CookContent> {
           // Ensure we have at least one non-section step
           final nonSectionSteps = _getNonSectionSteps(steps);
           if (nonSectionSteps.isEmpty) {
-            return _buildErrorContent("No steps found for this recipe");
+            return _buildErrorContent(context.l10n.recipeCookNoSteps);
           }
 
           // Get the current step index - ensure it's on a non-section step
@@ -531,7 +532,7 @@ class CookContentState extends ConsumerState<CookContent> {
                   // Previous button (disabled when on first step)
                   Expanded(
                     child: AppButtonVariants.primaryOutline(
-                      text: 'Previous',
+                      text: context.l10n.recipeCookPrevious,
                       size: AppButtonSize.large,
                       shape: AppButtonShape.square,
                       fullWidth: true,
@@ -543,7 +544,7 @@ class CookContentState extends ConsumerState<CookContent> {
                   // Next/Complete button
                   Expanded(
                     child: AppButtonVariants.primaryFilled(
-                      text: isLastStep ? 'Complete' : 'Next',
+                      text: isLastStep ? context.l10n.commonDone : context.l10n.recipeCookNext,
                       size: AppButtonSize.large,
                       shape: AppButtonShape.square,
                       fullWidth: true,

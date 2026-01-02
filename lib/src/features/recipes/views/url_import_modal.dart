@@ -31,6 +31,7 @@ import '../../clippings/models/extracted_recipe.dart';
 import '../../clippings/models/recipe_preview.dart';
 import '../../clippings/providers/preview_usage_provider.dart';
 import '../../share/widgets/share_recipe_preview_result.dart';
+import '../../../localization/l10n_extension.dart';
 import 'add_recipe_modal.dart';
 
 /// Shows a URL import modal to extract recipes from web pages.
@@ -88,7 +89,7 @@ class _UrlImportContentState extends ConsumerState<_UrlImportContent> {
   String? _errorMessage;
   bool _isRateLimitError = false;
   bool _isUpgradeLoading = false;
-  String _statusMessage = 'Fetching recipe...';
+  late String _statusMessage;
   bool _isTransitioningOut = false;
 
   late TextEditingController _urlController;
@@ -96,6 +97,12 @@ class _UrlImportContentState extends ConsumerState<_UrlImportContent> {
 
   // Stored extraction result for use after preview/paywall
   WebExtractionResult? _extractionResult;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _statusMessage = context.l10n.recipeUrlFetching;
+  }
 
   @override
   void initState() {
@@ -161,7 +168,7 @@ class _UrlImportContentState extends ConsumerState<_UrlImportContent> {
     if (connectivityResult.contains(ConnectivityResult.none)) {
       setState(() {
         _modalState = _ModalState.error;
-        _errorMessage = "You're offline. Please check your internet connection.";
+        _errorMessage = context.l10n.recipeUrlOffline;
       });
       return;
     }
@@ -171,7 +178,7 @@ class _UrlImportContentState extends ConsumerState<_UrlImportContent> {
     if (url == null) {
       setState(() {
         _modalState = _ModalState.error;
-        _errorMessage = 'Please enter a valid URL.';
+        _errorMessage = context.l10n.recipeUrlInvalid;
       });
       return;
     }
@@ -213,7 +220,7 @@ class _UrlImportContentState extends ConsumerState<_UrlImportContent> {
       if (!result.hasHtml) {
         setState(() {
           _modalState = _ModalState.error;
-          _errorMessage = "This page doesn't appear to contain recipe information.";
+          _errorMessage = context.l10n.recipeUrlNoRecipe;
         });
         return;
       }
@@ -250,7 +257,7 @@ class _UrlImportContentState extends ConsumerState<_UrlImportContent> {
       if (mounted) {
         setState(() {
           _modalState = _ModalState.error;
-          _errorMessage = 'Something went wrong. Please try again.';
+          _errorMessage = context.l10n.recipeUrlSomethingWrong;
         });
       }
     }
@@ -261,13 +268,13 @@ class _UrlImportContentState extends ConsumerState<_UrlImportContent> {
     if (!result.hasHtml) {
       setState(() {
         _modalState = _ModalState.error;
-        _errorMessage = "This page doesn't appear to contain recipe information.";
+        _errorMessage = context.l10n.recipeUrlNoRecipe;
       });
       return;
     }
 
     setState(() {
-      _statusMessage = 'Extracting recipe...';
+      _statusMessage = context.l10n.recipeUrlExtracting;
     });
 
     try {
@@ -282,7 +289,7 @@ class _UrlImportContentState extends ConsumerState<_UrlImportContent> {
       if (recipe == null) {
         setState(() {
           _modalState = _ModalState.error;
-          _errorMessage = "This page doesn't appear to contain recipe information.";
+          _errorMessage = context.l10n.recipeUrlNoRecipe;
         });
         return;
       }
@@ -293,7 +300,7 @@ class _UrlImportContentState extends ConsumerState<_UrlImportContent> {
         setState(() {
           _modalState = _ModalState.error;
           _errorMessage = e.statusCode == 429
-              ? 'Recipe previews are limited for free users. Upgrade to Plus for unlimited imports.'
+              ? context.l10n.recipeUrlPreviewLimit
               : e.message;
           _isRateLimitError = e.statusCode == 429;
         });
@@ -306,13 +313,13 @@ class _UrlImportContentState extends ConsumerState<_UrlImportContent> {
     if (!result.hasHtml) {
       setState(() {
         _modalState = _ModalState.error;
-        _errorMessage = 'This page requires Plus subscription for recipe extraction.';
+        _errorMessage = context.l10n.recipeUrlPlusRequired;
       });
       return;
     }
 
     setState(() {
-      _statusMessage = 'Extracting recipe...';
+      _statusMessage = context.l10n.recipeUrlExtracting;
     });
 
     try {
@@ -327,7 +334,7 @@ class _UrlImportContentState extends ConsumerState<_UrlImportContent> {
       if (preview == null) {
         setState(() {
           _modalState = _ModalState.error;
-          _errorMessage = "This page doesn't appear to contain recipe information.";
+          _errorMessage = context.l10n.recipeUrlNoRecipe;
         });
         return;
       }
@@ -344,7 +351,7 @@ class _UrlImportContentState extends ConsumerState<_UrlImportContent> {
         setState(() {
           _modalState = _ModalState.error;
           _errorMessage = e.statusCode == 429
-              ? 'Recipe previews are limited for free users. Upgrade to Plus for unlimited imports.'
+              ? context.l10n.recipeUrlPreviewLimit
               : e.message;
           _isRateLimitError = e.statusCode == 429;
         });
@@ -453,7 +460,7 @@ class _UrlImportContentState extends ConsumerState<_UrlImportContent> {
                     if (recipe == null) {
                       setModalState(() {
                         isExtracting = false;
-                        errorMessage = 'No recipe found on this page.';
+                        errorMessage = builderContext.l10n.recipeUrlNoRecipeFound;
                       });
                       return;
                     }
@@ -494,7 +501,7 @@ class _UrlImportContentState extends ConsumerState<_UrlImportContent> {
                     if (modalContext.mounted) {
                       setModalState(() {
                         isExtracting = false;
-                        errorMessage = 'Failed to extract recipe. Please try again.';
+                        errorMessage = builderContext.l10n.recipeUrlFailedExtract;
                       });
                     }
                   }
@@ -511,7 +518,7 @@ class _UrlImportContentState extends ConsumerState<_UrlImportContent> {
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           Text(
-                            'Importing Recipe',
+                            builderContext.l10n.recipeUrlImporting,
                             style: AppTypography.h4.copyWith(
                               color: AppColors.of(builderContext).textPrimary,
                             ),
@@ -522,7 +529,7 @@ class _UrlImportContentState extends ConsumerState<_UrlImportContent> {
                       const CupertinoActivityIndicator(radius: 16),
                       SizedBox(height: AppSpacing.lg),
                       Text(
-                        'Extracting recipe...',
+                        builderContext.l10n.recipeUrlExtracting,
                         style: AppTypography.body.copyWith(
                           color: AppColors.of(builderContext).textSecondary,
                         ),
@@ -542,7 +549,7 @@ class _UrlImportContentState extends ConsumerState<_UrlImportContent> {
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           Text(
-                            'Extraction Failed',
+                            builderContext.l10n.recipeUrlExtractionFailed,
                             style: AppTypography.h4.copyWith(
                               color: AppColors.of(builderContext).textPrimary,
                             ),
@@ -774,7 +781,7 @@ class _UrlImportContentState extends ConsumerState<_UrlImportContent> {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                'Import from URL',
+                context.l10n.recipeUrlImportTitle,
                 style: AppTypography.h4.copyWith(
                   color: colors.textPrimary,
                 ),
@@ -789,7 +796,7 @@ class _UrlImportContentState extends ConsumerState<_UrlImportContent> {
           ),
           SizedBox(height: AppSpacing.sm),
           Text(
-            'Paste a recipe URL to import',
+            context.l10n.recipeUrlImportSubtitle,
             style: AppTypography.body.copyWith(
               color: colors.textSecondary,
             ),
@@ -797,7 +804,7 @@ class _UrlImportContentState extends ConsumerState<_UrlImportContent> {
           SizedBox(height: AppSpacing.lg),
           AppTextFieldSimple(
             controller: _urlController,
-            placeholder: 'https://example.com/recipe',
+            placeholder: context.l10n.recipeUrlImportPlaceholder,
             keyboardType: TextInputType.url,
             textInputAction: TextInputAction.go,
             focusNode: _urlFocusNode,
@@ -811,7 +818,7 @@ class _UrlImportContentState extends ConsumerState<_UrlImportContent> {
             builder: (context, _) {
               final hasText = _urlController.text.trim().isNotEmpty;
               return AppButton(
-                text: 'Import Recipe',
+                text: context.l10n.recipeUrlImportButton,
                 onPressed: hasText ? _startExtraction : null,
                 style: AppButtonStyle.fill,
                 theme: AppButtonTheme.primary,
@@ -836,7 +843,7 @@ class _UrlImportContentState extends ConsumerState<_UrlImportContent> {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                'Importing Recipe',
+                context.l10n.recipeUrlImporting,
                 style: AppTypography.h4.copyWith(
                   color: AppColors.of(context).textPrimary,
                 ),
@@ -876,7 +883,7 @@ class _UrlImportContentState extends ConsumerState<_UrlImportContent> {
             children: [
               Expanded(
                 child: Text(
-                  _isRateLimitError ? 'Preview Limit Reached' : 'Import Failed',
+                  _isRateLimitError ? context.l10n.recipeUrlPreviewLimitReached : context.l10n.recipeUrlImportFailed,
                   style: AppTypography.h4.copyWith(
                     color: AppColors.of(context).textPrimary,
                   ),
@@ -892,7 +899,7 @@ class _UrlImportContentState extends ConsumerState<_UrlImportContent> {
           ),
           SizedBox(height: AppSpacing.lg),
           Text(
-            _errorMessage ?? 'Something went wrong.',
+            _errorMessage ?? context.l10n.recipeUrlSomethingWrong,
             style: AppTypography.body.copyWith(
               color: AppColors.of(context).textSecondary,
             ),
@@ -900,7 +907,7 @@ class _UrlImportContentState extends ConsumerState<_UrlImportContent> {
           SizedBox(height: AppSpacing.xl),
           if (_isRateLimitError)
             AppButton(
-              text: 'Upgrade to Plus',
+              text: context.l10n.recipeAiUpgradeToPlus,
               onPressed: _isUpgradeLoading ? null : () async {
                 setState(() {
                   _isUpgradeLoading = true;
@@ -945,7 +952,7 @@ class _UrlImportContentState extends ConsumerState<_UrlImportContent> {
             )
           else
             AppButton(
-              text: 'Close',
+              text: context.l10n.recipeAiTryAgain,
               onPressed: widget.onClose,
               style: AppButtonStyle.fill,
               theme: AppButtonTheme.primary,
