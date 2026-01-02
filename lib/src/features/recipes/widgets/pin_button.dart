@@ -1,7 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:hugeicons/hugeicons.dart';
 import '../../../providers/recipe_provider.dart';
 
 class PinButton extends ConsumerWidget {
@@ -40,17 +39,11 @@ class PinButton extends ConsumerWidget {
               shape: BoxShape.circle,
               color: Colors.black.withValues(alpha: 0.6),
             ),
-            child: isPinned
-                ? const Icon(
-                    CupertinoIcons.bookmark_fill,
-                    color: Colors.white,
-                    size: 20,
-                  )
-                : HugeIcon(
-                    icon: HugeIcons.strokeRoundedBookmark01,
-                    color: Colors.white,
-                    size: 20,
-                  ),
+            child: Icon(
+              isPinned ? CupertinoIcons.bookmark_fill : CupertinoIcons.bookmark,
+              color: Colors.white,
+              size: 20,
+            ),
           ),
         );
       },
