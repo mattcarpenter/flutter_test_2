@@ -1894,4 +1894,22 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get shoppingListCreateButton => 'Create List';
+
+  @override
+  String get stockStatusOut => 'Out';
+
+  @override
+  String get stockStatusLow => 'Low';
+
+  @override
+  String get stockStatusLowStock => 'Low Stock';
+
+  @override
+  String get stockStatusInStock => 'In Stock';
+
+  @override
+  String get stockStatusNewItem => 'New item';
+
+  @override
+  String get stockStatusNotInPantry => 'Not in Pantry';
 }

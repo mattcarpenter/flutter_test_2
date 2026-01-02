@@ -1843,4 +1843,22 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get shoppingListCreateButton => 'リストを作成';
+
+  @override
+  String get stockStatusOut => '切れ';
+
+  @override
+  String get stockStatusLow => '少';
+
+  @override
+  String get stockStatusLowStock => '残りわずか';
+
+  @override
+  String get stockStatusInStock => '在庫あり';
+
+  @override
+  String get stockStatusNewItem => '新規';
+
+  @override
+  String get stockStatusNotInPantry => 'パントリーにない';
 }

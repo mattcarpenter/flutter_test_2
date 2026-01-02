@@ -3393,6 +3393,42 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Create List'**
   String get shoppingListCreateButton;
+
+  /// Short label for out of stock status
+  ///
+  /// In en, this message translates to:
+  /// **'Out'**
+  String get stockStatusOut;
+
+  /// Short label for low stock status
+  ///
+  /// In en, this message translates to:
+  /// **'Low'**
+  String get stockStatusLow;
+
+  /// Full label for low stock status
+  ///
+  /// In en, this message translates to:
+  /// **'Low Stock'**
+  String get stockStatusLowStock;
+
+  /// Label for in stock status
+  ///
+  /// In en, this message translates to:
+  /// **'In Stock'**
+  String get stockStatusInStock;
+
+  /// Label for new pantry items
+  ///
+  /// In en, this message translates to:
+  /// **'New item'**
+  String get stockStatusNewItem;
+
+  /// Label for items not found in pantry
+  ///
+  /// In en, this message translates to:
+  /// **'Not in Pantry'**
+  String get stockStatusNotInPantry;
 }
 
 class _AppLocalizationsDelegate

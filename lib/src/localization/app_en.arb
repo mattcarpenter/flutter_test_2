@@ -2643,5 +2643,30 @@
   "shoppingListCreateButton": "Create List",
   "@shoppingListCreateButton": {
     "description": "Button text to create a shopping list"
+  },
+
+  "stockStatusOut": "Out",
+  "@stockStatusOut": {
+    "description": "Short label for out of stock status"
+  },
+  "stockStatusLow": "Low",
+  "@stockStatusLow": {
+    "description": "Short label for low stock status"
+  },
+  "stockStatusLowStock": "Low Stock",
+  "@stockStatusLowStock": {
+    "description": "Full label for low stock status"
+  },
+  "stockStatusInStock": "In Stock",
+  "@stockStatusInStock": {
+    "description": "Label for in stock status"
+  },
+  "stockStatusNewItem": "New item",
+  "@stockStatusNewItem": {
+    "description": "Label for new pantry items"
+  },
+  "stockStatusNotInPantry": "Not in Pantry",
+  "@stockStatusNotInPantry": {
+    "description": "Label for items not found in pantry"
   }
 }

@@ -620,5 +620,12 @@
   "shoppingListUnnamed": "名前なしリスト",
   "shoppingListNameLabel": "リスト名",
   "shoppingListNamePlaceholder": "リスト名を入力",
-  "shoppingListCreateButton": "リストを作成"
+  "shoppingListCreateButton": "リストを作成",
+
+  "stockStatusOut": "切れ",
+  "stockStatusLow": "少",
+  "stockStatusLowStock": "残りわずか",
+  "stockStatusInStock": "在庫あり",
+  "stockStatusNewItem": "新規",
+  "stockStatusNotInPantry": "パントリーにない"
 }

@@ -1,6 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import '../../../../database/models/pantry_items.dart';
+import '../../../localization/l10n_extension.dart';
 import '../../../theme/colors.dart';
 import '../../../theme/spacing.dart';
 import '../../../widgets/adaptive_pull_down/adaptive_menu_item.dart';
@@ -19,12 +20,6 @@ class StockStatusDropdown extends StatelessWidget {
   });
 
   // Stock status display configuration
-  static const Map<StockStatus, String> _labels = {
-    StockStatus.outOfStock: 'Out',
-    StockStatus.lowStock: 'Low',
-    StockStatus.inStock: 'In Stock',
-  };
-
   static const Map<StockStatus, Color> _colors = {
     StockStatus.outOfStock: Color(0xFFEF5350), // Red
     StockStatus.lowStock: Color(0xFFFFA726),    // Orange
@@ -32,7 +27,17 @@ class StockStatusDropdown extends StatelessWidget {
   };
 
   Color _getColor(StockStatus status) => _colors[status]!;
-  String _getLabel(StockStatus status) => _labels[status]!;
+
+  String _getLabel(BuildContext context, StockStatus status) {
+    switch (status) {
+      case StockStatus.outOfStock:
+        return context.l10n.stockStatusOut;
+      case StockStatus.lowStock:
+        return context.l10n.stockStatusLow;
+      case StockStatus.inStock:
+        return context.l10n.stockStatusInStock;
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -41,7 +46,7 @@ class StockStatusDropdown extends StatelessWidget {
     return AdaptivePullDownButton(
       items: StockStatus.values.map((status) {
         return AdaptiveMenuItem(
-          title: _getLabel(status),
+          title: _getLabel(context, status),
           icon: Icon(
             CupertinoIcons.circle_fill,
             color: _getColor(status),
@@ -78,7 +83,7 @@ class StockStatusDropdown extends StatelessWidget {
 
             // Status text
             Text(
-              _getLabel(value),
+              _getLabel(context, value),
               style: TextStyle(
                 fontSize: 13,
                 fontWeight: FontWeight.w500,

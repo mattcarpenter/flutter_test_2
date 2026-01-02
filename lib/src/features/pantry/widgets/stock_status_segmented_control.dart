@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../database/models/pantry_items.dart';
+import '../../../localization/l10n_extension.dart';
 import '../../../theme/colors.dart';
 
 /// A custom segmented control for selecting stock status with animated sliding background.
@@ -36,49 +37,73 @@ class _StockStatusSegmentedControlState extends State<StockStatusSegmentedContro
   static const double segmentSpacing = 2.0;
   static const double horizontalPadding = 12.0;
 
-  // Labels for each status
-  static const Map<StockStatus, String> _labels = {
-    StockStatus.outOfStock: 'Out',
-    StockStatus.lowStock: 'Low',
-    StockStatus.inStock: 'In-Stock',
-  };
+  // Cached localized labels
+  Map<StockStatus, String> _labels = {};
 
   late Map<StockStatus, double> _segmentWidths;
   late Map<StockStatus, double> _segmentPositions;
 
+  bool _initialized = false;
+
+  // Get localized label for a status
+  String _getLabel(BuildContext context, StockStatus status) {
+    switch (status) {
+      case StockStatus.outOfStock:
+        return context.l10n.stockStatusOut;
+      case StockStatus.lowStock:
+        return context.l10n.stockStatusLow;
+      case StockStatus.inStock:
+        return context.l10n.stockStatusInStock;
+    }
+  }
+
   @override
   void initState() {
     super.initState();
-    _calculateSegmentDimensions();
-
     _animationController = AnimationController(
       duration: const Duration(milliseconds: 250),
       vsync: this,
     );
+  }
 
-    _slideAnimation = Tween<double>(
-      begin: _segmentPositions[widget.value]!,
-      end: _segmentPositions[widget.value]!,
-    ).animate(CurvedAnimation(
-      parent: _animationController,
-      curve: Curves.easeInOut,
-    ));
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
 
-    _widthAnimation = Tween<double>(
-      begin: _segmentWidths[widget.value]!,
-      end: _segmentWidths[widget.value]!,
-    ).animate(CurvedAnimation(
-      parent: _animationController,
-      curve: Curves.easeInOut,
-    ));
+    // Initialize labels and dimensions when context is available
+    if (!_initialized) {
+      _labels = {
+        for (final status in StockStatus.values)
+          status: _getLabel(context, status),
+      };
+      _calculateSegmentDimensions();
 
-    _colorAnimation = ColorTween(
-      begin: _getBackgroundColor(widget.value),
-      end: _getBackgroundColor(widget.value),
-    ).animate(CurvedAnimation(
-      parent: _animationController,
-      curve: Curves.easeInOut,
-    ));
+      _slideAnimation = Tween<double>(
+        begin: _segmentPositions[widget.value]!,
+        end: _segmentPositions[widget.value]!,
+      ).animate(CurvedAnimation(
+        parent: _animationController,
+        curve: Curves.easeInOut,
+      ));
+
+      _widthAnimation = Tween<double>(
+        begin: _segmentWidths[widget.value]!,
+        end: _segmentWidths[widget.value]!,
+      ).animate(CurvedAnimation(
+        parent: _animationController,
+        curve: Curves.easeInOut,
+      ));
+
+      _colorAnimation = ColorTween(
+        begin: _getBackgroundColor(widget.value),
+        end: _getBackgroundColor(widget.value),
+      ).animate(CurvedAnimation(
+        parent: _animationController,
+        curve: Curves.easeInOut,
+      ));
+
+      _initialized = true;
+    }
   }
 
   void _calculateSegmentDimensions() {
@@ -161,6 +186,11 @@ class _StockStatusSegmentedControlState extends State<StockStatusSegmentedContro
 
   @override
   Widget build(BuildContext context) {
+    // Guard for first build before didChangeDependencies completes
+    if (!_initialized) {
+      return const SizedBox.shrink();
+    }
+
     final isDarkMode = Theme.of(context).brightness == Brightness.dark;
 
     return Container(

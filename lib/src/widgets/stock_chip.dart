@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../database/models/pantry_items.dart';
+import '../localization/l10n_extension.dart';
 import '../theme/colors.dart';
 
 /// A compact stock status chip with subtle styling
@@ -24,19 +25,19 @@ class StockChip extends StatelessWidget {
     this.showNotInPantry = false,
   });
 
-  String get _label {
+  String _getLabel(BuildContext context) {
     if (isNewItem) {
-      return 'New item';
+      return context.l10n.stockStatusNewItem;
     } else if (showNotInPantry) {
-      return 'Not in Pantry';
+      return context.l10n.stockStatusNotInPantry;
     } else if (status != null) {
       switch (status!) {
         case StockStatus.outOfStock:
-          return 'Out';
+          return context.l10n.stockStatusOut;
         case StockStatus.lowStock:
-          return 'Low Stock';
+          return context.l10n.stockStatusLowStock;
         case StockStatus.inStock:
-          return 'In Stock';
+          return context.l10n.stockStatusInStock;
       }
     }
     return '';
@@ -94,7 +95,7 @@ class StockChip extends StatelessWidget {
         borderRadius: BorderRadius.circular(7),
       ),
       child: Text(
-        _label,
+        _getLabel(context),
         style: TextStyle(
           fontSize: 11,
           fontWeight: FontWeight.w500,
