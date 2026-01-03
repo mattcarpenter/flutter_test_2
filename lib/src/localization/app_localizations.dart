@@ -5529,6 +5529,108 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'shared content'**
   String get shareSessionClippingSharedContent;
+
+  /// Bottom tab bar label for menu/more
+  ///
+  /// In en, this message translates to:
+  /// **'More'**
+  String get navTabMore;
+
+  /// Bottom tab bar label for recipes
+  ///
+  /// In en, this message translates to:
+  /// **'Recipes'**
+  String get navTabRecipes;
+
+  /// Bottom tab bar label for shopping
+  ///
+  /// In en, this message translates to:
+  /// **'Shopping'**
+  String get navTabShopping;
+
+  /// Bottom tab bar label for meal plan
+  ///
+  /// In en, this message translates to:
+  /// **'Meal Plan'**
+  String get navTabMealPlan;
+
+  /// Bottom tab bar label for pantry
+  ///
+  /// In en, this message translates to:
+  /// **'Pantry'**
+  String get navTabPantry;
+
+  /// Side menu item for recipes
+  ///
+  /// In en, this message translates to:
+  /// **'Recipes'**
+  String get menuRecipes;
+
+  /// Side menu item for shopping list
+  ///
+  /// In en, this message translates to:
+  /// **'Shopping List'**
+  String get menuShoppingList;
+
+  /// Side menu item for meal plans
+  ///
+  /// In en, this message translates to:
+  /// **'Meal Plans'**
+  String get menuMealPlans;
+
+  /// Side menu item for pantry
+  ///
+  /// In en, this message translates to:
+  /// **'Pantry'**
+  String get menuPantry;
+
+  /// Side menu item for clippings
+  ///
+  /// In en, this message translates to:
+  /// **'Clippings'**
+  String get menuClippings;
+
+  /// Side menu item for discover
+  ///
+  /// In en, this message translates to:
+  /// **'Discover'**
+  String get menuDiscover;
+
+  /// Side menu item for household
+  ///
+  /// In en, this message translates to:
+  /// **'Household'**
+  String get menuHousehold;
+
+  /// Side menu item for account (when logged in)
+  ///
+  /// In en, this message translates to:
+  /// **'Account'**
+  String get menuAccount;
+
+  /// Side menu item for sign up (when not logged in)
+  ///
+  /// In en, this message translates to:
+  /// **'Sign Up'**
+  String get menuSignUp;
+
+  /// Side menu item for settings
+  ///
+  /// In en, this message translates to:
+  /// **'Settings'**
+  String get menuSettings;
+
+  /// Upgrade banner title in side menu
+  ///
+  /// In en, this message translates to:
+  /// **'Upgrade to Plus'**
+  String get menuUpgradeTitle;
+
+  /// Upgrade banner subtitle in side menu
+  ///
+  /// In en, this message translates to:
+  /// **'Import from social media & more'**
+  String get menuUpgradeSubtitle;
 }
 
 class _AppLocalizationsDelegate

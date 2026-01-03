@@ -3116,4 +3116,55 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get shareSessionClippingSharedContent => 'shared content';
+
+  @override
+  String get navTabMore => 'More';
+
+  @override
+  String get navTabRecipes => 'Recipes';
+
+  @override
+  String get navTabShopping => 'Shopping';
+
+  @override
+  String get navTabMealPlan => 'Meal Plan';
+
+  @override
+  String get navTabPantry => 'Pantry';
+
+  @override
+  String get menuRecipes => 'Recipes';
+
+  @override
+  String get menuShoppingList => 'Shopping List';
+
+  @override
+  String get menuMealPlans => 'Meal Plans';
+
+  @override
+  String get menuPantry => 'Pantry';
+
+  @override
+  String get menuClippings => 'Clippings';
+
+  @override
+  String get menuDiscover => 'Discover';
+
+  @override
+  String get menuHousehold => 'Household';
+
+  @override
+  String get menuAccount => 'Account';
+
+  @override
+  String get menuSignUp => 'Sign Up';
+
+  @override
+  String get menuSettings => 'Settings';
+
+  @override
+  String get menuUpgradeTitle => 'Upgrade to Plus';
+
+  @override
+  String get menuUpgradeSubtitle => 'Import from social media & more';
 }

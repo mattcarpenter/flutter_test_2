@@ -4250,5 +4250,76 @@
   "commonClose": "Close",
   "@commonClose": {
     "description": "Close button text"
+  },
+
+  "navTabMore": "More",
+  "@navTabMore": {
+    "description": "Bottom tab bar label for menu/more"
+  },
+  "navTabRecipes": "Recipes",
+  "@navTabRecipes": {
+    "description": "Bottom tab bar label for recipes"
+  },
+  "navTabShopping": "Shopping",
+  "@navTabShopping": {
+    "description": "Bottom tab bar label for shopping"
+  },
+  "navTabMealPlan": "Meal Plan",
+  "@navTabMealPlan": {
+    "description": "Bottom tab bar label for meal plan"
+  },
+  "navTabPantry": "Pantry",
+  "@navTabPantry": {
+    "description": "Bottom tab bar label for pantry"
+  },
+
+  "menuRecipes": "Recipes",
+  "@menuRecipes": {
+    "description": "Side menu item for recipes"
+  },
+  "menuShoppingList": "Shopping List",
+  "@menuShoppingList": {
+    "description": "Side menu item for shopping list"
+  },
+  "menuMealPlans": "Meal Plans",
+  "@menuMealPlans": {
+    "description": "Side menu item for meal plans"
+  },
+  "menuPantry": "Pantry",
+  "@menuPantry": {
+    "description": "Side menu item for pantry"
+  },
+  "menuClippings": "Clippings",
+  "@menuClippings": {
+    "description": "Side menu item for clippings"
+  },
+  "menuDiscover": "Discover",
+  "@menuDiscover": {
+    "description": "Side menu item for discover"
+  },
+  "menuHousehold": "Household",
+  "@menuHousehold": {
+    "description": "Side menu item for household"
+  },
+  "menuAccount": "Account",
+  "@menuAccount": {
+    "description": "Side menu item for account (when logged in)"
+  },
+  "menuSignUp": "Sign Up",
+  "@menuSignUp": {
+    "description": "Side menu item for sign up (when not logged in)"
+  },
+  "menuSettings": "Settings",
+  "@menuSettings": {
+    "description": "Side menu item for settings"
+  },
+
+  "menuUpgradeTitle": "Upgrade to Plus",
+  "@menuUpgradeTitle": {
+    "description": "Upgrade banner title in side menu"
+  },
+  "menuUpgradeSubtitle": "Import from social media & more",
+  "@menuUpgradeSubtitle": {
+    "description": "Upgrade banner subtitle in side menu"
   }
 }

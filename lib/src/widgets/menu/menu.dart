@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hugeicons/hugeicons.dart';
 
+import '../../localization/l10n_extension.dart';
 import '../../providers/auth_provider.dart';
 import '../../providers/subscription_provider.dart';
 import '../../theme/colors.dart';
@@ -46,7 +47,7 @@ class Menu extends ConsumerWidget {
                 const SizedBox(height: 12),
                 MenuItem(
                   index: 1,
-                  title: 'Recipes',
+                  title: context.l10n.menuRecipes,
                   icon: HugeIcon(icon: HugeIcons.strokeRoundedBook01, color: primaryColor, size: 20),
                   isActive: selectedIndex == 1,
                   color: primaryColor,
@@ -57,7 +58,7 @@ class Menu extends ConsumerWidget {
                 ),
                 MenuItem(
                   index: 2,
-                  title: 'Shopping List',
+                  title: context.l10n.menuShoppingList,
                   icon: HugeIcon(icon: HugeIcons.strokeRoundedShoppingCart01, color: primaryColor, size: 20),
                   isActive: selectedIndex == 2,
                   color: primaryColor,
@@ -68,7 +69,7 @@ class Menu extends ConsumerWidget {
                 ),
                 MenuItem(
                   index: 3,
-                  title: 'Meal Plans',
+                  title: context.l10n.menuMealPlans,
                   icon: HugeIcon(icon: HugeIcons.strokeRoundedCalendar01, color: primaryColor, size: 20),
                   isActive: selectedIndex == 3,
                   color: primaryColor,
@@ -79,7 +80,7 @@ class Menu extends ConsumerWidget {
                 ),
                 MenuItem(
                   index: 4,
-                  title: 'Pantry',
+                  title: context.l10n.menuPantry,
                   icon: HugeIcon(icon: HugeIcons.strokeRoundedFridge, color: primaryColor, size: 20),
                   isActive: selectedIndex == 4,
                   color: primaryColor,
@@ -90,7 +91,7 @@ class Menu extends ConsumerWidget {
                 ),
                 MenuItem(
                   index: 5,
-                  title: 'Clippings',
+                  title: context.l10n.menuClippings,
                   icon: HugeIcon(icon: HugeIcons.strokeRoundedFile01, color: primaryColor, size: 20),
                   isActive: selectedIndex == 5,
                   color: primaryColor,
@@ -103,7 +104,7 @@ class Menu extends ConsumerWidget {
                 ),
                 MenuItem(
                   index: 6,
-                  title: 'Discover',
+                  title: context.l10n.menuDiscover,
                   icon: HugeIcon(icon: HugeIcons.strokeRoundedCompass01, color: primaryColor, size: 20),
                   isActive: selectedIndex == 6,
                   color: primaryColor,
@@ -116,7 +117,7 @@ class Menu extends ConsumerWidget {
                 ),
                 MenuItem(
                   index: 7,
-                  title: 'Household',
+                  title: context.l10n.menuHousehold,
                   icon: HugeIcon(icon: HugeIcons.strokeRoundedHome01, color: primaryColor, size: 20),
                   isActive: selectedIndex == 7,
                   color: primaryColor,
@@ -143,6 +144,8 @@ class Menu extends ConsumerWidget {
             isDarkMode: isDarkMode,
             backgroundColor: backgroundColor,
             textColor: activeTextColor,
+            title: context.l10n.menuUpgradeTitle,
+            subtitle: context.l10n.menuUpgradeSubtitle,
             onTap: () async {
               await ref.read(subscriptionProvider.notifier).presentPaywall(context);
             },
@@ -161,7 +164,7 @@ class Menu extends ConsumerWidget {
             if (isEffectivelyAuthenticated)
               MenuItem(
                 index: 8,
-                title: 'Account',
+                title: context.l10n.menuAccount,
                 icon: HugeIcon(icon: HugeIcons.strokeRoundedUserCircle, color: primaryColor, size: 20),
                 isActive: selectedIndex == 8,
                 color: primaryColor,
@@ -175,7 +178,7 @@ class Menu extends ConsumerWidget {
             else
               MenuItem(
                 index: 8,
-                title: 'Sign Up',
+                title: context.l10n.menuSignUp,
                 icon: HugeIcon(icon: HugeIcons.strokeRoundedUserCircle, color: primaryColor, size: 20),
                 isActive: selectedIndex == 8,
                 color: primaryColor,
@@ -188,7 +191,7 @@ class Menu extends ConsumerWidget {
               ),
             MenuItem(
               index: 9,
-              title: 'Settings',
+              title: context.l10n.menuSettings,
               icon: HugeIcon(icon: HugeIcons.strokeRoundedSettings01, color: primaryColor, size: 20),
               isActive: selectedIndex == 9,
               color: primaryColor,
@@ -211,12 +214,16 @@ class _UpgradeBanner extends StatefulWidget {
   final bool isDarkMode;
   final Color backgroundColor;
   final Color textColor;
+  final String title;
+  final String subtitle;
   final VoidCallback onTap;
 
   const _UpgradeBanner({
     required this.isDarkMode,
     required this.backgroundColor,
     required this.textColor,
+    required this.title,
+    required this.subtitle,
     required this.onTap,
   });
 
@@ -263,7 +270,7 @@ class _UpgradeBannerState extends State<_UpgradeBanner> {
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   Text(
-                    'Upgrade to Plus',
+                    widget.title,
                     style: TextStyle(
                       color: widget.textColor,
                       fontWeight: FontWeight.w600,
@@ -272,7 +279,7 @@ class _UpgradeBannerState extends State<_UpgradeBanner> {
                   ),
                   const SizedBox(height: 2),
                   Text(
-                    'Import from social media & more',
+                    widget.subtitle,
                     style: TextStyle(
                       color: widget.textColor,
                       fontWeight: FontWeight.w400,

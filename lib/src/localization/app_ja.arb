@@ -991,5 +991,25 @@
   "shareSessionClippingImportedFrom": "{date}に{platform}からインポート",
   "shareSessionClippingSharedContent": "共有コンテンツ",
 
-  "commonClose": "閉じる"
+  "commonClose": "閉じる",
+
+  "navTabMore": "その他",
+  "navTabRecipes": "レシピ",
+  "navTabShopping": "買い物",
+  "navTabMealPlan": "献立",
+  "navTabPantry": "パントリー",
+
+  "menuRecipes": "レシピ",
+  "menuShoppingList": "買い物リスト",
+  "menuMealPlans": "献立",
+  "menuPantry": "パントリー",
+  "menuClippings": "クリッピング",
+  "menuDiscover": "見つける",
+  "menuHousehold": "世帯",
+  "menuAccount": "アカウント",
+  "menuSignUp": "登録",
+  "menuSettings": "設定",
+
+  "menuUpgradeTitle": "Plusにアップグレード",
+  "menuUpgradeSubtitle": "SNSからのインポートなど"
 }

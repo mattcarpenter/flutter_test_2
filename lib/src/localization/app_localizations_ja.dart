@@ -2996,4 +2996,55 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get shareSessionClippingSharedContent => '共有コンテンツ';
+
+  @override
+  String get navTabMore => 'その他';
+
+  @override
+  String get navTabRecipes => 'レシピ';
+
+  @override
+  String get navTabShopping => '買い物';
+
+  @override
+  String get navTabMealPlan => '献立';
+
+  @override
+  String get navTabPantry => 'パントリー';
+
+  @override
+  String get menuRecipes => 'レシピ';
+
+  @override
+  String get menuShoppingList => '買い物リスト';
+
+  @override
+  String get menuMealPlans => '献立';
+
+  @override
+  String get menuPantry => 'パントリー';
+
+  @override
+  String get menuClippings => 'クリッピング';
+
+  @override
+  String get menuDiscover => '見つける';
+
+  @override
+  String get menuHousehold => '世帯';
+
+  @override
+  String get menuAccount => 'アカウント';
+
+  @override
+  String get menuSignUp => '登録';
+
+  @override
+  String get menuSettings => '設定';
+
+  @override
+  String get menuUpgradeTitle => 'Plusにアップグレード';
+
+  @override
+  String get menuUpgradeSubtitle => 'SNSからのインポートなど';
 }

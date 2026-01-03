@@ -5,6 +5,7 @@ import 'package:cupertino_sidebar/cupertino_sidebar.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hugeicons/hugeicons.dart';
 
+import '../localization/l10n_extension.dart';
 import '../widgets/menu/menu.dart';
 
 bool isTablet(BuildContext context) {
@@ -166,23 +167,23 @@ class MainPageShellState extends State<MainPageShell> with TickerProviderStateMi
         items: [
           BottomNavigationBarItem(
             icon: HugeIcon(icon: HugeIcons.strokeRoundedMenu01, strokeWidth: 1.75),
-            label: 'More',
+            label: context.l10n.navTabMore,
           ),
           BottomNavigationBarItem(
             icon: HugeIcon(icon: HugeIcons.strokeRoundedBook01, strokeWidth: 1.75),
-            label: 'Recipes',
+            label: context.l10n.navTabRecipes,
           ),
           BottomNavigationBarItem(
             icon: HugeIcon(icon: HugeIcons.strokeRoundedShoppingCart01, strokeWidth: 1.75),
-            label: 'Shopping',
+            label: context.l10n.navTabShopping,
           ),
           BottomNavigationBarItem(
             icon: HugeIcon(icon: HugeIcons.strokeRoundedCalendar01, strokeWidth: 1.75),
-            label: 'Meal Plan',
+            label: context.l10n.navTabMealPlan,
           ),
           BottomNavigationBarItem(
             icon: HugeIcon(icon: HugeIcons.strokeRoundedFridge, strokeWidth: 1.75),
-            label: 'Pantry',
+            label: context.l10n.navTabPantry,
           ),
         ],
       );
@@ -197,26 +198,26 @@ class MainPageShellState extends State<MainPageShell> with TickerProviderStateMi
             _switchToTab(context, index);
           }
         },
-        items: const [
+        items: [
           BottomNavigationBarItem(
-            icon: Icon(Icons.menu),
-            label: 'More',
+            icon: const Icon(Icons.menu),
+            label: context.l10n.navTabMore,
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.book),
-            label: 'Recipes',
+            icon: const Icon(Icons.book),
+            label: context.l10n.navTabRecipes,
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.shopping_cart),
-            label: 'Shopping',
+            icon: const Icon(Icons.shopping_cart),
+            label: context.l10n.navTabShopping,
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.calendar_month),
-            label: 'Meal Plan',
+            icon: const Icon(Icons.calendar_month),
+            label: context.l10n.navTabMealPlan,
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.inventory_2_outlined),
-            label: 'Pantry',
+            icon: const Icon(Icons.inventory_2_outlined),
+            label: context.l10n.navTabPantry,
           ),
         ],
       );
