@@ -1,6 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:super_context_menu/super_context_menu.dart';
 import '../../../../database/database.dart';
+import '../../../localization/l10n_extension.dart';
 import '../../../theme/colors.dart';
 import '../../../theme/spacing.dart';
 import '../../../theme/typography.dart';
@@ -24,7 +25,7 @@ class ClippingCard extends StatelessWidget {
     return extractPlainTextFromQuillJson(clipping.content);
   }
 
-  String _getDisplayTitle() {
+  String _getDisplayTitle(String untitledLabel) {
     final title = clipping.title;
     if (title != null && title.isNotEmpty) {
       return title;
@@ -32,18 +33,18 @@ class ClippingCard extends StatelessWidget {
 
     // Extract from content preview
     final preview = _getPreviewText();
-    if (preview.isEmpty) return 'Untitled';
+    if (preview.isEmpty) return untitledLabel;
 
     final firstLine = preview.split('\n').first;
     final words = firstLine.split(' ').take(6).join(' ');
     return words.isEmpty
-        ? 'Untitled'
+        ? untitledLabel
         : (words.length > 40 ? '${words.substring(0, 40)}...' : words);
   }
 
   @override
   Widget build(BuildContext context) {
-    final displayTitle = _getDisplayTitle();
+    final displayTitle = _getDisplayTitle(context.l10n.clippingsUntitled);
     final previewText = _getPreviewText();
 
     return ContextMenuWidget(
@@ -51,7 +52,7 @@ class ClippingCard extends StatelessWidget {
         return Menu(
           children: [
             MenuAction(
-              title: 'Delete',
+              title: context.l10n.commonDelete,
               image: MenuImage.icon(CupertinoIcons.delete),
               attributes: const MenuActionAttributes(destructive: true),
               callback: onDelete,

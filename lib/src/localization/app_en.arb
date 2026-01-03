@@ -3295,5 +3295,266 @@
   "pantrySave": "Save",
   "@pantrySave": {
     "description": "Save button text"
+  },
+
+  "clippingsTitle": "Clippings",
+  "@clippingsTitle": {
+    "description": "Clippings page title"
+  },
+  "clippingsEmpty": "No clippings yet",
+  "@clippingsEmpty": {
+    "description": "Empty state message when no clippings exist"
+  },
+  "clippingsEmptyHint": "Tap the + button to add a clipping",
+  "@clippingsEmptyHint": {
+    "description": "Hint text in empty state"
+  },
+  "clippingsNoSearchResults": "No clippings match your search",
+  "@clippingsNoSearchResults": {
+    "description": "Empty state when search has no results"
+  },
+  "clippingsClearSearch": "Clear Search",
+  "@clippingsClearSearch": {
+    "description": "Clear search button text"
+  },
+  "clippingsNewClipping": "New Clipping",
+  "@clippingsNewClipping": {
+    "description": "Menu item to create new clipping"
+  },
+  "clippingsUntitled": "Untitled",
+  "@clippingsUntitled": {
+    "description": "Fallback title for untitled clippings"
+  },
+  "clippingsToday": "Today",
+  "@clippingsToday": {
+    "description": "Date group header for today's clippings"
+  },
+  "clippingsPrevious7Days": "Previous 7 Days",
+  "@clippingsPrevious7Days": {
+    "description": "Date group header for last 7 days"
+  },
+  "clippingsDeleteTitle": "Delete Clipping",
+  "@clippingsDeleteTitle": {
+    "description": "Delete clipping dialog title and menu item"
+  },
+  "clippingsDeleteConfirm": "Are you sure you want to delete this clipping?",
+  "@clippingsDeleteConfirm": {
+    "description": "Delete clipping confirmation message"
+  },
+  "clippingsTitlePlaceholder": "Title",
+  "@clippingsTitlePlaceholder": {
+    "description": "Placeholder for clipping title field"
+  },
+  "clippingsContentPlaceholder": "Start typing...",
+  "@clippingsContentPlaceholder": {
+    "description": "Placeholder for clipping content field"
+  },
+  "clippingsConvertToRecipe": "Convert to Recipe",
+  "@clippingsConvertToRecipe": {
+    "description": "Button/menu item to convert clipping to recipe"
+  },
+  "clippingsToShoppingList": "To Shopping List",
+  "@clippingsToShoppingList": {
+    "description": "Button/menu item to convert clipping to shopping list"
+  },
+  "clippingsAddLinkTooltip": "Add link",
+  "@clippingsAddLinkTooltip": {
+    "description": "Tooltip for add link button in toolbar"
+  },
+  "clippingsLinkAddTitle": "Add Link",
+  "@clippingsLinkAddTitle": {
+    "description": "Add link modal title"
+  },
+  "clippingsLinkEditTitle": "Edit Link",
+  "@clippingsLinkEditTitle": {
+    "description": "Edit link modal title"
+  },
+  "clippingsLinkTextLabel": "Text",
+  "@clippingsLinkTextLabel": {
+    "description": "Link text field label"
+  },
+  "clippingsLinkTextPlaceholder": "Link text",
+  "@clippingsLinkTextPlaceholder": {
+    "description": "Link text field placeholder"
+  },
+  "clippingsLinkUrlLabel": "URL",
+  "@clippingsLinkUrlLabel": {
+    "description": "Link URL field label"
+  },
+  "clippingsLinkUrlPlaceholder": "https://example.com",
+  "@clippingsLinkUrlPlaceholder": {
+    "description": "Link URL field placeholder"
+  },
+  "clippingsAboutTitle": "About Clippings",
+  "@clippingsAboutTitle": {
+    "description": "Help modal title"
+  },
+  "clippingsAboutScratchpadTitle": "Your recipe scratchpad",
+  "@clippingsAboutScratchpadTitle": {
+    "description": "Help section title about clippings"
+  },
+  "clippingsAboutScratchpadBody": "Capture recipe ideas from anywhere — websites, messages, photos, or just your own thoughts. No need to format anything perfectly.",
+  "@clippingsAboutScratchpadBody": {
+    "description": "Help section body about clippings"
+  },
+  "clippingsAboutConvertTitle": "Convert to Recipe",
+  "@clippingsAboutConvertTitle": {
+    "description": "Help section title about converting to recipe"
+  },
+  "clippingsAboutConvertBody": "Turn your notes into a complete recipe. We'll extract ingredients, steps, cooking times, and more.",
+  "@clippingsAboutConvertBody": {
+    "description": "Help section body about converting to recipe"
+  },
+  "clippingsAboutConvertTip": "Have a partial recipe? Add \"Complete this recipe\" to your notes and we'll fill in the missing details.",
+  "@clippingsAboutConvertTip": {
+    "description": "Tip about completing partial recipes"
+  },
+  "clippingsAboutShoppingTitle": "To Shopping List",
+  "@clippingsAboutShoppingTitle": {
+    "description": "Help section title about shopping list"
+  },
+  "clippingsAboutShoppingBody": "Pull out the items you need to buy. We'll organize them by aisle automatically.",
+  "@clippingsAboutShoppingBody": {
+    "description": "Help section body about shopping list"
+  },
+  "clippingsExtractionNoInternet": "No internet connection. Please check your network and try again.",
+  "@clippingsExtractionNoInternet": {
+    "description": "Error message when no internet connection"
+  },
+  "clippingsExtractionNoRecipe": "Unable to extract a recipe from this text. Please make sure the text contains recipe information.",
+  "@clippingsExtractionNoRecipe": {
+    "description": "Error when recipe extraction fails"
+  },
+  "clippingsExtractionNoRecipeDetected": "Unable to detect a recipe in this text.",
+  "@clippingsExtractionNoRecipeDetected": {
+    "description": "Error when no recipe is detected in preview"
+  },
+  "clippingsExtractionNoItems": "No shopping list items found in this text.",
+  "@clippingsExtractionNoItems": {
+    "description": "Error when no shopping items found"
+  },
+  "clippingsExtractionFailed": "Failed to process. Please try again.",
+  "@clippingsExtractionFailed": {
+    "description": "Generic extraction failure message"
+  },
+  "clippingsExtractionExtractingRecipe": "Extracting recipe...",
+  "@clippingsExtractionExtractingRecipe": {
+    "description": "Loading message during recipe extraction"
+  },
+  "clippingsExtractionFindingDetails": "Finding the details...",
+  "@clippingsExtractionFindingDetails": {
+    "description": "Loading message during extraction"
+  },
+  "clippingsExtractionWrappingUp": "Wrapping up...",
+  "@clippingsExtractionWrappingUp": {
+    "description": "Loading message near end of extraction"
+  },
+  "clippingsExtractionExtractingItems": "Extracting items...",
+  "@clippingsExtractionExtractingItems": {
+    "description": "Loading message during shopping list extraction"
+  },
+  "clippingsExtractionScanningRecipes": "Scanning for recipes...",
+  "@clippingsExtractionScanningRecipes": {
+    "description": "Loading message during recipe preview"
+  },
+  "clippingsExtractionScanningItems": "Scanning for items...",
+  "@clippingsExtractionScanningItems": {
+    "description": "Loading message during shopping list preview"
+  },
+  "clippingsShoppingAdding": "Adding...",
+  "@clippingsShoppingAdding": {
+    "description": "Button loading text when adding items"
+  },
+  "clippingsShoppingAddTitle": "Add to Shopping List",
+  "@clippingsShoppingAddTitle": {
+    "description": "Add to shopping list modal title"
+  },
+  "clippingsShoppingManageLists": "Manage Lists",
+  "@clippingsShoppingManageLists": {
+    "description": "Manage lists button and page title"
+  },
+  "clippingsShoppingCreateNew": "Create New List",
+  "@clippingsShoppingCreateNew": {
+    "description": "Create new list page title"
+  },
+  "clippingsShoppingNoItems": "No items to add",
+  "@clippingsShoppingNoItems": {
+    "description": "Empty state title when all items are in lists"
+  },
+  "clippingsShoppingAllInList": "All items are already on a shopping list.",
+  "@clippingsShoppingAllInList": {
+    "description": "Empty state description when all items are in lists"
+  },
+  "clippingsShoppingAlreadyInList": "Already on shopping list",
+  "@clippingsShoppingAlreadyInList": {
+    "description": "Status text for items already in a shopping list"
+  },
+  "clippingsPreviewPlusBadge": "PLUS",
+  "@clippingsPreviewPlusBadge": {
+    "description": "Plus subscription badge text"
+  },
+  "clippingsPreviewRecipeName": "Recipe Name",
+  "@clippingsPreviewRecipeName": {
+    "description": "Recipe preview section label"
+  },
+  "clippingsPreviewDescription": "Description",
+  "@clippingsPreviewDescription": {
+    "description": "Recipe preview description section label"
+  },
+  "clippingsPreviewIngredients": "Ingredients",
+  "@clippingsPreviewIngredients": {
+    "description": "Recipe preview ingredients section label"
+  },
+  "clippingsPreviewItemsFound": "Items Found",
+  "@clippingsPreviewItemsFound": {
+    "description": "Shopping list preview section label"
+  },
+  "clippingsPreviewConvertToShoppingList": "Convert to Shopping List",
+  "@clippingsPreviewConvertToShoppingList": {
+    "description": "Shopping list preview title"
+  },
+  "clippingsPreviewValuePropHeadline": "We'll do the work for you",
+  "@clippingsPreviewValuePropHeadline": {
+    "description": "Value proposition headline"
+  },
+  "clippingsPreviewValuePropRecipe1": "Turn notes into real recipes",
+  "@clippingsPreviewValuePropRecipe1": {
+    "description": "Recipe value proposition item 1"
+  },
+  "clippingsPreviewValuePropRecipe2": "Auto-extract ingredients and steps",
+  "@clippingsPreviewValuePropRecipe2": {
+    "description": "Recipe value proposition item 2"
+  },
+  "clippingsPreviewValuePropRecipe3": "Complete partial recipes",
+  "@clippingsPreviewValuePropRecipe3": {
+    "description": "Recipe value proposition item 3"
+  },
+  "clippingsPreviewValuePropRecipe4": "Save it to your Library",
+  "@clippingsPreviewValuePropRecipe4": {
+    "description": "Recipe value proposition item 4"
+  },
+  "clippingsPreviewValuePropShopping1": "Turn notes into shopping lists",
+  "@clippingsPreviewValuePropShopping1": {
+    "description": "Shopping list value proposition item 1"
+  },
+  "clippingsPreviewValuePropShopping2": "Auto-categorize items by aisle",
+  "@clippingsPreviewValuePropShopping2": {
+    "description": "Shopping list value proposition item 2"
+  },
+  "clippingsPreviewValuePropShopping3": "Smart matching with your pantry",
+  "@clippingsPreviewValuePropShopping3": {
+    "description": "Shopping list value proposition item 3"
+  },
+  "clippingsPreviewValuePropShopping4": "Add everything in one tap",
+  "@clippingsPreviewValuePropShopping4": {
+    "description": "Shopping list value proposition item 4"
+  },
+  "clippingsPreviewValuePropMore": "… and much more!",
+  "@clippingsPreviewValuePropMore": {
+    "description": "Value proposition trailing item"
+  },
+  "clippingsPreviewUnlockPlus": "Unlock with Plus",
+  "@clippingsPreviewUnlockPlus": {
+    "description": "Subscribe button text"
   }
 }

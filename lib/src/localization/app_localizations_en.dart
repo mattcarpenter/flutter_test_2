@@ -2367,4 +2367,215 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get pantrySave => 'Save';
+
+  @override
+  String get clippingsTitle => 'Clippings';
+
+  @override
+  String get clippingsEmpty => 'No clippings yet';
+
+  @override
+  String get clippingsEmptyHint => 'Tap the + button to add a clipping';
+
+  @override
+  String get clippingsNoSearchResults => 'No clippings match your search';
+
+  @override
+  String get clippingsClearSearch => 'Clear Search';
+
+  @override
+  String get clippingsNewClipping => 'New Clipping';
+
+  @override
+  String get clippingsUntitled => 'Untitled';
+
+  @override
+  String get clippingsToday => 'Today';
+
+  @override
+  String get clippingsPrevious7Days => 'Previous 7 Days';
+
+  @override
+  String get clippingsDeleteTitle => 'Delete Clipping';
+
+  @override
+  String get clippingsDeleteConfirm =>
+      'Are you sure you want to delete this clipping?';
+
+  @override
+  String get clippingsTitlePlaceholder => 'Title';
+
+  @override
+  String get clippingsContentPlaceholder => 'Start typing...';
+
+  @override
+  String get clippingsConvertToRecipe => 'Convert to Recipe';
+
+  @override
+  String get clippingsToShoppingList => 'To Shopping List';
+
+  @override
+  String get clippingsAddLinkTooltip => 'Add link';
+
+  @override
+  String get clippingsLinkAddTitle => 'Add Link';
+
+  @override
+  String get clippingsLinkEditTitle => 'Edit Link';
+
+  @override
+  String get clippingsLinkTextLabel => 'Text';
+
+  @override
+  String get clippingsLinkTextPlaceholder => 'Link text';
+
+  @override
+  String get clippingsLinkUrlLabel => 'URL';
+
+  @override
+  String get clippingsLinkUrlPlaceholder => 'https://example.com';
+
+  @override
+  String get clippingsAboutTitle => 'About Clippings';
+
+  @override
+  String get clippingsAboutScratchpadTitle => 'Your recipe scratchpad';
+
+  @override
+  String get clippingsAboutScratchpadBody =>
+      'Capture recipe ideas from anywhere — websites, messages, photos, or just your own thoughts. No need to format anything perfectly.';
+
+  @override
+  String get clippingsAboutConvertTitle => 'Convert to Recipe';
+
+  @override
+  String get clippingsAboutConvertBody =>
+      'Turn your notes into a complete recipe. We\'ll extract ingredients, steps, cooking times, and more.';
+
+  @override
+  String get clippingsAboutConvertTip =>
+      'Have a partial recipe? Add \"Complete this recipe\" to your notes and we\'ll fill in the missing details.';
+
+  @override
+  String get clippingsAboutShoppingTitle => 'To Shopping List';
+
+  @override
+  String get clippingsAboutShoppingBody =>
+      'Pull out the items you need to buy. We\'ll organize them by aisle automatically.';
+
+  @override
+  String get clippingsExtractionNoInternet =>
+      'No internet connection. Please check your network and try again.';
+
+  @override
+  String get clippingsExtractionNoRecipe =>
+      'Unable to extract a recipe from this text. Please make sure the text contains recipe information.';
+
+  @override
+  String get clippingsExtractionNoRecipeDetected =>
+      'Unable to detect a recipe in this text.';
+
+  @override
+  String get clippingsExtractionNoItems =>
+      'No shopping list items found in this text.';
+
+  @override
+  String get clippingsExtractionFailed =>
+      'Failed to process. Please try again.';
+
+  @override
+  String get clippingsExtractionExtractingRecipe => 'Extracting recipe...';
+
+  @override
+  String get clippingsExtractionFindingDetails => 'Finding the details...';
+
+  @override
+  String get clippingsExtractionWrappingUp => 'Wrapping up...';
+
+  @override
+  String get clippingsExtractionExtractingItems => 'Extracting items...';
+
+  @override
+  String get clippingsExtractionScanningRecipes => 'Scanning for recipes...';
+
+  @override
+  String get clippingsExtractionScanningItems => 'Scanning for items...';
+
+  @override
+  String get clippingsShoppingAdding => 'Adding...';
+
+  @override
+  String get clippingsShoppingAddTitle => 'Add to Shopping List';
+
+  @override
+  String get clippingsShoppingManageLists => 'Manage Lists';
+
+  @override
+  String get clippingsShoppingCreateNew => 'Create New List';
+
+  @override
+  String get clippingsShoppingNoItems => 'No items to add';
+
+  @override
+  String get clippingsShoppingAllInList =>
+      'All items are already on a shopping list.';
+
+  @override
+  String get clippingsShoppingAlreadyInList => 'Already on shopping list';
+
+  @override
+  String get clippingsPreviewPlusBadge => 'PLUS';
+
+  @override
+  String get clippingsPreviewRecipeName => 'Recipe Name';
+
+  @override
+  String get clippingsPreviewDescription => 'Description';
+
+  @override
+  String get clippingsPreviewIngredients => 'Ingredients';
+
+  @override
+  String get clippingsPreviewItemsFound => 'Items Found';
+
+  @override
+  String get clippingsPreviewConvertToShoppingList =>
+      'Convert to Shopping List';
+
+  @override
+  String get clippingsPreviewValuePropHeadline => 'We\'ll do the work for you';
+
+  @override
+  String get clippingsPreviewValuePropRecipe1 => 'Turn notes into real recipes';
+
+  @override
+  String get clippingsPreviewValuePropRecipe2 =>
+      'Auto-extract ingredients and steps';
+
+  @override
+  String get clippingsPreviewValuePropRecipe3 => 'Complete partial recipes';
+
+  @override
+  String get clippingsPreviewValuePropRecipe4 => 'Save it to your Library';
+
+  @override
+  String get clippingsPreviewValuePropShopping1 =>
+      'Turn notes into shopping lists';
+
+  @override
+  String get clippingsPreviewValuePropShopping2 =>
+      'Auto-categorize items by aisle';
+
+  @override
+  String get clippingsPreviewValuePropShopping3 =>
+      'Smart matching with your pantry';
+
+  @override
+  String get clippingsPreviewValuePropShopping4 => 'Add everything in one tap';
+
+  @override
+  String get clippingsPreviewValuePropMore => '… and much more!';
+
+  @override
+  String get clippingsPreviewUnlockPlus => 'Unlock with Plus';
 }

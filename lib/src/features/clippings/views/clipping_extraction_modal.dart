@@ -12,6 +12,7 @@ import 'package:wolt_modal_sheet/wolt_modal_sheet.dart';
 import '../../../../database/database.dart';
 import '../../../../database/models/ingredients.dart';
 import '../../../../database/models/steps.dart' as db;
+import '../../../localization/l10n_extension.dart';
 import '../../../providers/subscription_provider.dart';
 import '../../../services/clipping_extraction_service.dart';
 import '../../../services/logging/app_logger.dart';
@@ -44,7 +45,7 @@ Future<void> showRecipeExtractionModal(
     if (context.mounted) {
       _showErrorDialog(
         context,
-        'No internet connection. Please check your network and try again.',
+        context.l10n.clippingsExtractionNoInternet,
       );
     }
     return;
@@ -110,7 +111,7 @@ Future<void> _showFullRecipeExtraction(
               if (context.mounted) {
                 _showErrorDialog(
                   context,
-                  'Unable to extract a recipe from this text. Please make sure the text contains recipe information.',
+                  context.l10n.clippingsExtractionNoRecipe,
                 );
               }
               return;
@@ -176,7 +177,7 @@ Future<void> _showRecipePreviewExtraction(
               }
             } else if (context.mounted) {
               _showErrorDialog(
-                  context, 'Unable to detect a recipe in this text.');
+                  context, context.l10n.clippingsExtractionNoRecipeDetected);
             }
           },
           onError: (message) {
@@ -251,7 +252,7 @@ Future<void> showShoppingListExtractionModal(
     if (context.mounted) {
       _showErrorDialog(
         context,
-        'No internet connection. Please check your network and try again.',
+        context.l10n.clippingsExtractionNoInternet,
       );
     }
     return;
@@ -320,7 +321,7 @@ Future<void> _showFullShoppingListExtraction(
               if (context.mounted) {
                 _showErrorDialog(
                   context,
-                  'No shopping list items found in this text.',
+                  context.l10n.clippingsExtractionNoItems,
                 );
               }
               return;
@@ -381,7 +382,7 @@ Future<void> _showShoppingListPreviewExtraction(
               }
             } else if (context.mounted) {
               _showErrorDialog(
-                  context, 'No shopping list items found in this text.');
+                  context, context.l10n.clippingsExtractionNoItems);
             }
           },
           onError: (message) {
@@ -561,7 +562,7 @@ class _RecipeExtractionContentState
       widget.onError(e.message);
     } catch (e) {
       AppLogger.error('Recipe extraction failed', e);
-      widget.onError('Failed to process. Please try again.');
+      widget.onError(context.l10n.clippingsExtractionFailed);
     }
   }
 
@@ -574,11 +575,11 @@ class _RecipeExtractionContentState
         children: [
           const CupertinoActivityIndicator(radius: 16),
           SizedBox(height: AppSpacing.lg),
-          const _AnimatedLoadingText(
+          _AnimatedLoadingText(
             messages: [
-              'Extracting recipe...',
-              'Finding the details...',
-              'Wrapping up...',
+              context.l10n.clippingsExtractionExtractingRecipe,
+              context.l10n.clippingsExtractionFindingDetails,
+              context.l10n.clippingsExtractionWrappingUp,
             ],
           ),
         ],
@@ -626,7 +627,7 @@ class _ShoppingListExtractionContentState
       widget.onError(e.message);
     } catch (e) {
       AppLogger.error('Shopping list extraction failed', e);
-      widget.onError('Failed to process. Please try again.');
+      widget.onError(context.l10n.clippingsExtractionFailed);
     }
   }
 
@@ -639,11 +640,11 @@ class _ShoppingListExtractionContentState
         children: [
           const CupertinoActivityIndicator(radius: 16),
           SizedBox(height: AppSpacing.lg),
-          const _AnimatedLoadingText(
+          _AnimatedLoadingText(
             messages: [
-              'Extracting items...',
-              'Finding the details...',
-              'Wrapping up...',
+              context.l10n.clippingsExtractionExtractingItems,
+              context.l10n.clippingsExtractionFindingDetails,
+              context.l10n.clippingsExtractionWrappingUp,
             ],
           ),
         ],
@@ -690,7 +691,7 @@ class _RecipePreviewContentState extends ConsumerState<_RecipePreviewContent> {
       widget.onError(e.message);
     } catch (e) {
       AppLogger.error('Recipe preview failed', e);
-      widget.onError('Failed to process. Please try again.');
+      widget.onError(context.l10n.clippingsExtractionFailed);
     }
   }
 
@@ -703,10 +704,10 @@ class _RecipePreviewContentState extends ConsumerState<_RecipePreviewContent> {
         children: [
           const CupertinoActivityIndicator(radius: 16),
           SizedBox(height: AppSpacing.lg),
-          const _AnimatedLoadingText(
+          _AnimatedLoadingText(
             messages: [
-              'Scanning for recipes...',
-              'Finding details...',
+              context.l10n.clippingsExtractionScanningRecipes,
+              context.l10n.clippingsExtractionFindingDetails,
             ],
           ),
         ],
@@ -754,7 +755,7 @@ class _ShoppingListPreviewContentState
       widget.onError(e.message);
     } catch (e) {
       AppLogger.error('Shopping list preview failed', e);
-      widget.onError('Failed to process. Please try again.');
+      widget.onError(context.l10n.clippingsExtractionFailed);
     }
   }
 
@@ -767,10 +768,10 @@ class _ShoppingListPreviewContentState
         children: [
           const CupertinoActivityIndicator(radius: 16),
           SizedBox(height: AppSpacing.lg),
-          const _AnimatedLoadingText(
+          _AnimatedLoadingText(
             messages: [
-              'Scanning for items...',
-              'Finding details...',
+              context.l10n.clippingsExtractionScanningItems,
+              context.l10n.clippingsExtractionFindingDetails,
             ],
           ),
         ],
@@ -783,14 +784,14 @@ class _ShoppingListPreviewContentState
 void _showErrorDialog(BuildContext context, String message) {
   showCupertinoDialog(
     context: context,
-    builder: (ctx) => CupertinoAlertDialog(
-      title: const Text('Error'),
+    builder: (dialogContext) => CupertinoAlertDialog(
+      title: Text(context.l10n.commonError),
       content: Text(message),
       actions: [
         CupertinoDialogAction(
           isDefaultAction: true,
-          child: const Text('OK'),
-          onPressed: () => Navigator.of(ctx).pop(),
+          child: Text(context.l10n.commonOk),
+          onPressed: () => Navigator.of(dialogContext).pop(),
         ),
       ],
     ),

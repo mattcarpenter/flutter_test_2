@@ -1,6 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:hugeicons/hugeicons.dart';
 
+import '../../../localization/l10n_extension.dart';
 import '../../../theme/colors.dart';
 import '../../../theme/spacing.dart';
 import '../../../theme/typography.dart';
@@ -20,7 +21,7 @@ class _PlusPill extends StatelessWidget {
         borderRadius: BorderRadius.circular(10),
       ),
       child: Text(
-        'PLUS',
+        context.l10n.clippingsPreviewPlusBadge,
         style: TextStyle(
           fontSize: 10,
           fontWeight: FontWeight.w700,
@@ -138,7 +139,7 @@ class RecipePreviewResultContent extends StatelessWidget {
                 SizedBox(width: AppSpacing.xs),
                 Expanded(
                   child: Text(
-                    'Convert to Recipe',
+                    context.l10n.clippingsConvertToRecipe,
                     style: AppTypography.h4.copyWith(
                       color: colors.textPrimary,
                     ),
@@ -188,7 +189,7 @@ class RecipePreviewResultContent extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     // Recipe Name section
-                    const _SectionLabel('Recipe Name'),
+                    _SectionLabel(context.l10n.clippingsPreviewRecipeName),
                     Text(
                       preview.title,
                       style: AppTypography.h5.copyWith(
@@ -199,7 +200,7 @@ class RecipePreviewResultContent extends StatelessWidget {
                     // Description section (if available)
                     if (preview.description.isNotEmpty) ...[
                       SizedBox(height: AppSpacing.md),
-                      const _SectionLabel('Description'),
+                      _SectionLabel(context.l10n.clippingsPreviewDescription),
                       Text(
                         preview.description,
                         style: AppTypography.body.copyWith(
@@ -213,7 +214,7 @@ class RecipePreviewResultContent extends StatelessWidget {
                     SizedBox(height: AppSpacing.md),
 
                     // Ingredients section
-                    const _SectionLabel('Ingredients'),
+                    _SectionLabel(context.l10n.clippingsPreviewIngredients),
                     ...preview.previewIngredients.map((ingredient) {
                       return Padding(
                         padding: EdgeInsets.only(bottom: AppSpacing.xs),
@@ -274,10 +275,13 @@ class RecipePreviewResultContent extends StatelessWidget {
                             color: colors.textPrimary,
                           ),
                           SizedBox(width: AppSpacing.sm),
-                          Text(
-                            "We'll do the work for you",
-                            style: AppTypography.h4.copyWith(
-                              color: colors.textPrimary,
+                          Flexible(
+                            child: Text(
+                              context.l10n.clippingsPreviewValuePropHeadline,
+                              style: AppTypography.h4.copyWith(
+                                color: colors.textPrimary,
+                              ),
+                              textAlign: TextAlign.center,
                             ),
                           ),
                         ],
@@ -293,26 +297,26 @@ class RecipePreviewResultContent extends StatelessWidget {
                           children: [
                             _ValuePropItem(
                               icon: HugeIcons.strokeRoundedCheckmarkCircle01,
-                              text: 'Turn notes into real recipes',
+                              text: context.l10n.clippingsPreviewValuePropRecipe1,
                               textColor: colors.textPrimary,
                             ),
                             _ValuePropItem(
                               icon: HugeIcons.strokeRoundedCheckmarkCircle01,
-                              text: 'Auto-extract ingredients and steps',
+                              text: context.l10n.clippingsPreviewValuePropRecipe2,
                               textColor: colors.textPrimary,
                             ),
                             _ValuePropItem(
                               icon: HugeIcons.strokeRoundedCheckmarkCircle01,
-                              text: 'Complete partial recipes',
+                              text: context.l10n.clippingsPreviewValuePropRecipe3,
                               textColor: colors.textPrimary,
                             ),
                             _ValuePropItem(
                               icon: HugeIcons.strokeRoundedCheckmarkCircle01,
-                              text: 'Save it to your Library',
+                              text: context.l10n.clippingsPreviewValuePropRecipe4,
                               textColor: colors.textPrimary,
                             ),
                             _ValuePropItem(
-                              text: '… and much more!',
+                              text: context.l10n.clippingsPreviewValuePropMore,
                               textColor: colors.textPrimary,
                             ),
                           ],
@@ -328,7 +332,7 @@ class RecipePreviewResultContent extends StatelessWidget {
             Transform.translate(
               offset: const Offset(0, -64),
               child: AppButton(
-                text: 'Unlock with Plus',
+                text: context.l10n.clippingsPreviewUnlockPlus,
                 onPressed: onSubscribe,
                 theme: AppButtonTheme.secondary,
                 style: AppButtonStyle.fill,

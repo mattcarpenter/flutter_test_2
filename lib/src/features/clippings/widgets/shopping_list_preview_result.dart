@@ -1,6 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:hugeicons/hugeicons.dart';
 
+import '../../../localization/l10n_extension.dart';
 import '../../../theme/colors.dart';
 import '../../../theme/spacing.dart';
 import '../../../theme/typography.dart';
@@ -20,7 +21,7 @@ class _PlusPill extends StatelessWidget {
         borderRadius: BorderRadius.circular(10),
       ),
       child: Text(
-        'PLUS',
+        context.l10n.clippingsPreviewPlusBadge,
         style: TextStyle(
           fontSize: 10,
           fontWeight: FontWeight.w700,
@@ -138,7 +139,7 @@ class ShoppingListPreviewResultContent extends StatelessWidget {
                 SizedBox(width: AppSpacing.xs),
                 Expanded(
                   child: Text(
-                    'Convert to Shopping List',
+                    context.l10n.clippingsPreviewConvertToShoppingList,
                     style: AppTypography.h4.copyWith(
                       color: colors.textPrimary,
                     ),
@@ -188,7 +189,7 @@ class ShoppingListPreviewResultContent extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     // Items Found section
-                    const _SectionLabel('Items Found'),
+                    _SectionLabel(context.l10n.clippingsPreviewItemsFound),
 
                     // Preview items
                     ...preview.previewItems.map((item) {
@@ -251,10 +252,13 @@ class ShoppingListPreviewResultContent extends StatelessWidget {
                             color: colors.textPrimary,
                           ),
                           SizedBox(width: AppSpacing.sm),
-                          Text(
-                            "We'll do the work for you",
-                            style: AppTypography.h4.copyWith(
-                              color: colors.textPrimary,
+                          Flexible(
+                            child: Text(
+                              context.l10n.clippingsPreviewValuePropHeadline,
+                              style: AppTypography.h4.copyWith(
+                                color: colors.textPrimary,
+                              ),
+                              textAlign: TextAlign.center,
                             ),
                           ),
                         ],
@@ -270,26 +274,26 @@ class ShoppingListPreviewResultContent extends StatelessWidget {
                           children: [
                             _ValuePropItem(
                               icon: HugeIcons.strokeRoundedCheckmarkCircle01,
-                              text: 'Turn notes into shopping lists',
+                              text: context.l10n.clippingsPreviewValuePropShopping1,
                               textColor: colors.textPrimary,
                             ),
                             _ValuePropItem(
                               icon: HugeIcons.strokeRoundedCheckmarkCircle01,
-                              text: 'Auto-categorize items by aisle',
+                              text: context.l10n.clippingsPreviewValuePropShopping2,
                               textColor: colors.textPrimary,
                             ),
                             _ValuePropItem(
                               icon: HugeIcons.strokeRoundedCheckmarkCircle01,
-                              text: 'Smart matching with your pantry',
+                              text: context.l10n.clippingsPreviewValuePropShopping3,
                               textColor: colors.textPrimary,
                             ),
                             _ValuePropItem(
                               icon: HugeIcons.strokeRoundedCheckmarkCircle01,
-                              text: 'Add everything in one tap',
+                              text: context.l10n.clippingsPreviewValuePropShopping4,
                               textColor: colors.textPrimary,
                             ),
                             _ValuePropItem(
-                              text: '… and much more!',
+                              text: context.l10n.clippingsPreviewValuePropMore,
                               textColor: colors.textPrimary,
                             ),
                           ],
@@ -305,7 +309,7 @@ class ShoppingListPreviewResultContent extends StatelessWidget {
             Transform.translate(
               offset: const Offset(0, -24),
               child: AppButton(
-                text: 'Unlock with Plus',
+                text: context.l10n.clippingsPreviewUnlockPlus,
                 onPressed: onSubscribe,
                 theme: AppButtonTheme.secondary,
                 style: AppButtonStyle.fill,

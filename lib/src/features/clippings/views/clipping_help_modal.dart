@@ -3,6 +3,7 @@ import 'package:hugeicons/hugeicons.dart';
 import 'package:flutter/material.dart';
 import 'package:wolt_modal_sheet/wolt_modal_sheet.dart';
 
+import '../../../localization/l10n_extension.dart';
 import '../../../theme/colors.dart';
 import '../../../theme/spacing.dart';
 import '../../../theme/typography.dart';
@@ -42,7 +43,7 @@ void showClippingHelpModal(BuildContext context) {
             children: [
               // Title
               Text(
-                'About Clippings',
+                context.l10n.clippingsAboutTitle,
                 style: AppTypography.h4.copyWith(
                   color: colors.textPrimary,
                 ),
@@ -52,7 +53,7 @@ void showClippingHelpModal(BuildContext context) {
 
               // Section 1: What are clippings
               Text(
-                'Your recipe scratchpad',
+                context.l10n.clippingsAboutScratchpadTitle,
                 style: AppTypography.body.copyWith(
                   color: colors.textPrimary,
                   fontWeight: FontWeight.w600,
@@ -60,7 +61,7 @@ void showClippingHelpModal(BuildContext context) {
               ),
               SizedBox(height: AppSpacing.xs),
               Text(
-                'Capture recipe ideas from anywhere — websites, messages, photos, or just your own thoughts. No need to format anything perfectly.',
+                context.l10n.clippingsAboutScratchpadBody,
                 style: AppTypography.body.copyWith(
                   color: colors.textSecondary,
                 ),
@@ -70,7 +71,7 @@ void showClippingHelpModal(BuildContext context) {
 
               // Section 2: Convert to Recipe
               Text(
-                'Convert to Recipe',
+                context.l10n.clippingsAboutConvertTitle,
                 style: AppTypography.body.copyWith(
                   color: colors.textPrimary,
                   fontWeight: FontWeight.w600,
@@ -78,7 +79,7 @@ void showClippingHelpModal(BuildContext context) {
               ),
               SizedBox(height: AppSpacing.xs),
               Text(
-                'Turn your notes into a complete recipe. We\'ll extract ingredients, steps, cooking times, and more.',
+                context.l10n.clippingsAboutConvertBody,
                 style: AppTypography.body.copyWith(
                   color: colors.textSecondary,
                 ),
@@ -108,7 +109,7 @@ void showClippingHelpModal(BuildContext context) {
                     SizedBox(width: AppSpacing.sm),
                     Expanded(
                       child: Text(
-                        'Have a partial recipe? Add "Complete this recipe" to your notes and we\'ll fill in the missing details.',
+                        context.l10n.clippingsAboutConvertTip,
                         style: AppTypography.bodySmall.copyWith(
                           color: colors.textPrimary,
                         ),
@@ -122,7 +123,7 @@ void showClippingHelpModal(BuildContext context) {
 
               // Section 3: To Shopping List
               Text(
-                'To Shopping List',
+                context.l10n.clippingsAboutShoppingTitle,
                 style: AppTypography.body.copyWith(
                   color: colors.textPrimary,
                   fontWeight: FontWeight.w600,
@@ -130,7 +131,7 @@ void showClippingHelpModal(BuildContext context) {
               ),
               SizedBox(height: AppSpacing.xs),
               Text(
-                'Pull out the items you need to buy. We\'ll organize them by aisle automatically.',
+                context.l10n.clippingsAboutShoppingBody,
                 style: AppTypography.body.copyWith(
                   color: colors.textSecondary,
                 ),

@@ -3,6 +3,7 @@ import 'package:flutter/material.dart' show Colors;
 import 'package:flutter_quill/flutter_quill.dart' as quill;
 import 'package:wolt_modal_sheet/wolt_modal_sheet.dart';
 
+import '../../../localization/l10n_extension.dart';
 import '../../../theme/colors.dart';
 import '../../../theme/spacing.dart';
 import '../../../theme/typography.dart';
@@ -121,7 +122,7 @@ class _LinkModalContentState extends State<_LinkModalContent> {
         mainAxisSize: MainAxisSize.min,
         children: [
           Text(
-            widget.initialLink != null ? 'Edit Link' : 'Add Link',
+            widget.initialLink != null ? context.l10n.clippingsLinkEditTitle : context.l10n.clippingsLinkAddTitle,
             style: AppTypography.h4.copyWith(
               color: colors.textPrimary,
             ),
@@ -130,7 +131,7 @@ class _LinkModalContentState extends State<_LinkModalContent> {
 
           // Text field
           Text(
-            'Text',
+            context.l10n.clippingsLinkTextLabel,
             style: AppTypography.caption.copyWith(
               color: colors.textSecondary,
             ),
@@ -138,7 +139,7 @@ class _LinkModalContentState extends State<_LinkModalContent> {
           SizedBox(height: AppSpacing.xs),
           AppTextFieldSimple(
             controller: _textController,
-            placeholder: 'Link text',
+            placeholder: context.l10n.clippingsLinkTextPlaceholder,
             autofocus: widget.initialText.isEmpty,
             onChanged: (_) => setState(() {}),
           ),
@@ -147,7 +148,7 @@ class _LinkModalContentState extends State<_LinkModalContent> {
 
           // URL field
           Text(
-            'URL',
+            context.l10n.clippingsLinkUrlLabel,
             style: AppTypography.caption.copyWith(
               color: colors.textSecondary,
             ),
@@ -155,7 +156,7 @@ class _LinkModalContentState extends State<_LinkModalContent> {
           SizedBox(height: AppSpacing.xs),
           AppTextFieldSimple(
             controller: _urlController,
-            placeholder: 'https://example.com',
+            placeholder: context.l10n.clippingsLinkUrlPlaceholder,
             autofocus: widget.initialText.isNotEmpty,
             keyboardType: TextInputType.url,
             onChanged: (_) => setState(() {}),
@@ -166,7 +167,7 @@ class _LinkModalContentState extends State<_LinkModalContent> {
 
           // Submit button
           AppButtonVariants.primaryFilled(
-            text: 'Done',
+            text: context.l10n.commonDone,
             size: AppButtonSize.large,
             shape: AppButtonShape.square,
             fullWidth: true,

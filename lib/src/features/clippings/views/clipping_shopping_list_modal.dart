@@ -6,6 +6,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:wolt_modal_sheet/wolt_modal_sheet.dart';
 
 import '../../../../database/database.dart';
+import '../../../localization/l10n_extension.dart';
 import '../../../../database/models/pantry_items.dart';
 import '../../../providers/shopping_list_provider.dart';
 import '../../../repositories/pantry_repository.dart';
@@ -153,8 +154,8 @@ SliverWoltModalSheetPage _buildAddToShoppingListPage({
               builder: (buttonContext, child) {
                 return AppButtonVariants.primaryFilled(
                   text: _clippingShoppingListController.isLoading
-                      ? 'Adding...'
-                      : 'Add to Shopping List',
+                      ? buttonContext.l10n.clippingsShoppingAdding
+                      : buttonContext.l10n.clippingsShoppingAddTitle,
                   size: AppButtonSize.large,
                   shape: AppButtonShape.square,
                   fullWidth: true,
@@ -226,7 +227,7 @@ WoltModalSheetPage _buildManageListsPage({
         mainAxisSize: MainAxisSize.min,
         children: [
           Text(
-            'Manage Lists',
+            modalContext.l10n.clippingsShoppingManageLists,
             style: AppTypography.h4.copyWith(
               color: AppColors.of(modalContext).textPrimary,
             ),
@@ -286,7 +287,7 @@ WoltModalSheetPage _buildCreateListPage({
         mainAxisSize: MainAxisSize.min,
         children: [
           Text(
-            'Create New List',
+            modalContext.l10n.clippingsShoppingCreateNew,
             style: AppTypography.h4.copyWith(
               color: AppColors.of(modalContext).textPrimary,
             ),
@@ -472,7 +473,7 @@ class _ClippingShoppingListContentState
         child: Center(child: CupertinoActivityIndicator()),
       ),
       error: (error, stack) => SliverFillRemaining(
-        child: Center(child: Text('Error: $error')),
+        child: Center(child: Text(context.l10n.commonError)),
       ),
       data: (lists) {
         return enrichedItemsAsync.when(
@@ -480,7 +481,7 @@ class _ClippingShoppingListContentState
             child: Center(child: CupertinoActivityIndicator()),
           ),
           error: (error, stack) => SliverFillRemaining(
-            child: Center(child: Text('Error: $error')),
+            child: Center(child: Text(context.l10n.commonError)),
           ),
           data: (enrichedItems) {
             // Initialize state on first build
@@ -521,13 +522,13 @@ class _ClippingShoppingListContentState
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
                     Text(
-                      'Add to Shopping List',
+                      context.l10n.clippingsShoppingAddTitle,
                       style: AppTypography.h4.copyWith(
                         color: colors.textPrimary,
                       ),
                     ),
                     AppButton(
-                      text: 'Manage Lists',
+                      text: context.l10n.clippingsShoppingManageLists,
                       onPressed: () {
                         widget.pageIndexNotifier.value = 1;
                       },
@@ -561,7 +562,7 @@ class _ClippingShoppingListContentState
                         ),
                         SizedBox(height: AppSpacing.lg),
                         Text(
-                          'No items to add',
+                          context.l10n.clippingsShoppingNoItems,
                           style: AppTypography.body.copyWith(
                             color: colors.textSecondary,
                             fontWeight: FontWeight.w600,
@@ -569,7 +570,7 @@ class _ClippingShoppingListContentState
                         ),
                         SizedBox(height: AppSpacing.sm),
                         Text(
-                          'All items are already on a shopping list.',
+                          context.l10n.clippingsShoppingAllInList,
                           style: AppTypography.bodySmall.copyWith(
                             color: colors.textTertiary,
                           ),
@@ -698,10 +699,10 @@ class _ClippingShoppingListContentState
         controller.selectedListIds[item.id] ?? defaultListId;
 
     // Get list name for display
-    String listName = 'My Shopping List';
+    String listName = context.l10n.recipeAddToShoppingListDefault;
     if (selectedListId != null) {
       final list = lists.where((l) => l.id == selectedListId).firstOrNull;
-      listName = list?.name ?? 'My Shopping List';
+      listName = list?.name ?? context.l10n.recipeAddToShoppingListDefault;
     }
 
     final borderRadius = GroupedListStyling.getBorderRadius(
@@ -767,7 +768,7 @@ class _ClippingShoppingListContentState
             AdaptivePullDownButton(
               items: [
                 AdaptiveMenuItem(
-                  title: 'My Shopping List',
+                  title: context.l10n.recipeAddToShoppingListDefault,
                   icon: selectedListId == null
                       ? const Icon(CupertinoIcons.checkmark)
                       : const HugeIcon(icon: HugeIcons.strokeRoundedLeftToRightListBullet),
@@ -779,7 +780,7 @@ class _ClippingShoppingListContentState
                   },
                 ),
                 ...lists.map((list) => AdaptiveMenuItem(
-                      title: list.name ?? 'Unnamed',
+                      title: list.name ?? context.l10n.shoppingListUnnamed,
                       icon: selectedListId == list.id
                           ? const Icon(CupertinoIcons.checkmark)
                           : const HugeIcon(icon: HugeIcons.strokeRoundedLeftToRightListBullet),
@@ -877,7 +878,7 @@ class _ClippingShoppingListContentState
                   ),
                   SizedBox(height: AppSpacing.xs),
                   Text(
-                    'Already on shopping list',
+                    context.l10n.clippingsShoppingAlreadyInList,
                     style: AppTypography.caption.copyWith(
                       color: colors.textTertiary,
                     ),

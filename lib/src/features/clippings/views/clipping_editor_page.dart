@@ -7,6 +7,7 @@ import 'package:flutter_quill/flutter_quill.dart' as quill;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:wolt_modal_sheet/wolt_modal_sheet.dart';
+import '../../../localization/l10n_extension.dart';
 import '../../../providers/clippings_provider.dart';
 import '../../../repositories/clippings_repository.dart';
 import '../../../services/logging/app_logger.dart';
@@ -300,19 +301,19 @@ class _ClippingEditorPageState extends ConsumerState<ClippingEditorPage>
   void _deleteClipping() {
     showCupertinoDialog(
       context: context,
-      builder: (context) => CupertinoAlertDialog(
-        title: const Text('Delete Clipping'),
-        content: const Text('Are you sure you want to delete this clipping?'),
+      builder: (dialogContext) => CupertinoAlertDialog(
+        title: Text(context.l10n.clippingsDeleteTitle),
+        content: Text(context.l10n.clippingsDeleteConfirm),
         actions: [
           CupertinoDialogAction(
-            child: const Text('Cancel'),
-            onPressed: () => Navigator.of(context).pop(),
+            child: Text(context.l10n.commonCancel),
+            onPressed: () => Navigator.of(dialogContext).pop(),
           ),
           CupertinoDialogAction(
             isDestructiveAction: true,
-            child: const Text('Delete'),
+            child: Text(context.l10n.commonDelete),
             onPressed: () {
-              Navigator.of(context).pop();
+              Navigator.of(dialogContext).pop();
               ref.read(clippingsProvider.notifier).deleteClipping(widget.clippingId);
               context.pop();
             },
@@ -396,7 +397,7 @@ class _ClippingEditorPageState extends ConsumerState<ClippingEditorPage>
                                 color: AppColors.of(context).textPrimary,
                               ),
                               decoration: InputDecoration(
-                                hintText: 'Title',
+                                hintText: context.l10n.clippingsTitlePlaceholder,
                                 hintStyle: AppTypography.h1.copyWith(
                                   color: AppColors.of(context).textTertiary,
                                 ),
@@ -442,7 +443,7 @@ class _ClippingEditorPageState extends ConsumerState<ClippingEditorPage>
                                 controller: _contentController,
                                 focusNode: _contentFocusNode,
                                 config: quill.QuillEditorConfig(
-                                  placeholder: 'Start typing...',
+                                  placeholder: context.l10n.clippingsContentPlaceholder,
                                   padding: EdgeInsets.zero,
                                   autoFocus: false,
                                   expands: false,
@@ -585,7 +586,7 @@ class _ClippingEditorPageState extends ConsumerState<ClippingEditorPage>
         Expanded(
           child: _buildConversionButton(
             context: context,
-            text: 'Convert to Recipe',
+            text: context.l10n.clippingsConvertToRecipe,
             icon: HugeIcon(icon: HugeIcons.strokeRoundedAiMagic),
             onPressed: hasContent ? _handleConvertToRecipe : null,
             enabled: hasContent,
@@ -595,7 +596,7 @@ class _ClippingEditorPageState extends ConsumerState<ClippingEditorPage>
         Expanded(
           child: _buildConversionButton(
             context: context,
-            text: 'To Shopping List',
+            text: context.l10n.clippingsToShoppingList,
             icon: HugeIcon(icon: HugeIcons.strokeRoundedLeftToRightListBullet),
             onPressed: hasContent ? _handleAddToShoppingList : null,
             enabled: hasContent,
@@ -689,7 +690,7 @@ class _ClippingEditorPageState extends ConsumerState<ClippingEditorPage>
         padding: EdgeInsets.zero,
         onPressed: _dismissKeyboard,
         child: Text(
-          'Done',
+          context.l10n.commonDone,
           style: TextStyle(
             color: AppColors.of(context).primary,
             fontWeight: FontWeight.w600,
@@ -713,18 +714,18 @@ class _ClippingEditorPageState extends ConsumerState<ClippingEditorPage>
           AdaptivePullDownButton(
             items: [
               AdaptiveMenuItem(
-                title: 'Convert to Recipe',
+                title: context.l10n.clippingsConvertToRecipe,
                 icon: const HugeIcon(icon: HugeIcons.strokeRoundedAiMagic),
                 onTap: hasContent ? _handleConvertToRecipe : null,
               ),
               AdaptiveMenuItem(
-                title: 'To Shopping List',
+                title: context.l10n.clippingsToShoppingList,
                 icon: const HugeIcon(icon: HugeIcons.strokeRoundedLeftToRightListBullet),
                 onTap: hasContent ? _handleAddToShoppingList : null,
               ),
               AdaptiveMenuItem.divider(),
               AdaptiveMenuItem(
-                title: 'Delete Clipping',
+                title: context.l10n.clippingsDeleteTitle,
                 icon: const HugeIcon(icon: HugeIcons.strokeRoundedDelete02),
                 onTap: _deleteClipping,
                 isDestructive: true,
@@ -796,7 +797,7 @@ class _ClippingEditorPageState extends ConsumerState<ClippingEditorPage>
                       ? AppColors.of(context).primary
                       : AppColors.of(context).textSecondary,
                 ),
-                tooltip: 'Add link',
+                tooltip: context.l10n.clippingsAddLinkTooltip,
                 onPressed: () => _showLinkModal(context),
               ),
             ],

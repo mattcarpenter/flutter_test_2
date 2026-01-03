@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import '../../../../database/database.dart';
+import '../../../localization/l10n_extension.dart';
 import '../../../theme/colors.dart';
 import '../../../theme/spacing.dart';
 import '../../../theme/typography.dart';
@@ -19,7 +20,11 @@ class ClippingGrid extends StatelessWidget {
   });
 
   /// Groups clippings into date sections: "Today", "Previous 7 Days", then month names
-  Map<String, List<ClippingEntry>> _groupByDate(List<ClippingEntry> clippings) {
+  Map<String, List<ClippingEntry>> _groupByDate(
+    List<ClippingEntry> clippings, {
+    required String todayLabel,
+    required String previous7DaysLabel,
+  }) {
     final now = DateTime.now();
     final today = DateTime(now.year, now.month, now.day);
     final sevenDaysAgo = today.subtract(const Duration(days: 7));
@@ -39,9 +44,9 @@ class ClippingGrid extends StatelessWidget {
 
       String section;
       if (dateOnly == today) {
-        section = 'Today';
+        section = todayLabel;
       } else if (dateOnly.isAfter(sevenDaysAgo)) {
-        section = 'Previous 7 Days';
+        section = previous7DaysLabel;
       } else {
         // Format as "December 2024"
         section = DateFormat('MMMM yyyy').format(date);
@@ -56,7 +61,11 @@ class ClippingGrid extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final groupedClippings = _groupByDate(clippings);
+    final groupedClippings = _groupByDate(
+      clippings,
+      todayLabel: context.l10n.clippingsToday,
+      previous7DaysLabel: context.l10n.clippingsPrevious7Days,
+    );
 
     // Build list of slivers: alternating section headers and grids
     final slivers = <Widget>[];

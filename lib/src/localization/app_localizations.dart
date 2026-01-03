@@ -4203,6 +4203,396 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Save'**
   String get pantrySave;
+
+  /// Clippings page title
+  ///
+  /// In en, this message translates to:
+  /// **'Clippings'**
+  String get clippingsTitle;
+
+  /// Empty state message when no clippings exist
+  ///
+  /// In en, this message translates to:
+  /// **'No clippings yet'**
+  String get clippingsEmpty;
+
+  /// Hint text in empty state
+  ///
+  /// In en, this message translates to:
+  /// **'Tap the + button to add a clipping'**
+  String get clippingsEmptyHint;
+
+  /// Empty state when search has no results
+  ///
+  /// In en, this message translates to:
+  /// **'No clippings match your search'**
+  String get clippingsNoSearchResults;
+
+  /// Clear search button text
+  ///
+  /// In en, this message translates to:
+  /// **'Clear Search'**
+  String get clippingsClearSearch;
+
+  /// Menu item to create new clipping
+  ///
+  /// In en, this message translates to:
+  /// **'New Clipping'**
+  String get clippingsNewClipping;
+
+  /// Fallback title for untitled clippings
+  ///
+  /// In en, this message translates to:
+  /// **'Untitled'**
+  String get clippingsUntitled;
+
+  /// Date group header for today's clippings
+  ///
+  /// In en, this message translates to:
+  /// **'Today'**
+  String get clippingsToday;
+
+  /// Date group header for last 7 days
+  ///
+  /// In en, this message translates to:
+  /// **'Previous 7 Days'**
+  String get clippingsPrevious7Days;
+
+  /// Delete clipping dialog title and menu item
+  ///
+  /// In en, this message translates to:
+  /// **'Delete Clipping'**
+  String get clippingsDeleteTitle;
+
+  /// Delete clipping confirmation message
+  ///
+  /// In en, this message translates to:
+  /// **'Are you sure you want to delete this clipping?'**
+  String get clippingsDeleteConfirm;
+
+  /// Placeholder for clipping title field
+  ///
+  /// In en, this message translates to:
+  /// **'Title'**
+  String get clippingsTitlePlaceholder;
+
+  /// Placeholder for clipping content field
+  ///
+  /// In en, this message translates to:
+  /// **'Start typing...'**
+  String get clippingsContentPlaceholder;
+
+  /// Button/menu item to convert clipping to recipe
+  ///
+  /// In en, this message translates to:
+  /// **'Convert to Recipe'**
+  String get clippingsConvertToRecipe;
+
+  /// Button/menu item to convert clipping to shopping list
+  ///
+  /// In en, this message translates to:
+  /// **'To Shopping List'**
+  String get clippingsToShoppingList;
+
+  /// Tooltip for add link button in toolbar
+  ///
+  /// In en, this message translates to:
+  /// **'Add link'**
+  String get clippingsAddLinkTooltip;
+
+  /// Add link modal title
+  ///
+  /// In en, this message translates to:
+  /// **'Add Link'**
+  String get clippingsLinkAddTitle;
+
+  /// Edit link modal title
+  ///
+  /// In en, this message translates to:
+  /// **'Edit Link'**
+  String get clippingsLinkEditTitle;
+
+  /// Link text field label
+  ///
+  /// In en, this message translates to:
+  /// **'Text'**
+  String get clippingsLinkTextLabel;
+
+  /// Link text field placeholder
+  ///
+  /// In en, this message translates to:
+  /// **'Link text'**
+  String get clippingsLinkTextPlaceholder;
+
+  /// Link URL field label
+  ///
+  /// In en, this message translates to:
+  /// **'URL'**
+  String get clippingsLinkUrlLabel;
+
+  /// Link URL field placeholder
+  ///
+  /// In en, this message translates to:
+  /// **'https://example.com'**
+  String get clippingsLinkUrlPlaceholder;
+
+  /// Help modal title
+  ///
+  /// In en, this message translates to:
+  /// **'About Clippings'**
+  String get clippingsAboutTitle;
+
+  /// Help section title about clippings
+  ///
+  /// In en, this message translates to:
+  /// **'Your recipe scratchpad'**
+  String get clippingsAboutScratchpadTitle;
+
+  /// Help section body about clippings
+  ///
+  /// In en, this message translates to:
+  /// **'Capture recipe ideas from anywhere — websites, messages, photos, or just your own thoughts. No need to format anything perfectly.'**
+  String get clippingsAboutScratchpadBody;
+
+  /// Help section title about converting to recipe
+  ///
+  /// In en, this message translates to:
+  /// **'Convert to Recipe'**
+  String get clippingsAboutConvertTitle;
+
+  /// Help section body about converting to recipe
+  ///
+  /// In en, this message translates to:
+  /// **'Turn your notes into a complete recipe. We\'ll extract ingredients, steps, cooking times, and more.'**
+  String get clippingsAboutConvertBody;
+
+  /// Tip about completing partial recipes
+  ///
+  /// In en, this message translates to:
+  /// **'Have a partial recipe? Add \"Complete this recipe\" to your notes and we\'ll fill in the missing details.'**
+  String get clippingsAboutConvertTip;
+
+  /// Help section title about shopping list
+  ///
+  /// In en, this message translates to:
+  /// **'To Shopping List'**
+  String get clippingsAboutShoppingTitle;
+
+  /// Help section body about shopping list
+  ///
+  /// In en, this message translates to:
+  /// **'Pull out the items you need to buy. We\'ll organize them by aisle automatically.'**
+  String get clippingsAboutShoppingBody;
+
+  /// Error message when no internet connection
+  ///
+  /// In en, this message translates to:
+  /// **'No internet connection. Please check your network and try again.'**
+  String get clippingsExtractionNoInternet;
+
+  /// Error when recipe extraction fails
+  ///
+  /// In en, this message translates to:
+  /// **'Unable to extract a recipe from this text. Please make sure the text contains recipe information.'**
+  String get clippingsExtractionNoRecipe;
+
+  /// Error when no recipe is detected in preview
+  ///
+  /// In en, this message translates to:
+  /// **'Unable to detect a recipe in this text.'**
+  String get clippingsExtractionNoRecipeDetected;
+
+  /// Error when no shopping items found
+  ///
+  /// In en, this message translates to:
+  /// **'No shopping list items found in this text.'**
+  String get clippingsExtractionNoItems;
+
+  /// Generic extraction failure message
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to process. Please try again.'**
+  String get clippingsExtractionFailed;
+
+  /// Loading message during recipe extraction
+  ///
+  /// In en, this message translates to:
+  /// **'Extracting recipe...'**
+  String get clippingsExtractionExtractingRecipe;
+
+  /// Loading message during extraction
+  ///
+  /// In en, this message translates to:
+  /// **'Finding the details...'**
+  String get clippingsExtractionFindingDetails;
+
+  /// Loading message near end of extraction
+  ///
+  /// In en, this message translates to:
+  /// **'Wrapping up...'**
+  String get clippingsExtractionWrappingUp;
+
+  /// Loading message during shopping list extraction
+  ///
+  /// In en, this message translates to:
+  /// **'Extracting items...'**
+  String get clippingsExtractionExtractingItems;
+
+  /// Loading message during recipe preview
+  ///
+  /// In en, this message translates to:
+  /// **'Scanning for recipes...'**
+  String get clippingsExtractionScanningRecipes;
+
+  /// Loading message during shopping list preview
+  ///
+  /// In en, this message translates to:
+  /// **'Scanning for items...'**
+  String get clippingsExtractionScanningItems;
+
+  /// Button loading text when adding items
+  ///
+  /// In en, this message translates to:
+  /// **'Adding...'**
+  String get clippingsShoppingAdding;
+
+  /// Add to shopping list modal title
+  ///
+  /// In en, this message translates to:
+  /// **'Add to Shopping List'**
+  String get clippingsShoppingAddTitle;
+
+  /// Manage lists button and page title
+  ///
+  /// In en, this message translates to:
+  /// **'Manage Lists'**
+  String get clippingsShoppingManageLists;
+
+  /// Create new list page title
+  ///
+  /// In en, this message translates to:
+  /// **'Create New List'**
+  String get clippingsShoppingCreateNew;
+
+  /// Empty state title when all items are in lists
+  ///
+  /// In en, this message translates to:
+  /// **'No items to add'**
+  String get clippingsShoppingNoItems;
+
+  /// Empty state description when all items are in lists
+  ///
+  /// In en, this message translates to:
+  /// **'All items are already on a shopping list.'**
+  String get clippingsShoppingAllInList;
+
+  /// Status text for items already in a shopping list
+  ///
+  /// In en, this message translates to:
+  /// **'Already on shopping list'**
+  String get clippingsShoppingAlreadyInList;
+
+  /// Plus subscription badge text
+  ///
+  /// In en, this message translates to:
+  /// **'PLUS'**
+  String get clippingsPreviewPlusBadge;
+
+  /// Recipe preview section label
+  ///
+  /// In en, this message translates to:
+  /// **'Recipe Name'**
+  String get clippingsPreviewRecipeName;
+
+  /// Recipe preview description section label
+  ///
+  /// In en, this message translates to:
+  /// **'Description'**
+  String get clippingsPreviewDescription;
+
+  /// Recipe preview ingredients section label
+  ///
+  /// In en, this message translates to:
+  /// **'Ingredients'**
+  String get clippingsPreviewIngredients;
+
+  /// Shopping list preview section label
+  ///
+  /// In en, this message translates to:
+  /// **'Items Found'**
+  String get clippingsPreviewItemsFound;
+
+  /// Shopping list preview title
+  ///
+  /// In en, this message translates to:
+  /// **'Convert to Shopping List'**
+  String get clippingsPreviewConvertToShoppingList;
+
+  /// Value proposition headline
+  ///
+  /// In en, this message translates to:
+  /// **'We\'ll do the work for you'**
+  String get clippingsPreviewValuePropHeadline;
+
+  /// Recipe value proposition item 1
+  ///
+  /// In en, this message translates to:
+  /// **'Turn notes into real recipes'**
+  String get clippingsPreviewValuePropRecipe1;
+
+  /// Recipe value proposition item 2
+  ///
+  /// In en, this message translates to:
+  /// **'Auto-extract ingredients and steps'**
+  String get clippingsPreviewValuePropRecipe2;
+
+  /// Recipe value proposition item 3
+  ///
+  /// In en, this message translates to:
+  /// **'Complete partial recipes'**
+  String get clippingsPreviewValuePropRecipe3;
+
+  /// Recipe value proposition item 4
+  ///
+  /// In en, this message translates to:
+  /// **'Save it to your Library'**
+  String get clippingsPreviewValuePropRecipe4;
+
+  /// Shopping list value proposition item 1
+  ///
+  /// In en, this message translates to:
+  /// **'Turn notes into shopping lists'**
+  String get clippingsPreviewValuePropShopping1;
+
+  /// Shopping list value proposition item 2
+  ///
+  /// In en, this message translates to:
+  /// **'Auto-categorize items by aisle'**
+  String get clippingsPreviewValuePropShopping2;
+
+  /// Shopping list value proposition item 3
+  ///
+  /// In en, this message translates to:
+  /// **'Smart matching with your pantry'**
+  String get clippingsPreviewValuePropShopping3;
+
+  /// Shopping list value proposition item 4
+  ///
+  /// In en, this message translates to:
+  /// **'Add everything in one tap'**
+  String get clippingsPreviewValuePropShopping4;
+
+  /// Value proposition trailing item
+  ///
+  /// In en, this message translates to:
+  /// **'… and much more!'**
+  String get clippingsPreviewValuePropMore;
+
+  /// Subscribe button text
+  ///
+  /// In en, this message translates to:
+  /// **'Unlock with Plus'**
+  String get clippingsPreviewUnlockPlus;
 }
 
 class _AppLocalizationsDelegate

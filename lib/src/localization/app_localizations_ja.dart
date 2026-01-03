@@ -2300,4 +2300,203 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get pantrySave => '保存';
+
+  @override
+  String get clippingsTitle => 'クリッピング';
+
+  @override
+  String get clippingsEmpty => 'クリッピングがありません';
+
+  @override
+  String get clippingsEmptyHint => '+ボタンをタップしてクリッピングを追加';
+
+  @override
+  String get clippingsNoSearchResults => '検索に一致するクリッピングがありません';
+
+  @override
+  String get clippingsClearSearch => '検索をクリア';
+
+  @override
+  String get clippingsNewClipping => '新規クリッピング';
+
+  @override
+  String get clippingsUntitled => '無題';
+
+  @override
+  String get clippingsToday => '今日';
+
+  @override
+  String get clippingsPrevious7Days => '過去7日間';
+
+  @override
+  String get clippingsDeleteTitle => 'クリッピングを削除';
+
+  @override
+  String get clippingsDeleteConfirm => 'このクリッピングを削除しますか？';
+
+  @override
+  String get clippingsTitlePlaceholder => 'タイトル';
+
+  @override
+  String get clippingsContentPlaceholder => '入力を開始...';
+
+  @override
+  String get clippingsConvertToRecipe => 'レシピに変換';
+
+  @override
+  String get clippingsToShoppingList => '買い物リストへ';
+
+  @override
+  String get clippingsAddLinkTooltip => 'リンクを追加';
+
+  @override
+  String get clippingsLinkAddTitle => 'リンクを追加';
+
+  @override
+  String get clippingsLinkEditTitle => 'リンクを編集';
+
+  @override
+  String get clippingsLinkTextLabel => 'テキスト';
+
+  @override
+  String get clippingsLinkTextPlaceholder => 'リンクテキスト';
+
+  @override
+  String get clippingsLinkUrlLabel => 'URL';
+
+  @override
+  String get clippingsLinkUrlPlaceholder => 'https://example.com';
+
+  @override
+  String get clippingsAboutTitle => 'クリッピングについて';
+
+  @override
+  String get clippingsAboutScratchpadTitle => 'レシピのメモ帳';
+
+  @override
+  String get clippingsAboutScratchpadBody =>
+      'ウェブサイト、メッセージ、写真、または自分のアイデアなど、どこからでもレシピのアイデアをキャプチャできます。完璧にフォーマットする必要はありません。';
+
+  @override
+  String get clippingsAboutConvertTitle => 'レシピに変換';
+
+  @override
+  String get clippingsAboutConvertBody => 'メモを完全なレシピに変換します。材料、手順、調理時間などを抽出します。';
+
+  @override
+  String get clippingsAboutConvertTip =>
+      '部分的なレシピがありますか？メモに「このレシピを完成させて」と追加すると、不足している詳細を補完します。';
+
+  @override
+  String get clippingsAboutShoppingTitle => '買い物リストへ';
+
+  @override
+  String get clippingsAboutShoppingBody => '購入が必要なアイテムを抽出します。売り場ごとに自動的に整理します。';
+
+  @override
+  String get clippingsExtractionNoInternet =>
+      'インターネット接続がありません。ネットワークを確認してもう一度お試しください。';
+
+  @override
+  String get clippingsExtractionNoRecipe =>
+      'このテキストからレシピを抽出できませんでした。レシピ情報が含まれていることを確認してください。';
+
+  @override
+  String get clippingsExtractionNoRecipeDetected => 'このテキストでレシピを検出できませんでした。';
+
+  @override
+  String get clippingsExtractionNoItems => 'このテキストに買い物リストのアイテムが見つかりませんでした。';
+
+  @override
+  String get clippingsExtractionFailed => '処理に失敗しました。もう一度お試しください。';
+
+  @override
+  String get clippingsExtractionExtractingRecipe => 'レシピを抽出中...';
+
+  @override
+  String get clippingsExtractionFindingDetails => '詳細を検索中...';
+
+  @override
+  String get clippingsExtractionWrappingUp => '仕上げ中...';
+
+  @override
+  String get clippingsExtractionExtractingItems => 'アイテムを抽出中...';
+
+  @override
+  String get clippingsExtractionScanningRecipes => 'レシピをスキャン中...';
+
+  @override
+  String get clippingsExtractionScanningItems => 'アイテムをスキャン中...';
+
+  @override
+  String get clippingsShoppingAdding => '追加中...';
+
+  @override
+  String get clippingsShoppingAddTitle => '買い物リストに追加';
+
+  @override
+  String get clippingsShoppingManageLists => 'リストを管理';
+
+  @override
+  String get clippingsShoppingCreateNew => '新しいリストを作成';
+
+  @override
+  String get clippingsShoppingNoItems => '追加するアイテムがありません';
+
+  @override
+  String get clippingsShoppingAllInList => 'すべてのアイテムはすでに買い物リストに追加されています。';
+
+  @override
+  String get clippingsShoppingAlreadyInList => '買い物リストに追加済み';
+
+  @override
+  String get clippingsPreviewPlusBadge => 'PLUS';
+
+  @override
+  String get clippingsPreviewRecipeName => 'レシピ名';
+
+  @override
+  String get clippingsPreviewDescription => '説明';
+
+  @override
+  String get clippingsPreviewIngredients => '材料';
+
+  @override
+  String get clippingsPreviewItemsFound => '見つかったアイテム';
+
+  @override
+  String get clippingsPreviewConvertToShoppingList => '買い物リストに変換';
+
+  @override
+  String get clippingsPreviewValuePropHeadline => 'お任せください';
+
+  @override
+  String get clippingsPreviewValuePropRecipe1 => 'メモを本格的なレシピに変換';
+
+  @override
+  String get clippingsPreviewValuePropRecipe2 => '材料と手順を自動抽出';
+
+  @override
+  String get clippingsPreviewValuePropRecipe3 => '部分的なレシピを補完';
+
+  @override
+  String get clippingsPreviewValuePropRecipe4 => 'ライブラリに保存';
+
+  @override
+  String get clippingsPreviewValuePropShopping1 => 'メモを買い物リストに変換';
+
+  @override
+  String get clippingsPreviewValuePropShopping2 => '売り場ごとに自動分類';
+
+  @override
+  String get clippingsPreviewValuePropShopping3 => 'パントリーとスマートマッチング';
+
+  @override
+  String get clippingsPreviewValuePropShopping4 => 'ワンタップで全て追加';
+
+  @override
+  String get clippingsPreviewValuePropMore => '…その他多数！';
+
+  @override
+  String get clippingsPreviewUnlockPlus => 'Plusでアンロック';
 }

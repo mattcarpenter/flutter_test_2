@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hugeicons/hugeicons.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import '../../../localization/l10n_extension.dart';
 import '../../../providers/household_provider.dart';
 import '../../../services/logging/app_logger.dart';
 import '../../../mobile/utils/adaptive_sliver_page.dart';
@@ -41,7 +42,7 @@ class ClippingsTab extends ConsumerWidget {
         : null;
 
     return AdaptiveSliverPage(
-      title: 'Clippings',
+      title: context.l10n.clippingsTitle,
       leading: isTablet ? null : menuButton,
       searchEnabled: true,
       onSearchChanged: (query) {
@@ -54,7 +55,7 @@ class ClippingsTab extends ConsumerWidget {
             child: Center(child: CircularProgressIndicator()),
           ),
           error: (error, stack) => SliverFillRemaining(
-            child: Center(child: Text('Error: $error')),
+            child: Center(child: Text(context.l10n.commonError)),
           ),
           data: (clippings) {
             // Apply search filter only (sorting is handled by date grouping)
@@ -78,8 +79,8 @@ class ClippingsTab extends ConsumerWidget {
                       SizedBox(height: AppSpacing.lg),
                       Text(
                         filterSortState.searchQuery.isNotEmpty
-                            ? 'No clippings match your search'
-                            : 'No clippings yet',
+                            ? context.l10n.clippingsNoSearchResults
+                            : context.l10n.clippingsEmpty,
                         style: TextStyle(
                           color: AppColors.of(context).textSecondary,
                         ),
@@ -87,7 +88,7 @@ class ClippingsTab extends ConsumerWidget {
                       if (filterSortState.searchQuery.isEmpty) ...[
                         SizedBox(height: AppSpacing.md),
                         Text(
-                          'Tap the + button to add a clipping',
+                          context.l10n.clippingsEmptyHint,
                           style: TextStyle(
                             color: AppColors.of(context).textTertiary,
                             fontSize: 13,
@@ -101,7 +102,7 @@ class ClippingsTab extends ConsumerWidget {
                                 .read(clippingsFilterSortProvider.notifier)
                                 .clearSearch();
                           },
-                          child: const Text('Clear Search'),
+                          child: Text(context.l10n.clippingsClearSearch),
                         ),
                     ],
                   ),
@@ -130,7 +131,7 @@ class ClippingsTab extends ConsumerWidget {
           AdaptivePullDownButton(
             items: [
               AdaptiveMenuItem(
-                title: 'New Clipping',
+                title: context.l10n.clippingsNewClipping,
                 icon: const HugeIcon(icon: HugeIcons.strokeRoundedFile01),
                 onTap: () => _createNewClipping(context, ref),
               ),
