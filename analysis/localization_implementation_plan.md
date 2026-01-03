@@ -240,7 +240,7 @@ Test by changing device language or using a test override.
 | 4 | shopping_list | 17 | Medium | ✅ Done | Core feature |
 | 5 | meal_plans | 22 | Medium | ✅ Done | Core feature |
 | 6 | pantry | 11 | Low | ✅ Done | Core feature |
-| 7 | clippings | 18 | Medium | ⏳ Pending | Labs feature |
+| 7 | clippings | 18 | Medium | ✅ Done | Labs feature |
 | 8 | import_export | 22 | Medium | ✅ Done | Utility feature |
 | 9 | household | 15 | Medium | ⏳ Pending | Sharing feature |
 | 10 | help | 4 | Low | ✅ Done | Help documentation |
@@ -485,7 +485,7 @@ validator: (value) {
 - [x] pantry (11 files) - ✅ Done
 
 ### Phase 4: Secondary Features
-- [ ] clippings (18 files)
+- [x] clippings (18 files) - ✅ Done
 - [x] import_export (22 files) - ✅ Done
 - [ ] household (15 files)
 - [x] help (4 files) - ✅ Done
