@@ -2817,4 +2817,183 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get householdThisMember => 'このメンバー';
+
+  @override
+  String get shareSessionLoading => '読み込み中...';
+
+  @override
+  String get shareSessionError => 'エラー';
+
+  @override
+  String get shareSessionErrorLoadFailed => '共有コンテンツの読み込みに失敗しました。もう一度お試しください。';
+
+  @override
+  String get shareSessionErrorSessionFailed => '共有コンテンツを読み込めませんでした。再度共有してください。';
+
+  @override
+  String get shareSessionErrorCantReadPost =>
+      'この投稿を読み取れませんでした。非公開または利用できない可能性があります。';
+
+  @override
+  String get shareSessionErrorCantReadPage => 'このページを読み取れませんでした。もう一度お試しください。';
+
+  @override
+  String get shareSessionErrorProcessing => '処理中に問題が発生しました。';
+
+  @override
+  String get shareSessionErrorOffline => 'オフラインです。インターネット接続を確認してもう一度お試しください。';
+
+  @override
+  String get shareSessionErrorImageProcessing => '画像の処理に失敗しました。もう一度お試しください。';
+
+  @override
+  String get shareSessionErrorNoRecipeInPhoto =>
+      '写真からレシピが見つかりませんでした。\n\nレシピカードや料理本のページの写真を共有してみてください。';
+
+  @override
+  String get shareSessionErrorPhotoProcessing => '写真の処理中に問題が発生しました。';
+
+  @override
+  String get shareSessionErrorNoContent => '抽出できるコンテンツがありません。';
+
+  @override
+  String get shareSessionErrorNoRecipeOnPage =>
+      'このページにはレシピ情報が見つかりませんでした。\n\nレシピが含まれているページを共有してみてください。';
+
+  @override
+  String get shareSessionErrorImporting => 'インポート中に問題が発生しました。';
+
+  @override
+  String get shareSessionErrorPlusRequired => 'このサイトからの抽出にはPlusサブスクリプションが必要です。';
+
+  @override
+  String get shareSessionErrorNoContentInPost => 'この投稿から抽出できるコンテンツが見つかりませんでした。';
+
+  @override
+  String get shareSessionErrorNoRecipeInPost =>
+      'この投稿にはレシピ情報が見つかりませんでした。\n\nキャプションに材料や調理手順が含まれている投稿を共有してみてください。';
+
+  @override
+  String get shareSessionErrorExtractFailed => 'この投稿からレシピを抽出できませんでした。';
+
+  @override
+  String get shareSessionErrorExtractRetry => 'レシピの抽出に失敗しました。もう一度お試しください。';
+
+  @override
+  String get shareSessionErrorNoRecipeOnPageShort => 'このページにレシピが見つかりませんでした。';
+
+  @override
+  String get shareSessionErrorClippingSave => 'クリッピングを保存できませんでした。もう一度お試しください。';
+
+  @override
+  String get shareSessionErrorNoImages => '処理する画像が見つかりません。';
+
+  @override
+  String get shareSessionErrorPageLoad => 'ページを読み込めませんでした。もう一度お試しください。';
+
+  @override
+  String get shareSessionErrorOccurred => 'エラーが発生しました。';
+
+  @override
+  String get shareSessionErrorGeneric => '問題が発生しました。';
+
+  @override
+  String get shareSessionTitleSharedContent => '共有コンテンツ';
+
+  @override
+  String get shareSessionTitleImportingRecipe => 'レシピをインポート中';
+
+  @override
+  String get shareSessionTitleProcessingPhoto => '写真を処理中';
+
+  @override
+  String get shareSessionTitleSavingClipping => 'クリッピングを保存中';
+
+  @override
+  String get shareSessionTitleExtractingContent => 'コンテンツを抽出中';
+
+  @override
+  String get shareSessionTitleExtractionFailed => '抽出に失敗';
+
+  @override
+  String get shareSessionErrorTitleNoRecipe => 'レシピが見つかりません';
+
+  @override
+  String get shareSessionErrorTitleCantRead => '投稿を読み取れません';
+
+  @override
+  String get shareSessionErrorTitleNoConnection => '接続なし';
+
+  @override
+  String get shareSessionErrorTitleGeneric => '問題が発生しました';
+
+  @override
+  String get shareSessionErrorTitleCantSave => '保存できません';
+
+  @override
+  String get shareSessionErrorTitleImportFailed => 'インポート失敗';
+
+  @override
+  String get shareSessionActionImportFromPhoto => '写真からインポート';
+
+  @override
+  String get shareSessionActionImportFromPhotoDesc => '料理本や料理写真からレシピを抽出';
+
+  @override
+  String get shareSessionActionImportRecipe => 'レシピをインポート';
+
+  @override
+  String get shareSessionActionImportRecipeDesc => '材料と手順を抽出して新しいレシピを作成';
+
+  @override
+  String get shareSessionActionSaveAsClipping => 'クリッピングとして保存';
+
+  @override
+  String get shareSessionActionSaveAsClippingDesc => '後で保存してレシピに変換';
+
+  @override
+  String get shareSessionActionSaveClippingErrorDesc => 'リンクを後で使うために保存';
+
+  @override
+  String shareSessionLoadingFetching(String domain) {
+    return '$domainから取得中...';
+  }
+
+  @override
+  String get shareSessionLoadingProcessingPhoto => '写真を処理中...';
+
+  @override
+  String get shareSessionLoadingExtractingRecipe => 'レシピを抽出中...';
+
+  @override
+  String get shareSessionLoadingSavingClipping => 'クリッピングに保存中...';
+
+  @override
+  String get shareSessionLoadingFindingIngredients => '材料を探しています...';
+
+  @override
+  String get shareSessionLoadingOrganizingSteps => '手順を整理しています...';
+
+  @override
+  String get shareSessionLoadingReadingPhoto => '写真を読み取り中...';
+
+  @override
+  String get shareSessionLoadingFindingRecipe => 'レシピを探しています...';
+
+  @override
+  String get shareSessionLoadingExtractingIngredients => '材料を抽出中...';
+
+  @override
+  String get shareSessionClippingIngredients => '材料';
+
+  @override
+  String get shareSessionClippingInstructions => '作り方';
+
+  @override
+  String shareSessionClippingImportedFrom(String platform, String date) {
+    return '$dateに$platformからインポート';
+  }
+
+  @override
+  String get shareSessionClippingSharedContent => '共有コンテンツ';
 }

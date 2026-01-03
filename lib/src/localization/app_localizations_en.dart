@@ -2917,4 +2917,203 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get householdThisMember => 'this member';
+
+  @override
+  String get shareSessionLoading => 'Loading...';
+
+  @override
+  String get shareSessionError => 'Error';
+
+  @override
+  String get shareSessionErrorLoadFailed =>
+      'Failed to load shared content. Please try again.';
+
+  @override
+  String get shareSessionErrorSessionFailed =>
+      'We couldn\'t load the shared content. Please try sharing again.';
+
+  @override
+  String get shareSessionErrorCantReadPost =>
+      'We couldn\'t read this post. It may be private or unavailable.';
+
+  @override
+  String get shareSessionErrorCantReadPage =>
+      'We couldn\'t read this page. Please try again.';
+
+  @override
+  String get shareSessionErrorProcessing =>
+      'Something went wrong while processing.';
+
+  @override
+  String get shareSessionErrorOffline =>
+      'You\'re offline. Please check your internet connection and try again.';
+
+  @override
+  String get shareSessionErrorImageProcessing =>
+      'Failed to process the image(s). Please try again.';
+
+  @override
+  String get shareSessionErrorNoRecipeInPhoto =>
+      'No recipe found in the photo.\n\nTry sharing a photo of a recipe card or cookbook page.';
+
+  @override
+  String get shareSessionErrorPhotoProcessing =>
+      'Something went wrong while processing the photo.';
+
+  @override
+  String get shareSessionErrorNoContent => 'No content available to extract.';
+
+  @override
+  String get shareSessionErrorNoRecipeOnPage =>
+      'This page doesn\'t appear to contain recipe information.\n\nTry sharing a page that includes a recipe.';
+
+  @override
+  String get shareSessionErrorImporting =>
+      'Something went wrong while importing.';
+
+  @override
+  String get shareSessionErrorPlusRequired =>
+      'This site requires Plus subscription for recipe extraction.';
+
+  @override
+  String get shareSessionErrorNoContentInPost =>
+      'We couldn\'t find any content to extract from this post.';
+
+  @override
+  String get shareSessionErrorNoRecipeInPost =>
+      'This post doesn\'t appear to contain recipe information.\n\nTry sharing a post that includes ingredients or cooking steps in the caption.';
+
+  @override
+  String get shareSessionErrorExtractFailed =>
+      'Unable to extract a recipe from this post.';
+
+  @override
+  String get shareSessionErrorExtractRetry =>
+      'Failed to extract recipe. Please try again.';
+
+  @override
+  String get shareSessionErrorNoRecipeOnPageShort =>
+      'No recipe found on this page.';
+
+  @override
+  String get shareSessionErrorClippingSave =>
+      'We couldn\'t save this clipping. Please try again.';
+
+  @override
+  String get shareSessionErrorNoImages => 'No images found to process.';
+
+  @override
+  String get shareSessionErrorPageLoad =>
+      'Could not load the page. Please try again.';
+
+  @override
+  String get shareSessionErrorOccurred => 'An error occurred.';
+
+  @override
+  String get shareSessionErrorGeneric => 'Something went wrong.';
+
+  @override
+  String get shareSessionTitleSharedContent => 'Shared Content';
+
+  @override
+  String get shareSessionTitleImportingRecipe => 'Importing Recipe';
+
+  @override
+  String get shareSessionTitleProcessingPhoto => 'Processing Photo';
+
+  @override
+  String get shareSessionTitleSavingClipping => 'Saving Clipping';
+
+  @override
+  String get shareSessionTitleExtractingContent => 'Extracting Content';
+
+  @override
+  String get shareSessionTitleExtractionFailed => 'Extraction Failed';
+
+  @override
+  String get shareSessionErrorTitleNoRecipe => 'No Recipe Found';
+
+  @override
+  String get shareSessionErrorTitleCantRead => 'Couldn\'t Read Post';
+
+  @override
+  String get shareSessionErrorTitleNoConnection => 'No Connection';
+
+  @override
+  String get shareSessionErrorTitleGeneric => 'Something Went Wrong';
+
+  @override
+  String get shareSessionErrorTitleCantSave => 'Couldn\'t Save';
+
+  @override
+  String get shareSessionErrorTitleImportFailed => 'Import Failed';
+
+  @override
+  String get shareSessionActionImportFromPhoto => 'Import from Photo';
+
+  @override
+  String get shareSessionActionImportFromPhotoDesc =>
+      'Extract recipe from cookbook or food photo';
+
+  @override
+  String get shareSessionActionImportRecipe => 'Import Recipe';
+
+  @override
+  String get shareSessionActionImportRecipeDesc =>
+      'Extract ingredients and steps to create a new recipe';
+
+  @override
+  String get shareSessionActionSaveAsClipping => 'Save as Clipping';
+
+  @override
+  String get shareSessionActionSaveAsClippingDesc =>
+      'Save for later and convert to a recipe when ready';
+
+  @override
+  String get shareSessionActionSaveClippingErrorDesc =>
+      'Save the link for later';
+
+  @override
+  String shareSessionLoadingFetching(String domain) {
+    return 'Fetching from $domain...';
+  }
+
+  @override
+  String get shareSessionLoadingProcessingPhoto => 'Processing photo...';
+
+  @override
+  String get shareSessionLoadingExtractingRecipe => 'Extracting recipe...';
+
+  @override
+  String get shareSessionLoadingSavingClipping => 'Saving to clippings...';
+
+  @override
+  String get shareSessionLoadingFindingIngredients => 'Finding ingredients...';
+
+  @override
+  String get shareSessionLoadingOrganizingSteps => 'Organizing steps...';
+
+  @override
+  String get shareSessionLoadingReadingPhoto => 'Reading photo...';
+
+  @override
+  String get shareSessionLoadingFindingRecipe => 'Finding recipe...';
+
+  @override
+  String get shareSessionLoadingExtractingIngredients =>
+      'Extracting ingredients...';
+
+  @override
+  String get shareSessionClippingIngredients => 'Ingredients';
+
+  @override
+  String get shareSessionClippingInstructions => 'Instructions';
+
+  @override
+  String shareSessionClippingImportedFrom(String platform, String date) {
+    return 'Imported from $platform on $date';
+  }
+
+  @override
+  String get shareSessionClippingSharedContent => 'shared content';
 }

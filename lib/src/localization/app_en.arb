@@ -3995,5 +3995,260 @@
   "householdThisMember": "this member",
   "@householdThisMember": {
     "description": "Fallback name for member"
+  },
+
+  "shareSessionLoading": "Loading...",
+  "@shareSessionLoading": {
+    "description": "Loading state title in share session modal"
+  },
+  "shareSessionError": "Error",
+  "@shareSessionError": {
+    "description": "Error state title in share session modal"
+  },
+  "shareSessionErrorLoadFailed": "Failed to load shared content. Please try again.",
+  "@shareSessionErrorLoadFailed": {
+    "description": "Error message when share session fails to load"
+  },
+  "shareSessionErrorSessionFailed": "We couldn't load the shared content. Please try sharing again.",
+  "@shareSessionErrorSessionFailed": {
+    "description": "Error message when session data fails to load"
+  },
+  "shareSessionErrorCantReadPost": "We couldn't read this post. It may be private or unavailable.",
+  "@shareSessionErrorCantReadPost": {
+    "description": "Error message when OG extraction fails"
+  },
+  "shareSessionErrorCantReadPage": "We couldn't read this page. Please try again.",
+  "@shareSessionErrorCantReadPage": {
+    "description": "Error message when web extraction fails"
+  },
+  "shareSessionErrorProcessing": "Something went wrong while processing.",
+  "@shareSessionErrorProcessing": {
+    "description": "Generic processing error message"
+  },
+  "shareSessionErrorOffline": "You're offline. Please check your internet connection and try again.",
+  "@shareSessionErrorOffline": {
+    "description": "Error message when user is offline"
+  },
+  "shareSessionErrorImageProcessing": "Failed to process the image(s). Please try again.",
+  "@shareSessionErrorImageProcessing": {
+    "description": "Error message when image processing fails"
+  },
+  "shareSessionErrorNoRecipeInPhoto": "No recipe found in the photo.\n\nTry sharing a photo of a recipe card or cookbook page.",
+  "@shareSessionErrorNoRecipeInPhoto": {
+    "description": "Error message when no recipe detected in photo"
+  },
+  "shareSessionErrorPhotoProcessing": "Something went wrong while processing the photo.",
+  "@shareSessionErrorPhotoProcessing": {
+    "description": "Error message when photo processing fails"
+  },
+  "shareSessionErrorNoContent": "No content available to extract.",
+  "@shareSessionErrorNoContent": {
+    "description": "Error message when no content is available"
+  },
+  "shareSessionErrorNoRecipeOnPage": "This page doesn't appear to contain recipe information.\n\nTry sharing a page that includes a recipe.",
+  "@shareSessionErrorNoRecipeOnPage": {
+    "description": "Error message when no recipe found on web page"
+  },
+  "shareSessionErrorImporting": "Something went wrong while importing.",
+  "@shareSessionErrorImporting": {
+    "description": "Error message during import"
+  },
+  "shareSessionErrorPlusRequired": "This site requires Plus subscription for recipe extraction.",
+  "@shareSessionErrorPlusRequired": {
+    "description": "Error message when Plus is required for extraction"
+  },
+  "shareSessionErrorNoContentInPost": "We couldn't find any content to extract from this post.",
+  "@shareSessionErrorNoContentInPost": {
+    "description": "Error message when no content in social post"
+  },
+  "shareSessionErrorNoRecipeInPost": "This post doesn't appear to contain recipe information.\n\nTry sharing a post that includes ingredients or cooking steps in the caption.",
+  "@shareSessionErrorNoRecipeInPost": {
+    "description": "Error message when no recipe in social post"
+  },
+  "shareSessionErrorExtractFailed": "Unable to extract a recipe from this post.",
+  "@shareSessionErrorExtractFailed": {
+    "description": "Error message when recipe extraction fails"
+  },
+  "shareSessionErrorExtractRetry": "Failed to extract recipe. Please try again.",
+  "@shareSessionErrorExtractRetry": {
+    "description": "Error message prompting retry"
+  },
+  "shareSessionErrorNoRecipeOnPageShort": "No recipe found on this page.",
+  "@shareSessionErrorNoRecipeOnPageShort": {
+    "description": "Short error message when no recipe found"
+  },
+  "shareSessionErrorClippingSave": "We couldn't save this clipping. Please try again.",
+  "@shareSessionErrorClippingSave": {
+    "description": "Error message when clipping save fails"
+  },
+  "shareSessionErrorNoImages": "No images found to process.",
+  "@shareSessionErrorNoImages": {
+    "description": "Error message when no images to process"
+  },
+  "shareSessionErrorPageLoad": "Could not load the page. Please try again.",
+  "@shareSessionErrorPageLoad": {
+    "description": "Error message when page load fails"
+  },
+  "shareSessionErrorOccurred": "An error occurred.",
+  "@shareSessionErrorOccurred": {
+    "description": "Fallback error message"
+  },
+  "shareSessionErrorGeneric": "Something went wrong.",
+  "@shareSessionErrorGeneric": {
+    "description": "Generic fallback error message"
+  },
+
+  "shareSessionTitleSharedContent": "Shared Content",
+  "@shareSessionTitleSharedContent": {
+    "description": "Title for choosing action state"
+  },
+  "shareSessionTitleImportingRecipe": "Importing Recipe",
+  "@shareSessionTitleImportingRecipe": {
+    "description": "Title during recipe import"
+  },
+  "shareSessionTitleProcessingPhoto": "Processing Photo",
+  "@shareSessionTitleProcessingPhoto": {
+    "description": "Title during photo processing"
+  },
+  "shareSessionTitleSavingClipping": "Saving Clipping",
+  "@shareSessionTitleSavingClipping": {
+    "description": "Title during clipping save"
+  },
+  "shareSessionTitleExtractingContent": "Extracting Content",
+  "@shareSessionTitleExtractingContent": {
+    "description": "Title during content extraction"
+  },
+  "shareSessionTitleExtractionFailed": "Extraction Failed",
+  "@shareSessionTitleExtractionFailed": {
+    "description": "Title when extraction fails"
+  },
+
+  "shareSessionErrorTitleNoRecipe": "No Recipe Found",
+  "@shareSessionErrorTitleNoRecipe": {
+    "description": "Error title when no recipe detected"
+  },
+  "shareSessionErrorTitleCantRead": "Couldn't Read Post",
+  "@shareSessionErrorTitleCantRead": {
+    "description": "Error title when post can't be read"
+  },
+  "shareSessionErrorTitleNoConnection": "No Connection",
+  "@shareSessionErrorTitleNoConnection": {
+    "description": "Error title when offline"
+  },
+  "shareSessionErrorTitleGeneric": "Something Went Wrong",
+  "@shareSessionErrorTitleGeneric": {
+    "description": "Generic error title"
+  },
+  "shareSessionErrorTitleCantSave": "Couldn't Save",
+  "@shareSessionErrorTitleCantSave": {
+    "description": "Error title when save fails"
+  },
+  "shareSessionErrorTitleImportFailed": "Import Failed",
+  "@shareSessionErrorTitleImportFailed": {
+    "description": "Error title when import fails"
+  },
+
+  "shareSessionActionImportFromPhoto": "Import from Photo",
+  "@shareSessionActionImportFromPhoto": {
+    "description": "Button title for photo import"
+  },
+  "shareSessionActionImportFromPhotoDesc": "Extract recipe from cookbook or food photo",
+  "@shareSessionActionImportFromPhotoDesc": {
+    "description": "Button description for photo import"
+  },
+  "shareSessionActionImportRecipe": "Import Recipe",
+  "@shareSessionActionImportRecipe": {
+    "description": "Button title for recipe import"
+  },
+  "shareSessionActionImportRecipeDesc": "Extract ingredients and steps to create a new recipe",
+  "@shareSessionActionImportRecipeDesc": {
+    "description": "Button description for recipe import"
+  },
+  "shareSessionActionSaveAsClipping": "Save as Clipping",
+  "@shareSessionActionSaveAsClipping": {
+    "description": "Button title for save as clipping"
+  },
+  "shareSessionActionSaveAsClippingDesc": "Save for later and convert to a recipe when ready",
+  "@shareSessionActionSaveAsClippingDesc": {
+    "description": "Button description for save as clipping"
+  },
+  "shareSessionActionSaveClippingErrorDesc": "Save the link for later",
+  "@shareSessionActionSaveClippingErrorDesc": {
+    "description": "Button description in error state"
+  },
+
+  "shareSessionLoadingFetching": "Fetching from {domain}...",
+  "@shareSessionLoadingFetching": {
+    "description": "Loading text during fetch",
+    "placeholders": {
+      "domain": {
+        "type": "String",
+        "example": "Instagram"
+      }
+    }
+  },
+  "shareSessionLoadingProcessingPhoto": "Processing photo...",
+  "@shareSessionLoadingProcessingPhoto": {
+    "description": "Loading text during photo processing"
+  },
+  "shareSessionLoadingExtractingRecipe": "Extracting recipe...",
+  "@shareSessionLoadingExtractingRecipe": {
+    "description": "Loading text during recipe extraction"
+  },
+  "shareSessionLoadingSavingClipping": "Saving to clippings...",
+  "@shareSessionLoadingSavingClipping": {
+    "description": "Loading text during clipping save"
+  },
+  "shareSessionLoadingFindingIngredients": "Finding ingredients...",
+  "@shareSessionLoadingFindingIngredients": {
+    "description": "Animated loading text"
+  },
+  "shareSessionLoadingOrganizingSteps": "Organizing steps...",
+  "@shareSessionLoadingOrganizingSteps": {
+    "description": "Animated loading text"
+  },
+  "shareSessionLoadingReadingPhoto": "Reading photo...",
+  "@shareSessionLoadingReadingPhoto": {
+    "description": "Animated loading text"
+  },
+  "shareSessionLoadingFindingRecipe": "Finding recipe...",
+  "@shareSessionLoadingFindingRecipe": {
+    "description": "Animated loading text"
+  },
+  "shareSessionLoadingExtractingIngredients": "Extracting ingredients...",
+  "@shareSessionLoadingExtractingIngredients": {
+    "description": "Animated loading text"
+  },
+
+  "shareSessionClippingIngredients": "Ingredients",
+  "@shareSessionClippingIngredients": {
+    "description": "Section title in clipping"
+  },
+  "shareSessionClippingInstructions": "Instructions",
+  "@shareSessionClippingInstructions": {
+    "description": "Section title in clipping"
+  },
+  "shareSessionClippingImportedFrom": "Imported from {platform} on {date}",
+  "@shareSessionClippingImportedFrom": {
+    "description": "Metadata in clipping",
+    "placeholders": {
+      "platform": {
+        "type": "String",
+        "example": "Instagram"
+      },
+      "date": {
+        "type": "String",
+        "example": "Jan 15, 2025"
+      }
+    }
+  },
+  "shareSessionClippingSharedContent": "shared content",
+  "@shareSessionClippingSharedContent": {
+    "description": "Default platform name when unknown"
+  },
+
+  "commonClose": "Close",
+  "@commonClose": {
+    "description": "Close button text"
   }
 }

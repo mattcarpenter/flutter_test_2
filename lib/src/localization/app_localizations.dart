@@ -2487,7 +2487,7 @@ abstract class AppLocalizations {
   /// **'Done'**
   String get commonDone;
 
-  /// Close button
+  /// Close button text
   ///
   /// In en, this message translates to:
   /// **'Close'**
@@ -5187,6 +5187,348 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'this member'**
   String get householdThisMember;
+
+  /// Loading state title in share session modal
+  ///
+  /// In en, this message translates to:
+  /// **'Loading...'**
+  String get shareSessionLoading;
+
+  /// Error state title in share session modal
+  ///
+  /// In en, this message translates to:
+  /// **'Error'**
+  String get shareSessionError;
+
+  /// Error message when share session fails to load
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to load shared content. Please try again.'**
+  String get shareSessionErrorLoadFailed;
+
+  /// Error message when session data fails to load
+  ///
+  /// In en, this message translates to:
+  /// **'We couldn\'t load the shared content. Please try sharing again.'**
+  String get shareSessionErrorSessionFailed;
+
+  /// Error message when OG extraction fails
+  ///
+  /// In en, this message translates to:
+  /// **'We couldn\'t read this post. It may be private or unavailable.'**
+  String get shareSessionErrorCantReadPost;
+
+  /// Error message when web extraction fails
+  ///
+  /// In en, this message translates to:
+  /// **'We couldn\'t read this page. Please try again.'**
+  String get shareSessionErrorCantReadPage;
+
+  /// Generic processing error message
+  ///
+  /// In en, this message translates to:
+  /// **'Something went wrong while processing.'**
+  String get shareSessionErrorProcessing;
+
+  /// Error message when user is offline
+  ///
+  /// In en, this message translates to:
+  /// **'You\'re offline. Please check your internet connection and try again.'**
+  String get shareSessionErrorOffline;
+
+  /// Error message when image processing fails
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to process the image(s). Please try again.'**
+  String get shareSessionErrorImageProcessing;
+
+  /// Error message when no recipe detected in photo
+  ///
+  /// In en, this message translates to:
+  /// **'No recipe found in the photo.\n\nTry sharing a photo of a recipe card or cookbook page.'**
+  String get shareSessionErrorNoRecipeInPhoto;
+
+  /// Error message when photo processing fails
+  ///
+  /// In en, this message translates to:
+  /// **'Something went wrong while processing the photo.'**
+  String get shareSessionErrorPhotoProcessing;
+
+  /// Error message when no content is available
+  ///
+  /// In en, this message translates to:
+  /// **'No content available to extract.'**
+  String get shareSessionErrorNoContent;
+
+  /// Error message when no recipe found on web page
+  ///
+  /// In en, this message translates to:
+  /// **'This page doesn\'t appear to contain recipe information.\n\nTry sharing a page that includes a recipe.'**
+  String get shareSessionErrorNoRecipeOnPage;
+
+  /// Error message during import
+  ///
+  /// In en, this message translates to:
+  /// **'Something went wrong while importing.'**
+  String get shareSessionErrorImporting;
+
+  /// Error message when Plus is required for extraction
+  ///
+  /// In en, this message translates to:
+  /// **'This site requires Plus subscription for recipe extraction.'**
+  String get shareSessionErrorPlusRequired;
+
+  /// Error message when no content in social post
+  ///
+  /// In en, this message translates to:
+  /// **'We couldn\'t find any content to extract from this post.'**
+  String get shareSessionErrorNoContentInPost;
+
+  /// Error message when no recipe in social post
+  ///
+  /// In en, this message translates to:
+  /// **'This post doesn\'t appear to contain recipe information.\n\nTry sharing a post that includes ingredients or cooking steps in the caption.'**
+  String get shareSessionErrorNoRecipeInPost;
+
+  /// Error message when recipe extraction fails
+  ///
+  /// In en, this message translates to:
+  /// **'Unable to extract a recipe from this post.'**
+  String get shareSessionErrorExtractFailed;
+
+  /// Error message prompting retry
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to extract recipe. Please try again.'**
+  String get shareSessionErrorExtractRetry;
+
+  /// Short error message when no recipe found
+  ///
+  /// In en, this message translates to:
+  /// **'No recipe found on this page.'**
+  String get shareSessionErrorNoRecipeOnPageShort;
+
+  /// Error message when clipping save fails
+  ///
+  /// In en, this message translates to:
+  /// **'We couldn\'t save this clipping. Please try again.'**
+  String get shareSessionErrorClippingSave;
+
+  /// Error message when no images to process
+  ///
+  /// In en, this message translates to:
+  /// **'No images found to process.'**
+  String get shareSessionErrorNoImages;
+
+  /// Error message when page load fails
+  ///
+  /// In en, this message translates to:
+  /// **'Could not load the page. Please try again.'**
+  String get shareSessionErrorPageLoad;
+
+  /// Fallback error message
+  ///
+  /// In en, this message translates to:
+  /// **'An error occurred.'**
+  String get shareSessionErrorOccurred;
+
+  /// Generic fallback error message
+  ///
+  /// In en, this message translates to:
+  /// **'Something went wrong.'**
+  String get shareSessionErrorGeneric;
+
+  /// Title for choosing action state
+  ///
+  /// In en, this message translates to:
+  /// **'Shared Content'**
+  String get shareSessionTitleSharedContent;
+
+  /// Title during recipe import
+  ///
+  /// In en, this message translates to:
+  /// **'Importing Recipe'**
+  String get shareSessionTitleImportingRecipe;
+
+  /// Title during photo processing
+  ///
+  /// In en, this message translates to:
+  /// **'Processing Photo'**
+  String get shareSessionTitleProcessingPhoto;
+
+  /// Title during clipping save
+  ///
+  /// In en, this message translates to:
+  /// **'Saving Clipping'**
+  String get shareSessionTitleSavingClipping;
+
+  /// Title during content extraction
+  ///
+  /// In en, this message translates to:
+  /// **'Extracting Content'**
+  String get shareSessionTitleExtractingContent;
+
+  /// Title when extraction fails
+  ///
+  /// In en, this message translates to:
+  /// **'Extraction Failed'**
+  String get shareSessionTitleExtractionFailed;
+
+  /// Error title when no recipe detected
+  ///
+  /// In en, this message translates to:
+  /// **'No Recipe Found'**
+  String get shareSessionErrorTitleNoRecipe;
+
+  /// Error title when post can't be read
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t Read Post'**
+  String get shareSessionErrorTitleCantRead;
+
+  /// Error title when offline
+  ///
+  /// In en, this message translates to:
+  /// **'No Connection'**
+  String get shareSessionErrorTitleNoConnection;
+
+  /// Generic error title
+  ///
+  /// In en, this message translates to:
+  /// **'Something Went Wrong'**
+  String get shareSessionErrorTitleGeneric;
+
+  /// Error title when save fails
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t Save'**
+  String get shareSessionErrorTitleCantSave;
+
+  /// Error title when import fails
+  ///
+  /// In en, this message translates to:
+  /// **'Import Failed'**
+  String get shareSessionErrorTitleImportFailed;
+
+  /// Button title for photo import
+  ///
+  /// In en, this message translates to:
+  /// **'Import from Photo'**
+  String get shareSessionActionImportFromPhoto;
+
+  /// Button description for photo import
+  ///
+  /// In en, this message translates to:
+  /// **'Extract recipe from cookbook or food photo'**
+  String get shareSessionActionImportFromPhotoDesc;
+
+  /// Button title for recipe import
+  ///
+  /// In en, this message translates to:
+  /// **'Import Recipe'**
+  String get shareSessionActionImportRecipe;
+
+  /// Button description for recipe import
+  ///
+  /// In en, this message translates to:
+  /// **'Extract ingredients and steps to create a new recipe'**
+  String get shareSessionActionImportRecipeDesc;
+
+  /// Button title for save as clipping
+  ///
+  /// In en, this message translates to:
+  /// **'Save as Clipping'**
+  String get shareSessionActionSaveAsClipping;
+
+  /// Button description for save as clipping
+  ///
+  /// In en, this message translates to:
+  /// **'Save for later and convert to a recipe when ready'**
+  String get shareSessionActionSaveAsClippingDesc;
+
+  /// Button description in error state
+  ///
+  /// In en, this message translates to:
+  /// **'Save the link for later'**
+  String get shareSessionActionSaveClippingErrorDesc;
+
+  /// Loading text during fetch
+  ///
+  /// In en, this message translates to:
+  /// **'Fetching from {domain}...'**
+  String shareSessionLoadingFetching(String domain);
+
+  /// Loading text during photo processing
+  ///
+  /// In en, this message translates to:
+  /// **'Processing photo...'**
+  String get shareSessionLoadingProcessingPhoto;
+
+  /// Loading text during recipe extraction
+  ///
+  /// In en, this message translates to:
+  /// **'Extracting recipe...'**
+  String get shareSessionLoadingExtractingRecipe;
+
+  /// Loading text during clipping save
+  ///
+  /// In en, this message translates to:
+  /// **'Saving to clippings...'**
+  String get shareSessionLoadingSavingClipping;
+
+  /// Animated loading text
+  ///
+  /// In en, this message translates to:
+  /// **'Finding ingredients...'**
+  String get shareSessionLoadingFindingIngredients;
+
+  /// Animated loading text
+  ///
+  /// In en, this message translates to:
+  /// **'Organizing steps...'**
+  String get shareSessionLoadingOrganizingSteps;
+
+  /// Animated loading text
+  ///
+  /// In en, this message translates to:
+  /// **'Reading photo...'**
+  String get shareSessionLoadingReadingPhoto;
+
+  /// Animated loading text
+  ///
+  /// In en, this message translates to:
+  /// **'Finding recipe...'**
+  String get shareSessionLoadingFindingRecipe;
+
+  /// Animated loading text
+  ///
+  /// In en, this message translates to:
+  /// **'Extracting ingredients...'**
+  String get shareSessionLoadingExtractingIngredients;
+
+  /// Section title in clipping
+  ///
+  /// In en, this message translates to:
+  /// **'Ingredients'**
+  String get shareSessionClippingIngredients;
+
+  /// Section title in clipping
+  ///
+  /// In en, this message translates to:
+  /// **'Instructions'**
+  String get shareSessionClippingInstructions;
+
+  /// Metadata in clipping
+  ///
+  /// In en, this message translates to:
+  /// **'Imported from {platform} on {date}'**
+  String shareSessionClippingImportedFrom(String platform, String date);
+
+  /// Default platform name when unknown
+  ///
+  /// In en, this message translates to:
+  /// **'shared content'**
+  String get shareSessionClippingSharedContent;
 }
 
 class _AppLocalizationsDelegate

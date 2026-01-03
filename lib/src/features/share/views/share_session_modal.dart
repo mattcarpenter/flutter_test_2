@@ -41,6 +41,7 @@ import '../../clippings/models/extracted_recipe.dart';
 import '../../clippings/models/recipe_preview.dart';
 import '../../clippings/providers/preview_usage_provider.dart';
 import '../../recipes/views/add_recipe_modal.dart';
+import '../../../localization/l10n_extension.dart';
 import '../models/og_extracted_content.dart';
 import '../widgets/share_recipe_preview_result.dart';
 
@@ -118,7 +119,7 @@ class _LoadingState extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                'Loading...',
+                context.l10n.shareSessionLoading,
                 style: AppTypography.h4.copyWith(
                   color: AppColors.of(context).textPrimary,
                 ),
@@ -161,7 +162,7 @@ class _ErrorState extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                'Error',
+                context.l10n.shareSessionError,
                 style: AppTypography.h4.copyWith(
                   color: AppColors.of(context).textPrimary,
                 ),
@@ -176,7 +177,7 @@ class _ErrorState extends StatelessWidget {
           ),
           SizedBox(height: AppSpacing.lg),
           Text(
-            'Failed to load shared content. Please try again.',
+            context.l10n.shareSessionErrorLoadFailed,
             style: AppTypography.body.copyWith(
               color: AppColors.of(context).textSecondary,
             ),
@@ -363,7 +364,7 @@ class _ShareSessionLoadedState extends ConsumerState<_ShareSessionLoaded>
           AppLogger.error('Web extraction failed', error);
           // Store the error result so we can show an appropriate message
           _webExtractionResult = WebExtractionResult(
-            error: 'Could not load the page. Please try again.',
+            error: context.l10n.shareSessionErrorPageLoad,
             sourceUrl: genericUrl.toString(),
           );
           if (!_webExtractionCompleter!.isCompleted) {
@@ -569,7 +570,7 @@ class _ShareSessionLoadedState extends ConsumerState<_ShareSessionLoaded>
       // Check if session failed to load
       if (_session == null) {
         setState(() {
-          _extractionError = 'We couldn\'t load the shared content. Please try sharing again.';
+          _extractionError = context.l10n.shareSessionErrorSessionFailed;
           _errorType = _ExtractionErrorType.sessionFailed;
           _modalState = _ModalState.extractionError;
         });
@@ -605,7 +606,7 @@ class _ShareSessionLoadedState extends ConsumerState<_ShareSessionLoaded>
         // Had an extractable URL but extraction failed/returned empty
         AppLogger.warning('OG extraction returned no content');
         setState(() {
-          _extractionError = 'We couldn\'t read this post. It may be private or unavailable.';
+          _extractionError = context.l10n.shareSessionErrorCantReadPost;
           _errorType = _ExtractionErrorType.noContentExtracted;
           _modalState = _ModalState.extractionError;
         });
@@ -613,7 +614,7 @@ class _ShareSessionLoadedState extends ConsumerState<_ShareSessionLoaded>
         // Had a generic URL but web extraction failed
         AppLogger.warning('Web extraction returned no result');
         setState(() {
-          _extractionError = 'We couldn\'t read this page. Please try again.';
+          _extractionError = context.l10n.shareSessionErrorCantReadPage;
           _errorType = _ExtractionErrorType.noContentExtracted;
           _modalState = _ModalState.extractionError;
         });
@@ -626,7 +627,7 @@ class _ShareSessionLoadedState extends ConsumerState<_ShareSessionLoaded>
       AppLogger.error('Content processing failed', e, stack);
       if (!mounted) return;
       setState(() {
-        _extractionError = 'Something went wrong while processing.';
+        _extractionError = context.l10n.shareSessionErrorProcessing;
         _errorType = _ExtractionErrorType.generic;
         _modalState = _ModalState.extractionError;
       });
@@ -651,7 +652,7 @@ class _ShareSessionLoadedState extends ConsumerState<_ShareSessionLoaded>
     if (connectivityResult.contains(ConnectivityResult.none)) {
       if (mounted) {
         setState(() {
-          _extractionError = 'You\'re offline. Please check your internet connection and try again.';
+          _extractionError = context.l10n.shareSessionErrorOffline;
           _errorType = _ExtractionErrorType.noConnectivity;
           _modalState = _ModalState.extractionError;
         });
@@ -695,7 +696,7 @@ class _ShareSessionLoadedState extends ConsumerState<_ShareSessionLoaded>
     if (connectivityResult.contains(ConnectivityResult.none)) {
       if (mounted) {
         setState(() {
-          _extractionError = 'You\'re offline. Please check your internet connection and try again.';
+          _extractionError = context.l10n.shareSessionErrorOffline;
           _errorType = _ExtractionErrorType.noConnectivity;
           _modalState = _ModalState.extractionError;
         });
@@ -709,7 +710,7 @@ class _ShareSessionLoadedState extends ConsumerState<_ShareSessionLoaded>
     final imagePaths = _findImagePaths();
     if (imagePaths.isEmpty) {
       setState(() {
-        _extractionError = 'No images found to process.';
+        _extractionError = context.l10n.shareSessionErrorNoImages;
         _errorType = _ExtractionErrorType.noContentExtracted;
         _modalState = _ModalState.extractionError;
       });
@@ -751,7 +752,7 @@ class _ShareSessionLoadedState extends ConsumerState<_ShareSessionLoaded>
 
       if (images.isEmpty) {
         setState(() {
-          _extractionError = 'Failed to process the image(s). Please try again.';
+          _extractionError = context.l10n.shareSessionErrorImageProcessing;
           _errorType = _ExtractionErrorType.noContentExtracted;
           _modalState = _ModalState.extractionError;
         });
@@ -766,7 +767,7 @@ class _ShareSessionLoadedState extends ConsumerState<_ShareSessionLoaded>
 
       if (recipe == null) {
         setState(() {
-          _extractionError = 'No recipe found in the photo.\n\nTry sharing a photo of a recipe card or cookbook page.';
+          _extractionError = context.l10n.shareSessionErrorNoRecipeInPhoto;
           _errorType = _ExtractionErrorType.noRecipeDetected;
           _modalState = _ModalState.extractionError;
         });
@@ -804,7 +805,7 @@ class _ShareSessionLoadedState extends ConsumerState<_ShareSessionLoaded>
       AppLogger.error('Photo recipe extraction failed', e);
       if (!mounted) return;
       setState(() {
-        _extractionError = 'Something went wrong while processing the photo.';
+        _extractionError = context.l10n.shareSessionErrorPhotoProcessing;
         _errorType = _ExtractionErrorType.generic;
         _modalState = _ModalState.extractionError;
       });
@@ -819,7 +820,7 @@ class _ShareSessionLoadedState extends ConsumerState<_ShareSessionLoaded>
 
       if (images.isEmpty) {
         setState(() {
-          _extractionError = 'Failed to process the image(s). Please try again.';
+          _extractionError = context.l10n.shareSessionErrorImageProcessing;
           _errorType = _ExtractionErrorType.noContentExtracted;
           _modalState = _ModalState.extractionError;
         });
@@ -834,7 +835,7 @@ class _ShareSessionLoadedState extends ConsumerState<_ShareSessionLoaded>
 
       if (preview == null) {
         setState(() {
-          _extractionError = 'No recipe found in the photo.\n\nTry sharing a photo of a recipe card or cookbook page.';
+          _extractionError = context.l10n.shareSessionErrorNoRecipeInPhoto;
           _errorType = _ExtractionErrorType.noRecipeDetected;
           _modalState = _ModalState.extractionError;
         });
@@ -867,7 +868,7 @@ class _ShareSessionLoadedState extends ConsumerState<_ShareSessionLoaded>
       AppLogger.error('Photo recipe preview failed', e);
       if (!mounted) return;
       setState(() {
-        _extractionError = 'Something went wrong while processing the photo.';
+        _extractionError = context.l10n.shareSessionErrorPhotoProcessing;
         _errorType = _ExtractionErrorType.generic;
         _modalState = _ModalState.extractionError;
       });
@@ -969,7 +970,7 @@ class _ShareSessionLoadedState extends ConsumerState<_ShareSessionLoaded>
                     if (images.isEmpty) {
                       setModalState(() {
                         isExtracting = false;
-                        errorMessage = 'Failed to process the image(s).';
+                        errorMessage = builderContext.l10n.shareSessionErrorImageProcessing;
                       });
                       return;
                     }
@@ -982,7 +983,7 @@ class _ShareSessionLoadedState extends ConsumerState<_ShareSessionLoaded>
                     if (recipe == null) {
                       setModalState(() {
                         isExtracting = false;
-                        errorMessage = 'No recipe found in the photo.';
+                        errorMessage = builderContext.l10n.shareSessionErrorNoRecipeOnPageShort;
                       });
                       return;
                     }
@@ -1021,7 +1022,7 @@ class _ShareSessionLoadedState extends ConsumerState<_ShareSessionLoaded>
                     if (modalContext.mounted) {
                       setModalState(() {
                         isExtracting = false;
-                        errorMessage = 'Failed to extract recipe. Please try again.';
+                        errorMessage = builderContext.l10n.shareSessionErrorExtractRetry;
                       });
                     }
                   }
@@ -1039,7 +1040,7 @@ class _ShareSessionLoadedState extends ConsumerState<_ShareSessionLoaded>
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           Text(
-                            'Importing Recipe',
+                            builderContext.l10n.shareSessionTitleImportingRecipe,
                             style: AppTypography.h4.copyWith(
                               color: AppColors.of(builderContext).textPrimary,
                             ),
@@ -1050,7 +1051,7 @@ class _ShareSessionLoadedState extends ConsumerState<_ShareSessionLoaded>
                       const CupertinoActivityIndicator(radius: 16),
                       SizedBox(height: AppSpacing.lg),
                       Text(
-                        'Processing photo...',
+                        builderContext.l10n.shareSessionLoadingProcessingPhoto,
                         style: AppTypography.body.copyWith(
                           color: AppColors.of(builderContext).textSecondary,
                         ),
@@ -1071,7 +1072,7 @@ class _ShareSessionLoadedState extends ConsumerState<_ShareSessionLoaded>
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           Text(
-                            'Extraction Failed',
+                            builderContext.l10n.shareSessionTitleExtractionFailed,
                             style: AppTypography.h4.copyWith(
                               color: AppColors.of(builderContext).textPrimary,
                             ),
@@ -1089,7 +1090,7 @@ class _ShareSessionLoadedState extends ConsumerState<_ShareSessionLoaded>
                       ),
                       SizedBox(height: AppSpacing.lg),
                       Text(
-                        errorMessage ?? 'An error occurred.',
+                        errorMessage ?? builderContext.l10n.shareSessionErrorOccurred,
                         style: AppTypography.body.copyWith(
                           color: AppColors.of(builderContext).textSecondary,
                         ),
@@ -1162,7 +1163,7 @@ class _ShareSessionLoadedState extends ConsumerState<_ShareSessionLoaded>
     final result = _webExtractionResult;
     if (result == null) {
       setState(() {
-        _extractionError = 'No content available to extract.';
+        _extractionError = context.l10n.shareSessionErrorNoContent;
         _errorType = _ExtractionErrorType.noContentExtracted;
         _modalState = _ModalState.extractionError;
       });
@@ -1195,7 +1196,7 @@ class _ShareSessionLoadedState extends ConsumerState<_ShareSessionLoaded>
     if (connectivityResult.contains(ConnectivityResult.none)) {
       if (mounted) {
         setState(() {
-          _extractionError = 'You\'re offline. Please check your internet connection and try again.';
+          _extractionError = context.l10n.shareSessionErrorOffline;
           _errorType = _ExtractionErrorType.noConnectivity;
           _modalState = _ModalState.extractionError;
         });
@@ -1276,7 +1277,7 @@ class _ShareSessionLoadedState extends ConsumerState<_ShareSessionLoaded>
   Future<void> _performWebBackendExtraction(WebExtractionResult webResult) async {
     if (!webResult.hasHtml) {
       setState(() {
-        _extractionError = 'No content available to extract.';
+        _extractionError = context.l10n.shareSessionErrorNoContent;
         _errorType = _ExtractionErrorType.noContentExtracted;
         _modalState = _ModalState.extractionError;
       });
@@ -1294,7 +1295,7 @@ class _ShareSessionLoadedState extends ConsumerState<_ShareSessionLoaded>
 
       if (recipe == null) {
         setState(() {
-          _extractionError = 'This page doesn\'t appear to contain recipe information.\n\nTry sharing a page that includes a recipe.';
+          _extractionError = context.l10n.shareSessionErrorNoRecipeOnPage;
           _errorType = _ExtractionErrorType.noRecipeDetected;
           _modalState = _ModalState.extractionError;
         });
@@ -1335,7 +1336,7 @@ class _ShareSessionLoadedState extends ConsumerState<_ShareSessionLoaded>
       AppLogger.error('Web backend extraction failed', e);
       if (!mounted) return;
       setState(() {
-        _extractionError = 'Something went wrong while importing.';
+        _extractionError = context.l10n.shareSessionErrorImporting;
         _errorType = _ExtractionErrorType.generic;
         _modalState = _ModalState.extractionError;
       });
@@ -1346,7 +1347,7 @@ class _ShareSessionLoadedState extends ConsumerState<_ShareSessionLoaded>
   Future<void> _performWebPreviewExtraction(WebExtractionResult webResult) async {
     if (!webResult.hasHtml) {
       setState(() {
-        _extractionError = 'This site requires Plus subscription for recipe extraction.';
+        _extractionError = context.l10n.shareSessionErrorPlusRequired;
         _errorType = _ExtractionErrorType.noContentExtracted;
         _modalState = _ModalState.extractionError;
       });
@@ -1364,7 +1365,7 @@ class _ShareSessionLoadedState extends ConsumerState<_ShareSessionLoaded>
 
       if (preview == null) {
         setState(() {
-          _extractionError = 'This page doesn\'t appear to contain recipe information.\n\nTry sharing a page that includes a recipe.';
+          _extractionError = context.l10n.shareSessionErrorNoRecipeOnPage;
           _errorType = _ExtractionErrorType.noRecipeDetected;
           _modalState = _ModalState.extractionError;
         });
@@ -1397,7 +1398,7 @@ class _ShareSessionLoadedState extends ConsumerState<_ShareSessionLoaded>
       AppLogger.error('Web preview extraction failed', e);
       if (!mounted) return;
       setState(() {
-        _extractionError = 'Something went wrong while importing.';
+        _extractionError = context.l10n.shareSessionErrorImporting;
         _errorType = _ExtractionErrorType.generic;
         _modalState = _ModalState.extractionError;
       });
@@ -1408,7 +1409,7 @@ class _ShareSessionLoadedState extends ConsumerState<_ShareSessionLoaded>
   Future<void> _performFullRecipeExtraction() async {
     if (_extractedContent == null || !_extractedContent!.hasContent) {
       setState(() {
-        _extractionError = 'We couldn\'t find any content to extract from this post.';
+        _extractionError = context.l10n.shareSessionErrorNoContentInPost;
         _errorType = _ExtractionErrorType.noContentExtracted;
         _modalState = _ModalState.extractionError;
       });
@@ -1436,7 +1437,7 @@ class _ShareSessionLoadedState extends ConsumerState<_ShareSessionLoaded>
 
       if (recipe == null) {
         setState(() {
-          _extractionError = 'This post doesn\'t appear to contain recipe information.\n\nTry sharing a post that includes ingredients or cooking steps in the caption.';
+          _extractionError = context.l10n.shareSessionErrorNoRecipeInPost;
           _errorType = _ExtractionErrorType.noRecipeDetected;
           _modalState = _ModalState.extractionError;
         });
@@ -1489,7 +1490,7 @@ class _ShareSessionLoadedState extends ConsumerState<_ShareSessionLoaded>
       AppLogger.error('Recipe extraction failed', e);
       if (!mounted) return;
       setState(() {
-        _extractionError = 'Something went wrong while importing.';
+        _extractionError = context.l10n.shareSessionErrorImporting;
         _errorType = _ExtractionErrorType.generic;
         _modalState = _ModalState.extractionError;
       });
@@ -1500,7 +1501,7 @@ class _ShareSessionLoadedState extends ConsumerState<_ShareSessionLoaded>
   Future<void> _performRecipePreviewExtraction() async {
     if (_extractedContent == null || !_extractedContent!.hasContent) {
       setState(() {
-        _extractionError = 'We couldn\'t find any content to extract from this post.';
+        _extractionError = context.l10n.shareSessionErrorNoContentInPost;
         _errorType = _ExtractionErrorType.noContentExtracted;
         _modalState = _ModalState.extractionError;
       });
@@ -1528,7 +1529,7 @@ class _ShareSessionLoadedState extends ConsumerState<_ShareSessionLoaded>
 
       if (preview == null) {
         setState(() {
-          _extractionError = 'This post doesn\'t appear to contain recipe information.\n\nTry sharing a post that includes ingredients or cooking steps in the caption.';
+          _extractionError = context.l10n.shareSessionErrorNoRecipeInPost;
           _errorType = _ExtractionErrorType.noRecipeDetected;
           _modalState = _ModalState.extractionError;
         });
@@ -1561,7 +1562,7 @@ class _ShareSessionLoadedState extends ConsumerState<_ShareSessionLoaded>
       AppLogger.error('Recipe preview failed', e);
       if (!mounted) return;
       setState(() {
-        _extractionError = 'Something went wrong while importing.';
+        _extractionError = context.l10n.shareSessionErrorImporting;
         _errorType = _ExtractionErrorType.generic;
         _modalState = _ModalState.extractionError;
       });
@@ -1711,7 +1712,7 @@ class _ShareSessionLoadedState extends ConsumerState<_ShareSessionLoaded>
       // No content - show error briefly
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('No content available to extract.')),
+          SnackBar(content: Text(context.l10n.shareSessionErrorNoContent)),
         );
       }
       return;
@@ -1761,8 +1762,7 @@ class _ShareSessionLoadedState extends ConsumerState<_ShareSessionLoaded>
                     if (recipe == null) {
                       setModalState(() {
                         isExtracting = false;
-                        errorMessage =
-                            'Unable to extract a recipe from this post.';
+                        errorMessage = builderContext.l10n.shareSessionErrorExtractFailed;
                       });
                       return;
                     }
@@ -1801,7 +1801,7 @@ class _ShareSessionLoadedState extends ConsumerState<_ShareSessionLoaded>
                     if (modalContext.mounted) {
                       setModalState(() {
                         isExtracting = false;
-                        errorMessage = 'Failed to extract recipe. Please try again.';
+                        errorMessage = builderContext.l10n.shareSessionErrorExtractRetry;
                       });
                     }
                   }
@@ -1819,7 +1819,7 @@ class _ShareSessionLoadedState extends ConsumerState<_ShareSessionLoaded>
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           Text(
-                            'Importing Recipe',
+                            builderContext.l10n.shareSessionTitleImportingRecipe,
                             style: AppTypography.h4.copyWith(
                               color: AppColors.of(builderContext).textPrimary,
                             ),
@@ -1830,7 +1830,7 @@ class _ShareSessionLoadedState extends ConsumerState<_ShareSessionLoaded>
                       const CupertinoActivityIndicator(radius: 16),
                       SizedBox(height: AppSpacing.lg),
                       Text(
-                        'Extracting recipe...',
+                        builderContext.l10n.shareSessionLoadingExtractingRecipe,
                         style: AppTypography.body.copyWith(
                           color: AppColors.of(builderContext).textSecondary,
                         ),
@@ -1851,7 +1851,7 @@ class _ShareSessionLoadedState extends ConsumerState<_ShareSessionLoaded>
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           Text(
-                            'Extraction Failed',
+                            builderContext.l10n.shareSessionTitleExtractionFailed,
                             style: AppTypography.h4.copyWith(
                               color: AppColors.of(builderContext).textPrimary,
                             ),
@@ -1869,7 +1869,7 @@ class _ShareSessionLoadedState extends ConsumerState<_ShareSessionLoaded>
                       ),
                       SizedBox(height: AppSpacing.lg),
                       Text(
-                        errorMessage ?? 'An error occurred.',
+                        errorMessage ?? builderContext.l10n.shareSessionErrorOccurred,
                         style: AppTypography.body.copyWith(
                           color: AppColors.of(builderContext).textSecondary,
                         ),
@@ -1895,7 +1895,7 @@ class _ShareSessionLoadedState extends ConsumerState<_ShareSessionLoaded>
     if (webResult == null || !webResult.hasHtml) {
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('No content available to extract.')),
+          SnackBar(content: Text(context.l10n.shareSessionErrorNoContent)),
         );
       }
       return;
@@ -1935,7 +1935,7 @@ class _ShareSessionLoadedState extends ConsumerState<_ShareSessionLoaded>
                     if (recipe == null) {
                       setModalState(() {
                         isExtracting = false;
-                        errorMessage = 'No recipe found on this page.';
+                        errorMessage = builderContext.l10n.shareSessionErrorNoRecipeOnPageShort;
                       });
                       return;
                     }
@@ -1975,7 +1975,7 @@ class _ShareSessionLoadedState extends ConsumerState<_ShareSessionLoaded>
                     if (modalContext.mounted) {
                       setModalState(() {
                         isExtracting = false;
-                        errorMessage = 'Failed to extract recipe. Please try again.';
+                        errorMessage = builderContext.l10n.shareSessionErrorExtractRetry;
                       });
                     }
                   }
@@ -1993,7 +1993,7 @@ class _ShareSessionLoadedState extends ConsumerState<_ShareSessionLoaded>
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           Text(
-                            'Importing Recipe',
+                            builderContext.l10n.shareSessionTitleImportingRecipe,
                             style: AppTypography.h4.copyWith(
                               color: AppColors.of(builderContext).textPrimary,
                             ),
@@ -2004,7 +2004,7 @@ class _ShareSessionLoadedState extends ConsumerState<_ShareSessionLoaded>
                       const CupertinoActivityIndicator(radius: 16),
                       SizedBox(height: AppSpacing.lg),
                       Text(
-                        'Extracting recipe...',
+                        builderContext.l10n.shareSessionLoadingExtractingRecipe,
                         style: AppTypography.body.copyWith(
                           color: AppColors.of(builderContext).textSecondary,
                         ),
@@ -2025,7 +2025,7 @@ class _ShareSessionLoadedState extends ConsumerState<_ShareSessionLoaded>
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           Text(
-                            'Extraction Failed',
+                            builderContext.l10n.shareSessionTitleExtractionFailed,
                             style: AppTypography.h4.copyWith(
                               color: AppColors.of(builderContext).textPrimary,
                             ),
@@ -2043,7 +2043,7 @@ class _ShareSessionLoadedState extends ConsumerState<_ShareSessionLoaded>
                       ),
                       SizedBox(height: AppSpacing.lg),
                       Text(
-                        errorMessage ?? 'An error occurred.',
+                        errorMessage ?? builderContext.l10n.shareSessionErrorOccurred,
                         style: AppTypography.body.copyWith(
                           color: AppColors.of(builderContext).textSecondary,
                         ),
@@ -2419,7 +2419,7 @@ class _ShareSessionLoadedState extends ConsumerState<_ShareSessionLoaded>
       final ingredients = recipe.ingredients.where((i) => i.isIngredient).toList();
       if (ingredients.isNotEmpty) {
         ops.add({
-          'insert': 'Ingredients',
+          'insert': context.l10n.shareSessionClippingIngredients,
           'attributes': {'bold': true},
         });
         ops.add({'insert': '\n'});
@@ -2433,7 +2433,7 @@ class _ShareSessionLoadedState extends ConsumerState<_ShareSessionLoaded>
       final steps = recipe.steps.where((s) => s.isStep).toList();
       if (steps.isNotEmpty) {
         ops.add({
-          'insert': 'Instructions',
+          'insert': context.l10n.shareSessionClippingInstructions,
           'attributes': {'bold': true},
         });
         ops.add({'insert': '\n'});
@@ -2454,9 +2454,9 @@ class _ShareSessionLoadedState extends ConsumerState<_ShareSessionLoaded>
     }
 
     // Import metadata
-    final platform = content.sourcePlatform ?? 'shared content';
+    final platform = content.sourcePlatform ?? context.l10n.shareSessionClippingSharedContent;
     final date = DateFormat.yMMMd().format(DateTime.now());
-    ops.add({'insert': 'Imported from $platform on $date\n'});
+    ops.add({'insert': '${context.l10n.shareSessionClippingImportedFrom(platform, date)}\n'});
 
     return jsonEncode(ops);
   }
@@ -2523,7 +2523,7 @@ class _ShareSessionLoadedState extends ConsumerState<_ShareSessionLoaded>
       AppLogger.error('Failed to save clipping', e, stack);
       if (mounted) {
         setState(() {
-          _extractionError = 'We couldn\'t save this clipping. Please try again.';
+          _extractionError = context.l10n.shareSessionErrorClippingSave;
           _errorType = _ExtractionErrorType.clippingSaveFailed;
           _modalState = _ModalState.extractionError;
         });
@@ -2592,7 +2592,7 @@ class _ShareSessionLoadedState extends ConsumerState<_ShareSessionLoaded>
             children: [
               Expanded(
                 child: Text(
-                  'Shared Content',
+                  context.l10n.shareSessionTitleSharedContent,
                   style: AppTypography.h4.copyWith(
                     color: AppColors.of(context).textPrimary,
                   ),
@@ -2612,8 +2612,8 @@ class _ShareSessionLoadedState extends ConsumerState<_ShareSessionLoaded>
           if (hasImages) ...[
             _ActionButton(
               icon: Icons.photo_camera_outlined,
-              title: 'Import from Photo',
-              description: 'Extract recipe from cookbook or food photo',
+              title: context.l10n.shareSessionActionImportFromPhoto,
+              description: context.l10n.shareSessionActionImportFromPhotoDesc,
               emphasized: true,
               onTap: _onPhotoImportTap,
             ),
@@ -2624,8 +2624,8 @@ class _ShareSessionLoadedState extends ConsumerState<_ShareSessionLoaded>
           if (!hasImages)
             _ActionButton(
               icon: Icons.restaurant_menu,
-              title: 'Import Recipe',
-              description: 'Extract ingredients and steps to create a new recipe',
+              title: context.l10n.shareSessionActionImportRecipe,
+              description: context.l10n.shareSessionActionImportRecipeDesc,
               emphasized: true,
               onTap: () => _onActionTap(_ModalAction.importRecipe),
             ),
@@ -2635,8 +2635,8 @@ class _ShareSessionLoadedState extends ConsumerState<_ShareSessionLoaded>
             if (!hasImages) SizedBox(height: AppSpacing.md),
             _ActionButton(
               icon: Icons.note_add_outlined,
-              title: 'Save as Clipping',
-              description: 'Save for later and convert to a recipe when ready',
+              title: context.l10n.shareSessionActionSaveAsClipping,
+              description: context.l10n.shareSessionActionSaveAsClippingDesc,
               onTap: () => _onActionTap(_ModalAction.saveAsClipping),
             ),
           ],
@@ -2669,7 +2669,7 @@ class _ShareSessionLoadedState extends ConsumerState<_ShareSessionLoaded>
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                'Extracting Content',
+                context.l10n.shareSessionTitleExtractingContent,
                 style: AppTypography.h4.copyWith(
                   color: AppColors.of(context).textPrimary,
                 ),
@@ -2686,7 +2686,7 @@ class _ShareSessionLoadedState extends ConsumerState<_ShareSessionLoaded>
           const CupertinoActivityIndicator(radius: 16),
           SizedBox(height: AppSpacing.lg),
           Text(
-            'Fetching from $domainName...',
+            context.l10n.shareSessionLoadingFetching(domainName),
             style: AppTypography.body.copyWith(
               color: AppColors.of(context).textSecondary,
             ),
@@ -2702,12 +2702,12 @@ class _ShareSessionLoadedState extends ConsumerState<_ShareSessionLoaded>
 
     // Determine title based on error type
     final title = switch (_errorType) {
-      _ExtractionErrorType.noRecipeDetected => 'No Recipe Found',
-      _ExtractionErrorType.noContentExtracted => 'Couldn\'t Read Post',
-      _ExtractionErrorType.noConnectivity => 'No Connection',
-      _ExtractionErrorType.sessionFailed => 'Something Went Wrong',
-      _ExtractionErrorType.clippingSaveFailed => 'Couldn\'t Save',
-      _ExtractionErrorType.generic => 'Import Failed',
+      _ExtractionErrorType.noRecipeDetected => context.l10n.shareSessionErrorTitleNoRecipe,
+      _ExtractionErrorType.noContentExtracted => context.l10n.shareSessionErrorTitleCantRead,
+      _ExtractionErrorType.noConnectivity => context.l10n.shareSessionErrorTitleNoConnection,
+      _ExtractionErrorType.sessionFailed => context.l10n.shareSessionErrorTitleGeneric,
+      _ExtractionErrorType.clippingSaveFailed => context.l10n.shareSessionErrorTitleCantSave,
+      _ExtractionErrorType.generic => context.l10n.shareSessionErrorTitleImportFailed,
     };
 
     // Only offer "Save as Clipping" for noRecipeDetected (when we got content but no recipe)
@@ -2744,7 +2744,7 @@ class _ShareSessionLoadedState extends ConsumerState<_ShareSessionLoaded>
 
           // Error message
           Text(
-            _extractionError ?? 'Something went wrong.',
+            _extractionError ?? context.l10n.shareSessionErrorGeneric,
             style: AppTypography.body.copyWith(
               color: colors.textSecondary,
             ),
@@ -2757,8 +2757,8 @@ class _ShareSessionLoadedState extends ConsumerState<_ShareSessionLoaded>
           if (canSaveAsClipping)
             _ActionButton(
               icon: Icons.note_add_outlined,
-              title: 'Save as Clipping',
-              description: 'Save the link for later',
+              title: context.l10n.shareSessionActionSaveAsClipping,
+              description: context.l10n.shareSessionActionSaveClippingErrorDesc,
               onTap: _saveAsClipping,
             )
           else
@@ -2770,7 +2770,7 @@ class _ShareSessionLoadedState extends ConsumerState<_ShareSessionLoaded>
                 borderRadius: BorderRadius.circular(8),
                 onPressed: widget.onClose,
                 child: Text(
-                  'Close',
+                  context.l10n.commonClose,
                   style: AppTypography.body.copyWith(
                     color: colors.textPrimary,
                     fontWeight: FontWeight.w600,
@@ -2793,7 +2793,7 @@ class _ShareSessionLoadedState extends ConsumerState<_ShareSessionLoaded>
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                'Importing Recipe',
+                context.l10n.shareSessionTitleImportingRecipe,
                 style: AppTypography.h4.copyWith(
                   color: AppColors.of(context).textPrimary,
                 ),
@@ -2810,10 +2810,10 @@ class _ShareSessionLoadedState extends ConsumerState<_ShareSessionLoaded>
           const CupertinoActivityIndicator(radius: 16),
           SizedBox(height: AppSpacing.lg),
           _AnimatedLoadingText(
-            messages: const [
-              'Extracting recipe...',
-              'Finding ingredients...',
-              'Organizing steps...',
+            messages: [
+              context.l10n.shareSessionLoadingExtractingRecipe,
+              context.l10n.shareSessionLoadingFindingIngredients,
+              context.l10n.shareSessionLoadingOrganizingSteps,
             ],
           ),
           SizedBox(height: AppSpacing.lg),
@@ -2832,7 +2832,7 @@ class _ShareSessionLoadedState extends ConsumerState<_ShareSessionLoaded>
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                'Processing Photo',
+                context.l10n.shareSessionTitleProcessingPhoto,
                 style: AppTypography.h4.copyWith(
                   color: AppColors.of(context).textPrimary,
                 ),
@@ -2849,10 +2849,10 @@ class _ShareSessionLoadedState extends ConsumerState<_ShareSessionLoaded>
           const CupertinoActivityIndicator(radius: 16),
           SizedBox(height: AppSpacing.lg),
           _AnimatedLoadingText(
-            messages: const [
-              'Reading photo...',
-              'Finding recipe...',
-              'Extracting ingredients...',
+            messages: [
+              context.l10n.shareSessionLoadingReadingPhoto,
+              context.l10n.shareSessionLoadingFindingRecipe,
+              context.l10n.shareSessionLoadingExtractingIngredients,
             ],
           ),
           SizedBox(height: AppSpacing.lg),
@@ -2871,7 +2871,7 @@ class _ShareSessionLoadedState extends ConsumerState<_ShareSessionLoaded>
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                'Saving Clipping',
+                context.l10n.shareSessionTitleSavingClipping,
                 style: AppTypography.h4.copyWith(
                   color: AppColors.of(context).textPrimary,
                 ),
@@ -2888,7 +2888,7 @@ class _ShareSessionLoadedState extends ConsumerState<_ShareSessionLoaded>
           const CupertinoActivityIndicator(radius: 16),
           SizedBox(height: AppSpacing.lg),
           Text(
-            'Saving to clippings...',
+            context.l10n.shareSessionLoadingSavingClipping,
             style: AppTypography.body.copyWith(
               color: AppColors.of(context).textSecondary,
             ),
