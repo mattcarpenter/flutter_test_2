@@ -233,7 +233,7 @@ Test by changing device language or using a test override.
 ### Feature Inventory & Prioritization
 
 | Priority | Feature | Files | Complexity | Status | Notes |
-|----------|---------|-------|------------|--------|-------|
+|----------|---------|-------|----------|------|-------|
 | 1 | auth | 12 | Low | ✅ Done | Pilot feature, high visibility |
 | 2 | settings | 25 | Medium | ✅ Done | User-facing settings, many labels |
 | 3 | recipes | 71 | High | ✅ Done | Largest feature, core functionality |
@@ -248,6 +248,7 @@ Test by changing device language or using a test override.
 | 12 | timers | 3 | Low | ✅ Done | Timer UI |
 | 13 | discover | 1 | Low | ⏳ Pending | Discovery page |
 | 14 | subscription | 1 | Low | ⏳ Pending | Paywall |
+| 15 | searches | ? | ? | ⏳ Pending | Multiple Places |
 
 ### Non-Feature Areas
 
