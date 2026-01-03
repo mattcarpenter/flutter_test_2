@@ -5631,6 +5631,168 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Import from social media & more'**
   String get menuUpgradeSubtitle;
+
+  /// Title for recipe preview sheet
+  ///
+  /// In en, this message translates to:
+  /// **'Import Recipe'**
+  String get recipePreviewTitle;
+
+  /// Plus badge label
+  ///
+  /// In en, this message translates to:
+  /// **'PLUS'**
+  String get recipePreviewPlusBadge;
+
+  /// Headline for recipe preview upsell
+  ///
+  /// In en, this message translates to:
+  /// **'Unlock the Full Recipe'**
+  String get recipePreviewHeadline;
+
+  /// Subheading for AI generation preview
+  ///
+  /// In en, this message translates to:
+  /// **'Subscribe to Plus to get all ingredients and detailed cooking steps.'**
+  String get recipePreviewSubheadingAi;
+
+  /// Subheading for photo import preview
+  ///
+  /// In en, this message translates to:
+  /// **'Plus extracts complete recipes from photos of cookbooks and handwritten notes.'**
+  String get recipePreviewSubheadingPhoto;
+
+  /// Subheading for social share preview
+  ///
+  /// In en, this message translates to:
+  /// **'Plus extracts complete recipes from Instagram, TikTok, YouTube, and more.'**
+  String get recipePreviewSubheadingSocial;
+
+  /// Subheading for URL import preview
+  ///
+  /// In en, this message translates to:
+  /// **'Plus uses AI to extract complete recipes from any website.'**
+  String get recipePreviewSubheadingUrl;
+
+  /// Recipe name section label
+  ///
+  /// In en, this message translates to:
+  /// **'Recipe Name'**
+  String get recipePreviewRecipeName;
+
+  /// Description section label
+  ///
+  /// In en, this message translates to:
+  /// **'Description'**
+  String get recipePreviewDescription;
+
+  /// Ingredients section label
+  ///
+  /// In en, this message translates to:
+  /// **'Ingredients'**
+  String get recipePreviewIngredients;
+
+  /// Value prop for AI generation
+  ///
+  /// In en, this message translates to:
+  /// **'AI generates complete recipes'**
+  String get recipePreviewValuePropAi1;
+
+  /// Value prop for AI generation
+  ///
+  /// In en, this message translates to:
+  /// **'Full ingredients with measurements'**
+  String get recipePreviewValuePropAi2;
+
+  /// Value prop for AI generation
+  ///
+  /// In en, this message translates to:
+  /// **'Detailed cooking steps'**
+  String get recipePreviewValuePropAi3;
+
+  /// Value prop for AI generation
+  ///
+  /// In en, this message translates to:
+  /// **'Unlimited AI recipe generation'**
+  String get recipePreviewValuePropAi4;
+
+  /// Value prop for photo import
+  ///
+  /// In en, this message translates to:
+  /// **'AI extracts ingredients and steps'**
+  String get recipePreviewValuePropPhoto1;
+
+  /// Value prop for photo import
+  ///
+  /// In en, this message translates to:
+  /// **'Works with photos of recipes'**
+  String get recipePreviewValuePropPhoto2;
+
+  /// Value prop for photo import
+  ///
+  /// In en, this message translates to:
+  /// **'Import from social media too'**
+  String get recipePreviewValuePropPhoto3;
+
+  /// Value prop for photo import
+  ///
+  /// In en, this message translates to:
+  /// **'Unlimited recipe imports'**
+  String get recipePreviewValuePropPhoto4;
+
+  /// Value prop for social share
+  ///
+  /// In en, this message translates to:
+  /// **'Full ingredients with measurements'**
+  String get recipePreviewValuePropSocial1;
+
+  /// Value prop for social share
+  ///
+  /// In en, this message translates to:
+  /// **'Complete cooking instructions'**
+  String get recipePreviewValuePropSocial2;
+
+  /// Value prop for social share
+  ///
+  /// In en, this message translates to:
+  /// **'Works with any social platform'**
+  String get recipePreviewValuePropSocial3;
+
+  /// Value prop for social share
+  ///
+  /// In en, this message translates to:
+  /// **'Unlimited recipe imports'**
+  String get recipePreviewValuePropSocial4;
+
+  /// Value prop for URL import
+  ///
+  /// In en, this message translates to:
+  /// **'AI extracts ingredients and steps'**
+  String get recipePreviewValuePropUrl1;
+
+  /// Value prop for URL import
+  ///
+  /// In en, this message translates to:
+  /// **'Works with any recipe page'**
+  String get recipePreviewValuePropUrl2;
+
+  /// Value prop for URL import
+  ///
+  /// In en, this message translates to:
+  /// **'Import from social media too'**
+  String get recipePreviewValuePropUrl3;
+
+  /// Value prop for URL import
+  ///
+  /// In en, this message translates to:
+  /// **'Unlimited recipe imports'**
+  String get recipePreviewValuePropUrl4;
+
+  /// Button to unlock recipe with Plus subscription
+  ///
+  /// In en, this message translates to:
+  /// **'Unlock with Plus'**
+  String get recipePreviewUnlockButton;
 }
 
 class _AppLocalizationsDelegate

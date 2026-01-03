@@ -4321,5 +4321,114 @@
   "menuUpgradeSubtitle": "Import from social media & more",
   "@menuUpgradeSubtitle": {
     "description": "Upgrade banner subtitle in side menu"
+  },
+
+  "recipePreviewTitle": "Import Recipe",
+  "@recipePreviewTitle": {
+    "description": "Title for recipe preview sheet"
+  },
+  "recipePreviewPlusBadge": "PLUS",
+  "@recipePreviewPlusBadge": {
+    "description": "Plus badge label"
+  },
+  "recipePreviewHeadline": "Unlock the Full Recipe",
+  "@recipePreviewHeadline": {
+    "description": "Headline for recipe preview upsell"
+  },
+  "recipePreviewSubheadingAi": "Subscribe to Plus to get all ingredients and detailed cooking steps.",
+  "@recipePreviewSubheadingAi": {
+    "description": "Subheading for AI generation preview"
+  },
+  "recipePreviewSubheadingPhoto": "Plus extracts complete recipes from photos of cookbooks and handwritten notes.",
+  "@recipePreviewSubheadingPhoto": {
+    "description": "Subheading for photo import preview"
+  },
+  "recipePreviewSubheadingSocial": "Plus extracts complete recipes from Instagram, TikTok, YouTube, and more.",
+  "@recipePreviewSubheadingSocial": {
+    "description": "Subheading for social share preview"
+  },
+  "recipePreviewSubheadingUrl": "Plus uses AI to extract complete recipes from any website.",
+  "@recipePreviewSubheadingUrl": {
+    "description": "Subheading for URL import preview"
+  },
+  "recipePreviewRecipeName": "Recipe Name",
+  "@recipePreviewRecipeName": {
+    "description": "Recipe name section label"
+  },
+  "recipePreviewDescription": "Description",
+  "@recipePreviewDescription": {
+    "description": "Description section label"
+  },
+  "recipePreviewIngredients": "Ingredients",
+  "@recipePreviewIngredients": {
+    "description": "Ingredients section label"
+  },
+  "recipePreviewValuePropAi1": "AI generates complete recipes",
+  "@recipePreviewValuePropAi1": {
+    "description": "Value prop for AI generation"
+  },
+  "recipePreviewValuePropAi2": "Full ingredients with measurements",
+  "@recipePreviewValuePropAi2": {
+    "description": "Value prop for AI generation"
+  },
+  "recipePreviewValuePropAi3": "Detailed cooking steps",
+  "@recipePreviewValuePropAi3": {
+    "description": "Value prop for AI generation"
+  },
+  "recipePreviewValuePropAi4": "Unlimited AI recipe generation",
+  "@recipePreviewValuePropAi4": {
+    "description": "Value prop for AI generation"
+  },
+  "recipePreviewValuePropPhoto1": "AI extracts ingredients and steps",
+  "@recipePreviewValuePropPhoto1": {
+    "description": "Value prop for photo import"
+  },
+  "recipePreviewValuePropPhoto2": "Works with photos of recipes",
+  "@recipePreviewValuePropPhoto2": {
+    "description": "Value prop for photo import"
+  },
+  "recipePreviewValuePropPhoto3": "Import from social media too",
+  "@recipePreviewValuePropPhoto3": {
+    "description": "Value prop for photo import"
+  },
+  "recipePreviewValuePropPhoto4": "Unlimited recipe imports",
+  "@recipePreviewValuePropPhoto4": {
+    "description": "Value prop for photo import"
+  },
+  "recipePreviewValuePropSocial1": "Full ingredients with measurements",
+  "@recipePreviewValuePropSocial1": {
+    "description": "Value prop for social share"
+  },
+  "recipePreviewValuePropSocial2": "Complete cooking instructions",
+  "@recipePreviewValuePropSocial2": {
+    "description": "Value prop for social share"
+  },
+  "recipePreviewValuePropSocial3": "Works with any social platform",
+  "@recipePreviewValuePropSocial3": {
+    "description": "Value prop for social share"
+  },
+  "recipePreviewValuePropSocial4": "Unlimited recipe imports",
+  "@recipePreviewValuePropSocial4": {
+    "description": "Value prop for social share"
+  },
+  "recipePreviewValuePropUrl1": "AI extracts ingredients and steps",
+  "@recipePreviewValuePropUrl1": {
+    "description": "Value prop for URL import"
+  },
+  "recipePreviewValuePropUrl2": "Works with any recipe page",
+  "@recipePreviewValuePropUrl2": {
+    "description": "Value prop for URL import"
+  },
+  "recipePreviewValuePropUrl3": "Import from social media too",
+  "@recipePreviewValuePropUrl3": {
+    "description": "Value prop for URL import"
+  },
+  "recipePreviewValuePropUrl4": "Unlimited recipe imports",
+  "@recipePreviewValuePropUrl4": {
+    "description": "Value prop for URL import"
+  },
+  "recipePreviewUnlockButton": "Unlock with Plus",
+  "@recipePreviewUnlockButton": {
+    "description": "Button to unlock recipe with Plus subscription"
   }
 }

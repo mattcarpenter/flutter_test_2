@@ -3047,4 +3047,87 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get menuUpgradeSubtitle => 'SNSからのインポートなど';
+
+  @override
+  String get recipePreviewTitle => 'レシピをインポート';
+
+  @override
+  String get recipePreviewPlusBadge => 'PLUS';
+
+  @override
+  String get recipePreviewHeadline => '完全なレシピをインポート';
+
+  @override
+  String get recipePreviewSubheadingAi => 'Plusに登録して、すべての材料と詳細な調理手順を入手しましょう。';
+
+  @override
+  String get recipePreviewSubheadingPhoto => 'Plusは料理本や手書きメモの写真から完全なレシピを抽出します。';
+
+  @override
+  String get recipePreviewSubheadingSocial =>
+      'PlusはInstagram、TikTok、YouTubeなどから完全なレシピを抽出します。';
+
+  @override
+  String get recipePreviewSubheadingUrl =>
+      'PlusはAIを使用してあらゆるウェブサイトから完全なレシピを抽出します。';
+
+  @override
+  String get recipePreviewRecipeName => '料理名';
+
+  @override
+  String get recipePreviewDescription => '概要';
+
+  @override
+  String get recipePreviewIngredients => '材料';
+
+  @override
+  String get recipePreviewValuePropAi1 => 'AIが完全なレシピを生成';
+
+  @override
+  String get recipePreviewValuePropAi2 => '分量付きの材料一覧';
+
+  @override
+  String get recipePreviewValuePropAi3 => '詳細な調理手順';
+
+  @override
+  String get recipePreviewValuePropAi4 => '無制限にAIレシピ生成';
+
+  @override
+  String get recipePreviewValuePropPhoto1 => 'AIが材料と手順を抽出';
+
+  @override
+  String get recipePreviewValuePropPhoto2 => 'レシピ写真に対応';
+
+  @override
+  String get recipePreviewValuePropPhoto3 => 'SNSからのインポートも可能';
+
+  @override
+  String get recipePreviewValuePropPhoto4 => '無制限にレシピインポート';
+
+  @override
+  String get recipePreviewValuePropSocial1 => '分量付きの材料一覧';
+
+  @override
+  String get recipePreviewValuePropSocial2 => '調理手順';
+
+  @override
+  String get recipePreviewValuePropSocial3 => 'あらゆるSNSに対応';
+
+  @override
+  String get recipePreviewValuePropSocial4 => '無制限にレシピインポート';
+
+  @override
+  String get recipePreviewValuePropUrl1 => 'AIが材料と手順を抽出';
+
+  @override
+  String get recipePreviewValuePropUrl2 => 'あらゆるレシピページに対応';
+
+  @override
+  String get recipePreviewValuePropUrl3 => 'SNSからのインポートも可能';
+
+  @override
+  String get recipePreviewValuePropUrl4 => '無制限にレシピインポート';
+
+  @override
+  String get recipePreviewUnlockButton => 'Plusで入手';
 }

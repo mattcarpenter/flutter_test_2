@@ -1608,6 +1608,7 @@ class _ShareSessionLoadedState extends ConsumerState<_ShareSessionLoaded>
           ),
           child: ShareRecipePreviewResultContent(
             preview: preview,
+            source: RecipePreviewSource.socialShare,
             onSubscribe: () async {
               // Don't close the preview sheet - paywall will cover it
               // Use the widget's context (share modal is still open behind the preview sheet)
@@ -1673,7 +1674,7 @@ class _ShareSessionLoadedState extends ConsumerState<_ShareSessionLoaded>
           ),
           child: ShareRecipePreviewResultContent(
             preview: preview,
-            source: RecipePreviewSource.socialShare,
+            source: RecipePreviewSource.urlImport,
             onSubscribe: () async {
               if (!context.mounted) return;
 

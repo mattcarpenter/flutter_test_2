@@ -1,6 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:hugeicons/hugeicons.dart';
 
+import '../../../localization/l10n_extension.dart';
 import '../../../theme/colors.dart';
 import '../../../theme/spacing.dart';
 import '../../../theme/typography.dart';
@@ -24,7 +25,9 @@ enum RecipePreviewSource {
 
 /// Small pill badge indicating Plus feature
 class _PlusPill extends StatelessWidget {
-  const _PlusPill();
+  final String text;
+
+  const _PlusPill({required this.text});
 
   @override
   Widget build(BuildContext context) {
@@ -35,7 +38,7 @@ class _PlusPill extends StatelessWidget {
         borderRadius: BorderRadius.circular(10),
       ),
       child: Text(
-        'PLUS',
+        text,
         style: TextStyle(
           fontSize: 10,
           fontWeight: FontWeight.w700,
@@ -165,56 +168,48 @@ class _ShareRecipePreviewResultContentState
   }
 
   /// Returns the headline text based on the source context.
-  String _getHeadline() {
-    switch (widget.source) {
-      case RecipePreviewSource.aiGeneration:
-        return 'Unlock the Full Recipe';
-      case RecipePreviewSource.photoImport:
-        return 'This recipe needs AI';
-      case RecipePreviewSource.socialShare:
-        return 'This recipe needs AI';
-      case RecipePreviewSource.urlImport:
-        return 'This recipe needs AI';
-    }
+  String _getHeadline(BuildContext context) {
+    // Same headline for all sources
+    return context.l10n.recipePreviewHeadline;
   }
 
   /// Returns the subheading text based on the source context.
-  String _getSubheading() {
+  String _getSubheading(BuildContext context) {
     switch (widget.source) {
       case RecipePreviewSource.aiGeneration:
-        return 'Subscribe to Plus to get all ingredients and detailed cooking steps.';
+        return context.l10n.recipePreviewSubheadingAi;
       case RecipePreviewSource.photoImport:
-        return "We'll use AI to extract the recipe from your photo.";
+        return context.l10n.recipePreviewSubheadingPhoto;
       case RecipePreviewSource.socialShare:
-        return "We'll use AI to extract the recipe from this post.";
+        return context.l10n.recipePreviewSubheadingSocial;
       case RecipePreviewSource.urlImport:
-        return "This site doesn't have structured recipe data, so we'll use AI to extract it for you.";
+        return context.l10n.recipePreviewSubheadingUrl;
     }
   }
 
   /// Returns the value proposition items based on the source context.
-  List<Widget> _getValueProps(AppColors colors) {
+  List<Widget> _getValueProps(BuildContext context, AppColors colors) {
     switch (widget.source) {
       case RecipePreviewSource.aiGeneration:
         return [
           _ValuePropItem(
             icon: HugeIcons.strokeRoundedCheckmarkCircle01,
-            text: 'AI generates complete recipes',
+            text: context.l10n.recipePreviewValuePropAi1,
             textColor: colors.textPrimary,
           ),
           _ValuePropItem(
             icon: HugeIcons.strokeRoundedCheckmarkCircle01,
-            text: 'Full ingredients with measurements',
+            text: context.l10n.recipePreviewValuePropAi2,
             textColor: colors.textPrimary,
           ),
           _ValuePropItem(
             icon: HugeIcons.strokeRoundedCheckmarkCircle01,
-            text: 'Detailed cooking steps',
+            text: context.l10n.recipePreviewValuePropAi3,
             textColor: colors.textPrimary,
           ),
           _ValuePropItem(
             icon: HugeIcons.strokeRoundedCheckmarkCircle01,
-            text: 'Unlimited AI recipe generation',
+            text: context.l10n.recipePreviewValuePropAi4,
             textColor: colors.textPrimary,
           ),
         ];
@@ -222,46 +217,68 @@ class _ShareRecipePreviewResultContentState
         return [
           _ValuePropItem(
             icon: HugeIcons.strokeRoundedCheckmarkCircle01,
-            text: 'AI extracts ingredients and steps',
+            text: context.l10n.recipePreviewValuePropPhoto1,
             textColor: colors.textPrimary,
           ),
           _ValuePropItem(
             icon: HugeIcons.strokeRoundedCheckmarkCircle01,
-            text: 'Works with photos of recipes',
+            text: context.l10n.recipePreviewValuePropPhoto2,
             textColor: colors.textPrimary,
           ),
           _ValuePropItem(
             icon: HugeIcons.strokeRoundedCheckmarkCircle01,
-            text: 'Import from social media too',
+            text: context.l10n.recipePreviewValuePropPhoto3,
             textColor: colors.textPrimary,
           ),
           _ValuePropItem(
             icon: HugeIcons.strokeRoundedCheckmarkCircle01,
-            text: 'Unlimited recipe imports',
+            text: context.l10n.recipePreviewValuePropPhoto4,
             textColor: colors.textPrimary,
           ),
         ];
       case RecipePreviewSource.socialShare:
+        return [
+          _ValuePropItem(
+            icon: HugeIcons.strokeRoundedCheckmarkCircle01,
+            text: context.l10n.recipePreviewValuePropSocial1,
+            textColor: colors.textPrimary,
+          ),
+          _ValuePropItem(
+            icon: HugeIcons.strokeRoundedCheckmarkCircle01,
+            text: context.l10n.recipePreviewValuePropSocial2,
+            textColor: colors.textPrimary,
+          ),
+          _ValuePropItem(
+            icon: HugeIcons.strokeRoundedCheckmarkCircle01,
+            text: context.l10n.recipePreviewValuePropSocial3,
+            textColor: colors.textPrimary,
+          ),
+          _ValuePropItem(
+            icon: HugeIcons.strokeRoundedCheckmarkCircle01,
+            text: context.l10n.recipePreviewValuePropSocial4,
+            textColor: colors.textPrimary,
+          ),
+        ];
       case RecipePreviewSource.urlImport:
         return [
           _ValuePropItem(
             icon: HugeIcons.strokeRoundedCheckmarkCircle01,
-            text: 'AI extracts ingredients and steps',
+            text: context.l10n.recipePreviewValuePropUrl1,
             textColor: colors.textPrimary,
           ),
           _ValuePropItem(
             icon: HugeIcons.strokeRoundedCheckmarkCircle01,
-            text: 'Works with any recipe page',
+            text: context.l10n.recipePreviewValuePropUrl2,
             textColor: colors.textPrimary,
           ),
           _ValuePropItem(
             icon: HugeIcons.strokeRoundedCheckmarkCircle01,
-            text: 'Import from social media too',
+            text: context.l10n.recipePreviewValuePropUrl3,
             textColor: colors.textPrimary,
           ),
           _ValuePropItem(
             icon: HugeIcons.strokeRoundedCheckmarkCircle01,
-            text: 'Unlimited recipe imports',
+            text: context.l10n.recipePreviewValuePropUrl4,
             textColor: colors.textPrimary,
           ),
         ];
@@ -291,13 +308,13 @@ class _ShareRecipePreviewResultContentState
                 SizedBox(width: AppSpacing.xs),
                 Expanded(
                   child: Text(
-                    'Import Recipe',
+                    context.l10n.recipePreviewTitle,
                     style: AppTypography.h4.copyWith(
                       color: colors.textPrimary,
                     ),
                   ),
                 ),
-                const _PlusPill(),
+                _PlusPill(text: context.l10n.recipePreviewPlusBadge),
               ],
             ),
 
@@ -340,7 +357,7 @@ class _ShareRecipePreviewResultContentState
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     // Recipe Name section
-                    const _SectionLabel('Recipe Name'),
+                    _SectionLabel(context.l10n.recipePreviewRecipeName),
                     Text(
                       preview.title,
                       style: AppTypography.h5.copyWith(
@@ -354,7 +371,7 @@ class _ShareRecipePreviewResultContentState
 
                     // Description (if available)
                     if (preview.description.isNotEmpty) ...[
-                      const _SectionLabel('Description'),
+                      _SectionLabel(context.l10n.recipePreviewDescription),
                       Text(
                         preview.description,
                         style: AppTypography.body.copyWith(
@@ -367,7 +384,7 @@ class _ShareRecipePreviewResultContentState
                     ],
 
                     // Ingredients section
-                    const _SectionLabel('Ingredients'),
+                    _SectionLabel(context.l10n.recipePreviewIngredients),
                     ...preview.previewIngredients.take(4).map((ingredient) {
                       return Padding(
                         padding: EdgeInsets.only(bottom: AppSpacing.xs),
@@ -432,7 +449,7 @@ class _ShareRecipePreviewResultContentState
                           SizedBox(width: AppSpacing.sm),
                           Flexible(
                             child: Text(
-                              _getHeadline(),
+                              _getHeadline(context),
                               style: AppTypography.h4.copyWith(
                                 color: colors.textPrimary,
                               ),
@@ -445,7 +462,7 @@ class _ShareRecipePreviewResultContentState
 
                       // Explanation text
                       Text(
-                        _getSubheading(),
+                        _getSubheading(context),
                         style: AppTypography.bodySmall.copyWith(
                           color: colors.textSecondary,
                         ),
@@ -459,7 +476,7 @@ class _ShareRecipePreviewResultContentState
                         padding: EdgeInsets.symmetric(horizontal: AppSpacing.lg),
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
-                          children: _getValueProps(colors),
+                          children: _getValueProps(context, colors),
                         ),
                       ),
                     ],
@@ -472,7 +489,7 @@ class _ShareRecipePreviewResultContentState
             Transform.translate(
               offset: const Offset(0, -64),
               child: AppButton(
-                text: 'Unlock with Plus',
+                text: context.l10n.recipePreviewUnlockButton,
                 onPressed: _isLoading ? null : _handleSubscribeTap,
                 theme: AppButtonTheme.secondary,
                 style: AppButtonStyle.fill,

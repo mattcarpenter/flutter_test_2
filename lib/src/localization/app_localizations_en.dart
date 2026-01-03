@@ -3167,4 +3167,91 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get menuUpgradeSubtitle => 'Import from social media & more';
+
+  @override
+  String get recipePreviewTitle => 'Import Recipe';
+
+  @override
+  String get recipePreviewPlusBadge => 'PLUS';
+
+  @override
+  String get recipePreviewHeadline => 'Unlock the Full Recipe';
+
+  @override
+  String get recipePreviewSubheadingAi =>
+      'Subscribe to Plus to get all ingredients and detailed cooking steps.';
+
+  @override
+  String get recipePreviewSubheadingPhoto =>
+      'Plus extracts complete recipes from photos of cookbooks and handwritten notes.';
+
+  @override
+  String get recipePreviewSubheadingSocial =>
+      'Plus extracts complete recipes from Instagram, TikTok, YouTube, and more.';
+
+  @override
+  String get recipePreviewSubheadingUrl =>
+      'Plus uses AI to extract complete recipes from any website.';
+
+  @override
+  String get recipePreviewRecipeName => 'Recipe Name';
+
+  @override
+  String get recipePreviewDescription => 'Description';
+
+  @override
+  String get recipePreviewIngredients => 'Ingredients';
+
+  @override
+  String get recipePreviewValuePropAi1 => 'AI generates complete recipes';
+
+  @override
+  String get recipePreviewValuePropAi2 => 'Full ingredients with measurements';
+
+  @override
+  String get recipePreviewValuePropAi3 => 'Detailed cooking steps';
+
+  @override
+  String get recipePreviewValuePropAi4 => 'Unlimited AI recipe generation';
+
+  @override
+  String get recipePreviewValuePropPhoto1 =>
+      'AI extracts ingredients and steps';
+
+  @override
+  String get recipePreviewValuePropPhoto2 => 'Works with photos of recipes';
+
+  @override
+  String get recipePreviewValuePropPhoto3 => 'Import from social media too';
+
+  @override
+  String get recipePreviewValuePropPhoto4 => 'Unlimited recipe imports';
+
+  @override
+  String get recipePreviewValuePropSocial1 =>
+      'Full ingredients with measurements';
+
+  @override
+  String get recipePreviewValuePropSocial2 => 'Complete cooking instructions';
+
+  @override
+  String get recipePreviewValuePropSocial3 => 'Works with any social platform';
+
+  @override
+  String get recipePreviewValuePropSocial4 => 'Unlimited recipe imports';
+
+  @override
+  String get recipePreviewValuePropUrl1 => 'AI extracts ingredients and steps';
+
+  @override
+  String get recipePreviewValuePropUrl2 => 'Works with any recipe page';
+
+  @override
+  String get recipePreviewValuePropUrl3 => 'Import from social media too';
+
+  @override
+  String get recipePreviewValuePropUrl4 => 'Unlimited recipe imports';
+
+  @override
+  String get recipePreviewUnlockButton => 'Unlock with Plus';
 }
