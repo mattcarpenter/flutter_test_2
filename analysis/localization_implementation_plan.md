@@ -488,12 +488,13 @@ validator: (value) {
 ### Phase 4: Secondary Features
 - [x] clippings (18 files) - ✅ Done
 - [x] import_export (22 files) - ✅ Done
-- [ ] household (15 files)
+- [x] household (15 files) - ✅ Done
 - [x] help (4 files) - ✅ Done
 - [ ] share (3 files)
 - [x] timers (3 files) - ✅ Done
-- [ ] discover (1 file)
+- [x] discover (1 file) - ✅ Done
 - [ ] subscription (1 file)
+- [x] searches (2 files) - ✅ Done
 
 ### Phase 5: Shared Components
 - [ ] mobile/main_page_shell.dart (nav labels)
