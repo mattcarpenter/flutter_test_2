@@ -2499,4 +2499,50 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get clippingsPreviewUnlockPlus => 'Plusでアンロック';
+
+  @override
+  String get discoverTitle => '見つける';
+
+  @override
+  String get discoverUrlPlaceholder => 'URLを入力または検索';
+
+  @override
+  String get discoverImportRecipe => 'レシピを取り込む';
+
+  @override
+  String get discoverErrorOffline => 'オフラインです。インターネット接続を確認してもう一度お試しください。';
+
+  @override
+  String get discoverErrorNoContent => 'ページの内容を読み取れませんでした。もう一度お試しください。';
+
+  @override
+  String get discoverErrorNoContentAvailable => '抽出できるコンテンツがありません。';
+
+  @override
+  String get discoverErrorNoRecipe =>
+      'このページにはレシピ情報が見つかりませんでした。\n\nレシピページに移動してお試しください。';
+
+  @override
+  String get discoverErrorPlusRequired => 'このページのレシピ抽出にはPlusが必要です。';
+
+  @override
+  String get discoverErrorNotFound => 'このページにレシピが見つかりませんでした。';
+
+  @override
+  String get discoverErrorFailed => 'レシピの抽出に失敗しました。もう一度お試しください。';
+
+  @override
+  String get discoverImporting => 'レシピを取り込み中';
+
+  @override
+  String get discoverExtracting => 'レシピを抽出中...';
+
+  @override
+  String get discoverExtractionFailed => '抽出に失敗しました';
+
+  @override
+  String get discoverImportFailed => '取り込みに失敗しました';
+
+  @override
+  String get discoverErrorGeneric => 'エラーが発生しました。';
 }

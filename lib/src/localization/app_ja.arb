@@ -824,5 +824,21 @@
   "clippingsPreviewValuePropShopping3": "パントリーとスマートマッチング",
   "clippingsPreviewValuePropShopping4": "ワンタップで全て追加",
   "clippingsPreviewValuePropMore": "…その他多数！",
-  "clippingsPreviewUnlockPlus": "Plusでアンロック"
+  "clippingsPreviewUnlockPlus": "Plusでアンロック",
+
+  "discoverTitle": "見つける",
+  "discoverUrlPlaceholder": "URLを入力または検索",
+  "discoverImportRecipe": "レシピを取り込む",
+  "discoverErrorOffline": "オフラインです。インターネット接続を確認してもう一度お試しください。",
+  "discoverErrorNoContent": "ページの内容を読み取れませんでした。もう一度お試しください。",
+  "discoverErrorNoContentAvailable": "抽出できるコンテンツがありません。",
+  "discoverErrorNoRecipe": "このページにはレシピ情報が見つかりませんでした。\n\nレシピページに移動してお試しください。",
+  "discoverErrorPlusRequired": "このページのレシピ抽出にはPlusが必要です。",
+  "discoverErrorNotFound": "このページにレシピが見つかりませんでした。",
+  "discoverErrorFailed": "レシピの抽出に失敗しました。もう一度お試しください。",
+  "discoverImporting": "レシピを取り込み中",
+  "discoverExtracting": "レシピを抽出中...",
+  "discoverExtractionFailed": "抽出に失敗しました",
+  "discoverImportFailed": "取り込みに失敗しました",
+  "discoverErrorGeneric": "エラーが発生しました。"
 }

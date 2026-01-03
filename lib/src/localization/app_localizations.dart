@@ -4593,6 +4593,96 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Unlock with Plus'**
   String get clippingsPreviewUnlockPlus;
+
+  /// Discover page navigation bar title
+  ///
+  /// In en, this message translates to:
+  /// **'Discover'**
+  String get discoverTitle;
+
+  /// Address bar placeholder text
+  ///
+  /// In en, this message translates to:
+  /// **'Enter URL or search'**
+  String get discoverUrlPlaceholder;
+
+  /// Import recipe button text
+  ///
+  /// In en, this message translates to:
+  /// **'Import Recipe'**
+  String get discoverImportRecipe;
+
+  /// Error message when user is offline
+  ///
+  /// In en, this message translates to:
+  /// **'You\'re offline. Please check your internet connection and try again.'**
+  String get discoverErrorOffline;
+
+  /// Error message when page content cannot be read
+  ///
+  /// In en, this message translates to:
+  /// **'Could not read page content. Please try again.'**
+  String get discoverErrorNoContent;
+
+  /// Error message when there is no content to extract
+  ///
+  /// In en, this message translates to:
+  /// **'No content available to extract.'**
+  String get discoverErrorNoContentAvailable;
+
+  /// Error message when no recipe is found on page
+  ///
+  /// In en, this message translates to:
+  /// **'This page doesn\'t appear to contain recipe information.\n\nTry navigating to a recipe page.'**
+  String get discoverErrorNoRecipe;
+
+  /// Error message when Plus is required for extraction
+  ///
+  /// In en, this message translates to:
+  /// **'This page requires Plus subscription for recipe extraction.'**
+  String get discoverErrorPlusRequired;
+
+  /// Error message when recipe not found after extraction
+  ///
+  /// In en, this message translates to:
+  /// **'No recipe found on this page.'**
+  String get discoverErrorNotFound;
+
+  /// Error message when extraction fails
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to extract recipe. Please try again.'**
+  String get discoverErrorFailed;
+
+  /// Importing modal title
+  ///
+  /// In en, this message translates to:
+  /// **'Importing Recipe'**
+  String get discoverImporting;
+
+  /// Loading message during extraction
+  ///
+  /// In en, this message translates to:
+  /// **'Extracting recipe...'**
+  String get discoverExtracting;
+
+  /// Extraction failed modal title
+  ///
+  /// In en, this message translates to:
+  /// **'Extraction Failed'**
+  String get discoverExtractionFailed;
+
+  /// Import failed modal title
+  ///
+  /// In en, this message translates to:
+  /// **'Import Failed'**
+  String get discoverImportFailed;
+
+  /// Generic error fallback message
+  ///
+  /// In en, this message translates to:
+  /// **'An error occurred.'**
+  String get discoverErrorGeneric;
 }
 
 class _AppLocalizationsDelegate

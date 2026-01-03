@@ -32,6 +32,7 @@ import '../../clippings/models/extracted_recipe.dart';
 import '../../clippings/models/recipe_preview.dart';
 import '../../clippings/providers/preview_usage_provider.dart';
 import '../../recipes/views/add_recipe_modal.dart';
+import '../../../localization/l10n_extension.dart';
 import '../../share/widgets/share_recipe_preview_result.dart';
 
 /// Default URL for the Discover browser
@@ -110,7 +111,7 @@ class _DiscoverPageState extends ConsumerState<DiscoverPage> {
 
     return CupertinoPageScaffold(
       navigationBar: CupertinoNavigationBar(
-        middle: const Text('Discover'),
+        middle: Text(context.l10n.discoverTitle),
         leading: isTablet
             ? null
             : GestureDetector(
@@ -143,7 +144,7 @@ class _DiscoverPageState extends ConsumerState<DiscoverPage> {
                     child: CupertinoTextField(
                       controller: _urlController,
                       focusNode: _urlFocusNode,
-                      placeholder: 'Enter URL or search',
+                      placeholder: context.l10n.discoverUrlPlaceholder,
                       prefix: Padding(
                         padding: EdgeInsets.only(left: AppSpacing.sm),
                         child: HugeIcon(
@@ -314,7 +315,7 @@ class _DiscoverPageState extends ConsumerState<DiscoverPage> {
                     child: _isImporting
                         ? const CupertinoActivityIndicator(radius: 12)
                         : Text(
-                            'Import Recipe',
+                            context.l10n.discoverImportRecipe,
                             style: AppTypography.bodyLarge.copyWith(
                               color: CupertinoTheme.of(context).primaryColor,
                               fontWeight: FontWeight.w600,
@@ -371,7 +372,7 @@ class _DiscoverPageState extends ConsumerState<DiscoverPage> {
       final connectivityResult = await Connectivity().checkConnectivity();
       if (connectivityResult.contains(ConnectivityResult.none)) {
         if (mounted) {
-          _showError('You\'re offline. Please check your internet connection and try again.');
+          _showError(context.l10n.discoverErrorOffline);
         }
         return;
       }
@@ -382,7 +383,7 @@ class _DiscoverPageState extends ConsumerState<DiscoverPage> {
 
       if (html == null || html.isEmpty) {
         if (mounted) {
-          _showError('Could not read page content. Please try again.');
+          _showError(context.l10n.discoverErrorNoContent);
         }
         return;
       }
@@ -407,12 +408,12 @@ class _DiscoverPageState extends ConsumerState<DiscoverPage> {
         AppLogger.info('Discover: No JSON-LD, using backend extraction');
         await _handleBackendExtraction(result);
       } else {
-        _showError('No content available to extract.');
+        _showError(context.l10n.discoverErrorNoContentAvailable);
       }
     } catch (e, stack) {
       AppLogger.error('Discover: Import failed', e, stack);
       if (mounted) {
-        _showError('Something went wrong while importing.');
+        _showError(context.l10n.discoverErrorFailed);
       }
     } finally {
       if (mounted) {
@@ -461,7 +462,7 @@ class _DiscoverPageState extends ConsumerState<DiscoverPage> {
   /// Perform full backend extraction for Plus users
   Future<void> _performFullExtraction(WebExtractionResult result) async {
     if (!result.hasHtml) {
-      _showError('No content available to extract.');
+      _showError(context.l10n.discoverErrorNoContentAvailable);
       return;
     }
 
@@ -475,7 +476,7 @@ class _DiscoverPageState extends ConsumerState<DiscoverPage> {
       if (!mounted) return;
 
       if (recipe == null) {
-        _showError('This page doesn\'t appear to contain recipe information.\n\nTry navigating to a recipe page.');
+        _showError(context.l10n.discoverErrorNoRecipe);
         return;
       }
 
@@ -490,7 +491,7 @@ class _DiscoverPageState extends ConsumerState<DiscoverPage> {
   /// Perform preview extraction for non-Plus users
   Future<void> _performPreviewExtraction(WebExtractionResult result) async {
     if (!result.hasHtml) {
-      _showError('This page requires Plus subscription for recipe extraction.');
+      _showError(context.l10n.discoverErrorPlusRequired);
       return;
     }
 
@@ -504,7 +505,7 @@ class _DiscoverPageState extends ConsumerState<DiscoverPage> {
       if (!mounted) return;
 
       if (preview == null) {
-        _showError('This page doesn\'t appear to contain recipe information.\n\nTry navigating to a recipe page.');
+        _showError(context.l10n.discoverErrorNoRecipe);
         return;
       }
 
@@ -617,7 +618,7 @@ class _DiscoverPageState extends ConsumerState<DiscoverPage> {
                     if (recipe == null) {
                       setModalState(() {
                         isExtracting = false;
-                        errorMessage = 'No recipe found on this page.';
+                        errorMessage = context.l10n.discoverErrorNotFound;
                       });
                       return;
                     }
@@ -657,7 +658,7 @@ class _DiscoverPageState extends ConsumerState<DiscoverPage> {
                     if (modalContext.mounted) {
                       setModalState(() {
                         isExtracting = false;
-                        errorMessage = 'Failed to extract recipe. Please try again.';
+                        errorMessage = context.l10n.discoverErrorFailed;
                       });
                     }
                   }
@@ -674,7 +675,7 @@ class _DiscoverPageState extends ConsumerState<DiscoverPage> {
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           Text(
-                            'Importing Recipe',
+                            context.l10n.discoverImporting,
                             style: AppTypography.h4.copyWith(
                               color: AppColors.of(builderContext).textPrimary,
                             ),
@@ -685,7 +686,7 @@ class _DiscoverPageState extends ConsumerState<DiscoverPage> {
                       const CupertinoActivityIndicator(radius: 16),
                       SizedBox(height: AppSpacing.lg),
                       Text(
-                        'Extracting recipe...',
+                        context.l10n.discoverExtracting,
                         style: AppTypography.body.copyWith(
                           color: AppColors.of(builderContext).textSecondary,
                         ),
@@ -697,34 +698,36 @@ class _DiscoverPageState extends ConsumerState<DiscoverPage> {
               } else {
                 // Error state
                 return Padding(
-                  padding: EdgeInsets.all(AppSpacing.xl),
+                  padding: EdgeInsets.all(AppSpacing.lg),
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Text(
-                            'Extraction Failed',
-                            style: AppTypography.h4.copyWith(
-                              color: AppColors.of(builderContext).textPrimary,
-                            ),
-                          ),
-                          AppCircleButton(
-                            icon: AppCircleButtonIcon.close,
-                            variant: AppCircleButtonVariant.neutral,
-                            size: 32,
-                            onPressed: () => Navigator.of(
-                              modalContext,
-                              rootNavigator: true,
-                            ).pop(),
-                          ),
-                        ],
+                      // Close button row
+                      Align(
+                        alignment: Alignment.topRight,
+                        child: AppCircleButton(
+                          icon: AppCircleButtonIcon.close,
+                          variant: AppCircleButtonVariant.neutral,
+                          size: 32,
+                          onPressed: () => Navigator.of(
+                            modalContext,
+                            rootNavigator: true,
+                          ).pop(),
+                        ),
                       ),
-                      SizedBox(height: AppSpacing.lg),
+                      SizedBox(height: AppSpacing.sm),
+                      // Title
                       Text(
-                        errorMessage ?? 'An error occurred.',
+                        context.l10n.discoverExtractionFailed,
+                        style: AppTypography.h4.copyWith(
+                          color: AppColors.of(builderContext).textPrimary,
+                        ),
+                      ),
+                      SizedBox(height: AppSpacing.md),
+                      // Message
+                      Text(
+                        errorMessage ?? context.l10n.discoverErrorGeneric,
                         style: AppTypography.body.copyWith(
                           color: AppColors.of(builderContext).textSecondary,
                         ),
@@ -777,32 +780,34 @@ class _DiscoverPageState extends ConsumerState<DiscoverPage> {
           backgroundColor: AppColors.of(modalContext).background,
           surfaceTintColor: Colors.transparent,
           child: Padding(
-            padding: EdgeInsets.all(AppSpacing.xl),
+            padding: EdgeInsets.all(AppSpacing.lg),
             child: Column(
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text(
-                      'Import Failed',
-                      style: AppTypography.h4.copyWith(
-                        color: AppColors.of(modalContext).textPrimary,
-                      ),
-                    ),
-                    AppCircleButton(
-                      icon: AppCircleButtonIcon.close,
-                      variant: AppCircleButtonVariant.neutral,
-                      size: 32,
-                      onPressed: () => Navigator.of(
-                        modalContext,
-                        rootNavigator: true,
-                      ).pop(),
-                    ),
-                  ],
+                // Close button row
+                Align(
+                  alignment: Alignment.topRight,
+                  child: AppCircleButton(
+                    icon: AppCircleButtonIcon.close,
+                    variant: AppCircleButtonVariant.neutral,
+                    size: 32,
+                    onPressed: () => Navigator.of(
+                      modalContext,
+                      rootNavigator: true,
+                    ).pop(),
+                  ),
                 ),
-                SizedBox(height: AppSpacing.lg),
+                SizedBox(height: AppSpacing.sm),
+                // Title
+                Text(
+                  context.l10n.discoverImportFailed,
+                  style: AppTypography.h4.copyWith(
+                    color: AppColors.of(modalContext).textPrimary,
+                  ),
+                ),
+                SizedBox(height: AppSpacing.md),
+                // Message
                 Text(
                   message,
                   style: AppTypography.body.copyWith(

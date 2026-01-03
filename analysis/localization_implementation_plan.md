@@ -246,7 +246,7 @@ Test by changing device language or using a test override.
 | 10 | help | 4 | Low | ✅ Done | Help documentation |
 | 11 | share | 3 | Low | ⏳ Pending | Share previews |
 | 12 | timers | 3 | Low | ✅ Done | Timer UI |
-| 13 | discover | 1 | Low | ⏳ Pending | Discovery page |
+| 13 | discover | 1 | Low | ✅ Done | Discovery page |
 | 14 | subscription | 1 | Low | ⏳ Pending | Paywall |
 | 15 | searches | ? | ? | ⏳ Pending | Multiple Places |
 

@@ -3556,5 +3556,66 @@
   "clippingsPreviewUnlockPlus": "Unlock with Plus",
   "@clippingsPreviewUnlockPlus": {
     "description": "Subscribe button text"
+  },
+
+  "discoverTitle": "Discover",
+  "@discoverTitle": {
+    "description": "Discover page navigation bar title"
+  },
+  "discoverUrlPlaceholder": "Enter URL or search",
+  "@discoverUrlPlaceholder": {
+    "description": "Address bar placeholder text"
+  },
+  "discoverImportRecipe": "Import Recipe",
+  "@discoverImportRecipe": {
+    "description": "Import recipe button text"
+  },
+  "discoverErrorOffline": "You're offline. Please check your internet connection and try again.",
+  "@discoverErrorOffline": {
+    "description": "Error message when user is offline"
+  },
+  "discoverErrorNoContent": "Could not read page content. Please try again.",
+  "@discoverErrorNoContent": {
+    "description": "Error message when page content cannot be read"
+  },
+  "discoverErrorNoContentAvailable": "No content available to extract.",
+  "@discoverErrorNoContentAvailable": {
+    "description": "Error message when there is no content to extract"
+  },
+  "discoverErrorNoRecipe": "This page doesn't appear to contain recipe information.\n\nTry navigating to a recipe page.",
+  "@discoverErrorNoRecipe": {
+    "description": "Error message when no recipe is found on page"
+  },
+  "discoverErrorPlusRequired": "This page requires Plus subscription for recipe extraction.",
+  "@discoverErrorPlusRequired": {
+    "description": "Error message when Plus is required for extraction"
+  },
+  "discoverErrorNotFound": "No recipe found on this page.",
+  "@discoverErrorNotFound": {
+    "description": "Error message when recipe not found after extraction"
+  },
+  "discoverErrorFailed": "Failed to extract recipe. Please try again.",
+  "@discoverErrorFailed": {
+    "description": "Error message when extraction fails"
+  },
+  "discoverImporting": "Importing Recipe",
+  "@discoverImporting": {
+    "description": "Importing modal title"
+  },
+  "discoverExtracting": "Extracting recipe...",
+  "@discoverExtracting": {
+    "description": "Loading message during extraction"
+  },
+  "discoverExtractionFailed": "Extraction Failed",
+  "@discoverExtractionFailed": {
+    "description": "Extraction failed modal title"
+  },
+  "discoverImportFailed": "Import Failed",
+  "@discoverImportFailed": {
+    "description": "Import failed modal title"
+  },
+  "discoverErrorGeneric": "An error occurred.",
+  "@discoverErrorGeneric": {
+    "description": "Generic error fallback message"
   }
 }

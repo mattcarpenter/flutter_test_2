@@ -2578,4 +2578,55 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get clippingsPreviewUnlockPlus => 'Unlock with Plus';
+
+  @override
+  String get discoverTitle => 'Discover';
+
+  @override
+  String get discoverUrlPlaceholder => 'Enter URL or search';
+
+  @override
+  String get discoverImportRecipe => 'Import Recipe';
+
+  @override
+  String get discoverErrorOffline =>
+      'You\'re offline. Please check your internet connection and try again.';
+
+  @override
+  String get discoverErrorNoContent =>
+      'Could not read page content. Please try again.';
+
+  @override
+  String get discoverErrorNoContentAvailable =>
+      'No content available to extract.';
+
+  @override
+  String get discoverErrorNoRecipe =>
+      'This page doesn\'t appear to contain recipe information.\n\nTry navigating to a recipe page.';
+
+  @override
+  String get discoverErrorPlusRequired =>
+      'This page requires Plus subscription for recipe extraction.';
+
+  @override
+  String get discoverErrorNotFound => 'No recipe found on this page.';
+
+  @override
+  String get discoverErrorFailed =>
+      'Failed to extract recipe. Please try again.';
+
+  @override
+  String get discoverImporting => 'Importing Recipe';
+
+  @override
+  String get discoverExtracting => 'Extracting recipe...';
+
+  @override
+  String get discoverExtractionFailed => 'Extraction Failed';
+
+  @override
+  String get discoverImportFailed => 'Import Failed';
+
+  @override
+  String get discoverErrorGeneric => 'An error occurred.';
 }
