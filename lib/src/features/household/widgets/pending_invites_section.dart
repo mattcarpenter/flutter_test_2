@@ -1,4 +1,5 @@
 import 'package:flutter/cupertino.dart';
+import '../../../localization/l10n_extension.dart';
 import '../../../theme/colors.dart';
 import '../../../theme/spacing.dart';
 import '../../../theme/typography.dart';
@@ -27,7 +28,7 @@ class PendingInvitesSection extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          'Pending Invitations',
+          context.l10n.householdPendingInvitations,
           style: AppTypography.h5.copyWith(
             color: AppColors.of(context).textPrimary,
           ),

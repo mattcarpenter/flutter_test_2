@@ -134,8 +134,14 @@ class HouseholdNotifier extends StateNotifier<HouseholdState> {
   // Household operations
   Future<void> createHousehold(String name) async {
     state = state.copyWith(isLoading: true);
-    
+
     try {
+      // Check if user is already in a household
+      final existingMemberships = await _householdRepository.getActiveUserMemberships(_currentUserId);
+      if (existingMemberships.isNotEmpty) {
+        throw Exception('You are already a member of a household. Please leave your current household first.');
+      }
+
       // Generate ID explicitly so we can use it for both operations
       final householdId = const Uuid().v4();
       
@@ -240,6 +246,12 @@ class HouseholdNotifier extends StateNotifier<HouseholdState> {
   }
 
   Future<void> acceptInvite(String inviteCode) async {
+    // Check if user is already in a household
+    final existingMemberships = await _householdRepository.getActiveUserMemberships(_currentUserId);
+    if (existingMemberships.isNotEmpty) {
+      throw Exception('You are already a member of a household. Please leave your current household first.');
+    }
+
     // Find the invite and mark it as accepting
     final inviteIndex = state.incomingInvites.indexWhere(
       (invite) => invite.inviteCode == inviteCode,

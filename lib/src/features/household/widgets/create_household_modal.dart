@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:wolt_modal_sheet/wolt_modal_sheet.dart';
+import '../../../localization/l10n_extension.dart';
 import '../../../theme/colors.dart';
 import '../../../theme/spacing.dart';
 import '../../../theme/typography.dart';
@@ -53,7 +54,7 @@ class CreateHouseholdModalPage {
           mainAxisSize: MainAxisSize.min,
           children: [
             Text(
-              'Create Household',
+              context.l10n.householdCreateTitle,
               style: AppTypography.h4.copyWith(
                 color: AppColors.of(context).textPrimary,
               ),
@@ -121,14 +122,14 @@ class _CreateHouseholdFormState extends ConsumerState<CreateHouseholdForm> {
         Navigator.of(context).pop();
         await SuccessDialog.show(
           context,
-          message: 'Household "${_controller.text.trim()}" has been created successfully!',
+          message: context.l10n.householdCreatedSuccess(_controller.text.trim()),
         );
       }
     } catch (e) {
       if (mounted) {
         await ErrorDialog.show(
           context,
-          message: HouseholdErrorMessages.getDisplayMessage(e.toString()),
+          message: HouseholdErrorMessages.getDisplayMessage(e.toString(), context.l10n),
         );
       }
     } finally {
@@ -147,7 +148,7 @@ class _CreateHouseholdFormState extends ConsumerState<CreateHouseholdForm> {
       mainAxisSize: MainAxisSize.min,
       children: [
         Text(
-          'Enter a name for your household',
+          context.l10n.householdEnterName,
           style: AppTypography.body.copyWith(
             color: AppColors.of(context).textSecondary,
           ),
@@ -155,7 +156,7 @@ class _CreateHouseholdFormState extends ConsumerState<CreateHouseholdForm> {
         SizedBox(height: AppSpacing.lg),
         AppTextFieldSimple(
           controller: _controller,
-          placeholder: 'Household name',
+          placeholder: context.l10n.householdNamePlaceholder,
           autofocus: true,
           enabled: !_isCreating,
           onSubmitted: (_) => _createHousehold(),
@@ -163,7 +164,7 @@ class _CreateHouseholdFormState extends ConsumerState<CreateHouseholdForm> {
         ),
         SizedBox(height: AppSpacing.xl),
         AppButtonVariants.primaryFilled(
-          text: 'Create Household',
+          text: context.l10n.householdCreateButton,
           size: AppButtonSize.large,
           shape: AppButtonShape.square,
           fullWidth: true,

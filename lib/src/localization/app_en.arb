@@ -3617,5 +3617,366 @@
   "discoverErrorGeneric": "An error occurred.",
   "@discoverErrorGeneric": {
     "description": "Generic error fallback message"
+  },
+
+  "householdTitle": "Household",
+  "@householdTitle": {
+    "description": "Household page title"
+  },
+  "householdLeaveTitle": "Leave Household",
+  "@householdLeaveTitle": {
+    "description": "Leave household dialog title"
+  },
+  "householdDeleteTitle": "Delete Household",
+  "@householdDeleteTitle": {
+    "description": "Delete household dialog title"
+  },
+  "householdTransferOwnershipTitle": "Transfer Ownership",
+  "@householdTransferOwnershipTitle": {
+    "description": "Transfer ownership modal title"
+  },
+  "householdCreateTitle": "Create Household",
+  "@householdCreateTitle": {
+    "description": "Create household modal title"
+  },
+  "householdJoinTitle": "Join Household",
+  "@householdJoinTitle": {
+    "description": "Join household modal title"
+  },
+  "householdInviteMemberTitle": "Invite Member",
+  "@householdInviteMemberTitle": {
+    "description": "Invite member modal title"
+  },
+  "householdMemberLimitTitle": "Member Limit Reached",
+  "@householdMemberLimitTitle": {
+    "description": "Member limit reached dialog title"
+  },
+  "householdRemoveMemberTitle": "Remove Member",
+  "@householdRemoveMemberTitle": {
+    "description": "Remove member dialog title"
+  },
+  "householdInviteCodeCreatedTitle": "Invite Code Created",
+  "@householdInviteCodeCreatedTitle": {
+    "description": "Invite code created dialog title"
+  },
+  "householdAuthRequiredTitle": "Authentication Required",
+  "@householdAuthRequiredTitle": {
+    "description": "Authentication required title"
+  },
+  "householdPendingInvites": "Pending Invites",
+  "@householdPendingInvites": {
+    "description": "Pending invites section header"
+  },
+  "householdPendingInvitations": "Pending Invitations",
+  "@householdPendingInvitations": {
+    "description": "Pending invitations section header"
+  },
+  "householdMembersCount": "Members ({count})",
+  "@householdMembersCount": {
+    "description": "Members section header with count",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "householdPendingInvitesCount": "Pending Invites ({count})",
+  "@householdPendingInvitesCount": {
+    "description": "Pending invites section header with count",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "householdSelectNewOwner": "Select new owner",
+  "@householdSelectNewOwner": {
+    "description": "Select new owner section header"
+  },
+  "householdDeleteMessage": "Since you are the only member, this will delete the household. Your shared data will become personal data. This cannot be undone.",
+  "@householdDeleteMessage": {
+    "description": "Delete household confirmation message"
+  },
+  "householdAuthRequiredMessage": "Please sign in to access household sharing features",
+  "@householdAuthRequiredMessage": {
+    "description": "Authentication required message"
+  },
+  "householdEmptyDescription": "Share recipes and collaborate with your household",
+  "@householdEmptyDescription": {
+    "description": "Empty state description when no household"
+  },
+  "householdLeaveConfirmation": "Are you sure you want to leave this household?",
+  "@householdLeaveConfirmation": {
+    "description": "Leave household confirmation message"
+  },
+  "householdTransferOwnershipMessage": "As the owner, you must transfer ownership to another member before leaving.",
+  "@householdTransferOwnershipMessage": {
+    "description": "Transfer ownership explanation"
+  },
+  "householdMemberLimitMessage": "Households can have a maximum of 10 members. Remove a member or revoke a pending invite to add someone new.",
+  "@householdMemberLimitMessage": {
+    "description": "Member limit reached message"
+  },
+  "householdRemoveMemberConfirmation": "Are you sure you want to remove {name} from the household?",
+  "@householdRemoveMemberConfirmation": {
+    "description": "Remove member confirmation message",
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "householdEnterName": "Enter a name for your household",
+  "@householdEnterName": {
+    "description": "Create household instruction"
+  },
+  "householdEnterInviteCode": "Enter the invitation code",
+  "@householdEnterInviteCode": {
+    "description": "Join with code instruction"
+  },
+  "householdChooseInviteMethod": "Choose how to invite a new member",
+  "@householdChooseInviteMethod": {
+    "description": "Invite method selection instruction"
+  },
+  "householdEmailInviteDescription": "An invitation email will be sent to this address",
+  "@householdEmailInviteDescription": {
+    "description": "Email invite description"
+  },
+  "householdCodeInviteDescription": "A shareable invitation code will be generated",
+  "@householdCodeInviteDescription": {
+    "description": "Code invite description"
+  },
+  "householdShareInviteUrl": "Share this URL with the person you want to invite:",
+  "@householdShareInviteUrl": {
+    "description": "Share invite URL instruction"
+  },
+  "householdNamePlaceholder": "Household name",
+  "@householdNamePlaceholder": {
+    "description": "Household name input placeholder"
+  },
+  "householdInviteCodePlaceholder": "Invitation code",
+  "@householdInviteCodePlaceholder": {
+    "description": "Invitation code input placeholder"
+  },
+  "householdEmailPlaceholder": "Email address",
+  "@householdEmailPlaceholder": {
+    "description": "Email address input placeholder"
+  },
+  "householdDisplayNamePlaceholder": "Display name",
+  "@householdDisplayNamePlaceholder": {
+    "description": "Display name input placeholder"
+  },
+  "householdCreateButton": "Create Household",
+  "@householdCreateButton": {
+    "description": "Create household button text"
+  },
+  "householdJoinButton": "Join Household",
+  "@householdJoinButton": {
+    "description": "Join household button text"
+  },
+  "householdJoinWithCodeButton": "Join with Code",
+  "@householdJoinWithCodeButton": {
+    "description": "Join with code button text"
+  },
+  "householdLeaveButton": "Leave",
+  "@householdLeaveButton": {
+    "description": "Leave button text"
+  },
+  "householdTransferLeaveButton": "Transfer & Leave",
+  "@householdTransferLeaveButton": {
+    "description": "Transfer ownership and leave button text"
+  },
+  "householdTransferringButton": "Transferring...",
+  "@householdTransferringButton": {
+    "description": "Transferring in progress button text"
+  },
+  "householdSendInvitationButton": "Send Invitation",
+  "@householdSendInvitationButton": {
+    "description": "Send invitation button text"
+  },
+  "householdGenerateCodeButton": "Generate Code",
+  "@householdGenerateCodeButton": {
+    "description": "Generate code button text"
+  },
+  "householdCopyCloseButton": "Copy & Close",
+  "@householdCopyCloseButton": {
+    "description": "Copy and close button text"
+  },
+  "householdAcceptButton": "Accept",
+  "@householdAcceptButton": {
+    "description": "Accept invite button text"
+  },
+  "householdAcceptingButton": "Accepting...",
+  "@householdAcceptingButton": {
+    "description": "Accepting in progress button text"
+  },
+  "householdDeclineButton": "Decline",
+  "@householdDeclineButton": {
+    "description": "Decline invite button text"
+  },
+  "householdResendButton": "Resend",
+  "@householdResendButton": {
+    "description": "Resend invite button text"
+  },
+  "householdRevokeButton": "Revoke",
+  "@householdRevokeButton": {
+    "description": "Revoke invite button text"
+  },
+  "householdRemoveButton": "Remove",
+  "@householdRemoveButton": {
+    "description": "Remove member button text"
+  },
+  "householdInviteEmail": "Email",
+  "@householdInviteEmail": {
+    "description": "Email invite segment label"
+  },
+  "householdInviteCode": "Code",
+  "@householdInviteCode": {
+    "description": "Code invite segment label"
+  },
+  "householdStatusPending": "Pending",
+  "@householdStatusPending": {
+    "description": "Pending status badge"
+  },
+  "householdStatusAccepted": "Accepted",
+  "@householdStatusAccepted": {
+    "description": "Accepted status badge"
+  },
+  "householdStatusDeclined": "Declined",
+  "@householdStatusDeclined": {
+    "description": "Declined status badge"
+  },
+  "householdStatusRevoked": "Revoked",
+  "@householdStatusRevoked": {
+    "description": "Revoked status badge"
+  },
+  "householdStatusAccepting": "Accepting...",
+  "@householdStatusAccepting": {
+    "description": "Accepting in progress status"
+  },
+  "householdStatusRevoking": "Revoking...",
+  "@householdStatusRevoking": {
+    "description": "Revoking in progress status"
+  },
+  "householdOwnerBadge": "Owner",
+  "@householdOwnerBadge": {
+    "description": "Owner badge text"
+  },
+  "householdCreatedSuccess": "Household \"{name}\" has been created successfully!",
+  "@householdCreatedSuccess": {
+    "description": "Household created success message",
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "householdJoinedSuccess": "You have successfully joined the household!",
+  "@householdJoinedSuccess": {
+    "description": "Household joined success message"
+  },
+  "householdLeftSuccess": "You have successfully left the household.",
+  "@householdLeftSuccess": {
+    "description": "Household left success message"
+  },
+  "householdTransferredSuccess": "You have successfully left the household and transferred ownership.",
+  "@householdTransferredSuccess": {
+    "description": "Ownership transferred and left success message"
+  },
+  "householdInviteSentSuccess": "Invitation email has been sent!",
+  "@householdInviteSentSuccess": {
+    "description": "Invitation sent success message"
+  },
+  "householdInviteResentSuccess": "Invitation has been resent successfully.",
+  "@householdInviteResentSuccess": {
+    "description": "Invitation resent success message"
+  },
+  "householdInviteCopiedSuccess": "Invite URL copied to clipboard!",
+  "@householdInviteCopiedSuccess": {
+    "description": "Invite URL copied success message"
+  },
+  "householdErrorInviteNotFound": "The invitation was not found. It may have been cancelled or expired.",
+  "@householdErrorInviteNotFound": {
+    "description": "Invite not found error message"
+  },
+  "householdErrorPermissionDenied": "You don't have permission to perform this action.",
+  "@householdErrorPermissionDenied": {
+    "description": "Permission denied error message"
+  },
+  "householdErrorAlreadyMember": "You are already a member of this household.",
+  "@householdErrorAlreadyMember": {
+    "description": "Already a member error message"
+  },
+  "householdErrorAlreadyHasHousehold": "You already belong to a household. Please leave your current household first.",
+  "@householdErrorAlreadyHasHousehold": {
+    "description": "Already has household error message"
+  },
+  "householdErrorInviteExpired": "This invitation has expired. Please request a new one.",
+  "@householdErrorInviteExpired": {
+    "description": "Invite expired error message"
+  },
+  "householdErrorNetwork": "Network error. Please check your internet connection and try again.",
+  "@householdErrorNetwork": {
+    "description": "Network error message"
+  },
+  "householdErrorTimeout": "The request timed out. Please try again.",
+  "@householdErrorTimeout": {
+    "description": "Timeout error message"
+  },
+  "householdErrorGeneric": "Something went wrong. Please try again.",
+  "@householdErrorGeneric": {
+    "description": "Generic error message"
+  },
+  "householdErrorAuthRequired": "Authentication required",
+  "@householdErrorAuthRequired": {
+    "description": "Authentication required error"
+  },
+  "householdExpiresIn": "Expires: {date}",
+  "@householdExpiresIn": {
+    "description": "Expires in prefix with date",
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "householdExpiresDays": "{count} days",
+  "@householdExpiresDays": {
+    "description": "Days until expiry",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "householdExpiresHours": "{count} hours",
+  "@householdExpiresHours": {
+    "description": "Hours until expiry",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "householdExpiresMinutes": "{count} minutes",
+  "@householdExpiresMinutes": {
+    "description": "Minutes until expiry",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "householdExpiresSoon": "Soon",
+  "@householdExpiresSoon": {
+    "description": "Expires soon text"
+  },
+  "householdNoPendingInvitations": "No pending invitations",
+  "@householdNoPendingInvitations": {
+    "description": "Empty state for no pending invitations"
+  },
+  "householdThisMember": "this member",
+  "@householdThisMember": {
+    "description": "Fallback name for member"
   }
 }

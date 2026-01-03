@@ -31,10 +31,15 @@ class HouseholdRepository {
         _db.householdMembers.householdId.equalsExp(_db.households.id),
       )
     ]);
-    
-    query.where(_db.householdMembers.userId.equals(userId) & 
+
+    query.where(_db.householdMembers.userId.equals(userId) &
                 _db.householdMembers.isActive.equals(1));
-    
+
+    // Order by most recent membership and limit to 1 to handle edge case
+    // where user somehow has multiple active memberships
+    query.orderBy([OrderingTerm.desc(_db.householdMembers.joinedAt)]);
+    query.limit(1);
+
     return query.map((row) => row.readTable(_db.households)).watchSingleOrNull();
   }
 

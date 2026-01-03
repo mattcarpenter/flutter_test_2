@@ -1,4 +1,5 @@
 import 'package:flutter/cupertino.dart';
+import '../../../localization/l10n_extension.dart';
 import '../../../theme/colors.dart';
 import '../../../theme/spacing.dart';
 import '../../../theme/typography.dart';
@@ -25,7 +26,7 @@ class HouseholdMembersSection extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          'Members (${members.length})',
+          context.l10n.householdMembersCount(members.length),
           style: AppTypography.h5.copyWith(
             color: AppColors.of(context).textPrimary,
           ),

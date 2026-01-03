@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:wolt_modal_sheet/wolt_modal_sheet.dart';
+import '../../../localization/l10n_extension.dart';
 import '../../../theme/colors.dart';
 import '../../../theme/spacing.dart';
 import '../../../theme/typography.dart';
@@ -61,7 +62,7 @@ class CreateInviteModalPage {
           mainAxisSize: MainAxisSize.min,
           children: [
             Text(
-              'Invite Member',
+              context.l10n.householdInviteMemberTitle,
               style: AppTypography.h4.copyWith(
                 color: AppColors.of(context).textPrimary,
               ),
@@ -166,14 +167,14 @@ class _CreateInviteFormState extends ConsumerState<CreateInviteForm> {
           Navigator.of(context).pop();
           await SuccessDialog.show(
             context,
-            message: 'Invitation email has been sent!',
+            message: context.l10n.householdInviteSentSuccess,
           );
         }
       } catch (e) {
         if (mounted) {
           await ErrorDialog.show(
             context,
-            message: HouseholdErrorMessages.getDisplayMessage(e.toString()),
+            message: HouseholdErrorMessages.getDisplayMessage(e.toString(), context.l10n),
           );
         }
       } finally {
@@ -201,7 +202,7 @@ class _CreateInviteFormState extends ConsumerState<CreateInviteForm> {
         if (mounted) {
           await ErrorDialog.show(
             context,
-            message: HouseholdErrorMessages.getDisplayMessage(e.toString()),
+            message: HouseholdErrorMessages.getDisplayMessage(e.toString(), context.l10n),
           );
         }
       } finally {
@@ -215,14 +216,15 @@ class _CreateInviteFormState extends ConsumerState<CreateInviteForm> {
   }
 
   void _showInviteCodeDialog(String inviteUrl) {
+    final l10n = context.l10n;
     showCupertinoDialog(
       context: context,
       builder: (dialogContext) => CupertinoAlertDialog(
-        title: const Text('Invite Code Created'),
+        title: Text(l10n.householdInviteCodeCreatedTitle),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const Text('Share this URL with the person you want to invite:'),
+            Text(l10n.householdShareInviteUrl),
             const SizedBox(height: 16),
             Container(
               padding: const EdgeInsets.all(12),
@@ -248,14 +250,14 @@ class _CreateInviteFormState extends ConsumerState<CreateInviteForm> {
               Navigator.of(dialogContext).pop();
               SuccessDialog.show(
                 context,
-                message: 'Invite URL copied to clipboard!',
+                message: l10n.householdInviteCopiedSuccess,
               );
             },
-            child: const Text('Copy & Close'),
+            child: Text(l10n.householdCopyCloseButton),
           ),
           CupertinoDialogAction(
             onPressed: () => Navigator.of(dialogContext).pop(),
-            child: const Text('Close'),
+            child: Text(l10n.commonClose),
           ),
         ],
       ),
@@ -269,7 +271,7 @@ class _CreateInviteFormState extends ConsumerState<CreateInviteForm> {
       mainAxisSize: MainAxisSize.min,
       children: [
         Text(
-          'Choose how to invite a new member',
+          context.l10n.householdChooseInviteMethod,
           style: AppTypography.body.copyWith(
             color: AppColors.of(context).textSecondary,
           ),
@@ -278,14 +280,14 @@ class _CreateInviteFormState extends ConsumerState<CreateInviteForm> {
         CupertinoSlidingSegmentedControl<int>(
           groupValue: _selectedSegment,
           onValueChanged: _isCreating ? (_) {} : _handleSegmentChanged,
-          children: const {
+          children: {
             0: Padding(
-              padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-              child: Text('Email'),
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+              child: Text(context.l10n.householdInviteEmail),
             ),
             1: Padding(
-              padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-              child: Text('Code'),
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+              child: Text(context.l10n.householdInviteCode),
             ),
           },
         ),
@@ -293,7 +295,7 @@ class _CreateInviteFormState extends ConsumerState<CreateInviteForm> {
         if (_selectedSegment == 0) ...[
           AppTextFieldSimple(
             controller: _emailController,
-            placeholder: 'Email address',
+            placeholder: context.l10n.householdEmailPlaceholder,
             keyboardType: TextInputType.emailAddress,
             autocorrect: false,
             autofocus: true,
@@ -303,7 +305,7 @@ class _CreateInviteFormState extends ConsumerState<CreateInviteForm> {
           ),
           SizedBox(height: AppSpacing.sm),
           Text(
-            'An invitation email will be sent to this address',
+            context.l10n.householdEmailInviteDescription,
             style: AppTypography.caption.copyWith(
               color: AppColors.of(context).textTertiary,
             ),
@@ -311,7 +313,7 @@ class _CreateInviteFormState extends ConsumerState<CreateInviteForm> {
         ] else ...[
           AppTextFieldSimple(
             controller: _nameController,
-            placeholder: 'Display name',
+            placeholder: context.l10n.householdDisplayNamePlaceholder,
             autofocus: true,
             enabled: !_isCreating,
             onSubmitted: (_) => _createInvite(),
@@ -319,7 +321,7 @@ class _CreateInviteFormState extends ConsumerState<CreateInviteForm> {
           ),
           SizedBox(height: AppSpacing.sm),
           Text(
-            'A shareable invitation code will be generated',
+            context.l10n.householdCodeInviteDescription,
             style: AppTypography.caption.copyWith(
               color: AppColors.of(context).textTertiary,
             ),
@@ -327,7 +329,7 @@ class _CreateInviteFormState extends ConsumerState<CreateInviteForm> {
         ],
         SizedBox(height: AppSpacing.xl),
         AppButtonVariants.primaryFilled(
-          text: _selectedSegment == 0 ? 'Send Invitation' : 'Generate Code',
+          text: _selectedSegment == 0 ? context.l10n.householdSendInvitationButton : context.l10n.householdGenerateCodeButton,
           size: AppButtonSize.large,
           shape: AppButtonShape.square,
           fullWidth: true,

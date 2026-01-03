@@ -5,6 +5,7 @@ import 'package:hugeicons/hugeicons.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../../providers/household_provider.dart';
 import '../../../mobile/utils/adaptive_sliver_page.dart';
+import '../../../localization/l10n_extension.dart';
 import '../../../theme/colors.dart';
 import '../../../theme/spacing.dart';
 import '../../../theme/typography.dart';
@@ -55,7 +56,7 @@ class HouseholdSharingPage extends ConsumerWidget {
       trailingMenu = AdaptivePullDownButton(
         items: [
           AdaptiveMenuItem(
-            title: 'Leave Household',
+            title: context.l10n.householdLeaveTitle,
             icon: Icon(CupertinoIcons.arrow_right_square, color: AppColors.of(context).error),
             isDestructive: true,
             onTap: () => _showLeaveHouseholdDialog(context, ref, householdState, currentMember, members),
@@ -68,7 +69,7 @@ class HouseholdSharingPage extends ConsumerWidget {
     }
 
     return AdaptiveSliverPage(
-      title: 'Household',
+      title: context.l10n.householdTitle,
       leading: menuButton,
       automaticallyImplyLeading: onMenuPressed == null,
       trailing: trailingMenu,
@@ -123,24 +124,22 @@ class HouseholdSharingPage extends ConsumerWidget {
   }
 
   void _showDeleteHouseholdModal(BuildContext context, WidgetRef ref, String householdId) {
+    final l10n = context.l10n;
     showCupertinoDialog(
       context: context,
-      builder: (context) => CupertinoAlertDialog(
-        title: const Text('Delete Household'),
-        content: const Text(
-          'Since you are the only member, this will delete the household. '
-          'Your shared data will become personal data. This cannot be undone.'
-        ),
+      builder: (dialogContext) => CupertinoAlertDialog(
+        title: Text(l10n.householdDeleteTitle),
+        content: Text(l10n.householdDeleteMessage),
         actions: [
           CupertinoDialogAction(
-            child: const Text('Cancel'),
-            onPressed: () => Navigator.pop(context),
+            child: Text(l10n.commonCancel),
+            onPressed: () => Navigator.pop(dialogContext),
           ),
           CupertinoDialogAction(
             isDestructiveAction: true,
-            child: const Text('Delete Household'),
+            child: Text(l10n.householdDeleteTitle),
             onPressed: () async {
-              Navigator.pop(context);
+              Navigator.pop(dialogContext);
 
               try {
                 await ref.read(householdNotifierProvider.notifier).deleteHousehold(householdId);
@@ -151,7 +150,7 @@ class HouseholdSharingPage extends ConsumerWidget {
                 if (context.mounted) {
                   await ErrorDialog.show(
                     context,
-                    message: HouseholdErrorMessages.getDisplayMessage(e.toString()),
+                    message: HouseholdErrorMessages.getDisplayMessage(e.toString(), l10n),
                   );
                 }
               }
@@ -171,7 +170,7 @@ class HouseholdSharingPage extends ConsumerWidget {
         : null;
 
     return AdaptiveSliverPage(
-      title: 'Household',
+      title: context.l10n.householdTitle,
       leading: menuButton,
       automaticallyImplyLeading: onMenuPressed == null,
       slivers: [
@@ -189,14 +188,14 @@ class HouseholdSharingPage extends ConsumerWidget {
                   ),
                   SizedBox(height: AppSpacing.lg),
                   Text(
-                    'Authentication Required',
+                    context.l10n.householdAuthRequiredTitle,
                     style: AppTypography.h3.copyWith(
                       color: AppColors.of(context).textPrimary,
                     ),
                   ),
                   SizedBox(height: AppSpacing.sm),
                   Text(
-                    'Please sign in to access household sharing features',
+                    context.l10n.householdAuthRequiredMessage,
                     style: AppTypography.body.copyWith(
                       color: AppColors.of(context).textSecondary,
                     ),
@@ -224,7 +223,7 @@ class HouseholdSharingPage extends ConsumerWidget {
   Widget _buildHouseholdManagementSection(BuildContext context, WidgetRef ref, householdState) {
     final currentUserId = Supabase.instance.client.auth.currentUser?.id;
     if (currentUserId == null) {
-      return const Text('Authentication required');
+      return Text(context.l10n.householdErrorAuthRequired);
     }
     final canManageMembers = householdState.canManageMembers(currentUserId);
 
@@ -252,7 +251,7 @@ class HouseholdSharingPage extends ConsumerWidget {
               if (context.mounted) {
                 await ErrorDialog.show(
                   context,
-                  message: HouseholdErrorMessages.getDisplayMessage(e.toString()),
+                  message: HouseholdErrorMessages.getDisplayMessage(e.toString(), context.l10n),
                 );
               }
             }
@@ -276,14 +275,14 @@ class HouseholdSharingPage extends ConsumerWidget {
                 if (context.mounted) {
                   await SuccessDialog.show(
                     context,
-                    message: 'Invitation has been resent successfully.',
+                    message: context.l10n.householdInviteResentSuccess,
                   );
                 }
               } catch (e) {
                 if (context.mounted) {
                   await ErrorDialog.show(
                     context,
-                    message: HouseholdErrorMessages.getDisplayMessage(e.toString()),
+                    message: HouseholdErrorMessages.getDisplayMessage(e.toString(), context.l10n),
                   );
                 }
               }
@@ -295,7 +294,7 @@ class HouseholdSharingPage extends ConsumerWidget {
                 if (context.mounted) {
                   await ErrorDialog.show(
                     context,
-                    message: HouseholdErrorMessages.getDisplayMessage(e.toString()),
+                    message: HouseholdErrorMessages.getDisplayMessage(e.toString(), context.l10n),
                   );
                 }
               }
@@ -313,7 +312,7 @@ class HouseholdSharingPage extends ConsumerWidget {
         // Show pending invites first if any
         if (householdState.hasPendingInvites) ...[
           Text(
-            'Pending Invites',
+            context.l10n.householdPendingInvites,
             style: AppTypography.h5.copyWith(
               color: AppColors.of(context).textPrimary,
             ),
@@ -331,14 +330,14 @@ class HouseholdSharingPage extends ConsumerWidget {
                   if (context.mounted) {
                     await SuccessDialog.show(
                       context,
-                      message: 'You have successfully joined the household!',
+                      message: context.l10n.householdJoinedSuccess,
                     );
                   }
                 } catch (e) {
                   if (context.mounted) {
                     await ErrorDialog.show(
                       context,
-                      message: HouseholdErrorMessages.getDisplayMessage(e.toString()),
+                      message: HouseholdErrorMessages.getDisplayMessage(e.toString(), context.l10n),
                     );
                   }
                 }
@@ -351,7 +350,7 @@ class HouseholdSharingPage extends ConsumerWidget {
                   if (context.mounted) {
                     await ErrorDialog.show(
                       context,
-                      message: HouseholdErrorMessages.getDisplayMessage(e.toString()),
+                      message: HouseholdErrorMessages.getDisplayMessage(e.toString(), context.l10n),
                     );
                   }
                 }
@@ -377,7 +376,7 @@ class HouseholdSharingPage extends ConsumerWidget {
               ),
               SizedBox(height: AppSpacing.lg),
               Text(
-                'Share recipes and collaborate with your household',
+                context.l10n.householdEmptyDescription,
                 style: AppTypography.body.copyWith(
                   color: AppColors.of(context).textSecondary,
                 ),
@@ -385,7 +384,7 @@ class HouseholdSharingPage extends ConsumerWidget {
               ),
               SizedBox(height: AppSpacing.xxl),
               AppButtonVariants.primaryFilled(
-                text: 'Create Household',
+                text: context.l10n.householdCreateButton,
                 size: AppButtonSize.large,
                 shape: AppButtonShape.square,
                 fullWidth: true,
@@ -393,7 +392,7 @@ class HouseholdSharingPage extends ConsumerWidget {
               ),
               SizedBox(height: AppSpacing.md),
               AppButtonVariants.mutedOutline(
-                text: 'Join with Code',
+                text: context.l10n.householdJoinWithCodeButton,
                 size: AppButtonSize.large,
                 shape: AppButtonShape.square,
                 fullWidth: true,

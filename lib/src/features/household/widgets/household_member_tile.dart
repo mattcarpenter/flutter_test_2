@@ -1,5 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:shimmer/shimmer.dart';
+import '../../../localization/l10n_extension.dart';
 import '../../../theme/colors.dart';
 import '../../../theme/spacing.dart';
 import '../../../theme/typography.dart';
@@ -130,7 +131,7 @@ class HouseholdMemberTile extends StatelessWidget {
         borderRadius: BorderRadius.circular(7),
       ),
       child: Text(
-        'Owner',
+        context.l10n.householdOwnerBadge,
         style: TextStyle(
           fontSize: 11,
           fontWeight: FontWeight.w500,
@@ -144,24 +145,25 @@ class HouseholdMemberTile extends StatelessWidget {
   }
 
   void _showRemoveConfirmation(BuildContext context) {
-    final displayName = member.userName ?? member.userEmail ?? 'this member';
+    final l10n = context.l10n;
+    final displayName = member.userName ?? member.userEmail ?? l10n.householdThisMember;
     showCupertinoDialog(
       context: context,
-      builder: (context) => CupertinoAlertDialog(
-        title: const Text('Remove Member'),
-        content: Text('Are you sure you want to remove $displayName from the household?'),
+      builder: (dialogContext) => CupertinoAlertDialog(
+        title: Text(l10n.householdRemoveMemberTitle),
+        content: Text(l10n.householdRemoveMemberConfirmation(displayName)),
         actions: [
           CupertinoDialogAction(
-            child: const Text('Cancel'),
-            onPressed: () => Navigator.of(context).pop(),
+            child: Text(l10n.commonCancel),
+            onPressed: () => Navigator.of(dialogContext).pop(),
           ),
           CupertinoDialogAction(
             isDestructiveAction: true,
             onPressed: () {
-              Navigator.of(context).pop();
+              Navigator.of(dialogContext).pop();
               onRemove?.call();
             },
-            child: const Text('Remove'),
+            child: Text(l10n.householdRemoveButton),
           ),
         ],
       ),

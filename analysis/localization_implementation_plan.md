@@ -242,7 +242,7 @@ Test by changing device language or using a test override.
 | 6 | pantry | 11 | Low | ✅ Done | Core feature |
 | 7 | clippings | 18 | Medium | ✅ Done | Labs feature |
 | 8 | import_export | 22 | Medium | ✅ Done | Utility feature |
-| 9 | household | 15 | Medium | ⏳ Pending | Sharing feature |
+| 9 | household | 15 | Medium | ✅ Done | Sharing feature |
 | 10 | help | 4 | Low | ✅ Done | Help documentation |
 | 11 | share | 3 | Low | ⏳ Pending | Share previews |
 | 12 | timers | 3 | Low | ✅ Done | Timer UI |

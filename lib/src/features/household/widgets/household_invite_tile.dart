@@ -1,6 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:hugeicons/hugeicons.dart';
 import 'package:flutter/services.dart';
+import '../../../localization/l10n_extension.dart';
 import '../../../theme/colors.dart';
 import '../../../theme/spacing.dart';
 import '../../../theme/typography.dart';
@@ -93,7 +94,7 @@ class HouseholdInviteTile extends StatelessWidget {
     final hasCode = invite.inviteType == HouseholdInviteType.code;
 
     final expiryText = Text(
-      'Expires: ${_formatDate(invite.expiresAt)}',
+      context.l10n.householdExpiresIn(_formatDate(context, invite.expiresAt)),
       style: AppTypography.caption.copyWith(
         color: AppColors.of(context).textTertiary,
       ),
@@ -149,6 +150,7 @@ class HouseholdInviteTile extends StatelessWidget {
 
   Widget _buildStatusBadge(BuildContext context) {
     final colors = AppColors.of(context);
+    final l10n = context.l10n;
     Color backgroundColor;
     Color textColor;
     String text;
@@ -156,32 +158,32 @@ class HouseholdInviteTile extends StatelessWidget {
     if (invite.isAccepting) {
       backgroundColor = colors.warningBackground;
       textColor = colors.warning;
-      text = 'Accepting...';
+      text = l10n.householdStatusAccepting;
     } else if (invite.isRevoking) {
       backgroundColor = colors.errorBackground;
       textColor = colors.error;
-      text = 'Revoking...';
+      text = l10n.householdStatusRevoking;
     } else {
       switch (invite.status) {
         case HouseholdInviteStatus.pending:
           backgroundColor = colors.infoBackground;
           textColor = colors.info;
-          text = 'Pending';
+          text = l10n.householdStatusPending;
           break;
         case HouseholdInviteStatus.accepted:
           backgroundColor = colors.successBackground;
           textColor = colors.success;
-          text = 'Accepted';
+          text = l10n.householdStatusAccepted;
           break;
         case HouseholdInviteStatus.declined:
           backgroundColor = colors.errorBackground;
           textColor = colors.error;
-          text = 'Declined';
+          text = l10n.householdStatusDeclined;
           break;
         case HouseholdInviteStatus.revoked:
           backgroundColor = colors.surfaceVariant;
           textColor = colors.textTertiary;
-          text = 'Revoked';
+          text = l10n.householdStatusRevoked;
           break;
       }
     }
@@ -206,13 +208,14 @@ class HouseholdInviteTile extends StatelessWidget {
 
   Widget _buildActionButtons(BuildContext context) {
     final isDisabled = invite.isAccepting || invite.isRevoking;
+    final l10n = context.l10n;
 
     return Row(
       children: [
         if (onAccept != null)
           Expanded(
             child: AppButtonVariants.primaryFilled(
-              text: invite.isAccepting ? 'Accepting...' : 'Accept',
+              text: invite.isAccepting ? l10n.householdAcceptingButton : l10n.householdAcceptButton,
               size: AppButtonSize.small,
               shape: AppButtonShape.square,
               loading: invite.isAccepting,
@@ -223,7 +226,7 @@ class HouseholdInviteTile extends StatelessWidget {
         if (onDecline != null)
           Expanded(
             child: AppButtonVariants.mutedOutline(
-              text: 'Decline',
+              text: l10n.householdDeclineButton,
               size: AppButtonSize.small,
               shape: AppButtonShape.square,
               onPressed: isDisabled ? null : onDecline,
@@ -234,7 +237,7 @@ class HouseholdInviteTile extends StatelessWidget {
             padding: EdgeInsets.symmetric(horizontal: AppSpacing.sm, vertical: AppSpacing.xs),
             onPressed: isDisabled ? null : onResend,
             child: Text(
-              'Resend',
+              l10n.householdResendButton,
               style: AppTypography.caption.copyWith(
                 color: isDisabled
                     ? AppColors.of(context).textDisabled
@@ -249,7 +252,7 @@ class HouseholdInviteTile extends StatelessWidget {
             child: invite.isRevoking
                 ? CupertinoActivityIndicator(color: AppColors.of(context).error)
                 : Text(
-                    'Revoke',
+                    l10n.householdRevokeButton,
                     style: AppTypography.caption.copyWith(
                       color: AppColors.of(context).error,
                     ),
@@ -264,18 +267,19 @@ class HouseholdInviteTile extends StatelessWidget {
     // Could show a toast here
   }
 
-  String _formatDate(DateTime date) {
+  String _formatDate(BuildContext context, DateTime date) {
     final now = DateTime.now();
     final difference = date.difference(now);
+    final l10n = context.l10n;
 
     if (difference.inDays > 1) {
-      return '${difference.inDays} days';
+      return l10n.householdExpiresDays(difference.inDays);
     } else if (difference.inHours > 1) {
-      return '${difference.inHours} hours';
+      return l10n.householdExpiresHours(difference.inHours);
     } else if (difference.inMinutes > 1) {
-      return '${difference.inMinutes} minutes';
+      return l10n.householdExpiresMinutes(difference.inMinutes);
     } else {
-      return 'Soon';
+      return l10n.householdExpiresSoon;
     }
   }
 }

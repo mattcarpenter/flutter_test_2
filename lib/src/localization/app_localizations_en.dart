@@ -2629,4 +2629,280 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get discoverErrorGeneric => 'An error occurred.';
+
+  @override
+  String get householdTitle => 'Household';
+
+  @override
+  String get householdLeaveTitle => 'Leave Household';
+
+  @override
+  String get householdDeleteTitle => 'Delete Household';
+
+  @override
+  String get householdTransferOwnershipTitle => 'Transfer Ownership';
+
+  @override
+  String get householdCreateTitle => 'Create Household';
+
+  @override
+  String get householdJoinTitle => 'Join Household';
+
+  @override
+  String get householdInviteMemberTitle => 'Invite Member';
+
+  @override
+  String get householdMemberLimitTitle => 'Member Limit Reached';
+
+  @override
+  String get householdRemoveMemberTitle => 'Remove Member';
+
+  @override
+  String get householdInviteCodeCreatedTitle => 'Invite Code Created';
+
+  @override
+  String get householdAuthRequiredTitle => 'Authentication Required';
+
+  @override
+  String get householdPendingInvites => 'Pending Invites';
+
+  @override
+  String get householdPendingInvitations => 'Pending Invitations';
+
+  @override
+  String householdMembersCount(int count) {
+    return 'Members ($count)';
+  }
+
+  @override
+  String householdPendingInvitesCount(int count) {
+    return 'Pending Invites ($count)';
+  }
+
+  @override
+  String get householdSelectNewOwner => 'Select new owner';
+
+  @override
+  String get householdDeleteMessage =>
+      'Since you are the only member, this will delete the household. Your shared data will become personal data. This cannot be undone.';
+
+  @override
+  String get householdAuthRequiredMessage =>
+      'Please sign in to access household sharing features';
+
+  @override
+  String get householdEmptyDescription =>
+      'Share recipes and collaborate with your household';
+
+  @override
+  String get householdLeaveConfirmation =>
+      'Are you sure you want to leave this household?';
+
+  @override
+  String get householdTransferOwnershipMessage =>
+      'As the owner, you must transfer ownership to another member before leaving.';
+
+  @override
+  String get householdMemberLimitMessage =>
+      'Households can have a maximum of 10 members. Remove a member or revoke a pending invite to add someone new.';
+
+  @override
+  String householdRemoveMemberConfirmation(String name) {
+    return 'Are you sure you want to remove $name from the household?';
+  }
+
+  @override
+  String get householdEnterName => 'Enter a name for your household';
+
+  @override
+  String get householdEnterInviteCode => 'Enter the invitation code';
+
+  @override
+  String get householdChooseInviteMethod => 'Choose how to invite a new member';
+
+  @override
+  String get householdEmailInviteDescription =>
+      'An invitation email will be sent to this address';
+
+  @override
+  String get householdCodeInviteDescription =>
+      'A shareable invitation code will be generated';
+
+  @override
+  String get householdShareInviteUrl =>
+      'Share this URL with the person you want to invite:';
+
+  @override
+  String get householdNamePlaceholder => 'Household name';
+
+  @override
+  String get householdInviteCodePlaceholder => 'Invitation code';
+
+  @override
+  String get householdEmailPlaceholder => 'Email address';
+
+  @override
+  String get householdDisplayNamePlaceholder => 'Display name';
+
+  @override
+  String get householdCreateButton => 'Create Household';
+
+  @override
+  String get householdJoinButton => 'Join Household';
+
+  @override
+  String get householdJoinWithCodeButton => 'Join with Code';
+
+  @override
+  String get householdLeaveButton => 'Leave';
+
+  @override
+  String get householdTransferLeaveButton => 'Transfer & Leave';
+
+  @override
+  String get householdTransferringButton => 'Transferring...';
+
+  @override
+  String get householdSendInvitationButton => 'Send Invitation';
+
+  @override
+  String get householdGenerateCodeButton => 'Generate Code';
+
+  @override
+  String get householdCopyCloseButton => 'Copy & Close';
+
+  @override
+  String get householdAcceptButton => 'Accept';
+
+  @override
+  String get householdAcceptingButton => 'Accepting...';
+
+  @override
+  String get householdDeclineButton => 'Decline';
+
+  @override
+  String get householdResendButton => 'Resend';
+
+  @override
+  String get householdRevokeButton => 'Revoke';
+
+  @override
+  String get householdRemoveButton => 'Remove';
+
+  @override
+  String get householdInviteEmail => 'Email';
+
+  @override
+  String get householdInviteCode => 'Code';
+
+  @override
+  String get householdStatusPending => 'Pending';
+
+  @override
+  String get householdStatusAccepted => 'Accepted';
+
+  @override
+  String get householdStatusDeclined => 'Declined';
+
+  @override
+  String get householdStatusRevoked => 'Revoked';
+
+  @override
+  String get householdStatusAccepting => 'Accepting...';
+
+  @override
+  String get householdStatusRevoking => 'Revoking...';
+
+  @override
+  String get householdOwnerBadge => 'Owner';
+
+  @override
+  String householdCreatedSuccess(String name) {
+    return 'Household \"$name\" has been created successfully!';
+  }
+
+  @override
+  String get householdJoinedSuccess =>
+      'You have successfully joined the household!';
+
+  @override
+  String get householdLeftSuccess =>
+      'You have successfully left the household.';
+
+  @override
+  String get householdTransferredSuccess =>
+      'You have successfully left the household and transferred ownership.';
+
+  @override
+  String get householdInviteSentSuccess => 'Invitation email has been sent!';
+
+  @override
+  String get householdInviteResentSuccess =>
+      'Invitation has been resent successfully.';
+
+  @override
+  String get householdInviteCopiedSuccess => 'Invite URL copied to clipboard!';
+
+  @override
+  String get householdErrorInviteNotFound =>
+      'The invitation was not found. It may have been cancelled or expired.';
+
+  @override
+  String get householdErrorPermissionDenied =>
+      'You don\'t have permission to perform this action.';
+
+  @override
+  String get householdErrorAlreadyMember =>
+      'You are already a member of this household.';
+
+  @override
+  String get householdErrorAlreadyHasHousehold =>
+      'You already belong to a household. Please leave your current household first.';
+
+  @override
+  String get householdErrorInviteExpired =>
+      'This invitation has expired. Please request a new one.';
+
+  @override
+  String get householdErrorNetwork =>
+      'Network error. Please check your internet connection and try again.';
+
+  @override
+  String get householdErrorTimeout =>
+      'The request timed out. Please try again.';
+
+  @override
+  String get householdErrorGeneric => 'Something went wrong. Please try again.';
+
+  @override
+  String get householdErrorAuthRequired => 'Authentication required';
+
+  @override
+  String householdExpiresIn(String date) {
+    return 'Expires: $date';
+  }
+
+  @override
+  String householdExpiresDays(int count) {
+    return '$count days';
+  }
+
+  @override
+  String householdExpiresHours(int count) {
+    return '$count hours';
+  }
+
+  @override
+  String householdExpiresMinutes(int count) {
+    return '$count minutes';
+  }
+
+  @override
+  String get householdExpiresSoon => 'Soon';
+
+  @override
+  String get householdNoPendingInvitations => 'No pending invitations';
+
+  @override
+  String get householdThisMember => 'this member';
 }

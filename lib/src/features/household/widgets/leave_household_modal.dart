@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:wolt_modal_sheet/wolt_modal_sheet.dart';
 import '../models/household_member.dart';
+import '../../../localization/l10n_extension.dart';
 import '../../../theme/colors.dart';
 import '../../../theme/spacing.dart';
 import '../../../theme/typography.dart';
@@ -21,28 +22,29 @@ void showLeaveHouseholdModal(
   List<HouseholdMember> otherMembers,
   Function(String? newOwnerId) onLeaveHousehold,
 ) {
+  final l10n = context.l10n;
   if (!isOwner) {
     // For non-owners, show a simple confirmation dialog
     showCupertinoDialog(
       context: context,
-      builder: (context) => CupertinoAlertDialog(
-        title: const Text('Leave Household'),
-        content: const Text('Are you sure you want to leave this household?'),
+      builder: (dialogContext) => CupertinoAlertDialog(
+        title: Text(l10n.householdLeaveTitle),
+        content: Text(l10n.householdLeaveConfirmation),
         actions: [
           CupertinoDialogAction(
-            onPressed: () => Navigator.of(context).pop(),
-            child: const Text('Cancel'),
+            onPressed: () => Navigator.of(dialogContext).pop(),
+            child: Text(l10n.commonCancel),
           ),
           CupertinoDialogAction(
             isDestructiveAction: true,
             onPressed: () async {
-              Navigator.of(context).pop();
+              Navigator.of(dialogContext).pop();
               try {
                 await onLeaveHousehold(null);
                 if (context.mounted) {
                   await SuccessDialog.show(
                     context,
-                    message: 'You have successfully left the household.',
+                    message: l10n.householdLeftSuccess,
                   );
                 }
               } catch (e) {
@@ -50,12 +52,12 @@ void showLeaveHouseholdModal(
                 if (context.mounted) {
                   await ErrorDialog.show(
                     context,
-                    message: HouseholdErrorMessages.getDisplayMessage(e.toString()),
+                    message: HouseholdErrorMessages.getDisplayMessage(e.toString(), l10n),
                   );
                 }
               }
             },
-            child: const Text('Leave'),
+            child: Text(l10n.householdLeaveButton),
           ),
         ],
       ),
@@ -106,7 +108,7 @@ class LeaveHouseholdModalPage {
           mainAxisSize: MainAxisSize.min,
           children: [
             Text(
-              'Transfer Ownership',
+              context.l10n.householdTransferOwnershipTitle,
               style: AppTypography.h4.copyWith(
                 color: AppColors.of(context).textPrimary,
               ),
@@ -162,7 +164,7 @@ class _LeaveHouseholdFormState extends ConsumerState<LeaveHouseholdForm> {
         Navigator.of(context).pop();
         await SuccessDialog.show(
           context,
-          message: 'You have successfully left the household and transferred ownership.',
+          message: context.l10n.householdTransferredSuccess,
         );
       }
     } catch (e) {
@@ -170,7 +172,7 @@ class _LeaveHouseholdFormState extends ConsumerState<LeaveHouseholdForm> {
       if (mounted) {
         await ErrorDialog.show(
           context,
-          message: HouseholdErrorMessages.getDisplayMessage(e.toString()),
+          message: HouseholdErrorMessages.getDisplayMessage(e.toString(), context.l10n),
         );
       }
     } finally {
@@ -189,14 +191,14 @@ class _LeaveHouseholdFormState extends ConsumerState<LeaveHouseholdForm> {
       mainAxisSize: MainAxisSize.min,
       children: [
         Text(
-          'As the owner, you must transfer ownership to another member before leaving.',
+          context.l10n.householdTransferOwnershipMessage,
           style: AppTypography.body.copyWith(
             color: AppColors.of(context).textSecondary,
           ),
         ),
         SizedBox(height: AppSpacing.xl),
         Text(
-          'Select new owner',
+          context.l10n.householdSelectNewOwner,
           style: AppTypography.h5.copyWith(
             color: AppColors.of(context).textPrimary,
           ),
@@ -225,7 +227,7 @@ class _LeaveHouseholdFormState extends ConsumerState<LeaveHouseholdForm> {
         }),
         SizedBox(height: AppSpacing.xl),
         AppButtonVariants.primaryFilled(
-          text: _isLeaving ? 'Transferring...' : 'Transfer & Leave',
+          text: _isLeaving ? context.l10n.householdTransferringButton : context.l10n.householdTransferLeaveButton,
           size: AppButtonSize.large,
           shape: AppButtonShape.square,
           fullWidth: true,

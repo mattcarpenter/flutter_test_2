@@ -1,4 +1,5 @@
 import 'package:flutter/cupertino.dart';
+import '../../../localization/l10n_extension.dart';
 import '../../../theme/colors.dart';
 import '../../../theme/spacing.dart';
 import '../../../theme/typography.dart';
@@ -36,7 +37,7 @@ class HouseholdInvitesSection extends StatelessWidget {
           children: [
             Expanded(
               child: Text(
-                'Pending Invites (${invites.length})',
+                context.l10n.householdPendingInvitesCount(invites.length),
                 style: AppTypography.h5.copyWith(
                   color: AppColors.of(context).textPrimary,
                 ),
@@ -65,7 +66,7 @@ class HouseholdInvitesSection extends StatelessWidget {
             ),
             child: Center(
               child: Text(
-                'No pending invitations',
+                context.l10n.householdNoPendingInvitations,
                 style: AppTypography.body.copyWith(
                   color: AppColors.of(context).textSecondary,
                 ),
@@ -102,17 +103,16 @@ class HouseholdInvitesSection extends StatelessWidget {
   }
 
   void _showMemberLimitDialog(BuildContext context) {
+    final l10n = context.l10n;
     showCupertinoDialog(
       context: context,
-      builder: (context) => CupertinoAlertDialog(
-        title: const Text('Member Limit Reached'),
-        content: const Text(
-          'Households can have a maximum of 10 members. Remove a member or revoke a pending invite to add someone new.',
-        ),
+      builder: (dialogContext) => CupertinoAlertDialog(
+        title: Text(l10n.householdMemberLimitTitle),
+        content: Text(l10n.householdMemberLimitMessage),
         actions: [
           CupertinoDialogAction(
-            child: const Text('OK'),
-            onPressed: () => Navigator.pop(context),
+            child: Text(l10n.commonOk),
+            onPressed: () => Navigator.pop(dialogContext),
           ),
         ],
       ),

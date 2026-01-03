@@ -2545,4 +2545,264 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get discoverErrorGeneric => 'エラーが発生しました。';
+
+  @override
+  String get householdTitle => '世帯';
+
+  @override
+  String get householdLeaveTitle => '世帯を離れる';
+
+  @override
+  String get householdDeleteTitle => '世帯を削除';
+
+  @override
+  String get householdTransferOwnershipTitle => 'オーナー権限を譲渡';
+
+  @override
+  String get householdCreateTitle => '世帯を作成';
+
+  @override
+  String get householdJoinTitle => '世帯に参加';
+
+  @override
+  String get householdInviteMemberTitle => 'メンバーを招待';
+
+  @override
+  String get householdMemberLimitTitle => 'メンバー数の上限';
+
+  @override
+  String get householdRemoveMemberTitle => 'メンバーを削除';
+
+  @override
+  String get householdInviteCodeCreatedTitle => '招待コードを作成しました';
+
+  @override
+  String get householdAuthRequiredTitle => '認証が必要です';
+
+  @override
+  String get householdPendingInvites => '保留中の招待';
+
+  @override
+  String get householdPendingInvitations => '保留中の招待';
+
+  @override
+  String householdMembersCount(int count) {
+    return 'メンバー（$count人）';
+  }
+
+  @override
+  String householdPendingInvitesCount(int count) {
+    return '保留中の招待（$count件）';
+  }
+
+  @override
+  String get householdSelectNewOwner => '新しいオーナーを選択';
+
+  @override
+  String get householdDeleteMessage =>
+      'あなたは唯一のメンバーのため、世帯が削除されます。共有データは個人データになります。この操作は取り消せません。';
+
+  @override
+  String get householdAuthRequiredMessage => '世帯共有機能を使用するにはサインインしてください';
+
+  @override
+  String get householdEmptyDescription => '世帯でレシピを共有してコラボレーション';
+
+  @override
+  String get householdLeaveConfirmation => 'この世帯を離れてもよろしいですか？';
+
+  @override
+  String get householdTransferOwnershipMessage =>
+      'オーナーとして、離れる前に他のメンバーにオーナー権限を譲渡する必要があります。';
+
+  @override
+  String get householdMemberLimitMessage =>
+      '世帯のメンバーは最大10人までです。新しいメンバーを追加するには、メンバーを削除するか保留中の招待を取り消してください。';
+
+  @override
+  String householdRemoveMemberConfirmation(String name) {
+    return '$nameを世帯から削除してもよろしいですか？';
+  }
+
+  @override
+  String get householdEnterName => '世帯の名前を入力してください';
+
+  @override
+  String get householdEnterInviteCode => '招待コードを入力してください';
+
+  @override
+  String get householdChooseInviteMethod => '招待方法を選択してください';
+
+  @override
+  String get householdEmailInviteDescription => 'このアドレスに招待メールが送信されます';
+
+  @override
+  String get householdCodeInviteDescription => '共有可能な招待コードが生成されます';
+
+  @override
+  String get householdShareInviteUrl => '招待したい人にこのURLを共有してください：';
+
+  @override
+  String get householdNamePlaceholder => '世帯名';
+
+  @override
+  String get householdInviteCodePlaceholder => '招待コード';
+
+  @override
+  String get householdEmailPlaceholder => 'メールアドレス';
+
+  @override
+  String get householdDisplayNamePlaceholder => '表示名';
+
+  @override
+  String get householdCreateButton => '世帯を作成';
+
+  @override
+  String get householdJoinButton => '世帯に参加';
+
+  @override
+  String get householdJoinWithCodeButton => 'コードで参加';
+
+  @override
+  String get householdLeaveButton => '離れる';
+
+  @override
+  String get householdTransferLeaveButton => '譲渡して離れる';
+
+  @override
+  String get householdTransferringButton => '譲渡中...';
+
+  @override
+  String get householdSendInvitationButton => '招待を送信';
+
+  @override
+  String get householdGenerateCodeButton => 'コードを生成';
+
+  @override
+  String get householdCopyCloseButton => 'コピーして閉じる';
+
+  @override
+  String get householdAcceptButton => '承認';
+
+  @override
+  String get householdAcceptingButton => '承認中...';
+
+  @override
+  String get householdDeclineButton => '辞退';
+
+  @override
+  String get householdResendButton => '再送信';
+
+  @override
+  String get householdRevokeButton => '取り消し';
+
+  @override
+  String get householdRemoveButton => '削除';
+
+  @override
+  String get householdInviteEmail => 'メール';
+
+  @override
+  String get householdInviteCode => 'コード';
+
+  @override
+  String get householdStatusPending => '保留中';
+
+  @override
+  String get householdStatusAccepted => '承認済み';
+
+  @override
+  String get householdStatusDeclined => '辞退済み';
+
+  @override
+  String get householdStatusRevoked => '取り消し済み';
+
+  @override
+  String get householdStatusAccepting => '承認中...';
+
+  @override
+  String get householdStatusRevoking => '取り消し中...';
+
+  @override
+  String get householdOwnerBadge => 'オーナー';
+
+  @override
+  String householdCreatedSuccess(String name) {
+    return '世帯「$name」を作成しました！';
+  }
+
+  @override
+  String get householdJoinedSuccess => '世帯に参加しました！';
+
+  @override
+  String get householdLeftSuccess => '世帯を離れました。';
+
+  @override
+  String get householdTransferredSuccess => 'オーナー権限を譲渡して世帯を離れました。';
+
+  @override
+  String get householdInviteSentSuccess => '招待メールを送信しました！';
+
+  @override
+  String get householdInviteResentSuccess => '招待を再送信しました。';
+
+  @override
+  String get householdInviteCopiedSuccess => '招待URLをコピーしました！';
+
+  @override
+  String get householdErrorInviteNotFound => '招待が見つかりません。取り消されたか期限切れの可能性があります。';
+
+  @override
+  String get householdErrorPermissionDenied => 'この操作を行う権限がありません。';
+
+  @override
+  String get householdErrorAlreadyMember => 'すでにこの世帯のメンバーです。';
+
+  @override
+  String get householdErrorAlreadyHasHousehold =>
+      'すでに世帯に所属しています。先に現在の世帯を離れてください。';
+
+  @override
+  String get householdErrorInviteExpired => 'この招待は期限切れです。新しい招待をリクエストしてください。';
+
+  @override
+  String get householdErrorNetwork => 'ネットワークエラー。インターネット接続を確認してもう一度お試しください。';
+
+  @override
+  String get householdErrorTimeout => 'リクエストがタイムアウトしました。もう一度お試しください。';
+
+  @override
+  String get householdErrorGeneric => 'エラーが発生しました。もう一度お試しください。';
+
+  @override
+  String get householdErrorAuthRequired => '認証が必要です';
+
+  @override
+  String householdExpiresIn(String date) {
+    return '有効期限：$date';
+  }
+
+  @override
+  String householdExpiresDays(int count) {
+    return '$count日';
+  }
+
+  @override
+  String householdExpiresHours(int count) {
+    return '$count時間';
+  }
+
+  @override
+  String householdExpiresMinutes(int count) {
+    return '$count分';
+  }
+
+  @override
+  String get householdExpiresSoon => 'まもなく';
+
+  @override
+  String get householdNoPendingInvitations => '保留中の招待はありません';
+
+  @override
+  String get householdThisMember => 'このメンバー';
 }

@@ -4683,6 +4683,486 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'An error occurred.'**
   String get discoverErrorGeneric;
+
+  /// Household page title
+  ///
+  /// In en, this message translates to:
+  /// **'Household'**
+  String get householdTitle;
+
+  /// Leave household dialog title
+  ///
+  /// In en, this message translates to:
+  /// **'Leave Household'**
+  String get householdLeaveTitle;
+
+  /// Delete household dialog title
+  ///
+  /// In en, this message translates to:
+  /// **'Delete Household'**
+  String get householdDeleteTitle;
+
+  /// Transfer ownership modal title
+  ///
+  /// In en, this message translates to:
+  /// **'Transfer Ownership'**
+  String get householdTransferOwnershipTitle;
+
+  /// Create household modal title
+  ///
+  /// In en, this message translates to:
+  /// **'Create Household'**
+  String get householdCreateTitle;
+
+  /// Join household modal title
+  ///
+  /// In en, this message translates to:
+  /// **'Join Household'**
+  String get householdJoinTitle;
+
+  /// Invite member modal title
+  ///
+  /// In en, this message translates to:
+  /// **'Invite Member'**
+  String get householdInviteMemberTitle;
+
+  /// Member limit reached dialog title
+  ///
+  /// In en, this message translates to:
+  /// **'Member Limit Reached'**
+  String get householdMemberLimitTitle;
+
+  /// Remove member dialog title
+  ///
+  /// In en, this message translates to:
+  /// **'Remove Member'**
+  String get householdRemoveMemberTitle;
+
+  /// Invite code created dialog title
+  ///
+  /// In en, this message translates to:
+  /// **'Invite Code Created'**
+  String get householdInviteCodeCreatedTitle;
+
+  /// Authentication required title
+  ///
+  /// In en, this message translates to:
+  /// **'Authentication Required'**
+  String get householdAuthRequiredTitle;
+
+  /// Pending invites section header
+  ///
+  /// In en, this message translates to:
+  /// **'Pending Invites'**
+  String get householdPendingInvites;
+
+  /// Pending invitations section header
+  ///
+  /// In en, this message translates to:
+  /// **'Pending Invitations'**
+  String get householdPendingInvitations;
+
+  /// Members section header with count
+  ///
+  /// In en, this message translates to:
+  /// **'Members ({count})'**
+  String householdMembersCount(int count);
+
+  /// Pending invites section header with count
+  ///
+  /// In en, this message translates to:
+  /// **'Pending Invites ({count})'**
+  String householdPendingInvitesCount(int count);
+
+  /// Select new owner section header
+  ///
+  /// In en, this message translates to:
+  /// **'Select new owner'**
+  String get householdSelectNewOwner;
+
+  /// Delete household confirmation message
+  ///
+  /// In en, this message translates to:
+  /// **'Since you are the only member, this will delete the household. Your shared data will become personal data. This cannot be undone.'**
+  String get householdDeleteMessage;
+
+  /// Authentication required message
+  ///
+  /// In en, this message translates to:
+  /// **'Please sign in to access household sharing features'**
+  String get householdAuthRequiredMessage;
+
+  /// Empty state description when no household
+  ///
+  /// In en, this message translates to:
+  /// **'Share recipes and collaborate with your household'**
+  String get householdEmptyDescription;
+
+  /// Leave household confirmation message
+  ///
+  /// In en, this message translates to:
+  /// **'Are you sure you want to leave this household?'**
+  String get householdLeaveConfirmation;
+
+  /// Transfer ownership explanation
+  ///
+  /// In en, this message translates to:
+  /// **'As the owner, you must transfer ownership to another member before leaving.'**
+  String get householdTransferOwnershipMessage;
+
+  /// Member limit reached message
+  ///
+  /// In en, this message translates to:
+  /// **'Households can have a maximum of 10 members. Remove a member or revoke a pending invite to add someone new.'**
+  String get householdMemberLimitMessage;
+
+  /// Remove member confirmation message
+  ///
+  /// In en, this message translates to:
+  /// **'Are you sure you want to remove {name} from the household?'**
+  String householdRemoveMemberConfirmation(String name);
+
+  /// Create household instruction
+  ///
+  /// In en, this message translates to:
+  /// **'Enter a name for your household'**
+  String get householdEnterName;
+
+  /// Join with code instruction
+  ///
+  /// In en, this message translates to:
+  /// **'Enter the invitation code'**
+  String get householdEnterInviteCode;
+
+  /// Invite method selection instruction
+  ///
+  /// In en, this message translates to:
+  /// **'Choose how to invite a new member'**
+  String get householdChooseInviteMethod;
+
+  /// Email invite description
+  ///
+  /// In en, this message translates to:
+  /// **'An invitation email will be sent to this address'**
+  String get householdEmailInviteDescription;
+
+  /// Code invite description
+  ///
+  /// In en, this message translates to:
+  /// **'A shareable invitation code will be generated'**
+  String get householdCodeInviteDescription;
+
+  /// Share invite URL instruction
+  ///
+  /// In en, this message translates to:
+  /// **'Share this URL with the person you want to invite:'**
+  String get householdShareInviteUrl;
+
+  /// Household name input placeholder
+  ///
+  /// In en, this message translates to:
+  /// **'Household name'**
+  String get householdNamePlaceholder;
+
+  /// Invitation code input placeholder
+  ///
+  /// In en, this message translates to:
+  /// **'Invitation code'**
+  String get householdInviteCodePlaceholder;
+
+  /// Email address input placeholder
+  ///
+  /// In en, this message translates to:
+  /// **'Email address'**
+  String get householdEmailPlaceholder;
+
+  /// Display name input placeholder
+  ///
+  /// In en, this message translates to:
+  /// **'Display name'**
+  String get householdDisplayNamePlaceholder;
+
+  /// Create household button text
+  ///
+  /// In en, this message translates to:
+  /// **'Create Household'**
+  String get householdCreateButton;
+
+  /// Join household button text
+  ///
+  /// In en, this message translates to:
+  /// **'Join Household'**
+  String get householdJoinButton;
+
+  /// Join with code button text
+  ///
+  /// In en, this message translates to:
+  /// **'Join with Code'**
+  String get householdJoinWithCodeButton;
+
+  /// Leave button text
+  ///
+  /// In en, this message translates to:
+  /// **'Leave'**
+  String get householdLeaveButton;
+
+  /// Transfer ownership and leave button text
+  ///
+  /// In en, this message translates to:
+  /// **'Transfer & Leave'**
+  String get householdTransferLeaveButton;
+
+  /// Transferring in progress button text
+  ///
+  /// In en, this message translates to:
+  /// **'Transferring...'**
+  String get householdTransferringButton;
+
+  /// Send invitation button text
+  ///
+  /// In en, this message translates to:
+  /// **'Send Invitation'**
+  String get householdSendInvitationButton;
+
+  /// Generate code button text
+  ///
+  /// In en, this message translates to:
+  /// **'Generate Code'**
+  String get householdGenerateCodeButton;
+
+  /// Copy and close button text
+  ///
+  /// In en, this message translates to:
+  /// **'Copy & Close'**
+  String get householdCopyCloseButton;
+
+  /// Accept invite button text
+  ///
+  /// In en, this message translates to:
+  /// **'Accept'**
+  String get householdAcceptButton;
+
+  /// Accepting in progress button text
+  ///
+  /// In en, this message translates to:
+  /// **'Accepting...'**
+  String get householdAcceptingButton;
+
+  /// Decline invite button text
+  ///
+  /// In en, this message translates to:
+  /// **'Decline'**
+  String get householdDeclineButton;
+
+  /// Resend invite button text
+  ///
+  /// In en, this message translates to:
+  /// **'Resend'**
+  String get householdResendButton;
+
+  /// Revoke invite button text
+  ///
+  /// In en, this message translates to:
+  /// **'Revoke'**
+  String get householdRevokeButton;
+
+  /// Remove member button text
+  ///
+  /// In en, this message translates to:
+  /// **'Remove'**
+  String get householdRemoveButton;
+
+  /// Email invite segment label
+  ///
+  /// In en, this message translates to:
+  /// **'Email'**
+  String get householdInviteEmail;
+
+  /// Code invite segment label
+  ///
+  /// In en, this message translates to:
+  /// **'Code'**
+  String get householdInviteCode;
+
+  /// Pending status badge
+  ///
+  /// In en, this message translates to:
+  /// **'Pending'**
+  String get householdStatusPending;
+
+  /// Accepted status badge
+  ///
+  /// In en, this message translates to:
+  /// **'Accepted'**
+  String get householdStatusAccepted;
+
+  /// Declined status badge
+  ///
+  /// In en, this message translates to:
+  /// **'Declined'**
+  String get householdStatusDeclined;
+
+  /// Revoked status badge
+  ///
+  /// In en, this message translates to:
+  /// **'Revoked'**
+  String get householdStatusRevoked;
+
+  /// Accepting in progress status
+  ///
+  /// In en, this message translates to:
+  /// **'Accepting...'**
+  String get householdStatusAccepting;
+
+  /// Revoking in progress status
+  ///
+  /// In en, this message translates to:
+  /// **'Revoking...'**
+  String get householdStatusRevoking;
+
+  /// Owner badge text
+  ///
+  /// In en, this message translates to:
+  /// **'Owner'**
+  String get householdOwnerBadge;
+
+  /// Household created success message
+  ///
+  /// In en, this message translates to:
+  /// **'Household \"{name}\" has been created successfully!'**
+  String householdCreatedSuccess(String name);
+
+  /// Household joined success message
+  ///
+  /// In en, this message translates to:
+  /// **'You have successfully joined the household!'**
+  String get householdJoinedSuccess;
+
+  /// Household left success message
+  ///
+  /// In en, this message translates to:
+  /// **'You have successfully left the household.'**
+  String get householdLeftSuccess;
+
+  /// Ownership transferred and left success message
+  ///
+  /// In en, this message translates to:
+  /// **'You have successfully left the household and transferred ownership.'**
+  String get householdTransferredSuccess;
+
+  /// Invitation sent success message
+  ///
+  /// In en, this message translates to:
+  /// **'Invitation email has been sent!'**
+  String get householdInviteSentSuccess;
+
+  /// Invitation resent success message
+  ///
+  /// In en, this message translates to:
+  /// **'Invitation has been resent successfully.'**
+  String get householdInviteResentSuccess;
+
+  /// Invite URL copied success message
+  ///
+  /// In en, this message translates to:
+  /// **'Invite URL copied to clipboard!'**
+  String get householdInviteCopiedSuccess;
+
+  /// Invite not found error message
+  ///
+  /// In en, this message translates to:
+  /// **'The invitation was not found. It may have been cancelled or expired.'**
+  String get householdErrorInviteNotFound;
+
+  /// Permission denied error message
+  ///
+  /// In en, this message translates to:
+  /// **'You don\'t have permission to perform this action.'**
+  String get householdErrorPermissionDenied;
+
+  /// Already a member error message
+  ///
+  /// In en, this message translates to:
+  /// **'You are already a member of this household.'**
+  String get householdErrorAlreadyMember;
+
+  /// Already has household error message
+  ///
+  /// In en, this message translates to:
+  /// **'You already belong to a household. Please leave your current household first.'**
+  String get householdErrorAlreadyHasHousehold;
+
+  /// Invite expired error message
+  ///
+  /// In en, this message translates to:
+  /// **'This invitation has expired. Please request a new one.'**
+  String get householdErrorInviteExpired;
+
+  /// Network error message
+  ///
+  /// In en, this message translates to:
+  /// **'Network error. Please check your internet connection and try again.'**
+  String get householdErrorNetwork;
+
+  /// Timeout error message
+  ///
+  /// In en, this message translates to:
+  /// **'The request timed out. Please try again.'**
+  String get householdErrorTimeout;
+
+  /// Generic error message
+  ///
+  /// In en, this message translates to:
+  /// **'Something went wrong. Please try again.'**
+  String get householdErrorGeneric;
+
+  /// Authentication required error
+  ///
+  /// In en, this message translates to:
+  /// **'Authentication required'**
+  String get householdErrorAuthRequired;
+
+  /// Expires in prefix with date
+  ///
+  /// In en, this message translates to:
+  /// **'Expires: {date}'**
+  String householdExpiresIn(String date);
+
+  /// Days until expiry
+  ///
+  /// In en, this message translates to:
+  /// **'{count} days'**
+  String householdExpiresDays(int count);
+
+  /// Hours until expiry
+  ///
+  /// In en, this message translates to:
+  /// **'{count} hours'**
+  String householdExpiresHours(int count);
+
+  /// Minutes until expiry
+  ///
+  /// In en, this message translates to:
+  /// **'{count} minutes'**
+  String householdExpiresMinutes(int count);
+
+  /// Expires soon text
+  ///
+  /// In en, this message translates to:
+  /// **'Soon'**
+  String get householdExpiresSoon;
+
+  /// Empty state for no pending invitations
+  ///
+  /// In en, this message translates to:
+  /// **'No pending invitations'**
+  String get householdNoPendingInvitations;
+
+  /// Fallback name for member
+  ///
+  /// In en, this message translates to:
+  /// **'this member'**
+  String get householdThisMember;
 }
 
 class _AppLocalizationsDelegate

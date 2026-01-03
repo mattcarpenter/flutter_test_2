@@ -1,6 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:wolt_modal_sheet/wolt_modal_sheet.dart';
+import '../../../localization/l10n_extension.dart';
 import '../../../theme/colors.dart';
 import '../../../theme/spacing.dart';
 import '../../../theme/typography.dart';
@@ -38,9 +39,9 @@ class JoinWithCodeModalPage {
         onPressed: () {
           Navigator.of(context).pop();
         },
-        child: const Text('Cancel'),
+        child: Text(context.l10n.commonCancel),
       ),
-      pageTitle: const ModalSheetTitle('Join Household'),
+      pageTitle: ModalSheetTitle(context.l10n.householdJoinTitle),
       child: Padding(
         padding: EdgeInsets.all(AppSpacing.lg),
         child: JoinWithCodeForm(onAcceptInvite: onAcceptInvite),
@@ -85,7 +86,7 @@ class _JoinWithCodeFormState extends ConsumerState<JoinWithCodeForm> {
         // Show success dialog for this major operation
         await SuccessDialog.show(
           context,
-          message: 'You have successfully joined the household!',
+          message: context.l10n.householdJoinedSuccess,
         );
       }
     } catch (e) {
@@ -93,7 +94,7 @@ class _JoinWithCodeFormState extends ConsumerState<JoinWithCodeForm> {
       if (mounted) {
         await ErrorDialog.show(
           context,
-          message: HouseholdErrorMessages.getDisplayMessage(e.toString()),
+          message: HouseholdErrorMessages.getDisplayMessage(e.toString(), context.l10n),
         );
       }
     } finally {
@@ -112,7 +113,7 @@ class _JoinWithCodeFormState extends ConsumerState<JoinWithCodeForm> {
       mainAxisSize: MainAxisSize.min,
       children: [
         Text(
-          'Enter the invitation code',
+          context.l10n.householdEnterInviteCode,
           style: AppTypography.body.copyWith(
             color: AppColors.of(context).textSecondary,
           ),
@@ -120,7 +121,7 @@ class _JoinWithCodeFormState extends ConsumerState<JoinWithCodeForm> {
         SizedBox(height: AppSpacing.lg),
         CupertinoTextField(
           controller: _controller,
-          placeholder: 'Invitation code',
+          placeholder: context.l10n.householdInviteCodePlaceholder,
           autofocus: true,
           enabled: !_isJoining,
           onSubmitted: (_) => _joinHousehold(),
@@ -136,7 +137,7 @@ class _JoinWithCodeFormState extends ConsumerState<JoinWithCodeForm> {
                 )
               : WoltElevatedButton(
                   onPressed: _joinHousehold,
-                  child: const Text('Join Household'),
+                  child: Text(context.l10n.householdJoinButton),
                 ),
         ),
       ],

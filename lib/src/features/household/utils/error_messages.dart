@@ -1,35 +1,37 @@
+import '../../../localization/app_localizations.dart';
+
 class HouseholdErrorMessages {
-  static String getDisplayMessage(String error) {
+  static String getDisplayMessage(String error, AppLocalizations l10n) {
     // Handle common API errors
     if (error.contains('404') || error.contains('Invalid invitation ID')) {
-      return 'The invitation was not found. It may have been cancelled or expired.';
+      return l10n.householdErrorInviteNotFound;
     }
-    
+
     if (error.contains('403') || error.contains('Permission denied')) {
-      return 'You don\'t have permission to perform this action.';
+      return l10n.householdErrorPermissionDenied;
     }
-    
+
     if (error.contains('already a member')) {
-      return 'You are already a member of this household.';
+      return l10n.householdErrorAlreadyMember;
     }
-    
+
     if (error.contains('already has a household')) {
-      return 'You already belong to a household. Please leave your current household first.';
+      return l10n.householdErrorAlreadyHasHousehold;
     }
-    
+
     if (error.contains('expired')) {
-      return 'This invitation has expired. Please request a new one.';
+      return l10n.householdErrorInviteExpired;
     }
-    
+
     if (error.contains('network') || error.contains('Failed host lookup')) {
-      return 'Network error. Please check your internet connection and try again.';
+      return l10n.householdErrorNetwork;
     }
-    
+
     if (error.contains('timeout')) {
-      return 'The request timed out. Please try again.';
+      return l10n.householdErrorTimeout;
     }
-    
+
     // Default message
-    return 'Something went wrong. Please try again.';
+    return l10n.householdErrorGeneric;
   }
 }
