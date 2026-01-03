@@ -248,7 +248,7 @@ Test by changing device language or using a test override.
 | 12 | timers | 3 | Low | ✅ Done | Timer UI |
 | 13 | discover | 1 | Low | ✅ Done | Discovery page |
 | 14 | subscription | 1 | Low | ⏳ Pending | Paywall |
-| 15 | searches | ? | ? | ⏳ Pending | Multiple Places |
+| 15 | searches | 2 | Low | ✅ Done | Search placeholders + cancel button |
 
 ### Non-Feature Areas
 

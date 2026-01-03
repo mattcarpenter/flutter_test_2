@@ -2823,6 +2823,30 @@ abstract class AppLocalizations {
   /// **'View All'**
   String get commonViewAll;
 
+  /// Search placeholder text
+  ///
+  /// In en, this message translates to:
+  /// **'Search'**
+  String get commonSearch;
+
+  /// Search placeholder when search is active
+  ///
+  /// In en, this message translates to:
+  /// **'Enter search text'**
+  String get commonSearchActive;
+
+  /// Message when search returns no results
+  ///
+  /// In en, this message translates to:
+  /// **'No search results'**
+  String get commonNoSearchResults;
+
+  /// Generic no results message
+  ///
+  /// In en, this message translates to:
+  /// **'No results'**
+  String get commonNoResults;
+
   /// Recently viewed section title
   ///
   /// In en, this message translates to:

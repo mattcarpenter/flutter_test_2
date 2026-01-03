@@ -1540,6 +1540,18 @@ class AppLocalizationsEn extends AppLocalizations {
   String get commonViewAll => 'View All';
 
   @override
+  String get commonSearch => 'Search';
+
+  @override
+  String get commonSearchActive => 'Enter search text';
+
+  @override
+  String get commonNoSearchResults => 'No search results';
+
+  @override
+  String get commonNoResults => 'No results';
+
+  @override
   String get recipeRecentlyViewedTitle => 'Recently Viewed';
 
   @override

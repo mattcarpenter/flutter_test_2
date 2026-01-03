@@ -511,6 +511,11 @@
 
   "commonViewAll": "すべて表示",
 
+  "commonSearch": "検索",
+  "commonSearchActive": "検索テキストを入力",
+  "commonNoSearchResults": "検索結果がありません",
+  "commonNoResults": "結果がありません",
+
   "recipeRecentlyViewedTitle": "最近見たレシピ",
   "recipeRecentlyViewedEmpty": "最近見たレシピはありません。\nレシピを探索してここに表示しましょう。",
 

@@ -6,6 +6,7 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_quill/flutter_quill.dart';
 
 import '../localization/app_localizations.dart';
+import '../localization/custom_cupertino_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
@@ -119,6 +120,7 @@ class _AdaptiveApp2State extends ConsumerState<AdaptiveApp2> {
         routeInformationProvider: router.routeInformationProvider,
         localizationsDelegates: const [
           AppLocalizations.delegate,
+          CustomCupertinoLocalizationsDelegate(),
           GlobalMaterialLocalizations.delegate,
           GlobalWidgetsLocalizations.delegate,
           GlobalCupertinoLocalizations.delegate,
@@ -149,6 +151,7 @@ class _AdaptiveApp2State extends ConsumerState<AdaptiveApp2> {
         routeInformationProvider: router.routeInformationProvider,
         localizationsDelegates: const [
           AppLocalizations.delegate,
+          CustomCupertinoLocalizationsDelegate(),
           GlobalMaterialLocalizations.delegate,
           GlobalWidgetsLocalizations.delegate,
           GlobalCupertinoLocalizations.delegate,

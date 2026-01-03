@@ -3,6 +3,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:super_cupertino_navigation_bar/super_cupertino_navigation_bar.dart';
 
+import '../../localization/l10n_extension.dart';
 import '../../theme/colors.dart';
 import '../../theme/typography.dart';
 
@@ -59,7 +60,7 @@ class AdaptiveSearchDelegate extends SearchDelegate<String> {
     if (searchResultsBuilder != null) {
       return searchResultsBuilder!(context, query);
     }
-    return Center(child: Text('No results'));
+    return Center(child: Text(context.l10n.commonNoResults));
   }
 }
 
@@ -139,8 +140,8 @@ class _AdaptiveSliverPageState extends State<AdaptiveSliverPage> {
         child: widget.searchResultsBuilder!(context, _searchQuery)
       );
     }
-    return const SliverFillRemaining(
-      child: Center(child: Text('No search results'))
+    return SliverFillRemaining(
+      child: Center(child: Text(context.l10n.commonNoSearchResults))
     );
   }
 
@@ -167,7 +168,7 @@ class _AdaptiveSliverPageState extends State<AdaptiveSliverPage> {
                       ? CupertinoSliverNavigationBar.search(
                           searchField: CupertinoSearchTextField(
                             controller: _controller,
-                            placeholder: _searchIsActive ? 'Enter search text' : 'Search',
+                            placeholder: _searchIsActive ? context.l10n.commonSearchActive : context.l10n.commonSearch,
                             autofocus: _searchIsActive,
                             onChanged: (value) {
                               setState(() {
@@ -210,7 +211,7 @@ class _AdaptiveSliverPageState extends State<AdaptiveSliverPage> {
                       ? CupertinoSliverNavigationBar.search(
                           searchField: CupertinoSearchTextField(
                             controller: _controller,
-                            placeholder: _searchIsActive ? 'Enter search text' : 'Search',
+                            placeholder: _searchIsActive ? context.l10n.commonSearchActive : context.l10n.commonSearch,
                             autofocus: _searchIsActive,
                             onChanged: (value) {
                               setState(() {

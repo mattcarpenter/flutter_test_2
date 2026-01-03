@@ -2095,6 +2095,23 @@
     "description": "View all button text"
   },
 
+  "commonSearch": "Search",
+  "@commonSearch": {
+    "description": "Search placeholder text"
+  },
+  "commonSearchActive": "Enter search text",
+  "@commonSearchActive": {
+    "description": "Search placeholder when search is active"
+  },
+  "commonNoSearchResults": "No search results",
+  "@commonNoSearchResults": {
+    "description": "Message when search returns no results"
+  },
+  "commonNoResults": "No results",
+  "@commonNoResults": {
+    "description": "Generic no results message"
+  },
+
   "recipeRecentlyViewedTitle": "Recently Viewed",
   "@recipeRecentlyViewedTitle": {
     "description": "Recently viewed section title"

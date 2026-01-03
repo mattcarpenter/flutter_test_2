@@ -1499,6 +1499,18 @@ class AppLocalizationsJa extends AppLocalizations {
   String get commonViewAll => 'すべて表示';
 
   @override
+  String get commonSearch => '検索';
+
+  @override
+  String get commonSearchActive => '検索テキストを入力';
+
+  @override
+  String get commonNoSearchResults => '検索結果がありません';
+
+  @override
+  String get commonNoResults => '結果がありません';
+
+  @override
   String get recipeRecentlyViewedTitle => '最近見たレシピ';
 
   @override
