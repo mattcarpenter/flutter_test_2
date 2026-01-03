@@ -244,7 +244,7 @@ Test by changing device language or using a test override.
 | 8 | import_export | 22 | Medium | ✅ Done | Utility feature |
 | 9 | household | 15 | Medium | ✅ Done | Sharing feature |
 | 10 | help | 4 | Low | ✅ Done | Help documentation |
-| 11 | share | 3 | Low | ⏳ Pending | Share previews |
+| 11 | share | 3 | Low | ✅ Done | Share previews |
 | 12 | timers | 3 | Low | ✅ Done | Timer UI |
 | 13 | discover | 1 | Low | ✅ Done | Discovery page |
 | 14 | subscription | 1 | Low | ⏳ Pending | Paywall |
@@ -254,8 +254,8 @@ Test by changing device language or using a test override.
 
 | Area | Files | Status | Notes |
 |------|-------|--------|-------|
-| widgets/ | 59 | ⏳ Pending | Shared UI components |
-| mobile/ | 7 | ⏳ Pending | Navigation labels, status bar |
+| widgets/ | 59 | 🔄 Partial | Side menu done, others pending |
+| mobile/ | 7 | 🔄 Partial | Nav labels done, status bar pending |
 | utils/ | ~5 | ⏳ Pending | Utility text (rare) |
 
 ---
@@ -490,16 +490,17 @@ validator: (value) {
 - [x] import_export (22 files) - ✅ Done
 - [x] household (15 files) - ✅ Done
 - [x] help (4 files) - ✅ Done
-- [ ] share (3 files)
+- [x] share (3 files) - ✅ Done
 - [x] timers (3 files) - ✅ Done
 - [x] discover (1 file) - ✅ Done
 - [ ] subscription (1 file)
 - [x] searches (2 files) - ✅ Done
 
 ### Phase 5: Shared Components
-- [ ] mobile/main_page_shell.dart (nav labels)
+- [x] mobile/main_page_shell.dart (nav labels) - ✅ Done
+- [x] widgets/menu/menu.dart (side menu + upgrade banner) - ✅ Done
 - [ ] mobile/global_status_bar.dart (cooking mode)
-- [ ] widgets/ directory (59 files)
+- [ ] widgets/ directory (remaining files)
 
 ### Phase 6: Verification
 - [ ] Full app test in English
