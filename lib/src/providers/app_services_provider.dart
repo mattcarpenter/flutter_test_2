@@ -2,6 +2,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../managers/ingredient_term_queue_manager.dart';
 import '../managers/upload_queue_manager.dart';
 import '../repositories/recipe_repository.dart';
+import 'subscription_provider.dart';
 
 /// This provider initializes and wires up the services that have circular dependencies.
 /// It handles connecting the RecipeRepository and IngredientTermQueueManager without
@@ -24,17 +25,23 @@ final dependencySetupProvider = Provider<void>((ref) {
 final appServicesProvider = Provider<void>((ref) {
   // First ensure the circular dependencies are resolved
   ref.watch(dependencySetupProvider);
-  
+
   // Access the managers to ensure they're created
   final uploadManager = ref.watch(uploadQueueManagerProvider);
   final ingredientTermManager = ref.watch(ingredientTermQueueManagerProvider);
-  
+
   // Start processing queues
   uploadManager.processQueue();
   ingredientTermManager.processQueue();
-  
+
+  // Initialize RevenueCat and prefetch offerings in background
+  // This runs async (fire-and-forget) so it doesn't block app startup
+  // Offerings will be cached and ready when user taps upgrade CTA
+  final subscriptionService = ref.read(subscriptionServiceProvider);
+  subscriptionService.initializeAndPrefetch();
+
   // Household data migration is now handled automatically by PostgreSQL triggers
-  
+
   // Return void
   return;
 });

@@ -122,6 +122,10 @@ class SubscriptionService {
   String? _customerInfoUserId; // Track which user this info belongs to
   DateTime? _customerInfoLastUpdated;
 
+  // Cached offering for fast paywall presentation
+  Offering? _cachedOffering;
+  DateTime? _offeringLastFetched;
+
   SubscriptionService() : _supabase = Supabase.instance.client;
 
   /// Initialize RevenueCat SDK
@@ -162,6 +166,106 @@ class SubscriptionService {
     if (!_isInitialized) {
       await initialize();
     }
+  }
+
+  /// Get the cached offering for fast paywall presentation.
+  /// Returns null if offerings haven't been prefetched yet.
+  Offering? get cachedOffering => _cachedOffering;
+
+  /// Prefetch offerings for fast paywall presentation.
+  /// Should be called at app startup after initialize().
+  /// Safe to call multiple times - will use cache if available.
+  Future<void> prefetchOfferings({bool force = false}) async {
+    // Skip if we already have a recent cache (within 5 minutes) and not forcing
+    if (!force && _cachedOffering != null && _offeringLastFetched != null) {
+      final age = DateTime.now().difference(_offeringLastFetched!);
+      if (age.inMinutes < 5) {
+        AppLogger.debug('[Paywall Timing] Using cached offering (age: ${age.inSeconds}s)');
+        return;
+      }
+    }
+
+    try {
+      await _ensureInitialized();
+
+      AppLogger.info('[Paywall Timing] Prefetching offerings...');
+      final stopwatch = Stopwatch()..start();
+
+      final offerings = await Purchases.getOfferings();
+      _cachedOffering = offerings.current;
+      _offeringLastFetched = DateTime.now();
+
+      AppLogger.info('[Paywall Timing] Offerings prefetched in ${stopwatch.elapsedMilliseconds}ms');
+    } catch (e) {
+      AppLogger.warning('Failed to prefetch offerings', e);
+      // Don't rethrow - prefetch is best-effort
+    }
+  }
+
+  /// Initialize RevenueCat and prefetch offerings in one call.
+  /// This is the preferred method for app startup.
+  Future<void> initializeAndPrefetch() async {
+    final stopwatch = Stopwatch()..start();
+    AppLogger.info('[Paywall Timing] Starting initializeAndPrefetch...');
+
+    await initialize();
+    AppLogger.info('[Paywall Timing] Initialize complete at ${stopwatch.elapsedMilliseconds}ms');
+
+    await prefetchOfferings();
+    AppLogger.info('[Paywall Timing] initializeAndPrefetch complete in ${stopwatch.elapsedMilliseconds}ms');
+  }
+
+  /// Ensure everything is ready for a purchase.
+  /// Creates anonymous user if needed, initializes RevenueCat, and logs in user.
+  /// Returns the offering to display.
+  ///
+  /// This is called from PaywallPage to do the slow setup work while showing a spinner.
+  Future<Offering?> ensureReadyForPurchase() async {
+    final stopwatch = Stopwatch()..start();
+    AppLogger.info('[Paywall Timing] ensureReadyForPurchase starting...');
+
+    // STEP 1: Ensure we have a Supabase user (anonymous or real)
+    String? userId = _supabase.auth.currentUser?.id;
+
+    if (userId == null) {
+      AppLogger.info('[Paywall Timing] Creating anonymous user...');
+      final userStopwatch = Stopwatch()..start();
+      userId = await _createAnonymousUserForPurchase();
+      AppLogger.info('[Paywall Timing] Anonymous user created in ${userStopwatch.elapsedMilliseconds}ms');
+    }
+
+    // STEP 2: Ensure RevenueCat is initialized
+    final initStopwatch = Stopwatch()..start();
+    final wasInitialized = _isInitialized;
+    await _ensureInitialized();
+    AppLogger.info('[Paywall Timing] RC init (wasAlreadyInit=$wasInitialized): ${initStopwatch.elapsedMilliseconds}ms');
+
+    // STEP 3: Ensure RevenueCat knows about this user
+    final loginStopwatch = Stopwatch()..start();
+    final currentRevenueCatUser = await Purchases.appUserID;
+    final needsLogin = currentRevenueCatUser != userId;
+    if (needsLogin) {
+      AppLogger.info('[Paywall Timing] Logging in RevenueCat user...');
+      await Purchases.logIn(userId);
+    }
+    AppLogger.info('[Paywall Timing] RC user check (needsLogin=$needsLogin): ${loginStopwatch.elapsedMilliseconds}ms');
+
+    // STEP 4: Get offering (use cache or fetch)
+    if (_cachedOffering != null) {
+      AppLogger.info('[Paywall Timing] ensureReadyForPurchase complete in ${stopwatch.elapsedMilliseconds}ms (cached offering)');
+      return _cachedOffering;
+    }
+
+    // No cached offering, fetch it
+    AppLogger.info('[Paywall Timing] Fetching offerings (no cache)...');
+    final fetchStopwatch = Stopwatch()..start();
+    final offerings = await Purchases.getOfferings();
+    _cachedOffering = offerings.current;
+    _offeringLastFetched = DateTime.now();
+    AppLogger.info('[Paywall Timing] Offerings fetched in ${fetchStopwatch.elapsedMilliseconds}ms');
+
+    AppLogger.info('[Paywall Timing] ensureReadyForPurchase complete in ${stopwatch.elapsedMilliseconds}ms');
+    return _cachedOffering;
   }
 
   /// Check if user has Plus subscription - hybrid approach
@@ -285,33 +389,17 @@ class SubscriptionService {
 
   /// Present paywall using our custom PaywallPage with PaywallView widget.
   /// This gives us full control over dismissal and navigation.
-  /// Creates an anonymous Supabase user if needed (for IAP without registration).
+  ///
+  /// The paywall is shown immediately with a spinner, then loads the RC content.
+  /// All slow setup work (user creation, RC login) happens inside PaywallPage.
   ///
   /// Returns true if a purchase or restore was successful, false otherwise.
   Future<bool> presentPaywall(BuildContext context) async {
     try {
-      // STEP 1: Ensure we have a Supabase user (anonymous or real)
-      String? userId = _supabase.auth.currentUser?.id;
+      AppLogger.info('[Paywall Timing] Navigating to PaywallPage immediately...');
 
-      if (userId == null) {
-        // Create anonymous user for IAP
-        AppLogger.info('No user session, creating anonymous user for IAP');
-        userId = await _createAnonymousUserForPurchase();
-      }
-
-      // STEP 2: Ensure RevenueCat is initialized
-      await _ensureInitialized();
-
-      // STEP 3: Ensure RevenueCat knows about this user
-      final currentRevenueCatUser = await Purchases.appUserID;
-      if (currentRevenueCatUser != userId) {
-        AppLogger.info('Syncing RevenueCat user ID: $userId');
-        await Purchases.logIn(userId);
-      }
-
-      // STEP 4: Navigate to PaywallPage and await result
+      // Navigate immediately - PaywallPage will handle all the slow setup work
       // Use rootNavigator to ensure full screen display over bottom nav
-      AppLogger.info('Navigating to PaywallPage');
       final result = await Navigator.of(context, rootNavigator: true).push<bool>(
         MaterialPageRoute(
           fullscreenDialog: true,

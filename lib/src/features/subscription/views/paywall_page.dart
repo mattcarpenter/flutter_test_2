@@ -4,20 +4,24 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:purchases_flutter/purchases_flutter.dart';
 import 'package:purchases_ui_flutter/purchases_ui_flutter.dart';
 
+import '../../../providers/subscription_provider.dart';
 import '../../../services/logging/app_logger.dart';
 import '../../../theme/colors.dart';
+import '../../../widgets/app_circle_button.dart';
 
 /// A full-screen page that displays RevenueCat's PaywallView widget.
 ///
-/// This gives us full control over the paywall presentation and dismissal,
-/// avoiding issues with RevenueCatUI.presentPaywall() not properly closing.
+/// This page is shown immediately with a spinner while it:
+/// 1. Creates anonymous user if needed
+/// 2. Initializes RevenueCat
+/// 3. Logs in the user to RevenueCat
+/// 4. Fetches/uses cached offering
+///
+/// This gives instant feedback to the user while the slow setup happens.
 ///
 /// The page returns `true` if a purchase or restore was successful, `false` otherwise.
 class PaywallPage extends ConsumerStatefulWidget {
-  /// Optional offering to display. If null, fetches the current offering.
-  final Offering? offering;
-
-  const PaywallPage({super.key, this.offering});
+  const PaywallPage({super.key});
 
   @override
   ConsumerState<PaywallPage> createState() => _PaywallPageState();
@@ -34,10 +38,16 @@ class _PaywallPageState extends ConsumerState<PaywallPage> {
   bool _transitionComplete = false;
   String? _loadError;
 
+  // Timing for diagnostics
+  final Stopwatch _pageStopwatch = Stopwatch();
+  bool _didLogPaywallReady = false;
+
   @override
   void initState() {
     super.initState();
-    _fetchOffering();
+    _pageStopwatch.start();
+    AppLogger.info('[Paywall Timing] PaywallPage initState called');
+    _setupAndLoadOffering();
     _waitForTransition();
   }
 
@@ -46,39 +56,36 @@ class _PaywallPageState extends ConsumerState<PaywallPage> {
   /// interfering with the slide-up animation.
   void _waitForTransition() {
     // MaterialPageRoute uses ~300ms for transitions
+    // NOTE: Currently set to 0ms - transition wait is disabled
     Future.delayed(const Duration(milliseconds: 0), () {
       if (mounted) {
         setState(() {
           _transitionComplete = true;
         });
+        AppLogger.info('[Paywall Timing] Transition marked complete at ${_pageStopwatch.elapsedMilliseconds}ms since initState');
       }
     });
   }
 
-  Future<void> _fetchOffering() async {
-    // If offering was provided, use it immediately
-    if (widget.offering != null) {
-      setState(() {
-        _offering = widget.offering;
-        _isLoading = false;
-      });
-      return;
-    }
-
-    // Otherwise fetch the current offering
+  /// Sets up everything needed for purchase and loads the offering.
+  /// This includes: anonymous user creation, RevenueCat init, RC login, offering fetch.
+  Future<void> _setupAndLoadOffering() async {
     try {
-      final offerings = await Purchases.getOfferings();
+      final subscriptionService = ref.read(subscriptionServiceProvider);
+      final offering = await subscriptionService.ensureReadyForPurchase();
+
       if (mounted) {
         setState(() {
-          _offering = offerings.current;
+          _offering = offering;
           _isLoading = false;
           if (_offering == null) {
             _loadError = 'No offerings available';
           }
         });
+        AppLogger.info('[Paywall Timing] Setup complete, _isLoading=false at ${_pageStopwatch.elapsedMilliseconds}ms since initState');
       }
     } catch (e) {
-      AppLogger.error('Failed to fetch offerings', e);
+      AppLogger.error('Failed to setup paywall', e);
       if (mounted) {
         setState(() {
           _isLoading = false;
@@ -162,6 +169,12 @@ class _PaywallPageState extends ConsumerState<PaywallPage> {
       );
     }
 
+    // Log when we're ready to show PaywallView (only once)
+    if (!_didLogPaywallReady) {
+      _didLogPaywallReady = true;
+      AppLogger.info('[Paywall Timing] Ready to show PaywallView at ${_pageStopwatch.elapsedMilliseconds}ms since initState');
+    }
+
     // Show error state if fetching failed
     if (_loadError != null || _offering == null) {
       return Center(
@@ -193,16 +206,32 @@ class _PaywallPageState extends ConsumerState<PaywallPage> {
     }
 
     // Show PaywallView once offering is loaded
-    return PaywallView(
-      offering: _offering,
-      displayCloseButton: true,
-      onPurchaseStarted: _handlePurchaseStarted,
-      onPurchaseCompleted: _handlePurchaseCompleted,
-      onPurchaseError: _handlePurchaseError,
-      onPurchaseCancelled: _handlePurchaseCancelled,
-      onRestoreCompleted: _handleRestoreCompleted,
-      onRestoreError: _handleRestoreError,
-      onDismiss: _handleDismiss,
+    // Wrap in Stack to overlay our own close button (RC's doesn't respect safe areas)
+    return Stack(
+      children: [
+        PaywallView(
+          offering: _offering,
+          displayCloseButton: false, // We provide our own
+          onPurchaseStarted: _handlePurchaseStarted,
+          onPurchaseCompleted: _handlePurchaseCompleted,
+          onPurchaseError: _handlePurchaseError,
+          onPurchaseCancelled: _handlePurchaseCancelled,
+          onRestoreCompleted: _handleRestoreCompleted,
+          onRestoreError: _handleRestoreError,
+          onDismiss: _handleDismiss,
+        ),
+        // Custom close button with proper safe area positioning
+        Positioned(
+          top: MediaQuery.paddingOf(context).top + 8,
+          right: 16,
+          child: AppCircleButton(
+            icon: AppCircleButtonIcon.close,
+            variant: AppCircleButtonVariant.overlay,
+            size: 40,
+            onPressed: _handleDismiss,
+          ),
+        ),
+      ],
     );
   }
 }
