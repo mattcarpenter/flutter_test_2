@@ -233,78 +233,134 @@ class _RecipeIngredientsViewState extends ConsumerState<RecipeIngredientsView>
               );
             }
 
+            // Check if previous item was a section (to skip top separator)
+            final isFirstAfterSection = index > 0 &&
+                widget.ingredients[index - 1].type == 'section';
+
             // Regular ingredient with match indicator (if available)
-            return Padding(
-              padding: EdgeInsets.only(
-                top: index == 0 ? 0 : 8.0,
-                bottom: 8.0,
-              ),
-              child: GestureDetector(
-                onTap: ingredient.recipeId != null
-                    ? () => _navigateToLinkedRecipe(context, ingredient.recipeId!)
-                    : null,
-                child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    // Simple bullet point
-                    Text(
-                      '•',
-                      style: AppTypography.body.copyWith(
-                        fontSize: scaledFontSize,
-                        color: AppColors.of(context).contentSecondary,
+            return Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                // Full-width separator (except for first item or first after section)
+                if (index > 0 && !isFirstAfterSection)
+                  Transform.translate(
+                    offset: const Offset(-16, 0), // Extend left into padding
+                    child: SizedBox(
+                      width: MediaQuery.of(context).size.width,
+                      child: Divider(
+                        height: 1,
+                        thickness: 0.5,
+                        color: AppColors.of(context).border,
                       ),
                     ),
-                    const SizedBox(width: 8),
-
-                    // Ingredient name (with optional scaling/conversion)
-                    Expanded(
-                      child: _buildIngredientText(
-                        ingredient: ingredient,
-                        transformed: transformedIngredients[ingredient.id],
-                        fontSize: scaledFontSize,
-                        isLinkedRecipe: ingredient.recipeId != null,
-                      ),
-                    ),
-
-                    // Stock status chip (right-aligned)
-                    if (currentMatches != null) ...[
-                      () {
-                        // Find the matching IngredientPantryMatch for this ingredient
-                        final match = currentMatches!.matches.firstWhere(
-                          (m) => m.ingredient.id == ingredient.id,
-                          // If no match found, create a default one with no pantry match
-                          orElse: () => IngredientPantryMatch(ingredient: ingredient),
-                        );
-
-                        return GestureDetector(
-                          onTap: () => _showMatchesBottomSheet(context, ref, currentMatches!),
-                          child: IngredientStockChip(match: match),
-                        );
-                      }(),
-                    ],
-
-                  // Note (if available)
-                  if (ingredient.note != null && ingredient.note!.isNotEmpty) ...[
-                    const SizedBox(width: 8),
-                    Expanded(
-                      flex: 1,
-                      child: Text(
-                        '(${ingredient.note})',
-                        style: AppTypography.caption.copyWith(
-                          fontStyle: FontStyle.italic,
-                          color: AppColors.of(context).textTertiary,
+                  ),
+                // Ingredient content with padding
+                Padding(
+                  padding: EdgeInsets.symmetric(vertical: AppSpacing.sm),
+                  child: GestureDetector(
+                    onTap: ingredient.recipeId != null
+                        ? () => _navigateToLinkedRecipe(context, ingredient.recipeId!)
+                        : null,
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        // Bullet point
+                        Text(
+                          '•',
+                          style: AppTypography.body.copyWith(
+                            fontSize: scaledFontSize * 1.4,
+                            height: 1.0,
+                            color: AppColors.of(context).textSecondary,
+                          ),
                         ),
-                      ),
+                        SizedBox(width: AppSpacing.xs),
+                        // Ingredient name (with optional scaling/conversion)
+                        Expanded(
+                          child: _buildIngredientText(
+                            ingredient: ingredient,
+                            transformed: transformedIngredients[ingredient.id],
+                            fontSize: scaledFontSize,
+                            isLinkedRecipe: ingredient.recipeId != null,
+                          ),
+                        ),
+
+                        // Stock status chip (right-aligned)
+                        if (currentMatches != null) ...[
+                          SizedBox(width: AppSpacing.sm),
+                          () {
+                            // Find the matching IngredientPantryMatch for this ingredient
+                            final match = currentMatches!.matches.firstWhere(
+                              (m) => m.ingredient.id == ingredient.id,
+                              // If no match found, create a default one with no pantry match
+                              orElse: () => IngredientPantryMatch(ingredient: ingredient),
+                            );
+
+                            return GestureDetector(
+                              onTap: () => _showMatchesBottomSheet(context, ref, currentMatches!),
+                              child: IngredientStockChip(match: match),
+                            );
+                          }(),
+                        ],
+
+                      // Note (if available)
+                      if (ingredient.note != null && ingredient.note!.isNotEmpty) ...[
+                        const SizedBox(width: 8),
+                        Expanded(
+                          flex: 1,
+                          child: Text(
+                            '(${ingredient.note})',
+                            style: AppTypography.caption.copyWith(
+                              fontStyle: FontStyle.italic,
+                              color: AppColors.of(context).textTertiary,
+                            ),
+                          ),
+                        ),
+                      ],
+                      ],
                     ),
-                  ],
-                  ],
+                  ),
                 ),
-              ),
+              ],
             );
           },
         ),
       ],
     );
+  }
+
+  /// Extracts trailing parenthetical text from ingredient name.
+  /// Returns a tuple of (mainText, parentheticalText) or null if no trailing parens.
+  /// Handles nested parentheses like "(real, not artificial (sub honey))".
+  ({String main, String paren})? _extractTrailingParenthetical(String text) {
+    final trimmed = text.trimRight();
+    if (!trimmed.endsWith(')')) return null;
+
+    // Find the matching opening paren by counting depth from the end
+    int depth = 0;
+    int openIndex = -1;
+    for (int i = trimmed.length - 1; i >= 0; i--) {
+      final char = trimmed[i];
+      if (char == ')') {
+        depth++;
+      } else if (char == '(') {
+        depth--;
+        if (depth == 0) {
+          openIndex = i;
+          break;
+        }
+      }
+    }
+
+    // No matching open paren found, or it's at the start (entire string is in parens)
+    if (openIndex <= 0) return null;
+
+    final main = trimmed.substring(0, openIndex).trimRight();
+    final paren = trimmed.substring(openIndex + 1, trimmed.length - 1);
+
+    // Don't extract if main text is empty
+    if (main.isEmpty) return null;
+
+    return (main: main, paren: paren);
   }
 
   /// Builds ingredient text with bold quantities and markdown support.
@@ -314,6 +370,7 @@ class _RecipeIngredientsViewState extends ConsumerState<RecipeIngredientsView>
   /// - `[text](url)` - External links
   /// - `**text**` - Bold formatting
   /// - `*text*` / `_text_` - Italic formatting
+  /// - Trailing parenthetical text displayed on second line
   ///
   /// If [transformed] is provided, uses the transformed display text and quantity
   /// positions. Otherwise falls back to parsing the original ingredient name.
@@ -352,14 +409,26 @@ class _RecipeIngredientsViewState extends ConsumerState<RecipeIngredientsView>
       }
     }
 
+    // Check for trailing parenthetical text
+    final parenResult = _extractTrailingParenthetical(text);
+
+    // If we have trailing parens, use only the main text for rich text processing
+    final displayText = parenResult?.main ?? text;
+
+    // Adjust quantity positions if we removed parenthetical text
+    // (positions remain valid since we only trim from the end)
+    final adjustedQuantities = quantityPositions
+        .where((q) => q.end <= displayText.length)
+        .toList();
+
     // Parse markdown tokens from the text
-    final markdownTokens = _parseMarkdownTokens(text);
+    final markdownTokens = _parseMarkdownTokens(displayText);
 
     // Build styled ranges by merging quantities and markdown
-    final styledRanges = _buildStyledRanges(text, quantityPositions, markdownTokens);
+    final styledRanges = _buildStyledRanges(displayText, adjustedQuantities, markdownTokens);
 
     // Build TextSpan children from styled ranges
-    final children = _buildSpansFromRanges(text, styledRanges, baseStyle, colors);
+    final children = _buildSpansFromRanges(displayText, styledRanges, baseStyle, colors);
 
     // Add external link icon for linked recipes (via ingredient.recipeId)
     if (isLinkedRecipe) {
@@ -374,7 +443,7 @@ class _RecipeIngredientsViewState extends ConsumerState<RecipeIngredientsView>
       ));
     }
 
-    return RichText(
+    final mainTextWidget = RichText(
       text: TextSpan(
         children: children,
         style: isLinkedRecipe
@@ -385,6 +454,31 @@ class _RecipeIngredientsViewState extends ConsumerState<RecipeIngredientsView>
               )
             : null,
       ),
+    );
+
+    // If no parenthetical text, just return the main text
+    if (parenResult == null) {
+      return mainTextWidget;
+    }
+
+    // Otherwise, return a Column with main text and parenthetical below
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        mainTextWidget,
+        const SizedBox(height: 2),
+        Padding(
+          padding: EdgeInsets.only(left: AppSpacing.xs),
+          child: Text(
+            parenResult.paren,
+            style: AppTypography.bodySmall.copyWith(
+              fontSize: fontSize * 0.85,
+              color: colors.textTertiary,
+            ),
+          ),
+        ),
+      ],
     );
   }
 
