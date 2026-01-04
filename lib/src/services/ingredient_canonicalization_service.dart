@@ -74,11 +74,13 @@ class CanonicalizeResult {
   final Map<String, List<IngredientTerm>> terms;
   final Map<String, ConverterData> converters;
   final Map<String, String> categories;
+  final Map<String, String> displayNames; // ingredient name → displayName
 
   CanonicalizeResult({
     required this.terms,
     required this.converters,
     required this.categories,
+    required this.displayNames,
   });
 }
 
@@ -113,6 +115,7 @@ class IngredientCanonicalizer {
       final Map<String, List<IngredientTerm>> terms = {};
       final Map<String, ConverterData> converters = {};
       final Map<String, String> categories = {};
+      final Map<String, String> displayNames = {};
 
       if (responseData.containsKey('ingredients') && responseData['ingredients'] is List) {
         final List<dynamic> analyzedIngredients = responseData['ingredients'];
@@ -169,10 +172,18 @@ class IngredientCanonicalizer {
               categories[original] = category;
             }
           }
+
+          // Process displayName if available
+          if (item.containsKey('displayName') && item['displayName'] != null) {
+            final displayName = item['displayName'].toString().trim();
+            if (displayName.isNotEmpty) {
+              displayNames[original] = displayName;
+            }
+          }
         }
       }
 
-      return CanonicalizeResult(terms: terms, converters: converters, categories: categories);
+      return CanonicalizeResult(terms: terms, converters: converters, categories: categories, displayNames: displayNames);
     } catch (e) {
       AppLogger.error('Canonicalization failed for ${ingredients.length} ingredients', e);
       rethrow;

@@ -4,6 +4,7 @@ import '../../../../database/models/pantry_items.dart';
 class AggregatedIngredient {
   final String id;
   final String name;
+  final String? displayName; // Clean name for shopping lists (no prep instructions)
   final List<String> terms;
   final List<String> sourceRecipeIds;
   final List<String> sourceRecipeTitles;
@@ -14,6 +15,7 @@ class AggregatedIngredient {
   AggregatedIngredient({
     required this.id,
     required this.name,
+    this.displayName,
     required this.terms,
     required this.sourceRecipeIds,
     required this.sourceRecipeTitles,
@@ -43,4 +45,11 @@ class AggregatedIngredient {
     return '${sourceRecipeTitles.length} recipes';
   }
 
+  /// Returns the clean display name for shopping list, preferring displayName over name
+  String get effectiveDisplayName {
+    if (displayName != null && displayName!.isNotEmpty) {
+      return displayName!;
+    }
+    return name;
+  }
 }

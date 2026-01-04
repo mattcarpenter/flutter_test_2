@@ -359,17 +359,23 @@ class IngredientTermQueueManager {
                 }
 
                 // Get category from API response if available
-                final category = results.categories.containsKey(originalName) 
-                    ? results.categories[originalName] 
+                final category = results.categories.containsKey(originalName)
+                    ? results.categories[originalName]
                     : null;
 
-                // Update the ingredient with merged terms, category, and mark as canonicalized
+                // Get displayName from API response if available
+                final displayName = results.displayNames.containsKey(originalName)
+                    ? results.displayNames[originalName]
+                    : null;
+
+                // Update the ingredient with merged terms, category, displayName, and mark as canonicalized
                 final originalIngredient = currentIngredients[ingredientIndex];
 
                 final updatedIngredient = originalIngredient.copyWith(
                   terms: mergedTerms,
                   isCanonicalised: true,
                   category: category,
+                  displayName: displayName,
                 );
 
                 currentIngredients[ingredientIndex] = updatedIngredient;
@@ -394,16 +400,22 @@ class IngredientTermQueueManager {
                 ];
 
                 // Get category from API response if available (even without terms)
-                final category = results.categories.containsKey(originalName) 
-                    ? results.categories[originalName] 
+                final category = results.categories.containsKey(originalName)
+                    ? results.categories[originalName]
                     : null;
 
-                // Update the ingredient with name-only terms, category, and mark as canonicalized
+                // Get displayName from API response if available (even without terms)
+                final displayName = results.displayNames.containsKey(originalName)
+                    ? results.displayNames[originalName]
+                    : null;
+
+                // Update the ingredient with name-only terms, category, displayName, and mark as canonicalized
                 currentIngredients[ingredientIndex] =
                     currentIngredients[ingredientIndex].copyWith(
                       terms: nameOnlyTerms,
                       isCanonicalised: true,
                       category: category,
+                      displayName: displayName,
                     );
                 ingredientsChanged = true;
 

@@ -8,6 +8,7 @@ class Ingredient {
   final String id;
   final String type; // "ingredient" or "section"
   final String name;
+  final String? displayName; // Clean name for shopping lists (no prep instructions)
   final String? note;
 
   final String? primaryAmount1Value;
@@ -35,6 +36,7 @@ class Ingredient {
     required this.id,
     required this.type,
     required this.name,
+    this.displayName,
     this.note,
     this.primaryAmount1Value,
     this.primaryAmount1Unit,
@@ -60,6 +62,7 @@ class Ingredient {
       id: json['id'] as String? ?? '',
       type: json['type'] as String? ?? 'ingredient',
       name: json['name'] as String? ?? '',
+      displayName: json['displayName'] as String?,
       note: json['note'] as String?,
       primaryAmount1Value: json['primaryAmount1Value'] as String?,
       primaryAmount1Unit: json['primaryAmount1Unit'] as String?,
@@ -87,6 +90,7 @@ class Ingredient {
     String? id,
     String? type,
     String? name,
+    String? displayName,
     String? note,
     String? primaryAmount1Value,
     String? primaryAmount1Unit,
@@ -109,6 +113,7 @@ class Ingredient {
       id: id ?? this.id,
       type: type ?? this.type,
       name: name ?? this.name,
+      displayName: displayName ?? this.displayName,
       note: note ?? this.note,
       primaryAmount1Value: primaryAmount1Value ?? this.primaryAmount1Value,
       primaryAmount1Unit: primaryAmount1Unit ?? this.primaryAmount1Unit,

@@ -76,6 +76,7 @@ class MealPlanShoppingListService {
           // Create new aggregation
           aggregations.add(_IngredientAggregation(
             name: ingredient.name,
+            displayName: ingredient.displayName,
             terms: Set.from(terms),  // Create mutable copy
           )..addIngredient(ingredient, recipe, terms, this));
         }
@@ -108,6 +109,7 @@ class MealPlanShoppingListService {
       aggregatedIngredients.add(AggregatedIngredient(
         id: _generateStableId(aggregation.terms),
         name: aggregation.name,
+        displayName: aggregation.displayName,
         terms: aggregation.terms.toList(),
         sourceRecipeIds: aggregation.sourceRecipeIds.toList(),
         sourceRecipeTitles: aggregation.sourceRecipeTitles.toList(),
@@ -169,12 +171,14 @@ class MealPlanShoppingListService {
 /// Helper class for aggregating ingredients
 class _IngredientAggregation {
   String name;  // Mutable to allow updating to better display name
+  String? displayName;  // Clean name from canonicalization (if available)
   final Set<String> terms;
   final Set<String> sourceRecipeIds = {};
   final Set<String> sourceRecipeTitles = {};
 
   _IngredientAggregation({
     required this.name,
+    this.displayName,
     required this.terms,
   });
 
@@ -191,7 +195,15 @@ class _IngredientAggregation {
     // Merge the new terms into our term set for future matching
     terms.addAll(ingredientTerms);
 
-    // Update display name if this one is better (more specific)
+    // Update display name if this ingredient has one and we don't,
+    // or if this one is "better" (more specific)
+    if (ingredient.displayName != null && ingredient.displayName!.isNotEmpty) {
+      if (displayName == null || _isBetterDisplayName(ingredient.displayName!, displayName!, service)) {
+        displayName = ingredient.displayName;
+      }
+    }
+
+    // Update raw name if this one is better (more specific)
     if (_isBetterDisplayName(ingredient.name, name, service)) {
       name = ingredient.name;
     }

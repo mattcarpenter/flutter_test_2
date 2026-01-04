@@ -288,15 +288,21 @@ class _AddRecipeIngredientsToShoppingListModalPage {
       // Add checked ingredients to shopping list
       for (final ingredient in ingredients) {
         if (controller.checkedState[ingredient.id] ?? false) {
-          // Parse ingredient name to strip quantities and units
-          final parseResult = parser.parse(ingredient.name);
-          final cleanName = parseResult.cleanName.isNotEmpty
-              ? parseResult.cleanName
-              : ingredient.name;
+          // Prefer displayName if available, fall back to parsed cleanName
+          String itemName;
+          if (ingredient.displayName != null && ingredient.displayName!.isNotEmpty) {
+            itemName = ingredient.displayName!;
+          } else {
+            // Parse ingredient name to strip quantities and units
+            final parseResult = parser.parse(ingredient.name);
+            itemName = parseResult.cleanName.isNotEmpty
+                ? parseResult.cleanName
+                : ingredient.name;
+          }
 
           await shoppingListRepository.addItem(
             shoppingListId: currentListId,
-            name: cleanName,
+            name: itemName,
             userId: userId,
             householdId: null,
           );
@@ -336,11 +342,17 @@ class _IngredientTile extends StatelessWidget {
   Widget build(BuildContext context) {
     final colors = AppColors.of(context);
 
-    // Parse ingredient name to strip quantities and units
-    final parseResult = _parser.parse(ingredient.name);
-    final displayName = parseResult.cleanName.isNotEmpty
-        ? parseResult.cleanName
-        : ingredient.name;
+    // Prefer displayName if available, fall back to parsed cleanName
+    String displayText;
+    if (ingredient.displayName != null && ingredient.displayName!.isNotEmpty) {
+      displayText = ingredient.displayName!;
+    } else {
+      // Parse ingredient name to strip quantities and units
+      final parseResult = _parser.parse(ingredient.name);
+      displayText = parseResult.cleanName.isNotEmpty
+          ? parseResult.cleanName
+          : ingredient.name;
+    }
 
     // Get grouped styling
     final borderRadius = GroupedListStyling.getBorderRadius(
@@ -381,7 +393,7 @@ class _IngredientTile extends StatelessWidget {
               // Ingredient info (Expanded)
               Expanded(
                 child: Text(
-                  displayName,
+                  displayText,
                   style: AppTypography.body.copyWith(
                     fontWeight: FontWeight.w600,
                     color: colors.textPrimary,
