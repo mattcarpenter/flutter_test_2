@@ -526,11 +526,16 @@ class IngredientMatchesListPage extends ConsumerWidget {
     final colors = AppColors.of(context);
     final ingredient = match.ingredient;
 
-    // Parse ingredient name to get clean name without quantities/units
-    final parseResult = _parser.parse(ingredient.name);
-    final displayName = parseResult.cleanName.isNotEmpty
-        ? parseResult.cleanName
-        : ingredient.name;
+    // Prefer displayName if available, fall back to parsed cleanName
+    String displayName;
+    if (ingredient.displayName != null && ingredient.displayName!.isNotEmpty) {
+      displayName = ingredient.displayName!;
+    } else {
+      final parseResult = _parser.parse(ingredient.name);
+      displayName = parseResult.cleanName.isNotEmpty
+          ? parseResult.cleanName
+          : ingredient.name;
+    }
 
     // Calculate position in group
     final isFirst = index == 0;
@@ -761,9 +766,13 @@ class _AddToShoppingListController extends ChangeNotifier {
 
   bool get isButtonEnabled => checkedCount > 0 && !isLoading;
 
-  String _getCleanName(String name) {
-    final parseResult = _parser.parse(name);
-    return parseResult.cleanName.isNotEmpty ? parseResult.cleanName : name;
+  /// Get the display name for an ingredient, preferring displayName field
+  String _getDisplayName(Ingredient ingredient) {
+    if (ingredient.displayName != null && ingredient.displayName!.isNotEmpty) {
+      return ingredient.displayName!;
+    }
+    final parseResult = _parser.parse(ingredient.name);
+    return parseResult.cleanName.isNotEmpty ? parseResult.cleanName : ingredient.name;
   }
 
   Future<void> addToShoppingList(NavigatorState navigator) async {
@@ -783,7 +792,7 @@ class _AddToShoppingListController extends ChangeNotifier {
         if (checkedState[id] == true) {
           final listId = selectedListIds[id];
           itemsByList.putIfAbsent(listId, () => []);
-          itemsByList[listId]!.add(_getCleanName(match.ingredient.name));
+          itemsByList[listId]!.add(_getDisplayName(match.ingredient));
         }
       }
 
@@ -890,7 +899,7 @@ class _AddToShoppingListPageState extends ConsumerState<AddToShoppingListPage> {
             final alreadyInListIngredients = <(IngredientPantryMatch, String)>[]; // (match, listName)
 
             for (final match in currentMatches.matches) {
-              final ingredientName = _getCleanName(match.ingredient.name);
+              final ingredientName = _getDisplayName(match.ingredient);
               final existingListName = itemToListMap[ingredientName.toLowerCase().trim()];
 
               if (existingListName != null) {
@@ -1033,7 +1042,7 @@ class _AddToShoppingListPageState extends ConsumerState<AddToShoppingListPage> {
   ) {
     for (final match in matches.matches) {
       final id = match.ingredient.id;
-      final ingredientName = _getCleanName(match.ingredient.name);
+      final ingredientName = _getDisplayName(match.ingredient);
       final existingListName = itemToListMap[ingredientName.toLowerCase().trim()];
 
       // Skip items already in a list
@@ -1055,9 +1064,13 @@ class _AddToShoppingListPageState extends ConsumerState<AddToShoppingListPage> {
     }
   }
 
-  String _getCleanName(String name) {
-    final parseResult = _parser.parse(name);
-    return parseResult.cleanName.isNotEmpty ? parseResult.cleanName : name;
+  /// Get the display name for an ingredient, preferring displayName field
+  String _getDisplayName(Ingredient ingredient) {
+    if (ingredient.displayName != null && ingredient.displayName!.isNotEmpty) {
+      return ingredient.displayName!;
+    }
+    final parseResult = _parser.parse(ingredient.name);
+    return parseResult.cleanName.isNotEmpty ? parseResult.cleanName : ingredient.name;
   }
 
   int _getSortPriority(IngredientPantryMatch match) {
@@ -1082,7 +1095,7 @@ class _AddToShoppingListPageState extends ConsumerState<AddToShoppingListPage> {
   }) {
     final colors = AppColors.of(context);
     final ingredient = match.ingredient;
-    final displayName = _getCleanName(ingredient.name);
+    final displayName = _getDisplayName(ingredient);
     final isChecked = controller.checkedState[ingredient.id] ?? false;
     final selectedListId = controller.selectedListIds[ingredient.id] ?? defaultListId;
 
@@ -1223,7 +1236,7 @@ class _AddToShoppingListPageState extends ConsumerState<AddToShoppingListPage> {
   }) {
     final colors = AppColors.of(context);
     final ingredient = match.ingredient;
-    final displayName = _getCleanName(ingredient.name);
+    final displayName = _getDisplayName(ingredient);
 
     final borderRadius = GroupedListStyling.getBorderRadius(
       isGrouped: true,
@@ -1363,17 +1376,22 @@ class _IngredientDetailPageState extends ConsumerState<IngredientDetailPage> {
     final terms = _ingredientTermsMap[ingredient.id] ?? [];
     final hasLinkedRecipe = ingredient.recipeId != null;
 
-    // Parse ingredient name to get clean name without quantities/units
-    final parseResult = _parser.parse(ingredient.name);
-    final displayName = parseResult.cleanName.isNotEmpty
-        ? parseResult.cleanName
-        : ingredient.name;
+    // Prefer displayName if available, fall back to parsed cleanName
+    String displayName;
+    if (ingredient.displayName != null && ingredient.displayName!.isNotEmpty) {
+      displayName = ingredient.displayName!;
+    } else {
+      final parseResult = _parser.parse(ingredient.name);
+      displayName = parseResult.cleanName.isNotEmpty
+          ? parseResult.cleanName
+          : ingredient.name;
+    }
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       mainAxisSize: MainAxisSize.min,
       children: [
-        // Ingredient name heading (parsed to remove quantities/units)
+        // Ingredient name heading (prefer displayName)
         Text(
           displayName,
           style: AppTypography.h4.copyWith(
@@ -2056,12 +2074,18 @@ class _AddCustomTermPageState extends ConsumerState<AddCustomTermPage> {
       orElse: () => widget.matches.matches.first,
     );
 
-    // Parse ingredient name to get clean name without quantities/units
-    final parser = IngredientParserService();
-    final parseResult = parser.parse(match.ingredient.name);
-    final displayName = parseResult.cleanName.isNotEmpty
-        ? parseResult.cleanName
-        : match.ingredient.name;
+    // Prefer displayName if available, fall back to parsed cleanName
+    final ingredient = match.ingredient;
+    String displayName;
+    if (ingredient.displayName != null && ingredient.displayName!.isNotEmpty) {
+      displayName = ingredient.displayName!;
+    } else {
+      final parser = IngredientParserService();
+      final parseResult = parser.parse(ingredient.name);
+      displayName = parseResult.cleanName.isNotEmpty
+          ? parseResult.cleanName
+          : ingredient.name;
+    }
 
     return Padding(
       padding: EdgeInsets.all(AppSpacing.lg),
@@ -2205,12 +2229,18 @@ class _SelectFromPantryPageState extends ConsumerState<SelectFromPantryPage> {
       orElse: () => widget.matches.matches.first,
     );
 
-    // Parse ingredient name to get clean name without quantities/units
-    final parser = IngredientParserService();
-    final parseResult = parser.parse(match.ingredient.name);
-    final displayName = parseResult.cleanName.isNotEmpty
-        ? parseResult.cleanName
-        : match.ingredient.name;
+    // Prefer displayName if available, fall back to parsed cleanName
+    final ingredient = match.ingredient;
+    String displayName;
+    if (ingredient.displayName != null && ingredient.displayName!.isNotEmpty) {
+      displayName = ingredient.displayName!;
+    } else {
+      final parser = IngredientParserService();
+      final parseResult = parser.parse(ingredient.name);
+      displayName = parseResult.cleanName.isNotEmpty
+          ? parseResult.cleanName
+          : ingredient.name;
+    }
 
     return Column(
       mainAxisSize: MainAxisSize.min,
