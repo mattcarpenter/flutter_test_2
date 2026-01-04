@@ -362,13 +362,75 @@ class JsonLdRecipeParser {
       return value
           .map((e) => _extractString(e))
           .where((s) => s != null && s.isNotEmpty)
-          .cast<String>()
+          .map((s) => _normalizeIngredientString(s!))
+          .where((s) => s.isNotEmpty)
           .toList();
     }
 
     // Single ingredient as string
     final single = _extractString(value);
-    return single != null ? [single] : [];
+    if (single == null) return [];
+    final normalized = _normalizeIngredientString(single);
+    return normalized.isNotEmpty ? [normalized] : [];
+  }
+
+  /// Normalizes ingredient strings from JSON-LD to fix common artifacts.
+  ///
+  /// Many recipe plugins (especially WordPress + Yoast) produce messy strings
+  /// when flattening structured ingredient data into schema.org recipeIngredient.
+  ///
+  /// Transformations:
+  /// 1. Collapse double parentheses: `((text))` → `(text)`
+  ///    Only collapses when they're wrapping parens, not legitimate nesting.
+  /// 2. Fix empty prep comma bug: `(, ` or `( , ` → `(`
+  /// 3. Whitespace cleanup: collapse multiple spaces, trim around parentheses
+  ///
+  /// Examples:
+  /// - `onion ((or red, brown))` → `onion (or red, brown)`
+  /// - `salt (, plus more to taste)` → `salt (plus more to taste)`
+  /// - `Lime juice ( , to taste)` → `Lime juice (to taste)`
+  /// - `(outer (inner))` → preserved (legitimate nesting)
+  String _normalizeIngredientString(String s) {
+    var result = s;
+
+    // Step 1: Collapse double parentheses smartly
+    // Only collapse if both `((` and `))` exist (they're a wrapping pair)
+    // This prevents collapsing legitimate nesting like `(outer (inner))`
+    if (result.contains('((') && result.contains('))')) {
+      // Collapse `((` when followed by a non-paren
+      result = result.replaceAllMapped(
+        RegExp(r'\(\(([^()])'),
+        (m) => '(${m.group(1)}',
+      );
+      // Collapse `))` when preceded by a non-paren
+      result = result.replaceAllMapped(
+        RegExp(r'([^()])\)\)'),
+        (m) => '${m.group(1)})',
+      );
+    }
+
+    // Step 2: Fix empty prep comma bug - remove leading comma inside parens
+    // Matches `(` followed by optional whitespace, then comma, then optional whitespace
+    result = result.replaceAllMapped(
+      RegExp(r'\(\s*,\s*'),
+      (match) => '(',
+    );
+
+    // Step 3a: Collapse multiple spaces into one
+    result = result.replaceAll(RegExp(r' {2,}'), ' ');
+
+    // Step 3b: Remove space after ( and before )
+    result = result.replaceAll(RegExp(r'\(\s+'), '(');
+    result = result.replaceAll(RegExp(r'\s+\)'), ')');
+
+    // Step 3c: Trim leading/trailing whitespace
+    result = result.trim();
+
+    // Clean up empty parentheses that might result from transformations
+    result = result.replaceAll('()', '');
+
+    // Final trim in case empty parens removal left trailing space
+    return result.trim();
   }
 
   /// Parses recipeInstructions which can be:
