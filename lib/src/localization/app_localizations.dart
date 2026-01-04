@@ -2187,6 +2187,12 @@ abstract class AppLocalizations {
   /// **'No recipes match your search'**
   String get recipeIngredientNoRecipesMatch;
 
+  /// Placeholder text for ingredient input field
+  ///
+  /// In en, this message translates to:
+  /// **'e.g. 1 cup flour'**
+  String get recipeIngredientPlaceholder;
+
   /// Next step button
   ///
   /// In en, this message translates to:

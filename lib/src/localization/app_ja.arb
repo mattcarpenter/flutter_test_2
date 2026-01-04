@@ -385,6 +385,7 @@
   "recipeIngredientRemoveLink": "レシピリンクを削除",
   "recipeIngredientNoRecipesFound": "レシピが見つかりません",
   "recipeIngredientNoRecipesMatch": "検索に一致するレシピがありません",
+  "recipeIngredientPlaceholder": "例：小麦粉 1カップ",
 
   "recipeStepNextStep": "次のステップ",
   "recipeStepConvertToStep": "手順に変換",

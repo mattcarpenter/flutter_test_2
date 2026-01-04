@@ -460,7 +460,7 @@ class _IngredientListItemState extends ConsumerState<IngredientListItem> with Si
                   // Convert the ingredient to a section
                   widget.onUpdate(widget.ingredient.copyWith(
                     type: 'section',
-                    name: widget.ingredient.name.isEmpty ? 'New Section' : widget.ingredient.name,
+                    name: widget.ingredient.name.isEmpty ? context.l10n.recipeEditorNewSection : widget.ingredient.name,
                     primaryAmount1Value: null,
                     primaryAmount1Unit: null,
                     primaryAmount1Type: null,
@@ -512,7 +512,7 @@ class _IngredientListItemState extends ConsumerState<IngredientListItem> with Si
                         color: colors.contentPrimary,
                       ),
                       decoration: InputDecoration(
-                        hintText: 'e.g. 1 cup flour',
+                        hintText: context.l10n.recipeIngredientPlaceholder,
                         hintStyle: AppTypography.fieldInput.copyWith(
                           color: colors.contentHint,
                         ),

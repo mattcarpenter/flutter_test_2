@@ -1198,6 +1198,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get recipeIngredientNoRecipesMatch => 'No recipes match your search';
 
   @override
+  String get recipeIngredientPlaceholder => 'e.g. 1 cup flour';
+
+  @override
   String get recipeStepNextStep => 'Next Step';
 
   @override

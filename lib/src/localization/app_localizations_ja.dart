@@ -1163,6 +1163,9 @@ class AppLocalizationsJa extends AppLocalizations {
   String get recipeIngredientNoRecipesMatch => '検索に一致するレシピがありません';
 
   @override
+  String get recipeIngredientPlaceholder => '例：小麦粉 1カップ';
+
+  @override
   String get recipeStepNextStep => '次のステップ';
 
   @override

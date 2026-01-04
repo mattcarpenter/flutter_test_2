@@ -1608,6 +1608,10 @@
   "@recipeIngredientNoRecipesMatch": {
     "description": "No recipes match message"
   },
+  "recipeIngredientPlaceholder": "e.g. 1 cup flour",
+  "@recipeIngredientPlaceholder": {
+    "description": "Placeholder text for ingredient input field"
+  },
 
   "recipeStepNextStep": "Next Step",
   "@recipeStepNextStep": {
