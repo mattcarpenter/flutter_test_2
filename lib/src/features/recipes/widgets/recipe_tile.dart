@@ -165,22 +165,22 @@ class _RecipeTileState extends ConsumerState<RecipeTile> with SingleTickerProvid
         // Format time display
         String timeDisplay = '';
         if (widget.recipe.totalTime != null) {
-          timeDisplay = DurationFormatter.formatMinutes(widget.recipe.totalTime!);
+          timeDisplay = DurationFormatter.formatMinutesLocalized(widget.recipe.totalTime!, context);
         } else if (widget.recipe.prepTime != null && widget.recipe.cookTime != null) {
           final totalTime = (widget.recipe.prepTime ?? 0) + (widget.recipe.cookTime ?? 0);
           if (totalTime > 0) {
-            timeDisplay = DurationFormatter.formatMinutes(totalTime);
+            timeDisplay = DurationFormatter.formatMinutesLocalized(totalTime, context);
           }
         } else if (widget.recipe.prepTime != null && widget.recipe.prepTime! > 0) {
-          timeDisplay = DurationFormatter.formatMinutes(widget.recipe.prepTime!);
+          timeDisplay = DurationFormatter.formatMinutesLocalized(widget.recipe.prepTime!, context);
         } else if (widget.recipe.cookTime != null && widget.recipe.cookTime! > 0) {
-          timeDisplay = DurationFormatter.formatMinutes(widget.recipe.cookTime!);
+          timeDisplay = DurationFormatter.formatMinutesLocalized(widget.recipe.cookTime!, context);
         }
 
         // Format servings display
         String servingsDisplay = '';
         if (widget.recipe.servings != null && widget.recipe.servings! > 0) {
-          servingsDisplay = '${widget.recipe.servings} serving${widget.recipe.servings! > 1 ? 's' : ''}';
+          servingsDisplay = context.l10n.recipeServingsCount(widget.recipe.servings!);
         }
 
         // Combine time and servings with bullet separator
