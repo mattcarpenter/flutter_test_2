@@ -7,6 +7,7 @@ import '../../../providers/shopping_list_provider.dart';
 import '../../../theme/colors.dart';
 import '../../../theme/spacing.dart';
 import '../../../theme/typography.dart';
+import '../../../utils/category_localizer.dart';
 import 'shopping_list_item_tile.dart';
 
 class ShoppingListItemsList extends ConsumerStatefulWidget {
@@ -144,7 +145,7 @@ class _ShoppingListItemsListState extends ConsumerState<ShoppingListItemsList> {
       child: Row(
         children: [
           Text(
-            category,
+            CategoryLocalizer.localize(context, category),
             style: AppTypography.h5.copyWith(
               color: AppColors.of(context).textPrimary,
             ),

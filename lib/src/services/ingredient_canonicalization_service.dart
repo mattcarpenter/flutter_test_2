@@ -1,10 +1,21 @@
 import 'dart:convert';
+import 'dart:ui';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:uuid/uuid.dart';
 import '../../database/database.dart';
 import '../../database/models/ingredient_terms.dart';
 import '../clients/recipe_api_client.dart';
 import 'logging/app_logger.dart';
+
+/// Supported locales for AI canonicalization.
+const Set<String> supportedLocales = {'en', 'ja'};
+
+/// Gets the current locale code for API calls.
+/// Returns the device's language code if supported, otherwise 'en'.
+String getCurrentLocale() {
+  final languageCode = PlatformDispatcher.instance.locale.languageCode;
+  return supportedLocales.contains(languageCode) ? languageCode : 'en';
+}
 
 /// Class representing a converter returned from the API
 class ConverterData {
@@ -76,13 +87,21 @@ class IngredientCanonicalizer {
 
   IngredientCanonicalizer({required this.apiClient});
 
-  /// Analyzes a list of ingredients and returns canonicalized terms and converters
+  /// Analyzes a list of ingredients and returns canonicalized terms and converters.
+  ///
+  /// The [locale] parameter determines the language for AI processing.
+  /// If not provided, uses the device's current locale (falling back to 'en').
   Future<CanonicalizeResult> canonicalizeIngredients(
-      List<Map<String, dynamic>> ingredients) async {
+      List<Map<String, dynamic>> ingredients,
+      {String? locale}) async {
     try {
+      final effectiveLocale = locale ?? getCurrentLocale();
       final response = await apiClient.post(
         '/v1/ingredients/analyze',
-        {'ingredients': ingredients},
+        {
+          'ingredients': ingredients,
+          'locale': effectiveLocale,
+        },
       );
 
       if (response.statusCode != 200) {
@@ -160,9 +179,12 @@ class IngredientCanonicalizer {
     }
   }
 
-  /// Canonicalize a single ingredient
+  /// Canonicalize a single ingredient.
+  ///
+  /// The [locale] parameter determines the language for AI processing.
+  /// If not provided, uses the device's current locale (falling back to 'en').
   Future<CanonicalizeResult?> canonicalizeSingleIngredient(
-      String name, {double? quantity, String? unit}) async {
+      String name, {double? quantity, String? unit, String? locale}) async {
     try {
       final Map<String, dynamic> ingredient = {
         'name': name,
@@ -170,7 +192,7 @@ class IngredientCanonicalizer {
         'unit': unit,
       };
 
-      return await canonicalizeIngredients([ingredient]);
+      return await canonicalizeIngredients([ingredient], locale: locale);
     } catch (e) {
       AppLogger.error('Single ingredient canonicalization failed: $name', e);
       return null;

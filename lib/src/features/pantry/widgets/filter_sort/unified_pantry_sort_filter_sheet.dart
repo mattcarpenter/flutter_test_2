@@ -12,6 +12,7 @@ import '../../../../widgets/adaptive_pull_down/adaptive_menu_item.dart';
 import '../../../../widgets/adaptive_pull_down/adaptive_pull_down.dart';
 import '../../../../widgets/app_button.dart';
 import '../../../../widgets/app_circle_button.dart';
+import '../../../../utils/category_localizer.dart';
 import '../../models/pantry_filter_sort.dart';
 
 /// Shows the unified pantry sort and filter bottom sheet
@@ -453,7 +454,7 @@ class _CategoryFilterSection extends ConsumerWidget {
 
   Widget _buildCategoryButton(BuildContext context, String category, bool isSelected) {
     return AppButton(
-      text: category,
+      text: CategoryLocalizer.localize(context, category),
       size: AppButtonSize.small,
       style: isSelected ? AppButtonStyle.fill : AppButtonStyle.mutedOutline,
       onPressed: () {

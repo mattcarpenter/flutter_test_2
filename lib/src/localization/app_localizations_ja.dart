@@ -3130,4 +3130,43 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get recipePreviewUnlockButton => 'Plusで入手';
+
+  @override
+  String get categoryProduce => '野菜・果物';
+
+  @override
+  String get categoryMeatSeafood => '肉・魚介類';
+
+  @override
+  String get categoryDairyEggs => '乳製品・卵';
+
+  @override
+  String get categoryFrozenFoods => '冷凍食品';
+
+  @override
+  String get categoryGrainsCerealsPasta => '穀物・シリアル・パスタ';
+
+  @override
+  String get categoryLegumesNutsPlantProteins => '豆類・ナッツ・植物性タンパク質';
+
+  @override
+  String get categoryBakingSweeteners => '製菓材料・甘味料';
+
+  @override
+  String get categoryOilsFatsVinegars => '油脂・酢';
+
+  @override
+  String get categoryHerbsSpicesSeasonings => 'ハーブ・スパイス・調味料';
+
+  @override
+  String get categorySaucesCondimentsSpreads => 'ソース・調味料・スプレッド';
+
+  @override
+  String get categoryCannedJarredGoods => '缶詰・瓶詰';
+
+  @override
+  String get categoryBeveragesSnacks => '飲料・スナック';
+
+  @override
+  String get categoryOther => 'その他';
 }

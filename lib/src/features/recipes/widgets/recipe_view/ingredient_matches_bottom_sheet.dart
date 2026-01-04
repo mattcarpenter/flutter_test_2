@@ -33,6 +33,7 @@ import 'package:recipe_app/src/services/logging/app_logger.dart';
 import 'package:recipe_app/src/features/shopping_list/widgets/shopping_lists_content.dart';
 import 'package:recipe_app/src/features/shopping_list/widgets/create_list_content.dart';
 import 'package:recipe_app/src/localization/l10n_extension.dart';
+import 'package:recipe_app/src/utils/category_localizer.dart';
 
 // Controller for Add to Shopping List page (no GlobalKey needed)
 final _addToShoppingListController = _AddToShoppingListController();
@@ -2286,7 +2287,7 @@ class _SelectFromPantryPageState extends ConsumerState<SelectFromPantryPage> {
                         Padding(
                           padding: EdgeInsets.fromLTRB(AppSpacing.lg, AppSpacing.lg, AppSpacing.lg, AppSpacing.sm),
                           child: Text(
-                            category,
+                            CategoryLocalizer.localize(context, category),
                             style: AppTypography.h5.copyWith(
                               color: colors.textPrimary,
                             ),

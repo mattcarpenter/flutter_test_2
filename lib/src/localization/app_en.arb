@@ -4430,5 +4430,58 @@
   "recipePreviewUnlockButton": "Unlock with Plus",
   "@recipePreviewUnlockButton": {
     "description": "Button to unlock recipe with Plus subscription"
+  },
+
+  "categoryProduce": "Produce",
+  "@categoryProduce": {
+    "description": "Category label for fresh produce (fruits and vegetables)"
+  },
+  "categoryMeatSeafood": "Meat & Seafood",
+  "@categoryMeatSeafood": {
+    "description": "Category label for meat and seafood"
+  },
+  "categoryDairyEggs": "Dairy & Eggs",
+  "@categoryDairyEggs": {
+    "description": "Category label for dairy products and eggs"
+  },
+  "categoryFrozenFoods": "Frozen Foods",
+  "@categoryFrozenFoods": {
+    "description": "Category label for frozen foods"
+  },
+  "categoryGrainsCerealsPasta": "Grains, Cereals & Pasta",
+  "@categoryGrainsCerealsPasta": {
+    "description": "Category label for grains, cereals, and pasta"
+  },
+  "categoryLegumesNutsPlantProteins": "Legumes, Nuts & Plant Proteins",
+  "@categoryLegumesNutsPlantProteins": {
+    "description": "Category label for legumes, nuts, and plant proteins"
+  },
+  "categoryBakingSweeteners": "Baking & Sweeteners",
+  "@categoryBakingSweeteners": {
+    "description": "Category label for baking ingredients and sweeteners"
+  },
+  "categoryOilsFatsVinegars": "Oils, Fats & Vinegars",
+  "@categoryOilsFatsVinegars": {
+    "description": "Category label for oils, fats, and vinegars"
+  },
+  "categoryHerbsSpicesSeasonings": "Herbs, Spices & Seasonings",
+  "@categoryHerbsSpicesSeasonings": {
+    "description": "Category label for herbs, spices, and seasonings"
+  },
+  "categorySaucesCondimentsSpreads": "Sauces, Condiments & Spreads",
+  "@categorySaucesCondimentsSpreads": {
+    "description": "Category label for sauces, condiments, and spreads"
+  },
+  "categoryCannedJarredGoods": "Canned & Jarred Goods",
+  "@categoryCannedJarredGoods": {
+    "description": "Category label for canned and jarred goods"
+  },
+  "categoryBeveragesSnacks": "Beverages & Snacks",
+  "@categoryBeveragesSnacks": {
+    "description": "Category label for beverages and snacks"
+  },
+  "categoryOther": "Other",
+  "@categoryOther": {
+    "description": "Category label for miscellaneous items"
   }
 }

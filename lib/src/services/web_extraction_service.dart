@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../clients/recipe_api_client.dart';
 import '../features/clippings/models/extracted_recipe.dart';
 import '../features/clippings/models/recipe_preview.dart';
+import 'ingredient_canonicalization_service.dart' show getCurrentLocale;
 import 'logging/app_logger.dart';
 
 /// Exception thrown when web extraction fails.
@@ -41,8 +42,10 @@ class WebExtractionService {
     String? sourceUrl,
   }) async {
     try {
+      final locale = getCurrentLocale();
       final body = <String, dynamic>{
         'html': html,
+        'locale': locale,
       };
       if (sourceUrl != null && sourceUrl.isNotEmpty) {
         body['sourceUrl'] = sourceUrl;
@@ -120,8 +123,10 @@ class WebExtractionService {
     String? sourceUrl,
   }) async {
     try {
+      final locale = getCurrentLocale();
       final body = <String, dynamic>{
         'html': html,
+        'locale': locale,
       };
       if (sourceUrl != null && sourceUrl.isNotEmpty) {
         body['sourceUrl'] = sourceUrl;

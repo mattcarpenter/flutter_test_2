@@ -1039,5 +1039,19 @@
   "recipePreviewValuePropUrl2": "あらゆるレシピページに対応",
   "recipePreviewValuePropUrl3": "SNSからのインポートも可能",
   "recipePreviewValuePropUrl4": "無制限にレシピインポート",
-  "recipePreviewUnlockButton": "Plusで入手"
+  "recipePreviewUnlockButton": "Plusで入手",
+
+  "categoryProduce": "野菜・果物",
+  "categoryMeatSeafood": "肉・魚介類",
+  "categoryDairyEggs": "乳製品・卵",
+  "categoryFrozenFoods": "冷凍食品",
+  "categoryGrainsCerealsPasta": "穀物・シリアル・パスタ",
+  "categoryLegumesNutsPlantProteins": "豆類・ナッツ・植物性タンパク質",
+  "categoryBakingSweeteners": "製菓材料・甘味料",
+  "categoryOilsFatsVinegars": "油脂・酢",
+  "categoryHerbsSpicesSeasonings": "ハーブ・スパイス・調味料",
+  "categorySaucesCondimentsSpreads": "ソース・調味料・スプレッド",
+  "categoryCannedJarredGoods": "缶詰・瓶詰",
+  "categoryBeveragesSnacks": "飲料・スナック",
+  "categoryOther": "その他"
 }

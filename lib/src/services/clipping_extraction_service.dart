@@ -5,6 +5,7 @@ import '../features/clippings/models/extracted_recipe.dart';
 import '../features/clippings/models/extracted_shopping_item.dart';
 import '../features/clippings/models/recipe_preview.dart';
 import '../features/clippings/models/shopping_list_preview.dart';
+import 'ingredient_canonicalization_service.dart' show getCurrentLocale;
 import 'logging/app_logger.dart';
 
 /// Exception thrown when clipping extraction fails
@@ -35,9 +36,10 @@ class ClippingExtractionService {
     required String body,
   }) async {
     try {
+      final locale = getCurrentLocale();
       final response = await _apiClient.post(
         '/v1/clippings/extract-recipe',
-        {'title': title, 'body': body},
+        {'title': title, 'body': body, 'locale': locale},
         requiresAuth: true,
       );
 
@@ -81,9 +83,10 @@ class ClippingExtractionService {
     required String body,
   }) async {
     try {
+      final locale = getCurrentLocale();
       final response = await _apiClient.post(
         '/v1/clippings/extract-shopping-list',
-        {'title': title, 'body': body},
+        {'title': title, 'body': body, 'locale': locale},
         requiresAuth: true,
       );
 
@@ -132,9 +135,10 @@ class ClippingExtractionService {
     required String body,
   }) async {
     try {
+      final locale = getCurrentLocale();
       final response = await _apiClient.post(
         '/v1/clippings/preview-recipe',
-        {'title': title, 'body': body},
+        {'title': title, 'body': body, 'locale': locale},
         requiresAuth: false,
       );
 
@@ -175,9 +179,10 @@ class ClippingExtractionService {
     required String body,
   }) async {
     try {
+      final locale = getCurrentLocale();
       final response = await _apiClient.post(
         '/v1/clippings/preview-shopping-list',
-        {'title': title, 'body': body},
+        {'title': title, 'body': body, 'locale': locale},
         requiresAuth: false,
       );
 

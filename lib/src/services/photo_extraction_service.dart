@@ -8,6 +8,7 @@ import '../../app_config.dart';
 import '../features/clippings/models/extracted_recipe.dart';
 import '../features/clippings/models/recipe_preview.dart';
 import 'api_signer.dart';
+import 'ingredient_canonicalization_service.dart' show getCurrentLocale;
 import 'logging/app_logger.dart';
 
 /// Exception thrown when photo extraction fails
@@ -61,6 +62,9 @@ class PhotoExtractionService {
       if (hint != null) {
         request.fields['hint'] = hint;
       }
+
+      // Add locale for AI processing
+      request.fields['locale'] = getCurrentLocale();
 
       // Add HMAC signature headers for multipart
       final signatureHeaders = ApiSigner.signMultipart('POST', path);
@@ -166,6 +170,9 @@ class PhotoExtractionService {
       if (hint != null) {
         request.fields['hint'] = hint;
       }
+
+      // Add locale for AI processing
+      request.fields['locale'] = getCurrentLocale();
 
       // Add HMAC signature headers for multipart
       final signatureHeaders = ApiSigner.signMultipart('POST', path);

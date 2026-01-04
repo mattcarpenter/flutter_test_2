@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../clients/recipe_api_client.dart';
 import '../features/clippings/models/extracted_recipe.dart';
 import '../features/clippings/models/recipe_preview.dart';
+import 'ingredient_canonicalization_service.dart' show getCurrentLocale;
 import 'logging/app_logger.dart';
 
 /// Exception thrown when share extraction fails
@@ -36,7 +37,10 @@ class ShareExtractionService {
     String? sourcePlatform,
   }) async {
     try {
-      final body = <String, dynamic>{};
+      final locale = getCurrentLocale();
+      final body = <String, dynamic>{
+        'locale': locale,
+      };
       if (ogTitle != null && ogTitle.isNotEmpty) {
         body['ogTitle'] = ogTitle;
       }
@@ -116,7 +120,10 @@ class ShareExtractionService {
     String? sourcePlatform,
   }) async {
     try {
-      final body = <String, dynamic>{};
+      final locale = getCurrentLocale();
+      final body = <String, dynamic>{
+        'locale': locale,
+      };
       if (ogTitle != null && ogTitle.isNotEmpty) {
         body['ogTitle'] = ogTitle;
       }

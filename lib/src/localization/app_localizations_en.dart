@@ -3254,4 +3254,44 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get recipePreviewUnlockButton => 'Unlock with Plus';
+
+  @override
+  String get categoryProduce => 'Produce';
+
+  @override
+  String get categoryMeatSeafood => 'Meat & Seafood';
+
+  @override
+  String get categoryDairyEggs => 'Dairy & Eggs';
+
+  @override
+  String get categoryFrozenFoods => 'Frozen Foods';
+
+  @override
+  String get categoryGrainsCerealsPasta => 'Grains, Cereals & Pasta';
+
+  @override
+  String get categoryLegumesNutsPlantProteins =>
+      'Legumes, Nuts & Plant Proteins';
+
+  @override
+  String get categoryBakingSweeteners => 'Baking & Sweeteners';
+
+  @override
+  String get categoryOilsFatsVinegars => 'Oils, Fats & Vinegars';
+
+  @override
+  String get categoryHerbsSpicesSeasonings => 'Herbs, Spices & Seasonings';
+
+  @override
+  String get categorySaucesCondimentsSpreads => 'Sauces, Condiments & Spreads';
+
+  @override
+  String get categoryCannedJarredGoods => 'Canned & Jarred Goods';
+
+  @override
+  String get categoryBeveragesSnacks => 'Beverages & Snacks';
+
+  @override
+  String get categoryOther => 'Other';
 }

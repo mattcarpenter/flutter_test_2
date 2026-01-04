@@ -16,6 +16,7 @@ import '../../../widgets/utils/grouped_list_styling.dart';
 import '../../../widgets/stock_chip.dart';
 import '../../../widgets/adaptive_pull_down/adaptive_menu_item.dart';
 import '../../../widgets/adaptive_pull_down/adaptive_pull_down.dart';
+import '../../../utils/category_localizer.dart';
 import '../views/add_pantry_item_modal.dart';
 import '../views/update_pantry_item_modal.dart';
 
@@ -195,7 +196,7 @@ class _PantryItemListState extends ConsumerState<PantryItemList> {
       child: Row(
         children: [
           Text(
-            category,
+            CategoryLocalizer.localize(context, category),
             style: AppTypography.h5.copyWith(
               color: AppColors.of(context).textPrimary,
             ),

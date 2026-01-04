@@ -5793,6 +5793,84 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Unlock with Plus'**
   String get recipePreviewUnlockButton;
+
+  /// Category label for fresh produce (fruits and vegetables)
+  ///
+  /// In en, this message translates to:
+  /// **'Produce'**
+  String get categoryProduce;
+
+  /// Category label for meat and seafood
+  ///
+  /// In en, this message translates to:
+  /// **'Meat & Seafood'**
+  String get categoryMeatSeafood;
+
+  /// Category label for dairy products and eggs
+  ///
+  /// In en, this message translates to:
+  /// **'Dairy & Eggs'**
+  String get categoryDairyEggs;
+
+  /// Category label for frozen foods
+  ///
+  /// In en, this message translates to:
+  /// **'Frozen Foods'**
+  String get categoryFrozenFoods;
+
+  /// Category label for grains, cereals, and pasta
+  ///
+  /// In en, this message translates to:
+  /// **'Grains, Cereals & Pasta'**
+  String get categoryGrainsCerealsPasta;
+
+  /// Category label for legumes, nuts, and plant proteins
+  ///
+  /// In en, this message translates to:
+  /// **'Legumes, Nuts & Plant Proteins'**
+  String get categoryLegumesNutsPlantProteins;
+
+  /// Category label for baking ingredients and sweeteners
+  ///
+  /// In en, this message translates to:
+  /// **'Baking & Sweeteners'**
+  String get categoryBakingSweeteners;
+
+  /// Category label for oils, fats, and vinegars
+  ///
+  /// In en, this message translates to:
+  /// **'Oils, Fats & Vinegars'**
+  String get categoryOilsFatsVinegars;
+
+  /// Category label for herbs, spices, and seasonings
+  ///
+  /// In en, this message translates to:
+  /// **'Herbs, Spices & Seasonings'**
+  String get categoryHerbsSpicesSeasonings;
+
+  /// Category label for sauces, condiments, and spreads
+  ///
+  /// In en, this message translates to:
+  /// **'Sauces, Condiments & Spreads'**
+  String get categorySaucesCondimentsSpreads;
+
+  /// Category label for canned and jarred goods
+  ///
+  /// In en, this message translates to:
+  /// **'Canned & Jarred Goods'**
+  String get categoryCannedJarredGoods;
+
+  /// Category label for beverages and snacks
+  ///
+  /// In en, this message translates to:
+  /// **'Beverages & Snacks'**
+  String get categoryBeveragesSnacks;
+
+  /// Category label for miscellaneous items
+  ///
+  /// In en, this message translates to:
+  /// **'Other'**
+  String get categoryOther;
 }
 
 class _AppLocalizationsDelegate
