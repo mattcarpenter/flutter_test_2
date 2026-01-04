@@ -680,6 +680,9 @@ class _ShareSessionLoadedState extends ConsumerState<_ShareSessionLoaded>
         if (purchased && mounted) {
           // User subscribed - now do full extraction
           await _performFullRecipeExtraction();
+        } else {
+          // Dismissed without purchase - close the modal
+          widget.onClose();
         }
         return;
       }
@@ -735,6 +738,9 @@ class _ShareSessionLoadedState extends ConsumerState<_ShareSessionLoaded>
         if (purchased && mounted) {
           // User subscribed - now do full extraction
           await _performFullPhotoExtraction(imagePaths);
+        } else {
+          // Dismissed without purchase - close the modal
+          widget.onClose();
         }
         return;
       }
@@ -1224,6 +1230,9 @@ class _ShareSessionLoadedState extends ConsumerState<_ShareSessionLoaded>
         if (purchased && mounted) {
           // User subscribed - now do backend extraction
           await _performWebBackendExtraction(result);
+        } else {
+          // Dismissed without purchase - close the modal
+          widget.onClose();
         }
         return;
       }

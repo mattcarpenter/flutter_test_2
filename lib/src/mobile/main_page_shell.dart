@@ -166,23 +166,23 @@ class MainPageShellState extends State<MainPageShell> with TickerProviderStateMi
         },
         items: [
           BottomNavigationBarItem(
-            icon: HugeIcon(icon: HugeIcons.strokeRoundedMenu01, strokeWidth: 2),
+            icon: HugeIcon(icon: HugeIcons.strokeRoundedMenu01, strokeWidth: 2.25),
             label: context.l10n.navTabMore,
           ),
           BottomNavigationBarItem(
-            icon: HugeIcon(icon: HugeIcons.strokeRoundedBook01, strokeWidth: 2),
+            icon: HugeIcon(icon: HugeIcons.strokeRoundedBook01, strokeWidth: 2.25),
             label: context.l10n.navTabRecipes,
           ),
           BottomNavigationBarItem(
-            icon: HugeIcon(icon: HugeIcons.strokeRoundedShoppingCart01, strokeWidth: 2),
+            icon: HugeIcon(icon: HugeIcons.strokeRoundedShoppingCart01, strokeWidth: 2.25),
             label: context.l10n.navTabShopping,
           ),
           BottomNavigationBarItem(
-            icon: HugeIcon(icon: HugeIcons.strokeRoundedCalendar01, strokeWidth: 2),
+            icon: HugeIcon(icon: HugeIcons.strokeRoundedCalendar01, strokeWidth: 2.25),
             label: context.l10n.navTabMealPlan,
           ),
           BottomNavigationBarItem(
-            icon: HugeIcon(icon: HugeIcons.strokeRoundedFridge, strokeWidth: 2),
+            icon: HugeIcon(icon: HugeIcons.strokeRoundedFridge, strokeWidth: 2.25),
             label: context.l10n.navTabPantry,
           ),
         ],
