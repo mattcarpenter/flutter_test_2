@@ -5818,6 +5818,12 @@ abstract class AppLocalizations {
   /// **'Dairy & Eggs'**
   String get categoryDairyEggs;
 
+  /// Category label for tofu and soy-based products
+  ///
+  /// In en, this message translates to:
+  /// **'Tofu & Soy Products'**
+  String get categoryTofuSoyProducts;
+
   /// Category label for frozen foods
   ///
   /// In en, this message translates to:
@@ -5835,6 +5841,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Legumes, Nuts & Plant Proteins'**
   String get categoryLegumesNutsPlantProteins;
+
+  /// Category label for dried foods like seaweed, mushrooms, and preserved items
+  ///
+  /// In en, this message translates to:
+  /// **'Dried Goods'**
+  String get categoryDriedGoods;
 
   /// Category label for baking ingredients and sweeteners
   ///

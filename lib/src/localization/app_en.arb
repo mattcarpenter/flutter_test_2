@@ -4448,6 +4448,10 @@
   "@categoryDairyEggs": {
     "description": "Category label for dairy products and eggs"
   },
+  "categoryTofuSoyProducts": "Tofu & Soy Products",
+  "@categoryTofuSoyProducts": {
+    "description": "Category label for tofu and soy-based products"
+  },
   "categoryFrozenFoods": "Frozen Foods",
   "@categoryFrozenFoods": {
     "description": "Category label for frozen foods"
@@ -4459,6 +4463,10 @@
   "categoryLegumesNutsPlantProteins": "Legumes, Nuts & Plant Proteins",
   "@categoryLegumesNutsPlantProteins": {
     "description": "Category label for legumes, nuts, and plant proteins"
+  },
+  "categoryDriedGoods": "Dried Goods",
+  "@categoryDriedGoods": {
+    "description": "Category label for dried foods like seaweed, mushrooms, and preserved items"
   },
   "categoryBakingSweeteners": "Baking & Sweeteners",
   "@categoryBakingSweeteners": {

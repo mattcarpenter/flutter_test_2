@@ -3144,6 +3144,9 @@ class AppLocalizationsJa extends AppLocalizations {
   String get categoryDairyEggs => '乳製品・卵';
 
   @override
+  String get categoryTofuSoyProducts => '豆腐・大豆食品';
+
+  @override
   String get categoryFrozenFoods => '冷凍食品';
 
   @override
@@ -3151,6 +3154,9 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get categoryLegumesNutsPlantProteins => '豆類・ナッツ・植物性タンパク質';
+
+  @override
+  String get categoryDriedGoods => '乾物';
 
   @override
   String get categoryBakingSweeteners => '製菓材料・甘味料';
