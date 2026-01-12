@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:io';
+import 'dart:ui' show PlatformDispatcher;
 
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/cupertino.dart';
@@ -35,8 +36,17 @@ import '../../recipes/views/add_recipe_modal.dart';
 import '../../../localization/l10n_extension.dart';
 import '../../share/widgets/share_recipe_preview_result.dart';
 
-/// Default URL for the Discover browser
-const String _defaultUrl = 'https://stockpot.app/discover/';
+/// Base URL for the Discover browser
+const String _baseDiscoverUrl = 'https://stockpot.app/discover/';
+
+/// Get the localized discover URL based on device language
+String _getLocalizedDiscoverUrl() {
+  final locale = PlatformDispatcher.instance.locale;
+  if (locale.languageCode == 'ja') {
+    return '${_baseDiscoverUrl}ja/';
+  }
+  return _baseDiscoverUrl;
+}
 
 /// Discover page with embedded browser for recipe discovery
 class DiscoverPage extends ConsumerStatefulWidget {
@@ -68,7 +78,7 @@ class _DiscoverPageState extends ConsumerState<DiscoverPage> {
   @override
   void initState() {
     super.initState();
-    _urlController = TextEditingController(text: _defaultUrl);
+    _urlController = TextEditingController(text: _getLocalizedDiscoverUrl());
   }
 
   @override
@@ -195,7 +205,7 @@ class _DiscoverPageState extends ConsumerState<DiscoverPage> {
             // WebView
             Expanded(
               child: InAppWebView(
-                initialUrlRequest: URLRequest(url: WebUri(_defaultUrl)),
+                initialUrlRequest: URLRequest(url: WebUri(_getLocalizedDiscoverUrl())),
                 initialSettings: InAppWebViewSettings(
                   javaScriptEnabled: true,
                   allowsBackForwardNavigationGestures: true,
