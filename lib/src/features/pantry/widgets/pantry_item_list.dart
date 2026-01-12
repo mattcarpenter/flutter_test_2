@@ -98,7 +98,7 @@ class _PantryItemListState extends ConsumerState<PantryItemList> {
 
         // Add spacing before category (except first)
         if (categoryIndex > 0) {
-          categoryWidgets.add(SizedBox(height: AppSpacing.lg));
+          categoryWidgets.add(SizedBox(height: AppSpacing.md));
         }
 
         // Add Disclosure widget for category
@@ -191,21 +191,18 @@ class _PantryItemListState extends ConsumerState<PantryItemList> {
   }
 
   Widget _buildCategoryHeader(BuildContext context, String category, int itemCount) {
+    final colors = AppColors.of(context);
     return Padding(
-      padding: EdgeInsets.fromLTRB(0, AppSpacing.lg, 0, AppSpacing.sm),
+      padding: EdgeInsets.fromLTRB(0, AppSpacing.sm, 0, AppSpacing.sm),
       child: Row(
         children: [
           Text(
-            CategoryLocalizer.localize(context, category),
-            style: AppTypography.h5.copyWith(
-              color: AppColors.of(context).textPrimary,
-            ),
-          ),
-          SizedBox(width: AppSpacing.sm),
-          Text(
-            '($itemCount)',
-            style: AppTypography.body.copyWith(
-              color: AppColors.of(context).textSecondary,
+            CategoryLocalizer.localize(context, category).toUpperCase(),
+            style: TextStyle(
+              fontSize: 13,
+              fontWeight: FontWeight.w400,
+              color: colors.textSecondary,
+              letterSpacing: -0.08,
             ),
           ),
           const Spacer(),
@@ -214,7 +211,7 @@ class _PantryItemListState extends ConsumerState<PantryItemList> {
             child: Padding(
               padding: EdgeInsets.all(AppSpacing.sm),
               child: DisclosureIcon(
-                color: AppColors.of(context).textSecondary,
+                color: colors.textSecondary,
               ),
             ),
           ),

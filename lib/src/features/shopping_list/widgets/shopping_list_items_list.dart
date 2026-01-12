@@ -30,7 +30,20 @@ class _ShoppingListItemsListState extends ConsumerState<ShoppingListItemsList> {
   void initState() {
     super.initState();
     // Initialize all categories as expanded
-    for (final item in widget.items) {
+    _addAllCategoriesToExpanded(widget.items);
+  }
+
+  @override
+  void didUpdateWidget(ShoppingListItemsList oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    // Auto-expand any new categories that appear
+    _addAllCategoriesToExpanded(widget.items);
+  }
+
+  /// Adds all categories from the given items to _expandedCategories.
+  /// New categories will automatically be expanded.
+  void _addAllCategoriesToExpanded(List<ShoppingListItemEntry> items) {
+    for (final item in items) {
       final category = item.category ?? 'Other';
       _expandedCategories.add(category);
     }
@@ -67,7 +80,7 @@ class _ShoppingListItemsListState extends ConsumerState<ShoppingListItemsList> {
 
       // Add spacing before category (except first)
       if (categoryIndex > 0) {
-        categoryWidgets.add(SizedBox(height: AppSpacing.lg));
+        categoryWidgets.add(SizedBox(height: AppSpacing.md));
       }
 
       // Add Disclosure widget for category
@@ -140,27 +153,24 @@ class _ShoppingListItemsListState extends ConsumerState<ShoppingListItemsList> {
   }
 
   Widget _buildCategoryHeader(BuildContext context, String category, int itemCount) {
+    final colors = AppColors.of(context);
     return Padding(
-      padding: EdgeInsets.fromLTRB(0, AppSpacing.lg, 0, AppSpacing.sm),
+      padding: EdgeInsets.fromLTRB(0, AppSpacing.sm, 0, AppSpacing.sm),
       child: Row(
         children: [
           Text(
-            CategoryLocalizer.localize(context, category),
-            style: AppTypography.h5.copyWith(
-              color: AppColors.of(context).textPrimary,
-            ),
-          ),
-          SizedBox(width: AppSpacing.sm),
-          Text(
-            '($itemCount)',
-            style: AppTypography.body.copyWith(
-              color: AppColors.of(context).textSecondary,
+            CategoryLocalizer.localize(context, category).toUpperCase(),
+            style: TextStyle(
+              fontSize: 13,
+              fontWeight: FontWeight.w400,
+              color: colors.textSecondary,
+              letterSpacing: -0.08,
             ),
           ),
           const Spacer(),
           // Animated chevron icon
           DisclosureIcon(
-            color: AppColors.of(context).textSecondary,
+            color: colors.textSecondary,
           ),
         ],
       ),

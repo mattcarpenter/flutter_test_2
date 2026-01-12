@@ -1947,9 +1947,9 @@
   "@recipeMatchTip": {
     "description": "Helpful tip for adding terms"
   },
-  "recipeMatchSource": "Source: {source}",
+  "recipeMatchSource": "{source, select, user{Added by you} api{Generated automatically} other{Source: {source}}}",
   "@recipeMatchSource": {
-    "description": "Term source label",
+    "description": "Term source label - maps user/api to friendly text",
     "placeholders": {
       "source": {
         "type": "String"
@@ -3091,9 +3091,9 @@
   "@pantryNoTermsMessage": {
     "description": "Empty state for terms list"
   },
-  "pantryTermSource": "Source: {source}",
+  "pantryTermSource": "{source, select, user{Added by you} api{Generated automatically} other{Source: {source}}}",
   "@pantryTermSource": {
-    "description": "Term source label",
+    "description": "Term source label - maps user/api to friendly text",
     "placeholders": {
       "source": {
         "type": "String",

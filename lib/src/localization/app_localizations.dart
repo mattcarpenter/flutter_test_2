@@ -2637,10 +2637,10 @@ abstract class AppLocalizations {
   /// **'Tip: Add terms that match pantry item names to improve matching.'**
   String get recipeMatchTip;
 
-  /// Term source label
+  /// Term source label - maps user/api to friendly text
   ///
   /// In en, this message translates to:
-  /// **'Source: {source}'**
+  /// **'{source, select, user{Added by you} api{Generated automatically} other{Source: {source}}}'**
   String recipeMatchSource(String source);
 
   /// Add term dialog title
@@ -3976,10 +3976,10 @@ abstract class AppLocalizations {
   /// **'No additional terms for this item. Add terms to improve recipe matching.'**
   String get pantryNoTermsMessage;
 
-  /// Term source label
+  /// Term source label - maps user/api to friendly text
   ///
   /// In en, this message translates to:
-  /// **'Source: {source}'**
+  /// **'{source, select, user{Added by you} api{Generated automatically} other{Source: {source}}}'**
   String pantryTermSource(String source);
 
   /// Tip for adding terms

@@ -1440,7 +1440,15 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String recipeMatchSource(String source) {
-    return 'Source: $source';
+    String _temp0 = intl.Intl.selectLogic(
+      source,
+      {
+        'user': 'Added by you',
+        'api': 'Generated automatically',
+        'other': 'Source: $source',
+      },
+    );
+    return '$_temp0';
   }
 
   @override
@@ -2223,7 +2231,15 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String pantryTermSource(String source) {
-    return 'Source: $source';
+    String _temp0 = intl.Intl.selectLogic(
+      source,
+      {
+        'user': 'Added by you',
+        'api': 'Generated automatically',
+        'other': 'Source: $source',
+      },
+    );
+    return '$_temp0';
   }
 
   @override

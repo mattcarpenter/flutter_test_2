@@ -1,3 +1,5 @@
+import 'dart:ui' show PlatformDispatcher;
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -17,6 +19,15 @@ class WelcomeRecipeCard extends ConsumerWidget {
 
   // Fixed width for the card on larger screens (iPad)
   static const double _maxCardWidth = 400.0;
+
+  /// Returns the localized mosaic image path based on device language.
+  String _getLocalizedMosaicImage() {
+    final locale = PlatformDispatcher.instance.locale;
+    if (locale.languageCode == 'ja') {
+      return 'assets/images/mosaic_ja.png';
+    }
+    return 'assets/images/mosaic_en.png';
+  }
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -69,14 +80,14 @@ class WelcomeRecipeCard extends ConsumerWidget {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                // Mosaic image
+                // Mosaic image (localized)
                 ClipRRect(
                   borderRadius: const BorderRadius.only(
                     topLeft: Radius.circular(15),
                     topRight: Radius.circular(15),
                   ),
                   child: Image.asset(
-                    'assets/images/mosaic_en.png',
+                    _getLocalizedMosaicImage(),
                     width: double.infinity,
                     fit: BoxFit.cover,
                   ),
