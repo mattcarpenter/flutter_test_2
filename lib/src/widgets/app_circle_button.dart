@@ -43,7 +43,7 @@ class AppCircleButton extends StatelessWidget {
       case AppCircleButtonIcon.plus:
         return HugeIcons.strokeRoundedAdd01;
       case AppCircleButtonIcon.ellipsis:
-        return HugeIcons.strokeRoundedMoreHorizontal;
+        return null; // Special case - uses Material icon
       case AppCircleButtonIcon.pencil:
         return HugeIcons.strokeRoundedPencilEdit01;
       case AppCircleButtonIcon.close:
@@ -134,17 +134,24 @@ class AppCircleButton extends StatelessWidget {
                   icon: _hugeIconData!,
                   size: size * 0.6, // Icon is 60% of button size for better visibility
                   color: iconColor,
+                  strokeWidth: 2.0,
                 )
-              : Text(
-                  'i',
-                  style: TextStyle(
-                    inherit: false,
-                    fontSize: size * 0.5,
-                    fontWeight: FontWeight.w700,
-                    fontStyle: FontStyle.italic,
-                    color: iconColor,
-                  ),
-                ),
+              : icon == AppCircleButtonIcon.ellipsis
+                  ? Icon(
+                      Icons.more_horiz,
+                      size: size * 0.65,
+                      color: iconColor,
+                    )
+                  : Text(
+                      'i',
+                      style: TextStyle(
+                        inherit: false,
+                        fontSize: size * 0.5,
+                        fontWeight: FontWeight.w700,
+                        fontStyle: FontStyle.italic,
+                        color: iconColor,
+                      ),
+                    ),
         ),
       ),
     );
