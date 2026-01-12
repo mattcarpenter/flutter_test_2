@@ -1068,6 +1068,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String get recipeViewNoInstructions => 'No instructions listed.';
 
   @override
+  String get recipeViewShowNotes => 'Show details';
+
+  @override
+  String get recipeViewHideNotes => 'Hide details';
+
+  @override
   String get recipeTagSelectTitle => 'Select Tags';
 
   @override

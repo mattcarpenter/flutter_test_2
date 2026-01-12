@@ -1036,6 +1036,12 @@ class AppLocalizationsJa extends AppLocalizations {
   String get recipeViewNoInstructions => '手順が登録されていません。';
 
   @override
+  String get recipeViewShowNotes => '詳細を表示';
+
+  @override
+  String get recipeViewHideNotes => '詳細を非表示';
+
+  @override
   String get recipeTagSelectTitle => 'タグを選択';
 
   @override

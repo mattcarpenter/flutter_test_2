@@ -339,6 +339,8 @@
   "recipeViewScaleConvert": "分量の変換",
   "recipeViewNoIngredients": "材料が登録されていません。",
   "recipeViewNoInstructions": "手順が登録されていません。",
+  "recipeViewShowNotes": "詳細を表示",
+  "recipeViewHideNotes": "詳細を非表示",
 
   "recipeTagSelectTitle": "タグを選択",
   "recipeTagCreateNew": "新しいタグを作成",

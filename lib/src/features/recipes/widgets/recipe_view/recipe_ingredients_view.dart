@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -47,6 +48,9 @@ class _RecipeIngredientsViewState extends ConsumerState<RecipeIngredientsView>
   late AnimationController _accordionController;
   late Animation<double> _accordionAnimation;
 
+  // Toggle for showing/hiding parenthetical notes (default: hidden)
+  bool _showNotes = false;
+
   @override
   void initState() {
     super.initState();
@@ -83,6 +87,16 @@ class _RecipeIngredientsViewState extends ConsumerState<RecipeIngredientsView>
     } else {
       _accordionController.forward();
     }
+  }
+
+  /// Check if any ingredient has parenthetical notes
+  bool _hasAnyParentheticalNotes() {
+    for (final ingredient in widget.ingredients) {
+      if (ingredient.type == 'section') continue;
+      final result = _extractTrailingParenthetical(ingredient.name);
+      if (result != null) return true;
+    }
+    return false;
   }
 
   @override
@@ -200,7 +214,44 @@ class _RecipeIngredientsViewState extends ConsumerState<RecipeIngredientsView>
             ),
           ),
 
-        SizedBox(height: AppSpacing.md),
+        SizedBox(height: AppSpacing.sm),
+
+        // Show/hide notes toggle (only if any ingredient has notes)
+        if (_hasAnyParentheticalNotes())
+          Padding(
+            padding: EdgeInsets.only(top: AppSpacing.xs, bottom: AppSpacing.md),
+            child: Transform.translate(
+              offset: const Offset(-2, 0),
+              child: GestureDetector(
+              onTap: () => setState(() => _showNotes = !_showNotes),
+              behavior: HitTestBehavior.opaque,
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  SizedBox(
+                    width: 46,
+                    height: 28,
+                    child: FittedBox(
+                      fit: BoxFit.contain,
+                      child: CupertinoSwitch(
+                        value: _showNotes,
+                        onChanged: (value) => setState(() => _showNotes = value),
+                        activeTrackColor: AppColors.of(context).primary,
+                      ),
+                    ),
+                  ),
+                  SizedBox(width: AppSpacing.xs),
+                  Text(
+                    context.l10n.recipeViewShowNotes,
+                    style: AppTypography.body.copyWith(
+                      color: AppColors.of(context).textSecondary,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
 
         if (widget.ingredients.isEmpty)
           Text(
@@ -256,7 +307,7 @@ class _RecipeIngredientsViewState extends ConsumerState<RecipeIngredientsView>
                   ),
                 // Ingredient content with padding
                 Padding(
-                  padding: EdgeInsets.symmetric(vertical: AppSpacing.sm),
+                  padding: EdgeInsets.symmetric(vertical: AppSpacing.xs),
                   child: GestureDetector(
                     onTap: ingredient.recipeId != null
                         ? () => _navigateToLinkedRecipe(context, ingredient.recipeId!)
@@ -281,6 +332,7 @@ class _RecipeIngredientsViewState extends ConsumerState<RecipeIngredientsView>
                             transformed: transformedIngredients[ingredient.id],
                             fontSize: scaledFontSize,
                             isLinkedRecipe: ingredient.recipeId != null,
+                            showNotes: _showNotes,
                           ),
                         ),
 
@@ -379,6 +431,7 @@ class _RecipeIngredientsViewState extends ConsumerState<RecipeIngredientsView>
     TransformedIngredient? transformed,
     required double fontSize,
     bool isLinkedRecipe = false,
+    bool showNotes = false,
   }) {
     final colors = AppColors.of(context);
     final baseStyle = AppTypography.body.copyWith(
@@ -456,8 +509,8 @@ class _RecipeIngredientsViewState extends ConsumerState<RecipeIngredientsView>
       ),
     );
 
-    // If no parenthetical text, just return the main text
-    if (parenResult == null) {
+    // If no parenthetical text or notes are hidden, just return the main text
+    if (parenResult == null || !showNotes) {
       return mainTextWidget;
     }
 

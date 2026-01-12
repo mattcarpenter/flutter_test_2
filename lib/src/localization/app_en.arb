@@ -1425,6 +1425,14 @@
   "@recipeViewNoInstructions": {
     "description": "No instructions message"
   },
+  "recipeViewShowNotes": "Show details",
+  "@recipeViewShowNotes": {
+    "description": "Toggle to show ingredient details/notes"
+  },
+  "recipeViewHideNotes": "Hide details",
+  "@recipeViewHideNotes": {
+    "description": "Toggle to hide ingredient details/notes"
+  },
 
   "recipeTagSelectTitle": "Select Tags",
   "@recipeTagSelectTitle": {

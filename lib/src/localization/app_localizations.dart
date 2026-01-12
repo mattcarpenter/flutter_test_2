@@ -1941,6 +1941,18 @@ abstract class AppLocalizations {
   /// **'No instructions listed.'**
   String get recipeViewNoInstructions;
 
+  /// Toggle to show ingredient details/notes
+  ///
+  /// In en, this message translates to:
+  /// **'Show details'**
+  String get recipeViewShowNotes;
+
+  /// Toggle to hide ingredient details/notes
+  ///
+  /// In en, this message translates to:
+  /// **'Hide details'**
+  String get recipeViewHideNotes;
+
   /// Select tags modal title
   ///
   /// In en, this message translates to:
